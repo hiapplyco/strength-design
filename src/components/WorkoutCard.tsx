@@ -121,13 +121,13 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           tomorrow.getDate(),
           tomorrow.getHours(),
           tomorrow.getMinutes()
-        ],
+        ] as [number, number, number, number, number],
         duration: { hours: 1 },
         title: `${title} Workout`,
         description: eventContent,
         location: '',
-        status: 'CONFIRMED',
-        busyStatus: 'BUSY'
+        status: 'CONFIRMED' as const,
+        busyStatus: 'BUSY' as const
       };
 
       createEvents([event], (error: Error | undefined, value: string) => {

@@ -58,21 +58,29 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const handleSpeakWorkout = async () => {
     try {
       setIsSpeaking(true);
-      const speechText = `
-        Today is ${title}.
-        Warm Up: ${warmup}.
-        Workout Of the Day: ${wod}.
-        ${notes ? `Notes: ${notes}.` : ''}
-      `;
 
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text: speechText }
+      // First, generate the monologue using Gemini
+      const { data: monologueData, error: monologueError } = await supabase.functions.invoke('generate-workout-monologue', {
+        body: {
+          dayToSpeak: title,
+          workoutPlan: allWorkouts,
+          warmup,
+          wod,
+          notes
+        }
       });
 
-      if (error) throw error;
+      if (monologueError) throw monologueError;
 
-      if (data?.audioContent && audioRef.current) {
-        audioRef.current.src = `data:audio/mp3;base64,${data.audioContent}`;
+      // Then, convert the monologue to speech using ElevenLabs
+      const { data: speechData, error: speechError } = await supabase.functions.invoke('text-to-speech', {
+        body: { text: monologueData.monologue }
+      });
+
+      if (speechError) throw speechError;
+
+      if (speechData?.audioContent && audioRef.current) {
+        audioRef.current.src = `data:audio/mp3;base64,${speechData.audioContent}`;
         await audioRef.current.play();
         
         audioRef.current.onended = () => {
@@ -80,7 +88,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
         };
       }
     } catch (error) {
-      console.error("Error calling text-to-speech:", error);
+      console.error("Error in handleSpeakWorkout:", error);
       toast({
         title: "Error",
         description: "Failed to generate speech. Please try again.",

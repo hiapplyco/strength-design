@@ -20,33 +20,37 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#C4A052", // Champion Gold
+          foreground: "#000000", // Power Black
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#707070", // Steel Gray
+          foreground: "#FFFFFF", // Victory White
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#FF4A4A", // Varsity Red
+          foreground: "#FFFFFF",
+        },
+        destructiveSecondary: {
+          DEFAULT: "#CC0000", // Crimson Red
+          foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#222222", // Shadow Black
+          foreground: "#FFFFFF", // Victory White
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "#A88B45", // Muted Gold
+          foreground: "#222222", // Shadow Black
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "#000000", // Power Black
+          foreground: "#FFFFFF", // Victory White
         },
+      },
+      fontFamily: {
+        sans: ["'Roboto Condensed'", "sans-serif"],
+        collegiate: ["'Bebas Neue'", "sans-serif"]
       },
       borderRadius: {
         lg: "var(--radius)",

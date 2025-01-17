@@ -42,7 +42,7 @@ const Index = () => {
       <div className="flex flex-col space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold">Your Workouts</h1>
+            <h1 className="text-4xl font-collegiate uppercase tracking-tight">Your Workouts</h1>
             <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
           </div>
           <Button onClick={handleGenerateWorkout} disabled={isGenerating}>

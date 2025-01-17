@@ -11,15 +11,43 @@ const Index = () => {
   const [showGenerateInput, setShowGenerateInput] = useState(false);
   const [generatePrompt, setGeneratePrompt] = useState("");
   const { toast } = useToast();
-  const [workoutDetails, setWorkoutDetails] = useState({
-    Sunday: { warmup: "", wod: "", notes: "" },
-    Monday: { warmup: "", wod: "", notes: "" },
-    Tuesday: { warmup: "", wod: "", notes: "" },
-    Wednesday: { warmup: "", wod: "", notes: "" },
-    Thursday: { warmup: "", wod: "", notes: "" },
-    Friday: { warmup: "", wod: "", notes: "" },
-    Saturday: { warmup: "", wod: "", notes: "" },
-  });
+  const [workouts, setWorkouts] = useState([
+    {
+      title: "Sunday",
+      description: "Rest and recovery day with mobility work and light stretching.",
+      duration: "30 minutes",
+    },
+    {
+      title: "Monday",
+      description: "Strength focus with compound movements and accessory work.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Tuesday",
+      description: "High-intensity cardio and bodyweight exercises.",
+      duration: "45 minutes",
+    },
+    {
+      title: "Wednesday",
+      description: "Olympic weightlifting technique and skill work.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Thursday",
+      description: "Endurance-based workout with mixed modal activities.",
+      duration: "50 minutes",
+    },
+    {
+      title: "Friday",
+      description: "Strength and power development with heavy lifts.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Saturday",
+      description: "Team workout with partner exercises and fun challenges.",
+      duration: "45 minutes",
+    },
+  ]);
 
   const handleGenerateWorkout = async () => {
     if (!generatePrompt.trim() && showGenerateInput) {
@@ -68,44 +96,6 @@ const Index = () => {
     }
   };
 
-  const [workouts, setWorkouts] = useState([
-    {
-      title: "Sunday",
-      description: "Rest and recovery day with mobility work and light stretching.",
-      duration: "30 minutes",
-    },
-    {
-      title: "Monday",
-      description: "Strength focus with compound movements and accessory work.",
-      duration: "60 minutes",
-    },
-    {
-      title: "Tuesday",
-      description: "High-intensity cardio and bodyweight exercises.",
-      duration: "45 minutes",
-    },
-    {
-      title: "Wednesday",
-      description: "Olympic weightlifting technique and skill work.",
-      duration: "60 minutes",
-    },
-    {
-      title: "Thursday",
-      description: "Endurance-based workout with mixed modal activities.",
-      duration: "50 minutes",
-    },
-    {
-      title: "Friday",
-      description: "Strength and power development with heavy lifts.",
-      duration: "60 minutes",
-    },
-    {
-      title: "Saturday",
-      description: "Team workout with partner exercises and fun challenges.",
-      duration: "45 minutes",
-    },
-  ]);
-
   const handleWorkoutUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; }) => {
     setWorkoutDetails(prev => ({
       ...prev,
@@ -117,59 +107,58 @@ const Index = () => {
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <div className="flex flex-col space-y-8">
         <div className="flex flex-col space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-collegiate uppercase tracking-tight">Your Workouts</h1>
-              <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
-            </div>
-            <Button 
-              onClick={() => setShowGenerateInput(!showGenerateInput)}
-              className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white"
-            >
-              {showGenerateInput ? (
-                <>
-                  <X className="mr-2 h-4 w-4" />
-                  Cancel
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Generate All Workouts
-                </>
-              )}
-            </Button>
+          <div>
+            <h1 className="text-4xl font-collegiate uppercase tracking-tight">Your Workouts</h1>
+            <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
           </div>
-
-          {showGenerateInput && (
-            <div className="flex gap-2 w-full">
-              <Input
-                placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
-                value={generatePrompt}
-                onChange={(e) => setGeneratePrompt(e.target.value)}
-                className="flex-1 border-2 border-primary"
-              />
+          
+          <div className="flex items-center gap-4 w-full">
+            {showGenerateInput ? (
+              <>
+                <Input
+                  placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
+                  value={generatePrompt}
+                  onChange={(e) => setGeneratePrompt(e.target.value)}
+                  className="flex-1 border-2 border-primary"
+                />
+                <Button 
+                  onClick={handleGenerateWorkout} 
+                  disabled={isGenerating}
+                  className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50 whitespace-nowrap"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Generate
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={() => setShowGenerateInput(false)}
+                  variant="outline"
+                  className="border-2 border-primary"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
               <Button 
-                onClick={handleGenerateWorkout} 
-                disabled={isGenerating}
-                className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50"
+                onClick={() => setShowGenerateInput(true)}
+                className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white"
               >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Generate
-                  </>
-                )}
+                <Plus className="mr-2 h-4 w-4" />
+                Generate All Workouts
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        <div className="grid gap-6 grid-cols-1">
+        <div className="grid gap-8 md:gap-12 grid-cols-1">
           {workouts.map((workout) => (
             <WorkoutCard 
               key={workout.title} 

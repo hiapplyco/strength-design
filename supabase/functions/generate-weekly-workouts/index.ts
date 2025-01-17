@@ -17,44 +17,83 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY')!);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const systemPrompt = `Generate a week of CrossFit workouts. Return ONLY a JSON object with the following structure for each day (Sunday through Saturday):
-    {
-      "Sunday": {
-        "description": "Brief overview",
-        "warmup": "Detailed warmup",
-        "wod": "Main workout",
-        "notes": "Additional info"
-      },
-      // ... repeat for each day
-    }
-    Consider CrossFit principles of constantly varied, functional movements at high intensity while maintaining proper progression and recovery throughout the week.`;
+    const systemPrompt = `You are a CrossFit coach generating a week of workouts. Return a valid JSON object with NO markdown formatting. The structure must be exactly:
+{
+  "Sunday": {
+    "description": "string with brief overview",
+    "warmup": "string with detailed warmup",
+    "wod": "string with main workout",
+    "notes": "string with additional info"
+  },
+  "Monday": { same structure },
+  "Tuesday": { same structure },
+  "Wednesday": { same structure },
+  "Thursday": { same structure },
+  "Friday": { same structure },
+  "Saturday": { same structure }
+}
 
-    const fullPrompt = `${systemPrompt}\n\nAdditional context from coach: ${prompt}`;
+Important: Return ONLY the JSON object, no other text or markdown formatting.`;
 
-    console.log('Generating workouts with prompt:', fullPrompt);
+    const fullPrompt = `${systemPrompt}\n\nAdditional context from coach: ${prompt || 'Create a balanced week of workouts'}`;
+
+    console.log('Sending prompt to Gemini:', fullPrompt);
 
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const text = response.text();
     
-    // Extract JSON from the response by removing any markdown formatting
-    const jsonStr = text.replace(/```json\n|\n```/g, '').trim();
-    
+    console.log('Raw response from Gemini:', text);
+
+    // Clean the response: remove any potential markdown and extra whitespace
+    const cleanedText = text
+      .replace(/```json\n?|\n?```/g, '') // Remove markdown code blocks
+      .replace(/^\s+|\s+$/g, '')         // Remove leading/trailing whitespace
+      .replace(/\\n/g, ' ')              // Replace escaped newlines with spaces
+      .replace(/\n/g, ' ');              // Replace actual newlines with spaces
+
+    console.log('Cleaned text:', cleanedText);
+
     try {
-      // Parse the cleaned JSON string
-      const workouts = JSON.parse(jsonStr);
-      console.log('Successfully parsed workouts:', workouts);
+      // Attempt to parse the cleaned JSON
+      const workouts = JSON.parse(cleanedText);
+
+      // Validate the structure
+      const requiredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const requiredFields = ['description', 'warmup', 'wod', 'notes'];
+
+      // Check if all required days and fields are present
+      const isValid = requiredDays.every(day => 
+        workouts[day] && requiredFields.every(field => 
+          typeof workouts[day][field] === 'string' && workouts[day][field].length > 0
+        )
+      );
+
+      if (!isValid) {
+        throw new Error('Generated JSON is missing required days or fields');
+      }
+
+      console.log('Successfully validated workouts:', workouts);
       
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (parseError) {
-      console.error('Error parsing JSON:', parseError);
-      console.log('Raw response:', text);
-      throw new Error('Invalid JSON format in AI response');
+      console.error('Error parsing or validating JSON:', parseError);
+      console.log('Failed to parse text:', cleanedText);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid response format',
+          details: parseError.message,
+          rawResponse: text.substring(0, 200) + '...' // First 200 chars for debugging
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
   } catch (error) {
-    console.error('Error generating workouts:', error);
+    console.error('Error in generate-weekly-workouts:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message,

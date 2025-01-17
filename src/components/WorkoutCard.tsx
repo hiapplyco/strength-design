@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Loader2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,9 +40,18 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const { toast } = useToast();
   const [isModifying, setIsModifying] = useState(false);
   const [modificationPrompt, setModificationPrompt] = useState("");
-  const [warmup, setWarmup] = useState(allWorkouts?.[title]?.warmup || "");
-  const [wod, setWod] = useState(allWorkouts?.[title]?.wod || "");
-  const [notes, setNotes] = useState(allWorkouts?.[title]?.notes || "");
+  const [warmup, setWarmup] = useState("");
+  const [wod, setWod] = useState("");
+  const [notes, setNotes] = useState("");
+
+  // Update local state when allWorkouts changes
+  useEffect(() => {
+    if (allWorkouts && allWorkouts[title]) {
+      setWarmup(allWorkouts[title].warmup || "");
+      setWod(allWorkouts[title].wod || "");
+      setNotes(allWorkouts[title].notes || "");
+    }
+  }, [allWorkouts, title]);
 
   const handleModifyWorkout = async () => {
     if (!modificationPrompt.trim()) {

@@ -20,10 +20,10 @@ export function GenerateWorkoutInput({
   return (
     <>
       <Input
-        placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
+        placeholder="e.g., 'Focus on Olympic lifts this cycle, with emphasis on technique and progressive loading'"
         value={generatePrompt}
         onChange={(e) => setGeneratePrompt(e.target.value)}
-        className="flex-1 border-2 border-primary bg-card text-white placeholder:text-muted-foreground"
+        className="flex-1 border-2 border-primary bg-white text-black placeholder:text-gray-500"
       />
       <Button 
         onClick={handleGenerateWorkout} 

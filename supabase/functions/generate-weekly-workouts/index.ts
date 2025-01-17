@@ -1,68 +1,102 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+import { GoogleGenerativeAI, SchemaType } from "https://esm.sh/@google/generative-ai@0.1.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface GeminiGenerationConfig {
+  model: string;
+  schema?: any;
+  apiKey: string;
+}
+
+const generateWithSchema = async (
+  { model: modelName, schema, apiKey }: GeminiGenerationConfig,
+  prompt: string
+) => {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    generationConfig: {
+      temperature: 0.7,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 2048,
+    },
+  });
+
+  const result = await model.generateContent(prompt);
+  return result.response.text();
+};
+
+const schema = {
+  type: SchemaType.OBJECT,
+  properties: {
+    Sunday: {
+      type: SchemaType.OBJECT,
+      properties: {
+        description: { type: SchemaType.STRING, description: "Brief overview of the workout" },
+        warmup: { type: SchemaType.STRING, description: "Detailed warmup routine" },
+        wod: { type: SchemaType.STRING, description: "Main workout of the day" },
+        notes: { type: SchemaType.STRING, description: "Additional coaching notes" }
+      },
+      required: ["description", "warmup", "wod", "notes"]
+    },
+    Monday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
+    Tuesday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
+    Wednesday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
+    Thursday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
+    Friday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
+    Saturday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" }
+  },
+  required: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+};
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { prompt } = await req.json();
-    const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY')!);
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    console.log('Received prompt:', prompt);
 
-    const systemPrompt = `You are a CrossFit coach generating a week of workouts. Return a valid JSON object with NO markdown formatting. The structure must be exactly:
-{
-  "Sunday": {
-    "description": "string with brief overview",
-    "warmup": "string with detailed warmup",
-    "wod": "string with main workout",
-    "notes": "string with additional info"
-  },
-  "Monday": { same structure },
-  "Tuesday": { same structure },
-  "Wednesday": { same structure },
-  "Thursday": { same structure },
-  "Friday": { same structure },
-  "Saturday": { same structure }
-}
+    const systemPrompt = `You are a CrossFit coach creating a week of workouts. Create a complete weekly program that includes a brief description, warmup, workout (WOD), and coaching notes for each day. Consider progression, recovery, and variety in the programming.
 
-Important: Return ONLY the JSON object, no other text or markdown formatting.`;
+Additional context from coach: ${prompt || 'Create a balanced week of workouts'}
 
-    const fullPrompt = `${systemPrompt}\n\nAdditional context from coach: ${prompt || 'Create a balanced week of workouts'}`;
+Important: Return the response as a properly formatted JSON object with all required fields.`;
 
-    console.log('Sending prompt to Gemini:', fullPrompt);
+    const textResponse = await generateWithSchema(
+      {
+        apiKey: Deno.env.get('GEMINI_API_KEY') || '',
+        model: "gemini-pro",
+        schema: schema
+      },
+      systemPrompt
+    );
 
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    console.log('Raw response from Gemini:', text);
-
-    // Clean the response: remove any potential markdown and extra whitespace
-    const cleanedText = text
-      .replace(/```json\n?|\n?```/g, '') // Remove markdown code blocks
-      .replace(/^\s+|\s+$/g, '')         // Remove leading/trailing whitespace
-      .replace(/\\n/g, ' ')              // Replace escaped newlines with spaces
-      .replace(/\n/g, ' ');              // Replace actual newlines with spaces
-
-    console.log('Cleaned text:', cleanedText);
+    console.log('Raw response from Gemini:', textResponse);
 
     try {
-      // Attempt to parse the cleaned JSON
+      // Clean the response text
+      const cleanedText = textResponse
+        .replace(/```json\n?|\n?```/g, '')
+        .replace(/^\s+|\s+$/g, '')
+        .replace(/\\n/g, ' ')
+        .replace(/\n/g, ' ');
+
+      console.log('Cleaned text:', cleanedText);
+
+      // Parse the JSON
       const workouts = JSON.parse(cleanedText);
 
       // Validate the structure
       const requiredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const requiredFields = ['description', 'warmup', 'wod', 'notes'];
 
-      // Check if all required days and fields are present
       const isValid = requiredDays.every(day => 
         workouts[day] && requiredFields.every(field => 
           typeof workouts[day][field] === 'string' && workouts[day][field].length > 0
@@ -80,12 +114,12 @@ Important: Return ONLY the JSON object, no other text or markdown formatting.`;
       });
     } catch (parseError) {
       console.error('Error parsing or validating JSON:', parseError);
-      console.log('Failed to parse text:', cleanedText);
+      console.log('Failed to parse text:', textResponse);
       return new Response(
         JSON.stringify({ 
           error: 'Invalid response format',
           details: parseError.message,
-          rawResponse: text.substring(0, 200) + '...' // First 200 chars for debugging
+          rawResponse: textResponse.substring(0, 200) + '...'
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

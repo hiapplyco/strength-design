@@ -114,11 +114,11 @@ const Index = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
+    <div className="container mx-auto px-4 py-8 animate-fade-in bg-background">
       <div className="flex flex-col space-y-8">
         <div className="flex flex-col space-y-4">
           <div>
-            <h1 className="text-4xl font-collegiate uppercase tracking-tight">Your Workouts</h1>
+            <h1 className="text-4xl font-collegiate uppercase tracking-tight text-foreground">Your Workouts</h1>
             <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
           </div>
           
@@ -129,12 +129,12 @@ const Index = () => {
                   placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
                   value={generatePrompt}
                   onChange={(e) => setGeneratePrompt(e.target.value)}
-                  className="flex-1 border-2 border-primary"
+                  className="flex-1 border-2 border-primary bg-background text-foreground"
                 />
                 <Button 
                   onClick={handleGenerateWorkout} 
                   disabled={isGenerating}
-                  className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50 whitespace-nowrap"
+                  className="border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50 whitespace-nowrap"
                 >
                   {isGenerating ? (
                     <>
@@ -151,7 +151,7 @@ const Index = () => {
                 <Button 
                   onClick={() => setShowGenerateInput(false)}
                   variant="outline"
-                  className="border-2 border-primary"
+                  className="border-2 border-primary text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -159,7 +159,7 @@ const Index = () => {
             ) : (
               <Button 
                 onClick={() => setShowGenerateInput(true)}
-                className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white"
+                className="border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Generate All Workouts

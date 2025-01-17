@@ -200,7 +200,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
             placeholder={`Examples: "Make ${title}'s workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
             value={modificationPrompt}
             onChange={(e) => setModificationPrompt(e.target.value)}
-            className="border-2 border-primary bg-white text-foreground"
+            className="border-2 border-primary bg-white text-foreground placeholder:text-gray-400"
           />
           <Button 
             onClick={handleModifyWorkout}

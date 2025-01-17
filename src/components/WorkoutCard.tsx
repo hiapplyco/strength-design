@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Loader2, Play, RefreshCw } from "lucide-react";
+import { CalendarDays, Loader2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,9 +40,9 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const { toast } = useToast();
   const [isModifying, setIsModifying] = useState(false);
   const [modificationPrompt, setModificationPrompt] = useState("");
-  const [warmup, setWarmup] = useState("");
-  const [wod, setWod] = useState("");
-  const [notes, setNotes] = useState("");
+  const [warmup, setWarmup] = useState(allWorkouts?.[title]?.warmup || "");
+  const [wod, setWod] = useState(allWorkouts?.[title]?.wod || "");
+  const [notes, setNotes] = useState(allWorkouts?.[title]?.notes || "");
 
   const handleModifyWorkout = async () => {
     if (!modificationPrompt.trim()) {
@@ -67,18 +67,24 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       if (error) throw error;
 
       if (data) {
+        // Update local state
         setWarmup(data.warmup);
         setWod(data.wod);
         setNotes(data.notes);
+        
+        // Clear the modification prompt
+        setModificationPrompt("");
+        
+        // Call the parent update function
         if (onUpdate) {
           onUpdate(data);
         }
-      }
 
-      toast({
-        title: "Success",
-        description: `${title}'s workout has been modified`,
-      });
+        toast({
+          title: "Success",
+          description: `${title}'s workout has been modified`,
+        });
+      }
     } catch (error) {
       console.error('Error modifying workout:', error);
       toast({
@@ -111,6 +117,24 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           label="Description"
           value={description}
           onChange={() => {}}
+          minHeight="60px"
+        />
+        <WorkoutSection
+          label="Warmup"
+          value={warmup}
+          onChange={setWarmup}
+          minHeight="80px"
+        />
+        <WorkoutSection
+          label="WOD"
+          value={wod}
+          onChange={setWod}
+          minHeight="100px"
+        />
+        <WorkoutSection
+          label="Notes"
+          value={notes}
+          onChange={setNotes}
           minHeight="60px"
         />
         <div className="space-y-2">

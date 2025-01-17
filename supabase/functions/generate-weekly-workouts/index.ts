@@ -6,6 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
 };
 
 interface GeminiGenerationConfig {
@@ -59,12 +60,33 @@ const schema = {
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 204,
+    });
+  }
+
+  // Validate request method
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }), 
+      { status: 405, headers: corsHeaders }
+    );
   }
 
   try {
+    // Validate content type
+    const contentType = req.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      throw new Error('Content-Type must be application/json');
+    }
+
     const { prompt } = await req.json();
     console.log('Received prompt:', prompt);
+
+    if (!prompt || typeof prompt !== 'string') {
+      throw new Error('Invalid or missing prompt in request body');
+    }
 
     const systemPrompt = `You are a CrossFit coach creating a week of workouts. Create a complete weekly program that includes a brief description, warmup, workout (WOD), and coaching notes for each day. Consider progression, recovery, and variety in the programming.
 
@@ -113,7 +135,8 @@ Important: Return the response as a properly formatted JSON object with all requ
       console.log('Successfully validated workouts:', workouts);
       
       return new Response(JSON.stringify(workouts), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: corsHeaders,
+        status: 200,
       });
     } catch (parseError) {
       console.error('Error parsing or validating JSON:', parseError);
@@ -125,7 +148,7 @@ Important: Return the response as a properly formatted JSON object with all requ
           rawResponse: textResponse.substring(0, 200) + '...'
         }), {
           status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: corsHeaders,
         }
       );
     }
@@ -137,7 +160,7 @@ Important: Return the response as a properly formatted JSON object with all requ
         details: 'Failed to generate or parse workouts'
       }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: corsHeaders,
       }
     );
   }

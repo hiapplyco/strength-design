@@ -6,10 +6,20 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 
+interface WorkoutDetails {
+  [key: string]: {
+    warmup: string;
+    wod: string;
+    notes: string;
+    description?: string;
+  };
+}
+
 const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGenerateInput, setShowGenerateInput] = useState(false);
   const [generatePrompt, setGeneratePrompt] = useState("");
+  const [workoutDetails, setWorkoutDetails] = useState<WorkoutDetails>({});
   const { toast } = useToast();
   const [workouts, setWorkouts] = useState([
     {

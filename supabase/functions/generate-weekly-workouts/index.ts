@@ -41,21 +41,16 @@ serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/json',
-      },
+      headers: corsHeaders,
       status: 204,
     });
   }
 
   try {
-    // Validate request method
     if (req.method !== 'POST') {
       throw new Error('Method not allowed');
     }
 
-    // Validate content type
     const contentType = req.headers.get('content-type');
     if (!contentType?.includes('application/json')) {
       throw new Error('Content-Type must be application/json');
@@ -72,16 +67,54 @@ serve(async (req) => {
 
 Additional context from coach: ${prompt}
 
-Important: Return the response as a properly formatted JSON object with the following structure for each day (Sunday through Saturday):
+IMPORTANT: You must return a valid JSON object with EXACTLY this structure, including ALL days and fields:
+
 {
   "Sunday": {
-    "description": "string",
-    "warmup": "string",
-    "wod": "string",
-    "notes": "string"
+    "description": "A brief overview of the day's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "The workout of the day",
+    "notes": "Coaching tips and scaling options"
   },
-  // ... same structure for Monday through Saturday
-}`;
+  "Monday": {
+    "description": "A brief overview of the day's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "The workout of the day",
+    "notes": "Coaching tips and scaling options"
+  },
+  "Tuesday": {
+    "description": "A brief overview of the day's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "The workout of the day",
+    "notes": "Coaching tips and scaling options"
+  },
+  "Wednesday": {
+    "description": "A brief overview of the day's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "The workout of the day",
+    "notes": "Coaching tips and scaling options"
+  },
+  "Thursday": {
+    "description": "A brief overview of the day's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "The workout of the day",
+    "notes": "Coaching tips and scaling options"
+  },
+  "Friday": {
+    "description": "A brief overview of the day's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "The workout of the day",
+    "notes": "Coaching tips and scaling options"
+  },
+  "Saturday": {
+    "description": "A brief overview of the day's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "The workout of the day",
+    "notes": "Coaching tips and scaling options"
+  }
+}
+
+DO NOT include any additional text or markdown formatting. ONLY return the JSON object.`;
 
     const textResponse = await generateWithGemini(systemPrompt);
     console.log('Processing Gemini response');
@@ -89,10 +122,10 @@ Important: Return the response as a properly formatted JSON object with the foll
     try {
       // Clean and parse the response
       const cleanedText = textResponse
-        .replace(/```json\n?|\n?```/g, '')
-        .replace(/^\s+|\s+$/g, '')
-        .replace(/\\n/g, ' ')
-        .replace(/\n/g, ' ');
+        .replace(/```json\n?|\n?```/g, '')  // Remove markdown code blocks
+        .replace(/^\s+|\s+$/g, '')          // Remove leading/trailing whitespace
+        .replace(/\\n/g, ' ')               // Replace escaped newlines
+        .replace(/\n/g, ' ');               // Replace actual newlines
 
       const workouts = JSON.parse(cleanedText);
 
@@ -107,6 +140,7 @@ Important: Return the response as a properly formatted JSON object with the foll
       );
 
       if (!isValid) {
+        console.error('Invalid workout structure:', workouts);
         throw new Error('Generated JSON is missing required days or fields');
       }
 

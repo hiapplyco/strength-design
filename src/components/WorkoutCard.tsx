@@ -67,7 +67,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           dayToSpeak: title,
           workoutPlan: allWorkouts,
           warmup,
-          wod,
+          wod: `Important: When referring to this section, always say "workout of the day" instead of "WOD". Here's the workout: ${wod}`,
           notes
         }
       });

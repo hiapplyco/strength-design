@@ -15,14 +15,14 @@ interface WorkoutSectionProps {
 }
 
 const WorkoutSection = ({ label, value, onChange, minHeight = "80px" }: WorkoutSectionProps) => (
-  <div className="space-y-2 rounded bg-card p-4 border-[3px] border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-    <label className="text-sm font-bold uppercase tracking-tight text-secondary">
+  <div className="space-y-2 rounded bg-muted p-4 border-[3px] border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+    <label className="text-sm font-bold uppercase tracking-tight text-primary">
       {label}
     </label>
     <Textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="min-h-[80px] resize-y bg-background font-medium text-foreground border-2 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+      className="min-h-[80px] resize-y bg-white font-medium text-foreground border-2 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
       style={{ minHeight }}
     />
   </div>
@@ -98,15 +98,15 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   };
 
   return (
-    <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
       <CardHeader className="relative border-b-[4px] border-primary bg-card">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="font-collegiate uppercase tracking-tight">{title}</CardTitle>
-            <CardDescription>{duration}</CardDescription>
+            <CardTitle className="font-collegiate uppercase tracking-tight text-primary">{title}</CardTitle>
+            <CardDescription className="text-muted-foreground">{duration}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary">
               <CalendarDays className="h-4 w-4" />
             </Button>
           </div>
@@ -142,7 +142,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
             placeholder={`How would you like to modify ${title}'s workout?`}
             value={modificationPrompt}
             onChange={(e) => setModificationPrompt(e.target.value)}
-            className="border-2 border-primary"
+            className="border-2 border-primary bg-white text-foreground"
           />
           <Button 
             onClick={handleModifyWorkout}

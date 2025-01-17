@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { WorkoutCard } from "@/components/WorkoutCard";
-import { Loader2, Plus } from "lucide-react";
+import { Check, Loader2, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showGenerateInput, setShowGenerateInput] = useState(false);
+  const [generatePrompt, setGeneratePrompt] = useState("");
   const { toast } = useToast();
   const [workoutDetails, setWorkoutDetails] = useState({
     Sunday: { warmup: "", wod: "", notes: "" },
@@ -18,17 +22,56 @@ const Index = () => {
   });
 
   const handleGenerateWorkout = async () => {
+    if (!generatePrompt.trim() && showGenerateInput) {
+      toast({
+        title: "Error",
+        description: "Please enter some context for the workout generation",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsGenerating(false);
-    toast({
-      title: "Workout Generated!",
-      description: "Your new workout plan is ready.",
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+        body: { prompt: generatePrompt },
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        // Update all workout details
+        setWorkoutDetails(data);
+        
+        // Update workouts array descriptions
+        const updatedWorkouts = workouts.map(workout => ({
+          ...workout,
+          description: data[workout.title].description || workout.description
+        }));
+        setWorkouts(updatedWorkouts);
+
+        toast({
+          title: "Success",
+          description: "Weekly workouts have been generated!",
+        });
+
+        // Reset the generate input
+        setShowGenerateInput(false);
+        setGeneratePrompt("");
+      }
+    } catch (error) {
+      console.error('Error generating workouts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate workouts",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const workouts = [
+  const [workouts, setWorkouts] = useState([
     {
       title: "Sunday",
       description: "Rest and recovery day with mobility work and light stretching.",
@@ -64,7 +107,7 @@ const Index = () => {
       description: "Team workout with partner exercises and fun challenges.",
       duration: "45 minutes",
     },
-  ];
+  ]);
 
   const handleWorkoutUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; }) => {
     setWorkoutDetails(prev => ({
@@ -81,11 +124,11 @@ const Index = () => {
             <h1 className="text-4xl font-collegiate uppercase tracking-tight">Your Workouts</h1>
             <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
           </div>
-          <Button onClick={handleGenerateWorkout} disabled={isGenerating}>
-            {isGenerating ? (
+          <Button onClick={() => setShowGenerateInput(!showGenerateInput)}>
+            {showGenerateInput ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating
+                <X className="mr-2 h-4 w-4" />
+                Cancel
               </>
             ) : (
               <>
@@ -95,6 +138,30 @@ const Index = () => {
             )}
           </Button>
         </div>
+
+        {showGenerateInput && (
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
+              value={generatePrompt}
+              onChange={(e) => setGeneratePrompt(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleGenerateWorkout} disabled={isGenerating}>
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating
+                </>
+              ) : (
+                <>
+                  <Check className="mr-2 h-4 w-4" />
+                  Generate
+                </>
+              )}
+            </Button>
+          </div>
+        )}
 
         <div className="grid gap-6 grid-cols-1">
           {workouts.map((workout) => (

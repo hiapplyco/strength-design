@@ -1,9 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI, SchemaType } from "https://esm.sh/@google/generative-ai@0.1.3";
 
+// Define CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 interface GeminiGenerationConfig {
@@ -37,10 +39,10 @@ const schema = {
     Sunday: {
       type: SchemaType.OBJECT,
       properties: {
-        description: { type: SchemaType.STRING, description: "Brief overview of the workout" },
-        warmup: { type: SchemaType.STRING, description: "Detailed warmup routine" },
-        wod: { type: SchemaType.STRING, description: "Main workout of the day" },
-        notes: { type: SchemaType.STRING, description: "Additional coaching notes" }
+        description: { type: SchemaType.STRING },
+        warmup: { type: SchemaType.STRING },
+        wod: { type: SchemaType.STRING },
+        notes: { type: SchemaType.STRING }
       },
       required: ["description", "warmup", "wod", "notes"]
     },
@@ -55,6 +57,7 @@ const schema = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -117,7 +120,7 @@ Important: Return the response as a properly formatted JSON object with all requ
       console.log('Failed to parse text:', textResponse);
       return new Response(
         JSON.stringify({ 
-          error: 'Invalid response format',
+          error: 'Invalid JSON format in AI response',
           details: parseError.message,
           rawResponse: textResponse.substring(0, 200) + '...'
         }), {

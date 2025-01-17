@@ -71,18 +71,23 @@ const Index = () => {
 
     setIsGenerating(true);
     try {
+      console.log('Calling generate-weekly-workouts with prompt:', generatePrompt);
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { prompt: generatePrompt },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error generating workouts:', error);
+        throw error;
+      }
 
       if (data) {
+        console.log('Received workout data:', data);
         setWorkoutDetails(data);
         
         const updatedWorkouts = workouts.map(workout => ({
           ...workout,
-          description: data[workout.title].description || workout.description
+          description: data[workout.title]?.description || workout.description
         }));
         setWorkouts(updatedWorkouts);
 
@@ -98,7 +103,7 @@ const Index = () => {
       console.error('Error generating workouts:', error);
       toast({
         title: "Error",
-        description: "Failed to generate workouts",
+        description: error instanceof Error ? error.message : "Failed to generate workouts. Please try again.",
         variant: "destructive",
       });
     } finally {

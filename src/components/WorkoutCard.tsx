@@ -18,14 +18,14 @@ interface WorkoutSectionProps {
 }
 
 const WorkoutSection = ({ label, value, onChange, minHeight = "80px", isDescription = false }: WorkoutSectionProps) => (
-  <div className={`space-y-2 rounded ${isDescription ? 'bg-primary' : 'bg-muted'} p-4 border-[3px] border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
+  <div className={`space-y-2 rounded-[20px] ${isDescription ? 'bg-primary' : 'bg-muted'} p-4 border-[3px] border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
     <label className={`text-sm font-bold uppercase tracking-tight ${isDescription ? 'text-white' : 'text-primary'}`}>
       {label}
     </label>
     <Textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`${isDescription ? 'min-h-[60px] text-lg font-collegiate uppercase tracking-wide' : 'min-h-[80px]'} resize-y bg-white font-medium text-foreground border-2 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`}
+      className={`${isDescription ? 'min-h-[60px] text-lg font-collegiate uppercase tracking-wide' : 'min-h-[80px]'} resize-y bg-white font-medium text-foreground border-2 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-[20px]`}
       style={{ minHeight }}
     />
   </div>
@@ -215,9 +215,9 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   };
 
   return (
-    <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px]">
       <audio ref={audioRef} className="hidden" />
-      <CardHeader className="relative border-b-[4px] border-primary bg-card">
+      <CardHeader className="relative border-b-[4px] border-primary bg-card rounded-t-[20px]">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="font-collegiate uppercase tracking-tight text-primary">{title}</CardTitle>
@@ -285,12 +285,12 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
             placeholder={`Examples: "Make ${title}'s workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
             value={modificationPrompt}
             onChange={(e) => setModificationPrompt(e.target.value)}
-            className="border-2 border-primary bg-white text-foreground placeholder:text-gray-400"
+            className="border-2 border-primary bg-white text-foreground placeholder:text-gray-400 rounded-[20px]"
           />
           <Button 
             onClick={handleModifyWorkout}
             disabled={isModifying}
-            className="w-full border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50"
+            className="w-full border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50 rounded-[20px]"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isModifying ? 'animate-spin' : ''}`} />
             {isModifying ? 'Modifying...' : 'Modify Workout'}

@@ -47,7 +47,6 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const [notes, setNotes] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Update local state when allWorkouts changes
   useEffect(() => {
     if (allWorkouts && allWorkouts[title]) {
       setWarmup(allWorkouts[title].warmup || "");

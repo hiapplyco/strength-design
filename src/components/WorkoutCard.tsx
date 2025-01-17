@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { createEvents } from 'ics';
+import { sanitizeText } from "@/utils/text";
 
 interface WorkoutSectionProps {
   label: string;
@@ -51,9 +52,9 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
 
   useEffect(() => {
     if (allWorkouts && allWorkouts[title]) {
-      setWarmup(allWorkouts[title].warmup || "");
-      setWod(allWorkouts[title].wod || "");
-      setNotes(allWorkouts[title].notes || "");
+      setWarmup(sanitizeText(allWorkouts[title].warmup || ""));
+      setWod(sanitizeText(allWorkouts[title].wod || ""));
+      setNotes(sanitizeText(allWorkouts[title].notes || ""));
     }
   }, [allWorkouts, title]);
 
@@ -61,7 +62,6 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
     try {
       setIsSpeaking(true);
 
-      // First, generate the monologue using Gemini
       const { data: monologueData, error: monologueError } = await supabase.functions.invoke('generate-workout-monologue', {
         body: {
           dayToSpeak: title,
@@ -74,7 +74,6 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
 
       if (monologueError) throw monologueError;
 
-      // Then, convert the monologue to speech using ElevenLabs
       const { data: speechData, error: speechError } = await supabase.functions.invoke('text-to-speech', {
         body: { text: monologueData.monologue }
       });
@@ -104,14 +103,10 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
     try {
       setIsExporting(true);
       
-      // Create the event content
-      const eventContent = `Warmup:\n${warmup}\n\nWOD:\n${wod}\n\nNotes:\n${notes}`;
+      const eventContent = `Warmup:\n${sanitizeText(warmup)}\n\nWOD:\n${sanitizeText(wod)}\n\nNotes:\n${sanitizeText(notes)}`;
       
-      // Get tomorrow's date for the event (since these are typically planned workouts)
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
-      
-      // Set the event time to 6 AM by default
       tomorrow.setHours(6, 0, 0, 0);
       
       const event = {
@@ -123,7 +118,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           tomorrow.getMinutes()
         ] as [number, number, number, number, number],
         duration: { hours: 1 },
-        title: `${title} Workout`,
+        title: `${sanitizeText(title)} Workout`,
         description: eventContent,
         location: '',
         status: 'CONFIRMED' as const,
@@ -141,10 +136,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           return;
         }
 
-        // Create a Blob from the ICS content
         const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
-        
-        // Create a link element and trigger download
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
         link.setAttribute('download', `${title.toLowerCase()}-workout.ics`);
@@ -184,7 +176,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       const { data, error } = await supabase.functions.invoke('workout-modifier', {
         body: {
           dayToModify: title,
-          modificationPrompt,
+          modificationPrompt: sanitizeText(modificationPrompt),
           allWorkouts,
         },
       });
@@ -192,13 +184,17 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       if (error) throw error;
 
       if (data) {
-        setWarmup(data.warmup);
-        setWod(data.wod);
-        setNotes(data.notes);
+        setWarmup(sanitizeText(data.warmup));
+        setWod(sanitizeText(data.wod));
+        setNotes(sanitizeText(data.notes));
         setModificationPrompt("");
         
         if (onUpdate) {
-          onUpdate(data);
+          onUpdate({
+            warmup: sanitizeText(data.warmup),
+            wod: sanitizeText(data.wod),
+            notes: sanitizeText(data.notes)
+          });
         }
 
         toast({

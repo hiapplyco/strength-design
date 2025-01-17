@@ -18,51 +18,113 @@ serve(async (req) => {
     }
 
     const { dayToModify, modificationPrompt, allWorkouts } = await req.json();
+    console.log('Received request to modify workout:', { dayToModify, modificationPrompt });
 
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const prompt = `You are a CrossFit coach helping modify a workout schedule.
-Current weekly schedule:
-${Object.entries(allWorkouts)
-  .map(([day, workout]) => `${day}:
-- Warmup: ${workout.warmup}
-- WOD: ${workout.wod}
-- Notes: ${workout.notes}`)
-  .join('\n\n')}
+    // Format the current workout plan for context
+    const currentWorkoutPlan = Object.entries(allWorkouts)
+      .map(([day, workout]) => `${day}:
+Warmup: ${workout.warmup}
+WOD: ${workout.wod}
+Notes: ${workout.notes || 'None'}`).join('\n\n');
 
-Request: Modify ${dayToModify}'s workout based on this request: "${modificationPrompt}"
+    const currentWorkout = allWorkouts[dayToModify];
 
-Consider the overall weekly schedule and maintain a balanced training program.
-Provide the modified workout in this exact format:
-WARMUP:
-[warmup content]
-WOD:
-[wod content]
-NOTES:
-[notes content]`;
+    const prompt = `You are an expert CrossFit coach modifying a specific workout based on new user input.
+
+Here is the current 5-day workout plan (context only, do not modify days other than the specified one):
+
+${currentWorkoutPlan}
+
+User's request for modifications to ${dayToModify}'s workout: ${modificationPrompt}
+
+Original workout for ${dayToModify}:
+Warmup: ${currentWorkout.warmup}
+WOD: ${currentWorkout.wod}
+Notes: ${currentWorkout.notes || 'None'}
+
+Modify the workout for ${dayToModify}, taking into account the user's request and the principles of periodization (progressive overload, movement pattern balance, energy system development, recovery).
+
+Provide a new workout for ${dayToModify} with the following:
+
+1. Warmup (10-15 minutes):
+    *   Movement preparation specific to the day's workout.
+    *   Mobility work for key joints involved.
+    *   Progressive intensity buildup.
+
+2. WOD (Workout of the Day):
+    *   Clear structure (e.g., AMRAP, For Time, EMOM).
+    *   Specific rep schemes and weights (or scaling options).
+    *   Work-to-rest ratios.
+    *   Target time domain.
+
+3. Coaching Notes:
+    *   Detailed movement standards.
+    *   Scaling options for different fitness levels.
+    *   Strategy recommendations.
+    *   Safety considerations.
+
+Return a JSON object in the following format:
+
+{
+    "day": "${dayToModify}",
+    "warmup": "Detailed modified warmup plan",
+    "wod": "Detailed modified workout details",
+    "notes": "Detailed modified coaching notes"
+}
+
+Ensure all text is clear, concise, and free of markdown formatting. Provide only the JSON output.`;
 
     console.log('Sending prompt to Gemini:', prompt);
 
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
+    console.log('Received response from Gemini:', text);
 
-    // Parse the response into sections
-    const sections = {
-      warmup: text.match(/WARMUP:\n([\s\S]*?)(?=WOD:)/)?.[1]?.trim() || '',
-      wod: text.match(/WOD:\n([\s\S]*?)(?=NOTES:)/)?.[1]?.trim() || '',
-      notes: text.match(/NOTES:\n([\s\S]*?)$/)?.[1]?.trim() || '',
-    };
+    try {
+      // Clean the response text
+      const cleanedText = text
+        .replace(/```json\n?|\n?```/g, '')  // Remove markdown code blocks
+        .replace(/^\s+|\s+$/g, '')          // Remove leading/trailing whitespace
+        .replace(/\\n/g, ' ')               // Replace escaped newlines
+        .replace(/\n/g, ' ');               // Replace actual newlines
 
-    console.log('Parsed response:', sections);
+      const modifiedWorkout = JSON.parse(cleanedText);
 
-    return new Response(JSON.stringify(sections), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      // Validate the structure
+      const requiredFields = ['day', 'warmup', 'wod', 'notes'];
+      const isValid = requiredFields.every(field => 
+        typeof modifiedWorkout[field] === 'string' && modifiedWorkout[field].length > 0
+      );
+
+      if (!isValid) {
+        console.error('Invalid workout structure:', modifiedWorkout);
+        throw new Error('Generated JSON is missing required fields');
+      }
+
+      // Extract just the fields we need
+      const response = {
+        warmup: modifiedWorkout.warmup,
+        wod: modifiedWorkout.wod,
+        notes: modifiedWorkout.notes
+      };
+
+      return new Response(JSON.stringify(response), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (parseError) {
+      console.error('Error parsing Gemini response:', parseError);
+      throw new Error(`Invalid JSON structure: ${parseError.message}`);
+    }
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error in workout-modifier function:', error);
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: 'Failed to generate or parse workouts'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

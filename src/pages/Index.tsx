@@ -142,7 +142,7 @@ const Index = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background">
-      <div className="flex flex-col space-y-8">
+      <div className="flex flex-col space-y-8 max-w-3xl mx-auto">
         <div className="flex flex-col space-y-4">
           <div className="text-center">
             <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">

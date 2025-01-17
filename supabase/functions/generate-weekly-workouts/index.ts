@@ -17,16 +17,17 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY')!);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const systemPrompt = `You are an experienced CrossFit coach and box owner creating a week of workouts. 
-    For each day (Sunday through Saturday), provide a structured workout with these components:
-    - Description: A brief overview of the day's focus
-    - Warmup: Detailed warmup routine
-    - WOD (Workout of the Day): The main workout with specific movements, reps, and scaling options
-    - Notes: Additional coaching cues, movement standards, and safety considerations
-    
-    Consider CrossFit principles of constantly varied, functional movements at high intensity while maintaining proper progression and recovery throughout the week.
-    
-    Format the response as a JSON object with days as keys, each containing description, warmup, wod, and notes fields.`;
+    const systemPrompt = `Generate a week of CrossFit workouts. Return ONLY a JSON object with the following structure for each day (Sunday through Saturday):
+    {
+      "Sunday": {
+        "description": "Brief overview",
+        "warmup": "Detailed warmup",
+        "wod": "Main workout",
+        "notes": "Additional info"
+      },
+      // ... repeat for each day
+    }
+    Consider CrossFit principles of constantly varied, functional movements at high intensity while maintaining proper progression and recovery throughout the week.`;
 
     const fullPrompt = `${systemPrompt}\n\nAdditional context from coach: ${prompt}`;
 
@@ -36,19 +37,32 @@ serve(async (req) => {
     const response = await result.response;
     const text = response.text();
     
-    // Parse the response as JSON
-    const workouts = JSON.parse(text);
-
-    console.log('Generated workouts:', workouts);
-
-    return new Response(JSON.stringify(workouts), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    // Extract JSON from the response by removing any markdown formatting
+    const jsonStr = text.replace(/```json\n|\n```/g, '').trim();
+    
+    try {
+      // Parse the cleaned JSON string
+      const workouts = JSON.parse(jsonStr);
+      console.log('Successfully parsed workouts:', workouts);
+      
+      return new Response(JSON.stringify(workouts), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (parseError) {
+      console.error('Error parsing JSON:', parseError);
+      console.log('Raw response:', text);
+      throw new Error('Invalid JSON format in AI response');
+    }
   } catch (error) {
     console.error('Error generating workouts:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Failed to generate or parse workouts'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
   }
 });

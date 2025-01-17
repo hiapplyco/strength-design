@@ -280,7 +280,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           onChange={setNotes}
           minHeight="60px"
         />
-        <div className="space-y-2">
+        <div className="space-y-2 border-4 border-destructive rounded-[20px] p-4">
           <Input
             placeholder={`Examples: "Make ${title}'s workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
             value={modificationPrompt}

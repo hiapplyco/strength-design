@@ -40,10 +40,8 @@ const Index = () => {
       if (error) throw error;
 
       if (data) {
-        // Update all workout details
         setWorkoutDetails(data);
         
-        // Update workouts array descriptions
         const updatedWorkouts = workouts.map(workout => ({
           ...workout,
           description: data[workout.title].description || workout.description
@@ -55,7 +53,6 @@ const Index = () => {
           description: "Weekly workouts have been generated!",
         });
 
-        // Reset the generate input
         setShowGenerateInput(false);
         setGeneratePrompt("");
       }
@@ -71,7 +68,7 @@ const Index = () => {
     }
   };
 
-  const [workouts, setWorkouts] = useState([
+  const [workouts] = useState([
     {
       title: "Sunday",
       description: "Rest and recovery day with mobility work and light stretching.",
@@ -119,49 +116,58 @@ const Index = () => {
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <div className="flex flex-col space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-collegiate uppercase tracking-tight">Your Workouts</h1>
-            <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
-          </div>
-          <Button onClick={() => setShowGenerateInput(!showGenerateInput)}>
-            {showGenerateInput ? (
-              <>
-                <X className="mr-2 h-4 w-4" />
-                Cancel
-              </>
-            ) : (
-              <>
-                <Plus className="mr-2 h-4 w-4" />
-                Generate All Workouts
-              </>
-            )}
-          </Button>
-        </div>
-
-        {showGenerateInput && (
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
-              value={generatePrompt}
-              onChange={(e) => setGeneratePrompt(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleGenerateWorkout} disabled={isGenerating}>
-              {isGenerating ? (
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-collegiate uppercase tracking-tight">Your Workouts</h1>
+              <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
+            </div>
+            <Button 
+              onClick={() => setShowGenerateInput(!showGenerateInput)}
+              className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white"
+            >
+              {showGenerateInput ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating
+                  <X className="mr-2 h-4 w-4" />
+                  Cancel
                 </>
               ) : (
                 <>
-                  <Check className="mr-2 h-4 w-4" />
-                  Generate
+                  <Plus className="mr-2 h-4 w-4" />
+                  Generate All Workouts
                 </>
               )}
             </Button>
           </div>
-        )}
+
+          {showGenerateInput && (
+            <div className="flex gap-2 w-full">
+              <Input
+                placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
+                value={generatePrompt}
+                onChange={(e) => setGeneratePrompt(e.target.value)}
+                className="flex-1 border-2 border-primary"
+              />
+              <Button 
+                onClick={handleGenerateWorkout} 
+                disabled={isGenerating}
+                className="border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating
+                  </>
+                ) : (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Generate
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
 
         <div className="grid gap-6 grid-cols-1">
           {workouts.map((workout) => (

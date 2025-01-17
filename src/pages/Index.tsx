@@ -83,8 +83,22 @@ const Index = () => {
 
       if (data) {
         console.log('Received workout data:', data);
-        setWorkoutDetails(data);
         
+        // Create a new workout details object with the received data
+        const newWorkoutDetails: WorkoutDetails = {};
+        Object.entries(data).forEach(([day, workout]: [string, any]) => {
+          newWorkoutDetails[day] = {
+            warmup: workout.warmup || '',
+            wod: workout.wod || '',
+            notes: workout.notes || '',
+            description: workout.description || '',
+          };
+        });
+        
+        // Update workout details state
+        setWorkoutDetails(newWorkoutDetails);
+        
+        // Update workouts array with new descriptions
         const updatedWorkouts = workouts.map(workout => ({
           ...workout,
           description: data[workout.title]?.description || workout.description
@@ -114,7 +128,10 @@ const Index = () => {
   const handleWorkoutUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; }) => {
     setWorkoutDetails(prev => ({
       ...prev,
-      [day]: updates
+      [day]: {
+        ...prev[day],
+        ...updates
+      }
     }));
   };
 

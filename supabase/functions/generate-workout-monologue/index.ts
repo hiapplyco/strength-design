@@ -36,7 +36,6 @@ const generateWithGemini = async (prompt: string) => {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: corsHeaders,
@@ -57,7 +56,7 @@ serve(async (req) => {
     const { dayToSpeak, workoutPlan, warmup, wod, notes } = await req.json();
     console.log('Received request for day:', dayToSpeak);
 
-    const systemPrompt = `You are an expert CrossFit coach delivering an engaging and informative monologue about today's workout.
+    const systemPrompt = `You are an expert CrossFit coach delivering a precisely timed monologue about today's workout.
 
 Today is ${dayToSpeak}.
 
@@ -75,16 +74,21 @@ Coaching Notes: ${notes}
 
 Your task is to create a motivating and descriptive monologue that a coach might deliver to an athlete or a class before starting today's workout.
 
-The monologue should:
+IMPORTANT FORMATTING REQUIREMENTS:
+1. The monologue MUST be exactly 150 words long. Not more, not less.
+2. Structure the monologue in exactly this order with these word counts:
+   - Introduction (20 words): Greet athletes and mention the day
+   - Warmup Description (35 words): Explain the warmup's purpose and flow
+   - WOD Explanation (60 words): Detail the workout, pacing, and intended stimulus
+   - Coaching Tips (35 words): Share key movement tips and scaling options
 
-1. Acknowledge the day of the week and create excitement for the workout.
-2. Describe the Warmup, explaining its purpose and how it prepares the body for the WOD.
-3. Explain the WOD (Workout of the Day) in detail, including the movements, rep scheme, and intended stimulus.
-4. Provide coaching cues from the Notes section, focusing on proper form, safety, and strategy.
-5. Offer scaling options from the Notes for different fitness levels.
-6. Deliver the monologue in a natural, conversational tone, as if speaking directly to an athlete or a group.
-7. Be enthusiastic and motivating, encouraging athletes to push themselves while staying safe.
-8. Keep the monologue concise, aiming for a delivery time of under 2 minutes.
+Additional guidelines:
+- Use a natural, conversational tone
+- Be enthusiastic and motivating
+- Focus on proper form and safety
+- Keep explanations clear and concise
+- Avoid unnecessary repetition
+- Maintain consistent energy throughout
 
 Output the monologue as a single block of text with no additional formatting.`;
 

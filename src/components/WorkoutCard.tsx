@@ -197,7 +197,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
         />
         <div className="space-y-2">
           <Input
-            placeholder={`How would you like to modify ${title}'s workout?`}
+            placeholder={`Examples: "Make ${title}'s workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
             value={modificationPrompt}
             onChange={(e) => setModificationPrompt(e.target.value)}
             className="border-2 border-primary bg-white text-foreground"

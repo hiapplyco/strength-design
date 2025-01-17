@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { createEvents } from 'ics';
 
 interface WorkoutSectionProps {
   label: string;
@@ -41,6 +42,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const { toast } = useToast();
   const [isModifying, setIsModifying] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [modificationPrompt, setModificationPrompt] = useState("");
   const [warmup, setWarmup] = useState("");
   const [wod, setWod] = useState("");
@@ -95,6 +97,75 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
         variant: "destructive",
       });
       setIsSpeaking(false);
+    }
+  };
+
+  const handleExportCalendar = async () => {
+    try {
+      setIsExporting(true);
+      
+      // Create the event content
+      const eventContent = `Warmup:\n${warmup}\n\nWOD:\n${wod}\n\nNotes:\n${notes}`;
+      
+      // Get tomorrow's date for the event (since these are typically planned workouts)
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      // Set the event time to 6 AM by default
+      tomorrow.setHours(6, 0, 0, 0);
+      
+      const event = {
+        start: [
+          tomorrow.getFullYear(),
+          tomorrow.getMonth() + 1,
+          tomorrow.getDate(),
+          tomorrow.getHours(),
+          tomorrow.getMinutes()
+        ],
+        duration: { hours: 1 },
+        title: `${title} Workout`,
+        description: eventContent,
+        location: '',
+        status: 'CONFIRMED',
+        busyStatus: 'BUSY'
+      };
+
+      createEvents([event], (error: Error | undefined, value: string) => {
+        if (error) {
+          console.error(error);
+          toast({
+            title: "Error",
+            description: "Failed to create calendar event",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Create a Blob from the ICS content
+        const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
+        
+        // Create a link element and trigger download
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', `${title.toLowerCase()}-workout.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast({
+          title: "Success",
+          description: "Calendar event has been downloaded",
+        });
+      });
+    } catch (error) {
+      console.error('Error exporting calendar:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export calendar event",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -170,12 +241,23 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
                 <Volume2 className="h-4 w-4" />
               )}
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary">
-              <CalendarDays className="h-4 w-4" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full text-primary"
+              onClick={handleExportCalendar}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CalendarDays className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
       </CardHeader>
+      
       <CardContent className="space-y-4 p-6">
         <WorkoutSection
           label="Description"
@@ -219,6 +301,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           </Button>
         </div>
       </CardContent>
+      
     </Card>
   );
 }

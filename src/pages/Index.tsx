@@ -21,19 +21,39 @@ const Index = () => {
 
   const workouts = [
     {
-      title: "Full Body Strength",
-      description: "A comprehensive workout targeting all major muscle groups with compound exercises.",
-      duration: "45 minutes",
-    },
-    {
-      title: "HIIT Cardio",
-      description: "High-intensity interval training to boost your cardiovascular fitness and burn calories.",
+      title: "Sunday",
+      description: "Rest and recovery day with mobility work and light stretching.",
       duration: "30 minutes",
     },
     {
-      title: "Core Focus",
-      description: "Strengthen your core with a mix of dynamic and static exercises.",
-      duration: "20 minutes",
+      title: "Monday",
+      description: "Strength focus with compound movements and accessory work.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Tuesday",
+      description: "High-intensity cardio and bodyweight exercises.",
+      duration: "45 minutes",
+    },
+    {
+      title: "Wednesday",
+      description: "Olympic weightlifting technique and skill work.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Thursday",
+      description: "Endurance-based workout with mixed modal activities.",
+      duration: "50 minutes",
+    },
+    {
+      title: "Friday",
+      description: "Strength and power development with heavy lifts.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Saturday",
+      description: "Team workout with partner exercises and fun challenges.",
+      duration: "45 minutes",
     },
   ];
 
@@ -54,13 +74,13 @@ const Index = () => {
             ) : (
               <>
                 <Plus className="mr-2 h-4 w-4" />
-                Generate Workout
+                Generate All Workouts
               </>
             )}
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {workouts.map((workout) => (
             <WorkoutCard key={workout.title} {...workout} />
           ))}

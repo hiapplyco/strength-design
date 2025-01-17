@@ -1,10 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { WorkoutCard } from "@/components/WorkoutCard";
-import { Check, Loader2, Plus, X } from "lucide-react";
+import { Plus, Loader2, Check, X } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
+import { GenerateWorkoutButton } from "@/components/GenerateWorkoutButton";
+import { sanitizeText } from "@/utils/text";
 
 interface WorkoutDetails {
   [key: string]: {
@@ -59,18 +62,11 @@ const Index = () => {
     },
   ]);
 
-  const sanitizeText = (text: string): string => {
-    // Remove special characters that might cause issues with TTS
-    return text.replace(/[^\w\s.,!?-]/g, ' ')
-              .replace(/\s+/g, ' ')
-              .trim();
-  };
-
   const handleGenerateWorkout = async () => {
     if (!generatePrompt.trim() && showGenerateInput) {
       toast({
         title: "Error",
-        description: "Please enter some context for the workout generation",
+        description: "Please enter some context for workout generation",
         variant: "destructive",
       });
       return;
@@ -157,46 +153,15 @@ const Index = () => {
           
           <div className="flex items-center justify-center w-full mt-6">
             {showGenerateInput ? (
-              <>
-                <Input
-                  placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
-                  value={generatePrompt}
-                  onChange={(e) => setGeneratePrompt(e.target.value)}
-                  className="flex-1 border-2 border-primary bg-card text-foreground placeholder:text-muted-foreground"
-                />
-                <Button 
-                  onClick={handleGenerateWorkout} 
-                  disabled={isGenerating}
-                  className="border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50 whitespace-nowrap"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Generate
-                    </>
-                  )}
-                </Button>
-                <Button 
-                  onClick={() => setShowGenerateInput(false)}
-                  variant="outline"
-                  className="border-2 border-primary text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </>
+              <GenerateWorkoutInput
+                generatePrompt={generatePrompt}
+                setGeneratePrompt={setGeneratePrompt}
+                handleGenerateWorkout={handleGenerateWorkout}
+                isGenerating={isGenerating}
+                setShowGenerateInput={setShowGenerateInput}
+              />
             ) : (
-              <Button 
-                onClick={() => setShowGenerateInput(true)}
-                className="border-2 border-destructive bg-destructive text-white font-collegiate text-xl uppercase tracking-tight transition-colors hover:bg-destructiveSecondary hover:border-destructiveSecondary transform hover:-translate-y-1 hover:shadow-lg px-8 py-6"
-              >
-                <Plus className="mr-2 h-6 w-6" />
-                Generate All Workouts
-              </Button>
+              <GenerateWorkoutButton setShowGenerateInput={setShowGenerateInput} />
             )}
           </div>
         </div>

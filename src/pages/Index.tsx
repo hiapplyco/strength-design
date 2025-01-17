@@ -68,7 +68,7 @@ const Index = () => {
     }
   };
 
-  const [workouts] = useState([
+  const [workouts, setWorkouts] = useState([
     {
       title: "Sunday",
       description: "Rest and recovery day with mobility work and light stretching.",

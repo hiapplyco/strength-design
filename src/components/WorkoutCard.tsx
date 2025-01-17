@@ -12,17 +12,18 @@ interface WorkoutSectionProps {
   value: string;
   onChange: (value: string) => void;
   minHeight?: string;
+  isDescription?: boolean;
 }
 
-const WorkoutSection = ({ label, value, onChange, minHeight = "80px" }: WorkoutSectionProps) => (
-  <div className="space-y-2 rounded bg-muted p-4 border-[3px] border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-    <label className="text-sm font-bold uppercase tracking-tight text-primary">
+const WorkoutSection = ({ label, value, onChange, minHeight = "80px", isDescription = false }: WorkoutSectionProps) => (
+  <div className={`space-y-2 rounded ${isDescription ? 'bg-primary' : 'bg-muted'} p-4 border-[3px] border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
+    <label className={`text-sm font-bold uppercase tracking-tight ${isDescription ? 'text-white' : 'text-primary'}`}>
       {label}
     </label>
     <Textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="min-h-[80px] resize-y bg-white font-medium text-foreground border-2 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+      className={`${isDescription ? 'min-h-[60px] text-lg font-collegiate uppercase tracking-wide' : 'min-h-[80px]'} resize-y bg-white font-medium text-foreground border-2 border-primary shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`}
       style={{ minHeight }}
     />
   </div>
@@ -174,6 +175,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           value={description}
           onChange={() => {}}
           minHeight="60px"
+          isDescription={true}
         />
         <WorkoutSection
           label="Warmup"

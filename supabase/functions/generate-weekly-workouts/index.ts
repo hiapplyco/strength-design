@@ -36,8 +36,6 @@ const generateWithGemini = async (prompt: string) => {
 };
 
 serve(async (req) => {
-  console.log('Received request:', req.method);
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
@@ -63,54 +61,84 @@ serve(async (req) => {
       throw new Error('Invalid or missing prompt in request body');
     }
 
-    const systemPrompt = `You are a CrossFit coach creating a week of workouts. Create a complete weekly program that includes a brief description, warmup, workout (WOD), and coaching notes for each day. Consider progression, recovery, and variety in the programming.
+    const systemPrompt = `You are an expert CrossFit coach designing a comprehensive Monday-Friday workout program.
 
-Additional context from coach: ${prompt}
+The user will provide you with their fitness goals, preferences, and any limitations. 
 
-IMPORTANT: You must return a valid JSON object with EXACTLY this structure, including ALL days and fields:
+Create a detailed 5-day workout plan following these principles of periodization:
+
+1. Progressive Overload: Gradually increase intensity across the week.
+2. Movement Pattern Balance: Include a mix of pushing, pulling, squatting, hinging, and core work each week, ensuring variation across the days.
+3. Energy System Development: Mix cardio, strength, and skill work throughout the week, varying the focus each day.
+4. Recovery Consideration: Alternate muscle groups and intensity levels to prevent overtraining. Allow for adequate rest and recovery.
+5. Concurrent Periodization: Develop strength, endurance, and skill simultaneously, in line with CrossFit's philosophy.
+6. Emphasis and Compromise: If the user has specific areas they want to improve (e.g., Olympic lifting), temporarily increase the focus on those elements while potentially reducing the volume of others.
+
+User's request: ${prompt}
+
+For each day (Monday to Friday), provide:
+
+1. Warmup (10-15 minutes):
+    *   Movement preparation specific to the day's workout.
+    *   Mobility work for key joints involved.
+    *   Progressive intensity buildup.
+
+2. WOD (Workout of the Day):
+    *   Clear structure (e.g., AMRAP, For Time, EMOM).
+    *   Specific rep schemes and weights (or scaling options).
+    *   Work-to-rest ratios.
+    *   Target time domain.
+
+3. Coaching Notes:
+    *   Detailed movement standards.
+    *   Scaling options for different fitness levels.
+    *   Strategy recommendations.
+    *   Safety considerations.
+
+IMPORTANT: You must return a valid JSON object with EXACTLY this structure for compatibility with the existing system:
 
 {
-  "Sunday": {
-    "description": "A brief overview of the day's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "The workout of the day",
-    "notes": "Coaching tips and scaling options"
-  },
   "Monday": {
-    "description": "A brief overview of the day's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "The workout of the day",
-    "notes": "Coaching tips and scaling options"
+    "description": "A brief overview focusing on the day's primary training goal",
+    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
+    "wod": "Structured workout with clear format, rep schemes, and time domains",
+    "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Tuesday": {
-    "description": "A brief overview of the day's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "The workout of the day",
-    "notes": "Coaching tips and scaling options"
+    "description": "A brief overview focusing on the day's primary training goal",
+    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
+    "wod": "Structured workout with clear format, rep schemes, and time domains",
+    "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Wednesday": {
-    "description": "A brief overview of the day's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "The workout of the day",
-    "notes": "Coaching tips and scaling options"
+    "description": "A brief overview focusing on the day's primary training goal",
+    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
+    "wod": "Structured workout with clear format, rep schemes, and time domains",
+    "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Thursday": {
-    "description": "A brief overview of the day's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "The workout of the day",
-    "notes": "Coaching tips and scaling options"
+    "description": "A brief overview focusing on the day's primary training goal",
+    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
+    "wod": "Structured workout with clear format, rep schemes, and time domains",
+    "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Friday": {
-    "description": "A brief overview of the day's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "The workout of the day",
-    "notes": "Coaching tips and scaling options"
+    "description": "A brief overview focusing on the day's primary training goal",
+    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
+    "wod": "Structured workout with clear format, rep schemes, and time domains",
+    "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Saturday": {
-    "description": "A brief overview of the day's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "The workout of the day",
-    "notes": "Coaching tips and scaling options"
+    "description": "Active Recovery Day",
+    "warmup": "Light mobility and movement preparation",
+    "wod": "Optional light cardio and mobility work",
+    "notes": "Focus on recovery and preparation for next week"
+  },
+  "Sunday": {
+    "description": "Rest Day",
+    "warmup": "Optional light stretching",
+    "wod": "Rest and recovery",
+    "notes": "Take time to rest and recover for the upcoming week"
   }
 }
 

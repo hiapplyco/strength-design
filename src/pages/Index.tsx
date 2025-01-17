@@ -59,6 +59,13 @@ const Index = () => {
     },
   ]);
 
+  const sanitizeText = (text: string): string => {
+    // Remove special characters that might cause issues with TTS
+    return text.replace(/[^\w\s.,!?-]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+  };
+
   const handleGenerateWorkout = async () => {
     if (!generatePrompt.trim() && showGenerateInput) {
       toast({
@@ -71,9 +78,11 @@ const Index = () => {
 
     setIsGenerating(true);
     try {
-      console.log('Calling generate-weekly-workouts with prompt:', generatePrompt);
+      const sanitizedPrompt = sanitizeText(generatePrompt);
+      console.log('Calling generate-weekly-workouts with prompt:', sanitizedPrompt);
+      
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
-        body: { prompt: generatePrompt },
+        body: { prompt: sanitizedPrompt },
       });
 
       if (error) {
@@ -88,17 +97,15 @@ const Index = () => {
         const newWorkoutDetails: WorkoutDetails = {};
         Object.entries(data).forEach(([day, workout]: [string, any]) => {
           newWorkoutDetails[day] = {
-            warmup: workout.warmup || '',
-            wod: workout.wod || '',
-            notes: workout.notes || '',
-            description: workout.description || '',
+            warmup: sanitizeText(workout.warmup || ''),
+            wod: sanitizeText(workout.wod || ''),
+            notes: sanitizeText(workout.notes || ''),
+            description: sanitizeText(workout.description || ''),
           };
         });
         
-        // Update workout details state
         setWorkoutDetails(newWorkoutDetails);
         
-        // Update workouts array with new descriptions
         const updatedWorkouts = workouts.map(workout => ({
           ...workout,
           description: data[workout.title]?.description || workout.description
@@ -108,6 +115,7 @@ const Index = () => {
         toast({
           title: "Success",
           description: "Weekly workouts have been generated!",
+          className: "bg-primary text-primary-foreground border-none",
         });
 
         setShowGenerateInput(false);
@@ -119,6 +127,7 @@ const Index = () => {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to generate workouts. Please try again.",
         variant: "destructive",
+        className: "bg-destructive text-destructive-foreground border-none",
       });
     } finally {
       setIsGenerating(false);
@@ -153,7 +162,7 @@ const Index = () => {
                   placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
                   value={generatePrompt}
                   onChange={(e) => setGeneratePrompt(e.target.value)}
-                  className="flex-1 border-2 border-primary bg-background text-foreground placeholder:text-gray-400"
+                  className="flex-1 border-2 border-primary bg-card text-foreground placeholder:text-muted-foreground"
                 />
                 <Button 
                   onClick={handleGenerateWorkout} 

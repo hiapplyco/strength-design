@@ -6,7 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Content-Type': 'application/json',
 };
 
 interface GeminiGenerationConfig {
@@ -20,7 +19,7 @@ const generateWithSchema = async (
   prompt: string
 ) => {
   try {
-    console.log('Initializing Gemini with prompt:', prompt);
+    console.log('Starting Gemini generation with prompt:', prompt);
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: modelName,
@@ -33,11 +32,11 @@ const generateWithSchema = async (
     });
 
     const result = await model.generateContent(prompt);
-    console.log('Received response from Gemini');
+    console.log('Successfully received Gemini response');
     return result.response.text();
   } catch (error) {
     console.error('Error in generateWithSchema:', error);
-    throw error;
+    throw new Error(`Gemini API error: ${error.message}`);
   }
 };
 
@@ -65,6 +64,8 @@ const schema = {
 };
 
 serve(async (req) => {
+  console.log('Received request:', req.method);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
@@ -98,16 +99,21 @@ Additional context from coach: ${prompt || 'Create a balanced week of workouts'}
 
 Important: Return the response as a properly formatted JSON object with all required fields.`;
 
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
     const textResponse = await generateWithSchema(
       {
-        apiKey: Deno.env.get('GEMINI_API_KEY') || '',
+        apiKey,
         model: "gemini-pro",
-        schema: schema
+        schema
       },
       systemPrompt
     );
 
-    console.log('Raw response from Gemini:', textResponse);
+    console.log('Processing Gemini response');
 
     try {
       // Clean the response text
@@ -136,7 +142,7 @@ Important: Return the response as a properly formatted JSON object with all requ
         throw new Error('Generated JSON is missing required days or fields');
       }
 
-      console.log('Successfully validated workouts:', workouts);
+      console.log('Successfully validated workouts structure');
       
       return new Response(JSON.stringify(workouts), {
         headers: {
@@ -148,16 +154,7 @@ Important: Return the response as a properly formatted JSON object with all requ
     } catch (parseError) {
       console.error('Error parsing or validating JSON:', parseError);
       console.log('Failed to parse text:', textResponse);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid JSON format in AI response',
-          details: parseError.message,
-          rawResponse: textResponse.substring(0, 200) + '...'
-        }), {
-          status: 500,
-          headers: corsHeaders,
-        }
-      );
+      throw new Error(`Invalid JSON format in AI response: ${parseError.message}`);
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
@@ -167,7 +164,10 @@ Important: Return the response as a properly formatted JSON object with all requ
         details: 'Failed to generate or parse workouts'
       }), {
         status: error.message === 'Method not allowed' ? 405 : 500,
-        headers: corsHeaders,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
       }
     );
   }

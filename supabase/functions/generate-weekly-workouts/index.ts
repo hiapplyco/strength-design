@@ -19,19 +19,26 @@ const generateWithSchema = async (
   { model: modelName, schema, apiKey }: GeminiGenerationConfig,
   prompt: string
 ) => {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: modelName,
-    generationConfig: {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 2048,
-    },
-  });
+  try {
+    console.log('Initializing Gemini with prompt:', prompt);
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      },
+    });
 
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+    const result = await model.generateContent(prompt);
+    console.log('Received response from Gemini');
+    return result.response.text();
+  } catch (error) {
+    console.error('Error in generateWithSchema:', error);
+    throw error;
+  }
 };
 
 const schema = {
@@ -66,15 +73,12 @@ serve(async (req) => {
     });
   }
 
-  // Validate request method
-  if (req.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ error: 'Method not allowed' }), 
-      { status: 405, headers: corsHeaders }
-    );
-  }
-
   try {
+    // Validate request method
+    if (req.method !== 'POST') {
+      throw new Error('Method not allowed');
+    }
+
     // Validate content type
     const contentType = req.headers.get('content-type');
     if (!contentType?.includes('application/json')) {
@@ -135,7 +139,10 @@ Important: Return the response as a properly formatted JSON object with all requ
       console.log('Successfully validated workouts:', workouts);
       
       return new Response(JSON.stringify(workouts), {
-        headers: corsHeaders,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
         status: 200,
       });
     } catch (parseError) {
@@ -159,7 +166,7 @@ Important: Return the response as a properly formatted JSON object with all requ
         error: error.message,
         details: 'Failed to generate or parse workouts'
       }), {
-        status: 500,
+        status: error.message === 'Method not allowed' ? 405 : 500,
         headers: corsHeaders,
       }
     );

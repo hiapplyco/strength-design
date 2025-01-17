@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Loader2, RefreshCw } from "lucide-react";
+import { CalendarDays, Loader2, RefreshCw, Volume2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,10 +39,12 @@ interface WorkoutCardProps {
 export function WorkoutCard({ title, description, duration, allWorkouts, onUpdate }: WorkoutCardProps) {
   const { toast } = useToast();
   const [isModifying, setIsModifying] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [modificationPrompt, setModificationPrompt] = useState("");
   const [warmup, setWarmup] = useState("");
   const [wod, setWod] = useState("");
   const [notes, setNotes] = useState("");
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Update local state when allWorkouts changes
   useEffect(() => {
@@ -52,6 +54,41 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       setNotes(allWorkouts[title].notes || "");
     }
   }, [allWorkouts, title]);
+
+  const handleSpeakWorkout = async () => {
+    try {
+      setIsSpeaking(true);
+      const speechText = `
+        Today is ${title}.
+        Warm Up: ${warmup}.
+        Workout Of the Day: ${wod}.
+        ${notes ? `Notes: ${notes}.` : ''}
+      `;
+
+      const { data, error } = await supabase.functions.invoke('text-to-speech', {
+        body: { text: speechText }
+      });
+
+      if (error) throw error;
+
+      if (data?.audioContent && audioRef.current) {
+        audioRef.current.src = `data:audio/mp3;base64,${data.audioContent}`;
+        await audioRef.current.play();
+        
+        audioRef.current.onended = () => {
+          setIsSpeaking(false);
+        };
+      }
+    } catch (error) {
+      console.error("Error calling text-to-speech:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate speech. Please try again.",
+        variant: "destructive",
+      });
+      setIsSpeaking(false);
+    }
+  };
 
   const handleModifyWorkout = async () => {
     if (!modificationPrompt.trim()) {
@@ -76,15 +113,11 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       if (error) throw error;
 
       if (data) {
-        // Update local state
         setWarmup(data.warmup);
         setWod(data.wod);
         setNotes(data.notes);
-        
-        // Clear the modification prompt
         setModificationPrompt("");
         
-        // Call the parent update function
         if (onUpdate) {
           onUpdate(data);
         }
@@ -108,6 +141,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
 
   return (
     <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+      <audio ref={audioRef} className="hidden" />
       <CardHeader className="relative border-b-[4px] border-primary bg-card">
         <div className="flex items-center justify-between">
           <div>
@@ -115,6 +149,19 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
             <CardDescription className="text-muted-foreground">{duration}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full text-primary"
+              onClick={handleSpeakWorkout}
+              disabled={isSpeaking}
+            >
+              {isSpeaking ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-primary">
               <CalendarDays className="h-4 w-4" />
             </Button>

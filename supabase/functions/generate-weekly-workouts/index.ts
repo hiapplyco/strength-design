@@ -1,28 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI, SchemaType } from "https://esm.sh/@google/generative-ai@0.1.3";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
-// Define CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-interface GeminiGenerationConfig {
-  model: string;
-  schema?: any;
-  apiKey: string;
-}
+const generateWithGemini = async (prompt: string) => {
+  const apiKey = Deno.env.get('GEMINI_API_KEY');
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not configured');
+  }
 
-const generateWithSchema = async (
-  { model: modelName, schema, apiKey }: GeminiGenerationConfig,
-  prompt: string
-) => {
   try {
     console.log('Starting Gemini generation with prompt:', prompt);
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: modelName,
+      model: "gemini-pro",
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -35,32 +30,9 @@ const generateWithSchema = async (
     console.log('Successfully received Gemini response');
     return result.response.text();
   } catch (error) {
-    console.error('Error in generateWithSchema:', error);
+    console.error('Error in generateWithGemini:', error);
     throw new Error(`Gemini API error: ${error.message}`);
   }
-};
-
-const schema = {
-  type: SchemaType.OBJECT,
-  properties: {
-    Sunday: {
-      type: SchemaType.OBJECT,
-      properties: {
-        description: { type: SchemaType.STRING },
-        warmup: { type: SchemaType.STRING },
-        wod: { type: SchemaType.STRING },
-        notes: { type: SchemaType.STRING }
-      },
-      required: ["description", "warmup", "wod", "notes"]
-    },
-    Monday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
-    Tuesday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
-    Wednesday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
-    Thursday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
-    Friday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" },
-    Saturday: { type: SchemaType.OBJECT, ref: "#/properties/Sunday" }
-  },
-  required: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 };
 
 serve(async (req) => {
@@ -69,7 +41,10 @@ serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
-      headers: corsHeaders,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      },
       status: 204,
     });
   }
@@ -95,37 +70,30 @@ serve(async (req) => {
 
     const systemPrompt = `You are a CrossFit coach creating a week of workouts. Create a complete weekly program that includes a brief description, warmup, workout (WOD), and coaching notes for each day. Consider progression, recovery, and variety in the programming.
 
-Additional context from coach: ${prompt || 'Create a balanced week of workouts'}
+Additional context from coach: ${prompt}
 
-Important: Return the response as a properly formatted JSON object with all required fields.`;
+Important: Return the response as a properly formatted JSON object with the following structure for each day (Sunday through Saturday):
+{
+  "Sunday": {
+    "description": "string",
+    "warmup": "string",
+    "wod": "string",
+    "notes": "string"
+  },
+  // ... same structure for Monday through Saturday
+}`;
 
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not configured');
-    }
-
-    const textResponse = await generateWithSchema(
-      {
-        apiKey,
-        model: "gemini-pro",
-        schema
-      },
-      systemPrompt
-    );
-
+    const textResponse = await generateWithGemini(systemPrompt);
     console.log('Processing Gemini response');
 
     try {
-      // Clean the response text
+      // Clean and parse the response
       const cleanedText = textResponse
         .replace(/```json\n?|\n?```/g, '')
         .replace(/^\s+|\s+$/g, '')
         .replace(/\\n/g, ' ')
         .replace(/\n/g, ' ');
 
-      console.log('Cleaned text:', cleanedText);
-
-      // Parse the JSON
       const workouts = JSON.parse(cleanedText);
 
       // Validate the structure
@@ -142,8 +110,6 @@ Important: Return the response as a properly formatted JSON object with all requ
         throw new Error('Generated JSON is missing required days or fields');
       }
 
-      console.log('Successfully validated workouts structure');
-      
       return new Response(JSON.stringify(workouts), {
         headers: {
           ...corsHeaders,
@@ -152,9 +118,8 @@ Important: Return the response as a properly formatted JSON object with all requ
         status: 200,
       });
     } catch (parseError) {
-      console.error('Error parsing or validating JSON:', parseError);
-      console.log('Failed to parse text:', textResponse);
-      throw new Error(`Invalid JSON format in AI response: ${parseError.message}`);
+      console.error('Error parsing response:', parseError);
+      throw new Error(`Invalid JSON structure: ${parseError.message}`);
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);

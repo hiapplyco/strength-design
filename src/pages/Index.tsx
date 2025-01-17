@@ -139,19 +139,21 @@ const Index = () => {
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background">
       <div className="flex flex-col space-y-8">
         <div className="flex flex-col space-y-4">
-          <div>
-            <h1 className="text-4xl font-collegiate uppercase tracking-tight text-foreground">Your Workouts</h1>
-            <p className="text-muted-foreground mt-2">Stay consistent with your fitness journey</p>
+          <div className="text-center">
+            <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">
+              Your Workouts
+            </h1>
+            <p className="text-muted-foreground mt-2 text-lg">Stay consistent with your fitness journey</p>
           </div>
           
-          <div className="flex items-center gap-4 w-full">
+          <div className="flex items-center justify-center w-full mt-6">
             {showGenerateInput ? (
               <>
                 <Input
                   placeholder="Enter context for workout generation (e.g., 'Focus on gymnastics this week' or 'Prepare for upcoming competition')"
                   value={generatePrompt}
                   onChange={(e) => setGeneratePrompt(e.target.value)}
-                  className="flex-1 border-2 border-primary bg-background text-foreground"
+                  className="flex-1 border-2 border-primary bg-background text-foreground placeholder:text-gray-400"
                 />
                 <Button 
                   onClick={handleGenerateWorkout} 
@@ -181,9 +183,9 @@ const Index = () => {
             ) : (
               <Button 
                 onClick={() => setShowGenerateInput(true)}
-                className="border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground"
+                className="border-2 border-destructive bg-destructive text-white font-collegiate text-xl uppercase tracking-tight transition-colors hover:bg-destructiveSecondary hover:border-destructiveSecondary transform hover:-translate-y-1 hover:shadow-lg px-8 py-6"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-2 h-6 w-6" />
                 Generate All Workouts
               </Button>
             )}

@@ -7,6 +7,15 @@ import { useToast } from "@/hooks/use-toast";
 const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const [workoutDetails, setWorkoutDetails] = useState({
+    Sunday: { warmup: "", wod: "", notes: "" },
+    Monday: { warmup: "", wod: "", notes: "" },
+    Tuesday: { warmup: "", wod: "", notes: "" },
+    Wednesday: { warmup: "", wod: "", notes: "" },
+    Thursday: { warmup: "", wod: "", notes: "" },
+    Friday: { warmup: "", wod: "", notes: "" },
+    Saturday: { warmup: "", wod: "", notes: "" },
+  });
 
   const handleGenerateWorkout = async () => {
     setIsGenerating(true);
@@ -57,6 +66,13 @@ const Index = () => {
     },
   ];
 
+  const handleWorkoutUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; }) => {
+    setWorkoutDetails(prev => ({
+      ...prev,
+      [day]: updates
+    }));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <div className="flex flex-col space-y-8">
@@ -82,7 +98,12 @@ const Index = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {workouts.map((workout) => (
-            <WorkoutCard key={workout.title} {...workout} />
+            <WorkoutCard 
+              key={workout.title} 
+              {...workout} 
+              allWorkouts={workoutDetails}
+              onUpdate={(updates) => handleWorkoutUpdate(workout.title, updates)}
+            />
           ))}
         </div>
       </div>

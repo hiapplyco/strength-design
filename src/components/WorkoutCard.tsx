@@ -4,6 +4,8 @@ import { CalendarDays, Loader2, Play, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WorkoutSectionProps {
   label: string;
@@ -30,32 +32,62 @@ interface WorkoutCardProps {
   title: string;
   description: string;
   duration: string;
-  onStart?: () => void;
+  allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; }>;
+  onUpdate?: (updates: { warmup: string; wod: string; notes: string; }) => void;
 }
 
-export function WorkoutCard({ title, description, duration, onStart }: WorkoutCardProps) {
+export function WorkoutCard({ title, description, duration, allWorkouts, onUpdate }: WorkoutCardProps) {
   const { toast } = useToast();
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isModifying, setIsModifying] = useState(false);
+  const [modificationPrompt, setModificationPrompt] = useState("");
+  const [warmup, setWarmup] = useState("");
+  const [wod, setWod] = useState("");
+  const [notes, setNotes] = useState("");
 
-  const handleStart = async () => {
-    if (onStart) {
-      setIsGenerating(true);
-      try {
-        await onStart();
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to start workout",
-          variant: "destructive",
-        });
-      } finally {
-        setIsGenerating(false);
-      }
-    } else {
+  const handleModifyWorkout = async () => {
+    if (!modificationPrompt.trim()) {
       toast({
-        title: "Coming Soon",
-        description: "This feature will be available soon!",
+        title: "Error",
+        description: "Please enter how you'd like to modify the workout",
+        variant: "destructive",
       });
+      return;
+    }
+
+    setIsModifying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('workout-modifier', {
+        body: {
+          dayToModify: title,
+          modificationPrompt,
+          allWorkouts,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        setWarmup(data.warmup);
+        setWod(data.wod);
+        setNotes(data.notes);
+        if (onUpdate) {
+          onUpdate(data);
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: `${title}'s workout has been modified`,
+      });
+    } catch (error) {
+      console.error('Error modifying workout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to modify workout",
+        variant: "destructive",
+      });
+    } finally {
+      setIsModifying(false);
     }
   };
 
@@ -71,13 +103,6 @@ export function WorkoutCard({ title, description, duration, onStart }: WorkoutCa
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
               <CalendarDays className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleStart} disabled={isGenerating}>
-              {isGenerating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
-            </Button>
           </div>
         </div>
       </CardHeader>
@@ -88,14 +113,22 @@ export function WorkoutCard({ title, description, duration, onStart }: WorkoutCa
           onChange={() => {}}
           minHeight="60px"
         />
-        <Button 
-          onClick={handleStart} 
-          disabled={isGenerating}
-          className="w-full border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50"
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-          {isGenerating ? 'Generating...' : 'Generate Workout'}
-        </Button>
+        <div className="space-y-2">
+          <Input
+            placeholder={`How would you like to modify ${title}'s workout?`}
+            value={modificationPrompt}
+            onChange={(e) => setModificationPrompt(e.target.value)}
+            className="border-2 border-primary"
+          />
+          <Button 
+            onClick={handleModifyWorkout}
+            disabled={isModifying}
+            className="w-full border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isModifying ? 'animate-spin' : ''}`} />
+            {isModifying ? 'Modifying...' : 'Modify Workout'}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -45,8 +45,8 @@ export function GenerateWorkoutInput({
         </Button>
         <Button 
           onClick={() => setShowGenerateInput(false)}
-          variant="outline"
-          className="border-2 border-primary text-foreground"
+          variant="destructive"
+          className="border-2 border-destructive bg-destructive text-destructive-foreground"
         >
           <X className="h-4 w-4" />
         </Button>

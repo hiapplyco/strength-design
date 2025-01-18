@@ -143,7 +143,7 @@ const Index = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen flex flex-col">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-8">
         <Link to="/best-app-of-day" className="text-primary hover:underline font-bold">
           Check out our CrossFit focused builder →
         </Link>

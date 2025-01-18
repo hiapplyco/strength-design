@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ExerciseSearch } from "@/components/ExerciseSearch";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WorkoutDetails {
   [key: string]: {
@@ -73,25 +74,23 @@ const Index = () => {
 
     setIsGenerating(true);
     try {
-      // Mock data generation
-      const mockWorkoutDetails: WorkoutDetails = {};
-      workouts.forEach(workout => {
-        mockWorkoutDetails[workout.title] = {
-          warmup: `Warmup for ${expertiseArea}`,
-          wod: `Workout of the day for ${expertiseArea}`,
-          notes: `Notes for ${expertiseArea}`,
-          strength: `Strength training for ${expertiseArea}`,
-          description: `Custom ${expertiseArea} training for ${workout.title.toLowerCase()}`
-        };
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+        body: { prompt: expertiseArea }
       });
 
-      setWorkoutDetails(mockWorkoutDetails);
-      setShowWorkouts(true);
-      toast({
-        title: "Success",
-        description: `Your ${expertiseArea} expertise journey has been generated!`,
-        className: "bg-primary text-primary-foreground border-none",
-      });
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setWorkoutDetails(data);
+        setShowWorkouts(true);
+        toast({
+          title: "Success",
+          description: `Your ${expertiseArea} expertise journey has been generated!`,
+          className: "bg-primary text-primary-foreground border-none",
+        });
+      }
     } catch (error) {
       console.error('Error generating workouts:', error);
       toast({

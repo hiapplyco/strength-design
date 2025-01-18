@@ -23,7 +23,7 @@ const Index = () => {
   const [workoutDetails, setWorkoutDetails] = useState<WorkoutDetails>({});
   const [showWorkouts, setShowWorkouts] = useState(false);
   const { toast } = useToast();
-  const [workouts] = useState([
+  const [workouts, setWorkouts] = useState([
     {
       title: "Sunday",
       description: "Rest and recovery focused on mobility and flexibility.",
@@ -121,6 +121,13 @@ const Index = () => {
 
       if (data) {
         setWorkoutDetails(data);
+        // Update workouts with Gemini-generated descriptions
+        setWorkouts(prevWorkouts => 
+          prevWorkouts.map(workout => ({
+            ...workout,
+            description: data[workout.title]?.description || workout.description
+          }))
+        );
         await persistWorkouts(data);
         setShowWorkouts(true);
         toast({

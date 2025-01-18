@@ -32,7 +32,7 @@ const generateWithGemini = async (prompt: string) => {
     console.log('Starting Gemini generation with prompt:', prompt);
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-pro",
+      model: "gemini-1.5-flash",
       generationConfig: {
         temperature: 0.7,
         topK: 40,

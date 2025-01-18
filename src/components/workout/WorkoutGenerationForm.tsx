@@ -3,8 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { createExpertCoachPrompt } from "@/utils/expertPrompts";
 
 interface WorkoutGenerationFormProps {
   onWorkoutsGenerated: (workoutData: any, descriptions: any) => void;
@@ -27,42 +25,29 @@ export function WorkoutGenerationForm({ onWorkoutsGenerated }: WorkoutGeneration
 
     setIsGenerating(true);
     try {
-      // First, ensure we have a user ID (either from auth or generate a temporary one)
-      let userId = (await supabase.auth.getUser()).data.user?.id;
-      
-      if (!userId) {
-        // If no authenticated user, use or create a temporary ID
-        userId = localStorage.getItem('tempUserId') || crypto.randomUUID();
-        localStorage.setItem('tempUserId', userId);
-        
-        // Ensure the user has a profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({ id: userId }, { onConflict: 'id' });
-          
-        if (profileError) {
-          console.error('Error ensuring profile exists:', profileError);
-          throw profileError;
-        }
-      }
-
-      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
-        body: { 
-          prompt: createExpertCoachPrompt(expertiseArea),
-          userId: userId // Pass the userId to the edge function
+      // Mock data for demonstration
+      const mockWorkoutData = {
+        Sunday: {
+          warmup: "Light stretching and mobility work",
+          wod: "Rest day - Focus on recovery",
+          notes: "Use this time for meditation and mental preparation",
+          description: "Recovery and mobility focus"
         },
+        Monday: {
+          warmup: "Dynamic stretching and joint mobility",
+          wod: `${expertiseArea} fundamentals practice`,
+          notes: "Focus on proper form and technique",
+          description: "Fundamental skill development"
+        },
+        // ... Add more mock data for other days
+      };
+
+      onWorkoutsGenerated(mockWorkoutData, mockWorkoutData);
+      toast({
+        title: "Success",
+        description: `Your ${expertiseArea} expertise journey has been generated!`,
+        className: "bg-primary text-primary-foreground border-none",
       });
-
-      if (error) throw error;
-
-      if (data) {
-        onWorkoutsGenerated(data, data);
-        toast({
-          title: "Success",
-          description: `Your ${expertiseArea} expertise journey has been generated and saved!`,
-          className: "bg-primary text-primary-foreground border-none",
-        });
-      }
     } catch (error) {
       console.error('Error generating workouts:', error);
       toast({

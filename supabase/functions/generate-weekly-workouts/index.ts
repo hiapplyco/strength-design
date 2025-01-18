@@ -41,11 +41,71 @@ const generateWithGemini = async (prompt: string) => {
       },
     });
 
-    const result = await model.generateContent(prompt);
+    const structuredPrompt = `
+Create a weekly workout progression plan for ${prompt}. For each day of the week, provide:
+
+1. A brief description of the day's focus
+2. A warmup routine
+3. The main workout (WOD)
+4. Additional notes or tips
+
+Return the response in this exact JSON format, with no additional text or explanations:
+
+{
+  "Sunday": {
+    "description": "Rest and mobility focus",
+    "warmup": "Light mobility work",
+    "wod": "Active recovery exercises",
+    "notes": "Focus on stretching",
+    "strength": "No strength work today"
+  },
+  "Monday": {
+    "description": "string",
+    "warmup": "string",
+    "wod": "string",
+    "notes": "string",
+    "strength": "string"
+  },
+  "Tuesday": {
+    "description": "string",
+    "warmup": "string",
+    "wod": "string",
+    "notes": "string",
+    "strength": "string"
+  },
+  "Wednesday": {
+    "description": "string",
+    "warmup": "string",
+    "wod": "string",
+    "notes": "string",
+    "strength": "string"
+  },
+  "Thursday": {
+    "description": "string",
+    "warmup": "string",
+    "wod": "string",
+    "notes": "string",
+    "strength": "string"
+  },
+  "Friday": {
+    "description": "string",
+    "warmup": "string",
+    "wod": "string",
+    "notes": "string",
+    "strength": "string"
+  },
+  "Saturday": {
+    "description": "string",
+    "warmup": "string",
+    "wod": "string",
+    "notes": "string",
+    "strength": "string"
+  }
+}`;
+
+    const result = await model.generateContent(structuredPrompt);
     console.log('Successfully received Gemini response');
-    
-    // Clean the response text
-    return cleanText(result.response.text());
+    return result.response.text();
   } catch (error) {
     console.error('Error in generateWithGemini:', error);
     throw new Error(`Gemini API error: ${error.message}`);
@@ -53,11 +113,21 @@ const generateWithGemini = async (prompt: string) => {
 };
 
 const cleanJsonText = (text: string): string => {
-  let cleaned = text.replace(/```json\n?|\n?```/g, '');
+  // First, try to find JSON object within the text using regex
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('No JSON object found in response');
+  }
+  
+  let cleaned = jsonMatch[0];
+  // Remove any comments
   cleaned = cleaned.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+  // Fix trailing commas
   cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+  // Remove extra whitespace
   cleaned = cleaned.replace(/\s+/g, ' ');
   cleaned = cleaned.trim();
+  // Remove newlines
   cleaned = cleaned.replace(/\\n/g, ' ');
   cleaned = cleaned.replace(/\n/g, ' ');
   return cleaned;

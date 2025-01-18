@@ -50,26 +50,26 @@ export const ExerciseSearch = () => {
     }
   }, [searchTerm, exercises]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (searchRef.current) {
-        const scrollY = window.scrollY;
-        searchRef.current.style.transform = `translateY(${scrollY}px)`;
-      }
-    };
+  const handleClickOutside = (event: MouseEvent) => {
+    if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      setIsOpen(false);
+    }
+  };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   return (
     <div 
       ref={searchRef}
       className={cn(
-        "fixed right-4 z-50 transition-all duration-300 ease-in-out",
+        "fixed bottom-8 right-8 z-50 transition-all duration-300 ease-in-out",
         isOpen ? "w-96" : "w-12"
       )}
-      style={{ top: '5rem' }}
     >
       <div className="bg-primary rounded-lg shadow-lg p-4 border-2 border-black">
         <div className="flex items-center gap-2">

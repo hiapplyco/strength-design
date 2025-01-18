@@ -71,13 +71,13 @@ export const ExerciseSearch = () => {
       )}
       style={{ top: '5rem' }}
     >
-      <div className="bg-card rounded-lg shadow-lg p-4">
+      <div className="bg-primary rounded-lg shadow-lg p-4 border-2 border-black">
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsOpen(!isOpen)}
-            className="shrink-0"
+            className="shrink-0 text-primary-foreground hover:text-primary-foreground/80"
           >
             {isOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
           </Button>
@@ -87,7 +87,7 @@ export const ExerciseSearch = () => {
               placeholder="Search exercises..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
+              className="w-full bg-white text-black placeholder:text-gray-500"
             />
           )}
         </div>
@@ -95,16 +95,16 @@ export const ExerciseSearch = () => {
         {isOpen && searchTerm && (
           <div className="mt-4 max-h-[60vh] overflow-y-auto">
             {isLoading ? (
-              <p className="text-center text-muted-foreground">Loading...</p>
+              <p className="text-center text-primary-foreground">Loading...</p>
             ) : filteredExercises.length > 0 ? (
               <div className="space-y-4">
                 {filteredExercises.map((exercise, index) => (
-                  <div key={index} className="bg-background rounded p-4">
-                    <h3 className="font-bold text-lg">{exercise.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-2">Level: {exercise.level}</p>
+                  <div key={index} className="bg-white rounded p-4 border border-black">
+                    <h3 className="font-bold text-lg text-black">{exercise.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">Level: {exercise.level}</p>
                     <div className="text-sm">
-                      <p className="font-medium mb-1">Instructions:</p>
-                      <ul className="list-disc pl-4 space-y-1">
+                      <p className="font-medium mb-1 text-black">Instructions:</p>
+                      <ul className="list-disc pl-4 space-y-1 text-black">
                         {exercise.instructions.map((instruction, idx) => (
                           <li key={idx}>{instruction}</li>
                         ))}
@@ -122,7 +122,7 @@ export const ExerciseSearch = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-muted-foreground">No exercises found</p>
+              <p className="text-center text-destructive font-bold">No exercises found</p>
             )}
           </div>
         )}

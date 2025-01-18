@@ -31,7 +31,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
     const sections = [
       strength && `Strength:\n${strength}`,
       warmup && `Warmup:\n${warmup}`,
-      wod && `WOD:\n${wod}`,
+      wod && `Workout:\n${wod}`,
       notes && `Notes:\n${notes}`
     ].filter(Boolean);
 

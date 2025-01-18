@@ -33,7 +33,7 @@ export function WorkoutHeader({
       `${title}`,
       strength && `Strength:\n${strength}`,
       warmup && `Warmup:\n${warmup}`,
-      wod && `WOD:\n${wod}`,
+      wod && `Workout:\n${wod}`,
       notes && `Notes:\n${notes}`
     ].filter(Boolean);
 

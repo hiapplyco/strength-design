@@ -91,7 +91,6 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
 
   return (
     <div className="space-y-2">
-      <h3 className="text-center text-primary italic text-2xl font-collegiate uppercase tracking-wider">{title}</h3>
       <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px]">
         <audio ref={audioRef} className="hidden" />
         

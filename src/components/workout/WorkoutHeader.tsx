@@ -79,41 +79,44 @@ export function WorkoutHeader({
 
   return (
     <CardHeader className="relative border-b-[4px] border-primary bg-card rounded-t-[20px]">
-      <div className="flex items-center justify-end gap-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 rounded-full text-primary"
-          onClick={handleShare}
-        >
-          <Share2 className="h-4 w-4" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 rounded-full text-primary"
-          onClick={onSpeak}
-          disabled={isSpeaking}
-        >
-          {isSpeaking ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Volume2 className="h-4 w-4" />
-          )}
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 rounded-full text-primary"
-          onClick={onExport}
-          disabled={isExporting}
-        >
-          {isExporting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <CalendarDays className="h-4 w-4" />
-          )}
-        </Button>
+      <div className="flex items-center justify-between">
+        <h3 className="text-primary italic text-2xl font-collegiate uppercase tracking-wider">{title}</h3>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full text-primary"
+            onClick={handleShare}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full text-primary"
+            onClick={onSpeak}
+            disabled={isSpeaking}
+          >
+            {isSpeaking ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Volume2 className="h-4 w-4" />
+            )}
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 rounded-full text-primary"
+            onClick={onExport}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CalendarDays className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </div>
     </CardHeader>
   );

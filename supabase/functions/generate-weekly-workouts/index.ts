@@ -10,15 +10,6 @@ const cleanText = (text: string): string => {
   return text
     .replace(/[^\w\s.,!?;:()\-–—]/g, ' ')
     .replace(/\s+/g, ' ')
-    .replace(/(\d+)x/g, '$1 times')
-    .replace(/(\d+)m/g, '$1 meters')
-    .replace(/(\d+)s/g, '$1 seconds')
-    .replace(/(\d+)min/g, '$1 minutes')
-    .replace(/@/g, 'at')
-    .replace(/%/g, 'percent')
-    .replace(/&/g, 'and')
-    .replace(/\+/g, 'plus')
-    .replace(/=/g, 'equals')
     .trim();
 };
 
@@ -51,93 +42,16 @@ const generateWithGemini = async (prompt: string) => {
 };
 
 const createExpertCoachPrompt = (expertise: string) => `
-You are a world-renowned coach and movement specialist with over 25 years of experience in athletic development, movement optimization, and performance enhancement. Your expertise spans across multiple domains including:
-- Olympic weightlifting and powerlifting
-- Gymnastics and calisthenics
-- Sport-specific conditioning
-- Rehabilitation and injury prevention
-- Movement screening and assessment
-- Periodization and program design
-- Mental performance coaching
+You are a world-renowned coach and movement specialist. Create a comprehensive weekly progression plan for someone wanting to master ${expertise}.
 
-Based on your extensive expertise, create a comprehensive weekly progression plan for someone wanting to master ${expertise}. Your program should reflect your deep understanding of skill acquisition and development, incorporating:
-
-MOVEMENT ANALYSIS:
-- Detailed breakdown of fundamental movement patterns specific to ${expertise}
-- Identification of mobility requirements and restrictions
-- Progressive complexity in movement combinations
-- Technical prerequisites for advanced skills
-
-PHYSICAL PREPARATION:
-- Sport-specific warmup protocols
-- Mobility and flexibility requirements
-- Strength foundation development
-- Power and speed development where applicable
-- Energy system development tailored to ${expertise}
-
-PROGRAMMING CONSIDERATIONS:
-- Volume and intensity management
-- Recovery and adaptation requirements
-- Progressive overload strategies
-- Deload and testing protocols
-- Injury prevention measures
-
-SKILL DEVELOPMENT:
-- Movement pattern progressions
-- Technical drill sequences
-- Skill transfer exercises
-- Common technical errors and corrections
-- Success metrics and progression criteria
-
-For each training day, provide:
-
-1. STRATEGIC OVERVIEW:
-   - Day's specific focus within weekly progression
-   - Connection to overall skill development
-   - Expected adaptation and progress markers
-   - Integration with previous/future sessions
-
-2. DETAILED WARMUP PROTOCOL:
-   - Movement preparation sequence
-   - Mobility/stability work specific to ${expertise}
-   - Progressive intensity building
-   - Skill-specific activation drills
-   - Neural preparation elements
-
-3. MAIN WORKOUT (WOD):
-   - Clear movement standards and technique requirements
-   - Loading parameters with scientific rationale
-   - Work-to-rest ratios based on energy system demands
-   - Intensity guidelines with RPE recommendations
-   - Progression and regression options
-   - Time domains with physiological justification
-
-4. COMPREHENSIVE COACHING NOTES:
-   - Technical execution priorities
-   - Common faults and correction strategies
-   - Performance metrics and success indicators
-   - Recovery considerations and management
-   - Mental preparation strategies
-   - Long-term progression markers
-   - Safety considerations and contraindications
-
-5. STRENGTH DEVELOPMENT FOCUS:
-   - Primary movement patterns
-   - Loading schemes with scientific backing
-   - Tempo and execution guidelines
-   - Accessory work recommendations
-   - Specific weakness addressing strategies
-   - Integration with skill work
-
-Return the response in this exact JSON format:
-
+Your response must follow this exact format:
 {
   "Sunday": {
-    "description": "Active recovery and mobility focus to promote tissue repair and movement quality",
-    "warmup": "Detailed mobility routine",
-    "wod": "Recovery-focused movement practice",
-    "notes": "Specific mobility and recovery guidelines",
-    "strength": "Movement quality focus"
+    "description": "Brief description of Sunday's focus",
+    "warmup": "Detailed warmup routine",
+    "wod": "Main workout details",
+    "notes": "Coaching notes and tips",
+    "strength": "Strength focus"
   },
   "Monday": {
     "description": "string",
@@ -183,23 +97,8 @@ Return the response in this exact JSON format:
   }
 }
 
-Ensure your response demonstrates your deep expertise in ${expertise} while maintaining sound training principles and scientific methodology.`;
-
-const cleanJsonText = (text: string): string => {
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('No JSON object found in response');
-  }
-  
-  let cleaned = jsonMatch[0];
-  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-  cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
-  cleaned = cleaned.replace(/\s+/g, ' ');
-  cleaned = cleaned.trim();
-  cleaned = cleaned.replace(/\\n/g, ' ');
-  cleaned = cleaned.replace(/\n/g, ' ');
-  return cleaned;
-};
+Ensure each day includes specific exercises, techniques, and progressions unique to ${expertise}.
+`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -214,13 +113,8 @@ serve(async (req) => {
       throw new Error('Method not allowed');
     }
 
-    const contentType = req.headers.get('content-type');
-    if (!contentType?.includes('application/json')) {
-      throw new Error('Content-Type must be application/json');
-    }
-
     const { prompt } = await req.json();
-    console.log('Received prompt:', prompt);
+    console.log('Received expertise area:', prompt);
 
     if (!prompt || typeof prompt !== 'string') {
       throw new Error('Invalid or missing prompt in request body');
@@ -230,13 +124,14 @@ serve(async (req) => {
     console.log('Generated expert prompt:', expertPrompt);
 
     const textResponse = await generateWithGemini(expertPrompt);
-    console.log('Processing Gemini response');
+    console.log('Raw Gemini response:', textResponse);
 
     try {
-      const cleanedText = cleanJsonText(textResponse);
-      console.log('Cleaned JSON text:', cleanedText);
+      const cleanedText = textResponse.replace(/```json\n?|\n?```/g, '').trim();
+      console.log('Cleaned response:', cleanedText);
 
       const workouts = JSON.parse(cleanedText);
+      console.log('Parsed workouts:', workouts);
 
       const requiredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const requiredFields = ['description', 'strength', 'warmup', 'wod', 'notes'];
@@ -261,7 +156,6 @@ serve(async (req) => {
       });
     } catch (parseError) {
       console.error('Error parsing response:', parseError);
-      console.error('Raw text response:', textResponse);
       throw new Error(`Invalid JSON structure: ${parseError.message}`);
     }
   } catch (error) {

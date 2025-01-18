@@ -50,7 +50,8 @@ export default {
       },
       fontFamily: {
         sans: ["'Roboto Condensed'", "sans-serif"],
-        collegiate: ["'Bebas Neue'", "sans-serif"]
+        collegiate: ["'Bebas Neue'", "sans-serif"],
+        oswald: ["'Oswald'", "sans-serif"]
       },
       borderRadius: {
         lg: "var(--radius)",

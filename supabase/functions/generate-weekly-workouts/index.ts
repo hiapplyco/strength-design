@@ -63,6 +63,12 @@ serve(async (req) => {
 
 The user will provide you with their fitness goals, preferences, and any limitations. 
 
+IMPORTANT: When writing workouts, spell out all special characters and symbols for text-to-speech compatibility. For example:
+- Use "percent" instead of "%"
+- Use "at" instead of "@"
+- Use "to" instead of "-" when describing ranges
+- Spell out any other symbols or special characters
+
 Create a detailed 5-day workout plan following these principles of periodization:
 
 1. Progressive Overload: Gradually increase intensity across the week.
@@ -111,48 +117,7 @@ IMPORTANT: Return a valid JSON object with EXACTLY this structure:
     "wod": "Structured workout with clear format, rep schemes, and time domains",
     "notes": "Coaching tips including standards, scaling, and safety"
   },
-  "Tuesday": {
-    "description": "A brief overview focusing on the day's primary training goal",
-    "strength": "Detailed strength portion with sets, reps, and loading strategy",
-    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
-    "wod": "Structured workout with clear format, rep schemes, and time domains",
-    "notes": "Coaching tips including standards, scaling, and safety"
-  },
-  "Wednesday": {
-    "description": "A brief overview focusing on the day's primary training goal",
-    "strength": "Detailed strength portion with sets, reps, and loading strategy",
-    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
-    "wod": "Structured workout with clear format, rep schemes, and time domains",
-    "notes": "Coaching tips including standards, scaling, and safety"
-  },
-  "Thursday": {
-    "description": "A brief overview focusing on the day's primary training goal",
-    "strength": "Detailed strength portion with sets, reps, and loading strategy",
-    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
-    "wod": "Structured workout with clear format, rep schemes, and time domains",
-    "notes": "Coaching tips including standards, scaling, and safety"
-  },
-  "Friday": {
-    "description": "A brief overview focusing on the day's primary training goal",
-    "strength": "Detailed strength portion with sets, reps, and loading strategy",
-    "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
-    "wod": "Structured workout with clear format, rep schemes, and time domains",
-    "notes": "Coaching tips including standards, scaling, and safety"
-  },
-  "Saturday": {
-    "description": "Active Recovery Day",
-    "strength": "Optional light technique work",
-    "warmup": "Light mobility and movement preparation",
-    "wod": "Optional light cardio and mobility work",
-    "notes": "Focus on recovery and preparation for next week"
-  },
-  "Sunday": {
-    "description": "Rest Day",
-    "strength": "Rest",
-    "warmup": "Optional light stretching",
-    "wod": "Rest and recovery",
-    "notes": "Take time to rest and recover for the upcoming week"
-  }
+  // ... similar structure for other days of the week
 }
 
 DO NOT include any additional text or markdown formatting. ONLY return the JSON object.`;

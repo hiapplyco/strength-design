@@ -11,7 +11,9 @@ export const ExerciseSearch = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -24,6 +26,26 @@ export const ExerciseSearch = () => {
       }
     };
     fetchExercises();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY.current;
+      const isNearBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 100;
+
+      // Hide when near bottom or scrolling down significantly
+      if (isNearBottom || (isScrollingDown && currentScrollY > 200)) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -64,6 +86,8 @@ export const ExerciseSearch = () => {
       .replace(/\s+/g, ' ')
       .trim();
   };
+
+  if (!isVisible) return null;
 
   return (
     <div 

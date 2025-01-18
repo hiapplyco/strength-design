@@ -36,7 +36,7 @@ serve(async (req) => {
     }
 
     console.log('Making request to ElevenLabs API...');
-    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/CVGkPm7rQbBw8hVrkqQn', {
+    const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/TX3LPaxmHKxFdv7VOQHJ', {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',

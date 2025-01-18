@@ -41,50 +41,95 @@ const generateWithGemini = async (prompt: string) => {
       },
     });
 
-    const structuredPrompt = `You are an elite-level coach with over 20 years of experience in strength and conditioning, movement optimization, and athletic development. Your expertise spans across multiple domains including Olympic weightlifting, powerlifting, gymnastics, and endurance training. You have successfully coached athletes from beginners to elite competitors.
+    const result = await model.generateContent(prompt);
+    console.log('Successfully received Gemini response');
+    return result.response.text();
+  } catch (error) {
+    console.error('Error in generateWithGemini:', error);
+    throw new Error(`Gemini API error: ${error.message}`);
+  }
+};
 
-Based on your extensive experience, create a comprehensive weekly progression plan for someone wanting to master ${prompt}. Your program should reflect your deep understanding of skill acquisition and development. Consider:
+const createExpertCoachPrompt = (expertise: string) => `
+You are a world-renowned coach and movement specialist with over 25 years of experience in athletic development, movement optimization, and performance enhancement. Your expertise spans across multiple domains including:
+- Olympic weightlifting and powerlifting
+- Gymnastics and calisthenics
+- Sport-specific conditioning
+- Rehabilitation and injury prevention
+- Movement screening and assessment
+- Periodization and program design
+- Mental performance coaching
 
-- The natural progression of movement patterns specific to ${prompt}
-- How to build foundational strength and mobility required for ${prompt}
-- Energy system development tailored to ${prompt}'s demands
-- Recovery needs based on training intensity and volume
-- Common technical challenges in ${prompt} and how to address them
-- Safety considerations and injury prevention specific to ${prompt}
+Based on your extensive expertise, create a comprehensive weekly progression plan for someone wanting to master ${expertise}. Your program should reflect your deep understanding of skill acquisition and development, incorporating:
 
-For each day, provide:
-1. A strategic description that explains:
-   - The day's specific focus within the weekly progression
-   - How this session builds upon previous work
-   - What skills or attributes we're developing
+MOVEMENT ANALYSIS:
+- Detailed breakdown of fundamental movement patterns specific to ${expertise}
+- Identification of mobility requirements and restrictions
+- Progressive complexity in movement combinations
+- Technical prerequisites for advanced skills
 
-2. A carefully designed warmup that:
-   - Prepares the body for the specific demands of ${prompt}
-   - Includes movement preparation and mobility work
-   - Gradually increases intensity
-   - Incorporates skill-specific drills
+PHYSICAL PREPARATION:
+- Sport-specific warmup protocols
+- Mobility and flexibility requirements
+- Strength foundation development
+- Power and speed development where applicable
+- Energy system development tailored to ${expertise}
 
-3. The main workout (WOD) with:
-   - Clear movement standards and technique cues
-   - Specific loading parameters or scaling options
-   - Work-to-rest ratios when applicable
-   - Target time domains or intensity guidelines
-   - Progressive variations based on skill level
+PROGRAMMING CONSIDERATIONS:
+- Volume and intensity management
+- Recovery and adaptation requirements
+- Progressive overload strategies
+- Deload and testing protocols
+- Injury prevention measures
 
-4. Expert coaching notes including:
-   - Common technical errors to watch for
-   - Success metrics for the session
-   - Recovery considerations
-   - Mental preparation tips
-   - How this connects to long-term progression
+SKILL DEVELOPMENT:
+- Movement pattern progressions
+- Technical drill sequences
+- Skill transfer exercises
+- Common technical errors and corrections
+- Success metrics and progression criteria
 
-5. Strength focus that:
-   - Complements the skill work
-   - Builds specific strength needed for ${prompt}
-   - Includes appropriate loading schemes
-   - Addresses common weaknesses in ${prompt}
+For each training day, provide:
 
-Return the response in this exact JSON format, with no additional text or explanations:
+1. STRATEGIC OVERVIEW:
+   - Day's specific focus within weekly progression
+   - Connection to overall skill development
+   - Expected adaptation and progress markers
+   - Integration with previous/future sessions
+
+2. DETAILED WARMUP PROTOCOL:
+   - Movement preparation sequence
+   - Mobility/stability work specific to ${expertise}
+   - Progressive intensity building
+   - Skill-specific activation drills
+   - Neural preparation elements
+
+3. MAIN WORKOUT (WOD):
+   - Clear movement standards and technique requirements
+   - Loading parameters with scientific rationale
+   - Work-to-rest ratios based on energy system demands
+   - Intensity guidelines with RPE recommendations
+   - Progression and regression options
+   - Time domains with physiological justification
+
+4. COMPREHENSIVE COACHING NOTES:
+   - Technical execution priorities
+   - Common faults and correction strategies
+   - Performance metrics and success indicators
+   - Recovery considerations and management
+   - Mental preparation strategies
+   - Long-term progression markers
+   - Safety considerations and contraindications
+
+5. STRENGTH DEVELOPMENT FOCUS:
+   - Primary movement patterns
+   - Loading schemes with scientific backing
+   - Tempo and execution guidelines
+   - Accessory work recommendations
+   - Specific weakness addressing strategies
+   - Integration with skill work
+
+Return the response in this exact JSON format:
 
 {
   "Sunday": {
@@ -138,33 +183,19 @@ Return the response in this exact JSON format, with no additional text or explan
   }
 }
 
-Ensure each component reflects your expertise in programming, progression, and coaching methodology. Make the program specific to ${prompt} while maintaining proper training principles.`;
-
-    const result = await model.generateContent(structuredPrompt);
-    console.log('Successfully received Gemini response');
-    return result.response.text();
-  } catch (error) {
-    console.error('Error in generateWithGemini:', error);
-    throw new Error(`Gemini API error: ${error.message}`);
-  }
-};
+Ensure your response demonstrates your deep expertise in ${expertise} while maintaining sound training principles and scientific methodology.`;
 
 const cleanJsonText = (text: string): string => {
-  // First, try to find JSON object within the text using regex
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error('No JSON object found in response');
   }
   
   let cleaned = jsonMatch[0];
-  // Remove any comments
   cleaned = cleaned.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-  // Fix trailing commas
   cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
-  // Remove extra whitespace
   cleaned = cleaned.replace(/\s+/g, ' ');
   cleaned = cleaned.trim();
-  // Remove newlines
   cleaned = cleaned.replace(/\\n/g, ' ');
   cleaned = cleaned.replace(/\n/g, ' ');
   return cleaned;
@@ -195,7 +226,10 @@ serve(async (req) => {
       throw new Error('Invalid or missing prompt in request body');
     }
 
-    const textResponse = await generateWithGemini(prompt);
+    const expertPrompt = createExpertCoachPrompt(prompt);
+    console.log('Generated expert prompt:', expertPrompt);
+
+    const textResponse = await generateWithGemini(expertPrompt);
     console.log('Processing Gemini response');
 
     try {

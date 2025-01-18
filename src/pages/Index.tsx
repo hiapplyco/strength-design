@@ -118,30 +118,30 @@ const Index = () => {
       <div className="flex flex-col items-center justify-center space-y-16 pt-12">
         {/* Hero Section */}
         <div className="text-center space-y-6 max-w-4xl">
-          <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-4">
+          <h1 className="text-7xl font-collegiate uppercase tracking-tight text-primary transform -skew-x-12 mb-4">
             Master Your Craft
           </h1>
-          <p className="text-xl text-destructive">
+          <p className="text-xl text-destructive font-semibold">
             Hyper-Refined Training Programs That Adapt To Your Athletes
           </p>
-          <p className="text-muted-foreground mt-2">Built by Apply, Co.</p>
+          <p className="text-primary mt-2">Built by Apply, Co.</p>
         </div>
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mx-auto">
           <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-primary">
-            <Dumbbell className="w-12 h-12 text-black mb-4" />
-            <h3 className="text-xl font-bold mb-2 text-destructive">Adaptive Programming</h3>
+            <Dumbbell className="w-12 h-12 text-primary mb-4" />
+            <h2 className="text-xl font-bold mb-2 text-primary">Adaptive Programming</h2>
             <p className="text-destructiveSecondary">Precision-crafted weekly programs that evolve with your athletes</p>
           </div>
           <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-primary">
-            <Target className="w-12 h-12 text-black mb-4" />
-            <h3 className="text-xl font-bold mb-2 text-destructive">Elite Methodology</h3>
+            <Target className="w-12 h-12 text-primary mb-4" />
+            <h2 className="text-xl font-bold mb-2 text-primary">Elite Methodology</h2>
             <p className="text-destructiveSecondary">Data-driven coaching adapted to specific performance goals</p>
           </div>
           <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-primary">
-            <Trophy className="w-12 h-12 text-black mb-4" />
-            <h3 className="text-xl font-bold mb-2 text-destructive">Performance Mastery</h3>
+            <Trophy className="w-12 h-12 text-primary mb-4" />
+            <h2 className="text-xl font-bold mb-2 text-primary">Performance Mastery</h2>
             <p className="text-destructiveSecondary">Strategic progression from fundamentals to advanced techniques</p>
           </div>
         </div>
@@ -149,7 +149,7 @@ const Index = () => {
         {/* Input Section */}
         <div className="w-full max-w-3xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold text-destructive">Start Your Journey</h2>
+            <h3 className="text-2xl font-bold text-primary">Start Your Journey</h3>
             <p className="text-destructiveSecondary">
               Enter your training focus and receive a tailored program built for excellence
             </p>

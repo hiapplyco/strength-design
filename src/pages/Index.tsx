@@ -2,7 +2,6 @@ import { useState } from "react";
 import { HeaderSection } from "@/components/header/HeaderSection";
 import { WorkoutGenerationForm } from "@/components/workout/WorkoutGenerationForm";
 import { WorkoutList } from "@/components/workout/WorkoutList";
-import { supabase } from "@/integrations/supabase/client";
 
 interface WorkoutDetails {
   [key: string]: {
@@ -55,41 +54,6 @@ const Index = () => {
     },
   ]);
 
-  const persistWorkouts = async (workoutData: WorkoutDetails) => {
-    try {
-      const tempUserId = localStorage.getItem('tempUserId') || crypto.randomUUID();
-      localStorage.setItem('tempUserId', tempUserId);
-
-      const { error: deleteError } = await supabase
-        .from('workouts')
-        .delete()
-        .eq('user_id', tempUserId);
-
-      if (deleteError) {
-        console.error('Error deleting existing workouts:', deleteError);
-        return;
-      }
-
-      for (const [title, details] of Object.entries(workoutData)) {
-        const { error: insertError } = await supabase
-          .from('workouts')
-          .insert({
-            user_id: tempUserId,
-            day: title,
-            warmup: details.warmup,
-            wod: details.wod,
-            notes: details.notes
-          });
-
-        if (insertError) {
-          console.error(`Error inserting workout for ${title}:`, insertError);
-        }
-      }
-    } catch (error) {
-      console.error('Error persisting workouts:', error);
-    }
-  };
-
   const handleWorkoutsGenerated = (data: WorkoutDetails, descriptions: any) => {
     setWorkoutDetails(data);
     setWorkouts(prevWorkouts => 
@@ -98,17 +62,14 @@ const Index = () => {
         description: descriptions[workout.title]?.description || workout.description
       }))
     );
-    persistWorkouts(data);
     setShowWorkouts(true);
   };
 
   const handleWorkoutUpdate = (updates: any) => {
-    const newWorkoutDetails = {
-      ...workoutDetails,
+    setWorkoutDetails(prev => ({
+      ...prev,
       [updates.title]: updates
-    };
-    setWorkoutDetails(newWorkoutDetails);
-    persistWorkouts(newWorkoutDetails);
+    }));
   };
 
   return (

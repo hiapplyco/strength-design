@@ -114,52 +114,53 @@ const BestAppOfDay = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in bg-background">
-      <div className="flex flex-col space-y-8 max-w-3xl mx-auto">
-        <div className="flex flex-col space-y-4">
-          <div className="relative">
-            <Link 
-              to="/" 
-              className="absolute -left-4 top-0 text-primary hover:text-primary/80 inline-flex items-center gap-1"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to all workouts
-            </Link>
-            <div className="text-center mt-12">
+    <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen flex flex-col">
+      <div className="flex-1 flex items-center">
+        <div className="flex flex-col space-y-8 max-w-3xl mx-auto w-full relative">
+          <Link 
+            to="/" 
+            className="absolute -left-4 -top-12 text-primary hover:text-primary/80 inline-flex items-center gap-1"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to all workouts
+          </Link>
+
+          <div className="flex flex-col space-y-4">
+            <div className="text-center">
               <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">
                 Your Workouts
               </h1>
               <p className="text-muted-foreground mt-2 text-lg">Built by Apply, Co.</p>
             </div>
+            
+            <div className="flex items-center justify-center w-full mt-6">
+              {showGenerateInput ? (
+                <GenerateWorkoutInput
+                  generatePrompt={generatePrompt}
+                  setGeneratePrompt={setGeneratePrompt}
+                  handleGenerateWorkout={handleGenerateWorkout}
+                  isGenerating={isGenerating}
+                  setShowGenerateInput={setShowGenerateInput}
+                />
+              ) : (
+                <GenerateWorkoutButton setShowGenerateInput={setShowGenerateInput} />
+              )}
+            </div>
           </div>
-          
-          <div className="flex items-center justify-center w-full mt-6">
-            {showGenerateInput ? (
-              <GenerateWorkoutInput
-                generatePrompt={generatePrompt}
-                setGeneratePrompt={setGeneratePrompt}
-                handleGenerateWorkout={handleGenerateWorkout}
-                isGenerating={isGenerating}
-                setShowGenerateInput={setShowGenerateInput}
-              />
-            ) : (
-              <GenerateWorkoutButton setShowGenerateInput={setShowGenerateInput} />
-            )}
-          </div>
-        </div>
 
-        {showWorkouts && (
-          <div className="grid gap-8 md:gap-12 grid-cols-1">
-            {workouts.map((workout) => (
-              <WorkoutCard 
-                key={workout.title} 
-                {...workout} 
-                allWorkouts={workoutDetails}
-                onUpdate={(updates) => handleWorkoutUpdate(workout.title, updates)}
-              />
-            ))}
-          </div>
-        )}
+          {showWorkouts && (
+            <div className="grid gap-8 md:gap-12 grid-cols-1">
+              {workouts.map((workout) => (
+                <WorkoutCard 
+                  key={workout.title} 
+                  {...workout} 
+                  allWorkouts={workoutDetails}
+                  onUpdate={(updates) => handleWorkoutUpdate(workout.title, updates)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

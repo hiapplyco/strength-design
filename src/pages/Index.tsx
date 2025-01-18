@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Loader2, Check } from "lucide-react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { ExerciseSearch } from "@/components/ExerciseSearch";
 
 interface WorkoutDetails {
   [key: string]: {
@@ -61,42 +61,6 @@ const Index = () => {
     },
   ]);
 
-  const persistWorkouts = async (workoutData: WorkoutDetails) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('No user found');
-      return;
-    }
-
-    // Delete existing workouts for this user
-    const { error: deleteError } = await supabase
-      .from('workouts')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (deleteError) {
-      console.error('Error deleting existing workouts:', deleteError);
-      return;
-    }
-
-    // Insert new workouts
-    for (const [title, details] of Object.entries(workoutData)) {
-      const { error: insertError } = await supabase
-        .from('workouts')
-        .insert({
-          user_id: user.id,
-          day: title,
-          warmup: details.warmup,
-          wod: details.wod,
-          notes: details.notes
-        });
-
-      if (insertError) {
-        console.error(`Error inserting workout for ${title}:`, insertError);
-      }
-    }
-  };
-
   const handleGenerateWorkout = async () => {
     if (!expertiseArea.trim()) {
       toast({
@@ -109,33 +73,25 @@ const Index = () => {
 
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
-        body: { 
-          prompt: `Create a comprehensive progression plan for someone wanting to become an expert in ${expertiseArea}. 
-                  Focus on proper skill development, gradually increasing complexity, and building a strong foundation.
-                  Include specific drills, techniques, and progressions unique to ${expertiseArea}.`
-        },
+      // Mock data generation
+      const mockWorkoutDetails: WorkoutDetails = {};
+      workouts.forEach(workout => {
+        mockWorkoutDetails[workout.title] = {
+          warmup: `Warmup for ${expertiseArea}`,
+          wod: `Workout of the day for ${expertiseArea}`,
+          notes: `Notes for ${expertiseArea}`,
+          strength: `Strength training for ${expertiseArea}`,
+          description: `Custom ${expertiseArea} training for ${workout.title.toLowerCase()}`
+        };
       });
 
-      if (error) throw error;
-
-      if (data) {
-        setWorkoutDetails(data);
-        // Update workouts with Gemini-generated descriptions
-        setWorkouts(prevWorkouts => 
-          prevWorkouts.map(workout => ({
-            ...workout,
-            description: data[workout.title]?.description || workout.description
-          }))
-        );
-        await persistWorkouts(data);
-        setShowWorkouts(true);
-        toast({
-          title: "Success",
-          description: `Your ${expertiseArea} expertise journey has been generated and saved!`,
-          className: "bg-primary text-primary-foreground border-none",
-        });
-      }
+      setWorkoutDetails(mockWorkoutDetails);
+      setShowWorkouts(true);
+      toast({
+        title: "Success",
+        description: `Your ${expertiseArea} expertise journey has been generated!`,
+        className: "bg-primary text-primary-foreground border-none",
+      });
     } catch (error) {
       console.error('Error generating workouts:', error);
       toast({
@@ -150,6 +106,7 @@ const Index = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen flex flex-col">
+      <ExerciseSearch />
       <div className="absolute top-4 right-0 pr-4 max-w-md text-right">
         <Link to="/best-app-of-day" className="text-primary hover:underline font-bold inline-flex items-center">
           Check out our CrossFit focused builder→
@@ -209,7 +166,6 @@ const Index = () => {
                       [workout.title]: updates
                     };
                     setWorkoutDetails(newWorkoutDetails);
-                    persistWorkouts(newWorkoutDetails);
                   }}
                 />
               ))}

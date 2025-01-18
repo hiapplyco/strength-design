@@ -3,7 +3,7 @@ import { WorkoutCard } from "@/components/WorkoutCard";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Dumbbell, Target, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ExerciseSearch } from "@/components/ExerciseSearch";
 import { supabase } from "@/integrations/supabase/client";
@@ -104,73 +104,103 @@ const Index = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen flex flex-col">
+    <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen">
       <ExerciseSearch />
-      <div className="absolute top-4 right-0 pr-4 max-w-md text-right">
+      <div className="absolute top-4 right-4 max-w-md text-right">
         <Link to="/best-app-of-day" className="text-primary hover:underline font-bold inline-flex items-center">
           Check out our CrossFit focused builder→
         </Link>
         <p className="text-sm text-muted-foreground mt-2">
-          CrossFit's unique blend of complex movements and intense metrics inspired our journey, shaping how we approach progression in all domains.
+          CrossFit's unique blend of complex movements and intense metrics inspired our journey.
         </p>
       </div>
       
-      <div className="flex-1 flex items-center">
-        <div className="flex flex-col space-y-8 max-w-3xl mx-auto w-full">
-          <div className="flex flex-col space-y-4">
-            <div className="text-center">
-              <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">
-                Master Your Craft
-              </h1>
-              <p className="text-muted-foreground mt-2 text-lg">Built by Apply, Co.</p>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row w-full max-w-3xl mx-auto gap-4">
-              <Input
-                placeholder="Enter your desired expertise area (e.g., Yoga, Calisthenics, Olympic Lifting)"
-                value={expertiseArea}
-                onChange={(e) => setExpertiseArea(e.target.value)}
-                className="flex-1 border-2 border-primary bg-white text-black placeholder:text-gray-500"
-              />
-              <Button 
-                onClick={handleGenerateWorkout}
-                disabled={isGenerating}
-                className="flex-1 sm:flex-none border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50 whitespace-nowrap"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Generate Plan
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {showWorkouts && (
-            <div className="grid gap-8 md:gap-12 grid-cols-1">
-              {workouts.map((workout) => (
-                <WorkoutCard 
-                  key={workout.title} 
-                  {...workout} 
-                  allWorkouts={workoutDetails}
-                  onUpdate={(updates) => {
-                    const newWorkoutDetails = {
-                      ...workoutDetails,
-                      [workout.title]: updates
-                    };
-                    setWorkoutDetails(newWorkoutDetails);
-                  }}
-                />
-              ))}
-            </div>
-          )}
+      <div className="flex flex-col items-center justify-center space-y-16 pt-12">
+        {/* Hero Section */}
+        <div className="text-center space-y-6 max-w-4xl">
+          <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-4">
+            Master Your Craft
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Your AI-powered journey to expertise in any athletic discipline
+          </p>
+          <p className="text-muted-foreground mt-2">Built by Apply, Co.</p>
         </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mx-auto">
+          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gradient-to-br from-card to-muted">
+            <Dumbbell className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-bold mb-2">Progressive Training</h3>
+            <p className="text-muted-foreground">Customized weekly programs that evolve with your progress</p>
+          </div>
+          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gradient-to-br from-card to-muted">
+            <Target className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-bold mb-2">Expert Guidance</h3>
+            <p className="text-muted-foreground">AI-powered coaching adapted to your specific goals</p>
+          </div>
+          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gradient-to-br from-card to-muted">
+            <Trophy className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-xl font-bold mb-2">Skill Mastery</h3>
+            <p className="text-muted-foreground">Structured progression from fundamentals to advanced techniques</p>
+          </div>
+        </div>
+
+        {/* Input Section */}
+        <div className="w-full max-w-3xl mx-auto space-y-8">
+          <div className="text-center space-y-4">
+            <h2 className="text-2xl font-bold">Start Your Journey</h2>
+            <p className="text-muted-foreground">
+              Enter your desired expertise area and let our AI create a personalized weekly program
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row w-full gap-4">
+            <Input
+              placeholder="Enter your desired expertise area (e.g., Yoga, Calisthenics, Olympic Lifting)"
+              value={expertiseArea}
+              onChange={(e) => setExpertiseArea(e.target.value)}
+              className="flex-1 border-2 border-primary bg-white text-black placeholder:text-gray-500"
+            />
+            <Button 
+              onClick={handleGenerateWorkout}
+              disabled={isGenerating}
+              className="flex-1 sm:flex-none border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50 whitespace-nowrap"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Check className="mr-2 h-4 w-4" />
+                  Generate Plan
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Workout Cards */}
+        {showWorkouts && (
+          <div className="grid gap-8 md:gap-12 grid-cols-1 w-full">
+            {workouts.map((workout) => (
+              <WorkoutCard 
+                key={workout.title} 
+                {...workout} 
+                allWorkouts={workoutDetails}
+                onUpdate={(updates) => {
+                  const newWorkoutDetails = {
+                    ...workoutDetails,
+                    [workout.title]: updates
+                  };
+                  setWorkoutDetails(newWorkoutDetails);
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -85,7 +85,7 @@ const Index = () => {
             The Ultimate Platform for Coaches
           </h2>
           <p className="text-lg text-destructive">
-            Apply Strong combines the science of periodization with the flexibility of a modern coaching platform.
+            Apply Your Strength combines the science of periodization with the flexibility of a modern coaching platform.
           </p>
         </div>
 
@@ -120,7 +120,7 @@ const Index = () => {
                 <Star key={i} className="w-5 h-5 text-primary fill-current" />
               ))}
             </div>
-            <p className="text-white mb-4">"Apply Strong changed how I coach my athletes—streamlined, efficient, and easy to use!"</p>
+            <p className="text-white mb-4">"Apply Your Strength changed how I coach my athletes—streamlined, efficient, and easy to use!"</p>
             <p className="text-primary font-oswald">– Jane D.</p>
           </div>
           <div className="bg-muted p-8 rounded-xl">

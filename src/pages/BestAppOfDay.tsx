@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { GenerateWorkoutButton } from "@/components/GenerateWorkoutButton";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 interface WorkoutDetails {
   [key: string]: {
@@ -115,11 +117,20 @@ const BestAppOfDay = () => {
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background">
       <div className="flex flex-col space-y-8 max-w-3xl mx-auto">
         <div className="flex flex-col space-y-4">
-          <div className="text-center">
-            <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">
-              Your Workouts
-            </h1>
-            <p className="text-muted-foreground mt-2 text-lg">Built by Apply, Co.</p>
+          <div className="relative">
+            <Link 
+              to="/" 
+              className="absolute -left-4 top-0 text-primary hover:text-primary/80 inline-flex items-center gap-1"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to all workouts
+            </Link>
+            <div className="text-center mt-12">
+              <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">
+                Your Workouts
+              </h1>
+              <p className="text-muted-foreground mt-2 text-lg">Built by Apply, Co.</p>
+            </div>
           </div>
           
           <div className="flex items-center justify-center w-full mt-6">

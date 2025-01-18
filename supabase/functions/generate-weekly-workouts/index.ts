@@ -34,6 +34,31 @@ const generateWithGemini = async (prompt: string) => {
   }
 };
 
+const cleanJsonText = (text: string): string => {
+  // Remove any markdown code blocks
+  let cleaned = text.replace(/```json\n?|\n?```/g, '');
+  
+  // Remove any comments (both // and /* */ style)
+  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+  
+  // Remove any trailing commas before closing braces/brackets
+  cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+  
+  // Remove any whitespace between properties
+  cleaned = cleaned.replace(/\s+/g, ' ');
+  
+  // Trim any leading/trailing whitespace
+  cleaned = cleaned.trim();
+  
+  // Replace any escaped newlines with spaces
+  cleaned = cleaned.replace(/\\n/g, ' ');
+  
+  // Remove actual newlines
+  cleaned = cleaned.replace(/\n/g, ' ');
+  
+  return cleaned;
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
@@ -85,7 +110,7 @@ YOU MUST PROVIDE WORKOUTS FOR ALL SEVEN DAYS OF THE WEEK (Sunday, Monday, Tuesda
 For each day, you MUST provide ALL of these sections:
 
 1. Description:
-    * A brief, motivating overview of the day's focus and goals.
+    * A brief, motivating overview of the day's primary training goal
 
 2. Strength Focus:
     * Main lift or strength movement
@@ -133,11 +158,8 @@ DO NOT include any additional text or markdown formatting. ONLY return the JSON 
     console.log('Processing Gemini response');
 
     try {
-      const cleanedText = textResponse
-        .replace(/```json\n?|\n?```/g, '')
-        .replace(/^\s+|\s+$/g, '')
-        .replace(/\\n/g, ' ')
-        .replace(/\n/g, ' ');
+      const cleanedText = cleanJsonText(textResponse);
+      console.log('Cleaned JSON text:', cleanedText);
 
       const workouts = JSON.parse(cleanedText);
 
@@ -164,6 +186,7 @@ DO NOT include any additional text or markdown formatting. ONLY return the JSON 
       });
     } catch (parseError) {
       console.error('Error parsing response:', parseError);
+      console.error('Raw text response:', textResponse);
       throw new Error(`Invalid JSON structure: ${parseError.message}`);
     }
   } catch (error) {

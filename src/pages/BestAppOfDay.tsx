@@ -115,16 +115,16 @@ const BestAppOfDay = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen flex flex-col">
+      <Link 
+        to="/" 
+        className="text-primary hover:text-primary/80 inline-flex items-center gap-1 mb-8"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to all workouts
+      </Link>
+      
       <div className="flex-1 flex items-center">
-        <div className="flex flex-col space-y-8 max-w-3xl mx-auto w-full relative">
-          <Link 
-            to="/" 
-            className="absolute -left-4 -top-12 text-primary hover:text-primary/80 inline-flex items-center gap-1"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to all workouts
-          </Link>
-
+        <div className="flex flex-col space-y-8 max-w-3xl mx-auto w-full">
           <div className="flex flex-col space-y-4">
             <div className="text-center">
               <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">

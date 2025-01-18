@@ -41,23 +41,30 @@ const generateWithGemini = async (prompt: string) => {
       },
     });
 
-    const structuredPrompt = `
-Create a weekly workout progression plan for ${prompt}. For each day of the week, provide:
+    const structuredPrompt = `You are an elite-level coach with over 20 years of experience in strength and conditioning, movement optimization, and athletic development. Your expertise spans across multiple domains including Olympic weightlifting, powerlifting, gymnastics, and endurance training. You have successfully coached athletes from beginners to elite competitors.
 
-1. A brief description of the day's focus
-2. A warmup routine
-3. The main workout (WOD)
-4. Additional notes or tips
+Based on your extensive experience, create a comprehensive weekly progression plan for ${prompt}. Your program should reflect your deep understanding of:
+- Progressive overload principles
+- Movement pattern development
+- Energy system optimization
+- Recovery and adaptation
+
+For each day, provide:
+1. A strategic description of the day's focus and its role in the overall progression
+2. A carefully designed warmup that primes the body for the day's specific demands
+3. The main workout (WOD) with precise movement standards and loading parameters
+4. Expert coaching notes including form cues, scaling options, and strategic advice
+5. Strength focus that aligns with the day's objectives
 
 Return the response in this exact JSON format, with no additional text or explanations:
 
 {
   "Sunday": {
-    "description": "Rest and mobility focus",
-    "warmup": "Light mobility work",
-    "wod": "Active recovery exercises",
-    "notes": "Focus on stretching",
-    "strength": "No strength work today"
+    "description": "Active recovery and mobility focus to promote tissue repair and movement quality",
+    "warmup": "Detailed mobility routine",
+    "wod": "Recovery-focused movement practice",
+    "notes": "Specific mobility and recovery guidelines",
+    "strength": "Movement quality focus"
   },
   "Monday": {
     "description": "string",
@@ -101,7 +108,9 @@ Return the response in this exact JSON format, with no additional text or explan
     "notes": "string",
     "strength": "string"
   }
-}`;
+}
+
+Ensure each component reflects your expertise in programming, progression, and coaching methodology.`;
 
     const result = await model.generateContent(structuredPrompt);
     console.log('Successfully received Gemini response');

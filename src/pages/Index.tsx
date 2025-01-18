@@ -16,6 +16,9 @@ import {
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
+import { useAudioPlayback } from "@/hooks/useAudioPlayback";
+import { exportToCalendar } from "@/utils/calendar";
 
 interface WorkoutDay {
   description: string;
@@ -33,6 +36,8 @@ const Index = () => {
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
   const { toast } = useToast();
+  const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleGenerateWorkout = async () => {
     if (!generatePrompt.trim()) {
@@ -91,10 +96,27 @@ const Index = () => {
         
         <div className="grid gap-8">
           {Object.entries(workouts).map(([day, workout]) => (
-            <div key={day} className="bg-card rounded-xl p-6">
-              <h2 className="text-2xl font-oswald text-primary mb-4">{day}</h2>
+            <div key={day} className="bg-card rounded-xl">
+              <WorkoutHeader
+                title={day}
+                isSpeaking={isSpeaking}
+                isExporting={isExporting}
+                onSpeak={() => handleSpeakWorkout(day, workouts, workout.warmup, workout.wod, workout.notes || '')}
+                onExport={async () => {
+                  try {
+                    setIsExporting(true);
+                    await exportToCalendar(day, workout.warmup, workout.wod, workout.notes || '', toast);
+                  } finally {
+                    setIsExporting(false);
+                  }
+                }}
+                warmup={workout.warmup}
+                wod={workout.wod}
+                notes={workout.notes}
+                strength={workout.strength}
+              />
               
-              <div className="space-y-4">
+              <div className="p-6 space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold text-destructive mb-2">Description</h3>
                   <p className="text-white">{workout.description}</p>
@@ -125,6 +147,7 @@ const Index = () => {
             </div>
           ))}
         </div>
+        <audio ref={audioRef} className="hidden" />
       </div>
     );
   }
@@ -265,6 +288,6 @@ const Index = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Index;

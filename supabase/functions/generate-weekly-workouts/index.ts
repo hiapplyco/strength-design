@@ -43,18 +43,46 @@ const generateWithGemini = async (prompt: string) => {
 
     const structuredPrompt = `You are an elite-level coach with over 20 years of experience in strength and conditioning, movement optimization, and athletic development. Your expertise spans across multiple domains including Olympic weightlifting, powerlifting, gymnastics, and endurance training. You have successfully coached athletes from beginners to elite competitors.
 
-Based on your extensive experience, create a comprehensive weekly progression plan for ${prompt}. Your program should reflect your deep understanding of:
-- Progressive overload principles
-- Movement pattern development
-- Energy system optimization
-- Recovery and adaptation
+Based on your extensive experience, create a comprehensive weekly progression plan for someone wanting to master ${prompt}. Your program should reflect your deep understanding of skill acquisition and development. Consider:
+
+- The natural progression of movement patterns specific to ${prompt}
+- How to build foundational strength and mobility required for ${prompt}
+- Energy system development tailored to ${prompt}'s demands
+- Recovery needs based on training intensity and volume
+- Common technical challenges in ${prompt} and how to address them
+- Safety considerations and injury prevention specific to ${prompt}
 
 For each day, provide:
-1. A strategic description of the day's focus and its role in the overall progression
-2. A carefully designed warmup that primes the body for the day's specific demands
-3. The main workout (WOD) with precise movement standards and loading parameters
-4. Expert coaching notes including form cues, scaling options, and strategic advice
-5. Strength focus that aligns with the day's objectives
+1. A strategic description that explains:
+   - The day's specific focus within the weekly progression
+   - How this session builds upon previous work
+   - What skills or attributes we're developing
+
+2. A carefully designed warmup that:
+   - Prepares the body for the specific demands of ${prompt}
+   - Includes movement preparation and mobility work
+   - Gradually increases intensity
+   - Incorporates skill-specific drills
+
+3. The main workout (WOD) with:
+   - Clear movement standards and technique cues
+   - Specific loading parameters or scaling options
+   - Work-to-rest ratios when applicable
+   - Target time domains or intensity guidelines
+   - Progressive variations based on skill level
+
+4. Expert coaching notes including:
+   - Common technical errors to watch for
+   - Success metrics for the session
+   - Recovery considerations
+   - Mental preparation tips
+   - How this connects to long-term progression
+
+5. Strength focus that:
+   - Complements the skill work
+   - Builds specific strength needed for ${prompt}
+   - Includes appropriate loading schemes
+   - Addresses common weaknesses in ${prompt}
 
 Return the response in this exact JSON format, with no additional text or explanations:
 
@@ -110,7 +138,7 @@ Return the response in this exact JSON format, with no additional text or explan
   }
 }
 
-Ensure each component reflects your expertise in programming, progression, and coaching methodology.`;
+Ensure each component reflects your expertise in programming, progression, and coaching methodology. Make the program specific to ${prompt} while maintaining proper training principles.`;
 
     const result = await model.generateContent(structuredPrompt);
     console.log('Successfully received Gemini response');

@@ -3,7 +3,7 @@ import { WorkoutCard } from "@/components/WorkoutCard";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -19,7 +19,6 @@ interface WorkoutDetails {
 
 const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showGenerateInput, setShowGenerateInput] = useState(false);
   const [expertiseArea, setExpertiseArea] = useState("");
   const [workoutDetails, setWorkoutDetails] = useState<WorkoutDetails>({});
   const [showWorkouts, setShowWorkouts] = useState(false);
@@ -41,6 +40,42 @@ const Index = () => {
       duration: "60-90 minutes",
     }
   ]);
+
+  const persistWorkouts = async (workoutData: WorkoutDetails) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('No user found');
+      return;
+    }
+
+    // Delete existing workouts for this user
+    const { error: deleteError } = await supabase
+      .from('workouts')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (deleteError) {
+      console.error('Error deleting existing workouts:', deleteError);
+      return;
+    }
+
+    // Insert new workouts
+    for (const [title, details] of Object.entries(workoutData)) {
+      const { error: insertError } = await supabase
+        .from('workouts')
+        .insert({
+          user_id: user.id,
+          day: title,
+          warmup: details.warmup,
+          wod: details.wod,
+          notes: details.notes
+        });
+
+      if (insertError) {
+        console.error(`Error inserting workout for ${title}:`, insertError);
+      }
+    }
+  };
 
   const handleGenerateWorkout = async () => {
     if (!expertiseArea.trim()) {
@@ -66,10 +101,11 @@ const Index = () => {
 
       if (data) {
         setWorkoutDetails(data);
+        await persistWorkouts(data);
         setShowWorkouts(true);
         toast({
           title: "Success",
-          description: `Your ${expertiseArea} expertise journey has been generated!`,
+          description: `Your ${expertiseArea} expertise journey has been generated and saved!`,
           className: "bg-primary text-primary-foreground border-none",
         });
       }
@@ -82,7 +118,6 @@ const Index = () => {
       });
     } finally {
       setIsGenerating(false);
-      setShowGenerateInput(false);
     }
   };
 
@@ -135,10 +170,12 @@ const Index = () => {
                 {...workout} 
                 allWorkouts={workoutDetails}
                 onUpdate={(updates) => {
-                  setWorkoutDetails(prev => ({
-                    ...prev,
+                  const newWorkoutDetails = {
+                    ...workoutDetails,
                     [workout.title]: updates
-                  }));
+                  };
+                  setWorkoutDetails(newWorkoutDetails);
+                  persistWorkouts(newWorkoutDetails);
                 }}
               />
             ))}

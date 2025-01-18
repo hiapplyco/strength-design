@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { createExpertCoachPrompt } from "@/utils/expertPrompts";
 
 interface WorkoutGenerationFormProps {
   onWorkoutsGenerated: (workoutData: any, descriptions: any) => void;
@@ -28,9 +29,7 @@ export function WorkoutGenerationForm({ onWorkoutsGenerated }: WorkoutGeneration
     try {
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
-          prompt: `Create a comprehensive progression plan for someone wanting to become an expert in ${expertiseArea}. 
-                  Focus on proper skill development, gradually increasing complexity, and building a strong foundation.
-                  Include specific drills, techniques, and progressions unique to ${expertiseArea}.`
+          prompt: createExpertCoachPrompt(expertiseArea)
         },
       });
 

@@ -13,8 +13,8 @@ interface WorkoutCardProps {
   title: string;
   description: string;
   duration: string;
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; }>;
-  onUpdate?: (updates: { warmup: string; wod: string; notes: string; }) => void;
+  allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; strength: string; }>;
+  onUpdate?: (updates: { warmup: string; wod: string; notes: string; strength: string; }) => void;
 }
 
 export function WorkoutCard({ title, description, duration, allWorkouts, onUpdate }: WorkoutCardProps) {
@@ -24,7 +24,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const [modificationPrompt, setModificationPrompt] = useState("");
   
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
-  const { warmup, wod, notes, setWarmup, setWod, setNotes, setState } = useWorkoutState(title, allWorkouts);
+  const { warmup, wod, notes, strength, setWarmup, setWod, setNotes, setStrength, setState } = useWorkoutState(title, allWorkouts);
 
   const handleExportCalendar = async () => {
     try {
@@ -87,6 +87,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           warmup={warmup}
           wod={wod}
           notes={notes}
+          strength={strength}
         />
         
         <CardContent className="space-y-4 p-6">
@@ -96,6 +97,12 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
             onChange={() => {}}
             minHeight="60px"
             isDescription={true}
+          />
+          <WorkoutSection
+            label="Strength"
+            value={strength}
+            onChange={setStrength}
+            minHeight="80px"
           />
           <WorkoutSection
             label="Warmup"

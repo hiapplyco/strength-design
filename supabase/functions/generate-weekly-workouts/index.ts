@@ -4,7 +4,6 @@ import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 const generateWithGemini = async (prompt: string) => {
@@ -36,7 +35,6 @@ const generateWithGemini = async (prompt: string) => {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: corsHeaders,
@@ -68,74 +66,89 @@ The user will provide you with their fitness goals, preferences, and any limitat
 Create a detailed 5-day workout plan following these principles of periodization:
 
 1. Progressive Overload: Gradually increase intensity across the week.
-2. Movement Pattern Balance: Include a mix of pushing, pulling, squatting, hinging, and core work each week, ensuring variation across the days.
-3. Energy System Development: Mix cardio, strength, and skill work throughout the week, varying the focus each day.
-4. Recovery Consideration: Alternate muscle groups and intensity levels to prevent overtraining. Allow for adequate rest and recovery.
-5. Concurrent Periodization: Develop strength, endurance, and skill simultaneously, in line with CrossFit's philosophy.
-6. Emphasis and Compromise: If the user has specific areas they want to improve (e.g., Olympic lifting), temporarily increase the focus on those elements while potentially reducing the volume of others.
+2. Movement Pattern Balance: Include a mix of pushing, pulling, squatting, hinging, and core work each week.
+3. Energy System Development: Mix cardio, strength, and skill work throughout the week.
+4. Recovery Consideration: Alternate muscle groups and intensity levels to prevent overtraining.
+5. Concurrent Periodization: Develop strength, endurance, and skill simultaneously.
+6. Emphasis and Compromise: Balance user's specific goals with overall fitness.
 
 User's request: ${prompt}
 
 For each day (Monday to Friday), provide:
 
-1. Warmup (10-15 minutes):
-    *   Movement preparation specific to the day's workout.
-    *   Mobility work for key joints involved.
-    *   Progressive intensity buildup.
+1. Description:
+    * A brief, motivating overview of the day's focus and goals.
 
-2. WOD (Workout of the Day):
-    *   Clear structure (e.g., AMRAP, For Time, EMOM).
-    *   Specific rep schemes and weights (or scaling options).
-    *   Work-to-rest ratios.
-    *   Target time domain.
+2. Strength Focus:
+    * Main lift or strength movement
+    * Sets, reps, and loading strategy
+    * Technical cues and progression options
 
-3. Coaching Notes:
-    *   Detailed movement standards.
-    *   Scaling options for different fitness levels.
-    *   Strategy recommendations.
-    *   Safety considerations.
+3. Warmup (10-15 minutes):
+    * Movement preparation specific to the day's workout
+    * Mobility work for key joints involved
+    * Progressive intensity buildup
 
-IMPORTANT: You must return a valid JSON object with EXACTLY this structure for compatibility with the existing system:
+4. WOD (Workout of the Day):
+    * Clear structure (e.g., AMRAP, For Time, EMOM)
+    * Specific rep schemes and weights (or scaling options)
+    * Work-to-rest ratios
+    * Target time domain
+
+5. Coaching Notes:
+    * Detailed movement standards
+    * Scaling options for different fitness levels
+    * Strategy recommendations
+    * Safety considerations
+
+IMPORTANT: Return a valid JSON object with EXACTLY this structure:
 
 {
   "Monday": {
     "description": "A brief overview focusing on the day's primary training goal",
+    "strength": "Detailed strength portion with sets, reps, and loading strategy",
     "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
     "wod": "Structured workout with clear format, rep schemes, and time domains",
     "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Tuesday": {
     "description": "A brief overview focusing on the day's primary training goal",
+    "strength": "Detailed strength portion with sets, reps, and loading strategy",
     "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
     "wod": "Structured workout with clear format, rep schemes, and time domains",
     "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Wednesday": {
     "description": "A brief overview focusing on the day's primary training goal",
+    "strength": "Detailed strength portion with sets, reps, and loading strategy",
     "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
     "wod": "Structured workout with clear format, rep schemes, and time domains",
     "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Thursday": {
     "description": "A brief overview focusing on the day's primary training goal",
+    "strength": "Detailed strength portion with sets, reps, and loading strategy",
     "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
     "wod": "Structured workout with clear format, rep schemes, and time domains",
     "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Friday": {
     "description": "A brief overview focusing on the day's primary training goal",
+    "strength": "Detailed strength portion with sets, reps, and loading strategy",
     "warmup": "Detailed 10-15 minute warmup plan with movement prep and mobility",
     "wod": "Structured workout with clear format, rep schemes, and time domains",
     "notes": "Coaching tips including standards, scaling, and safety"
   },
   "Saturday": {
     "description": "Active Recovery Day",
+    "strength": "Optional light technique work",
     "warmup": "Light mobility and movement preparation",
     "wod": "Optional light cardio and mobility work",
     "notes": "Focus on recovery and preparation for next week"
   },
   "Sunday": {
     "description": "Rest Day",
+    "strength": "Rest",
     "warmup": "Optional light stretching",
     "wod": "Rest and recovery",
     "notes": "Take time to rest and recover for the upcoming week"
@@ -148,18 +161,16 @@ DO NOT include any additional text or markdown formatting. ONLY return the JSON 
     console.log('Processing Gemini response');
 
     try {
-      // Clean and parse the response
       const cleanedText = textResponse
-        .replace(/```json\n?|\n?```/g, '')  // Remove markdown code blocks
-        .replace(/^\s+|\s+$/g, '')          // Remove leading/trailing whitespace
-        .replace(/\\n/g, ' ')               // Replace escaped newlines
-        .replace(/\n/g, ' ');               // Replace actual newlines
+        .replace(/```json\n?|\n?```/g, '')
+        .replace(/^\s+|\s+$/g, '')
+        .replace(/\\n/g, ' ')
+        .replace(/\n/g, ' ');
 
       const workouts = JSON.parse(cleanedText);
 
-      // Validate the structure
       const requiredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const requiredFields = ['description', 'warmup', 'wod', 'notes'];
+      const requiredFields = ['description', 'strength', 'warmup', 'wod', 'notes'];
 
       const isValid = requiredDays.every(day => 
         workouts[day] && requiredFields.every(field => 

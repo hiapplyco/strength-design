@@ -12,6 +12,7 @@ interface WorkoutHeaderProps {
   warmup?: string;
   wod?: string;
   notes?: string;
+  strength?: string;
 }
 
 export function WorkoutHeader({ 
@@ -22,13 +23,15 @@ export function WorkoutHeader({
   onExport,
   warmup = "",
   wod = "",
-  notes = ""
+  notes = "",
+  strength = ""
 }: WorkoutHeaderProps) {
   const { toast } = useToast();
 
   const formatWorkoutText = () => {
     const sections = [
-      `${title} Workout`,
+      `${title}`,
+      strength && `Strength:\n${strength}`,
       warmup && `Warmup:\n${warmup}`,
       wod && `WOD:\n${wod}`,
       notes && `Notes:\n${notes}`
@@ -43,7 +46,7 @@ export function WorkoutHeader({
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `${title} Workout`,
+          title: `${title}`,
           text: workoutText,
         });
         toast({

@@ -151,7 +151,7 @@ const Index = () => {
             <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">
               Your Workouts
             </h1>
-            <p className="text-muted-foreground mt-2 text-lg">Stay consistent with your fitness journey</p>
+            <p className="text-muted-foreground mt-2 text-lg">Built by Apply, Co.</p>
           </div>
           
           <div className="flex items-center justify-center w-full mt-6">

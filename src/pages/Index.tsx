@@ -62,38 +62,40 @@ const Index = () => {
   ]);
 
   const persistWorkouts = async (workoutData: WorkoutDetails) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('No user found');
-      return;
-    }
+    try {
+      // Create a temporary user ID for non-authenticated users
+      const tempUserId = localStorage.getItem('tempUserId') || crypto.randomUUID();
+      localStorage.setItem('tempUserId', tempUserId);
 
-    // Delete existing workouts for this user
-    const { error: deleteError } = await supabase
-      .from('workouts')
-      .delete()
-      .eq('user_id', user.id);
-
-    if (deleteError) {
-      console.error('Error deleting existing workouts:', deleteError);
-      return;
-    }
-
-    // Insert new workouts
-    for (const [title, details] of Object.entries(workoutData)) {
-      const { error: insertError } = await supabase
+      // Delete existing workouts for this temporary user
+      const { error: deleteError } = await supabase
         .from('workouts')
-        .insert({
-          user_id: user.id,
-          day: title,
-          warmup: details.warmup,
-          wod: details.wod,
-          notes: details.notes
-        });
+        .delete()
+        .eq('user_id', tempUserId);
 
-      if (insertError) {
-        console.error(`Error inserting workout for ${title}:`, insertError);
+      if (deleteError) {
+        console.error('Error deleting existing workouts:', deleteError);
+        return;
       }
+
+      // Insert new workouts
+      for (const [title, details] of Object.entries(workoutData)) {
+        const { error: insertError } = await supabase
+          .from('workouts')
+          .insert({
+            user_id: tempUserId,
+            day: title,
+            warmup: details.warmup,
+            wod: details.wod,
+            notes: details.notes
+          });
+
+        if (insertError) {
+          console.error(`Error inserting workout for ${title}:`, insertError);
+        }
+      }
+    } catch (error) {
+      console.error('Error persisting workouts:', error);
     }
   };
 
@@ -121,7 +123,6 @@ const Index = () => {
 
       if (data) {
         setWorkoutDetails(data);
-        // Update workouts with Gemini-generated descriptions
         setWorkouts(prevWorkouts => 
           prevWorkouts.map(workout => ({
             ...workout,

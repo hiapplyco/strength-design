@@ -145,19 +145,19 @@ const Index = () => {
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background">
       <div className="flex flex-col space-y-8 max-w-3xl mx-auto">
         <div className="flex flex-col space-y-4">
-          <div className="text-center">
+          <div className="text-center relative">
+            <div className="mb-12 sm:mb-8 flex flex-col items-center">
+              <Link to="/best-app-of-day" className="text-primary hover:underline font-bold">
+                Check out our CrossFit focused builder →
+              </Link>
+              <p className="text-sm text-muted-foreground mt-2 max-w-md text-center px-4">
+                CrossFit's unique blend of complex movements and intense metrics inspired our journey, shaping how we approach progression in all domains.
+              </p>
+            </div>
             <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-2">
               Master Your Craft
             </h1>
             <p className="text-muted-foreground mt-2 text-lg">Built by Apply, Co.</p>
-            <div className="absolute top-4 right-4 flex flex-col items-end">
-              <Link to="/best-app-of-day" className="text-primary hover:underline font-bold">
-                Check out our CrossFit focused builder →
-              </Link>
-              <p className="text-sm text-muted-foreground mt-2 max-w-md text-right">
-                CrossFit's unique blend of complex movements and intense metrics inspired our journey, shaping how we approach progression in all domains.
-              </p>
-            </div>
           </div>
           
           <div className="flex flex-col sm:flex-row w-full max-w-3xl mx-auto gap-4">

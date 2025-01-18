@@ -63,6 +63,14 @@ export const ExerciseSearch = () => {
     };
   }, []);
 
+  const sanitizeText = (text: string): string => {
+    return text
+      .replace(/WOD/g, 'Workout')
+      .replace(/[^\w\s.,!?;:()\-–—]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   return (
     <div 
       ref={searchRef}
@@ -100,13 +108,13 @@ export const ExerciseSearch = () => {
               <div className="space-y-4">
                 {filteredExercises.map((exercise, index) => (
                   <div key={index} className="bg-white rounded p-4 border border-black">
-                    <h3 className="font-bold text-lg text-black">{exercise.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">Level: {exercise.level}</p>
+                    <h3 className="font-bold text-lg text-black">{sanitizeText(exercise.name)}</h3>
+                    <p className="text-sm text-gray-600 mb-2">Level: {sanitizeText(exercise.level)}</p>
                     <div className="text-sm">
                       <p className="font-medium mb-1 text-black">Instructions:</p>
                       <ul className="list-disc pl-4 space-y-1 text-black">
                         {exercise.instructions.map((instruction, idx) => (
-                          <li key={idx}>{instruction}</li>
+                          <li key={idx}>{sanitizeText(instruction)}</li>
                         ))}
                       </ul>
                     </div>

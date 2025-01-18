@@ -10,7 +10,8 @@ import {
   BarChart,
   Globe,
   Star,
-  ChevronRight
+  ChevronRight,
+  ArrowLeft
 } from "lucide-react";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ const Index = () => {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
+  const [workouts, setWorkouts] = useState(null);
   const { toast } = useToast();
 
   const handleGenerateWorkout = async () => {
@@ -41,11 +43,11 @@ const Index = () => {
       if (error) throw error;
 
       if (data) {
+        setWorkouts(data);
         toast({
           title: "Success",
-          description: "Workouts generated successfully! Check your dashboard to view them.",
+          description: "Workouts generated successfully!",
         });
-        // You might want to redirect to the dashboard or display the workouts here
       }
     } catch (error) {
       console.error('Error generating workouts:', error);
@@ -58,6 +60,64 @@ const Index = () => {
       setIsGenerating(false);
     }
   };
+
+  const resetWorkouts = () => {
+    setWorkouts(null);
+    setGeneratePrompt("");
+  };
+
+  if (workouts) {
+    return (
+      <div className="container mx-auto px-4 py-8 animate-fade-in">
+        <Button 
+          variant="ghost" 
+          className="mb-8 flex items-center gap-2"
+          onClick={resetWorkouts}
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </Button>
+        
+        <h1 className="text-4xl font-oswald text-primary mb-8">Your Weekly Workout Plan</h1>
+        
+        <div className="grid gap-8">
+          {Object.entries(workouts).map(([day, workout]) => (
+            <div key={day} className="bg-card rounded-xl p-6">
+              <h2 className="text-2xl font-oswald text-primary mb-4">{day}</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-destructive mb-2">Description</h3>
+                  <p className="text-white">{workout.description}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-destructive mb-2">Warm-up</h3>
+                  <p className="text-white whitespace-pre-line">{workout.warmup}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-destructive mb-2">Workout of the Day</h3>
+                  <p className="text-white whitespace-pre-line">{workout.wod}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold text-destructive mb-2">Strength Focus</h3>
+                  <p className="text-white">{workout.strength}</p>
+                </div>
+                
+                {workout.notes && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-destructive mb-2">Coaching Notes</h3>
+                    <p className="text-white">{workout.notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen">

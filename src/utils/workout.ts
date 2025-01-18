@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { sanitizeText } from "@/utils/text";
+import { sanitizeText, cleanJsonText } from "@/utils/text";
 
 export const modifyWorkout = async (
   title: string,

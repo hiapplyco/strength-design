@@ -4,7 +4,6 @@ import { CalendarDays, Loader2, Volume2 } from "lucide-react";
 
 interface WorkoutHeaderProps {
   title: string;
-  duration: string;
   isSpeaking: boolean;
   isExporting: boolean;
   onSpeak: () => void;
@@ -13,7 +12,6 @@ interface WorkoutHeaderProps {
 
 export function WorkoutHeader({ 
   title, 
-  duration, 
   isSpeaking, 
   isExporting, 
   onSpeak, 
@@ -23,8 +21,7 @@ export function WorkoutHeader({
     <CardHeader className="relative border-b-[4px] border-primary bg-card rounded-t-[20px]">
       <div className="flex items-center justify-between">
         <div>
-          <CardTitle className="font-collegiate uppercase tracking-tight text-primary">{title}</CardTitle>
-          <CardDescription className="text-muted-foreground">{duration}</CardDescription>
+          <CardTitle className="font-collegiate uppercase tracking-tight text-primary">Workout</CardTitle>
         </div>
         <div className="flex items-center gap-2">
           <Button 

@@ -73,53 +73,55 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   };
 
   return (
-    <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px]">
-      <audio ref={audioRef} className="hidden" />
-      
-      <WorkoutHeader
-        title={title}
-        duration={duration}
-        isSpeaking={isSpeaking}
-        isExporting={isExporting}
-        onSpeak={() => handleSpeakWorkout(title, allWorkouts, warmup, wod, notes)}
-        onExport={handleExportCalendar}
-      />
-      
-      <CardContent className="space-y-4 p-6">
-        <WorkoutSection
-          label="Description"
-          value={description}
-          onChange={() => {}}
-          minHeight="60px"
-          isDescription={true}
-        />
-        <WorkoutSection
-          label="Warmup"
-          value={warmup}
-          onChange={setWarmup}
-          minHeight="80px"
-        />
-        <WorkoutSection
-          label="WOD"
-          value={wod}
-          onChange={setWod}
-          minHeight="100px"
-        />
-        <WorkoutSection
-          label="Notes"
-          value={notes}
-          onChange={setNotes}
-          minHeight="60px"
+    <div className="space-y-2">
+      <h3 className="text-center text-destructive italic text-sm font-medium">{title}</h3>
+      <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px]">
+        <audio ref={audioRef} className="hidden" />
+        
+        <WorkoutHeader
+          title={title}
+          isSpeaking={isSpeaking}
+          isExporting={isExporting}
+          onSpeak={() => handleSpeakWorkout(title, allWorkouts, warmup, wod, notes)}
+          onExport={handleExportCalendar}
         />
         
-        <WorkoutModifier
-          title={title}
-          modificationPrompt={modificationPrompt}
-          isModifying={isModifying}
-          onModificationPromptChange={setModificationPrompt}
-          onModify={handleModifyWorkout}
-        />
-      </CardContent>
-    </Card>
+        <CardContent className="space-y-4 p-6">
+          <WorkoutSection
+            label="Description"
+            value={description}
+            onChange={() => {}}
+            minHeight="60px"
+            isDescription={true}
+          />
+          <WorkoutSection
+            label="Warmup"
+            value={warmup}
+            onChange={setWarmup}
+            minHeight="80px"
+          />
+          <WorkoutSection
+            label="WOD"
+            value={wod}
+            onChange={setWod}
+            minHeight="100px"
+          />
+          <WorkoutSection
+            label="Notes"
+            value={notes}
+            onChange={setNotes}
+            minHeight="60px"
+          />
+          
+          <WorkoutModifier
+            title={title}
+            modificationPrompt={modificationPrompt}
+            isModifying={isModifying}
+            onModificationPromptChange={setModificationPrompt}
+            onModify={handleModifyWorkout}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

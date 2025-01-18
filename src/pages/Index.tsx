@@ -13,16 +13,50 @@ import {
   ChevronRight
 } from "lucide-react";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
+  const { toast } = useToast();
 
   const handleGenerateWorkout = async () => {
-    setIsGenerating(true);
-    // Add your workout generation logic here
-    setTimeout(() => setIsGenerating(false), 2000);
+    if (!generatePrompt.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a prompt for workout generation",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+        body: { prompt: generatePrompt }
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        toast({
+          title: "Success",
+          description: "Workouts generated successfully! Check your dashboard to view them.",
+        });
+        // You might want to redirect to the dashboard or display the workouts here
+      }
+    } catch (error) {
+      console.error('Error generating workouts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate workouts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -48,7 +82,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">

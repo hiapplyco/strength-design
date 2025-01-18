@@ -20,7 +20,8 @@ export const modifyWorkout = async (
     return {
       warmup: sanitizeText(data.warmup),
       wod: sanitizeText(data.wod),
-      notes: sanitizeText(data.notes)
+      notes: sanitizeText(data.notes),
+      description: sanitizeText(data.description)
     };
   }
 

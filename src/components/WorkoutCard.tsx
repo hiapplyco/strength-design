@@ -14,7 +14,7 @@ interface WorkoutCardProps {
   description: string;
   duration: string;
   allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; strength: string; }>;
-  onUpdate?: (updates: { warmup: string; wod: string; notes: string; strength: string; }) => void;
+  onUpdate?: (updates: { warmup: string; wod: string; notes: string; strength: string; description?: string; }) => void;
 }
 
 export function WorkoutCard({ title, description, duration, allWorkouts, onUpdate }: WorkoutCardProps) {
@@ -22,6 +22,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const [isModifying, setIsModifying] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [modificationPrompt, setModificationPrompt] = useState("");
+  const [currentDescription, setCurrentDescription] = useState(description);
   
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
   const { warmup, wod, notes, strength, setWarmup, setWod, setNotes, setStrength, setState } = useWorkoutState(title, allWorkouts);
@@ -66,10 +67,15 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       });
       setModificationPrompt("");
       
+      if (updates.description) {
+        setCurrentDescription(updates.description);
+      }
+      
       if (onUpdate) {
         onUpdate({
           ...updates,
-          strength: strength
+          strength: strength,
+          description: updates.description
         });
       }
 
@@ -109,7 +115,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
         <CardContent className="space-y-4 p-6">
           <WorkoutSection
             label="Description"
-            value={description}
+            value={currentDescription}
             onChange={() => {}}
             minHeight="60px"
             isDescription={true}

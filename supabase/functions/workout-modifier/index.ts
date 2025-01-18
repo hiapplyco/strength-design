@@ -1,5 +1,5 @@
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -49,27 +49,32 @@ Modify the workout for ${dayToModify}, taking into account the user's request an
 
 Provide a new workout for ${dayToModify} with the following:
 
-1. Warmup (10-15 minutes):
-    *   Movement preparation specific to the day's workout.
-    *   Mobility work for key joints involved.
-    *   Progressive intensity buildup.
+1. Description (1-2 sentences):
+    * A brief, engaging summary of the workout's focus and intensity level.
+    * Example: "High-intensity cardio session focusing on explosive movements and endurance."
 
-2. WOD (Workout of the Day):
-    *   Clear structure (e.g., AMRAP, For Time, EMOM).
-    *   Specific rep schemes and weights (or scaling options).
-    *   Work-to-rest ratios.
-    *   Target time domain.
+2. Warmup (10-15 minutes):
+    * Movement preparation specific to the day's workout.
+    * Mobility work for key joints involved.
+    * Progressive intensity buildup.
 
-3. Coaching Notes:
-    *   Detailed movement standards.
-    *   Scaling options for different fitness levels.
-    *   Strategy recommendations.
-    *   Safety considerations.
+3. WOD (Workout of the Day):
+    * Clear structure (e.g., AMRAP, For Time, EMOM).
+    * Specific rep schemes and weights (or scaling options).
+    * Work-to-rest ratios.
+    * Target time domain.
+
+4. Coaching Notes:
+    * Detailed movement standards.
+    * Scaling options for different fitness levels.
+    * Strategy recommendations.
+    * Safety considerations.
 
 Return a JSON object in the following format:
 
 {
     "day": "${dayToModify}",
+    "description": "Brief workout description",
     "warmup": "Detailed modified warmup plan",
     "wod": "Detailed modified workout details",
     "notes": "Detailed modified coaching notes"
@@ -95,7 +100,7 @@ Ensure all text is clear, concise, and free of markdown formatting. Provide only
       const modifiedWorkout = JSON.parse(cleanedText);
 
       // Validate the structure
-      const requiredFields = ['day', 'warmup', 'wod', 'notes'];
+      const requiredFields = ['day', 'description', 'warmup', 'wod', 'notes'];
       const isValid = requiredFields.every(field => 
         typeof modifiedWorkout[field] === 'string' && modifiedWorkout[field].length > 0
       );
@@ -107,6 +112,7 @@ Ensure all text is clear, concise, and free of markdown formatting. Provide only
 
       // Extract just the fields we need
       const response = {
+        description: modifiedWorkout.description,
         warmup: modifiedWorkout.warmup,
         wod: modifiedWorkout.wod,
         notes: modifiedWorkout.notes

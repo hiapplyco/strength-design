@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { GenerateWorkoutButton } from "@/components/GenerateWorkoutButton";
+import { ExerciseSearch } from "@/components/ExerciseSearch";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -162,6 +163,8 @@ const BestAppOfDay = () => {
           )}
         </div>
       </div>
+      
+      <ExerciseSearch />
     </div>
   );
 }

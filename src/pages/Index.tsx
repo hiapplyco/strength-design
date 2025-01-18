@@ -17,11 +17,21 @@ import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+interface WorkoutDay {
+  description: string;
+  warmup: string;
+  wod: string;
+  strength: string;
+  notes?: string;
+}
+
+type WeeklyWorkouts = Record<string, WorkoutDay>;
+
 const Index = () => {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
-  const [workouts, setWorkouts] = useState(null);
+  const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
   const { toast } = useToast();
 
   const handleGenerateWorkout = async () => {
@@ -36,7 +46,7 @@ const Index = () => {
 
     try {
       setIsGenerating(true);
-      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+      const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
         body: { prompt: generatePrompt }
       });
 

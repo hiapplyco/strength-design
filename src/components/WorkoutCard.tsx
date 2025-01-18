@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { createEvents } from 'ics';
 import { sanitizeText } from "@/utils/text";
@@ -26,6 +26,16 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const [wod, setWod] = useState("");
   const [notes, setNotes] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Initialize state with workout details when they become available
+  useEffect(() => {
+    if (allWorkouts && allWorkouts[title]) {
+      const workout = allWorkouts[title];
+      setWarmup(workout.warmup || "");
+      setWod(workout.wod || "");
+      setNotes(workout.notes || "");
+    }
+  }, [allWorkouts, title]);
 
   const handleSpeakWorkout = async () => {
     try {

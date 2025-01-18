@@ -27,9 +27,29 @@ export function WorkoutGenerationForm({ onWorkoutsGenerated }: WorkoutGeneration
 
     setIsGenerating(true);
     try {
+      // First, ensure we have a user ID (either from auth or generate a temporary one)
+      let userId = (await supabase.auth.getUser()).data.user?.id;
+      
+      if (!userId) {
+        // If no authenticated user, use or create a temporary ID
+        userId = localStorage.getItem('tempUserId') || crypto.randomUUID();
+        localStorage.setItem('tempUserId', userId);
+        
+        // Ensure the user has a profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({ id: userId }, { onConflict: 'id' });
+          
+        if (profileError) {
+          console.error('Error ensuring profile exists:', profileError);
+          throw profileError;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
-          prompt: createExpertCoachPrompt(expertiseArea)
+          prompt: createExpertCoachPrompt(expertiseArea),
+          userId: userId // Pass the userId to the edge function
         },
       });
 

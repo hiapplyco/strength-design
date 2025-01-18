@@ -84,6 +84,9 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           isExporting={isExporting}
           onSpeak={() => handleSpeakWorkout(title, allWorkouts, warmup, wod, notes)}
           onExport={handleExportCalendar}
+          warmup={warmup}
+          wod={wod}
+          notes={notes}
         />
         
         <CardContent className="space-y-4 p-6">

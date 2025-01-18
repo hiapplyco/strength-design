@@ -80,7 +80,7 @@ export const ExerciseSearch = () => {
       )}
     >
       <div className="bg-primary rounded-lg shadow-lg p-4 border-2 border-black">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <Button
             variant="ghost"
             size="icon"

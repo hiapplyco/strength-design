@@ -150,9 +150,14 @@ const Index = () => {
               Master Your Craft
             </h1>
             <p className="text-muted-foreground mt-2 text-lg">Built by Apply, Co.</p>
-            <Link to="/best-app-of-day" className="text-primary hover:underline mt-4 block">
-              Looking for daily workouts? Click here
-            </Link>
+            <div className="absolute top-4 right-4 flex flex-col items-end">
+              <Link to="/best-app-of-day" className="text-primary hover:underline font-bold">
+                Check out our CrossFit focused builder →
+              </Link>
+              <p className="text-sm text-muted-foreground mt-2 max-w-md text-right">
+                CrossFit's unique blend of complex movements and intense metrics inspired our journey, shaping how we approach progression in all domains.
+              </p>
+            </div>
           </div>
           
           <div className="flex flex-col sm:flex-row w-full max-w-3xl mx-auto gap-4">

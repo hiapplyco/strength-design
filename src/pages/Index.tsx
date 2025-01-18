@@ -24,6 +24,7 @@ const Index = () => {
   const [showGenerateInput, setShowGenerateInput] = useState(false);
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [workoutDetails, setWorkoutDetails] = useState<WorkoutDetails>({});
+  const [showWorkouts, setShowWorkouts] = useState(false);
   const { toast } = useToast();
   const [workouts, setWorkouts] = useState([
     {
@@ -90,7 +91,6 @@ const Index = () => {
       if (data) {
         console.log('Received workout data:', data);
         
-        // Create a new workout details object with the received data
         const newWorkoutDetails: WorkoutDetails = {};
         Object.entries(data).forEach(([day, workout]: [string, any]) => {
           newWorkoutDetails[day] = {
@@ -109,6 +109,7 @@ const Index = () => {
           description: data[workout.title]?.description || workout.description
         }));
         setWorkouts(updatedWorkouts);
+        setShowWorkouts(true);
 
         toast({
           title: "Success",
@@ -168,16 +169,18 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="grid gap-8 md:gap-12 grid-cols-1">
-          {workouts.map((workout) => (
-            <WorkoutCard 
-              key={workout.title} 
-              {...workout} 
-              allWorkouts={workoutDetails}
-              onUpdate={(updates) => handleWorkoutUpdate(workout.title, updates)}
-            />
-          ))}
-        </div>
+        {showWorkouts && (
+          <div className="grid gap-8 md:gap-12 grid-cols-1">
+            {workouts.map((workout) => (
+              <WorkoutCard 
+                key={workout.title} 
+                {...workout} 
+                allWorkouts={workoutDetails}
+                onUpdate={(updates) => handleWorkoutUpdate(workout.title, updates)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

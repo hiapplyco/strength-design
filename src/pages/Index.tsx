@@ -14,6 +14,7 @@ interface WorkoutDetails {
     warmup: string;
     wod: string;
     notes: string;
+    strength: string;
     description?: string;
   };
 }
@@ -96,6 +97,7 @@ const Index = () => {
             warmup: sanitizeText(workout.warmup || ''),
             wod: sanitizeText(workout.wod || ''),
             notes: sanitizeText(workout.notes || ''),
+            strength: sanitizeText(workout.strength || ''),
             description: sanitizeText(workout.description || ''),
           };
         });
@@ -130,7 +132,7 @@ const Index = () => {
     }
   };
 
-  const handleWorkoutUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; }) => {
+  const handleWorkoutUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; strength: string; }) => {
     setWorkoutDetails(prev => ({
       ...prev,
       [day]: {
@@ -179,6 +181,6 @@ const Index = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Index;

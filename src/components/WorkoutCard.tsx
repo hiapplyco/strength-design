@@ -26,6 +26,17 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
   const { warmup, wod, notes, strength, setWarmup, setWod, setNotes, setStrength, setState } = useWorkoutState(title, allWorkouts);
 
+  const formatWorkoutText = () => {
+    const sections = [
+      strength && `Strength:\n${strength}`,
+      warmup && `Warmup:\n${warmup}`,
+      wod && `WOD:\n${wod}`,
+      notes && `Notes:\n${notes}`
+    ].filter(Boolean);
+
+    return sections.join('\n\n');
+  };
+
   const handleExportCalendar = async () => {
     try {
       setIsExporting(true);
@@ -49,11 +60,17 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
     try {
       const updates = await modifyWorkout(title, modificationPrompt, allWorkouts);
       
-      setState(updates);
+      setState({
+        ...updates,
+        strength: strength // Preserve strength when modifying
+      });
       setModificationPrompt("");
       
       if (onUpdate) {
-        onUpdate(updates);
+        onUpdate({
+          ...updates,
+          strength: strength
+        });
       }
 
       toast({
@@ -99,28 +116,10 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
             isDescription={true}
           />
           <WorkoutSection
-            label="Strength"
-            value={strength}
-            onChange={setStrength}
-            minHeight="80px"
-          />
-          <WorkoutSection
-            label="Warmup"
-            value={warmup}
-            onChange={setWarmup}
-            minHeight="80px"
-          />
-          <WorkoutSection
-            label="WOD"
-            value={wod}
-            onChange={setWod}
-            minHeight="100px"
-          />
-          <WorkoutSection
-            label="Notes"
-            value={notes}
-            onChange={setNotes}
-            minHeight="60px"
+            label="Workout"
+            value={formatWorkoutText()}
+            onChange={() => {}}
+            minHeight="200px"
           />
           
           <WorkoutModifier

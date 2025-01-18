@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ExerciseSearch } from "@/components/ExerciseSearch";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { 
   GraduationCap, 
   Trophy, 
@@ -11,8 +12,19 @@ import {
   Star,
   ChevronRight
 } from "lucide-react";
+import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 
 const Index = () => {
+  const [generatePrompt, setGeneratePrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [showGenerateInput, setShowGenerateInput] = useState(true);
+
+  const handleGenerateWorkout = async () => {
+    setIsGenerating(true);
+    // Add your workout generation logic here
+    setTimeout(() => setIsGenerating(false), 2000);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen">
       <ExerciseSearch />
@@ -25,18 +37,14 @@ const Index = () => {
         <p className="text-xl md:text-2xl text-destructive font-semibold text-center max-w-2xl">
           Empower your athletes with collegiate-level training tools that build consistency, adaptability, and growth.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button 
-            className="bg-destructive hover:bg-destructive/90 text-white font-oswald text-lg px-8"
-          >
-            Start My Free Trial
-          </Button>
-          <Button 
-            variant="outline"
-            className="border-primary text-primary hover:bg-primary hover:text-white font-oswald text-lg px-8"
-          >
-            View Pricing
-          </Button>
+        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-3xl">
+          <GenerateWorkoutInput
+            generatePrompt={generatePrompt}
+            setGeneratePrompt={setGeneratePrompt}
+            handleGenerateWorkout={handleGenerateWorkout}
+            isGenerating={isGenerating}
+            setShowGenerateInput={setShowGenerateInput}
+          />
         </div>
       </section>
 
@@ -132,12 +140,15 @@ const Index = () => {
         <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-8">
           Join a Community of Excellence
         </h2>
-        <Button 
-          className="bg-destructive hover:bg-destructive/90 text-white font-oswald text-lg px-12 py-6"
-        >
-          Start My Free Trial Today
-          <ChevronRight className="ml-2 h-5 w-5" />
-        </Button>
+        <div className="w-full max-w-3xl mx-auto">
+          <GenerateWorkoutInput
+            generatePrompt={generatePrompt}
+            setGeneratePrompt={setGeneratePrompt}
+            handleGenerateWorkout={handleGenerateWorkout}
+            isGenerating={isGenerating}
+            setShowGenerateInput={setShowGenerateInput}
+          />
+        </div>
       </section>
 
       {/* CrossFit Link */}

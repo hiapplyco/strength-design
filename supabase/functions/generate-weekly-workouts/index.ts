@@ -7,12 +7,15 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
     const { prompt, userId } = await req.json()
+    console.log('Received request with prompt:', prompt)
+    console.log('User ID:', userId)
     
     if (!userId) {
       throw new Error('User ID is required')
@@ -25,6 +28,7 @@ serve(async (req) => {
     )
 
     // Call Gemini API to generate workouts
+    console.log('Calling Gemini API...')
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
       method: 'POST',
       headers: {
@@ -41,15 +45,31 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('Gemini API response received')
     
     if (!response.ok) {
+      console.error('Gemini API error:', data.error)
       throw new Error(data.error?.message || 'Failed to generate workouts');
     }
 
     const generatedText = data.candidates[0].content.parts[0].text;
     const workoutData = JSON.parse(generatedText);
+    console.log('Parsed workout data')
+
+    // Delete existing workouts for this user
+    console.log('Deleting existing workouts...')
+    const { error: deleteError } = await supabase
+      .from('workouts')
+      .delete()
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      console.error('Error deleting existing workouts:', deleteError)
+      throw deleteError;
+    }
 
     // Store the workouts in Supabase
+    console.log('Storing new workouts...')
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     
     for (const day of days) {
@@ -69,6 +89,7 @@ serve(async (req) => {
       }
     }
 
+    console.log('Successfully stored all workouts')
     return new Response(
       JSON.stringify(workoutData),
       {
@@ -77,6 +98,7 @@ serve(async (req) => {
       },
     )
   } catch (error) {
+    console.error('Function error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {

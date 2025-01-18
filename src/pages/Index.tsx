@@ -25,20 +25,40 @@ const Index = () => {
   const { toast } = useToast();
   const [workouts] = useState([
     {
-      title: "Beginner",
-      description: "Foundation building and basic movement patterns.",
+      title: "Sunday",
+      description: "Rest and recovery focused on mobility and flexibility.",
       duration: "30-45 minutes",
     },
     {
-      title: "Intermediate",
-      description: "Progressive overload and skill development.",
+      title: "Monday",
+      description: "Foundational skill development and technique work.",
       duration: "45-60 minutes",
     },
     {
-      title: "Advanced",
-      description: "Complex movements and specialized training.",
-      duration: "60-90 minutes",
-    }
+      title: "Tuesday",
+      description: "Progressive skill application and practice.",
+      duration: "45-60 minutes",
+    },
+    {
+      title: "Wednesday",
+      description: "Advanced technique refinement and mastery.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Thursday",
+      description: "Skill integration and flow practice.",
+      duration: "50 minutes",
+    },
+    {
+      title: "Friday",
+      description: "Performance enhancement and advanced applications.",
+      duration: "60 minutes",
+    },
+    {
+      title: "Saturday",
+      description: "Practice sessions and skill assessment.",
+      duration: "45-60 minutes",
+    },
   ]);
 
   const persistWorkouts = async (workoutData: WorkoutDetails) => {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { GenerateWorkoutButton } from "@/components/GenerateWorkoutButton";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WorkoutDetails {
   [key: string]: {
@@ -101,6 +102,13 @@ const BestAppOfDay = () => {
       setIsGenerating(false);
       setShowGenerateInput(false);
     }
+  };
+
+  const handleWorkoutUpdate = (title: string, updates: any) => {
+    setWorkoutDetails(prev => ({
+      ...prev,
+      [title]: updates
+    }));
   };
 
   return (

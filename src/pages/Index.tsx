@@ -121,37 +121,37 @@ const Index = () => {
           <h1 className="text-7xl font-collegiate uppercase tracking-tight text-destructive transform -skew-x-12 mb-4">
             Master Your Craft
           </h1>
-          <p className="text-xl text-muted-foreground">
-            Your AI-powered journey to expertise in any athletic discipline
+          <p className="text-xl text-destructive">
+            Hyper-Refined Training Programs That Adapt To Your Athletes
           </p>
           <p className="text-muted-foreground mt-2">Built by Apply, Co.</p>
         </div>
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mx-auto">
-          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gradient-to-br from-card to-muted">
-            <Dumbbell className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-xl font-bold mb-2">Progressive Training</h3>
-            <p className="text-muted-foreground">Customized weekly programs that evolve with your progress</p>
+          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-primary">
+            <Dumbbell className="w-12 h-12 text-black mb-4" />
+            <h3 className="text-xl font-bold mb-2 text-destructive">Adaptive Programming</h3>
+            <p className="text-destructiveSecondary">Precision-crafted weekly programs that evolve with your athletes</p>
           </div>
-          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gradient-to-br from-card to-muted">
-            <Target className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-xl font-bold mb-2">Expert Guidance</h3>
-            <p className="text-muted-foreground">AI-powered coaching adapted to your specific goals</p>
+          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-primary">
+            <Target className="w-12 h-12 text-black mb-4" />
+            <h3 className="text-xl font-bold mb-2 text-destructive">Elite Methodology</h3>
+            <p className="text-destructiveSecondary">Data-driven coaching adapted to specific performance goals</p>
           </div>
-          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-gradient-to-br from-card to-muted">
-            <Trophy className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-xl font-bold mb-2">Skill Mastery</h3>
-            <p className="text-muted-foreground">Structured progression from fundamentals to advanced techniques</p>
+          <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border-2 border-primary">
+            <Trophy className="w-12 h-12 text-black mb-4" />
+            <h3 className="text-xl font-bold mb-2 text-destructive">Performance Mastery</h3>
+            <p className="text-destructiveSecondary">Strategic progression from fundamentals to advanced techniques</p>
           </div>
         </div>
 
         {/* Input Section */}
         <div className="w-full max-w-3xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold">Start Your Journey</h2>
-            <p className="text-muted-foreground">
-              Enter your desired expertise area and let our AI create a personalized weekly program
+            <h2 className="text-2xl font-bold text-destructive">Start Your Journey</h2>
+            <p className="text-destructiveSecondary">
+              Enter your training focus and receive a tailored program built for excellence
             </p>
           </div>
           

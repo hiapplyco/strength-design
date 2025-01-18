@@ -18,7 +18,7 @@ export function WorkoutModifier({
   onModify
 }: WorkoutModifierProps) {
   return (
-    <div className="space-y-2 border-4 border-destructive rounded-[20px] p-4">
+    <div className="space-y-2 border-4 border-destructive bg-destructive rounded-[20px] p-4">
       <Input
         placeholder={`Examples: "Make ${title}'s workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
         value={modificationPrompt}

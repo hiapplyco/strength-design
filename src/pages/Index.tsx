@@ -101,22 +101,6 @@ const Index = () => {
       <SolutionsSection />
       <TestimonialsSection />
 
-      {/* CTA Section */}
-      <section className="py-20 text-center">
-        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-8 italic">
-          Join a Community of Excellence
-        </h2>
-        <div className="w-full max-w-3xl mx-auto">
-          <GenerateWorkoutInput
-            generatePrompt={generatePrompt}
-            setGeneratePrompt={setGeneratePrompt}
-            handleGenerateWorkout={handleGenerateWorkout}
-            isGenerating={isGenerating}
-            setShowGenerateInput={setShowGenerateInput}
-          />
-        </div>
-      </section>
-
       {/* CrossFit Link */}
       <div className="absolute top-4 right-4 max-w-md text-right">
         <Link to="/best-app-of-day" className="text-primary hover:underline font-bold inline-flex items-center">

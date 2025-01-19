@@ -30,11 +30,11 @@ export const SearchResults = ({ isLoading, exercises, sanitizeText, onExerciseSe
             {onExerciseSelect && (
               <Button
                 variant="ghost"
-                size="icon"
                 onClick={() => onExerciseSelect(exercise)}
-                className="shrink-0 hover:bg-primary/20"
+                className="shrink-0 hover:bg-primary/20 flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
+                Add to workout
               </Button>
             )}
           </div>

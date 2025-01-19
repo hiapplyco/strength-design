@@ -22,11 +22,17 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   useEffect(() => {
     const fetchExercises = async () => {
       try {
+        setIsLoading(true);
         const response = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch exercises');
+        }
         const data = await response.json();
         setExercises(data);
       } catch (error) {
         console.error('Error fetching exercises:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchExercises();

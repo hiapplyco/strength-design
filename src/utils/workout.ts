@@ -4,7 +4,7 @@ import { sanitizeText, cleanJsonText } from "@/utils/text";
 export const modifyWorkout = async (
   title: string,
   modificationPrompt: string,
-  allWorkouts: Record<string, { warmup: string; workout: string; notes: string; }> | undefined
+  allWorkouts: Record<string, { warmup: string; workout: string; notes?: string; }> | undefined
 ) => {
   const { data, error } = await supabase.functions.invoke('workout-modifier', {
     body: {
@@ -20,7 +20,7 @@ export const modifyWorkout = async (
     return {
       warmup: sanitizeText(data.warmup),
       workout: sanitizeText(data.workout),
-      notes: sanitizeText(data.notes),
+      notes: sanitizeText(data.notes || ''), // Provide default empty string if notes is undefined
       description: sanitizeText(data.description)
     };
   }

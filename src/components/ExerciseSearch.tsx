@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Dumbbell, Plus } from "lucide-react";
+import { Loader2, Plus, Check } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -24,6 +24,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [searchResults, setSearchResults] = useState<Exercise[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,6 +64,11 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const handleExerciseSelect = (exercise: Exercise) => {
+    setSelectedExercises(prev => [...prev, exercise.name]);
+    onExerciseSelect?.(exercise);
   };
 
   const sanitizeText = (text: string): string => {
@@ -113,38 +119,53 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
               </TableRow>
             </TableHeader>
             <TableBody>
-              {searchResults.map((exercise, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col gap-2">
-                      <span className="text-primary font-semibold">
-                        {sanitizeText(exercise.name)}
-                      </span>
-                      {exercise.images?.[0] && (
-                        <img
-                          src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
-                          alt={exercise.name}
-                          className="rounded-md w-48 h-auto object-cover"
-                          loading="lazy"
-                        />
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground max-w-md">
-                    {exercise.instructions[0]}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="default"
-                      onClick={() => onExerciseSelect?.(exercise)}
-                      className="w-full bg-primary hover:bg-primary/90"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {searchResults.map((exercise, index) => {
+                const isSelected = selectedExercises.includes(exercise.name);
+                return (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col gap-2">
+                        <span className="text-primary font-semibold">
+                          {sanitizeText(exercise.name)}
+                        </span>
+                        {exercise.images?.[0] && (
+                          <img
+                            src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
+                            alt={exercise.name}
+                            className="rounded-md w-48 h-auto object-cover"
+                            loading="lazy"
+                          />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground max-w-md">
+                      {exercise.instructions[0]}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant={isSelected ? "default" : "default"}
+                        onClick={() => !isSelected && handleExerciseSelect(exercise)}
+                        className={cn(
+                          "w-full transition-all duration-200",
+                          isSelected 
+                            ? "bg-green-500 hover:bg-green-600" 
+                            : "bg-primary hover:bg-primary/90"
+                        )}
+                        disabled={isSelected}
+                      >
+                        {isSelected ? (
+                          <Check className="h-4 w-4 text-white" />
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add
+                          </>
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

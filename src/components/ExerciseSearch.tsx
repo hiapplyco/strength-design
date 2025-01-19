@@ -2,7 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Dumbbell } from "lucide-react";
+import { Loader2, Dumbbell, Plus } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { Exercise } from "./exercise-search/types";
 
 interface ExerciseSearchProps {
@@ -84,7 +92,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
         <Button 
           onClick={handleSearch}
           disabled={isSearching}
-          className="min-w-[100px]"
+          className="min-w-[100px] bg-primary hover:bg-primary/90"
         >
           {isSearching ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -95,23 +103,50 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
       </div>
 
       {searchResults.length > 0 && (
-        <div className="space-y-2">
-          {searchResults.map((exercise, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className="w-full justify-start text-left"
-              onClick={() => onExerciseSelect?.(exercise)}
-            >
-              <Dumbbell className="mr-2 h-4 w-4" />
-              <div className="flex flex-col items-start">
-                <span className="font-semibold">{exercise.name}</span>
-                <span className="text-sm text-muted-foreground">
-                  {exercise.instructions[0]}
-                </span>
-              </div>
-            </Button>
-          ))}
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Exercise</TableHead>
+                <TableHead>Instructions</TableHead>
+                <TableHead className="w-[100px]">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {searchResults.map((exercise, index) => (
+                <TableRow key={index}>
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-primary font-semibold">
+                        {sanitizeText(exercise.name)}
+                      </span>
+                      {exercise.images?.[0] && (
+                        <img
+                          src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
+                          alt={exercise.name}
+                          className="rounded-md w-48 h-auto object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground max-w-md">
+                    {exercise.instructions[0]}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      onClick={() => onExerciseSelect?.(exercise)}
+                      className="w-full hover:bg-primary/20"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

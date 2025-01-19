@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X, CloudSun, Dumbbell, Send } from "lucide-react";
 import { LocationSearch } from "./LocationSearch";
 import { ExerciseSearch } from "./ExerciseSearch";
 import { useState } from "react";
@@ -74,7 +74,6 @@ export function GenerateWorkoutInput({
   };
 
   const handleGenerateWithWeather = () => {
-    // Combine user's prompt with weather data and selected exercises
     const exercisesPrompt = selectedExercises.length > 0 
       ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}.`
       : "";
@@ -85,69 +84,98 @@ export function GenerateWorkoutInput({
   };
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto gap-4">
-      <LocationSearch onLocationSelect={handleLocationSelect} />
-      
-      {weatherData && (
-        <div className="text-sm text-primary">
-          Weather conditions for {weatherData.location}:
-          <ul className="list-disc list-inside mt-1">
-            <li>Temperature: {weatherData.temperature}°C</li>
-            <li>Humidity: {weatherData.humidity}%</li>
-            <li>Wind Speed: {weatherData.windSpeed} m/s</li>
-          </ul>
+    <div className="flex flex-col w-full max-w-3xl mx-auto gap-6 bg-gradient-to-br from-background to-muted p-6 rounded-xl shadow-lg border-2 border-primary/20">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-primary">
+          <CloudSun className="h-5 w-5" />
+          <h3 className="font-oswald text-lg uppercase">Weather Conditions</h3>
         </div>
-      )}
+        <LocationSearch onLocationSelect={handleLocationSelect} />
+        
+        {weatherData && (
+          <div className="bg-primary/10 rounded-lg p-4 text-sm text-primary animate-fade-in">
+            <p className="font-semibold mb-2">{weatherData.location}</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Temperature</p>
+                <p className="font-semibold">{weatherData.temperature}°C</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Humidity</p>
+                <p className="font-semibold">{weatherData.humidity}%</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Wind Speed</p>
+                <p className="font-semibold">{weatherData.windSpeed} m/s</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
-      <ExerciseSearch 
-        onExerciseSelect={handleExerciseSelect} 
-        embedded={true}
-        className="mb-4"
-      />
-
-      {selectedExercises.length > 0 && (
-        <div className="text-sm text-primary">
-          Selected exercises:
-          <ul className="list-disc list-inside mt-1">
-            {selectedExercises.map((exercise, index) => (
-              <li key={index}>{exercise.name}</li>
-            ))}
-          </ul>
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-primary">
+          <Dumbbell className="h-5 w-5" />
+          <h3 className="font-oswald text-lg uppercase">Exercise Selection</h3>
         </div>
-      )}
+        <ExerciseSearch 
+          onExerciseSelect={handleExerciseSelect} 
+          embedded={true}
+          className="mb-4"
+        />
 
-      <Input
-        placeholder="e.g., 'Focus on Olympic lifts this cycle, with emphasis on technique and progressive loading'"
-        value={generatePrompt}
-        onChange={(e) => setGeneratePrompt(e.target.value)}
-        className="flex-1 border-2 border-primary bg-white text-black placeholder:text-gray-500"
-      />
-      
-      <div className="flex gap-2 sm:gap-4">
-        <Button 
-          onClick={handleGenerateWithWeather} 
-          disabled={isGenerating}
-          className="flex-1 sm:flex-none border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50 whitespace-nowrap"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Check className="mr-2 h-4 w-4" />
-              Generate
-            </>
-          )}
-        </Button>
-        <Button 
-          onClick={() => setShowGenerateInput(false)}
-          variant="destructive"
-          className="border-2 border-destructive bg-destructive text-destructive-foreground"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        {selectedExercises.length > 0 && (
+          <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in">
+            <p className="font-semibold text-primary mb-2">Selected Exercises:</p>
+            <div className="flex flex-wrap gap-2">
+              {selectedExercises.map((exercise, index) => (
+                <span key={index} className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-sm">
+                  {exercise.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-primary">
+          <Send className="h-5 w-5" />
+          <h3 className="font-oswald text-lg uppercase">Generate Workout</h3>
+        </div>
+        <Input
+          placeholder="e.g., 'Focus on Olympic lifts this cycle, with emphasis on technique and progressive loading'"
+          value={generatePrompt}
+          onChange={(e) => setGeneratePrompt(e.target.value)}
+          className="border-2 border-primary/20 bg-white/80 text-black placeholder:text-gray-500"
+        />
+        
+        <div className="flex gap-2 sm:gap-4">
+          <Button 
+            onClick={handleGenerateWithWeather} 
+            disabled={isGenerating}
+            className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-colors disabled:opacity-50"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Generate Workout
+              </>
+            )}
+          </Button>
+          <Button 
+            onClick={() => setShowGenerateInput(false)}
+            variant="destructive"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

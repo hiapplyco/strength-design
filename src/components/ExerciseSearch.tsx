@@ -105,14 +105,14 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
         className
       )}
     >
-      <div className="bg-black rounded-[20px] p-4 border-[3px] border-primary shadow-[8px_8px_0px_0px_#ea384c]">
+      <div className="bg-primary rounded-lg shadow-lg p-4 border-2 border-black">
         <div className="flex items-center justify-center gap-2">
           <SearchButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
           {isOpen && <SearchInput value={searchTerm} onChange={setSearchTerm} />}
         </div>
 
         {isOpen && searchTerm && (
-          <div className="mt-4 max-h-[60vh] overflow-y-auto bg-black rounded-[20px] border-2 border-primary/20">
+          <div className="mt-4 max-h-[60vh] overflow-y-auto">
             <SearchResults 
               isLoading={isLoading}
               exercises={filteredExercises}

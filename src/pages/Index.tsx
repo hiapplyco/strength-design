@@ -181,7 +181,7 @@ const Index = () => {
             Train Smarter, Not Harder
           </h2>
           <p className="text-lg text-destructive">
-            From customized programming to tracking progress, Apply Strong is the toolset you need.
+            From customized programming to tracking progress, Apply Your Strength is the toolset you need.
           </p>
         </div>
 

@@ -32,7 +32,6 @@ export function GenerateWorkoutInput({
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLocationSelect = async (location: { 
     name: string; 
@@ -71,12 +70,14 @@ export function GenerateWorkoutInput({
   };
 
   const handleExerciseSelect = (exercise: Exercise) => {
-    setSelectedExercises(prev => [...prev, exercise]);
+    if (!selectedExercises.some(e => e.name === exercise.name)) {
+      setSelectedExercises(prev => [...prev, exercise]);
+    }
   };
 
   const handleGenerateWithWeather = () => {
     const exercisesPrompt = selectedExercises.length > 0 
-      ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}.`
+      ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
       : "";
     
     const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}`;
@@ -119,7 +120,7 @@ export function GenerateWorkoutInput({
           <Dumbbell className="h-5 w-5" />
           <h3 className="font-oswald text-lg uppercase">Exercise Selection</h3>
         </div>
-        <SearchInput value={searchTerm} onChange={setSearchTerm} />
+        <ExerciseSearch onExerciseSelect={handleExerciseSelect} />
 
         {selectedExercises.length > 0 && (
           <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in">

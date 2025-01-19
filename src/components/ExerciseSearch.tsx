@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { SearchInput } from "./exercise-search/SearchInput";
-import { SearchResults } from "./exercise-search/SearchResults";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2, Dumbbell } from "lucide-react";
 import type { Exercise } from "./exercise-search/types";
 
 interface ExerciseSearchProps {
@@ -11,10 +12,10 @@ interface ExerciseSearchProps {
 }
 
 export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }: ExerciseSearchProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchResults, setSearchResults] = useState<Exercise[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,17 +29,16 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
         setExercises(data);
       } catch (error) {
         console.error('Error fetching exercises:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchExercises();
   }, []);
 
-  useEffect(() => {
-    const filterExercises = () => {
-      if (searchTerm.trim()) {
-        const term = searchTerm.toLowerCase();
+  const handleSearch = () => {
+    setIsSearching(true);
+    try {
+      if (searchQuery.trim()) {
+        const term = searchQuery.toLowerCase();
         const results = exercises.filter(exercise => {
           const nameMatch = exercise.name.toLowerCase().includes(term);
           const instructionsMatch = exercise.instructions.some(
@@ -46,26 +46,16 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
           );
           return nameMatch || instructionsMatch;
         });
-        setFilteredExercises(results);
+        setSearchResults(results);
       } else {
-        setFilteredExercises([]);
+        setSearchResults([]);
       }
-    };
-    filterExercises();
-  }, [searchTerm, exercises]);
-
-  const handleClickOutside = (event: MouseEvent) => {
-    if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-      setSearchTerm("");
+    } catch (error) {
+      console.error('Error searching exercises:', error);
+    } finally {
+      setIsSearching(false);
     }
   };
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const sanitizeText = (text: string): string => {
     return text
@@ -79,20 +69,49 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
     <div 
       ref={searchRef}
       className={cn(
-        "w-full relative",
+        "space-y-4",
         className
       )}
     >
-      <SearchInput value={searchTerm} onChange={setSearchTerm} />
+      <div className="flex gap-2">
+        <Input
+          placeholder="Search for equipment (e.g., barbell, dumbbells, kettlebells)"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          className="flex-1 bg-white text-black placeholder:text-gray-500"
+        />
+        <Button 
+          onClick={handleSearch}
+          disabled={isSearching}
+          className="min-w-[100px]"
+        >
+          {isSearching ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            "Search"
+          )}
+        </Button>
+      </div>
 
-      {(searchTerm || isLoading) && (
-        <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg">
-          <SearchResults 
-            isLoading={isLoading}
-            exercises={filteredExercises}
-            sanitizeText={sanitizeText}
-            onExerciseSelect={onExerciseSelect}
-          />
+      {searchResults.length > 0 && (
+        <div className="space-y-2">
+          {searchResults.map((exercise, index) => (
+            <Button
+              key={index}
+              variant="outline"
+              className="w-full justify-start text-left"
+              onClick={() => onExerciseSelect?.(exercise)}
+            >
+              <Dumbbell className="mr-2 h-4 w-4" />
+              <div className="flex flex-col items-start">
+                <span className="font-semibold">{exercise.name}</span>
+                <span className="text-sm text-muted-foreground">
+                  {exercise.instructions[0]}
+                </span>
+              </div>
+            </Button>
+          ))}
         </div>
       )}
     </div>

@@ -150,7 +150,7 @@ export function WorkoutHeader({
               placeholder="Add equipment, notes, or change it up..."
               value={modificationPrompt}
               onChange={(e) => setModificationPrompt(e.target.value)}
-              className="border-2 border-primary"
+              className="border-2 border-primary bg-[#222222] text-white placeholder:text-gray-400"
             />
             <div className="flex justify-end gap-2">
               <Button

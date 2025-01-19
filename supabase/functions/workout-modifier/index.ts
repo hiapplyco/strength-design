@@ -28,26 +28,47 @@ serve(async (req) => {
     const currentWorkout = allWorkouts[dayToModify];
 
     const prompt = `
-As an expert coach, modify this workout based on the user's request:
+As an expert coach with deep expertise in exercise programming and movement optimization, modify this workout based on the following request while maintaining its core purpose and progression:
 
-Current workout for ${dayToModify}:
+CURRENT WORKOUT FOR ${dayToModify}:
+Description: ${currentWorkout.description}
 Warmup: ${currentWorkout.warmup}
 Workout: ${currentWorkout.workout}
-Notes: ${currentWorkout.notes || 'None'}
-Strength: ${currentWorkout.strength || 'None'}
+Strength Focus: ${currentWorkout.strength}
+Coaching Notes: ${currentWorkout.notes || 'None provided'}
 
-User's modification request: ${modificationPrompt}
+MODIFICATION REQUEST: ${modificationPrompt}
 
-Return a JSON object with the modified workout in this exact format:
+Consider:
+1. Movement pattern integrity
+2. Exercise progression/regression needs
+3. Equipment modifications
+4. Safety and technique priorities
+5. Energy system demands
+6. Recovery implications
+
+Provide a complete, modified workout that includes ALL of the following sections:
+
+1. Brief description explaining focus and stimulus
+2. Detailed warmup sequence
+3. Complete workout with:
+   - Clear movement standards
+   - Loading parameters
+   - Work/rest ratios
+   - Scaling options
+4. Strength focus with specific movement patterns
+5. Comprehensive coaching notes
+
+Return ONLY a JSON object with the modified workout in this exact format:
 {
     "description": "Brief workout description",
-    "warmup": "Modified warmup plan",
-    "workout": "Modified workout details",
-    "notes": "Modified coaching notes",
-    "strength": "Modified strength focus"
+    "warmup": "Detailed warmup plan",
+    "workout": "Complete workout details",
+    "notes": "Comprehensive coaching notes",
+    "strength": "Specific strength focus"
 }
 
-Ensure you maintain the core purpose of the workout while adapting it according to the user's needs.`;
+Ensure all sections are detailed and complete, maintaining the professional coaching standard of the original workout.`;
 
     console.log('Sending prompt to Gemini:', prompt);
 
@@ -82,6 +103,7 @@ Ensure you maintain the core purpose of the workout while adapting it according 
       const modifiedWorkout = JSON.parse(cleanedText);
       console.log('Parsed workout:', modifiedWorkout);
 
+      // Validate all required fields are present and non-empty
       const requiredFields = ['description', 'warmup', 'workout', 'notes', 'strength'];
       const isValid = requiredFields.every(field => 
         typeof modifiedWorkout[field] === 'string' && modifiedWorkout[field].length > 0
@@ -89,7 +111,7 @@ Ensure you maintain the core purpose of the workout while adapting it according 
 
       if (!isValid) {
         console.error('Invalid workout structure:', modifiedWorkout);
-        throw new Error('Generated JSON is missing required fields');
+        throw new Error('Generated workout is missing required fields');
       }
 
       return new Response(JSON.stringify(modifiedWorkout), {

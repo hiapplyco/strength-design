@@ -6,13 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const cleanText = (text: string): string => {
-  return text
-    .replace(/[^\w\s.,!?;:()\-–—]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
-
 const generateWithGemini = async (prompt: string) => {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) {
@@ -24,18 +17,16 @@ const generateWithGemini = async (prompt: string) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-pro",
+      generationConfig: {
+        temperature: 0.9,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 8192,
+      }
     });
-
-    const generationConfig = {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-      maxOutputTokens: 8192,
-    };
 
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig,
     });
 
     const response = result.response;
@@ -48,63 +39,108 @@ const generateWithGemini = async (prompt: string) => {
 };
 
 const createExpertCoachPrompt = (expertise: string) => `
-You are a world-renowned coach and movement specialist. Create a comprehensive weekly progression plan for someone wanting to master ${expertise}.
+You are a world-renowned coach and movement specialist with over 25 years of experience in athletic development, movement optimization, and performance enhancement. Your expertise spans across multiple domains including:
+- Olympic weightlifting and powerlifting
+- Gymnastics and calisthenics
+- Sport-specific conditioning
+- Rehabilitation and injury prevention
+- Movement screening and assessment
+- Periodization and program design
+- Mental performance coaching
 
-Your response must follow this exact format:
+Based on your extensive expertise in ${expertise}, create a comprehensive weekly progression plan that demonstrates your deep understanding of movement science and athletic development.
+
+For each training day, provide:
+
+1. STRATEGIC OVERVIEW:
+   - Day's specific focus and purpose
+   - Connection to overall progression
+   - Expected adaptation markers
+   - Integration with weekly flow
+
+2. DETAILED WARMUP PROTOCOL:
+   - Movement preparation sequence
+   - Mobility/stability work
+   - Progressive intensity building
+   - Neural preparation elements
+
+3. MAIN WORKOUT:
+   - Clear movement standards
+   - Loading parameters with rationale
+   - Work-to-rest ratios
+   - Intensity guidelines
+   - Progression/regression options
+   - Time domains with purpose
+
+4. STRENGTH DEVELOPMENT:
+   - Primary movement patterns
+   - Loading schemes
+   - Tempo guidelines
+   - Accessory work
+   - Integration with skill work
+
+5. COACHING NOTES:
+   - Technical priorities
+   - Common faults and corrections
+   - Performance metrics
+   - Safety considerations
+   - Recovery guidelines
+
+Return the response in this exact JSON format:
+
 {
   "Sunday": {
-    "description": "Brief description of Sunday's focus",
-    "warmup": "Detailed warmup routine",
-    "wod": "Main workout details",
-    "notes": "Coaching notes and tips",
-    "strength": "Strength focus"
+    "description": "Detailed focus and purpose",
+    "warmup": "Complete warmup protocol",
+    "workout": "Main workout with all parameters",
+    "notes": "Comprehensive coaching notes",
+    "strength": "Detailed strength focus"
   },
   "Monday": {
     "description": "string",
     "warmup": "string",
-    "wod": "string",
+    "workout": "string",
     "notes": "string",
     "strength": "string"
   },
   "Tuesday": {
     "description": "string",
     "warmup": "string",
-    "wod": "string",
+    "workout": "string",
     "notes": "string",
     "strength": "string"
   },
   "Wednesday": {
     "description": "string",
     "warmup": "string",
-    "wod": "string",
+    "workout": "string",
     "notes": "string",
     "strength": "string"
   },
   "Thursday": {
     "description": "string",
     "warmup": "string",
-    "wod": "string",
+    "workout": "string",
     "notes": "string",
     "strength": "string"
   },
   "Friday": {
     "description": "string",
     "warmup": "string",
-    "wod": "string",
+    "workout": "string",
     "notes": "string",
     "strength": "string"
   },
   "Saturday": {
     "description": "string",
     "warmup": "string",
-    "wod": "string",
+    "workout": "string",
     "notes": "string",
     "strength": "string"
   }
 }
 
-Ensure each day includes specific exercises, techniques, and progressions unique to ${expertise}.
-`;
+Ensure each day's workout demonstrates your expertise in ${expertise} while maintaining sound training principles and scientific methodology.`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -140,7 +176,7 @@ serve(async (req) => {
       console.log('Parsed workouts:', workouts);
 
       const requiredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const requiredFields = ['description', 'strength', 'warmup', 'wod', 'notes'];
+      const requiredFields = ['description', 'warmup', 'workout', 'notes', 'strength'];
 
       const isValid = requiredDays.every(day => 
         workouts[day] && requiredFields.every(field => 

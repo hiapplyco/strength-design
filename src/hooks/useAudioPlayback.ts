@@ -14,7 +14,9 @@ export function useAudioPlayback() {
       const { data: monologueData, error: monologueError } = await supabase.functions.invoke('generate-workout-monologue', {
         body: {
           dayToSpeak: title,
-          workoutPlan: allWorkouts,
+          workoutPlan: {
+            [title]: allWorkouts[title] // Only pass the current day's workout
+          },
           warmup,
           wod: `Important: When referring to this section, always say "workout of the day" instead of "WOD". Here's the workout: ${wod}`,
           notes

@@ -11,15 +11,15 @@ interface SearchResultsProps {
 
 export const SearchResults = ({ isLoading, exercises, sanitizeText, onExerciseSelect }: SearchResultsProps) => {
   if (isLoading) {
-    return <p className="text-center text-primary-foreground">Loading exercises...</p>;
+    return <p className="text-center p-4 text-black">Loading exercises...</p>;
   }
 
   if (exercises.length === 0) {
-    return <p className="text-center text-destructive font-bold">No exercises found</p>;
+    return <p className="text-center p-4 text-destructive font-bold">No exercises found</p>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 max-h-[60vh] overflow-y-auto">
       {exercises.map((exercise, index) => (
         <div key={index} className="bg-white rounded p-4 border border-black">
           <div className="flex justify-between items-start gap-4">

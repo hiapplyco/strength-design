@@ -14,13 +14,12 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   const [searchTerm, setSearchTerm] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        setIsLoading(true);
         const response = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
         if (!response.ok) {
           throw new Error('Failed to fetch exercises');
@@ -37,19 +36,22 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   }, []);
 
   useEffect(() => {
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      const results = exercises.filter(exercise => {
-        const nameMatch = exercise.name.toLowerCase().includes(term);
-        const instructionsMatch = exercise.instructions.some(
-          instruction => instruction.toLowerCase().includes(term)
-        );
-        return nameMatch || instructionsMatch;
-      });
-      setFilteredExercises(results);
-    } else {
-      setFilteredExercises([]);
-    }
+    const filterExercises = () => {
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        const results = exercises.filter(exercise => {
+          const nameMatch = exercise.name.toLowerCase().includes(term);
+          const instructionsMatch = exercise.instructions.some(
+            instruction => instruction.toLowerCase().includes(term)
+          );
+          return nameMatch || instructionsMatch;
+        });
+        setFilteredExercises(results);
+      } else {
+        setFilteredExercises([]);
+      }
+    };
+    filterExercises();
   }, [searchTerm, exercises]);
 
   const handleClickOutside = (event: MouseEvent) => {
@@ -77,14 +79,14 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
     <div 
       ref={searchRef}
       className={cn(
-        "w-full",
+        "w-full relative",
         className
       )}
     >
       <SearchInput value={searchTerm} onChange={setSearchTerm} />
 
-      {searchTerm && (
-        <div className="mt-4 max-h-[60vh] overflow-y-auto">
+      {(searchTerm || isLoading) && (
+        <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg">
           <SearchResults 
             isLoading={isLoading}
             exercises={filteredExercises}

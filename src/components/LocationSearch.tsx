@@ -48,6 +48,12 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
     }
   };
 
+  const handleLocationSelect = (location: Location) => {
+    onLocationSelect(location);
+    setLocations([]); // Clear the search results
+    setSearchQuery(""); // Clear the search input
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
@@ -78,7 +84,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
               key={index}
               variant="outline"
               className="w-full justify-start text-left"
-              onClick={() => onLocationSelect(location)}
+              onClick={() => handleLocationSelect(location)}
             >
               <MapPin className="mr-2 h-4 w-4" />
               <span>

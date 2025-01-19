@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
+import { exportToCalendar } from "@/utils/calendar";
+import { useToast } from "@/hooks/use-toast";
 
 interface WorkoutDay {
   description: string;
@@ -17,6 +19,7 @@ interface WorkoutDisplayProps {
   resetWorkouts: () => void;
   isSpeaking: boolean;
   isExporting: boolean;
+  setIsExporting: (value: boolean) => void;
   handleSpeakWorkout: (day: string, workouts: WeeklyWorkouts, warmup: string, wod: string, notes: string) => void;
   audioRef: React.RefObject<HTMLAudioElement>;
 }
@@ -26,9 +29,12 @@ export const WorkoutDisplay = ({
   resetWorkouts,
   isSpeaking,
   isExporting,
+  setIsExporting,
   handleSpeakWorkout,
   audioRef
 }: WorkoutDisplayProps) => {
+  const { toast } = useToast();
+
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <Button 

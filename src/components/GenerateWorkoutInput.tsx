@@ -84,7 +84,7 @@ export function GenerateWorkoutInput({
   };
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto gap-6 bg-gradient-to-br from-background to-muted p-6 rounded-xl shadow-lg border-2 border-primary/20">
+    <div className="flex flex-col w-full max-w-3xl mx-auto gap-6 bg-muted p-6 rounded-xl shadow-lg">
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-primary">
           <CloudSun className="h-5 w-5" />
@@ -147,7 +147,7 @@ export function GenerateWorkoutInput({
           placeholder="e.g., 'Focus on Olympic lifts this cycle, with emphasis on technique and progressive loading'"
           value={generatePrompt}
           onChange={(e) => setGeneratePrompt(e.target.value)}
-          className="border-2 border-primary/20 bg-white/80 text-black placeholder:text-gray-500"
+          className="bg-black text-white placeholder:text-gray-500"
         />
         
         <div className="flex gap-2 sm:gap-4">

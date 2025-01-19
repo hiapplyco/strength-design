@@ -18,16 +18,23 @@ serve(async (req) => {
       throw new Error('Missing Gemini API key');
     }
 
-    const { dayToModify, modificationPrompt, currentWorkout } = await req.json();
+    const { dayToModify, modificationPrompt, allWorkouts } = await req.json();
     console.log('Received request to modify workout:', { dayToModify, modificationPrompt });
+
+    if (!allWorkouts || !allWorkouts[dayToModify]) {
+      throw new Error('No workout data provided for modification');
+    }
+
+    const currentWorkout = allWorkouts[dayToModify];
 
     const prompt = `
 As an expert coach, modify this workout based on the user's request:
 
 Current workout for ${dayToModify}:
 Warmup: ${currentWorkout.warmup}
-WOD: ${currentWorkout.wod}
+Workout: ${currentWorkout.workout}
 Notes: ${currentWorkout.notes || 'None'}
+Strength: ${currentWorkout.strength || 'None'}
 
 User's modification request: ${modificationPrompt}
 
@@ -35,7 +42,7 @@ Return a JSON object with the modified workout in this exact format:
 {
     "description": "Brief workout description",
     "warmup": "Modified warmup plan",
-    "wod": "Modified workout details",
+    "workout": "Modified workout details",
     "notes": "Modified coaching notes",
     "strength": "Modified strength focus"
 }
@@ -75,7 +82,7 @@ Ensure you maintain the core purpose of the workout while adapting it according 
       const modifiedWorkout = JSON.parse(cleanedText);
       console.log('Parsed workout:', modifiedWorkout);
 
-      const requiredFields = ['description', 'warmup', 'wod', 'notes', 'strength'];
+      const requiredFields = ['description', 'warmup', 'workout', 'notes', 'strength'];
       const isValid = requiredFields.every(field => 
         typeof modifiedWorkout[field] === 'string' && modifiedWorkout[field].length > 0
       );

@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Check, X } from "lucide-react";
 import { LocationSearch } from "./LocationSearch";
+import { ExerciseSearch } from "./ExerciseSearch";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Exercise } from "./exercise-search/types";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -29,6 +31,7 @@ export function GenerateWorkoutInput({
 }: GenerateWorkoutInputProps) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
+  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
 
   const handleLocationSelect = async (location: { 
     name: string; 
@@ -60,16 +63,23 @@ export function GenerateWorkoutInput({
         location: locationString
       });
 
-      // Store weather prompt separately
       setWeatherPrompt(`Consider these weather conditions: ${data.weather.current.temperature_2m}°C, ${data.weather.current.relative_humidity_2m}% humidity, wind speed ${data.weather.current.wind_speed_10m}m/s in ${locationString}.`);
     } catch (error) {
       console.error('Error fetching weather:', error);
     }
   };
 
+  const handleExerciseSelect = (exercise: Exercise) => {
+    setSelectedExercises(prev => [...prev, exercise]);
+  };
+
   const handleGenerateWithWeather = () => {
-    // Combine the user's prompt with weather data only when generating
-    const fullPrompt = weatherPrompt ? `${generatePrompt} ${weatherPrompt}` : generatePrompt;
+    // Combine user's prompt with weather data and selected exercises
+    const exercisesPrompt = selectedExercises.length > 0 
+      ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}.`
+      : "";
+    
+    const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}`;
     setGeneratePrompt(fullPrompt);
     handleGenerateWorkout();
   };
@@ -85,6 +95,23 @@ export function GenerateWorkoutInput({
             <li>Temperature: {weatherData.temperature}°C</li>
             <li>Humidity: {weatherData.humidity}%</li>
             <li>Wind Speed: {weatherData.windSpeed} m/s</li>
+          </ul>
+        </div>
+      )}
+
+      <ExerciseSearch 
+        onExerciseSelect={handleExerciseSelect} 
+        embedded={true}
+        className="mb-4"
+      />
+
+      {selectedExercises.length > 0 && (
+        <div className="text-sm text-primary">
+          Selected exercises:
+          <ul className="list-disc list-inside mt-1">
+            {selectedExercises.map((exercise, index) => (
+              <li key={index}>{exercise.name}</li>
+            ))}
           </ul>
         </div>
       )}

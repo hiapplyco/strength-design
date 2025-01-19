@@ -5,7 +5,13 @@ import { SearchInput } from "./exercise-search/SearchInput";
 import { SearchResults } from "./exercise-search/SearchResults";
 import type { Exercise } from "./exercise-search/types";
 
-export const ExerciseSearch = () => {
+interface ExerciseSearchProps {
+  onExerciseSelect?: (exercise: Exercise) => void;
+  className?: string;
+  embedded?: boolean;
+}
+
+export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }: ExerciseSearchProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -29,24 +35,25 @@ export const ExerciseSearch = () => {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const isScrollingDown = currentScrollY > lastScrollY.current;
-      const isNearBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 100;
+    if (!embedded) {
+      const handleScroll = () => {
+        const currentScrollY = window.scrollY;
+        const isScrollingDown = currentScrollY > lastScrollY.current;
+        const isNearBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 100;
 
-      // Hide when near bottom or scrolling down significantly
-      if (isNearBottom || (isScrollingDown && currentScrollY > 200)) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
+        if (isNearBottom || (isScrollingDown && currentScrollY > 200)) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
 
-      lastScrollY.current = currentScrollY;
-    };
+        lastScrollY.current = currentScrollY;
+      };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [embedded]);
 
   useEffect(() => {
     if (searchTerm.trim()) {
@@ -87,14 +94,15 @@ export const ExerciseSearch = () => {
       .trim();
   };
 
-  if (!isVisible) return null;
+  if (!isVisible && !embedded) return null;
 
   return (
     <div 
       ref={searchRef}
       className={cn(
-        "fixed bottom-8 right-8 z-50 transition-all duration-300 ease-in-out",
-        isOpen ? "w-96" : "w-12"
+        embedded ? "w-full" : "fixed bottom-8 right-8 z-50 transition-all duration-300 ease-in-out",
+        isOpen && !embedded ? "w-96" : embedded ? "w-full" : "w-12",
+        className
       )}
     >
       <div className="bg-primary rounded-lg shadow-lg p-4 border-2 border-black">
@@ -109,6 +117,7 @@ export const ExerciseSearch = () => {
               isLoading={isLoading}
               exercises={filteredExercises}
               sanitizeText={sanitizeText}
+              onExerciseSelect={onExerciseSelect}
             />
           </div>
         )}

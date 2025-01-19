@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
@@ -100,17 +98,6 @@ const Index = () => {
       <FeaturesSection />
       <SolutionsSection />
       <TestimonialsSection />
-
-      {/* CrossFit Link */}
-      <div className="absolute top-4 right-4 max-w-md text-right">
-        <Link to="/best-app-of-day" className="text-primary hover:underline font-bold inline-flex items-center">
-          Check out our CrossFit focused builder
-          <ChevronRight className="w-4 h-4" />
-        </Link>
-        <p className="text-sm text-foreground mt-2">
-          CrossFit's unique blend of complex movements and intense metrics inspired our journey.
-        </p>
-      </div>
     </div>
   );
 };

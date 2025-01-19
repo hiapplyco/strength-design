@@ -2,18 +2,18 @@ import { useState, useEffect } from "react";
 
 interface WorkoutState {
   warmup: string;
-  wod: string;
+  workout: string;
   notes?: string;
   strength: string;
 }
 
 export function useWorkoutState(
   title: string,
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes?: string; strength: string; }>
+  allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>
 ) {
   const [state, setState] = useState<WorkoutState>({
     warmup: "",
-    wod: "",
+    workout: "",
     notes: "",
     strength: ""
   });
@@ -23,7 +23,7 @@ export function useWorkoutState(
       const workout = allWorkouts[title];
       setState({
         warmup: workout.warmup || "",
-        wod: workout.wod || "",
+        workout: workout.workout || "",
         notes: workout.notes || "",
         strength: workout.strength || ""
       });
@@ -31,14 +31,14 @@ export function useWorkoutState(
   }, [allWorkouts, title]);
 
   const setWarmup = (warmup: string) => setState(prev => ({ ...prev, warmup }));
-  const setWod = (wod: string) => setState(prev => ({ ...prev, wod }));
+  const setWorkout = (workout: string) => setState(prev => ({ ...prev, workout }));
   const setNotes = (notes: string) => setState(prev => ({ ...prev, notes }));
   const setStrength = (strength: string) => setState(prev => ({ ...prev, strength }));
 
   return {
     ...state,
     setWarmup,
-    setWod,
+    setWorkout,
     setNotes,
     setStrength,
     setState

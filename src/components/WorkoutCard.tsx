@@ -11,8 +11,8 @@ interface WorkoutCardProps {
   title: string;
   description: string;
   duration: string;
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes?: string; strength: string; }>;
-  onUpdate?: (updates: { warmup: string; wod: string; notes?: string; strength: string; description?: string; }) => void;
+  allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>;
+  onUpdate?: (updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => void;
 }
 
 export function WorkoutCard({ title, description, duration, allWorkouts, onUpdate }: WorkoutCardProps) {
@@ -21,13 +21,13 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const [currentDescription, setCurrentDescription] = useState(description);
   
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
-  const { warmup, wod, notes, strength, setState } = useWorkoutState(title, allWorkouts);
+  const { warmup, workout, notes, strength, setState } = useWorkoutState(title, allWorkouts);
 
   const formatWorkoutText = () => {
     const sections = [
       strength && `Strength:\n${strength}`,
       warmup && `Warmup:\n${warmup}`,
-      wod && `Workout:\n${wod}`,
+      workout && `Workout:\n${workout}`,
       notes && `Notes:\n${notes}`
     ].filter(Boolean);
 
@@ -37,7 +37,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const handleExportCalendar = async () => {
     try {
       setIsExporting(true);
-      await exportToCalendar(title, warmup, wod, notes || '', toast);
+      await exportToCalendar(title, warmup, workout, notes || '', toast);
     } finally {
       setIsExporting(false);
     }
@@ -52,10 +52,10 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           title={title}
           isSpeaking={isSpeaking}
           isExporting={isExporting}
-          onSpeak={() => handleSpeakWorkout(title, allWorkouts, warmup, wod, notes)}
+          onSpeak={() => handleSpeakWorkout(title, allWorkouts, warmup, workout, notes)}
           onExport={handleExportCalendar}
           warmup={warmup}
-          wod={wod}
+          workout={workout}
           notes={notes}
           strength={strength}
           allWorkouts={allWorkouts}

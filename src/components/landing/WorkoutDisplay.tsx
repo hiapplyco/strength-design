@@ -8,7 +8,7 @@ import { useState } from "react";
 interface WorkoutDay {
   description: string;
   warmup: string;
-  wod: string;
+  workout: string;
   strength: string;
   notes?: string;
 }
@@ -21,7 +21,7 @@ interface WorkoutDisplayProps {
   isSpeaking: boolean;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
-  handleSpeakWorkout: (day: string, workouts: WeeklyWorkouts, warmup: string, wod: string, notes: string) => void;
+  handleSpeakWorkout: (day: string, workouts: WeeklyWorkouts, warmup: string, workout: string, notes: string) => void;
   audioRef: React.RefObject<HTMLAudioElement>;
 }
 
@@ -37,7 +37,7 @@ export const WorkoutDisplay = ({
   const { toast } = useToast();
   const [localWorkouts, setLocalWorkouts] = useState<WeeklyWorkouts>(workouts);
 
-  const handleUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; strength: string; description?: string; }) => {
+  const handleUpdate = (day: string, updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => {
     setLocalWorkouts(prev => ({
       ...prev,
       [day]: {
@@ -67,17 +67,17 @@ export const WorkoutDisplay = ({
               title={day}
               isSpeaking={isSpeaking}
               isExporting={isExporting}
-              onSpeak={() => handleSpeakWorkout(day, workouts, workout.warmup, workout.wod, workout.notes || '')}
+              onSpeak={() => handleSpeakWorkout(day, workouts, workout.warmup, workout.workout, workout.notes || '')}
               onExport={async () => {
                 try {
                   setIsExporting(true);
-                  await exportToCalendar(day, workout.warmup, workout.wod, workout.notes || '', toast);
+                  await exportToCalendar(day, workout.warmup, workout.workout, workout.notes || '', toast);
                 } finally {
                   setIsExporting(false);
                 }
               }}
               warmup={workout.warmup}
-              wod={workout.wod}
+              workout={workout.workout}
               notes={workout.notes}
               strength={workout.strength}
               allWorkouts={localWorkouts}
@@ -96,8 +96,8 @@ export const WorkoutDisplay = ({
               </div>
               
               <div>
-                <h3 className="text-lg font-semibold text-destructive mb-2">Workout of the Day</h3>
-                <p className="text-white whitespace-pre-line">{workout.wod}</p>
+                <h3 className="text-lg font-semibold text-destructive mb-2">Workout</h3>
+                <p className="text-white whitespace-pre-line">{workout.workout}</p>
               </div>
               
               <div>

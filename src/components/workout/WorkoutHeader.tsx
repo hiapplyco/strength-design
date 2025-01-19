@@ -12,11 +12,11 @@ interface WorkoutHeaderProps {
   onSpeak: () => void;
   onExport: () => void;
   warmup?: string;
-  wod?: string;
+  workout?: string;
   notes?: string;
   strength?: string;
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes?: string; strength: string; }>;
-  onUpdate?: (updates: { warmup: string; wod: string; notes?: string; strength: string; description?: string; }) => void;
+  allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>;
+  onUpdate?: (updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => void;
 }
 
 export function WorkoutHeader({ 
@@ -26,7 +26,7 @@ export function WorkoutHeader({
   onSpeak, 
   onExport,
   warmup = "",
-  wod = "",
+  workout = "",
   notes = "",
   strength = "",
   allWorkouts,
@@ -40,7 +40,7 @@ export function WorkoutHeader({
       `${title}`,
       strength && `Strength:\n${strength}`,
       warmup && `Warmup:\n${warmup}`,
-      wod && `Workout:\n${wod}`,
+      workout && `Workout:\n${workout}`,
       notes && `Notes:\n${notes}`
     ].filter(Boolean);
 

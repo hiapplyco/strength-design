@@ -102,7 +102,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
         className
       )}
     >
-      <div className="bg-primary rounded-lg shadow-lg p-4 border-2 border-black">
+      <div className="bg-black rounded-lg shadow-lg p-4">
         <SearchInput value={searchTerm} onChange={setSearchTerm} />
 
         {searchTerm && (

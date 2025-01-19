@@ -5,6 +5,7 @@ import { LocationSearch } from "./LocationSearch";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "./exercise-search/types";
+import { ExerciseSearch } from "./ExerciseSearch";
 import { SearchInput } from "./exercise-search/SearchInput";
 
 interface GenerateWorkoutInputProps {

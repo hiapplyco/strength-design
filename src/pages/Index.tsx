@@ -92,7 +92,7 @@ const Index = () => {
           <ArrowLeft className="w-4 h-4" /> Back to Home
         </Button>
         
-        <h1 className="text-4xl font-oswald text-primary mb-8">Your Weekly Workout Plan</h1>
+        <h1 className="text-4xl font-oswald text-primary mb-8 italic">Your Weekly Workout Plan</h1>
         
         <div className="grid gap-8">
           {Object.entries(workouts).map(([day, workout]) => (
@@ -162,7 +162,7 @@ const Index = () => {
           <h1 className="text-6xl md:text-7xl font-oswald uppercase tracking-tight text-primary text-center max-w-4xl italic">
             Build Stronger, Train Smarter
           </h1>
-          <p className="text-2xl font-oswald text-destructive text-center">
+          <p className="text-2xl font-oswald text-destructive text-center italic">
             with A.Y.S
           </p>
         </div>
@@ -182,7 +182,7 @@ const Index = () => {
 
       <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
+          <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4 italic">
             Train Smarter, Not Harder
           </h2>
           <p className="text-lg text-destructive">
@@ -193,17 +193,17 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="text-center space-y-4">
             <GraduationCap className="w-16 h-16 text-primary mx-auto" />
-            <h3 className="text-2xl font-oswald text-primary">Adaptive Programming</h3>
+            <h3 className="text-2xl font-oswald text-primary italic">Adaptive Programming</h3>
             <p className="text-white">Precision-crafted plans tailored to your athletes' goals.</p>
           </div>
           <div className="text-center space-y-4">
             <Trophy className="w-16 h-16 text-primary mx-auto" />
-            <h3 className="text-2xl font-oswald text-primary">Performance Analytics</h3>
+            <h3 className="text-2xl font-oswald text-primary italic">Performance Analytics</h3>
             <p className="text-white">Data-driven insights to drive smarter decisions.</p>
           </div>
           <div className="text-center space-y-4">
             <BookOpen className="w-16 h-16 text-primary mx-auto" />
-            <h3 className="text-2xl font-oswald text-primary">Strategic Progression</h3>
+            <h3 className="text-2xl font-oswald text-primary italic">Strategic Progression</h3>
             <p className="text-white">Build lasting results through structured periodization.</p>
           </div>
         </div>
@@ -212,7 +212,7 @@ const Index = () => {
       {/* Solutions Section */}
       <section className="py-20">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
+          <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4 italic">
             The Ultimate Platform for Coaches
           </h2>
           <p className="text-lg text-destructive">
@@ -223,17 +223,17 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <div className="bg-card p-8 rounded-xl space-y-4">
             <Users className="w-12 h-12 text-primary" />
-            <h3 className="text-2xl font-oswald text-primary">Connect with Athletes</h3>
+            <h3 className="text-2xl font-oswald text-primary italic">Connect with Athletes</h3>
             <p className="text-white">Real-time chat, form review, and leaderboards to engage clients.</p>
           </div>
           <div className="bg-card p-8 rounded-xl space-y-4">
             <BarChart className="w-12 h-12 text-primary" />
-            <h3 className="text-2xl font-oswald text-primary">Build Your Program</h3>
+            <h3 className="text-2xl font-oswald text-primary italic">Build Your Program</h3>
             <p className="text-white">Design scalable training plans and save time with reusable templates.</p>
           </div>
           <div className="bg-card p-8 rounded-xl space-y-4">
             <Globe className="w-12 h-12 text-primary" />
-            <h3 className="text-2xl font-oswald text-primary">Grow Anywhere</h3>
+            <h3 className="text-2xl font-oswald text-primary italic">Grow Anywhere</h3>
             <p className="text-white">Sell your programs online or coach remotely from anywhere in the world.</p>
           </div>
         </div>
@@ -241,7 +241,7 @@ const Index = () => {
 
       {/* Testimonials Section */}
       <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
-        <h2 className="text-4xl md:text-5xl font-oswald text-primary text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-oswald text-primary text-center mb-16 italic">
           What Coaches Are Saying
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -268,7 +268,7 @@ const Index = () => {
 
       {/* CTA Section */}
       <section className="py-20 text-center">
-        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-8">
+        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-8 italic">
           Join a Community of Excellence
         </h2>
         <div className="w-full max-w-3xl mx-auto">

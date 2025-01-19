@@ -1,9 +1,8 @@
 import { CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CalendarDays, Loader2, Volume2, Share2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { modifyWorkout } from "@/utils/workout";
+import { HeaderActions } from "./header/HeaderActions";
 
 interface WorkoutHeaderProps {
   title: string;
@@ -91,7 +90,7 @@ export function WorkoutHeader({
       
       onUpdate({
         ...updates,
-        strength // Preserve strength when modifying
+        strength
       });
 
       toast({
@@ -113,58 +112,19 @@ export function WorkoutHeader({
   return (
     <CardHeader className="relative border-b-[4px] border-primary bg-card rounded-t-[20px]">
       <div className="flex items-center justify-between">
-        <h3 className="text-primary italic text-2xl font-collegiate uppercase tracking-wider">{title}</h3>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-full text-primary"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-full text-primary"
-            onClick={onSpeak}
-            disabled={isSpeaking}
-          >
-            {isSpeaking ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 rounded-full text-primary"
-            onClick={onExport}
-            disabled={isExporting}
-          >
-            {isExporting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <CalendarDays className="h-4 w-4" />
-            )}
-          </Button>
-          {allWorkouts && onUpdate && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 rounded-full text-primary"
-              onClick={handleModify}
-              disabled={isModifying}
-            >
-              {isModifying ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Edit className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-        </div>
+        <h3 className="text-primary italic text-2xl font-collegiate uppercase tracking-wider">
+          {title}
+        </h3>
+        <HeaderActions
+          onShare={handleShare}
+          onSpeak={onSpeak}
+          onExport={onExport}
+          onModify={handleModify}
+          isSpeaking={isSpeaking}
+          isExporting={isExporting}
+          isModifying={isModifying}
+          showModify={!!allWorkouts && !!onUpdate}
+        />
       </div>
     </CardHeader>
   );

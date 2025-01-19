@@ -23,7 +23,7 @@ const generateWithGemini = async (prompt: string) => {
     console.log('Starting Gemini generation with prompt:', prompt);
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-pro",
     });
 
     const generationConfig = {
@@ -33,14 +33,14 @@ const generateWithGemini = async (prompt: string) => {
       maxOutputTokens: 8192,
     };
 
-    const chatSession = model.startChat({
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig,
-      history: [],
     });
 
-    const result = await chatSession.sendMessage(prompt);
+    const response = result.response;
     console.log('Successfully received Gemini response');
-    return result.response.text();
+    return response.text();
   } catch (error) {
     console.error('Error in generateWithGemini:', error);
     throw new Error(`Gemini API error: ${error.message}`);

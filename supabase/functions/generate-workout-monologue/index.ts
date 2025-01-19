@@ -22,7 +22,7 @@ serve(async (req) => {
     console.log('Starting Gemini generation');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-1.5-pro",
     });
 
     const generationConfig = {
@@ -38,16 +38,16 @@ serve(async (req) => {
     Workout: ${wod}
     Notes: ${notes}`;
 
-    const chatSession = model.startChat({
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig,
-      history: [],
     });
 
-    const result = await chatSession.sendMessage(prompt);
+    const response = result.response;
     console.log('Successfully received Gemini response');
     
     return new Response(
-      JSON.stringify({ monologue: result.response.text() }),
+      JSON.stringify({ monologue: response.text() }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,29 +13,13 @@ serve(async (req) => {
   }
 
   try {
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!apiKey) {
       throw new Error('Missing Gemini API key');
     }
 
-    const { dayToModify, modificationPrompt, allWorkouts } = await req.json();
+    const { dayToModify, modificationPrompt, currentWorkout } = await req.json();
     console.log('Received request to modify workout:', { dayToModify, modificationPrompt });
-
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 2048,
-      }
-    });
-
-    const currentWorkout = allWorkouts[dayToModify];
-    if (!currentWorkout) {
-      throw new Error(`No workout found for ${dayToModify}`);
-    }
 
     const prompt = `
 As an expert coach, modify this workout based on the user's request:
@@ -51,13 +36,29 @@ Return a JSON object with the modified workout in this exact format:
     "description": "Brief workout description",
     "warmup": "Modified warmup plan",
     "wod": "Modified workout details",
-    "notes": "Modified coaching notes"
+    "notes": "Modified coaching notes",
+    "strength": "Modified strength focus"
 }
-`;
+
+Ensure you maintain the core purpose of the workout while adapting it according to the user's needs.`;
 
     console.log('Sending prompt to Gemini:', prompt);
 
-    const result = await model.generateContent(prompt);
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-pro",
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      }
+    });
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    });
+
     const response = result.response;
     const text = response.text();
     console.log('Received response from Gemini:', text);
@@ -74,7 +75,7 @@ Return a JSON object with the modified workout in this exact format:
       const modifiedWorkout = JSON.parse(cleanedText);
       console.log('Parsed workout:', modifiedWorkout);
 
-      const requiredFields = ['description', 'warmup', 'wod', 'notes'];
+      const requiredFields = ['description', 'warmup', 'wod', 'notes', 'strength'];
       const isValid = requiredFields.every(field => 
         typeof modifiedWorkout[field] === 'string' && modifiedWorkout[field].length > 0
       );

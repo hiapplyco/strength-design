@@ -28,6 +28,7 @@ export function GenerateWorkoutInput({
   setShowGenerateInput,
 }: GenerateWorkoutInputProps) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherPrompt, setWeatherPrompt] = useState<string>("");
 
   const handleLocationSelect = async (location: { 
     name: string; 
@@ -59,12 +60,18 @@ export function GenerateWorkoutInput({
         location: locationString
       });
 
-      // Update the generate prompt with weather information
-      const weatherPrompt = `${generatePrompt} Consider these weather conditions: ${data.weather.current.temperature_2m}°C, ${data.weather.current.relative_humidity_2m}% humidity, wind speed ${data.weather.current.wind_speed_10m}m/s in ${locationString}.`;
-      setGeneratePrompt(weatherPrompt);
+      // Store weather prompt separately
+      setWeatherPrompt(`Consider these weather conditions: ${data.weather.current.temperature_2m}°C, ${data.weather.current.relative_humidity_2m}% humidity, wind speed ${data.weather.current.wind_speed_10m}m/s in ${locationString}.`);
     } catch (error) {
       console.error('Error fetching weather:', error);
     }
+  };
+
+  const handleGenerateWithWeather = () => {
+    // Combine the user's prompt with weather data only when generating
+    const fullPrompt = weatherPrompt ? `${generatePrompt} ${weatherPrompt}` : generatePrompt;
+    setGeneratePrompt(fullPrompt);
+    handleGenerateWorkout();
   };
 
   return (
@@ -91,7 +98,7 @@ export function GenerateWorkoutInput({
       
       <div className="flex gap-2 sm:gap-4">
         <Button 
-          onClick={handleGenerateWorkout} 
+          onClick={handleGenerateWithWeather} 
           disabled={isGenerating}
           className="flex-1 sm:flex-none border-2 border-primary bg-card text-primary font-bold uppercase tracking-tight transition-colors hover:bg-primary hover:text-primary-foreground disabled:opacity-50 whitespace-nowrap"
         >

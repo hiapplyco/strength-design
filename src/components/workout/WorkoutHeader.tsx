@@ -88,10 +88,15 @@ export function WorkoutHeader({
     try {
       const updates = await modifyWorkout(title, "Make this workout easier", allWorkouts);
       
-      onUpdate({
+      // Convert wod to workout in the updates
+      const convertedUpdates = {
         ...updates,
+        workout: updates.wod,
         strength
-      });
+      };
+      delete convertedUpdates.wod;
+
+      onUpdate(convertedUpdates);
 
       toast({
         title: "Success",

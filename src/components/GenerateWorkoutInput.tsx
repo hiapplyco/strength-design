@@ -60,9 +60,8 @@ export function GenerateWorkoutInput({
       });
 
       // Update the generate prompt with weather information
-      setGeneratePrompt(prev => 
-        `${prev} Consider these weather conditions: ${data.weather.current.temperature_2m}°C, ${data.weather.current.relative_humidity_2m}% humidity, wind speed ${data.weather.current.wind_speed_10m}m/s in ${locationString}.`
-      );
+      const weatherPrompt = `${generatePrompt} Consider these weather conditions: ${data.weather.current.temperature_2m}°C, ${data.weather.current.relative_humidity_2m}% humidity, wind speed ${data.weather.current.wind_speed_10m}m/s in ${locationString}.`;
+      setGeneratePrompt(weatherPrompt);
     } catch (error) {
       console.error('Error fetching weather:', error);
     }

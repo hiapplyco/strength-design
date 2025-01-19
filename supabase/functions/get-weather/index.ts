@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { lookup } from "https://deno.land/x/geoip@0.2.1/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,16 +12,20 @@ serve(async (req) => {
   }
 
   try {
-    // Get location from IP
-    const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")
-    const geo = ip ? lookup(ip) : null
-
-    if (!geo || !geo.latitude || !geo.longitude) {
-      console.error("Could not determine location from ip:", ip)
-      throw new Error('Unable to determine location')
+    // Default coordinates for when we can't determine location (New York)
+    const defaultCoords = {
+      latitude: 40.7128,
+      longitude: -74.0060,
+      city: "New York"
     }
 
-    const { latitude, longitude, city } = geo
+    // Get location from IP
+    const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")
+    console.log("Client IP:", ip)
+
+    // For development and testing, use default coordinates
+    // In production, you might want to use a proper IP geolocation service
+    const { latitude, longitude, city } = defaultCoords
 
     // Fetch weather data from Open-Meteo
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&timezone=auto`

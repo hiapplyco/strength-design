@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { lookup } from "https://deno.land/x/geoip@1.0.1/mod.ts"
+import { lookup } from "https://deno.land/x/geoip@0.2.1/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

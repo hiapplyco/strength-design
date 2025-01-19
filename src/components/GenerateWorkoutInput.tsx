@@ -144,7 +144,7 @@ export function GenerateWorkoutInput({
           placeholder="e.g., 'Focus on Olympic lifts this cycle, with emphasis on technique and progressive loading'"
           value={generatePrompt}
           onChange={(e) => setGeneratePrompt(e.target.value)}
-          className="bg-black text-white placeholder:text-gray-500"
+          className="bg-white text-black placeholder:text-gray-500"
         />
         
         <div className="flex gap-2 sm:gap-4">

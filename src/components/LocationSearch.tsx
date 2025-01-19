@@ -56,7 +56,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="flex-1"
+          className="flex-1 bg-white text-black placeholder:text-gray-500"
         />
         <Button 
           onClick={handleSearch}

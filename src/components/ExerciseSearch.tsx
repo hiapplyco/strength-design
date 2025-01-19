@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { SearchButton } from "./exercise-search/SearchButton";
 import { SearchInput } from "./exercise-search/SearchInput";
 import { SearchResults } from "./exercise-search/SearchResults";
 import type { Exercise } from "./exercise-search/types";
@@ -12,7 +11,6 @@ interface ExerciseSearchProps {
 }
 
 export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }: ExerciseSearchProps) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
@@ -75,7 +73,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
 
   const handleClickOutside = (event: MouseEvent) => {
     if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-      setIsOpen(false);
+      setSearchTerm("");
     }
   };
 
@@ -100,18 +98,14 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
     <div 
       ref={searchRef}
       className={cn(
-        embedded ? "w-full" : "fixed bottom-8 right-8 z-50 transition-all duration-300 ease-in-out",
-        isOpen && !embedded ? "w-96" : embedded ? "w-full" : "w-12",
+        embedded ? "w-full" : "fixed bottom-8 right-8 z-50 transition-all duration-300 ease-in-out w-96",
         className
       )}
     >
       <div className="bg-primary rounded-lg shadow-lg p-4 border-2 border-black">
-        <div className="flex items-center justify-center gap-2">
-          <SearchButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
-          {isOpen && <SearchInput value={searchTerm} onChange={setSearchTerm} />}
-        </div>
+        <SearchInput value={searchTerm} onChange={setSearchTerm} />
 
-        {isOpen && searchTerm && (
+        {searchTerm && (
           <div className="mt-4 max-h-[60vh] overflow-y-auto">
             <SearchResults 
               isLoading={isLoading}

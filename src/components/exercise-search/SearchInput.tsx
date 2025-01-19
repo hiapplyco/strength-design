@@ -11,7 +11,7 @@ export const SearchInput = ({ value, onChange }: SearchInputProps) => {
       placeholder="Search for barbells, dumbbells, kettlebells, or other training equipment..."
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-black text-white placeholder:text-gray-500"
+      className="bg-black text-white placeholder:text-gray-500"
     />
   );
 };

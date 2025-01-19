@@ -2,10 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Check, X, CloudSun, Dumbbell, Send } from "lucide-react";
 import { LocationSearch } from "./LocationSearch";
-import { ExerciseSearch } from "./ExerciseSearch";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "./exercise-search/types";
+import { SearchInput } from "./exercise-search/SearchInput";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -32,6 +32,7 @@ export function GenerateWorkoutInput({
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLocationSelect = async (location: { 
     name: string; 
@@ -118,11 +119,7 @@ export function GenerateWorkoutInput({
           <Dumbbell className="h-5 w-5" />
           <h3 className="font-oswald text-lg uppercase">Exercise Selection</h3>
         </div>
-        <ExerciseSearch 
-          onExerciseSelect={handleExerciseSelect} 
-          embedded={true}
-          className="mb-4"
-        />
+        <SearchInput value={searchTerm} onChange={setSearchTerm} />
 
         {selectedExercises.length > 0 && (
           <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in">

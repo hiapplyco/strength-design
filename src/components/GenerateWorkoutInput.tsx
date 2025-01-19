@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Check, X, CloudSun, Dumbbell, Send } from "lucide-react";
+import { Loader2, Check, X, CloudSun, Dumbbell, Send, Activity } from "lucide-react";
 import { LocationSearch } from "./LocationSearch";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "./exercise-search/types";
 import { ExerciseSearch } from "./ExerciseSearch";
-import { SearchInput } from "./exercise-search/SearchInput";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -33,6 +32,7 @@ export function GenerateWorkoutInput({
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
+  const [fitnessLevel, setFitnessLevel] = useState<string>("");
 
   const handleLocationSelect = async (location: { 
     name: string; 
@@ -81,7 +81,11 @@ export function GenerateWorkoutInput({
       ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
       : "";
     
-    const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}`;
+    const fitnessPrompt = fitnessLevel 
+      ? ` Consider this fitness profile: ${fitnessLevel}.`
+      : "";
+    
+    const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}${fitnessPrompt}`;
     setGeneratePrompt(fullPrompt);
     handleGenerateWorkout();
   };
@@ -133,6 +137,25 @@ export function GenerateWorkoutInput({
                 </span>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-primary">
+          <Activity className="h-5 w-5" />
+          <h3 className="font-oswald text-lg uppercase">Fitness Level</h3>
+        </div>
+        <Input
+          placeholder="e.g., 'Intermediate, RX weights, moderate fatigue from yesterday's session'"
+          value={fitnessLevel}
+          onChange={(e) => setFitnessLevel(e.target.value)}
+          className="bg-white text-black placeholder:text-gray-500"
+        />
+        {fitnessLevel && (
+          <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in">
+            <p className="font-semibold text-primary">Fitness Profile:</p>
+            <p>{fitnessLevel}</p>
           </div>
         )}
       </div>

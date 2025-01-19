@@ -269,11 +269,18 @@ export function GenerateWorkoutInput({
             )}
           </Button>
           <Button 
-            onClick={() => setShowGenerateInput(false)}
-            variant="destructive"
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => {
+              setGeneratePrompt("");
+              setWeatherData(null);
+              setWeatherPrompt("");
+              setSelectedExercises([]);
+              setFitnessLevel("");
+            }}
+            variant="outline"
+            className="hover:bg-destructive/10"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 mr-2" />
+            Clear All
           </Button>
         </div>
       </div>

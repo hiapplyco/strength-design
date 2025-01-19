@@ -135,9 +135,9 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
                   </TableCell>
                   <TableCell>
                     <Button
-                      variant="ghost"
+                      variant="default"
                       onClick={() => onExerciseSelect?.(exercise)}
-                      className="w-full hover:bg-primary/20"
+                      className="w-full bg-primary hover:bg-primary/90"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add

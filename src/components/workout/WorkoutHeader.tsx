@@ -14,7 +14,7 @@ interface WorkoutHeaderProps {
   workout?: string;
   notes?: string;
   strength?: string;
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes?: string; strength: string; }>;
+  allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>;
   onUpdate?: (updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => void;
 }
 
@@ -88,13 +88,12 @@ export function WorkoutHeader({
     try {
       const updates = await modifyWorkout(title, "Make this workout easier", allWorkouts);
       
-      // Convert wod to workout in the updates
+      // Convert workout to workout in the updates
       const convertedUpdates = {
         ...updates,
-        workout: updates.wod,
+        workout: updates.workout,
         strength: strength // Preserve strength when modifying
       };
-      delete convertedUpdates.wod;
 
       onUpdate(convertedUpdates);
 

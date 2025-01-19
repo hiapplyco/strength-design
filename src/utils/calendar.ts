@@ -5,12 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 export const exportToCalendar = async (
   title: string,
   warmup: string,
-  wod: string,
+  workout: string,
   notes: string,
   toast: ReturnType<typeof useToast>["toast"]
 ) => {
   try {
-    const eventContent = `Warmup:\n${sanitizeText(warmup)}\n\nWOD:\n${sanitizeText(wod)}\n\nNotes:\n${sanitizeText(notes)}`;
+    const eventContent = `Warmup:\n${sanitizeText(warmup)}\n\nWorkout:\n${sanitizeText(workout)}\n\nNotes:\n${sanitizeText(notes)}`;
     
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);

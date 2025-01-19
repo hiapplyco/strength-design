@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
 import { exportToCalendar } from "@/utils/calendar";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface WorkoutDay {
   description: string;
@@ -34,6 +35,18 @@ export const WorkoutDisplay = ({
   audioRef
 }: WorkoutDisplayProps) => {
   const { toast } = useToast();
+  const [localWorkouts, setLocalWorkouts] = useState<WeeklyWorkouts>(workouts);
+
+  const handleUpdate = (day: string, updates: { warmup: string; wod: string; notes: string; strength: string; description?: string; }) => {
+    setLocalWorkouts(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        ...updates,
+        description: updates.description || prev[day].description
+      }
+    }));
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
@@ -48,7 +61,7 @@ export const WorkoutDisplay = ({
       <h1 className="text-4xl font-oswald text-primary mb-8 italic">Your Weekly Workout Plan</h1>
       
       <div className="grid gap-8">
-        {Object.entries(workouts).map(([day, workout]) => (
+        {Object.entries(localWorkouts).map(([day, workout]) => (
           <div key={day} className="bg-card rounded-xl">
             <WorkoutHeader
               title={day}
@@ -67,6 +80,8 @@ export const WorkoutDisplay = ({
               wod={workout.wod}
               notes={workout.notes}
               strength={workout.strength}
+              allWorkouts={localWorkouts}
+              onUpdate={(updates) => handleUpdate(day, updates)}
             />
             
             <div className="p-6 space-y-4">

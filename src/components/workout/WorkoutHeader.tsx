@@ -1,7 +1,9 @@
 import { CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Loader2, Volume2, Share2 } from "lucide-react";
+import { CalendarDays, Loader2, Volume2, Share2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { modifyWorkout } from "@/utils/workout";
 
 interface WorkoutHeaderProps {
   title: string;
@@ -13,6 +15,8 @@ interface WorkoutHeaderProps {
   wod?: string;
   notes?: string;
   strength?: string;
+  allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; strength: string; }>;
+  onUpdate?: (updates: { warmup: string; wod: string; notes: string; strength: string; description?: string; }) => void;
 }
 
 export function WorkoutHeader({ 
@@ -24,9 +28,12 @@ export function WorkoutHeader({
   warmup = "",
   wod = "",
   notes = "",
-  strength = ""
+  strength = "",
+  allWorkouts,
+  onUpdate
 }: WorkoutHeaderProps) {
   const { toast } = useToast();
+  const [isModifying, setIsModifying] = useState(false);
 
   const formatWorkoutText = () => {
     const sections = [
@@ -54,7 +61,6 @@ export function WorkoutHeader({
           description: "Workout shared successfully",
         });
       } else {
-        // Fallback for browsers that don't support Web Share API
         await navigator.clipboard.writeText(workoutText);
         toast({
           title: "Copied to clipboard",
@@ -68,12 +74,39 @@ export function WorkoutHeader({
         description: "Unable to share the workout. The details have been copied to your clipboard instead.",
         variant: "destructive",
       });
-      // Fallback to clipboard
       try {
         await navigator.clipboard.writeText(workoutText);
       } catch (clipboardError) {
         console.error('Clipboard fallback failed:', clipboardError);
       }
+    }
+  };
+
+  const handleModify = async () => {
+    if (!allWorkouts || !onUpdate) return;
+    
+    setIsModifying(true);
+    try {
+      const updates = await modifyWorkout(title, "Make this workout easier", allWorkouts);
+      
+      onUpdate({
+        ...updates,
+        strength // Preserve strength when modifying
+      });
+
+      toast({
+        title: "Success",
+        description: `${title}'s workout has been modified`,
+      });
+    } catch (error) {
+      console.error('Error modifying workout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to modify workout",
+        variant: "destructive",
+      });
+    } finally {
+      setIsModifying(false);
     }
   };
 
@@ -116,6 +149,21 @@ export function WorkoutHeader({
               <CalendarDays className="h-4 w-4" />
             )}
           </Button>
+          {allWorkouts && onUpdate && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full text-primary"
+              onClick={handleModify}
+              disabled={isModifying}
+            >
+              {isModifying ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Edit className="h-4 w-4" />
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </CardHeader>

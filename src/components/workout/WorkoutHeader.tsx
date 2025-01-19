@@ -15,7 +15,7 @@ interface WorkoutHeaderProps {
   wod?: string;
   notes?: string;
   strength?: string;
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; strength: string; }>;
+  allWorkouts?: Record<string, { warmup: string; wod: string; notes?: string; strength: string; }>;
   onUpdate?: (updates: { warmup: string; wod: string; notes: string; strength: string; description?: string; }) => void;
 }
 

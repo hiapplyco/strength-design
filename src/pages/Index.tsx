@@ -80,6 +80,7 @@ const Index = () => {
         resetWorkouts={resetWorkouts}
         isSpeaking={isSpeaking}
         isExporting={isExporting}
+        setIsExporting={setIsExporting}
         handleSpeakWorkout={handleSpeakWorkout}
         audioRef={audioRef}
       />

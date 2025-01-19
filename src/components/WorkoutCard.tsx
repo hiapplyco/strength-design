@@ -3,29 +3,25 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { WorkoutSection } from "./workout/WorkoutSection";
 import { WorkoutHeader } from "./workout/WorkoutHeader";
-import { WorkoutModifier } from "./workout/WorkoutModifier";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { useWorkoutState } from "@/hooks/useWorkoutState";
 import { exportToCalendar } from "@/utils/calendar";
-import { modifyWorkout } from "@/utils/workout";
 
 interface WorkoutCardProps {
   title: string;
   description: string;
   duration: string;
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; strength: string; }>;
-  onUpdate?: (updates: { warmup: string; wod: string; notes: string; strength: string; description?: string; }) => void;
+  allWorkouts?: Record<string, { warmup: string; wod: string; notes?: string; strength: string; }>;
+  onUpdate?: (updates: { warmup: string; wod: string; notes?: string; strength: string; description?: string; }) => void;
 }
 
 export function WorkoutCard({ title, description, duration, allWorkouts, onUpdate }: WorkoutCardProps) {
   const { toast } = useToast();
-  const [isModifying, setIsModifying] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [modificationPrompt, setModificationPrompt] = useState("");
   const [currentDescription, setCurrentDescription] = useState(description);
   
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
-  const { warmup, wod, notes, strength, setWarmup, setWod, setNotes, setStrength, setState } = useWorkoutState(title, allWorkouts);
+  const { warmup, wod, notes, strength, setState } = useWorkoutState(title, allWorkouts);
 
   const formatWorkoutText = () => {
     const sections = [
@@ -41,57 +37,9 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const handleExportCalendar = async () => {
     try {
       setIsExporting(true);
-      await exportToCalendar(title, warmup, wod, notes, toast);
+      await exportToCalendar(title, warmup, wod, notes || '', toast);
     } finally {
       setIsExporting(false);
-    }
-  };
-
-  const handleModifyWorkout = async () => {
-    if (!modificationPrompt.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter how you'd like to modify the workout",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsModifying(true);
-    try {
-      const updates = await modifyWorkout(title, modificationPrompt, allWorkouts);
-      
-      setState({
-        ...updates,
-        strength: strength // Preserve strength when modifying
-      });
-      setModificationPrompt("");
-      
-      if (updates.description) {
-        setCurrentDescription(updates.description);
-      }
-      
-      if (onUpdate) {
-        onUpdate({
-          ...updates,
-          strength: strength,
-          description: updates.description
-        });
-      }
-
-      toast({
-        title: "Success",
-        description: `${title}'s workout has been modified`,
-      });
-    } catch (error) {
-      console.error('Error modifying workout:', error);
-      toast({
-        title: "Error",
-        description: "Failed to modify workout",
-        variant: "destructive",
-      });
-    } finally {
-      setIsModifying(false);
     }
   };
 
@@ -110,6 +58,25 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           wod={wod}
           notes={notes}
           strength={strength}
+          allWorkouts={allWorkouts}
+          onUpdate={(updates) => {
+            setState({
+              ...updates,
+              strength: strength // Preserve strength when modifying
+            });
+            
+            if (updates.description) {
+              setCurrentDescription(updates.description);
+            }
+            
+            if (onUpdate) {
+              onUpdate({
+                ...updates,
+                strength: strength,
+                description: updates.description
+              });
+            }
+          }}
         />
         
         <CardContent className="space-y-4 p-6">
@@ -125,14 +92,6 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
             value={formatWorkoutText()}
             onChange={() => {}}
             minHeight="200px"
-          />
-          
-          <WorkoutModifier
-            title={title}
-            modificationPrompt={modificationPrompt}
-            isModifying={isModifying}
-            onModificationPromptChange={setModificationPrompt}
-            onModify={handleModifyWorkout}
           />
         </CardContent>
       </Card>

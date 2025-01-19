@@ -3,13 +3,13 @@ import { useState, useEffect } from "react";
 interface WorkoutState {
   warmup: string;
   wod: string;
-  notes: string;
+  notes?: string;
   strength: string;
 }
 
 export function useWorkoutState(
   title: string,
-  allWorkouts?: Record<string, { warmup: string; wod: string; notes: string; strength: string; }>
+  allWorkouts?: Record<string, { warmup: string; wod: string; notes?: string; strength: string; }>
 ) {
   const [state, setState] = useState<WorkoutState>({
     warmup: "",

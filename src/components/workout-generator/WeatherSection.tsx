@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CloudSun } from "lucide-react";
 import { LocationSearch } from "../LocationSearch";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WeatherData {
   temperature: number;

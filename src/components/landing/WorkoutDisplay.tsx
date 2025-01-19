@@ -36,6 +36,7 @@ export const WorkoutDisplay = ({
 }: WorkoutDisplayProps) => {
   const { toast } = useToast();
   const [localWorkouts, setLocalWorkouts] = useState<WeeklyWorkouts>(workouts);
+  const [speakingDay, setSpeakingDay] = useState<string | null>(null);
 
   const handleUpdate = (day: string, updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => {
     setLocalWorkouts(prev => ({
@@ -46,6 +47,11 @@ export const WorkoutDisplay = ({
         description: updates.description || prev[day].description
       }
     }));
+  };
+
+  const handleSpeak = (day: string, workout: WorkoutDay) => {
+    setSpeakingDay(day);
+    handleSpeakWorkout(day, workouts, workout.warmup, workout.workout, workout.notes || '');
   };
 
   return (
@@ -65,9 +71,9 @@ export const WorkoutDisplay = ({
           <div key={day} className="bg-card rounded-xl">
             <WorkoutHeader
               title={day}
-              isSpeaking={isSpeaking}
+              isSpeaking={isSpeaking && speakingDay === day}
               isExporting={isExporting}
-              onSpeak={() => handleSpeakWorkout(day, workouts, workout.warmup, workout.workout, workout.notes || '')}
+              onSpeak={() => handleSpeak(day, workout)}
               onExport={async () => {
                 try {
                   setIsExporting(true);

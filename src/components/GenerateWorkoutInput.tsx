@@ -70,7 +70,24 @@ export function GenerateWorkoutInput({
         weatherCode: data.weather.current.weather_code
       });
 
-      setWeatherPrompt(`Consider these weather conditions: ${data.weather.current.temperature_2m}°C (${(data.weather.current.temperature_2m * 9/5 + 32).toFixed(1)}°F), ${data.weather.current.relative_humidity_2m}% humidity, wind speed ${data.weather.current.wind_speed_10m}m/s in ${locationString}.`);
+      const weatherDesc = getWeatherDescription(data.weather.current.weather_code);
+      setWeatherPrompt(
+        `Consider these detailed weather conditions: 
+        Location: ${locationString}
+        Temperature: ${data.weather.current.temperature_2m}°C (${(data.weather.current.temperature_2m * 9/5 + 32).toFixed(1)}°F)
+        Feels Like: ${data.weather.current.apparent_temperature}°C (${(data.weather.current.apparent_temperature * 9/5 + 32).toFixed(1)}°F)
+        Humidity: ${data.weather.current.relative_humidity_2m}%
+        Wind Speed: ${data.weather.current.wind_speed_10m} m/s (${(data.weather.current.wind_speed_10m * 2.237).toFixed(1)} mph)
+        Precipitation: ${data.weather.current.precipitation} mm
+        Weather Conditions: ${weatherDesc}
+        
+        Please adjust the workout accordingly, considering factors like:
+        - Temperature impact on warm-up duration and intensity
+        - Humidity effects on rest periods and hydration needs
+        - Wind considerations for outdoor movements
+        - Precipitation adaptations if outdoor work is planned
+        - Overall safety modifications based on weather conditions`
+      );
     } catch (error) {
       console.error('Error fetching weather:', error);
     }

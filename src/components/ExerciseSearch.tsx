@@ -15,9 +15,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
-  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -39,29 +37,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   }, []);
 
   useEffect(() => {
-    if (!embedded) {
-      const handleScroll = () => {
-        const currentScrollY = window.scrollY;
-        const isScrollingDown = currentScrollY > lastScrollY.current;
-        const isNearBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 100;
-
-        if (isNearBottom || (isScrollingDown && currentScrollY > 200)) {
-          setIsVisible(false);
-        } else {
-          setIsVisible(true);
-        }
-
-        lastScrollY.current = currentScrollY;
-      };
-
-      window.addEventListener('scroll', handleScroll, { passive: true });
-      return () => window.removeEventListener('scroll', handleScroll);
-    }
-  }, [embedded]);
-
-  useEffect(() => {
     if (searchTerm.trim()) {
-      setIsLoading(true);
       const term = searchTerm.toLowerCase();
       const results = exercises.filter(exercise => {
         const nameMatch = exercise.name.toLowerCase().includes(term);
@@ -71,7 +47,6 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
         return nameMatch || instructionsMatch;
       });
       setFilteredExercises(results);
-      setIsLoading(false);
     } else {
       setFilteredExercises([]);
     }
@@ -98,30 +73,26 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
       .trim();
   };
 
-  if (!isVisible && !embedded) return null;
-
   return (
     <div 
       ref={searchRef}
       className={cn(
-        embedded ? "w-full" : "fixed bottom-8 right-8 z-50 transition-all duration-300 ease-in-out w-96",
+        "w-full",
         className
       )}
     >
-      <div className="bg-black rounded-lg shadow-lg p-4">
-        <SearchInput value={searchTerm} onChange={setSearchTerm} />
+      <SearchInput value={searchTerm} onChange={setSearchTerm} />
 
-        {searchTerm && (
-          <div className="mt-4 max-h-[60vh] overflow-y-auto">
-            <SearchResults 
-              isLoading={isLoading}
-              exercises={filteredExercises}
-              sanitizeText={sanitizeText}
-              onExerciseSelect={onExerciseSelect}
-            />
-          </div>
-        )}
-      </div>
+      {searchTerm && (
+        <div className="mt-4 max-h-[60vh] overflow-y-auto">
+          <SearchResults 
+            isLoading={isLoading}
+            exercises={filteredExercises}
+            sanitizeText={sanitizeText}
+            onExerciseSelect={onExerciseSelect}
+          />
+        </div>
+      )}
     </div>
   );
 };

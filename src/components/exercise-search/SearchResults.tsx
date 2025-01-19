@@ -11,7 +11,7 @@ interface SearchResultsProps {
 
 export const SearchResults = ({ isLoading, exercises, sanitizeText, onExerciseSelect }: SearchResultsProps) => {
   if (isLoading) {
-    return <p className="text-center text-primary-foreground">Loading...</p>;
+    return <p className="text-center text-primary-foreground">Loading exercises...</p>;
   }
 
   if (exercises.length === 0) {

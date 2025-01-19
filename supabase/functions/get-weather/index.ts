@@ -1,69 +1,57 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Default coordinates for when we can't determine location (New York)
-    const defaultCoords = {
-      latitude: 40.7128,
-      longitude: -74.0060,
-      city: "New York"
+    const { query, latitude, longitude } = await req.json();
+
+    if (query) {
+      // Search for location using Geocoding API
+      const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
+      const geoResponse = await fetch(geocodingUrl);
+      const geoData = await geoResponse.json();
+      
+      return new Response(JSON.stringify(geoData), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Get location from IP
-    const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")
-    console.log("Client IP:", ip)
-
-    // For development and testing, use default coordinates
-    // In production, you might want to use a proper IP geolocation service
-    const { latitude, longitude, city } = defaultCoords
+    if (!latitude || !longitude) {
+      throw new Error('Latitude and longitude are required for weather data');
+    }
 
     // Fetch weather data from Open-Meteo
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&timezone=auto`
-    const weatherResponse = await fetch(weatherUrl)
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&timezone=auto`;
+    const weatherResponse = await fetch(weatherUrl);
+    const weatherData = await weatherResponse.json();
 
-    if (!weatherResponse.ok) {
-      console.error('Open-Meteo API error:', await weatherResponse.text())
-      throw new Error('Failed to fetch weather data')
-    }
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
-    const weatherData = await weatherResponse.json()
-
-    // Get current date and day
-    const currentDate = new Date()
-    const currentDay = currentDate.toLocaleDateString('en-US', { weekday: 'long' })
-
-    const responseData = {
-      city,
-      weather: weatherData.current,
-      day: currentDay,
-    }
-
-    console.log('Weather data retrieved successfully:', responseData)
-    
-    return new Response(JSON.stringify(responseData), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    })
-
+    return new Response(JSON.stringify({
+      weather: weatherData,
+      currentDay: currentDate
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    console.error('Error in weather edge function:', error)
-    return new Response(
-      JSON.stringify({
-        error: error.message,
-        details: error instanceof Error ? error.stack : 'Unknown error'
-      }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    )
+    console.error('Error in get-weather function:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
-})
+});

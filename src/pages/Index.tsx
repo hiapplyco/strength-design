@@ -15,7 +15,7 @@ import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 interface WorkoutDay {
   description: string;
   warmup: string;
-  wod: string;
+  workout: string;
   strength: string;
   notes?: string;
 }

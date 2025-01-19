@@ -12,8 +12,8 @@ import { ArrowLeft } from "lucide-react";
 interface WorkoutDetails {
   [key: string]: {
     warmup: string;
-    wod: string;
-    notes: string;
+    workout: string;
+    notes?: string;
     strength: string;
     description?: string;
   };

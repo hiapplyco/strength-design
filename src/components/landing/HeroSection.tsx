@@ -50,6 +50,32 @@ export const HeroSection = ({
         </div>
       )}
 
+      {/* New Free Workout Generation Section */}
+      <div className="w-full max-w-3xl bg-primary p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300">
+        <div className="text-center mb-6">
+          <h2 className="text-4xl font-oswald text-white mb-2 uppercase tracking-wider">
+            🎉 Generate Your First Week FREE! 🎉
+          </h2>
+          <p className="text-white text-xl">
+            Create a complete week of personalized workouts instantly! Share with friends, export to calendar, or have our AI coach guide you through each session.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-white mb-6">
+          <div className="bg-black/20 p-4 rounded-lg">
+            <h3 className="font-oswald text-xl mb-2">Monday-Wednesday</h3>
+            <p>Strength & Skill Focus</p>
+          </div>
+          <div className="bg-black/20 p-4 rounded-lg">
+            <h3 className="font-oswald text-xl mb-2">Thursday-Friday</h3>
+            <p>Conditioning & Power</p>
+          </div>
+          <div className="bg-black/20 p-4 rounded-lg">
+            <h3 className="font-oswald text-xl mb-2">Weekend</h3>
+            <p>Recovery & Mobility</p>
+          </div>
+        </div>
+      </div>
+
       {/* Generate Search Section */}
       <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
         <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>

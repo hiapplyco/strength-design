@@ -7,15 +7,86 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { triggerConfetti } from "@/utils/confetti";
 
 export const TestimonialsSection = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isUnlimitedDialogOpen, setIsUnlimitedDialogOpen] = useState(false);
+  const [isPersonalizedDialogOpen, setIsPersonalizedDialogOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const { toast } = useToast();
 
-  const handleSuccessfulSubscribe = () => {
-    setIsDialogOpen(false);
+  const handleSubmit = async (subscriptionType: string) => {
+    if (!name.trim() || !email.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("contact_submissions")
+        .insert([{ name, email, subscription_type: subscriptionType }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Thank you for your interest. We'll reach out to you shortly.",
+      });
+      triggerConfetti();
+      
+      // Reset form and close dialog
+      setName("");
+      setEmail("");
+      if (subscriptionType === "Unlimited") {
+        setIsUnlimitedDialogOpen(false);
+      } else {
+        setIsPersonalizedDialogOpen(false);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to submit form. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
+
+  const ContactForm = ({ subscriptionType }: { subscriptionType: string }) => (
+    <div className="space-y-4">
+      <Input
+        type="text"
+        placeholder="Your Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="bg-white"
+      />
+      <Input
+        type="email"
+        placeholder="Your Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="bg-white"
+      />
+      <Button 
+        className="w-full" 
+        onClick={() => handleSubmit(subscriptionType)}
+      >
+        Submit
+      </Button>
+      <p className="text-sm text-center text-gray-600">
+        We'll reach out to you shortly to discuss how we can help achieve your fitness goals.
+      </p>
+    </div>
+  );
 
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
@@ -41,7 +112,7 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialog open={isUnlimitedDialogOpen} onOpenChange={setIsUnlimitedDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button className="w-full" size="lg">Choose Unlimited</Button>
             </AlertDialogTrigger>
@@ -50,10 +121,7 @@ export const TestimonialsSection = () => {
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Let's Level Up Your Training Program
                 </AlertDialogTitle>
-                <p className="mb-6">
-                  Subscribe to discuss how we can enhance your program with our Strength Design expertise.
-                </p>
-                <EmailSubscriptionForm onSuccessfulSubscribe={handleSuccessfulSubscribe} />
+                <ContactForm subscriptionType="Unlimited" />
               </AlertDialogHeader>
             </AlertDialogContent>
           </AlertDialog>
@@ -76,7 +144,7 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <AlertDialog>
+          <AlertDialog open={isPersonalizedDialogOpen} onOpenChange={setIsPersonalizedDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button className="w-full" size="lg">Go Personalized</Button>
             </AlertDialogTrigger>
@@ -85,10 +153,7 @@ export const TestimonialsSection = () => {
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Transform Your Training Experience
                 </AlertDialogTitle>
-                <p className="mb-6">
-                  Subscribe to learn how our personalized dashboard can revolutionize your strength program.
-                </p>
-                <EmailSubscriptionForm onSuccessfulSubscribe={handleSuccessfulSubscribe} />
+                <ContactForm subscriptionType="Personalized" />
               </AlertDialogHeader>
             </AlertDialogContent>
           </AlertDialog>

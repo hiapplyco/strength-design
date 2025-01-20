@@ -48,6 +48,30 @@ export type Database = {
           },
         ]
       }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          subscription_type: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          subscription_type: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          subscription_type?: string
+        }
+        Relationships: []
+      }
       email_subscriptions: {
         Row: {
           created_at: string

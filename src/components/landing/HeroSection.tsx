@@ -29,10 +29,10 @@ export const HeroSection = ({
       </div>
       
       {/* Email Subscription Form */}
-      <div className="w-full max-w-3xl mt-8">
+      <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">
         <div className="text-center mb-4">
           <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
-          <p className="text-muted-foreground">Subscribe to receive updates about our latest features and releases</p>
+          <p className="text-card-foreground">Subscribe to receive updates about our latest features and releases</p>
         </div>
         <EmailSubscriptionForm />
       </div>

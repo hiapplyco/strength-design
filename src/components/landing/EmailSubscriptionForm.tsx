@@ -53,9 +53,13 @@ export const EmailSubscriptionForm = () => {
         placeholder="Enter your email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="flex-1"
+        className="flex-1 bg-white text-black placeholder:text-gray-500"
       />
-      <Button type="submit" disabled={isSubmitting}>
+      <Button 
+        type="submit" 
+        disabled={isSubmitting}
+        className="bg-primary text-primary-foreground hover:bg-primary/90"
+      >
         {isSubmitting ? "Subscribing..." : "Subscribe"}
       </Button>
     </form>

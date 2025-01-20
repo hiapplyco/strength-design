@@ -111,12 +111,9 @@ export function GenerateWorkoutInput({
           onExerciseSelect={handleExerciseSelect}
         />
 
-        <div className="flex items-center">
-          <h3 className="text-lg font-semibold text-accent">Your Fitness Profile</h3>
-          {renderTooltip(
-            "Share your fitness level and experience to receive personalized workouts that match your capabilities."
-          )}
-        </div>
+        {renderTooltip(
+          "Share your fitness level and experience to receive personalized workouts that match your capabilities."
+        )}
         <FitnessSection
           fitnessLevel={fitnessLevel}
           onFitnessLevelChange={setFitnessLevel}

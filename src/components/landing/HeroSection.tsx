@@ -1,4 +1,5 @@
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
+import { Button } from "@/components/ui/button";
 
 interface HeroSectionProps {
   generatePrompt: string;
@@ -17,18 +18,18 @@ export const HeroSection = ({
 }: HeroSectionProps) => {
   return (
     <section className="flex flex-col items-center justify-center space-y-8 pt-12 pb-20">
-      <div className="space-y-2">
-        <h1 className="text-6xl md:text-7xl font-oswald uppercase tracking-tight text-primary text-center max-w-4xl italic">
-          Build Stronger, Train Smarter
+      <div className="space-y-4 text-center">
+        <h1 className="text-6xl md:text-7xl font-oswald text-primary tracking-tight max-w-4xl">
+          Design Smarter Strength Programs From Anywhere
         </h1>
-        <p className="text-2xl font-oswald text-destructive text-center italic">
-          with A.Y.S
+        <p className="text-xl md:text-2xl text-destructive max-w-2xl mx-auto">
+          Empower your fitness business and members with science-backed, data-driven workouts tailored for every goal
         </p>
       </div>
-      <p className="text-xl md:text-2xl text-destructive font-semibold text-center max-w-2xl">
-        Empower your athletes with collegiate-level training tools that build consistency, adaptability, and growth.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-3xl">
+      
+      {/* Preserve Generate Search Section */}
+      <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">
+        <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
         <GenerateWorkoutInput
           generatePrompt={generatePrompt}
           setGeneratePrompt={setGeneratePrompt}
@@ -36,6 +37,15 @@ export const HeroSection = ({
           isGenerating={isGenerating}
           setShowGenerateInput={setShowGenerateInput}
         />
+      </div>
+
+      <div className="flex gap-4 mt-8">
+        <Button size="lg" className="bg-primary text-white">
+          Start Your Free Trial
+        </Button>
+        <Button size="lg" variant="outline">
+          View All Features
+        </Button>
       </div>
     </section>
   );

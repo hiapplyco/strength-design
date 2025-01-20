@@ -1,32 +1,32 @@
-import { Users, BarChart, Globe } from "lucide-react";
+import { Users, Building2, PersonStanding } from "lucide-react";
 
 export const SolutionsSection = () => {
   return (
     <section className="py-20">
       <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4 italic">
-          The Ultimate Platform for Coaches
+        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
+          Designed for Trainers, Coaches and Enthusiasts Alike
         </h2>
         <p className="text-lg text-destructive">
-          Apply Your Strength combines the science of periodization with the flexibility of a modern coaching platform.
+          Our platform helps you deliver personalized strength programs anywhere, anytime
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
         <div className="bg-card p-8 rounded-xl space-y-4">
           <Users className="w-12 h-12 text-primary" />
-          <h3 className="text-2xl font-oswald text-primary italic">Connect with Athletes</h3>
-          <p className="text-white">Real-time chat, form review, and leaderboards to engage clients.</p>
+          <h3 className="text-2xl font-oswald text-primary">Coaches & Trainers</h3>
+          <p className="text-white">Efficiently manage multiple clients, analyze progress, and adapt workouts in real-time.</p>
         </div>
         <div className="bg-card p-8 rounded-xl space-y-4">
-          <BarChart className="w-12 h-12 text-primary" />
-          <h3 className="text-2xl font-oswald text-primary italic">Build Your Program</h3>
-          <p className="text-white">Design scalable training plans and save time with reusable templates.</p>
+          <Building2 className="w-12 h-12 text-primary" />
+          <h3 className="text-2xl font-oswald text-primary">Group Fitness & Gyms</h3>
+          <p className="text-white">Scale personalized programs to all of your participants, providing dynamic dashboards and progress tracking.</p>
         </div>
         <div className="bg-card p-8 rounded-xl space-y-4">
-          <Globe className="w-12 h-12 text-primary" />
-          <h3 className="text-2xl font-oswald text-primary italic">Grow Anywhere</h3>
-          <p className="text-white">Sell your programs online or coach remotely from anywhere in the world.</p>
+          <PersonStanding className="w-12 h-12 text-primary" />
+          <h3 className="text-2xl font-oswald text-primary">Fitness Enthusiasts</h3>
+          <p className="text-white">Take the guesswork out of training with expertly crafted plans tailored to your goals.</p>
         </div>
       </div>
     </section>

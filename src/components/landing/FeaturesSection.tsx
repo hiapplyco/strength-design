@@ -1,32 +1,37 @@
-import { GraduationCap, Trophy, BookOpen } from "lucide-react";
+import { BarChart, Brain, Users, Scale } from "lucide-react";
 
 export const FeaturesSection = () => {
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
       <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4 italic">
-          Train Smarter, Not Harder
+        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
+          Why Strength Design
         </h2>
         <p className="text-lg text-destructive">
-          From customized programming to tracking progress, Apply Your Strength is the toolset you need.
+          Combine cutting-edge exercise science with intuitive software to build programs your members will love
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
         <div className="text-center space-y-4">
-          <GraduationCap className="w-16 h-16 text-primary mx-auto" />
-          <h3 className="text-2xl font-oswald text-primary italic">Adaptive Programming</h3>
-          <p className="text-white">Precision-crafted plans tailored to your athletes' goals.</p>
+          <BarChart className="w-16 h-16 text-primary mx-auto" />
+          <h3 className="text-2xl font-oswald text-primary">Data-Driven Programming</h3>
+          <p className="text-white">Leverage advanced algorithms and real-time metrics to optimize strength gains.</p>
         </div>
         <div className="text-center space-y-4">
-          <Trophy className="w-16 h-16 text-primary mx-auto" />
-          <h3 className="text-2xl font-oswald text-primary italic">Performance Analytics</h3>
-          <p className="text-white">Data-driven insights to drive smarter decisions.</p>
+          <Brain className="w-16 h-16 text-primary mx-auto" />
+          <h3 className="text-2xl font-oswald text-primary">Science-Backed Methods</h3>
+          <p className="text-white">Every routine is rooted in the latest research on exercise physiology and biomechanics.</p>
         </div>
         <div className="text-center space-y-4">
-          <BookOpen className="w-16 h-16 text-primary mx-auto" />
-          <h3 className="text-2xl font-oswald text-primary italic">Strategic Progression</h3>
-          <p className="text-white">Build lasting results through structured periodization.</p>
+          <Users className="w-16 h-16 text-primary mx-auto" />
+          <h3 className="text-2xl font-oswald text-primary">Customizable Workouts</h3>
+          <p className="text-white">Craft individualized programs for different fitness levels from beginners to elite athletes.</p>
+        </div>
+        <div className="text-center space-y-4">
+          <Scale className="w-16 h-16 text-primary mx-auto" />
+          <h3 className="text-2xl font-oswald text-primary">Scalable Solutions</h3>
+          <p className="text-white">Easily expand your programs to serve entire gyms, teams, or online communities.</p>
         </div>
       </div>
     </section>

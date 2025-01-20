@@ -41,7 +41,7 @@ export const HeroSection = ({
       
       {/* Email Subscription Form */}
       {showSubscription && (
-        <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">
+        <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
           <div className="text-center mb-4">
             <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
             <p className="text-card-foreground">Subscribe to receive updates about our latest features and releases</p>
@@ -51,7 +51,7 @@ export const HeroSection = ({
       )}
 
       {/* Generate Search Section */}
-      <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">
+      <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
         <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
         <GenerateWorkoutInput
           generatePrompt={generatePrompt}

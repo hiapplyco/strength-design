@@ -76,10 +76,10 @@ export function GenerateWorkoutInput({
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="inline-flex items-center">
-            <HelpCircle className="h-4 w-4 text-accent ml-2" />
+            <HelpCircle className="h-4 w-4 text-accent ml-1" />
           </div>
         </TooltipTrigger>
-        <TooltipContent side="right" className="max-w-xs bg-[#D4B96D] text-black">
+        <TooltipContent side="bottom" align="end" className="max-w-xs bg-[#D4B96D] text-black">
           <p>{content}</p>
         </TooltipContent>
       </Tooltip>
@@ -90,7 +90,7 @@ export function GenerateWorkoutInput({
     <div className="w-full max-w-3xl mx-auto">
       <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
         <div className="flex items-center">
-          <h3 className="text-lg font-semibold text-accent">Weather Conditions</h3>
+          <span className="text-lg font-semibold text-accent">Weather Conditions</span>
           {renderTooltip(
             "Weather conditions affect your workout performance. Adding your location helps create a program that's suitable for your environment."
           )}
@@ -101,7 +101,7 @@ export function GenerateWorkoutInput({
         />
         
         <div className="flex items-center">
-          <h3 className="text-lg font-semibold text-accent">Available Equipment</h3>
+          <span className="text-lg font-semibold text-accent">Available Equipment</span>
           {renderTooltip(
             "Add specific equipment or exercises you have access to. This helps create workouts that match your available resources."
           )}
@@ -111,16 +111,19 @@ export function GenerateWorkoutInput({
           onExerciseSelect={handleExerciseSelect}
         />
 
-        {renderTooltip(
-          "Share your fitness level and experience to receive personalized workouts that match your capabilities."
-        )}
+        <div className="flex items-center">
+          <span className="text-lg font-semibold text-accent">Your Fitness Profile</span>
+          {renderTooltip(
+            "Share your fitness level and experience to receive personalized workouts that match your capabilities."
+          )}
+        </div>
         <FitnessSection
           fitnessLevel={fitnessLevel}
           onFitnessLevelChange={setFitnessLevel}
         />
 
         <div className="flex items-center">
-          <h3 className="text-lg font-semibold text-accent">Generate Your Program</h3>
+          <span className="text-lg font-semibold text-accent">Generate Your Program</span>
           {renderTooltip(
             "Review your selections and generate a custom workout program tailored to your needs."
           )}

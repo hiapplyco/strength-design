@@ -48,6 +48,24 @@ export type Database = {
           },
         ]
       }
+      email_subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

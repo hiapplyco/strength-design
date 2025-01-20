@@ -1,5 +1,6 @@
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { Button } from "@/components/ui/button";
+import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
 
 interface HeroSectionProps {
   generatePrompt: string;
@@ -27,7 +28,16 @@ export const HeroSection = ({
         </p>
       </div>
       
-      {/* Preserve Generate Search Section */}
+      {/* Email Subscription Form */}
+      <div className="w-full max-w-3xl mt-8">
+        <div className="text-center mb-4">
+          <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
+          <p className="text-muted-foreground">Subscribe to receive updates about our latest features and releases</p>
+        </div>
+        <EmailSubscriptionForm />
+      </div>
+
+      {/* Generate Search Section */}
       <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">
         <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
         <GenerateWorkoutInput
@@ -41,9 +51,6 @@ export const HeroSection = ({
 
       <div className="flex gap-4 mt-8">
         <Button size="lg" className="bg-primary text-white">
-          Start Your Free Trial
-        </Button>
-        <Button size="lg" variant="outline">
           View All Features
         </Button>
       </div>

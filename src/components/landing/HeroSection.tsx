@@ -75,7 +75,7 @@ export const HeroSection = ({
                 STRENGTH.DESIGN: Redefining Fitness Programming for a Stronger Future
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 text-card-foreground">
+            <div className="space-y-4 text-black">
               <p className="leading-relaxed">
                 STRENGTH.DESIGN is the ultimate tool for coaches, athletes, and fitness enthusiasts to revolutionize the way they approach training. Built on cutting-edge science, real-world data, and the principles of periodization, our platform empowers you to design precision-tailored programs that drive results.
               </p>

@@ -44,7 +44,7 @@ export const HeroSection = ({
         <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
           <div className="text-center mb-4">
             <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
-            <p className="text-card-foreground">Subscribe to receive updates about our latest features and releases</p>
+            <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
           </div>
           <EmailSubscriptionForm onSuccessfulSubscribe={() => setShowSubscription(false)} />
         </div>

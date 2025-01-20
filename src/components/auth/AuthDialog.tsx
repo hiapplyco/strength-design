@@ -26,13 +26,31 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
         });
         onSuccess();
       }
+      if (event === 'USER_UPDATED') {
+        const { error } = await supabase.auth.getSession();
+        if (error) {
+          setError(getErrorMessage(error));
+        }
+      }
+      if (event === 'SIGNED_OUT') {
+        setError(""); // Clear errors on sign out
+      }
     });
 
     return () => subscription.unsubscribe();
   }, [onSuccess, toast]);
 
-  const handleError = (error: AuthError) => {
-    setError(error.message);
+  const getErrorMessage = (error: AuthError) => {
+    switch (error.message) {
+      case 'Invalid login credentials':
+        return 'Invalid email or password. Please check your credentials and try again.';
+      case 'Email not confirmed':
+        return 'Please verify your email address before signing in.';
+      case 'User not found':
+        return 'No user found with these credentials.';
+      default:
+        return error.message;
+    }
   };
 
   return (
@@ -62,7 +80,6 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
             }
           }}
           providers={[]}
-          onError={handleError}
         />
       </DialogContent>
     </Dialog>

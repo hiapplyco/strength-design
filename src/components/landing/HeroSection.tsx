@@ -4,6 +4,7 @@ import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { triggerConfetti } from "@/utils/confetti";
+import { ArrowDown } from "lucide-react";
 
 interface HeroSectionProps {
   generatePrompt: string;
@@ -57,23 +58,30 @@ export const HeroSection = ({
             🎉 Generate Your First Week FREE! 🎉
           </h2>
           <p className="text-white text-xl">
-            Create a complete week of personalized workouts instantly! Share with friends, export to calendar, or have our AI coach guide you through each session.
+            Create a complete week of personalized workouts instantly! Our advanced computational algorithms analyze your goals and preferences to design the perfect progression.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-white mb-6">
           <div className="bg-black/20 p-4 rounded-lg">
             <h3 className="font-oswald text-xl mb-2">Monday-Wednesday</h3>
-            <p>Strength & Skill Focus</p>
+            <p>Progressive Overload & Technical Development</p>
           </div>
           <div className="bg-black/20 p-4 rounded-lg">
             <h3 className="font-oswald text-xl mb-2">Thursday-Friday</h3>
-            <p>Conditioning & Power</p>
+            <p>Metabolic Optimization & Power Output</p>
           </div>
           <div className="bg-black/20 p-4 rounded-lg">
             <h3 className="font-oswald text-xl mb-2">Weekend</h3>
-            <p>Recovery & Mobility</p>
+            <p>Active Recovery & Movement Restoration</p>
           </div>
         </div>
+      </div>
+
+      {/* Arrows pointing to generate section */}
+      <div className="flex justify-center space-x-4">
+        <ArrowDown className="w-8 h-8 text-primary animate-bounce" />
+        <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-100" />
+        <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200" />
       </div>
 
       {/* Generate Search Section */}

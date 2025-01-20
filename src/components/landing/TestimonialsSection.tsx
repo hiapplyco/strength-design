@@ -67,14 +67,14 @@ export const TestimonialsSection = () => {
         placeholder="Your Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="bg-white"
+        className="bg-white text-black"
       />
       <Input
         type="email"
         placeholder="Your Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="bg-white"
+        className="bg-white text-black"
       />
       <Button 
         className="w-full" 

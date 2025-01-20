@@ -76,10 +76,10 @@ export function GenerateWorkoutInput({
       <TooltipTrigger asChild>
         <div className="flex items-center gap-2">
           {children}
-          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+          <HelpCircle className="h-4 w-4 text-accent" />
         </div>
       </TooltipTrigger>
-      <TooltipContent className="max-w-xs">
+      <TooltipContent className="max-w-xs bg-[#D4B96D] text-black">
         <p>{content}</p>
       </TooltipContent>
     </Tooltip>
@@ -90,7 +90,7 @@ export function GenerateWorkoutInput({
       <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
         {renderTooltip(
           "Weather conditions affect your workout performance. Adding your location helps create a program that's suitable for your environment.",
-          <div className="font-semibold text-lg mb-2">Weather Conditions</div>
+          <div className="font-semibold text-lg mb-2 text-accent">Weather Conditions</div>
         )}
         <WeatherSection 
           weatherData={weatherData}
@@ -99,7 +99,7 @@ export function GenerateWorkoutInput({
         
         {renderTooltip(
           "Add specific equipment or exercises you have access to. This helps create workouts that match your available resources.",
-          <div className="font-semibold text-lg mb-2">Available Equipment</div>
+          <div className="font-semibold text-lg mb-2 text-accent">Available Equipment</div>
         )}
         <ExerciseSection
           selectedExercises={selectedExercises}
@@ -108,7 +108,7 @@ export function GenerateWorkoutInput({
 
         {renderTooltip(
           "Share your fitness level and experience to receive personalized workouts that match your capabilities.",
-          <div className="font-semibold text-lg mb-2">Your Fitness Profile</div>
+          <div className="font-semibold text-lg mb-2 text-accent">Your Fitness Profile</div>
         )}
         <FitnessSection
           fitnessLevel={fitnessLevel}
@@ -117,7 +117,7 @@ export function GenerateWorkoutInput({
 
         {renderTooltip(
           "Review your selections and generate a custom workout program tailored to your needs.",
-          <div className="font-semibold text-lg mb-2">Generate Your Program</div>
+          <div className="font-semibold text-lg mb-2 text-accent">Generate Your Program</div>
         )}
         <GenerateSection
           generatePrompt={generatePrompt}

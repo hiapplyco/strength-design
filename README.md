@@ -1,69 +1,69 @@
-# Welcome to your Lovable project
+# Strength Design - Intelligent Workout Programming Platform
 
-## Project info
+## Overview
 
-**URL**: https://lovable.dev/projects/0b2787bf-d61b-4518-b06e-297d11fced1f
+Strength Design is a cutting-edge platform that combines exercise science with intuitive software to create personalized strength training programs. Our platform helps trainers, coaches, and fitness enthusiasts deliver science-backed, data-driven workouts tailored to individual goals.
 
-## How can I edit this code?
+## Key Features
 
-There are several ways of editing your application.
+- **Data-Driven Programming**: Leverage advanced algorithms and real-time metrics to optimize strength gains
+- **Science-Backed Methods**: Every routine is rooted in the latest research on exercise physiology and biomechanics
+- **Customizable Workouts**: Craft individualized programs for different fitness levels
+- **Scalable Solutions**: Easily expand your programs to serve entire gyms, teams, or online communities
 
-**Use Lovable**
+## Target Users
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0b2787bf-d61b-4518-b06e-297d11fced1f) and start prompting.
+- **Coaches & Trainers**: Efficiently manage multiple clients and adapt workouts in real-time
+- **Group Fitness & Gyms**: Scale personalized programs across all participants
+- **Fitness Enthusiasts**: Access expertly crafted plans tailored to specific goals
 
-Changes made via Lovable will be committed automatically to this repo.
+## Pricing Plans
 
-**Use your preferred IDE**
+### Unlimited Access - $24.99/month
+- Unlimited access to science-based workout templates
+- Data-driven insights
+- Basic progress tracking and analytics
+- Perfect for individual enthusiasts
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Personalized Dashboards - $99.99/month
+- Individualized member dashboards
+- Automated personalized strength programs
+- Real-time performance tracking
+- Advanced analytics for fitness professionals
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Technology Stack
 
-Follow these steps:
+- React with TypeScript
+- Tailwind CSS for styling
+- shadcn/ui component library
+- Supabase for backend services
+- Real-time data synchronization
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. Clone the repository
+```bash
+git clone <repository-url>
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Install dependencies
+```bash
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Contributing
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+We welcome contributions! Please read our contributing guidelines before submitting pull requests.
 
-**Use GitHub Codespaces**
+## Support
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+For questions or support, please contact our team through the subscription form on our website.
 
-## What technologies are used for this project?
+## License
 
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/0b2787bf-d61b-4518-b06e-297d11fced1f) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+This project is proprietary software. All rights reserved.

@@ -4,8 +4,8 @@ export const FeaturesSection = () => {
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
       <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
-          Why Strength Design
+        <h2 className="text-5xl md:text-6xl font-collegiate text-destructive mb-4 transform -skew-x-12 uppercase tracking-wider">
+          strength.design
         </h2>
         <p className="text-lg text-destructive">
           Combine cutting-edge exercise science with intuitive software to build programs your members will love

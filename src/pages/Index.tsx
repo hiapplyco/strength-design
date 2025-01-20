@@ -96,6 +96,9 @@ const Index = () => {
       />
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8 animate-fade-in backdrop-blur-sm">
+          <h1 className="text-7xl md:text-8xl xl:text-9xl font-collegiate text-destructive mb-12 transform -skew-x-12 uppercase tracking-wider text-center">
+            strength.design
+          </h1>
           <HeroSection
             generatePrompt={generatePrompt}
             setGeneratePrompt={setGeneratePrompt}

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { triggerConfetti } from "@/utils/confetti";
 
 interface EmailSubscriptionFormProps {
   onSuccessfulSubscribe: () => void;
@@ -36,6 +37,7 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
         title: "Success!",
         description: "Thank you for subscribing to our updates.",
       });
+      triggerConfetti();
       setEmail("");
       onSuccessfulSubscribe();
     } catch (error: any) {

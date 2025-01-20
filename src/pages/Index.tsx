@@ -8,6 +8,7 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
+import { triggerConfetti } from "@/utils/confetti";
 
 interface WorkoutDay {
   description: string;
@@ -52,6 +53,7 @@ const Index = () => {
           title: "Success",
           description: "Workouts generated successfully!",
         });
+        triggerConfetti();
       }
     } catch (error) {
       console.error('Error generating workouts:', error);

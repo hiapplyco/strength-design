@@ -8,6 +8,7 @@ interface GenerateSectionProps {
   onGenerate: () => void;
   onClear: () => void;
   isGenerating: boolean;
+  renderTooltip: () => React.ReactNode;
 }
 
 export function GenerateSection({ 
@@ -15,13 +16,15 @@ export function GenerateSection({
   onGeneratePromptChange, 
   onGenerate, 
   onClear,
-  isGenerating 
+  isGenerating,
+  renderTooltip
 }: GenerateSectionProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-primary">
-        <Send className="h-5 w-5" />
-        <h3 className="font-oswald text-lg uppercase">Generate Workout</h3>
+      <div className="flex items-center gap-2">
+        <Send className="h-5 w-5 text-primary" />
+        <h3 className="font-oswald text-lg uppercase text-primary">Generate Workout</h3>
+        {renderTooltip()}
       </div>
       <Input
         placeholder="e.g., 'Focus on Olympic lifts this cycle, with emphasis on technique and progressive loading'"

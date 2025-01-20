@@ -34,11 +34,10 @@ export const TestimonialsSection = () => {
             <p className="text-4xl font-bold text-white mb-4">$99.99<span className="text-lg">/month</span></p>
             <ul className="space-y-4">
               {[
-                "Individualized gym-member dashboards inspired by Orangetheory-style metrics",
-                "Personalized strength programs for each member updated automatically",
-                "Real-time performance tracking with the ability to scale to all your members or teams",
-                "Advanced analytics for coaches, trainers, and gym owners",
-                "Ideal for gyms, studios, and large coaching businesses"
+                "Individualized member dashboards with comprehensive performance metrics",
+                "Automated personalized strength programs with dynamic adjustments",
+                "Real-time performance tracking and team management capabilities",
+                "Advanced analytics and business insights for fitness professionals"
               ].map((feature, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <Check className="w-5 h-5 text-primary mt-1" />

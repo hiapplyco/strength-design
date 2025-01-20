@@ -96,7 +96,7 @@ const Index = () => {
       />
       <div className="relative z-10">
         <div className="container mx-auto px-4 py-8 animate-fade-in backdrop-blur-sm">
-          <h1 className="text-7xl md:text-8xl xl:text-9xl font-collegiate text-destructive mb-12 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg p-4 shadow-[8px_8px_0px_0px_rgba(255,0,0,1)]">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-collegiate text-destructive mb-12 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg p-4 shadow-[8px_8px_0px_0px_rgba(255,0,0,1)]">
             strength.design
           </h1>
           <HeroSection

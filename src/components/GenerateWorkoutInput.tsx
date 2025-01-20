@@ -71,15 +71,14 @@ export function GenerateWorkoutInput({
     setFitnessLevel("");
   };
 
-  const renderTooltip = (content: string, children: React.ReactNode) => (
+  const renderTooltip = (content: string) => (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="flex items-center gap-2">
-          {children}
-          <HelpCircle className="h-4 w-4 text-accent" />
+        <div className="inline-flex items-center">
+          <HelpCircle className="h-4 w-4 text-accent ml-2" />
         </div>
       </TooltipTrigger>
-      <TooltipContent className="max-w-xs bg-[#D4B96D] text-black">
+      <TooltipContent side="right" className="max-w-xs bg-[#D4B96D] text-black">
         <p>{content}</p>
       </TooltipContent>
     </Tooltip>
@@ -88,37 +87,41 @@ export function GenerateWorkoutInput({
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-        {renderTooltip(
-          "Weather conditions affect your workout performance. Adding your location helps create a program that's suitable for your environment.",
-          <div className="font-semibold text-lg mb-2 text-accent">Weather Conditions</div>
-        )}
+        <div className="flex items-center">
+          {renderTooltip(
+            "Weather conditions affect your workout performance. Adding your location helps create a program that's suitable for your environment."
+          )}
+        </div>
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
         />
         
-        {renderTooltip(
-          "Add specific equipment or exercises you have access to. This helps create workouts that match your available resources.",
-          <div className="font-semibold text-lg mb-2 text-accent">Available Equipment</div>
-        )}
+        <div className="flex items-center">
+          {renderTooltip(
+            "Add specific equipment or exercises you have access to. This helps create workouts that match your available resources."
+          )}
+        </div>
         <ExerciseSection
           selectedExercises={selectedExercises}
           onExerciseSelect={handleExerciseSelect}
         />
 
-        {renderTooltip(
-          "Share your fitness level and experience to receive personalized workouts that match your capabilities.",
-          <div className="font-semibold text-lg mb-2 text-accent">Your Fitness Profile</div>
-        )}
+        <div className="flex items-center">
+          {renderTooltip(
+            "Share your fitness level and experience to receive personalized workouts that match your capabilities."
+          )}
+        </div>
         <FitnessSection
           fitnessLevel={fitnessLevel}
           onFitnessLevelChange={setFitnessLevel}
         />
 
-        {renderTooltip(
-          "Review your selections and generate a custom workout program tailored to your needs.",
-          <div className="font-semibold text-lg mb-2 text-accent">Generate Your Program</div>
-        )}
+        <div className="flex items-center">
+          {renderTooltip(
+            "Review your selections and generate a custom workout program tailored to your needs."
+          )}
+        </div>
         <GenerateSection
           generatePrompt={generatePrompt}
           onGeneratePromptChange={setGeneratePrompt}

@@ -89,7 +89,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
     >
       <div className="flex gap-2">
         <Input
-          placeholder="Search for equipment (e.g., barbell, dumbbells, kettlebells)"
+          placeholder="Add equipment to enhance your Program..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -109,7 +109,7 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
       </div>
 
       {searchResults.length > 0 && (
-        <div className="rounded-lg border bg-card">
+        <div className="rounded-lg border bg-card max-h-[60vh] overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow>

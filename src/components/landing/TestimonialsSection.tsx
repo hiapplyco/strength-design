@@ -61,7 +61,7 @@ export const TestimonialsSection = () => {
   };
 
   const ContactForm = ({ subscriptionType }: { subscriptionType: string }) => (
-    <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
+    <div className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</label>
         <Input
@@ -127,7 +127,13 @@ export const TestimonialsSection = () => {
             <AlertDialogTrigger asChild>
               <Button className="w-full" size="lg">Choose Unlimited</Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="bg-background">
+            <AlertDialogContent 
+              className="bg-background"
+              onPointerDownOutside={(e) => {
+                e.preventDefault();
+                setIsUnlimitedDialogOpen(false);
+              }}
+            >
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Let's Level Up Your Training Program
@@ -162,7 +168,13 @@ export const TestimonialsSection = () => {
             <AlertDialogTrigger asChild>
               <Button className="w-full" size="lg">Go Personalized</Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="bg-background">
+            <AlertDialogContent 
+              className="bg-background"
+              onPointerDownOutside={(e) => {
+                e.preventDefault();
+                setIsPersonalizedDialogOpen(false);
+              }}
+            >
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Transform Your Training Experience

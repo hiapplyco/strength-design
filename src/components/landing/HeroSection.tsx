@@ -1,6 +1,7 @@
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { Button } from "@/components/ui/button";
 import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
+import { useState } from "react";
 
 interface HeroSectionProps {
   generatePrompt: string;
@@ -17,6 +18,8 @@ export const HeroSection = ({
   isGenerating,
   setShowGenerateInput
 }: HeroSectionProps) => {
+  const [showSubscription, setShowSubscription] = useState(true);
+
   return (
     <section className="flex flex-col items-center justify-center space-y-8 pt-12 pb-20">
       <div className="space-y-4 text-center">
@@ -29,13 +32,15 @@ export const HeroSection = ({
       </div>
       
       {/* Email Subscription Form */}
-      <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
-          <p className="text-card-foreground">Subscribe to receive updates about our latest features and releases</p>
+      {showSubscription && (
+        <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
+            <p className="text-card-foreground">Subscribe to receive updates about our latest features and releases</p>
+          </div>
+          <EmailSubscriptionForm onSuccessfulSubscribe={() => setShowSubscription(false)} />
         </div>
-        <EmailSubscriptionForm />
-      </div>
+      )}
 
       {/* Generate Search Section */}
       <div className="w-full max-w-3xl bg-card p-8 rounded-xl mt-8">

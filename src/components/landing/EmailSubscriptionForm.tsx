@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-export const EmailSubscriptionForm = () => {
+interface EmailSubscriptionFormProps {
+  onSuccessfulSubscribe: () => void;
+}
+
+export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscriptionFormProps) => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -33,6 +37,7 @@ export const EmailSubscriptionForm = () => {
         description: "Thank you for subscribing to our updates.",
       });
       setEmail("");
+      onSuccessfulSubscribe();
     } catch (error: any) {
       toast({
         title: "Error",

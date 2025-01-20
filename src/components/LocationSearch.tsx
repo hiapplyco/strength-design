@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Loader2, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "./ui/button";
 
 interface Location {
   name: string;
@@ -21,32 +21,41 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    setIsSearching(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('get-weather', {
-        body: { query: searchQuery }
-      });
-
-      if (error) throw error;
-
-      if (data.results) {
-        setLocations(data.results.map((result: any) => ({
-          name: result.name,
-          latitude: result.latitude,
-          longitude: result.longitude,
-          country: result.country,
-          admin1: result.admin1
-        })));
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!searchQuery.trim()) {
+        setLocations([]);
+        return;
       }
-    } catch (error) {
-      console.error('Error searching locations:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
+
+      setIsSearching(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('get-weather', {
+          body: { query: searchQuery }
+        });
+
+        if (error) throw error;
+
+        if (data.results) {
+          setLocations(data.results.map((result: any) => ({
+            name: result.name,
+            latitude: result.latitude,
+            longitude: result.longitude,
+            country: result.country,
+            admin1: result.admin1
+          })));
+        }
+      } catch (error) {
+        console.error('Error searching locations:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    // Add a small delay to prevent too many searches while typing
+    const debounceTimeout = setTimeout(performSearch, 300);
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery]);
 
   const handleLocationSelect = (location: Location) => {
     onLocationSelect(location);
@@ -56,26 +65,12 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Input
-          placeholder="Search location (e.g., New York, London)"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="flex-1 bg-white text-black placeholder:text-gray-500"
-        />
-        <Button 
-          onClick={handleSearch}
-          disabled={isSearching}
-          className="min-w-[100px]"
-        >
-          {isSearching ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Search"
-          )}
-        </Button>
-      </div>
+      <Input
+        placeholder="Search location (e.g., New York, London)"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="flex-1 bg-white text-black placeholder:text-gray-500"
+      />
 
       {locations.length > 0 && (
         <div className="space-y-2">

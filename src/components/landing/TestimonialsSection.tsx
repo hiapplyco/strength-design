@@ -1,7 +1,22 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
+import { useState } from "react";
 
 export const TestimonialsSection = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleSuccessfulSubscribe = () => {
+    setIsDialogOpen(false);
+  };
+
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
       <h2 className="text-4xl md:text-5xl font-oswald text-primary text-center mb-16">
@@ -26,7 +41,22 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <Button className="w-full" size="lg">Choose Unlimited</Button>
+          <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <Button className="w-full" size="lg">Choose Unlimited</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-background">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
+                  Let's Level Up Your Training Program
+                </AlertDialogTitle>
+                <p className="text-muted-foreground mb-6">
+                  Subscribe to discuss how we can enhance your program with our Strength Design expertise.
+                </p>
+                <EmailSubscriptionForm onSuccessfulSubscribe={handleSuccessfulSubscribe} />
+              </AlertDialogHeader>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
         <div className="bg-muted p-8 rounded-xl border-2 border-primary">
           <div className="mb-8">
@@ -46,7 +76,22 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <Button className="w-full" size="lg">Go Personalized</Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className="w-full" size="lg">Go Personalized</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-background">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
+                  Transform Your Training Experience
+                </AlertDialogTitle>
+                <p className="text-muted-foreground mb-6">
+                  Subscribe to learn how our personalized dashboard can revolutionize your strength program.
+                </p>
+                <EmailSubscriptionForm onSuccessfulSubscribe={handleSuccessfulSubscribe} />
+              </AlertDialogHeader>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </section>

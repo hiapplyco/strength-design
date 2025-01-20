@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Check } from "lucide-react";
+import { Plus, Check } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -23,7 +23,6 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   const [searchQuery, setSearchQuery] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [searchResults, setSearchResults] = useState<Exercise[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -43,28 +42,31 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
     fetchExercises();
   }, []);
 
-  const handleSearch = () => {
-    setIsSearching(true);
-    try {
-      if (searchQuery.trim()) {
-        const term = searchQuery.toLowerCase();
-        const results = exercises.filter(exercise => {
-          const nameMatch = exercise.name.toLowerCase().includes(term);
-          const instructionsMatch = exercise.instructions.some(
-            instruction => instruction.toLowerCase().includes(term)
-          );
-          return nameMatch || instructionsMatch;
-        });
-        setSearchResults(results);
-      } else {
-        setSearchResults([]);
+  useEffect(() => {
+    const performSearch = () => {
+      try {
+        if (searchQuery.trim()) {
+          const term = searchQuery.toLowerCase();
+          const results = exercises.filter(exercise => {
+            const nameMatch = exercise.name.toLowerCase().includes(term);
+            const instructionsMatch = exercise.instructions.some(
+              instruction => instruction.toLowerCase().includes(term)
+            );
+            return nameMatch || instructionsMatch;
+          });
+          setSearchResults(results);
+        } else {
+          setSearchResults([]);
+        }
+      } catch (error) {
+        console.error('Error searching exercises:', error);
       }
-    } catch (error) {
-      console.error('Error searching exercises:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
+    };
+
+    // Add a small delay to prevent too many searches while typing
+    const debounceTimeout = setTimeout(performSearch, 300);
+    return () => clearTimeout(debounceTimeout);
+  }, [searchQuery, exercises]);
 
   const handleExerciseSelect = (exercise: Exercise) => {
     setSelectedExercises(prev => [...prev, exercise.name]);
@@ -92,20 +94,8 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
           placeholder="Add equipment to enhance your Program..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           className="flex-1 bg-white text-black placeholder:text-gray-500"
         />
-        <Button 
-          onClick={handleSearch}
-          disabled={isSearching}
-          className="min-w-[100px] bg-primary hover:bg-primary/90"
-        >
-          {isSearching ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            "Search"
-          )}
-        </Button>
       </div>
 
       {searchResults.length > 0 && (

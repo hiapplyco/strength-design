@@ -5,14 +5,16 @@ import type { Exercise } from "../exercise-search/types";
 interface ExerciseSectionProps {
   selectedExercises: Exercise[];
   onExerciseSelect: (exercise: Exercise) => void;
+  renderTooltip: () => React.ReactNode;
 }
 
-export function ExerciseSection({ selectedExercises, onExerciseSelect }: ExerciseSectionProps) {
+export function ExerciseSection({ selectedExercises, onExerciseSelect, renderTooltip }: ExerciseSectionProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-primary">
         <Dumbbell className="h-5 w-5" />
         <h3 className="font-oswald text-lg uppercase">Equipment Selection</h3>
+        {renderTooltip()}
       </div>
       <ExerciseSearch onExerciseSelect={onExerciseSelect} />
 

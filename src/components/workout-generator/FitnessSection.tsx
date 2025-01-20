@@ -4,14 +4,16 @@ import { Input } from "../ui/input";
 interface FitnessSectionProps {
   fitnessLevel: string;
   onFitnessLevelChange: (value: string) => void;
+  renderTooltip: () => React.ReactNode;
 }
 
-export function FitnessSection({ fitnessLevel, onFitnessLevelChange }: FitnessSectionProps) {
+export function FitnessSection({ fitnessLevel, onFitnessLevelChange, renderTooltip }: FitnessSectionProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-primary">
         <Activity className="h-5 w-5" />
         <h3 className="font-oswald text-lg uppercase">Fitness Level</h3>
+        {renderTooltip()}
       </div>
       <Input
         placeholder="e.g., 'Intermediate, RX weights, moderate fatigue from yesterday's session'"

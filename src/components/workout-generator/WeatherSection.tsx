@@ -16,9 +16,10 @@ interface WeatherData {
 interface WeatherSectionProps {
   weatherData: WeatherData | null;
   onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
+  renderTooltip: () => React.ReactNode;
 }
 
-export function WeatherSection({ weatherData, onWeatherUpdate }: WeatherSectionProps) {
+export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: WeatherSectionProps) {
   const getWeatherDescription = (code: number) => {
     const weatherCodes: Record<number, string> = {
       0: "Clear sky",
@@ -111,6 +112,7 @@ export function WeatherSection({ weatherData, onWeatherUpdate }: WeatherSectionP
       <div className="flex items-center gap-2 text-primary">
         <CloudSun className="h-5 w-5" />
         <h3 className="font-oswald text-lg uppercase">Weather Conditions</h3>
+        {renderTooltip()}
       </div>
       <LocationSearch onLocationSelect={handleLocationSelect} />
       

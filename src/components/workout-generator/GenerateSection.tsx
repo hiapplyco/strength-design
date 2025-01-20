@@ -30,11 +30,11 @@ export function GenerateSection({
         className="bg-white text-black placeholder:text-gray-500"
       />
       
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Button 
           onClick={onGenerate} 
           disabled={isGenerating}
-          className="flex-1 min-w-[200px] bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-colors disabled:opacity-50"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-colors disabled:opacity-50"
         >
           {isGenerating ? (
             <>
@@ -51,7 +51,7 @@ export function GenerateSection({
         <Button 
           onClick={onClear}
           variant="outline"
-          className="flex-shrink-0 hover:bg-destructive/10"
+          className="w-full hover:bg-destructive/10"
         >
           <X className="h-4 w-4 mr-2" />
           Clear All

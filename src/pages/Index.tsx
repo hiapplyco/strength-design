@@ -9,6 +9,8 @@ import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { triggerConfetti } from "@/utils/confetti";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useNavigate } from "react-router-dom";
 
 interface WorkoutDay {
   description: string;
@@ -25,9 +27,12 @@ const Index = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const { toast } = useToast();
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
   const [isExporting, setIsExporting] = useState(false);
+  const navigate = useNavigate();
 
   const handleGenerateWorkout = async () => {
     if (!generatePrompt.trim()) {
@@ -48,12 +53,14 @@ const Index = () => {
       if (error) throw error;
 
       if (data) {
-        setWorkouts(data);
-        toast({
-          title: "Success",
-          description: "Workouts generated successfully!",
-        });
-        triggerConfetti();
+        setGeneratedWorkouts(data);
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          await saveWorkouts(data);
+        } else {
+          setShowAuthDialog(true);
+        }
       }
     } catch (error) {
       console.error('Error generating workouts:', error);
@@ -67,9 +74,49 @@ const Index = () => {
     }
   };
 
+  const saveWorkouts = async (workoutsToSave: WeeklyWorkouts) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const workoutPromises = Object.entries(workoutsToSave).map(([day, workout]) => 
+        supabase.from('workouts').insert({
+          user_id: user.id,
+          day,
+          warmup: workout.warmup,
+          wod: workout.workout,
+          notes: workout.notes,
+        })
+      );
+
+      await Promise.all(workoutPromises);
+      setWorkouts(workoutsToSave);
+      toast({
+        title: "Success",
+        description: "Workouts generated and saved successfully!",
+      });
+      triggerConfetti();
+    } catch (error) {
+      console.error('Error saving workouts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save workouts. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAuthSuccess = async () => {
+    setShowAuthDialog(false);
+    if (generatedWorkouts) {
+      await saveWorkouts(generatedWorkouts);
+    }
+  };
+
   const resetWorkouts = () => {
     setWorkouts(null);
     setGeneratePrompt("");
+    setGeneratedWorkouts(null);
   };
 
   if (workouts) {
@@ -111,6 +158,12 @@ const Index = () => {
           <TestimonialsSection />
         </div>
       </div>
+      <AuthDialog 
+        isOpen={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        onSuccess={handleAuthSuccess}
+      />
+      <audio ref={audioRef} className="hidden" />
     </div>
   );
 };

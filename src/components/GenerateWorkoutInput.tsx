@@ -93,7 +93,7 @@ export function GenerateWorkoutInput({
           {renderTooltip(
             "Weather conditions affect your workout performance. Adding your location helps create a program that's suitable for your environment."
           )}
-          <div className="text-lg font-semibold text-accent">Weather Conditions</div>
+          <h3 className="text-lg font-semibold text-accent">Weather Conditions</h3>
         </div>
         <WeatherSection 
           weatherData={weatherData}
@@ -104,7 +104,7 @@ export function GenerateWorkoutInput({
           {renderTooltip(
             "Add specific equipment or exercises you have access to. This helps create workouts that match your available resources."
           )}
-          <div className="text-lg font-semibold text-accent">Available Equipment</div>
+          <h3 className="text-lg font-semibold text-accent">Equipment Selection</h3>
         </div>
         <ExerciseSection
           selectedExercises={selectedExercises}
@@ -115,7 +115,7 @@ export function GenerateWorkoutInput({
           {renderTooltip(
             "Share your fitness level and experience to receive personalized workouts that match your capabilities."
           )}
-          <div className="text-lg font-semibold text-accent">Your Fitness Profile</div>
+          <h3 className="text-lg font-semibold text-accent">Fitness Profile</h3>
         </div>
         <FitnessSection
           fitnessLevel={fitnessLevel}
@@ -126,7 +126,7 @@ export function GenerateWorkoutInput({
           {renderTooltip(
             "Review your selections and generate a custom workout program tailored to your needs."
           )}
-          <div className="text-lg font-semibold text-accent">Generate Your Program</div>
+          <h3 className="text-lg font-semibold text-accent">Program Generation</h3>
         </div>
         <GenerateSection
           generatePrompt={generatePrompt}

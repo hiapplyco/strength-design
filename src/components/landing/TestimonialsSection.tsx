@@ -8,93 +8,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { triggerConfetti } from "@/utils/confetti";
+import { ContactForm } from "./ContactForm";
 
 export const TestimonialsSection = () => {
   const [isUnlimitedDialogOpen, setIsUnlimitedDialogOpen] = useState(false);
   const [isPersonalizedDialogOpen, setIsPersonalizedDialogOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const { toast } = useToast();
-
-  const handleSubmit = async (subscriptionType: string) => {
-    if (!name.trim() || !email.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("contact_submissions")
-        .insert([{ name, email, subscription_type: subscriptionType }]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success!",
-        description: "Thank you for your interest. We'll reach out to you shortly.",
-      });
-      triggerConfetti();
-      
-      // Reset form and close dialog
-      setName("");
-      setEmail("");
-      if (subscriptionType === "Unlimited") {
-        setIsUnlimitedDialogOpen(false);
-      } else {
-        setIsPersonalizedDialogOpen(false);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to submit form. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const ContactForm = ({ subscriptionType }: { subscriptionType: string }) => (
-    <div className="space-y-4" onMouseDown={(e) => e.stopPropagation()}>
-      <div className="space-y-2">
-        <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</label>
-        <Input
-          id="name"
-          type="text"
-          placeholder="Enter your full name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="bg-white text-black placeholder:text-gray-400"
-        />
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="Enter your email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="bg-white text-black placeholder:text-gray-400"
-        />
-      </div>
-      <Button 
-        className="w-full" 
-        onClick={() => handleSubmit(subscriptionType)}
-      >
-        Submit
-      </Button>
-      <p className="text-sm text-center text-gray-600">
-        We'll reach out to you shortly to discuss how we can help achieve your fitness goals.
-      </p>
-    </div>
-  );
 
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
@@ -132,7 +50,10 @@ export const TestimonialsSection = () => {
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Let's Level Up Your Training Program
                 </AlertDialogTitle>
-                <ContactForm subscriptionType="Unlimited" />
+                <ContactForm 
+                  subscriptionType="Unlimited" 
+                  onSuccess={() => setIsUnlimitedDialogOpen(false)} 
+                />
               </AlertDialogHeader>
             </AlertDialogContent>
           </AlertDialog>
@@ -167,7 +88,10 @@ export const TestimonialsSection = () => {
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Transform Your Training Experience
                 </AlertDialogTitle>
-                <ContactForm subscriptionType="Personalized" />
+                <ContactForm 
+                  subscriptionType="Personalized" 
+                  onSuccess={() => setIsPersonalizedDialogOpen(false)} 
+                />
               </AlertDialogHeader>
             </AlertDialogContent>
           </AlertDialog>

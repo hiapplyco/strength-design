@@ -62,20 +62,28 @@ export const TestimonialsSection = () => {
 
   const ContactForm = ({ subscriptionType }: { subscriptionType: string }) => (
     <div className="space-y-4">
-      <Input
-        type="text"
-        placeholder="Your Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="bg-white text-black"
-      />
-      <Input
-        type="email"
-        placeholder="Your Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="bg-white text-black"
-      />
+      <div className="space-y-2">
+        <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</label>
+        <Input
+          id="name"
+          type="text"
+          placeholder="Enter your full name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="bg-white text-black placeholder:text-gray-400"
+        />
+      </div>
+      <div className="space-y-2">
+        <label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="Enter your email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="bg-white text-black placeholder:text-gray-400"
+        />
+      </div>
       <Button 
         className="w-full" 
         onClick={() => handleSubmit(subscriptionType)}
@@ -112,7 +120,10 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <AlertDialog open={isUnlimitedDialogOpen} onOpenChange={setIsUnlimitedDialogOpen}>
+          <AlertDialog 
+            open={isUnlimitedDialogOpen} 
+            onOpenChange={setIsUnlimitedDialogOpen}
+          >
             <AlertDialogTrigger asChild>
               <Button className="w-full" size="lg">Choose Unlimited</Button>
             </AlertDialogTrigger>
@@ -144,7 +155,10 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <AlertDialog open={isPersonalizedDialogOpen} onOpenChange={setIsPersonalizedDialogOpen}>
+          <AlertDialog 
+            open={isPersonalizedDialogOpen} 
+            onOpenChange={setIsPersonalizedDialogOpen}
+          >
             <AlertDialogTrigger asChild>
               <Button className="w-full" size="lg">Go Personalized</Button>
             </AlertDialogTrigger>

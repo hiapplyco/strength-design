@@ -90,7 +90,7 @@ export function GenerateWorkoutInput({
     <div className="w-full max-w-3xl mx-auto">
       <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
         <div className="flex items-center">
-          <span className="text-lg font-semibold text-accent">Weather Conditions</span>
+          <div className="text-lg font-semibold text-accent">Weather Conditions</div>
           {renderTooltip(
             "Weather conditions affect your workout performance. Adding your location helps create a program that's suitable for your environment."
           )}
@@ -101,7 +101,7 @@ export function GenerateWorkoutInput({
         />
         
         <div className="flex items-center">
-          <span className="text-lg font-semibold text-accent">Available Equipment</span>
+          <div className="text-lg font-semibold text-accent">Available Equipment</div>
           {renderTooltip(
             "Add specific equipment or exercises you have access to. This helps create workouts that match your available resources."
           )}
@@ -112,7 +112,7 @@ export function GenerateWorkoutInput({
         />
 
         <div className="flex items-center">
-          <span className="text-lg font-semibold text-accent">Your Fitness Profile</span>
+          <div className="text-lg font-semibold text-accent">Your Fitness Profile</div>
           {renderTooltip(
             "Share your fitness level and experience to receive personalized workouts that match your capabilities."
           )}
@@ -123,7 +123,7 @@ export function GenerateWorkoutInput({
         />
 
         <div className="flex items-center">
-          <span className="text-lg font-semibold text-accent">Generate Your Program</span>
+          <div className="text-lg font-semibold text-accent">Generate Your Program</div>
           {renderTooltip(
             "Review your selections and generate a custom workout program tailored to your needs."
           )}

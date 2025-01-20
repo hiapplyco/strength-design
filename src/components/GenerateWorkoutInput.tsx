@@ -89,45 +89,21 @@ export function GenerateWorkoutInput({
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-        <div className="flex items-center">
-          {renderTooltip(
-            "Weather conditions affect your workout performance. Adding your location helps create a program that's suitable for your environment."
-          )}
-          <h3 className="text-lg font-semibold text-accent">Weather Conditions</h3>
-        </div>
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
         />
         
-        <div className="flex items-center">
-          {renderTooltip(
-            "Add specific equipment or exercises you have access to. This helps create workouts that match your available resources."
-          )}
-          <h3 className="text-lg font-semibold text-accent">Equipment Selection</h3>
-        </div>
         <ExerciseSection
           selectedExercises={selectedExercises}
           onExerciseSelect={handleExerciseSelect}
         />
 
-        <div className="flex items-center">
-          {renderTooltip(
-            "Share your fitness level and experience to receive personalized workouts that match your capabilities."
-          )}
-          <h3 className="text-lg font-semibold text-accent">Fitness Profile</h3>
-        </div>
         <FitnessSection
           fitnessLevel={fitnessLevel}
           onFitnessLevelChange={setFitnessLevel}
         />
 
-        <div className="flex items-center">
-          {renderTooltip(
-            "Review your selections and generate a custom workout program tailored to your needs."
-          )}
-          <h3 className="text-lg font-semibold text-accent">Program Generation</h3>
-        </div>
         <GenerateSection
           generatePrompt={generatePrompt}
           onGeneratePromptChange={setGeneratePrompt}

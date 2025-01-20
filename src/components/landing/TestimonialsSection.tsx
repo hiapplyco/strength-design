@@ -61,7 +61,7 @@ export const TestimonialsSection = () => {
   };
 
   const ContactForm = ({ subscriptionType }: { subscriptionType: string }) => (
-    <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
+    <div className="space-y-4" onMouseDown={(e) => e.stopPropagation()}>
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</label>
         <Input

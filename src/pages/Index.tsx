@@ -87,17 +87,27 @@ const Index = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in bg-background min-h-screen">
-      <HeroSection
-        generatePrompt={generatePrompt}
-        setGeneratePrompt={setGeneratePrompt}
-        handleGenerateWorkout={handleGenerateWorkout}
-        isGenerating={isGenerating}
-        setShowGenerateInput={setShowGenerateInput}
+    <div className="relative min-h-screen">
+      <div 
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-10 z-0"
+        style={{
+          backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
+        }}
       />
-      <FeaturesSection />
-      <SolutionsSection />
-      <TestimonialsSection />
+      <div className="relative z-10">
+        <div className="container mx-auto px-4 py-8 animate-fade-in bg-background/80 backdrop-blur-sm">
+          <HeroSection
+            generatePrompt={generatePrompt}
+            setGeneratePrompt={setGeneratePrompt}
+            handleGenerateWorkout={handleGenerateWorkout}
+            isGenerating={isGenerating}
+            setShowGenerateInput={setShowGenerateInput}
+          />
+          <FeaturesSection />
+          <SolutionsSection />
+          <TestimonialsSection />
+        </div>
+      </div>
     </div>
   );
 };

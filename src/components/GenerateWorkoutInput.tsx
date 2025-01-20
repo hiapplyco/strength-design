@@ -70,15 +70,8 @@ export function GenerateWorkoutInput({
   };
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto">
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10 rounded-xl overflow-hidden"
-        style={{
-          backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
-          backgroundAttachment: "fixed"
-        }}
-      />
-      <div className="relative flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
+    <div className="w-full max-w-3xl mx-auto">
+      <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}

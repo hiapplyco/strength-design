@@ -50,7 +50,7 @@ export const TestimonialsSection = () => {
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Let's Level Up Your Training Program
                 </AlertDialogTitle>
-                <p className="text-muted-foreground mb-6">
+                <p className="mb-6">
                   Subscribe to discuss how we can enhance your program with our Strength Design expertise.
                 </p>
                 <EmailSubscriptionForm onSuccessfulSubscribe={handleSuccessfulSubscribe} />
@@ -85,7 +85,7 @@ export const TestimonialsSection = () => {
                 <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
                   Transform Your Training Experience
                 </AlertDialogTitle>
-                <p className="text-muted-foreground mb-6">
+                <p className="mb-6">
                   Subscribe to learn how our personalized dashboard can revolutionize your strength program.
                 </p>
                 <EmailSubscriptionForm onSuccessfulSubscribe={handleSuccessfulSubscribe} />

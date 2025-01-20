@@ -72,16 +72,22 @@ export function GenerateWorkoutInput({
   };
 
   const renderTooltip = (content: string) => (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={100}>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="inline-flex items-center">
-            <HelpCircle className="h-4 w-4 text-accent mr-2" />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" align="end" className="max-w-xs bg-[#D4B96D] text-black">
-          <p>{content}</p>
-        </TooltipContent>
+        <div className="flex items-center mb-2">
+          <TooltipTrigger asChild>
+            <button className="p-1 hover:bg-primary/10 rounded-full transition-colors">
+              <HelpCircle className="h-4 w-4 text-primary" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent 
+            side="right" 
+            align="start" 
+            className="max-w-xs bg-primary text-primary-foreground p-2 text-sm"
+          >
+            <p>{content}</p>
+          </TooltipContent>
+        </div>
       </Tooltip>
     </TooltipProvider>
   );

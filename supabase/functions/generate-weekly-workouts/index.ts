@@ -19,12 +19,12 @@ const generateWithGemini = async (prompt: string, retryCount = 0): Promise<strin
   
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro-latest",
+    model: "gemini-1.5-pro-flash",
     generationConfig: {
       temperature: 0.7,
       topP: 0.8,
       topK: 40,
-      maxOutputTokens: 8192, // Set to 8192 as requested
+      maxOutputTokens: 8192,
     },
   });
 
@@ -44,7 +44,6 @@ const generateWithGemini = async (prompt: string, retryCount = 0): Promise<strin
   } catch (error) {
     console.error(`Error in generateWithGemini (attempt ${retryCount + 1}):`, error);
     
-    // Retry logic
     if (retryCount < MAX_RETRIES) {
       console.log(`Retrying... (${retryCount + 1}/${MAX_RETRIES})`);
       return generateWithGemini(prompt, retryCount + 1);
@@ -54,7 +53,6 @@ const generateWithGemini = async (prompt: string, retryCount = 0): Promise<strin
   }
 };
 
-// Simplified prompt to reduce token count while maintaining quality
 const createExpertCoachPrompt = (expertise: string) => `
 Create a focused weekly workout plan based on: ${expertise}. Include for each day:
 

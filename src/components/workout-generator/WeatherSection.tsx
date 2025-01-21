@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CloudSun } from "lucide-react";
-import { LocationSearch } from "../LocationSearch";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 
 interface WeatherData {
@@ -20,6 +21,9 @@ interface WeatherSectionProps {
 }
 
 export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: WeatherSectionProps) {
+  const [location, setLocation] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const getWeatherDescription = (code: number) => {
     const weatherCodes: Record<number, string> = {
       0: "Clear sky",
@@ -50,48 +54,55 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
     return weatherCodes[code] || "Unknown";
   };
 
-  const handleLocationSelect = async (location: { 
-    name: string; 
-    latitude: number; 
-    longitude: number;
-    admin1?: string;
-    country: string;
-  }) => {
+  const handleGetWeather = async () => {
+    if (!location.trim()) return;
+
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('get-weather', {
+      // First get location coordinates
+      const { data: locationData, error: locationError } = await supabase.functions.invoke('get-weather', {
+        body: { query: location }
+      });
+
+      if (locationError) throw locationError;
+      if (!locationData.results?.[0]) throw new Error('Location not found');
+
+      const firstResult = locationData.results[0];
+      const locationString = [
+        firstResult.name,
+        firstResult.admin1,
+        firstResult.country
+      ].filter(Boolean).join(", ");
+
+      // Then get weather data
+      const { data: weatherResponse, error: weatherError } = await supabase.functions.invoke('get-weather', {
         body: { 
-          latitude: location.latitude,
-          longitude: location.longitude
+          latitude: firstResult.latitude,
+          longitude: firstResult.longitude
         }
       });
 
-      if (error) throw error;
-
-      const locationString = [
-        location.name,
-        location.admin1,
-        location.country
-      ].filter(Boolean).join(", ");
+      if (weatherError) throw weatherError;
 
       const weatherData = {
-        temperature: data.weather.current.temperature_2m,
-        humidity: data.weather.current.relative_humidity_2m,
-        windSpeed: data.weather.current.wind_speed_10m,
+        temperature: weatherResponse.weather.current.temperature_2m,
+        humidity: weatherResponse.weather.current.relative_humidity_2m,
+        windSpeed: weatherResponse.weather.current.wind_speed_10m,
         location: locationString,
-        apparentTemperature: data.weather.current.apparent_temperature,
-        precipitation: data.weather.current.precipitation,
-        weatherCode: data.weather.current.weather_code
+        apparentTemperature: weatherResponse.weather.current.apparent_temperature,
+        precipitation: weatherResponse.weather.current.precipitation,
+        weatherCode: weatherResponse.weather.current.weather_code
       };
 
-      const weatherDesc = getWeatherDescription(data.weather.current.weather_code);
+      const weatherDesc = getWeatherDescription(weatherResponse.weather.current.weather_code);
       const weatherPrompt = 
         `Consider these detailed weather conditions: 
         Location: ${locationString}
-        Temperature: ${data.weather.current.temperature_2m}°C (${(data.weather.current.temperature_2m * 9/5 + 32).toFixed(1)}°F)
-        Feels Like: ${data.weather.current.apparent_temperature}°C (${(data.weather.current.apparent_temperature * 9/5 + 32).toFixed(1)}°F)
-        Humidity: ${data.weather.current.relative_humidity_2m}%
-        Wind Speed: ${data.weather.current.wind_speed_10m} m/s (${(data.weather.current.wind_speed_10m * 2.237).toFixed(1)} mph)
-        Precipitation: ${data.weather.current.precipitation} mm
+        Temperature: ${weatherResponse.weather.current.temperature_2m}°C (${(weatherResponse.weather.current.temperature_2m * 9/5 + 32).toFixed(1)}°F)
+        Feels Like: ${weatherResponse.weather.current.apparent_temperature}°C (${(weatherResponse.weather.current.apparent_temperature * 9/5 + 32).toFixed(1)}°F)
+        Humidity: ${weatherResponse.weather.current.relative_humidity_2m}%
+        Wind Speed: ${weatherResponse.weather.current.wind_speed_10m} m/s (${(weatherResponse.weather.current.wind_speed_10m * 2.237).toFixed(1)} mph)
+        Precipitation: ${weatherResponse.weather.current.precipitation} mm
         Weather Conditions: ${weatherDesc}
         
         Please adjust the workout accordingly, considering factors like:
@@ -104,6 +115,8 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
       onWeatherUpdate(weatherData, weatherPrompt);
     } catch (error) {
       console.error('Error fetching weather:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,7 +127,23 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
         <h3 className="font-oswald text-lg uppercase">Weather Conditions</h3>
         {renderTooltip()}
       </div>
-      <LocationSearch onLocationSelect={handleLocationSelect} />
+      
+      <div className="flex gap-2">
+        <Input
+          placeholder="Enter location (e.g., New York, London)"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleGetWeather()}
+          className="flex-1 bg-white text-black placeholder:text-gray-500"
+        />
+        <Button 
+          onClick={handleGetWeather}
+          disabled={isLoading}
+          className="bg-primary text-white"
+        >
+          {isLoading ? "Loading..." : "Get Weather"}
+        </Button>
+      </div>
       
       {weatherData && (
         <div className="bg-primary/10 rounded-lg p-4 text-sm text-primary animate-fade-in">

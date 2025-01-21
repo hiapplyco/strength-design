@@ -41,15 +41,22 @@ export const TestimonialsSection = () => {
       }
 
       console.log('Creating checkout session...');
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { subscriptionType: type },
-        signal: controller.signal,
+      
+      // Create a promise that rejects after 10 seconds
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timed out')), 10000);
       });
 
-      clearTimeout(timeoutId);
+      // Race between the actual request and the timeout
+      const result = await Promise.race([
+        supabase.functions.invoke('create-checkout', {
+          body: { subscriptionType: type }
+        }),
+        timeoutPromise
+      ]);
+
+      // Type assertion to handle the response type
+      const { data, error } = result as { data: any; error: any };
 
       if (error) throw error;
 
@@ -59,11 +66,11 @@ export const TestimonialsSection = () => {
       } else {
         throw new Error('No checkout URL received');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating checkout session:', error);
       toast({
         title: "Error",
-        description: error.message === 'The operation was aborted.' 
+        description: error.message === 'Request timed out'
           ? "Request timed out. Please try again."
           : error.message || "Failed to create checkout session",
         variant: "destructive",

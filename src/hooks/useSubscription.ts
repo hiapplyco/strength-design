@@ -26,35 +26,23 @@ export const useSubscription = () => {
       }
 
       console.log('Creating checkout session...');
-      
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timed out')), 10000);
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { subscriptionType: type }
       });
-
-      const result = await Promise.race([
-        supabase.functions.invoke('create-checkout', {
-          body: { subscriptionType: type }
-        }),
-        timeoutPromise
-      ]);
-
-      const { data, error } = result as { data: any; error: any };
 
       if (error) throw error;
 
-      if (data?.url) {
-        console.log('Redirecting to Stripe...');
-        window.location.href = data.url;
-      } else {
+      if (!data?.url) {
         throw new Error('No checkout URL received');
       }
+
+      console.log('Redirecting to Stripe...');
+      window.location.href = data.url;
     } catch (error: any) {
       console.error('Error creating checkout session:', error);
       toast({
-        title: "Error",
-        description: error.message === 'Request timed out'
-          ? "Request timed out. Please try again."
-          : error.message || "Failed to create checkout session",
+        title: "Subscription Error",
+        description: error.message || "Failed to start subscription process. Please try again.",
         variant: "destructive",
       });
     } finally {

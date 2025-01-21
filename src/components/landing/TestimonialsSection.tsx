@@ -1,82 +1,31 @@
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
+import { PricingCard } from "./PricingCard";
 
 export const TestimonialsSection = () => {
-  const [loadingStates, setLoadingStates] = useState({
-    unlimited: false,
-    personalized: false
-  });
-  const [authSession, setAuthSession] = useState(null);
-  const { toast } = useToast();
+  const { loadingStates, handleSubscription } = useSubscription();
 
-  // Pre-fetch auth session
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (!error && session) {
-        setAuthSession(session);
-      }
-    };
-    fetchSession();
-  }, []);
-
-  const handleSubscription = async (type: 'unlimited' | 'personalized') => {
-    try {
-      console.log(`Starting ${type} subscription process...`);
-      setLoadingStates(prev => ({ ...prev, [type]: true }));
-      
-      // Use pre-fetched session if available
-      const session = authSession || (await supabase.auth.getSession()).data.session;
-      
-      if (!session) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to subscribe to a plan",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Creating checkout session...');
-      
-      // Create a promise that rejects after 10 seconds
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timed out')), 10000);
-      });
-
-      // Race between the actual request and the timeout
-      const result = await Promise.race([
-        supabase.functions.invoke('create-checkout', {
-          body: { subscriptionType: type }
-        }),
-        timeoutPromise
-      ]);
-
-      // Type assertion to handle the response type
-      const { data, error } = result as { data: any; error: any };
-
-      if (error) throw error;
-
-      if (data?.url) {
-        console.log('Redirecting to Stripe...');
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error: any) {
-      console.error('Error creating checkout session:', error);
-      toast({
-        title: "Error",
-        description: error.message === 'Request timed out'
-          ? "Request timed out. Please try again."
-          : error.message || "Failed to create checkout session",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingStates(prev => ({ ...prev, [type]: false }));
+  const pricingData = {
+    unlimited: {
+      title: "Unlimited Access",
+      price: "$24.99",
+      features: [
+        "Unlimited access to our entire library of science-based workout templates",
+        "Data-driven insights to guide your training",
+        "Basic progress tracking and analytics",
+        "Perfect for individual enthusiasts and smaller training operations"
+      ],
+      buttonText: "Choose Unlimited"
+    },
+    personalized: {
+      title: "Personalized Dashboards",
+      price: "$99.99",
+      features: [
+        "Individualized member dashboards with comprehensive performance metrics",
+        "Automated personalized strength programs with dynamic adjustments",
+        "Real-time performance tracking and team management capabilities",
+        "Advanced analytics and business insights for fitness professionals"
+      ],
+      buttonText: "Go Personalized"
     }
   };
 
@@ -86,60 +35,17 @@ export const TestimonialsSection = () => {
         Flexible Pricing for Every Fitness Goal
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-muted p-8 rounded-xl">
-          <div className="mb-8">
-            <h3 className="text-3xl font-oswald text-primary mb-2">Unlimited Access</h3>
-            <p className="text-4xl font-bold text-white mb-4">$24.99<span className="text-lg">/month</span></p>
-            <ul className="space-y-4">
-              {[
-                "Unlimited access to our entire library of science-based workout templates",
-                "Data-driven insights to guide your training",
-                "Basic progress tracking and analytics",
-                "Perfect for individual enthusiasts and smaller training operations"
-              ].map((feature, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-1" />
-                  <span className="text-white">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <Button 
-            className="w-full" 
-            size="lg" 
-            onClick={() => handleSubscription('unlimited')}
-            disabled={loadingStates.unlimited}
-          >
-            {loadingStates.unlimited ? "Processing..." : "Choose Unlimited"}
-          </Button>
-        </div>
-        <div className="bg-muted p-8 rounded-xl border-2 border-primary">
-          <div className="mb-8">
-            <h3 className="text-3xl font-oswald text-primary mb-2">Personalized Dashboards</h3>
-            <p className="text-4xl font-bold text-white mb-4">$99.99<span className="text-lg">/month</span></p>
-            <ul className="space-y-4">
-              {[
-                "Individualized member dashboards with comprehensive performance metrics",
-                "Automated personalized strength programs with dynamic adjustments",
-                "Real-time performance tracking and team management capabilities",
-                "Advanced analytics and business insights for fitness professionals"
-              ].map((feature, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-primary mt-1" />
-                  <span className="text-white">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <Button 
-            className="w-full" 
-            size="lg" 
-            onClick={() => handleSubscription('personalized')}
-            disabled={loadingStates.personalized}
-          >
-            {loadingStates.personalized ? "Processing..." : "Go Personalized"}
-          </Button>
-        </div>
+        <PricingCard
+          {...pricingData.unlimited}
+          isLoading={loadingStates.unlimited}
+          onSubscribe={() => handleSubscription('unlimited')}
+        />
+        <PricingCard
+          {...pricingData.personalized}
+          isHighlighted
+          isLoading={loadingStates.personalized}
+          onSubscribe={() => handleSubscription('personalized')}
+        />
       </div>
     </section>
   );

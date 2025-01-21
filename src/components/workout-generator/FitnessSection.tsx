@@ -22,7 +22,7 @@ export function FitnessSection({ fitnessLevel, onFitnessLevelChange, renderToolt
         className="bg-white text-black placeholder:text-gray-500"
       />
       {fitnessLevel && (
-        <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in">
+        <div className="bg-white rounded-lg p-4 text-sm animate-fade-in">
           <p className="font-semibold text-primary">Fitness Profile:</p>
           <p>{fitnessLevel}</p>
         </div>

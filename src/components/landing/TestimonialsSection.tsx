@@ -15,12 +15,15 @@ import { useToast } from "@/hooks/use-toast";
 export const TestimonialsSection = () => {
   const [isUnlimitedDialogOpen, setIsUnlimitedDialogOpen] = useState(false);
   const [isPersonalizedDialogOpen, setIsPersonalizedDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStates, setLoadingStates] = useState({
+    unlimited: false,
+    personalized: false
+  });
   const { toast } = useToast();
 
   const handleSubscription = async (type: 'unlimited' | 'personalized') => {
     try {
-      setIsLoading(true);
+      setLoadingStates(prev => ({ ...prev, [type]: true }));
       
       const { data: { session }, error: authError } = await supabase.auth.getSession();
       
@@ -52,7 +55,7 @@ export const TestimonialsSection = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setLoadingStates(prev => ({ ...prev, [type]: false }));
     }
   };
 
@@ -84,9 +87,9 @@ export const TestimonialsSection = () => {
             className="w-full" 
             size="lg" 
             onClick={() => handleSubscription('unlimited')}
-            disabled={isLoading}
+            disabled={loadingStates.unlimited}
           >
-            {isLoading ? "Processing..." : "Choose Unlimited"}
+            {loadingStates.unlimited ? "Processing..." : "Choose Unlimited"}
           </Button>
         </div>
         <div className="bg-muted p-8 rounded-xl border-2 border-primary">
@@ -111,9 +114,9 @@ export const TestimonialsSection = () => {
             className="w-full" 
             size="lg" 
             onClick={() => handleSubscription('personalized')}
-            disabled={isLoading}
+            disabled={loadingStates.personalized}
           >
-            {isLoading ? "Processing..." : "Go Personalized"}
+            {loadingStates.personalized ? "Processing..." : "Go Personalized"}
           </Button>
         </div>
       </div>

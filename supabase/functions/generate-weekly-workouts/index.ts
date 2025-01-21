@@ -6,21 +6,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const generateWithGemini = async (prompt: string) => {
+const MAX_RETRIES = 2;
+const TIMEOUT_MS = 20000; // Increased to 20 seconds
+
+const generateWithGemini = async (prompt: string, retryCount = 0): Promise<string> => {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not configured');
   }
 
-  console.log('Starting Gemini generation with prompt length:', prompt.length);
+  console.log(`Attempt ${retryCount + 1} - Starting Gemini generation with prompt length: ${prompt.length}`);
+  
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
     model: "gemini-1.5-pro",
     generationConfig: {
-      temperature: 0.7, // Reduced from 0.9 for faster, more focused responses
-      topP: 0.8, // Reduced from 0.95 for more focused token selection
-      topK: 20, // Reduced from 40 for faster processing
-      maxOutputTokens: 4096, // Reduced from 8192 to optimize response time
+      temperature: 0.6, // Further reduced for faster responses
+      topP: 0.7,       // Further reduced for more focused responses
+      topK: 10,        // Further reduced for faster processing
+      maxOutputTokens: 2048, // Reduced for faster processing while maintaining quality
     },
   });
 
@@ -30,7 +34,7 @@ const generateWithGemini = async (prompt: string) => {
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       }),
       new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Gemini API timeout')), 15000)
+        setTimeout(() => reject(new Error('Gemini API timeout')), TIMEOUT_MS)
       ),
     ]);
 
@@ -38,41 +42,29 @@ const generateWithGemini = async (prompt: string) => {
     console.log('Successfully received Gemini response');
     return result.response.text();
   } catch (error) {
-    console.error('Error in generateWithGemini:', error);
-    throw new Error(`Gemini API error: ${error.message}`);
+    console.error(`Error in generateWithGemini (attempt ${retryCount + 1}):`, error);
+    
+    // Retry logic
+    if (retryCount < MAX_RETRIES) {
+      console.log(`Retrying... (${retryCount + 1}/${MAX_RETRIES})`);
+      return generateWithGemini(prompt, retryCount + 1);
+    }
+    
+    throw new Error(`Gemini API error after ${retryCount + 1} attempts: ${error.message}`);
   }
 };
 
 // Simplified prompt to reduce token count while maintaining quality
 const createExpertCoachPrompt = (expertise: string) => `
-As an expert coach, create a focused weekly workout plan based on ${expertise}. Include:
+Create a focused weekly workout plan based on: ${expertise}. Include for each day:
 
-1. Daily Focus:
-   - Purpose and goals
-   - Expected outcomes
+1. Brief description (2-3 sentences max)
+2. Quick warmup sequence
+3. Main workout with clear standards
+4. Basic strength focus
+5. Short coaching notes
 
-2. Warmup:
-   - Movement prep
-   - Mobility work
-   - Intensity build-up
-
-3. Main Workout:
-   - Movement standards
-   - Loading parameters
-   - Rest periods
-   - Scaling options
-
-4. Strength Focus:
-   - Primary movements
-   - Loading schemes
-   - Technical cues
-
-5. Coaching Notes:
-   - Key points
-   - Safety tips
-   - Recovery guidelines
-
-Return in JSON format:
+Format as JSON:
 {
   "Sunday": {
     "description": "Focus and purpose",
@@ -81,48 +73,7 @@ Return in JSON format:
     "notes": "Coaching notes",
     "strength": "Strength focus"
   },
-  "Monday": {
-    "description": "string",
-    "warmup": "string",
-    "workout": "string",
-    "notes": "string",
-    "strength": "string"
-  },
-  "Tuesday": {
-    "description": "string",
-    "warmup": "string",
-    "workout": "string",
-    "notes": "string",
-    "strength": "string"
-  },
-  "Wednesday": {
-    "description": "string",
-    "warmup": "string",
-    "workout": "string",
-    "notes": "string",
-    "strength": "string"
-  },
-  "Thursday": {
-    "description": "string",
-    "warmup": "string",
-    "workout": "string",
-    "notes": "string",
-    "strength": "string"
-  },
-  "Friday": {
-    "description": "string",
-    "warmup": "string",
-    "workout": "string",
-    "notes": "string",
-    "strength": "string"
-  },
-  "Saturday": {
-    "description": "string",
-    "warmup": "string",
-    "workout": "string",
-    "notes": "string",
-    "strength": "string"
-  }
+  // ... repeat for all days
 }`;
 
 serve(async (req) => {
@@ -143,10 +94,15 @@ serve(async (req) => {
     }
 
     const expertPrompt = createExpertCoachPrompt(prompt);
+    console.log('Generated expert prompt length:', expertPrompt.length);
+    
     const textResponse = await generateWithGemini(expertPrompt);
+    console.log('Received response from Gemini');
 
     try {
       const cleanedText = textResponse.replace(/```json\n?|\n?```/g, '').trim();
+      console.log('Cleaned response length:', cleanedText.length);
+      
       const workouts = JSON.parse(cleanedText);
 
       // Validate required structure
@@ -164,6 +120,7 @@ serve(async (req) => {
         throw new Error('Generated workout plan is incomplete');
       }
 
+      console.log('Successfully validated workout structure');
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

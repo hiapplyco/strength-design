@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import BestAppOfDay from "./pages/BestAppOfDay";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/components/layout/Navbar";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <Navbar />
         <Toaster />
         <Sonner />
         <BrowserRouter>

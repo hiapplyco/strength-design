@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const MAX_RETRIES = 2;
-const TIMEOUT_MS = 20000; // Increased to 20 seconds
+const TIMEOUT_MS = 20000; // 20 seconds timeout
 
 const generateWithGemini = async (prompt: string, retryCount = 0): Promise<string> => {
   const apiKey = Deno.env.get('GEMINI_API_KEY');
@@ -19,12 +19,12 @@ const generateWithGemini = async (prompt: string, retryCount = 0): Promise<strin
   
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-pro",
+    model: "gemini-1.5-pro-latest",
     generationConfig: {
-      temperature: 0.6, // Further reduced for faster responses
-      topP: 0.7,       // Further reduced for more focused responses
-      topK: 10,        // Further reduced for faster processing
-      maxOutputTokens: 2048, // Reduced for faster processing while maintaining quality
+      temperature: 0.7,
+      topP: 0.8,
+      topK: 40,
+      maxOutputTokens: 8192, // Set to 8192 as requested
     },
   });
 

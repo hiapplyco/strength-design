@@ -1,61 +1,91 @@
-import { Exercise } from "./types";
-import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Plus, Check } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import type { Exercise } from "./types";
 
 interface SearchResultsProps {
-  isLoading: boolean;
-  exercises: Exercise[];
+  results: Exercise[];
+  selectedExercises: string[];
+  onExerciseSelect: (exercise: Exercise) => void;
   sanitizeText: (text: string) => string;
-  onExerciseSelect?: (exercise: Exercise) => void;
 }
 
-export const SearchResults = ({ isLoading, exercises, sanitizeText, onExerciseSelect }: SearchResultsProps) => {
-  if (isLoading) {
-    return <p className="text-center p-4 text-black">Loading exercises...</p>;
-  }
-
-  if (exercises.length === 0) {
-    return <p className="text-center p-4 text-destructive font-bold">No exercises found</p>;
-  }
+export const SearchResults = ({ 
+  results, 
+  selectedExercises, 
+  onExerciseSelect,
+  sanitizeText 
+}: SearchResultsProps) => {
+  if (results.length === 0) return null;
 
   return (
-    <div className="space-y-4 p-4 max-h-[60vh] overflow-y-auto">
-      {exercises.map((exercise, index) => (
-        <div key={index} className="bg-white rounded p-4 border border-black">
-          <div className="flex justify-between items-start gap-4">
-            <div className="flex-1">
-              <h3 className="font-bold text-lg text-black">{sanitizeText(exercise.name)}</h3>
-              <p className="text-sm text-gray-600 mb-2">Level: {sanitizeText(exercise.level)}</p>
-            </div>
-            {onExerciseSelect && (
-              <Button
-                variant="ghost"
-                onClick={() => onExerciseSelect(exercise)}
-                className="shrink-0 hover:bg-primary/20 flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add to workout
-              </Button>
-            )}
-          </div>
-          <div className="text-sm">
-            <p className="font-medium mb-1 text-black">Instructions:</p>
-            <ul className="list-disc pl-4 space-y-1 text-black">
-              {exercise.instructions.map((instruction, idx) => (
-                <li key={idx}>{sanitizeText(instruction)}</li>
-              ))}
-            </ul>
-          </div>
-          {exercise.images?.[0] && (
-            <img
-              src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
-              alt={exercise.name}
-              className="mt-2 rounded w-full h-auto"
-              loading="lazy"
-            />
-          )}
-        </div>
-      ))}
+    <div className="rounded-lg border bg-card max-h-[60vh] overflow-y-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Exercise</TableHead>
+            <TableHead>Instructions</TableHead>
+            <TableHead className="w-[100px]">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {results.map((exercise, index) => {
+            const isSelected = selectedExercises.includes(exercise.name);
+            return (
+              <TableRow key={index}>
+                <TableCell className="font-medium">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-primary font-semibold">
+                      {sanitizeText(exercise.name)}
+                    </span>
+                    {exercise.images?.[0] && (
+                      <img
+                        src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
+                        alt={exercise.name}
+                        className="rounded-md w-48 h-auto object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground max-w-md">
+                  {exercise.instructions[0]}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant={isSelected ? "default" : "default"}
+                    onClick={() => !isSelected && onExerciseSelect(exercise)}
+                    className={cn(
+                      "w-full transition-all duration-200",
+                      isSelected 
+                        ? "bg-green-500 hover:bg-green-600" 
+                        : "bg-primary hover:bg-primary/90"
+                    )}
+                    disabled={isSelected}
+                  >
+                    {isSelected ? (
+                      <Check className="h-4 w-4 text-white" />
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add
+                      </>
+                    )}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 };

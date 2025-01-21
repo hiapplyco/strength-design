@@ -1,16 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Check, X } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { SearchInput } from "./exercise-search/SearchInput";
+import { SearchResults } from "./exercise-search/SearchResults";
 import type { Exercise } from "./exercise-search/types";
 
 interface ExerciseSearchProps {
@@ -19,7 +10,11 @@ interface ExerciseSearchProps {
   embedded?: boolean;
 }
 
-export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }: ExerciseSearchProps) => {
+export const ExerciseSearch = ({ 
+  onExerciseSelect, 
+  className, 
+  embedded = false 
+}: ExerciseSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [searchResults, setSearchResults] = useState<Exercise[]>([]);
@@ -63,7 +58,6 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
       }
     };
 
-    // Add a small delay to prevent too many searches while typing
     const debounceTimeout = setTimeout(performSearch, 300);
     return () => clearTimeout(debounceTimeout);
   }, [searchQuery, exercises]);
@@ -89,91 +83,19 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
   return (
     <div 
       ref={searchRef}
-      className={cn(
-        "space-y-4",
-        className
-      )}
+      className={cn("space-y-4", className)}
     >
-      <div className="flex gap-2 relative">
-        <Input
-          placeholder="Add equipment to enhance your Program..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 bg-white text-black placeholder:text-gray-500 pr-8"
-        />
-        {searchQuery && (
-          <button
-            onClick={handleClearSearch}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
-            aria-label="Clear search"
-          >
-            <X className="h-4 w-4 text-gray-500" />
-          </button>
-        )}
-      </div>
-
-      {searchResults.length > 0 && (
-        <div className="rounded-lg border bg-card max-h-[60vh] overflow-y-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Exercise</TableHead>
-                <TableHead>Instructions</TableHead>
-                <TableHead className="w-[100px]">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {searchResults.map((exercise, index) => {
-                const isSelected = selectedExercises.includes(exercise.name);
-                return (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-primary font-semibold">
-                          {sanitizeText(exercise.name)}
-                        </span>
-                        {exercise.images?.[0] && (
-                          <img
-                            src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
-                            alt={exercise.name}
-                            className="rounded-md w-48 h-auto object-cover"
-                            loading="lazy"
-                          />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground max-w-md">
-                      {exercise.instructions[0]}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant={isSelected ? "default" : "default"}
-                        onClick={() => !isSelected && handleExerciseSelect(exercise)}
-                        className={cn(
-                          "w-full transition-all duration-200",
-                          isSelected 
-                            ? "bg-green-500 hover:bg-green-600" 
-                            : "bg-primary hover:bg-primary/90"
-                        )}
-                        disabled={isSelected}
-                      >
-                        {isSelected ? (
-                          <Check className="h-4 w-4 text-white" />
-                        ) : (
-                          <>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add
-                          </>
-                        )}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onClear={handleClearSearch}
+      />
+      <SearchResults
+        results={searchResults}
+        selectedExercises={selectedExercises}
+        onExerciseSelect={handleExerciseSelect}
+        sanitizeText={sanitizeText}
+      />
     </div>
   );
 };

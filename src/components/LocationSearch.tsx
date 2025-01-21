@@ -52,7 +52,6 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
       }
     };
 
-    // Add a small delay to prevent too many searches while typing
     const debounceTimeout = setTimeout(performSearch, 300);
     return () => clearTimeout(debounceTimeout);
   }, [searchQuery]);
@@ -73,7 +72,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
       />
 
       {locations.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-[200px] overflow-y-auto">
           {locations.map((location, index) => (
             <Button
               key={index}
@@ -89,6 +88,12 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
               </span>
             </Button>
           ))}
+        </div>
+      )}
+
+      {isSearching && (
+        <div className="text-sm text-muted-foreground">
+          Searching...
         </div>
       )}
     </div>

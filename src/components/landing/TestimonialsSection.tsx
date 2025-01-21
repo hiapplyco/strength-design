@@ -1,33 +1,37 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useState } from "react";
-import { ContactForm } from "./ContactForm";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export const TestimonialsSection = () => {
-  const [isUnlimitedDialogOpen, setIsUnlimitedDialogOpen] = useState(false);
-  const [isPersonalizedDialogOpen, setIsPersonalizedDialogOpen] = useState(false);
   const [loadingStates, setLoadingStates] = useState({
     unlimited: false,
     personalized: false
   });
+  const [authSession, setAuthSession] = useState(null);
   const { toast } = useToast();
+
+  // Pre-fetch auth session
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (!error && session) {
+        setAuthSession(session);
+      }
+    };
+    fetchSession();
+  }, []);
 
   const handleSubscription = async (type: 'unlimited' | 'personalized') => {
     try {
+      console.log(`Starting ${type} subscription process...`);
       setLoadingStates(prev => ({ ...prev, [type]: true }));
       
-      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      // Use pre-fetched session if available
+      const session = authSession || (await supabase.auth.getSession()).data.session;
       
-      if (authError || !session) {
+      if (!session) {
         toast({
           title: "Authentication required",
           description: "Please sign in to subscribe to a plan",
@@ -36,13 +40,21 @@ export const TestimonialsSection = () => {
         return;
       }
 
+      console.log('Creating checkout session...');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { subscriptionType: type }
+        body: { subscriptionType: type },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (error) throw error;
 
       if (data?.url) {
+        console.log('Redirecting to Stripe...');
         window.location.href = data.url;
       } else {
         throw new Error('No checkout URL received');
@@ -51,7 +63,9 @@ export const TestimonialsSection = () => {
       console.error('Error creating checkout session:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create checkout session",
+        description: error.message === 'The operation was aborted.' 
+          ? "Request timed out. Please try again."
+          : error.message || "Failed to create checkout session",
         variant: "destructive",
       });
     } finally {

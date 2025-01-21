@@ -9,10 +9,52 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { ContactForm } from "./ContactForm";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const TestimonialsSection = () => {
   const [isUnlimitedDialogOpen, setIsUnlimitedDialogOpen] = useState(false);
   const [isPersonalizedDialogOpen, setIsPersonalizedDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubscription = async (type: 'unlimited' | 'personalized') => {
+    try {
+      setIsLoading(true);
+      
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      
+      if (authError || !session) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to subscribe to a plan",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { subscriptionType: type }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create checkout session",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
@@ -38,25 +80,14 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <AlertDialog 
-            open={isUnlimitedDialogOpen} 
-            onOpenChange={setIsUnlimitedDialogOpen}
+          <Button 
+            className="w-full" 
+            size="lg" 
+            onClick={() => handleSubscription('unlimited')}
+            disabled={isLoading}
           >
-            <AlertDialogTrigger asChild>
-              <Button className="w-full" size="lg">Choose Unlimited</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-background">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
-                  Let's Level Up Your Training Program
-                </AlertDialogTitle>
-                <ContactForm 
-                  subscriptionType="Unlimited" 
-                  onSuccess={() => setIsUnlimitedDialogOpen(false)} 
-                />
-              </AlertDialogHeader>
-            </AlertDialogContent>
-          </AlertDialog>
+            {isLoading ? "Processing..." : "Choose Unlimited"}
+          </Button>
         </div>
         <div className="bg-muted p-8 rounded-xl border-2 border-primary">
           <div className="mb-8">
@@ -76,25 +107,14 @@ export const TestimonialsSection = () => {
               ))}
             </ul>
           </div>
-          <AlertDialog 
-            open={isPersonalizedDialogOpen} 
-            onOpenChange={setIsPersonalizedDialogOpen}
+          <Button 
+            className="w-full" 
+            size="lg" 
+            onClick={() => handleSubscription('personalized')}
+            disabled={isLoading}
           >
-            <AlertDialogTrigger asChild>
-              <Button className="w-full" size="lg">Go Personalized</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-background">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-2xl font-oswald text-primary mb-4">
-                  Transform Your Training Experience
-                </AlertDialogTitle>
-                <ContactForm 
-                  subscriptionType="Personalized" 
-                  onSuccess={() => setIsPersonalizedDialogOpen(false)} 
-                />
-              </AlertDialogHeader>
-            </AlertDialogContent>
-          </AlertDialog>
+            {isLoading ? "Processing..." : "Go Personalized"}
+          </Button>
         </div>
       </div>
     </section>

@@ -12,89 +12,74 @@ const generateWithGemini = async (prompt: string) => {
     throw new Error('GEMINI_API_KEY is not configured');
   }
 
+  console.log('Starting Gemini generation with prompt length:', prompt.length);
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-pro",
+    generationConfig: {
+      temperature: 0.7, // Reduced from 0.9 for faster, more focused responses
+      topP: 0.8, // Reduced from 0.95 for more focused token selection
+      topK: 20, // Reduced from 40 for faster processing
+      maxOutputTokens: 4096, // Reduced from 8192 to optimize response time
+    },
+  });
+
   try {
-    console.log('Starting Gemini generation with prompt:', prompt);
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-pro",
-      generationConfig: {
-        temperature: 0.9,
-        topP: 0.95,
-        topK: 40,
-        maxOutputTokens: 8192,
-      }
-    });
+    const result = await Promise.race([
+      model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Gemini API timeout')), 15000)
+      ),
+    ]);
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-    });
-
-    const response = result.response;
+    if (result instanceof Error) throw result;
     console.log('Successfully received Gemini response');
-    return response.text();
+    return result.response.text();
   } catch (error) {
     console.error('Error in generateWithGemini:', error);
     throw new Error(`Gemini API error: ${error.message}`);
   }
 };
 
+// Simplified prompt to reduce token count while maintaining quality
 const createExpertCoachPrompt = (expertise: string) => `
-You are a world-renowned coach and movement specialist with over 25 years of experience in athletic development, movement optimization, and performance enhancement. Your expertise spans across multiple domains including:
-- Olympic weightlifting and powerlifting
-- Gymnastics and calisthenics
-- Sport-specific conditioning
-- Rehabilitation and injury prevention
-- Movement screening and assessment
-- Periodization and program design
-- Mental performance coaching
+As an expert coach, create a focused weekly workout plan based on ${expertise}. Include:
 
-Based on your extensive expertise in ${expertise}, create a comprehensive weekly progression plan that demonstrates your deep understanding of movement science and athletic development.
+1. Daily Focus:
+   - Purpose and goals
+   - Expected outcomes
 
-For each training day, provide:
+2. Warmup:
+   - Movement prep
+   - Mobility work
+   - Intensity build-up
 
-1. STRATEGIC OVERVIEW:
-   - Day's specific focus and purpose
-   - Connection to overall progression
-   - Expected adaptation markers
-   - Integration with weekly flow
+3. Main Workout:
+   - Movement standards
+   - Loading parameters
+   - Rest periods
+   - Scaling options
 
-2. DETAILED WARMUP PROTOCOL:
-   - Movement preparation sequence
-   - Mobility/stability work
-   - Progressive intensity building
-   - Neural preparation elements
-
-3. MAIN WORKOUT:
-   - Clear movement standards
-   - Loading parameters with rationale
-   - Work-to-rest ratios
-   - Intensity guidelines
-   - Progression/regression options
-   - Time domains with purpose
-
-4. STRENGTH DEVELOPMENT:
-   - Primary movement patterns
+4. Strength Focus:
+   - Primary movements
    - Loading schemes
-   - Tempo guidelines
-   - Accessory work
-   - Integration with skill work
+   - Technical cues
 
-5. COACHING NOTES:
-   - Technical priorities
-   - Common faults and corrections
-   - Performance metrics
-   - Safety considerations
+5. Coaching Notes:
+   - Key points
+   - Safety tips
    - Recovery guidelines
 
-Return the response in this exact JSON format:
-
+Return in JSON format:
 {
   "Sunday": {
-    "description": "Detailed focus and purpose",
-    "warmup": "Complete warmup protocol",
-    "workout": "Main workout with all parameters",
-    "notes": "Comprehensive coaching notes",
-    "strength": "Detailed strength focus"
+    "description": "Focus and purpose",
+    "warmup": "Warmup protocol",
+    "workout": "Main workout",
+    "notes": "Coaching notes",
+    "strength": "Strength focus"
   },
   "Monday": {
     "description": "string",
@@ -138,16 +123,11 @@ Return the response in this exact JSON format:
     "notes": "string",
     "strength": "string"
   }
-}
-
-Ensure each day's workout demonstrates your expertise in ${expertise} while maintaining sound training principles and scientific methodology.`;
+}`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      headers: corsHeaders,
-      status: 204,
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -156,25 +136,20 @@ serve(async (req) => {
     }
 
     const { prompt } = await req.json();
-    console.log('Received expertise area:', prompt);
+    console.log('Processing request for expertise:', prompt);
 
     if (!prompt || typeof prompt !== 'string') {
-      throw new Error('Invalid or missing prompt in request body');
+      throw new Error('Invalid or missing prompt');
     }
 
     const expertPrompt = createExpertCoachPrompt(prompt);
-    console.log('Generated expert prompt:', expertPrompt);
-
     const textResponse = await generateWithGemini(expertPrompt);
-    console.log('Raw Gemini response:', textResponse);
 
     try {
       const cleanedText = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-      console.log('Cleaned response:', cleanedText);
-
       const workouts = JSON.parse(cleanedText);
-      console.log('Parsed workouts:', workouts);
 
+      // Validate required structure
       const requiredDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const requiredFields = ['description', 'warmup', 'workout', 'notes', 'strength'];
 
@@ -185,33 +160,26 @@ serve(async (req) => {
       );
 
       if (!isValid) {
-        console.error('Invalid workout structure:', workouts);
-        throw new Error('Generated JSON is missing required days or fields');
+        console.error('Invalid workout structure');
+        throw new Error('Generated workout plan is incomplete');
       }
 
       return new Response(JSON.stringify(workouts), {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (parseError) {
       console.error('Error parsing response:', parseError);
-      throw new Error(`Invalid JSON structure: ${parseError.message}`);
+      throw new Error('Failed to generate valid workout plan');
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: 'Failed to generate or parse workouts'
+        details: 'Failed to generate workouts'
       }), {
         status: error.message === 'Method not allowed' ? 405 : 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }

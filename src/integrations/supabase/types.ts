@@ -150,6 +150,56 @@ export type Database = {
           },
         ]
       }
+      workout_dashboard: {
+        Row: {
+          created_at: string
+          friday: string | null
+          id: string
+          monday: string | null
+          saturday: string | null
+          sunday: string | null
+          thursday: string | null
+          tuesday: string | null
+          updated_at: string
+          user_id: string
+          wednesday: string | null
+        }
+        Insert: {
+          created_at?: string
+          friday?: string | null
+          id?: string
+          monday?: string | null
+          saturday?: string | null
+          sunday?: string | null
+          thursday?: string | null
+          tuesday?: string | null
+          updated_at?: string
+          user_id: string
+          wednesday?: string | null
+        }
+        Update: {
+          created_at?: string
+          friday?: string | null
+          id?: string
+          monday?: string | null
+          saturday?: string | null
+          sunday?: string | null
+          thursday?: string | null
+          tuesday?: string | null
+          updated_at?: string
+          user_id?: string
+          wednesday?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_dashboard_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workout_history: {
         Row: {
           created_at: string

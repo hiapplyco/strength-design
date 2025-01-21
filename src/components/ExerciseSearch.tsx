@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Check } from "lucide-react";
+import { Plus, Check, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -73,6 +73,11 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
     onExerciseSelect?.(exercise);
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   const sanitizeText = (text: string): string => {
     return text
       .replace(/WOD/g, 'Workout')
@@ -89,13 +94,22 @@ export const ExerciseSearch = ({ onExerciseSelect, className, embedded = false }
         className
       )}
     >
-      <div className="flex gap-2">
+      <div className="flex gap-2 relative">
         <Input
           placeholder="Add equipment to enhance your Program..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 bg-white text-black placeholder:text-gray-500"
+          className="flex-1 bg-white text-black placeholder:text-gray-500 pr-8"
         />
+        {searchQuery && (
+          <button
+            onClick={handleClearSearch}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4 text-gray-500" />
+          </button>
+        )}
       </div>
 
       {searchResults.length > 0 && (

@@ -1,28 +1,10 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { MapPin, Loader2, X } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getWeatherDescription } from "./weather-utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-
-interface WeatherSearchProps {
-  onWeatherUpdate: (weatherData: any | null, weatherPrompt: string) => void;
-  renderTooltip: () => React.ReactNode;
-}
-
-interface LocationResult {
-  name: string;
-  country: string;
-  admin1?: string;
-  latitude: number;
-  longitude: number;
-}
+import { SearchForm } from "./SearchForm";
+import { LocationResultsDialog } from "./LocationResultsDialog";
+import type { WeatherSearchProps, LocationResult } from "./types";
 
 export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchProps) {
   const [location, setLocation] = useState("");
@@ -166,67 +148,20 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
         {renderTooltip()}
       </div>
       
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <div className="relative flex-1">
-          <Input
-            type="text"
-            placeholder="Enter city name..."
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="bg-white text-black placeholder:text-gray-500 rounded-full border-2 border-primary focus-visible:ring-primary pr-10"
-          />
-          {location && (
-            <button
-              type="button"
-              onClick={() => setLocation("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-primary/20 rounded-full transition-colors"
-            >
-              <X className="h-4 w-4 text-primary" />
-            </button>
-          )}
-        </div>
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="rounded-full"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Searching...
-            </>
-          ) : (
-            "Search"
-          )}
-        </Button>
-      </form>
+      <SearchForm
+        location={location}
+        setLocation={setLocation}
+        onSubmit={handleSearch}
+        isLoading={isLoading}
+      />
 
-      {isWeatherLoading && (
-        <div className="flex items-center justify-center p-8 bg-primary/10 rounded-xl animate-pulse">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-primary font-medium">Loading weather data...</span>
-        </div>
-      )}
-
-      <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Location</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {locationResults.map((result, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="w-full justify-start rounded-full"
-                onClick={() => handleLocationSelect(result)}
-              >
-                {formatLocation(result)}
-              </Button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <LocationResultsDialog
+        open={showLocationDialog}
+        onOpenChange={setShowLocationDialog}
+        locationResults={locationResults}
+        onLocationSelect={handleLocationSelect}
+        formatLocation={formatLocation}
+      />
     </div>
   );
 }

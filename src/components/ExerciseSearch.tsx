@@ -96,12 +96,12 @@ export const ExerciseSearch = ({
         onClick={() => setDialogOpen(true)}
         readOnly
         placeholder="Enter exercises or equipment..."
-        className="cursor-pointer bg-white text-black"
+        className="cursor-pointer bg-white text-black rounded-full border-2 border-primary focus-visible:ring-primary"
       />
 
       <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] p-0 gap-0 bg-background border-none">
-          <div className="sticky top-0 z-10 bg-background p-4 border-b">
+          <div className="sticky top-0 z-10 bg-background p-4 border-b rounded-t-xl">
             <div className="flex gap-2 items-center">
               <div className="flex-1">
                 <SearchInput
@@ -113,7 +113,7 @@ export const ExerciseSearch = ({
               <DialogClose asChild>
                 <Button 
                   variant="default"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
                 >
                   Done
                 </Button>

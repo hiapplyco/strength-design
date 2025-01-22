@@ -5,25 +5,25 @@
 @layer base {
   :root {
     --background: 0 0% 100%; /* White background */
-    --foreground: 0 0% 0%; /* Black text */
+    --foreground: 215 25% 27%; /* Changed to darker color for better readability */
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 215 25% 27%; /* Matching text color */
  
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 215 25% 27%; /* Matching text color */
  
     --primary: 36 36% 42%; /* Bronze */
-    --primary-foreground: 0 0% 0%;
+    --primary-foreground: 215 25% 27%; /* Matching text color */
  
     --secondary: 0 0% 75%; /* Silver */
-    --secondary-foreground: 0 0% 0%;
+    --secondary-foreground: 215 25% 27%; /* Matching text color */
  
     --muted: 215 25% 27%; /* Slate */
-    --muted-foreground: 0 0% 45%;
+    --muted-foreground: 215 25% 45%;
  
     --accent: 41 65% 55%; /* Gold */
-    --accent-foreground: 0 0% 0%;
+    --accent-foreground: 215 25% 27%; /* Matching text color */
  
     --destructive: 0 84% 60%; /* Red */
     --destructive-foreground: 0 0% 100%;

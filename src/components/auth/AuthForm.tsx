@@ -18,12 +18,11 @@ export const AuthForm = ({ view }: AuthFormProps) => {
             colors: {
               brand: '#D4B96D',
               brandAccent: '#b39b5c',
-              inputBackground: 'white',
               inputText: 'black',
-              inputPlaceholder: 'darkgray',
-              backgroundAccent: 'white',
-              backgroundSecondary: 'white',
-              backgroundPrimary: 'white',
+              defaultButtonBackground: 'white',
+              defaultButtonBackgroundHover: '#f8f8f8',
+              defaultButtonBorder: '#e2e8f0',
+              defaultButtonText: 'black',
             }
           }
         },

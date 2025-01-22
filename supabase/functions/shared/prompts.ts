@@ -41,47 +41,6 @@ export const createWorkoutGenerationPrompt = ({
     Do not use trailing commas.`;
 };
 
-export const createWorkoutModificationPrompt = (
-  dayToModify: string,
-  modificationPrompt: string,
-  currentWorkout: {
-    warmup: string;
-    workout: string;
-    notes?: string;
-  }
-): string => {
-  return `As an expert coach, modify this workout based on the following request while maintaining its core purpose and progression:
-
-CURRENT WORKOUT FOR ${dayToModify}:
-Warmup: ${currentWorkout.warmup}
-Workout: ${currentWorkout.workout}
-Notes: ${currentWorkout.notes || 'None provided'}
-
-MODIFICATION REQUEST: ${modificationPrompt}
-
-Consider:
-1. Movement pattern integrity
-2. Exercise progression/regression needs
-3. Equipment modifications
-4. Safety and technique priorities
-5. Energy system demands
-6. Recovery implications
-
-IMPORTANT: Your response MUST be a valid, parseable JSON object with this exact structure:
-{
-    "description": "string - Brief workout description",
-    "warmup": "string - Detailed warmup plan",
-    "workout": "string - Complete workout details",
-    "notes": "string - Comprehensive coaching notes",
-    "strength": "string - Specific strength focus"
-}
-
-Do not include any text outside of the JSON object.
-Do not include markdown code blocks.
-Ensure all string values are properly escaped.
-Do not use trailing commas.`;
-};
-
 export const getGeminiConfig = () => ({
   model: "gemini-1.5-flash",
   generationConfig: {

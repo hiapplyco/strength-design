@@ -91,14 +91,12 @@ export const ExerciseSearch = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <Button 
+      <Input
         onClick={() => setDialogOpen(true)}
-        variant="outline"
-        className="w-full flex items-center justify-between bg-white text-black hover:bg-gray-100"
-      >
-        <span>Search Exercises & Equipment</span>
-        <Search className="h-4 w-4" />
-      </Button>
+        readOnly
+        placeholder="Enter exercises or equipment..."
+        className="cursor-pointer bg-white text-black"
+      />
 
       <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col bg-white">

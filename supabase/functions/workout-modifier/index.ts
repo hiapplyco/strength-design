@@ -56,16 +56,10 @@ serve(async (req) => {
     const prompt = createWorkoutModificationPrompt(dayToModify, modificationPrompt, currentWorkout);
     console.log('Generated prompt:', prompt);
 
-    // Initialize Gemini with minimal config
+    // Initialize Gemini with config from shared prompts
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: 0.7,
-        topK: 1,
-        maxOutputTokens: 2048,
-      }
-    });
+    const config = getGeminiConfig();
+    const model = genAI.getGenerativeModel(config);
 
     // Generate content with timeout
     const timeoutMs = 30000; // 30 seconds timeout

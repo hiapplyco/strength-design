@@ -12,7 +12,9 @@ interface WeatherSectionProps {
 
 export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: WeatherSectionProps) {
   const formatTemp = (temp: number | undefined) => {
-    return temp !== undefined ? `${temp}°C` : 'N/A';
+    if (temp === undefined) return 'N/A';
+    const fahrenheit = (temp * 9/5) + 32;
+    return `${temp}°C (${fahrenheit.toFixed(1)}°F)`;
   };
 
   const formatValue = (value: number | undefined, unit: string) => {

@@ -85,38 +85,19 @@ Do not use trailing commas.`;
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
-    } catch (directParseError) {
-      console.log('Direct JSON parse failed, attempting to extract JSON');
-      
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.error('No valid JSON found in response');
-        throw new Error('No valid JSON found in response');
-      }
-
-      const cleanedJson = jsonMatch[0]
-        .replace(/```json\s*|\s*```/g, '')
-        .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-        .replace(/,(\s*[}\]])/g, '$1')
-        .trim();
-
-      console.log('Cleaned JSON:', cleanedJson);
-
-      try {
-        const workouts = JSON.parse(cleanedJson);
-        console.log('Successfully parsed cleaned JSON');
-        return new Response(JSON.stringify(workouts), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        });
-      } catch (extractedParseError) {
-        console.error('Failed to parse cleaned JSON:', extractedParseError);
-        throw new Error(`Failed to parse JSON: ${extractedParseError.message}`);
-      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Problematic JSON text:', responseText);
+      throw new Error(`Failed to parse JSON: ${parseError.message}`);
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message || 'Failed to generate workouts',
+      details: error.stack,
+      timestamp: new Date().toISOString(),
+      type: error.name || 'UnknownError'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

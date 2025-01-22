@@ -50,7 +50,7 @@ serve(async (req) => {
       generationConfig: config.generationConfig,
     });
 
-    const timeoutMs = 60000; // Increased to 60 seconds
+    const timeoutMs = 60000; // 60 seconds timeout
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
     });
@@ -91,7 +91,9 @@ serve(async (req) => {
     console.error('Error in workout-modifier:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to modify workout',
-      details: error.stack
+      details: error.stack,
+      timestamp: new Date().toISOString(),
+      type: error.name || 'UnknownError'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

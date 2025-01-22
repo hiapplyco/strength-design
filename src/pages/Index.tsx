@@ -115,12 +115,13 @@ const Index = () => {
           title: "Success",
           description: "Your workout plan has been generated!",
         });
+        triggerConfetti();
       }
     } catch (error) {
       console.error('Error generating workouts:', error);
       toast({
         title: "Error",
-        description: "Failed to generate workouts. Please try again.",
+        description: error.message || "Failed to generate workouts. Please try again.",
         variant: "destructive",
       });
     } finally {

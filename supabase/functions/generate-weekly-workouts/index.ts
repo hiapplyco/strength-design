@@ -38,41 +38,43 @@ serve(async (req) => {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const generationConfig = {
-      temperature: 1,
-      topP: 0.95,
+      temperature: 0.9,
+      topP: 0.8,
       topK: 40,
       maxOutputTokens: 8192,
     };
 
     console.log("Creating chat session");
-    const chatSession = model.startChat({
+    const chat = model.startChat({
       generationConfig,
       history: [],
     });
 
     const expertPrompt = `You are a world-renowned coach and movement specialist. Create a ${numberOfDays}-day workout plan based on this context: ${prompt}
 
-For each training day, provide a JSON object with:
-1. description: Brief overview of the day's focus
-2. warmup: Detailed warmup protocol
-3. workout: Main workout details
-4. strength: Strength work details
-5. notes: Coaching notes and considerations
-
 Return ONLY a valid JSON object with no additional text, following this exact format for ${numberOfDays} days:
 {
   "[Day Name]": {
-    "description": "Brief overview",
-    "warmup": "Warmup details",
-    "workout": "Workout details",
-    "strength": "Strength details",
-    "notes": "Notes"
+    "description": "Brief overview of the day's focus (1-2 sentences)",
+    "warmup": "Detailed warmup protocol (2-3 paragraphs)",
+    "workout": "Main workout details (2-3 paragraphs)",
+    "strength": "Strength work details (1-2 paragraphs)",
+    "notes": "Coaching notes and considerations (1-2 paragraphs)"
   }
-}`;
+}
+
+Important:
+1. Use the exact field names shown above
+2. Return ONLY the JSON object, no other text
+3. Ensure the JSON is properly formatted and valid
+4. Include exactly ${numberOfDays} days
+5. Use realistic workout progressions`;
 
     console.log("Sending prompt to Gemini");
+    console.log("Prompt length:", expertPrompt.length);
+    
     const result = await Promise.race([
-      chatSession.sendMessage(expertPrompt),
+      chat.sendMessage(expertPrompt),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('API request timeout')), 25000)
       )
@@ -81,12 +83,14 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
     console.log("Received response from Gemini");
     const text = result.response.text();
     console.log("Raw response length:", text.length);
+    console.log("Raw response preview:", text.substring(0, 200));
 
     let workouts;
     try {
       console.log("Parsing response as JSON");
       workouts = JSON.parse(text);
       console.log("Successfully parsed JSON");
+      console.log("Number of days in response:", Object.keys(workouts).length);
     } catch (error) {
       console.error("Failed to parse initial JSON:", error);
       console.log("Attempting to extract JSON from text");
@@ -133,6 +137,8 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
       });
 
     console.log("Successfully processed all workouts");
+    console.log("Final number of days:", Object.keys(limitedWorkouts).length);
+    
     return new Response(JSON.stringify(limitedWorkouts), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

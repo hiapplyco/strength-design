@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { ChatGPTAPI } from "npm:chatgpt@5.2.5";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,85 +13,77 @@ serve(async (req) => {
   }
 
   try {
-    const {
-      numberOfDays,
-      weatherPrompt,
-      selectedExercises,
-      fitnessLevel,
-      prescribedExercises
-    } = await req.json();
+    const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises } = await req.json();
 
-    console.log("Received parameters:", {
-      numberOfDays,
-      hasWeather: !!weatherPrompt,
-      hasExercises: !!selectedExercises?.length,
-      hasFitnessLevel: !!fitnessLevel,
-      hasPrescribedExercises: !!prescribedExercises
-    });
-    
-    // Require at least fitness level and number of days
-    if (!fitnessLevel || !numberOfDays) {
-      console.error("Missing required parameters");
+    // Validate required fields
+    if (!fitnessLevel) {
       return new Response(
-        JSON.stringify({ error: 'Please select your fitness level and number of days' }), 
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
+        JSON.stringify({ error: 'Please select your fitness level' }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
-    const api = new ChatGPTAPI({
-      apiKey: Deno.env.get('OPENAI_API_KEY') || '',
-      completionParams: {
-        model: 'gpt-4o-mini',
-        temperature: 0.7,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-      },
-      debug: true,
-    });
-
-    const prompt_template = `As an expert fitness coach, create a ${numberOfDays}-day workout program. ${weatherPrompt ? ` ${weatherPrompt}` : ""}${selectedExercises?.length ? ` Include these exercises: ${selectedExercises.join(", ")}` : ""}${fitnessLevel ? ` Consider this fitness level: ${fitnessLevel}` : ""}${prescribedExercises ? ` Include these prescribed exercises: ${prescribedExercises}` : ""}
-
-    For each day, provide:
-    1. A brief description of the focus and stimulus
-    2. A warmup routine
-    3. The main workout
-    4. A strength component
-    5. Optional notes or modifications
-
-    Format each day as follows:
-    {
-      "day1": {
-        "description": "...",
-        "warmup": "...",
-        "workout": "...",
-        "strength": "...",
-        "notes": "..."
-      },
-      // ... repeat for each day
+    if (!numberOfDays || numberOfDays < 1) {
+      return new Response(
+        JSON.stringify({ error: 'Please select number of days' }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
-    Ensure the response is a valid JSON object.`;
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!apiKey) {
+      throw new Error('Missing Gemini API key');
+    }
 
-    console.log("Sending prompt to OpenAI:", prompt_template);
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-    const response = await api.sendMessage(prompt_template, {
-      systemMessage: "You are an expert fitness coach specializing in creating personalized workout programs. You always provide detailed, safe, and effective workouts tailored to the individual's needs and circumstances.",
+    // Construct prompt from user inputs
+    const prompt = `As an expert fitness coach, create a ${numberOfDays}-day workout program. 
+      ${weatherPrompt ? `Consider these weather conditions: ${weatherPrompt}` : ''}
+      ${selectedExercises?.length ? `Include these exercises: ${selectedExercises.join(", ")}` : ''}
+      ${fitnessLevel ? `This program is for a ${fitnessLevel} level individual` : ''}
+      ${prescribedExercises ? `Include these prescribed exercises/modifications: ${prescribedExercises}` : ''}
+
+      For each day, provide:
+      1. A brief description of the focus and stimulus
+      2. A warmup routine
+      3. The main workout
+      4. A strength component
+      5. Optional notes or modifications
+
+      Format each day as follows:
+      {
+        "day1": {
+          "description": "...",
+          "warmup": "...",
+          "workout": "...",
+          "strength": "...",
+          "notes": "..."
+        }
+      }
+
+      Ensure the response is a valid JSON object.`;
+
+    console.log('Sending prompt to Gemini:', prompt);
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
-    console.log("Received response from OpenAI");
+    const response = result.response;
+    const text = response.text();
+    
+    console.log('Received response from Gemini:', text);
 
     try {
-      const workouts = JSON.parse(response.text);
+      const workouts = JSON.parse(text);
       return new Response(
         JSON.stringify(workouts),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (error) {
-      console.error("Failed to parse OpenAI response:", error);
+      console.error("Failed to parse Gemini response:", error);
       return new Response(
         JSON.stringify({ error: 'Failed to generate workout plan' }),
         { 

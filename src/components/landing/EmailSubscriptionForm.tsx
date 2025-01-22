@@ -60,7 +60,7 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
         placeholder="Enter your email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="flex-1 bg-white text-black placeholder:text-gray-500"
+        className="flex-1 bg-white text-black placeholder:text-gray-500 border border-border"
       />
       <Button 
         type="submit" 

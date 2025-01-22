@@ -18,11 +18,13 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting checkout process...')
     const { subscriptionType } = await req.json()
-    const priceId = PRICE_IDS[subscriptionType]
+    console.log('Subscription type:', subscriptionType)
     
+    const priceId = PRICE_IDS[subscriptionType]
     if (!priceId) {
-      throw new Error('Invalid subscription type')
+      throw new Error(`Invalid subscription type: ${subscriptionType}`)
     }
 
     // Get user authentication
@@ -40,8 +42,11 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
     
     if (userError || !user?.email) {
+      console.error('Auth error:', userError)
       throw new Error('Authentication failed')
     }
+
+    console.log('User authenticated:', user.email)
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
@@ -56,6 +61,7 @@ serve(async (req) => {
 
     if (customers.data.length > 0) {
       customer = customers.data[0]
+      console.log('Found existing customer:', customer.id)
       
       // Check if already subscribed
       const subscriptions = await stripe.subscriptions.list({
@@ -76,6 +82,12 @@ serve(async (req) => {
           supabase_user_id: user.id
         }
       })
+      console.log('Created new customer:', customer.id)
+    }
+
+    const origin = req.headers.get('origin')
+    if (!origin) {
+      throw new Error('No origin header')
     }
 
     // Create checkout session
@@ -84,8 +96,8 @@ serve(async (req) => {
       customer: customer.id,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/dashboard`,
-      cancel_url: `${req.headers.get('origin')}/`,
+      success_url: `${origin}/`,
+      cancel_url: `${origin}/`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
       payment_method_types: ['card'],

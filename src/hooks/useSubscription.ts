@@ -22,6 +22,7 @@ export const useSubscription = () => {
           description: "Please sign in to subscribe to a plan",
           variant: "destructive",
         });
+        setLoadingStates(prev => ({ ...prev, [type]: false }));
         return;
       }
 
@@ -30,7 +31,10 @@ export const useSubscription = () => {
         body: { subscriptionType: type }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Checkout error:', error);
+        throw error;
+      }
 
       if (!data?.url) {
         throw new Error('No checkout URL received');
@@ -45,7 +49,6 @@ export const useSubscription = () => {
         description: error.message || "Failed to start subscription process. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setLoadingStates(prev => ({ ...prev, [type]: false }));
     }
   };

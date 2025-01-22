@@ -14,7 +14,7 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
   const formatTemp = (temp: number | undefined) => {
     if (temp === undefined) return 'N/A';
     const fahrenheit = (temp * 9/5) + 32;
-    return `${temp}°C (${fahrenheit.toFixed(1)}°F)`;
+    return `${fahrenheit.toFixed(1)}°F (${temp}°C)`;
   };
 
   const formatValue = (value: number | undefined, unit: string) => {

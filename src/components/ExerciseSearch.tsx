@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SearchInput } from "./exercise-search/SearchInput";
 import { SearchResults } from "./exercise-search/SearchResults";
+import { Dialog, DialogContent } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Search } from "lucide-react";
 import type { Exercise } from "./exercise-search/types";
 
 interface ExerciseSearchProps {
@@ -19,6 +22,7 @@ export const ExerciseSearch = ({
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [searchResults, setSearchResults] = useState<Exercise[]>([]);
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -81,21 +85,35 @@ export const ExerciseSearch = ({
   };
 
   return (
-    <div 
-      ref={searchRef}
-      className={cn("space-y-4", className)}
-    >
-      <SearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        onClear={handleClearSearch}
-      />
-      <SearchResults
-        results={searchResults}
-        selectedExercises={selectedExercises}
-        onExerciseSelect={handleExerciseSelect}
-        sanitizeText={sanitizeText}
-      />
+    <div className={cn("space-y-4", className)}>
+      <Button 
+        onClick={() => setDialogOpen(true)}
+        variant="outline"
+        className="w-full flex items-center justify-between"
+      >
+        <span>Search for Equipment</span>
+        <Search className="h-4 w-4" />
+      </Button>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
+          <div className="space-y-4 flex-1 overflow-hidden">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onClear={handleClearSearch}
+            />
+            <div className="overflow-y-auto flex-1 max-h-[calc(80vh-150px)]">
+              <SearchResults
+                results={searchResults}
+                selectedExercises={selectedExercises}
+                onExerciseSelect={handleExerciseSelect}
+                sanitizeText={sanitizeText}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

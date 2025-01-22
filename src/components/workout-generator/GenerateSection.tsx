@@ -23,7 +23,7 @@ export function GenerateSection({
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Send className="h-5 w-5 text-primary" />
-        <h3 className="font-oswald text-lg uppercase text-primary">Generate Workout</h3>
+        <h3 className="font-oswald text-lg">Create Your Workout</h3>
         {renderTooltip()}
       </div>
       <Input

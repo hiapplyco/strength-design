@@ -126,7 +126,7 @@ export function GenerateWorkoutInput({
 
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium">Number of Days</h3>
+            <h3 className="text-sm font-medium">How many days would you like to train?</h3>
             {renderTooltip("Select how many days of workouts to generate (1-12 days)")}
           </div>
           <ToggleGroup 

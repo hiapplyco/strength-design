@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Dumbbell } from "lucide-react";
 import { ExerciseSearch } from "../ExerciseSearch";
 import type { Exercise } from "../exercise-search/types";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 
 interface ExerciseSectionProps {
   selectedExercises: Exercise[];
@@ -9,13 +12,16 @@ interface ExerciseSectionProps {
 }
 
 export function ExerciseSection({ selectedExercises, onExerciseSelect, renderTooltip }: ExerciseSectionProps) {
+  const [showSearch, setShowSearch] = useState(false);
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-primary">
-        <Dumbbell className="h-5 w-5" />
-        <h3 className="font-oswald text-lg uppercase">Equipment Selection</h3>
+      <div className="flex items-center gap-2">
+        <Dumbbell className="h-5 w-5 text-primary" />
+        <h3 className="font-oswald text-lg">Choose Equipment</h3>
         {renderTooltip()}
       </div>
+      
       <ExerciseSearch onExerciseSelect={onExerciseSelect} />
 
       {selectedExercises.length > 0 && (

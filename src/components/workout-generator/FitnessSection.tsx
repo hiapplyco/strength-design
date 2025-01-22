@@ -1,5 +1,6 @@
 import { Activity } from "lucide-react";
-import { Input } from "../ui/input";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Label } from "../ui/label";
 
 interface FitnessSectionProps {
   fitnessLevel: string;
@@ -10,23 +11,25 @@ interface FitnessSectionProps {
 export function FitnessSection({ fitnessLevel, onFitnessLevelChange, renderTooltip }: FitnessSectionProps) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-primary">
-        <Activity className="h-5 w-5" />
-        <h3 className="font-oswald text-lg uppercase">Fitness Level</h3>
+      <div className="flex items-center gap-2">
+        <Activity className="h-5 w-5 text-primary" />
+        <h3 className="font-oswald text-lg">Your Experience Level</h3>
         {renderTooltip()}
       </div>
-      <Input
-        placeholder="e.g., 'Intermediate, RX weights, moderate fatigue from yesterday's session'"
-        value={fitnessLevel}
-        onChange={(e) => onFitnessLevelChange(e.target.value)}
-        className="bg-white text-black placeholder:text-gray-500"
-      />
-      {fitnessLevel && (
-        <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in text-white">
-          <p className="font-semibold text-primary">Fitness Profile:</p>
-          <p>{fitnessLevel}</p>
+      <RadioGroup value={fitnessLevel} onValueChange={onFitnessLevelChange} className="flex flex-col space-y-2">
+        <div className="flex items-center">
+          <RadioGroupItem value="beginner" id="fitness-beginner" />
+          <Label htmlFor="fitness-beginner" className="ml-2">Beginner</Label>
         </div>
-      )}
+        <div className="flex items-center">
+          <RadioGroupItem value="intermediate" id="fitness-intermediate" />
+          <Label htmlFor="fitness-intermediate" className="ml-2">Intermediate</Label>
+        </div>
+        <div className="flex items-center">
+          <RadioGroupItem value="advanced" id="fitness-advanced" />
+          <Label htmlFor="fitness-advanced" className="ml-2">Advanced</Label>
+        </div>
+      </RadioGroup>
     </div>
   );
 }

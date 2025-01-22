@@ -94,14 +94,14 @@ export const ExerciseSearch = ({
       <Button 
         onClick={() => setDialogOpen(true)}
         variant="outline"
-        className="w-full flex items-center justify-between"
+        className="w-full flex items-center justify-between bg-white text-black hover:bg-gray-100"
       >
         <span>Search Exercises & Equipment</span>
         <Search className="h-4 w-4" />
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col bg-white">
           <div className="space-y-4 flex-1 overflow-hidden">
             <div className="flex justify-between items-center">
               <SearchInput

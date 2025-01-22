@@ -1,8 +1,8 @@
-import { Share2, Play, Pause, CalendarDays, Edit } from "lucide-react";
+import { Share2, Play, Pause, CalendarDays, Edit, ArrowRightSquare } from "lucide-react";
 import { ActionButton } from "./ActionButton";
 
 interface HeaderActionsProps {
-  onShare?: () => void; // Made optional with ?
+  onShare?: () => void;
   onSpeak: () => void;
   onExport: () => void;
   onModify?: () => void;
@@ -26,7 +26,7 @@ export function HeaderActions({
 }: HeaderActionsProps) {
   return (
     <div className="flex items-center gap-2">
-      {onShare && <ActionButton icon={Share2} onClick={onShare} />}
+      {onShare && <ActionButton icon={ArrowRightSquare} onClick={onShare} />}
       <ActionButton 
         icon={isSpeaking ? Pause : Play} 
         onClick={onSpeak} 

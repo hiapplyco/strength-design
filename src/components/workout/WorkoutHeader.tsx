@@ -94,7 +94,7 @@ export function WorkoutHeader({
           onClick={() => setShowModifier(true)}
           className="text-sm"
         >
-          Modify
+          Edit
         </Button>
       </div>
 
@@ -104,6 +104,14 @@ export function WorkoutHeader({
         isExporting={isExporting}
         onSpeak={onSpeak}
         onExport={onExport}
+        onModify={() => setShowModifier(true)}
+        showModify={true}
+        onShare={() => {
+          navigator.share?.({
+            title: `Workout for ${title}`,
+            text: `Check out this workout for ${title}!`,
+          }).catch(console.error);
+        }}
       />
 
       <Dialog open={showModifier} onOpenChange={setShowModifier}>

@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createWorkoutModificationPrompt, getGeminiConfig } from "../../../src/utils/geminiPrompts.ts";
+import { createWorkoutModificationPrompt, getGeminiConfig } from "../shared/prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

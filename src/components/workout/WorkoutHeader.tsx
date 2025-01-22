@@ -36,9 +36,12 @@ export function WorkoutHeader({
   onUpdate
 }: WorkoutHeaderProps) {
   const [showModifier, setShowModifier] = useState(false);
+  const [modificationPrompt, setModificationPrompt] = useState("");
+  const [isModifying, setIsModifying] = useState(false);
   const { toast } = useToast();
 
-  const handleModify = async (modificationPrompt: string) => {
+  const handleModify = async (prompt: string) => {
+    setIsModifying(true);
     try {
       const response = await fetch('https://ulnsvkrrdcmfiguibkpx.supabase.co/functions/v1/workout-modifier', {
         method: 'POST',
@@ -47,7 +50,7 @@ export function WorkoutHeader({
         },
         body: JSON.stringify({
           dayToModify: title,
-          modificationPrompt,
+          modificationPrompt: prompt,
           allWorkouts
         })
       });
@@ -61,7 +64,7 @@ export function WorkoutHeader({
       
       if (onUpdate) {
         onUpdate(modifiedWorkout);
-        triggerConfetti(); // Trigger confetti on successful modification
+        triggerConfetti();
         toast({
           title: "Success",
           description: "Workout modified successfully!",
@@ -76,6 +79,8 @@ export function WorkoutHeader({
         description: error.message || "Failed to modify workout",
         variant: "destructive",
       });
+    } finally {
+      setIsModifying(false);
     }
   };
 
@@ -107,8 +112,11 @@ export function WorkoutHeader({
             <DialogTitle>Modify Workout for {title}</DialogTitle>
           </DialogHeader>
           <WorkoutModifier
+            title={title}
+            modificationPrompt={modificationPrompt}
+            isModifying={isModifying}
+            onModificationPromptChange={setModificationPrompt}
             onModify={handleModify}
-            currentWorkout={{ warmup, workout, notes: notes || '', strength }}
           />
         </DialogContent>
       </Dialog>

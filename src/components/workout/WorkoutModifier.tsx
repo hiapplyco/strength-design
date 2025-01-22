@@ -7,7 +7,7 @@ interface WorkoutModifierProps {
   modificationPrompt: string;
   isModifying: boolean;
   onModificationPromptChange: (value: string) => void;
-  onModify: () => void;
+  onModify: (modificationPrompt: string) => void; // Updated to match the expected signature
 }
 
 export function WorkoutModifier({
@@ -26,7 +26,7 @@ export function WorkoutModifier({
         className="border-2 border-primary bg-white text-black placeholder:text-gray-400 rounded-[20px]"
       />
       <Button 
-        onClick={onModify}
+        onClick={() => onModify(modificationPrompt)} // Updated to pass the modificationPrompt
         disabled={isModifying}
         className="w-full border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50 rounded-[20px]"
       >

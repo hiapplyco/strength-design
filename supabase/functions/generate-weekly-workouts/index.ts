@@ -42,14 +42,16 @@ serve(async (req) => {
     console.log("Initializing Gemini AI...");
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash-8b-latest",
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
-      }
+      model: "gemini-1.5-flash",
     });
+
+    const generationConfig = {
+      temperature: 1,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,
+      responseMimeType: "text/plain",
+    };
 
     const weatherContext = weatherData ? `
     WEATHER CONSIDERATIONS:
@@ -171,11 +173,15 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
     console.log("Sending prompt to Gemini...");
     console.log("Prompt length:", expertPrompt.length);
     
-    const result = await model.generateContent(expertPrompt);
+    const chatSession = model.startChat({
+      generationConfig,
+      history: [],
+    });
+
+    const result = await chatSession.sendMessage(expertPrompt);
     console.log("Received response from Gemini");
     
-    const response = await result.response;
-    const text = response.text();
+    const text = result.response.text();
     console.log("Response text length:", text.length);
 
     let workouts;

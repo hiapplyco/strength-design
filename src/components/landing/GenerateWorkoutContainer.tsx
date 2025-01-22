@@ -42,41 +42,34 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       setIsGenerating(true);
       console.log("Starting workout generation with params:", params);
 
-      const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
+      // Proper way to call Supabase Edge Function with error handling
+      const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
         body: {
           ...params,
           numberOfDays,
+        },
+        // Optional: Add headers if needed
+        headers: {
+          'Custom-Header': 'value' // Example of custom header
         }
       });
 
-      console.log("Function response received:", { 
-        success: !!data, 
-        error: functionError,
-        data: data 
-      });
+      // Log the complete response for debugging
+      console.log("Edge Function response:", { data, error });
 
-      if (functionError) {
-        console.error("Function error:", functionError);
-        let errorMessage = 'Error generating workouts';
-        try {
-          const errorBody = JSON.parse(functionError.message);
-          errorMessage = errorBody.error || errorMessage;
-        } catch (e) {
-          errorMessage = functionError.message || errorMessage;
-        }
-        throw new Error(errorMessage);
+      // Handle function error
+      if (error) {
+        console.error("Edge Function error:", error);
+        throw new Error(error.message || 'Failed to generate workouts');
       }
 
+      // Handle missing data
       if (!data) {
-        console.error("No data received from function");
+        console.error("No data received from Edge Function");
         throw new Error("No workout data received");
       }
 
-      if ('error' in data) {
-        console.error("API error:", data.error);
-        throw new Error(data.error);
-      }
-
+      // Set the workouts
       console.log("Setting generated workouts:", data);
       setGeneratedWorkouts(data);
       setWorkouts(data);
@@ -87,11 +80,19 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       });
       triggerConfetti();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in handleGenerateWorkout:', error);
+      
+      // Enhanced error handling with detailed messages
+      const errorMessage = error.message || "Failed to generate workouts. Please try again.";
+      console.error('Detailed error:', {
+        message: errorMessage,
+        originalError: error
+      });
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to generate workouts. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

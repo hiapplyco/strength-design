@@ -52,15 +52,7 @@ serve(async (req) => {
 
     console.log('Sending prompt to Gemini:', systemPrompt);
     
-    const timeoutMs = 60000;
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
-    });
-
-    console.log('Starting Gemini request...');
-    const generationPromise = model.generateContent(systemPrompt);
-    const result = await Promise.race([generationPromise, timeoutPromise]);
-    
+    const result = await model.generateContent(systemPrompt);
     console.log('Response received from Gemini:', result?.response ? 'Has response' : 'No response');
 
     if (!result?.response) {
@@ -91,7 +83,6 @@ serve(async (req) => {
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
-    console.error('Error stack:', error.stack);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
       details: error.stack,

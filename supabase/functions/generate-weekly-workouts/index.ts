@@ -41,7 +41,15 @@ serve(async (req) => {
 
     console.log("Initializing Gemini AI...");
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash-8b-latest",
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+      }
+    });
 
     const weatherContext = weatherData ? `
     WEATHER CONSIDERATIONS:
@@ -185,6 +193,10 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
         workouts = JSON.parse(jsonMatch[0]);
       }
       
+      if (!workouts || typeof workouts !== 'object') {
+        throw new Error("Invalid workout data structure");
+      }
+
       const limitedWorkouts: Record<string, any> = {};
       Object.entries(workouts)
         .slice(0, numberOfDays)

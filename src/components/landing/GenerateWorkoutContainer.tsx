@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { triggerConfetti } from "@/utils/confetti";
 import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
 import { AuthDialog } from "@/components/auth/AuthDialog";
-import { Loader2 } from "lucide-react";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 interface WorkoutDay {
   description: string;
@@ -178,14 +178,7 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
         onSuccess={handleAuthSuccess}
         isNewUser={isNewUser}
       />
-      {isGenerating && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black p-6 rounded-lg shadow-lg flex items-center space-x-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-lg font-medium text-white">Generating your workout plan...</p>
-          </div>
-        </div>
-      )}
+      {isGenerating && <LoadingIndicator />}
     </>
   );
 }

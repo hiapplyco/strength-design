@@ -1,8 +1,14 @@
-import type { Config } from "tailwindcss";
+import { type Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
   prefix: "",
   theme: {
     container: {
@@ -20,43 +26,44 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#C4A052", // Champion Gold
-          foreground: "#000000", // Power Black
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#707070", // Steel Gray
-          foreground: "#FFFFFF", // Victory White
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "#FF4A4A", // Varsity Red
-          foreground: "#FFFFFF",
-        },
-        destructiveSecondary: {
-          DEFAULT: "#CC0000", // Crimson Red
-          foreground: "#FFFFFF",
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
-          DEFAULT: "#222222", // Shadow Black
-          foreground: "#FFFFFF", // Victory White
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#A88B45", // Muted Gold
-          foreground: "#222222", // Shadow Black
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
         },
         card: {
-          DEFAULT: "#000000", // Power Black
-          foreground: "#FFFFFF", // Victory White
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
         },
-      },
-      fontFamily: {
-        sans: ["'Roboto Condensed'", "sans-serif"],
-        collegiate: ["'Bebas Neue'", "sans-serif"],
-        oswald: ["'Oswald'", "sans-serif"]
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
+        heading: ["var(--font-heading)", ...fontFamily.sans],
+        collegiate: ["Collegiate", ...fontFamily.sans],
+        oswald: ["Oswald", ...fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {
@@ -67,22 +74,23 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
+        progress: {
+          '0%': { transform: 'translateX(-100%)' },
+          '50%': { transform: 'translateX(-10%)' },
+          '100%': { transform: 'translateX(0)' }
         },
-        "fade-out": {
-          from: { opacity: "1" },
-          to: { opacity: "0" },
-        },
+        gradient: {
+          '0%, 100%': { transform: 'translateX(-50%)' },
+          '50%': { transform: 'translateX(50%)' }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.2s ease-out",
-        "fade-out": "fade-out 0.2s ease-out",
+        "progress": "progress 2s ease-in-out infinite",
+        "gradient": "gradient 3s ease infinite"
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+} satisfies Config

@@ -27,16 +27,16 @@ serve(async (req) => {
       throw new Error(`Invalid subscription type: ${subscriptionType}`)
     }
 
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    )
+
     // Get user authentication
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       throw new Error('No authorization header')
     }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
 
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
@@ -52,15 +52,50 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     })
 
+    // Find or create customer
+    console.log('Looking for existing customer...')
+    let customerId: string
+    const customers = await stripe.customers.list({
+      email: user.email,
+      limit: 1
+    })
+
+    if (customers.data.length > 0) {
+      customerId = customers.data[0].id
+      console.log('Found existing customer:', customerId)
+      
+      // Check if already subscribed
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: 'active',
+        price: priceId,
+        limit: 1
+      })
+
+      if (subscriptions.data.length > 0) {
+        throw new Error("You are already subscribed to this plan")
+      }
+    } else {
+      // Create new customer
+      const newCustomer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          supabase_user_id: user.id
+        }
+      })
+      customerId = newCustomer.id
+      console.log('Created new customer:', customerId)
+    }
+
     const origin = req.headers.get('origin')
     if (!origin) {
       throw new Error('No origin header')
     }
 
-    // Create checkout session directly without customer checks
+    // Create checkout session
     console.log('Creating checkout session...')
     const session = await stripe.checkout.sessions.create({
-      customer_email: user.email,
+      customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
       success_url: `${origin}/`,

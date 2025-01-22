@@ -22,7 +22,6 @@ export const useSubscription = () => {
           description: "Please sign in to subscribe to a plan",
           variant: "destructive",
         });
-        setLoadingStates(prev => ({ ...prev, [type]: false }));
         return;
       }
 
@@ -39,7 +38,7 @@ export const useSubscription = () => {
         throw new Error('No checkout URL received');
       }
 
-      // Redirect to Stripe
+      console.log('Redirecting to checkout:', data.url);
       window.location.href = data.url;
       
     } catch (error: any) {

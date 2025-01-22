@@ -20,30 +20,13 @@ serve(async (req) => {
       throw new Error('Missing Gemini API key');
     }
 
-    let requestBody;
-    try {
-      requestBody = await req.json();
-      console.log('Received request body:', requestBody);
-    } catch (parseError) {
-      console.error('Failed to parse request body:', parseError);
-      throw new Error('Invalid request format');
-    }
+    const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
+    console.log('Request params:', { weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays });
 
-    const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = requestBody;
-    
-    // Validate required parameters
     if (!numberOfDays || numberOfDays < 1) {
       console.error('Invalid number of days:', numberOfDays);
       throw new Error('Invalid number of days');
     }
-
-    console.log('Generating prompt with params:', {
-      numberOfDays,
-      weatherPrompt,
-      selectedExercises: selectedExercises?.length,
-      fitnessLevel,
-      prescribedExercises: !!prescribedExercises
-    });
 
     const generationPrompt = createWorkoutGenerationPrompt({
       numberOfDays,
@@ -60,15 +43,9 @@ serve(async (req) => {
     const model = genAI.getGenerativeModel(config);
 
     console.log('Sending request to Gemini...');
-    let result;
-    try {
-      result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: generationPrompt }] }],
-      });
-    } catch (geminiError) {
-      console.error('Gemini API error:', geminiError);
-      throw new Error(`Gemini API error: ${geminiError.message}`);
-    }
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: generationPrompt }] }],
+    });
 
     if (!result || !result.response) {
       console.error('No response from Gemini');
@@ -80,21 +57,26 @@ serve(async (req) => {
     console.log('Raw response from Gemini:', text);
 
     try {
-      // Clean the response text
-      const cleanedText = text
+      // Extract JSON from the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error('No JSON found in response');
+        throw new Error('Invalid response format');
+      }
+
+      const jsonText = jsonMatch[0]
         .replace(/```json\s*|\s*```/g, '') // Remove JSON code block markers
         .replace(/\n/g, ' ') // Remove newlines
         .trim();
 
-      console.log('Cleaned response:', cleanedText);
+      console.log('Cleaned JSON text:', jsonText);
       
-      // Attempt to parse the JSON
       let workouts;
       try {
-        workouts = JSON.parse(cleanedText);
+        workouts = JSON.parse(jsonText);
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
-        console.log('Failed to parse text:', cleanedText);
+        console.log('Failed to parse text:', jsonText);
         throw new Error(`Invalid JSON structure: ${parseError.message}`);
       }
 
@@ -118,22 +100,22 @@ serve(async (req) => {
         });
       });
 
-      console.log('Successfully validated workouts structure');
+      console.log('Successfully validated workouts:', workouts);
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
 
-    } catch (processError) {
-      console.error('Error processing Gemini response:', processError);
-      throw new Error(`Failed to process workout data: ${processError.message}`);
+    } catch (parseError) {
+      console.error('Error processing Gemini response:', parseError);
+      throw new Error(`Failed to process workout data: ${parseError.message}`);
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts function:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
-      details: 'An error occurred while generating workouts. Please try again.',
-      timestamp: new Date().toISOString()
+      details: 'An error occurred while generating workouts',
+      raw_error: error.toString()
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

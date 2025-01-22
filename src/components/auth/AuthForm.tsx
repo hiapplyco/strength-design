@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface AuthFormProps {
   view: "sign_up" | "sign_in";
+  onViewChange: (view: "sign_up" | "sign_in") => void;
 }
 
-export const AuthForm = ({ view }: AuthFormProps) => {
+export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
   return (
     <Auth
       supabaseClient={supabase}
@@ -39,6 +40,7 @@ export const AuthForm = ({ view }: AuthFormProps) => {
           },
         },
       }}
+      onViewChange={({ view }) => onViewChange(view as "sign_up" | "sign_in")}
     />
   );
 };

@@ -7,11 +7,10 @@ interface AuthDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-  isNewUser?: boolean;
 }
 
-export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }: AuthDialogProps) => {
-  const { error, view } = useAuthState(isOpen, onOpenChange, onSuccess, isNewUser);
+export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps) => {
+  const { error, view, setView } = useAuthState(isOpen, onOpenChange, onSuccess);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -22,7 +21,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
           </DialogTitle>
         </DialogHeader>
         <AuthErrorAlert error={error} />
-        <AuthForm view={view} />
+        <AuthForm view={view} onViewChange={setView} />
       </DialogContent>
     </Dialog>
   );

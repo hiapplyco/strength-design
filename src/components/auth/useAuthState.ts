@@ -7,28 +7,29 @@ export const useAuthState = (
   isOpen: boolean,
   onOpenChange: (open: boolean) => void,
   onSuccess: () => void,
-  isNewUser: boolean = true
 ) => {
   const [error, setError] = useState<string>("");
-  const [view, setView] = useState<"sign_up" | "sign_in">(isNewUser ? "sign_up" : "sign_in");
+  const [view, setView] = useState<"sign_up" | "sign_in">("sign_up");
   const { toast } = useToast();
 
   useEffect(() => {
-    if (isOpen) {
-      const checkSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          console.log("User already signed in, closing dialog");
-          onOpenChange(false);
-          onSuccess();
-        }
-      };
-      checkSession();
-    }
+    if (!isOpen) return;
+    
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        console.log("User already signed in, closing dialog");
+        onOpenChange(false);
+        onSuccess();
+      }
+    };
+    checkSession();
   }, [isOpen, onOpenChange, onSuccess]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+      
       if (event === 'SIGNED_IN') {
         const { data: profile } = await supabase
           .from('profiles')
@@ -36,12 +37,13 @@ export const useAuthState = (
           .eq('id', session?.user?.id)
           .single();
 
-        if (profile && new Date(profile.trial_end_date) > new Date()) {
+        if (profile?.trial_end_date && new Date(profile.trial_end_date) > new Date()) {
           toast({
             title: "Welcome!",
             description: "Your 7-day trial has started. Enjoy creating custom workouts!",
           });
           onSuccess();
+          onOpenChange(false);
         } else {
           toast({
             title: "Trial Expired",
@@ -50,19 +52,18 @@ export const useAuthState = (
           });
         }
       }
-      if (event === 'USER_UPDATED') {
-        const { error } = await supabase.auth.getSession();
-        if (error) {
-          setError(getErrorMessage(error));
-        }
-      }
+      
       if (event === 'SIGNED_OUT') {
+        toast({
+          title: "Signed out",
+          description: "Come back soon!",
+        });
         setError("");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [onSuccess, toast]);
+  }, [onSuccess, onOpenChange, toast]);
 
   const getErrorMessage = (error: AuthError) => {
     switch (error.message) {

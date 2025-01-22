@@ -8,20 +8,10 @@ interface SearchInputProps {
 }
 
 export const SearchInput = ({ value, onChange, onClear }: SearchInputProps) => {
-  const placeholderExamples = [
-    "dumbbell bench press",
-    "bodyweight squats",
-    "resistance band workout",
-    "yoga poses",
-    "stretching exercises"
-  ];
-  
-  const randomPlaceholder = placeholderExamples[Math.floor(Math.random() * placeholderExamples.length)];
-  
   return (
     <div className="relative">
       <Input
-        placeholder={`Try searching: ${randomPlaceholder}...`}
+        placeholder="Search for exercises or equipment..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full bg-primary/10 text-white placeholder:text-gray-400"

@@ -8,28 +8,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const cleanJsonText = (text: string): string => {
-  console.log('Starting JSON cleaning process. Input:', text);
-  
-  // Remove code block markers and whitespace
-  let cleaned = text.replace(/```json\s*|\s*```/g, '');
-  console.log('After removing code blocks:', cleaned);
-  
-  // Remove comments
-  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-  console.log('After removing comments:', cleaned);
-  
-  // Fix trailing commas
-  cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
-  console.log('After fixing trailing commas:', cleaned);
-  
-  // Normalize whitespace
-  cleaned = cleaned.replace(/\s+/g, ' ').trim();
-  console.log('Final cleaned JSON:', cleaned);
-  
-  return cleaned;
-};
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -72,16 +50,19 @@ serve(async (req) => {
       generationConfig: config.generationConfig,
     });
 
-    const timeoutMs = 30000;
+    const timeoutMs = 60000; // Increased to 60 seconds
     const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timed out')), timeoutMs);
+      setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
     });
 
     const generationPromise = model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
+    console.log('Starting Gemini request with 60s timeout');
     const result = await Promise.race([generationPromise, timeoutPromise]);
+    console.log('Received response from Gemini');
+
     if (!result || !('response' in result)) {
       throw new Error('Failed to generate response from Gemini');
     }
@@ -89,7 +70,7 @@ serve(async (req) => {
     const text = result.response.text();
     console.log('Raw Gemini response:', text);
 
-    const cleanedText = cleanJsonText(text);
+    const cleanedText = text.trim();
     console.log('Cleaned response:', cleanedText);
     
     let modifiedWorkout;

@@ -58,9 +58,16 @@ Do not include markdown code blocks.
 Ensure all string values are properly escaped.
 Do not use trailing commas.`;
 
-    console.log('Sending prompt to Gemini');
+    console.log('Sending prompt to Gemini with 60s timeout');
     
-    const result = await model.generateContent(systemPrompt);
+    const timeoutMs = 60000; // Increased to 60 seconds
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
+    });
+
+    const generationPromise = model.generateContent(systemPrompt);
+    const result = await Promise.race([generationPromise, timeoutPromise]);
+    
     console.log('Response received:', result?.response ? 'Has response' : 'No response');
 
     if (!result?.response?.text) {

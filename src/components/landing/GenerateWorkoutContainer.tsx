@@ -1,21 +1,12 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { triggerConfetti } from "@/utils/confetti";
 import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { generateWorkout, saveWorkouts } from "@/utils/workoutGeneration";
+import type { WeeklyWorkouts } from "@/utils/workoutGeneration";
 import type { Exercise } from "../exercise-search/types";
-
-interface WorkoutDay {
-  description: string;
-  warmup: string;
-  workout: string;
-  strength: string;
-  notes?: string;
-}
-
-type WeeklyWorkouts = Record<string, WorkoutDay>;
 
 interface GenerateWorkoutContainerProps {
   setWorkouts: (workouts: WeeklyWorkouts | null) => void;
@@ -40,39 +31,14 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   }) => {
     try {
       setIsGenerating(true);
-      console.log("Starting workout generation with params:", params);
-
-      // Proper way to call Supabase Edge Function with error handling
-      const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
-        body: {
-          ...params,
-          numberOfDays,
-        },
-        // Optional: Add headers if needed
-        headers: {
-          'Custom-Header': 'value' // Example of custom header
-        }
+      
+      const workouts = await generateWorkout({
+        ...params,
+        numberOfDays,
       });
 
-      // Log the complete response for debugging
-      console.log("Edge Function response:", { data, error });
-
-      // Handle function error
-      if (error) {
-        console.error("Edge Function error:", error);
-        throw new Error(error.message || 'Failed to generate workouts');
-      }
-
-      // Handle missing data
-      if (!data) {
-        console.error("No data received from Edge Function");
-        throw new Error("No workout data received");
-      }
-
-      // Set the workouts
-      console.log("Setting generated workouts:", data);
-      setGeneratedWorkouts(data);
-      setWorkouts(data);
+      setGeneratedWorkouts(workouts);
+      setWorkouts(workouts);
       
       toast({
         title: "Success",
@@ -82,9 +48,8 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
 
     } catch (error: any) {
       console.error('Error in handleGenerateWorkout:', error);
-      
-      // Enhanced error handling with detailed messages
       const errorMessage = error.message || "Failed to generate workouts. Please try again.";
+      
       console.error('Detailed error:', {
         message: errorMessage,
         originalError: error
@@ -100,53 +65,15 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
     }
   };
 
-  const saveWorkouts = async (workoutsToSave: WeeklyWorkouts) => {
-    try {
-      console.log("Starting saveWorkouts");
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log("No user in saveWorkouts, showing auth dialog");
-        setShowAuthDialog(true);
-        return;
-      }
-
-      console.log("Creating workout promises");
-      const workoutPromises = Object.entries(workoutsToSave).map(([day, workout]) => {
-        return supabase.from('workouts').insert({
-          user_id: user.id,
-          day,
-          warmup: workout.warmup,
-          workout: workout.workout,
-          notes: workout.notes,
-          strength: workout.strength,
-          description: workout.description
-        });
-      });
-
-      console.log("Executing workout promises");
-      await Promise.all(workoutPromises);
-      setWorkouts(workoutsToSave);
-      toast({
-        title: "Success",
-        description: "Workouts saved successfully!",
-      });
-    } catch (error) {
-      console.error('Error in saveWorkouts:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save workouts. Please try again.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
   const handleAuthSuccess = async () => {
     console.log("Auth success handler called");
     setShowAuthDialog(false);
     if (generatedWorkouts) {
       console.log("Saving generated workouts after auth");
-      await saveWorkouts(generatedWorkouts);
+      const saved = await saveWorkouts(generatedWorkouts);
+      if (saved) {
+        setWorkouts(generatedWorkouts);
+      }
     }
   };
 

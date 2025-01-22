@@ -51,7 +51,7 @@ export const WorkoutDisplay = ({
 
   const formatDayTitle = (day: string) => {
     const dayNumber = day.match(/\d+/)?.[0] || "1";
-    return `Day${dayNumber}`;
+    return `day${dayNumber}`;
   };
 
   const handleExportAllWorkouts = async () => {

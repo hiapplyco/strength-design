@@ -39,6 +39,11 @@ export function WorkoutHeader({
     return `Day ${dayNumber}`;
   };
 
+  const getDayKey = (title: string) => {
+    const dayNumber = title.match(/\d+/)?.[0] || "1";
+    return `day${dayNumber}`;
+  };
+
   const handleModify = async (prompt: string) => {
     setIsModifying(true);
     try {
@@ -48,7 +53,7 @@ export function WorkoutHeader({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          dayToModify: title,
+          dayToModify: getDayKey(title),
           modificationPrompt: prompt,
           allWorkouts
         })
@@ -114,7 +119,7 @@ export function WorkoutHeader({
             <DialogTitle>Modify Workout for {formatDayTitle(title)}</DialogTitle>
           </DialogHeader>
           <WorkoutModifier
-            title={title}
+            title={getDayKey(title)}
             modificationPrompt={modificationPrompt}
             isModifying={isModifying}
             onModificationPromptChange={setModificationPrompt}

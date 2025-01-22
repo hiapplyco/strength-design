@@ -19,16 +19,6 @@ interface GenerateWorkoutInputProps {
   setNumberOfDays: (value: number) => void;
 }
 
-interface WeatherData {
-  temperature: number;
-  humidity: number;
-  windSpeed: number;
-  location: string;
-  apparentTemperature: number;
-  precipitation: number;
-  weatherCode: number;
-}
-
 export function GenerateWorkoutInput({
   generatePrompt,
   setGeneratePrompt,
@@ -42,6 +32,7 @@ export function GenerateWorkoutInput({
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [fitnessLevel, setFitnessLevel] = useState<string>("");
+  const [prescribedExercises, setPrescribedExercises] = useState<string>("");
 
   const handleWeatherUpdate = (weatherData: WeatherData | null, weatherPrompt: string) => {
     setWeatherData(weatherData);
@@ -62,8 +53,12 @@ export function GenerateWorkoutInput({
     const fitnessPrompt = fitnessLevel 
       ? ` Consider this fitness profile: ${fitnessLevel}.`
       : "";
+
+    const prescribedPrompt = prescribedExercises
+      ? ` Please incorporate these prescribed exercises/restrictions: ${prescribedExercises}.`
+      : "";
     
-    const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}${fitnessPrompt}`;
+    const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}${fitnessPrompt}${prescribedPrompt}`;
     setGeneratePrompt(fullPrompt);
     handleGenerateWorkout();
   };
@@ -74,6 +69,7 @@ export function GenerateWorkoutInput({
     setWeatherPrompt("");
     setSelectedExercises([]);
     setFitnessLevel("");
+    setPrescribedExercises("");
   };
 
   const renderTooltip = (content: string) => (
@@ -94,8 +90,6 @@ export function GenerateWorkoutInput({
       </Tooltip>
     </TooltipProvider>
   );
-
-  const dayOptions = Array.from({ length: 12 }, (_, i) => i + 1);
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -119,8 +113,10 @@ export function GenerateWorkoutInput({
         <FitnessSection
           fitnessLevel={fitnessLevel}
           onFitnessLevelChange={setFitnessLevel}
+          prescribedExercises={prescribedExercises}
+          onPrescribedExercisesChange={setPrescribedExercises}
           renderTooltip={() => renderTooltip(
-            "Share your fitness level and experience to receive personalized workouts that match your capabilities."
+            "Share your fitness level and any prescribed exercises to receive personalized workouts that match your capabilities and requirements."
           )}
         />
 
@@ -135,7 +131,7 @@ export function GenerateWorkoutInput({
             onValueChange={(value) => setNumberOfDays(parseInt(value || "7"))}
             className="flex flex-wrap gap-2"
           >
-            {dayOptions.map((day) => (
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((day) => (
               <ToggleGroupItem 
                 key={day} 
                 value={day.toString()}

@@ -1,14 +1,23 @@
 import { Activity } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 
 interface FitnessSectionProps {
   fitnessLevel: string;
   onFitnessLevelChange: (value: string) => void;
   renderTooltip: () => React.ReactNode;
+  prescribedExercises?: string;
+  onPrescribedExercisesChange?: (value: string) => void;
 }
 
-export function FitnessSection({ fitnessLevel, onFitnessLevelChange, renderTooltip }: FitnessSectionProps) {
+export function FitnessSection({ 
+  fitnessLevel, 
+  onFitnessLevelChange, 
+  renderTooltip,
+  prescribedExercises = "",
+  onPrescribedExercisesChange = () => {}
+}: FitnessSectionProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -30,6 +39,19 @@ export function FitnessSection({ fitnessLevel, onFitnessLevelChange, renderToolt
           <Label htmlFor="fitness-advanced" className="ml-2">Advanced</Label>
         </div>
       </RadioGroup>
+
+      <div className="space-y-2">
+        <Label htmlFor="prescribed-exercises" className="text-sm font-medium">
+          Prescribed Exercises (Optional)
+        </Label>
+        <Textarea
+          id="prescribed-exercises"
+          placeholder="Enter any prescribed exercises, PT recommendations, or medical restrictions..."
+          value={prescribedExercises}
+          onChange={(e) => onPrescribedExercisesChange(e.target.value)}
+          className="min-h-[100px] resize-y bg-white text-black placeholder:text-gray-500"
+        />
+      </div>
     </div>
   );
 }

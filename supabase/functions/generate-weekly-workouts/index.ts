@@ -7,6 +7,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const cleanJsonText = (text: string): string => {
+  return text
+    .replace(/```json\s*|\s*```/g, '')           // Remove markdown code blocks
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')     // Remove comments
+    .replace(/,(\s*[}\]])/g, '$1')               // Remove trailing commas
+    .replace(/\s+/g, ' ')                        // Normalize whitespace
+    .replace(/\\n/g, ' ')                        // Replace escaped newlines
+    .replace(/\n/g, ' ')                         // Remove actual newlines
+    .trim();                                     // Remove leading/trailing whitespace
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -36,7 +47,15 @@ serve(async (req) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-pro",
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      }
+    });
 
     // Construct prompt from user inputs
     const prompt = `As an expert fitness coach, create a ${numberOfDays}-day workout program. 
@@ -71,13 +90,46 @@ serve(async (req) => {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
+    if (!result || !result.response) {
+      throw new Error('Failed to generate response from Gemini');
+    }
+
     const response = result.response;
     const text = response.text();
     
     console.log('Received response from Gemini:', text);
 
     try {
-      const workouts = JSON.parse(text);
+      const cleanedText = cleanJsonText(text);
+      console.log('Cleaned response:', cleanedText);
+      
+      let workouts;
+      try {
+        workouts = JSON.parse(cleanedText);
+      } catch (parseError) {
+        console.error('Initial JSON parse failed, attempting to fix common issues:', parseError);
+        // Try to fix common JSON issues
+        const fixedText = cleanedText
+          .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
+          .replace(/'/g, '"') // Replace single quotes with double quotes
+          .replace(/\\/g, '\\\\'); // Escape backslashes
+        workouts = JSON.parse(fixedText);
+      }
+
+      console.log('Parsed workouts:', workouts);
+
+      // Validate the structure of each day's workout
+      const requiredFields = ['description', 'warmup', 'workout', 'strength', 'notes'];
+      Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
+        const missingFields = requiredFields.filter(field => 
+          !workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()
+        );
+
+        if (missingFields.length > 0) {
+          throw new Error(`Day ${day} is missing or has invalid required fields: ${missingFields.join(', ')}`);
+        }
+      });
+
       return new Response(
         JSON.stringify(workouts),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -48,7 +48,8 @@ const Index = () => {
 
     try {
       setIsGenerating(true);
-      console.log("Starting workout generation...");
+      console.log("Starting workout generation with prompt:", generatePrompt);
+      console.log("Number of days requested:", numberOfDays);
       
       const { data: { user } } = await supabase.auth.getUser();
       console.log("Auth check result:", user ? "User found" : "No user");
@@ -61,7 +62,15 @@ const Index = () => {
         return;
       }
 
-      console.log("Calling generate-weekly-workouts function");
+      console.log("Calling generate-weekly-workouts function with params:", {
+        prompt: generatePrompt,
+        numberOfDays,
+        weatherPrompt: "",
+        selectedExercises: [],
+        fitnessLevel: "",
+        prescribedExercises: ""
+      });
+
       const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
           prompt: generatePrompt,
@@ -73,7 +82,11 @@ const Index = () => {
         }
       });
 
-      console.log("Function response received:", { data: !!data, error: functionError });
+      console.log("Function response received:", { 
+        success: !!data, 
+        error: functionError,
+        data: data 
+      });
 
       if (functionError) {
         console.error("Function error:", functionError);
@@ -90,10 +103,10 @@ const Index = () => {
         throw new Error(data.error);
       }
 
-      console.log("Setting generated workouts");
+      console.log("Setting generated workouts:", data);
       setGeneratedWorkouts(data);
       
-      console.log("Saving workouts");
+      console.log("Saving workouts to database");
       await saveWorkouts(data);
       
       toast({

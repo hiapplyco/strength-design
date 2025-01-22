@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,28 +8,22 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  console.log("Edge function called with method:", req.method);
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const {
-      prompt,
-      numberOfDays = 7,
-      weatherPrompt = "",
-      selectedExercises = [],
-      fitnessLevel = "",
-      prescribedExercises = ""
-    } = await req.json();
-    
-    console.log("Received request with:", {
-      prompt,
+    console.log("Parsing request body");
+    const { prompt, numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises } = await req.json();
+    console.log("Request parameters:", { 
+      promptLength: prompt?.length,
       numberOfDays,
-      weatherPrompt,
-      selectedExercises,
-      fitnessLevel,
-      prescribedExercises
+      hasWeatherPrompt: !!weatherPrompt,
+      exercisesCount: selectedExercises?.length,
+      hasFitnessLevel: !!fitnessLevel,
+      hasPrescribedExercises: !!prescribedExercises
     });
     
     if (!prompt) {
@@ -37,8 +31,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Prompt is required' }), 
         { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
         }
       );
     }
@@ -49,8 +43,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'GEMINI_API_KEY is not configured' }), 
         { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
         }
       );
     }
@@ -61,8 +55,8 @@ serve(async (req) => {
 
     const generationConfig = {
       temperature: 0.9,
-      topP: 0.8,
-      topK: 40,
+      topK: 1,
+      topP: 1,
       maxOutputTokens: 8192,
     };
 
@@ -72,43 +66,31 @@ serve(async (req) => {
       history: [],
     });
 
-    const exercisesPrompt = selectedExercises.length > 0 
-      ? `Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
-      : "";
-    
-    const fitnessPrompt = fitnessLevel 
-      ? `Consider this fitness profile: ${fitnessLevel}.`
-      : "";
+    const prompt_template = `As an expert fitness coach, create a ${numberOfDays}-day workout program. ${prompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${selectedExercises?.length ? ` Include these exercises: ${selectedExercises.join(", ")}` : ""}${fitnessLevel ? ` Consider this fitness level: ${fitnessLevel}` : ""}${prescribedExercises ? ` Include these prescribed exercises: ${prescribedExercises}` : ""}
 
-    const prescribedPrompt = prescribedExercises
-      ? `Please incorporate these prescribed exercises/restrictions: ${prescribedExercises}.`
-      : "";
+    For each day, provide:
+    1. A brief description of the focus and stimulus
+    2. A detailed warmup sequence
+    3. The main workout with clear standards
+    4. A strength component
+    5. Coaching notes with form cues
 
-    const expertPrompt = `
-As an expert coach with deep expertise in exercise programming and movement optimization, create a ${numberOfDays}-day workout plan based on this context: ${prompt}
-${weatherPrompt ? `Weather conditions to consider: ${weatherPrompt}` : ""}
-${exercisesPrompt}
-${fitnessPrompt}
-${prescribedPrompt}
+    Return ONLY a JSON object where each key is the day (Day 1, Day 2, etc) and contains:
+    {
+      "description": "Brief focus description",
+      "warmup": "Detailed warmup sequence",
+      "workout": "Main workout details",
+      "strength": "Strength component",
+      "notes": "Coaching notes and cues"
+    }`;
 
-Return ONLY a valid JSON object with no additional text, following this exact format for ${numberOfDays} days:
-{
-  "[Day Name]": {
-    "description": "Brief overview of the day's focus (1-2 sentences)",
-    "warmup": "Detailed warmup protocol (2-3 paragraphs)",
-    "workout": "Main workout details (2-3 paragraphs)",
-    "strength": "Strength work details (1-2 paragraphs)",
-    "notes": "Coaching notes and considerations (1-2 paragraphs)"
-  }
-}`;
-
-    console.log("Sending prompt to Gemini:", expertPrompt);
+    console.log("Sending prompt to Gemini, length:", prompt_template.length);
 
     let result;
     try {
       result = await Promise.race([
-        chat.sendMessage(expertPrompt),
-        new Promise((_, reject) => 
+        chat.sendMessage(prompt_template),
+        new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Request timeout')), 25000)
         )
       ]);
@@ -116,10 +98,10 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
     } catch (error) {
       console.error("Error during Gemini API call:", error);
       return new Response(
-        JSON.stringify({ error: `Gemini API error: ${error.message}` }), 
+        JSON.stringify({ error: `Failed to generate workout: ${error.message}` }), 
         { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
         }
       );
     }
@@ -129,8 +111,8 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
       return new Response(
         JSON.stringify({ error: 'No response received from Gemini API' }), 
         { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
         }
       );
     }
@@ -146,29 +128,29 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     } catch (error) {
-      console.error("Failed to parse JSON:", error);
+      console.error("Error parsing Gemini response:", error);
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to generate valid workout data',
+          error: 'Failed to parse workout data',
           details: error.message,
-          rawResponse: text 
+          rawResponse: text
         }), 
         { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500 
         }
       );
     }
   } catch (error) {
-    console.error('Error in generate-weekly-workouts function:', error);
+    console.error("Unexpected error in edge function:", error);
     return new Response(
       JSON.stringify({ 
-        error: 'Internal server error',
+        error: 'Unexpected error occurred',
         details: error.message 
       }), 
       { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
       }
     );
   }

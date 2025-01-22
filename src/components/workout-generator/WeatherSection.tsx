@@ -11,6 +11,36 @@ interface WeatherSectionProps {
   renderTooltip: () => React.ReactNode;
 }
 
+const getWeatherDescription = (code: number): string => {
+  const weatherCodes: Record<number, string> = {
+    0: 'Clear sky',
+    1: 'Mainly clear',
+    2: 'Partly cloudy',
+    3: 'Overcast',
+    45: 'Foggy',
+    48: 'Depositing rime fog',
+    51: 'Light drizzle',
+    53: 'Moderate drizzle',
+    55: 'Dense drizzle',
+    61: 'Slight rain',
+    63: 'Moderate rain',
+    65: 'Heavy rain',
+    71: 'Slight snow fall',
+    73: 'Moderate snow fall',
+    75: 'Heavy snow fall',
+    77: 'Snow grains',
+    80: 'Slight rain showers',
+    81: 'Moderate rain showers',
+    82: 'Violent rain showers',
+    85: 'Slight snow showers',
+    86: 'Heavy snow showers',
+    95: 'Thunderstorm',
+    96: 'Thunderstorm with slight hail',
+    99: 'Thunderstorm with heavy hail',
+  };
+  return weatherCodes[code] || 'Unknown';
+};
+
 export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: WeatherSectionProps) {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +60,8 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
       }
 
       if (data) {
-        onWeatherUpdate(data, `The weather in ${location} is ${data.current?.weather[0]?.description || 'available'}.`);
+        const weatherDescription = getWeatherDescription(data.weatherCode);
+        onWeatherUpdate(data, `The weather in ${data.location} is ${weatherDescription} with a temperature of ${data.temperature}°C.`);
       }
     } catch (error) {
       console.error("Error fetching weather data:", error);
@@ -58,10 +89,35 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
         </Button>
       </div>
       {weatherData && (
-        <div className="mt-4">
-          <p>Temperature: {weatherData.temperature}°C</p>
-          <p>Humidity: {weatherData.humidity}%</p>
-          <p>Wind Speed: {weatherData.windSpeed} km/h</p>
+        <div className="mt-4 space-y-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="font-medium">Current Weather:</p>
+              <p>Temperature: {weatherData.temperature}°C</p>
+              <p>Feels like: {weatherData.apparentTemperature}°C</p>
+              <p>Humidity: {weatherData.humidity}%</p>
+              <p>Wind Speed: {weatherData.windSpeed} km/h</p>
+              <p>Wind Direction: {weatherData.windDirection}°</p>
+              <p>Wind Gusts: {weatherData.windGusts} km/h</p>
+              <p>Conditions: {getWeatherDescription(weatherData.weatherCode)}</p>
+            </div>
+            {weatherData.forecast && (
+              <div>
+                <p className="font-medium">Forecast:</p>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {weatherData.forecast.dates.map((date, index) => (
+                    <div key={date} className="text-sm">
+                      <p className="font-medium">{new Date(date).toLocaleDateString()}</p>
+                      <p>High: {weatherData.forecast!.maxTemps[index]}°C</p>
+                      <p>Low: {weatherData.forecast!.minTemps[index]}°C</p>
+                      <p>Precipitation: {weatherData.forecast!.precipitationProb[index]}%</p>
+                      <p>Conditions: {getWeatherDescription(weatherData.forecast!.weatherCodes[index])}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

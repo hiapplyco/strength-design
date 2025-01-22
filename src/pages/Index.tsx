@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
-import { exportToCalendar } from "@/utils/calendar";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
@@ -37,18 +36,11 @@ const Index = () => {
   const [isExporting, setIsExporting] = useState(false);
   const navigate = useNavigate();
 
-  const checkTrialStatus = async (userId: string) => {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('trial_end_date')
-      .eq('id', userId)
-      .single();
-
-    return profile && new Date(profile.trial_end_date) > new Date();
-  };
-
   const handleGenerateWorkout = async () => {
+    console.log("Starting handleGenerateWorkout function...");
+    
     if (!generatePrompt.trim()) {
+      console.log("No prompt provided, showing error toast");
       toast({
         title: "Error",
         description: "Please enter a prompt for workout generation",
@@ -58,41 +50,64 @@ const Index = () => {
     }
 
     try {
+      console.log("Setting isGenerating to true");
       setIsGenerating(true);
+      
+      console.log("Showing generating toast");
       toast({
         title: "Generating Workout",
         description: "Please wait while we create your personalized workout plan...",
       });
 
-      console.log("Starting workout generation...");
+      console.log("Checking user authentication...");
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("User auth check result:", user ? "User authenticated" : "No user found");
 
       if (user) {
-        const isTrialValid = await checkTrialStatus(user.id);
+        console.log("Checking trial status for user:", user.id);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('trial_end_date')
+          .eq('id', user.id)
+          .single();
+        
+        const isTrialValid = profile && new Date(profile.trial_end_date) > new Date();
+        console.log("Trial status:", isTrialValid ? "Valid" : "Invalid");
+        
         if (!isTrialValid) {
+          console.log("Trial not valid, showing auth dialog");
           setIsNewUser(false);
           setShowAuthDialog(true);
+          setIsGenerating(false);
           return;
         }
       }
 
-      const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
+      console.log("Calling generate-weekly-workouts function with prompt:", generatePrompt);
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
           prompt: generatePrompt,
           numberOfDays 
         }
       });
 
-      console.log("Workout generation response:", { data, error });
+      console.log("Function response received:", { data, error });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error from function:", error);
+        throw error;
+      }
 
       if (data) {
+        console.log("Workout data received:", data);
         setGeneratedWorkouts(data);
+        
         if (!user) {
+          console.log("No user found, showing auth dialog");
           setIsNewUser(true);
           setShowAuthDialog(true);
         } else {
+          console.log("Saving workouts for user");
           await saveWorkouts(data);
         }
 
@@ -109,6 +124,7 @@ const Index = () => {
         variant: "destructive",
       });
     } finally {
+      console.log("Setting isGenerating to false");
       setIsGenerating(false);
     }
   };

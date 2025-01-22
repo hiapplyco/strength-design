@@ -191,10 +191,10 @@ const Index = () => {
       />
       <audio ref={audioRef} className="hidden" />
       {isGenerating && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-4">
+        <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+          <div className="bg-black p-6 rounded-lg shadow-lg flex items-center space-x-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-lg font-medium">Generating your workout plan...</p>
+            <p className="text-lg font-medium text-white">Generating your workout plan...</p>
           </div>
         </div>
       )}

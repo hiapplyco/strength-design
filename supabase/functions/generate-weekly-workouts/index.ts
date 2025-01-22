@@ -19,76 +19,93 @@ serve(async (req) => {
     }
 
     const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
-
-    console.log('Starting workout generation with inputs:', {
-      weatherPrompt,
-      exercisesCount: selectedExercises?.length,
+    
+    console.log('Starting workout generation with params:', {
+      hasWeather: !!weatherPrompt,
+      exerciseCount: selectedExercises?.length,
       fitnessLevel,
-      numberOfDays
+      days: numberOfDays
     });
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        temperature: 0.7,
+        topK: 1,
+        topP: 1,
+        maxOutputTokens: 2048,
+      },
+    });
 
-    const exercisesList = selectedExercises?.map(e => e.name).join(", ") || '';
-    
-    const systemPrompt = `As a professional fitness coach, create a ${numberOfDays}-day workout program.
-    Weather conditions: ${weatherPrompt || 'Not specified'}
-    Exercises to include: ${exercisesList || 'No specific exercises required'}
-    Fitness level: ${fitnessLevel || 'Not specified'}
-    Additional exercises: ${prescribedExercises || 'None'}
+    const systemPrompt = `Create a ${numberOfDays}-day workout program as a JSON object.
+${weatherPrompt ? `Weather conditions: ${weatherPrompt}` : ''}
+${selectedExercises?.length ? `Include exercises: ${selectedExercises.map(e => e.name).join(', ')}` : ''}
+${fitnessLevel ? `Fitness level: ${fitnessLevel}` : ''}
+${prescribedExercises ? `Additional exercises: ${prescribedExercises}` : ''}
 
-    Create a workout plan with these components for each day:
-    1. Brief description
-    2. Warmup routine
-    3. Main workout
-    4. Strength focus
-    5. Optional notes
+Format as JSON with numbered days (day1, day2, etc). Each day must have:
+- description: Brief focus description
+- warmup: Detailed warmup
+- workout: Main workout
+- strength: Strength component
+- notes: Optional coaching notes
 
-    Format the response as a JSON object with numbered days as keys (day1, day2, etc).
-    Each day should have these exact fields: description, warmup, workout, strength, notes.
-    Keep the response concise and focused on the workout details.`;
+Example format:
+{
+  "day1": {
+    "description": "Focus description",
+    "warmup": "Warmup details",
+    "workout": "Workout details",
+    "strength": "Strength focus",
+    "notes": "Optional notes"
+  }
+}`;
 
     console.log('Sending prompt to Gemini');
     
     const result = await model.generateContent(systemPrompt);
-    console.log('Received response from Gemini:', result);
+    console.log('Response received:', result?.response ? 'Has response' : 'No response');
 
     if (!result?.response?.text) {
-      console.error('Invalid response structure:', result);
       throw new Error('Invalid response from Gemini');
     }
 
-    const responseText = result.response.text;
-    console.log('Response text type:', typeof responseText);
-    console.log('Raw response:', responseText);
+    const responseText = result.response.text.trim();
+    console.log('Response length:', responseText.length);
 
-    // Extract JSON from the response
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('No JSON found in response:', responseText);
-      throw new Error('No valid JSON found in response');
-    }
-
-    const cleanedJson = jsonMatch[0]
-      .replace(/```json\s*|\s*```/g, '')  // Remove markdown code blocks
-      .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')  // Remove comments
-      .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas
-      .trim();
-
-    console.log('Cleaned JSON:', cleanedJson);
-    
     try {
-      const workouts = JSON.parse(cleanedJson);
+      // First try direct JSON parse
+      const workouts = JSON.parse(responseText);
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
-    } catch (parseError) {
-      console.error('JSON parsing error:', parseError);
-      throw new Error(`Failed to parse response as JSON: ${parseError.message}`);
-    }
+    } catch (directParseError) {
+      console.log('Direct JSON parse failed, attempting to extract JSON');
+      
+      // Try to extract JSON if direct parse fails
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in response');
+      }
 
+      const cleanedJson = jsonMatch[0]
+        .replace(/```json\s*|\s*```/g, '')
+        .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+        .replace(/,(\s*[}\]])/g, '$1')
+        .trim();
+
+      try {
+        const workouts = JSON.parse(cleanedJson);
+        return new Response(JSON.stringify(workouts), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      } catch (extractedParseError) {
+        throw new Error(`Failed to parse JSON: ${extractedParseError.message}`);
+      }
+    }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
     return new Response(JSON.stringify({ error: error.message }), {

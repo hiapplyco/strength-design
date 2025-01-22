@@ -8,7 +8,13 @@ export function useAudioPlayback() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
-  const handleSpeakWorkout = async (day: string, workouts: Record<string, any>, warmup: string, workout: string, notes: string) => {
+  const handleSpeakWorkout = async (
+    day: string, 
+    workouts: Record<string, any>, 
+    warmup: string, 
+    workout: string, 
+    notes: string
+  ) => {
     try {
       if (isPaused && audioRef.current) {
         audioRef.current.play();

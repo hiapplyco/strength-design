@@ -34,17 +34,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
     try {
       setIsGenerating(true);
       console.log("Starting workout generation");
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log("Auth check result:", user ? "User found" : "No user");
-      
-      if (!user) {
-        console.log("No user found, showing auth dialog");
-        setIsNewUser(true);
-        setShowAuthDialog(true);
-        setIsGenerating(false);
-        return;
-      }
 
       console.log("Calling generate-weekly-workouts function with params:", {
         prompt: generatePrompt,
@@ -89,9 +78,7 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
 
       console.log("Setting generated workouts:", data);
       setGeneratedWorkouts(data);
-      
-      console.log("Saving workouts to database");
-      await saveWorkouts(data);
+      setWorkouts(data);
       
       toast({
         title: "Success",

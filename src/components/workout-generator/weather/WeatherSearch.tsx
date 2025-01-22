@@ -7,20 +7,71 @@ import type { WeatherData } from "@/types/weather";
 import { useToast } from "@/hooks/use-toast";
 import debounce from 'lodash/debounce';
 import { getWeatherDescription } from "./weather-utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface WeatherSearchProps {
   onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
   renderTooltip: () => React.ReactNode;
 }
 
+interface LocationResult {
+  name: string;
+  country: string;
+  admin1?: string;
+}
+
 export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchProps) {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [locations, setLocations] = useState<LocationResult[]>([]);
   const { toast } = useToast();
 
-  const fetchWeather = async (searchLocation: string) => {
-    if (!searchLocation.trim()) {
+  const searchLocations = async (searchTerm: string) => {
+    if (searchTerm.length < 3) {
+      setLocations([]);
+      return;
+    }
+
+    try {
+      const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchTerm)}&count=5&language=en&format=json`;
+      const response = await fetch(geocodingUrl);
+      const data = await response.json();
+      
+      if (data.results) {
+        setLocations(data.results.map((result: any) => ({
+          name: result.name,
+          country: result.country,
+          admin1: result.admin1
+        })));
+      } else {
+        setLocations([]);
+      }
+    } catch (error) {
+      console.error('Error searching locations:', error);
+      setLocations([]);
+    }
+  };
+
+  const debouncedSearch = useCallback(
+    debounce(searchLocations, 300),
+    []
+  );
+
+  const fetchWeather = async (selectedLocation: string) => {
+    if (!selectedLocation.trim()) {
       setError("Please enter a location");
       return;
     }
@@ -29,9 +80,9 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
     setError(null);
     
     try {
-      console.log("Fetching weather data for:", searchLocation);
+      console.log("Fetching weather data for:", selectedLocation);
       const { data, error: apiError } = await supabase.functions.invoke("get-weather", {
-        body: { query: searchLocation },
+        body: { query: selectedLocation },
       });
 
       if (apiError) {
@@ -62,16 +113,13 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       });
     } finally {
       setIsLoading(false);
+      setOpen(false);
     }
   };
 
-  const debouncedFetchWeather = useCallback(
-    debounce(fetchWeather, 500),
-    []
-  );
-
-  const handleLocationSearch = () => {
-    fetchWeather(location);
+  const handleLocationSelect = (locationString: string) => {
+    setLocation(locationString);
+    fetchWeather(locationString);
   };
 
   return (
@@ -82,34 +130,50 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
         {renderTooltip()}
       </div>
       
-      <div className="flex gap-2">
-        <Input
-          placeholder="Enter your location"
-          value={location}
-          onChange={(e) => {
-            setLocation(e.target.value);
-            if (e.target.value.length >= 3) {
-              debouncedFetchWeather(e.target.value);
-            }
-          }}
-          className="flex-1"
-          onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
-        />
-        <Button 
-          onClick={handleLocationSearch} 
-          disabled={isLoading || !location.trim()}
-          className="min-w-[120px]"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Loading...
-            </>
-          ) : (
-            "Get Weather"
-          )}
-        </Button>
-      </div>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between"
+          >
+            {location ? location : "Search for a location..."}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput
+              placeholder="Search for a location..."
+              value={location}
+              onValueChange={(search) => {
+                setLocation(search);
+                debouncedSearch(search);
+              }}
+            />
+            <CommandEmpty>No locations found.</CommandEmpty>
+            <CommandGroup>
+              {locations.map((loc, index) => (
+                <CommandItem
+                  key={index}
+                  value={`${loc.name}, ${loc.admin1 ? `${loc.admin1}, ` : ''}${loc.country}`}
+                  onSelect={handleLocationSelect}
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  {loc.name}, {loc.admin1 ? `${loc.admin1}, ` : ''}{loc.country}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      {isLoading && (
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="ml-2">Loading weather data...</span>
+        </div>
+      )}
 
       {error && (
         <div className="text-destructive text-sm">{error}</div>

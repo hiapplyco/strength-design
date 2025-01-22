@@ -20,13 +20,30 @@ serve(async (req) => {
       throw new Error('Missing Gemini API key');
     }
 
-    const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
-    console.log('Request params:', { weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays });
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log('Received request body:', requestBody);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      throw new Error('Invalid request format');
+    }
 
+    const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = requestBody;
+    
+    // Validate required parameters
     if (!numberOfDays || numberOfDays < 1) {
       console.error('Invalid number of days:', numberOfDays);
       throw new Error('Invalid number of days');
     }
+
+    console.log('Generating prompt with params:', {
+      numberOfDays,
+      weatherPrompt,
+      selectedExercises: selectedExercises?.length,
+      fitnessLevel,
+      prescribedExercises: !!prescribedExercises
+    });
 
     const generationPrompt = createWorkoutGenerationPrompt({
       numberOfDays,
@@ -43,9 +60,15 @@ serve(async (req) => {
     const model = genAI.getGenerativeModel(config);
 
     console.log('Sending request to Gemini...');
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: generationPrompt }] }],
-    });
+    let result;
+    try {
+      result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: generationPrompt }] }],
+      });
+    } catch (geminiError) {
+      console.error('Gemini API error:', geminiError);
+      throw new Error(`Gemini API error: ${geminiError.message}`);
+    }
 
     if (!result || !result.response) {
       console.error('No response from Gemini');
@@ -95,21 +118,22 @@ serve(async (req) => {
         });
       });
 
-      console.log('Successfully validated workouts:', workouts);
+      console.log('Successfully validated workouts structure');
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
 
-    } catch (parseError) {
-      console.error('Error processing Gemini response:', parseError);
-      throw new Error(`Failed to process workout data: ${parseError.message}`);
+    } catch (processError) {
+      console.error('Error processing Gemini response:', processError);
+      throw new Error(`Failed to process workout data: ${processError.message}`);
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts function:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
-      details: 'An error occurred while generating workouts'
+      details: 'An error occurred while generating workouts. Please try again.',
+      timestamp: new Date().toISOString()
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

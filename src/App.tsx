@@ -92,18 +92,18 @@ const AppContent = () => {
           console.log('User updated');
           setSession(currentSession);
           break;
-        case 'USER_DELETED':
-          setSession(null);
-          navigate('/');
+        case 'PASSWORD_RECOVERY':
+          console.log('Password recovery initiated');
           break;
-        case 'ERROR':
-          console.error('Auth error occurred');
-          toast({
-            title: "Authentication Error",
-            description: "Please try signing in again.",
-            variant: "destructive",
-          });
-          break;
+        default:
+          if (!currentSession) {
+            console.error('Auth state change error');
+            toast({
+              title: "Authentication Error",
+              description: "Please try signing in again.",
+              variant: "destructive",
+            });
+          }
       }
     });
 

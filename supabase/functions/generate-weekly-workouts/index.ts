@@ -68,7 +68,6 @@ serve(async (req) => {
       throw new Error('Invalid response from Gemini');
     }
 
-    // Get the response text from the candidates
     const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!responseText) {
       console.error('No text content in Gemini response');

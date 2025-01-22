@@ -69,6 +69,7 @@ export function GenerateWorkoutInput({
       : "";
     
     const fullPrompt = `${weatherPrompt}${exercisesPrompt}${fitnessPrompt}${prescribedPrompt}`;
+    console.log("Generating workout with prompt:", fullPrompt);
     setGeneratePrompt(fullPrompt);
 
     try {

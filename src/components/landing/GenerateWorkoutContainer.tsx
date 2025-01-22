@@ -31,12 +31,14 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   }) => {
     try {
       setIsGenerating(true);
+      console.log("Starting workout generation with params:", params);
       
       const workouts = await generateWorkout({
         ...params,
         numberOfDays,
       });
 
+      console.log("Generated workouts:", workouts);
       setGeneratedWorkouts(workouts);
       setWorkouts(workouts);
       

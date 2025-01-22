@@ -26,10 +26,7 @@ export const generateWorkout = async (params: GenerateWorkoutParams): Promise<We
   console.log("Starting workout generation with params:", params);
 
   const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
-    body: params,
-    headers: {
-      'Custom-Header': 'value'
-    }
+    body: params
   });
 
   console.log("Edge Function response:", { data, error });

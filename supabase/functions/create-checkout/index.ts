@@ -1,10 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from 'https://esm.sh/stripe@14.21.0'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
+import Stripe from 'https://esm.sh/stripe@14.21.0';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 const PRICE_IDS = {
@@ -19,13 +20,20 @@ serve(async (req) => {
 
   try {
     if (req.method !== 'POST') {
-      throw new Error('Method not allowed');
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 405 }
+      );
     }
 
     const { subscriptionType } = await req.json();
     const priceId = PRICE_IDS[subscriptionType];
+    
     if (!priceId) {
-      throw new Error(`Invalid subscription type: ${subscriptionType}`);
+      return new Response(
+        JSON.stringify({ error: `Invalid subscription type: ${subscriptionType}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     const supabaseClient = createClient(
@@ -35,14 +43,20 @@ serve(async (req) => {
 
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('Authentication required');
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
     }
 
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
     if (userError || !user?.email) {
-      throw new Error('Authentication failed');
+      return new Response(
+        JSON.stringify({ error: 'Authentication failed' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
     }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -65,7 +79,10 @@ serve(async (req) => {
       });
 
       if (subscriptions.data.length > 0) {
-        throw new Error('You already have an active subscription to this plan');
+        return new Response(
+          JSON.stringify({ error: 'You already have an active subscription to this plan' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
       }
     } else {
       const newCustomer = await stripe.customers.create({
@@ -79,7 +96,10 @@ serve(async (req) => {
 
     const origin = req.headers.get('origin');
     if (!origin) {
-      throw new Error('Origin header required');
+      return new Response(
+        JSON.stringify({ error: 'Origin header required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -94,7 +114,10 @@ serve(async (req) => {
     });
 
     if (!session.url) {
-      throw new Error('Failed to create checkout session URL');
+      return new Response(
+        JSON.stringify({ error: 'Failed to create checkout session URL' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
     }
 
     return new Response(
@@ -110,7 +133,7 @@ serve(async (req) => {
       JSON.stringify({ error: error.message }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message === 'Authentication required' ? 401 : 500,
+        status: 500,
       }
     );
   }

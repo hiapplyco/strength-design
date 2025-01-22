@@ -4,18 +4,27 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function useAudioPlayback() {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
   const handleSpeakWorkout = async (title: string, allWorkouts: any, warmup: string, wod: string, notes: string) => {
     try {
+      if (isPaused && audioRef.current) {
+        audioRef.current.play();
+        setIsPaused(false);
+        setIsSpeaking(true);
+        return;
+      }
+
       setIsSpeaking(true);
+      setIsPaused(false);
 
       const { data: monologueData, error: monologueError } = await supabase.functions.invoke('generate-workout-monologue', {
         body: {
           dayToSpeak: title,
           workoutPlan: {
-            [title]: allWorkouts[title] // Only pass the current day's workout
+            [title]: allWorkouts[title]
           },
           warmup,
           wod: `Important: When referring to this section, always say "workout of the day" instead of "WOD". Here's the workout: ${wod}`,
@@ -37,6 +46,7 @@ export function useAudioPlayback() {
         
         audioRef.current.onended = () => {
           setIsSpeaking(false);
+          setIsPaused(false);
         };
       }
     } catch (error) {
@@ -47,12 +57,23 @@ export function useAudioPlayback() {
         variant: "destructive",
       });
       setIsSpeaking(false);
+      setIsPaused(false);
+    }
+  };
+
+  const handlePause = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPaused(true);
+      setIsSpeaking(false);
     }
   };
 
   return {
     isSpeaking,
+    isPaused,
     audioRef,
-    handleSpeakWorkout
+    handleSpeakWorkout,
+    handlePause
   };
 }

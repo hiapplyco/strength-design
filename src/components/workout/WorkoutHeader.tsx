@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 interface WorkoutHeaderProps {
   title: string;
   isSpeaking: boolean;
+  isPaused?: boolean;
   isExporting: boolean;
   onSpeak: () => void;
   onExport: () => void;
@@ -24,6 +25,7 @@ interface WorkoutHeaderProps {
 export function WorkoutHeader({ 
   title, 
   isSpeaking, 
+  isPaused,
   isExporting, 
   onSpeak, 
   onExport,
@@ -133,6 +135,7 @@ export function WorkoutHeader({
             onExport={onExport}
             onModify={() => setShowModifyDialog(true)}
             isSpeaking={isSpeaking}
+            isPaused={isPaused}
             isExporting={isExporting}
             isModifying={isModifying}
             showModify={!!allWorkouts && !!onUpdate}

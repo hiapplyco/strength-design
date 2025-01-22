@@ -20,7 +20,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const [isExporting, setIsExporting] = useState(false);
   const [currentDescription, setCurrentDescription] = useState(description);
   
-  const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
+  const { isSpeaking, isPaused, audioRef, handleSpeakWorkout, handlePause } = useAudioPlayback();
   const { warmup, workout, notes, strength, setState } = useWorkoutState(title, allWorkouts);
 
   const formatWorkoutText = () => {
@@ -43,6 +43,14 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
     }
   };
 
+  const handleSpeakToggle = () => {
+    if (isSpeaking || isPaused) {
+      handlePause();
+    } else {
+      handleSpeakWorkout(title, allWorkouts, warmup, workout, notes);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px]">
@@ -51,8 +59,9 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
         <WorkoutHeader
           title={title}
           isSpeaking={isSpeaking}
+          isPaused={isPaused}
           isExporting={isExporting}
-          onSpeak={() => handleSpeakWorkout(title, allWorkouts, warmup, workout, notes)}
+          onSpeak={handleSpeakToggle}
           onExport={handleExportCalendar}
           warmup={warmup}
           workout={workout}
@@ -62,7 +71,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           onUpdate={(updates) => {
             setState({
               ...updates,
-              strength: strength // Preserve strength when modifying
+              strength: strength
             });
             
             if (updates.description) {

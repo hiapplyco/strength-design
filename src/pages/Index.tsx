@@ -48,9 +48,10 @@ const Index = () => {
 
     try {
       setIsGenerating(true);
+      console.log("Starting workout generation...");
       
-      // Check user authentication first
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("Auth check result:", user ? "User found" : "No user");
       
       if (!user) {
         console.log("No user found, showing auth dialog");
@@ -60,7 +61,7 @@ const Index = () => {
         return;
       }
 
-      // Generate workout
+      console.log("Calling generate-weekly-workouts function");
       const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
           prompt: generatePrompt,
@@ -68,16 +69,22 @@ const Index = () => {
         }
       });
 
+      console.log("Function response received:", { data: !!data, error: functionError });
+
       if (functionError) {
         console.error("Function error:", functionError);
         throw functionError;
       }
 
       if (!data) {
+        console.error("No data received from function");
         throw new Error("No workout data received");
       }
 
+      console.log("Setting generated workouts");
       setGeneratedWorkouts(data);
+      
+      console.log("Saving workouts");
       await saveWorkouts(data);
       
       toast({
@@ -87,7 +94,8 @@ const Index = () => {
       triggerConfetti();
 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error in handleGenerateWorkout:', error);
+      setIsGenerating(false);
       toast({
         title: "Error",
         description: error.message || "Failed to generate workouts. Please try again.",
@@ -100,12 +108,15 @@ const Index = () => {
 
   const saveWorkouts = async (workoutsToSave: WeeklyWorkouts) => {
     try {
+      console.log("Starting saveWorkouts");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        console.log("No user in saveWorkouts, showing auth dialog");
         setShowAuthDialog(true);
         return;
       }
 
+      console.log("Creating workout promises");
       const workoutPromises = Object.entries(workoutsToSave).map(([day, workout]) => {
         return supabase.from('workouts').insert({
           user_id: user.id,
@@ -116,6 +127,7 @@ const Index = () => {
         });
       });
 
+      console.log("Executing workout promises");
       await Promise.all(workoutPromises);
       setWorkouts(workoutsToSave);
       toast({
@@ -123,18 +135,21 @@ const Index = () => {
         description: "Workouts saved successfully!",
       });
     } catch (error) {
-      console.error('Error saving workouts:', error);
+      console.error('Error in saveWorkouts:', error);
       toast({
         title: "Error",
         description: "Failed to save workouts. Please try again.",
         variant: "destructive",
       });
+      throw error; // Re-throw to be caught by the calling function
     }
   };
 
   const handleAuthSuccess = async () => {
+    console.log("Auth success handler called");
     setShowAuthDialog(false);
     if (generatedWorkouts) {
+      console.log("Saving generated workouts after auth");
       await saveWorkouts(generatedWorkouts);
     }
   };

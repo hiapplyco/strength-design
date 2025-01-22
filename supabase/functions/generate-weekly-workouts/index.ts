@@ -19,8 +19,19 @@ serve(async (req) => {
       throw new Error('Missing Gemini API key');
     }
 
-    const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
-    console.log('Received request with params:', { weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays });
+    const requestData = await req.json();
+    console.log('Received request with params:', requestData);
+
+    const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = requestData;
+
+    // Validate required fields
+    if (!fitnessLevel || typeof fitnessLevel !== 'string') {
+      throw new Error('Invalid or missing fitnessLevel');
+    }
+
+    if (!numberOfDays || typeof numberOfDays !== 'number') {
+      throw new Error('Invalid or missing numberOfDays');
+    }
 
     const generationPrompt = createWorkoutGenerationPrompt({
       numberOfDays,
@@ -59,6 +70,18 @@ serve(async (req) => {
       const workouts = JSON.parse(cleanedText);
       console.log('Parsed workouts:', workouts);
 
+      // Validate the workout structure
+      Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
+        const requiredFields = ['description', 'warmup', 'workout', 'strength'];
+        const missingFields = requiredFields.filter(field => 
+          !workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()
+        );
+        
+        if (missingFields.length > 0) {
+          throw new Error(`Missing or invalid required fields for ${day}: ${missingFields.join(', ')}`);
+        }
+      });
+
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -71,6 +94,7 @@ serve(async (req) => {
     console.error('Error in generate-weekly-workouts function:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
+      details: error.stack
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

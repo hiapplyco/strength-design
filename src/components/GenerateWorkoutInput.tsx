@@ -7,6 +7,8 @@ import { FitnessSection } from "./workout-generator/FitnessSection";
 import { GenerateSection } from "./workout-generator/GenerateSection";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -14,6 +16,8 @@ interface GenerateWorkoutInputProps {
   handleGenerateWorkout: () => void;
   isGenerating: boolean;
   setShowGenerateInput: (value: boolean) => void;
+  numberOfDays: number;
+  setNumberOfDays: (value: number) => void;
 }
 
 interface WeatherData {
@@ -32,6 +36,8 @@ export function GenerateWorkoutInput({
   handleGenerateWorkout,
   isGenerating,
   setShowGenerateInput,
+  numberOfDays,
+  setNumberOfDays
 }: GenerateWorkoutInputProps) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
@@ -71,6 +77,13 @@ export function GenerateWorkoutInput({
     setFitnessLevel("");
   };
 
+  const handleDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (value >= 1 && value <= 12) {
+      setNumberOfDays(value);
+    }
+  };
+
   const renderTooltip = (content: string) => (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -93,6 +106,22 @@ export function GenerateWorkoutInput({
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="days">Number of Days</Label>
+            {renderTooltip("Select how many days of workouts to generate (1-12 days)")}
+          </div>
+          <Input
+            id="days"
+            type="number"
+            min={1}
+            max={12}
+            value={numberOfDays}
+            onChange={handleDaysChange}
+            className="bg-white text-black placeholder:text-gray-500"
+          />
+        </div>
+
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}

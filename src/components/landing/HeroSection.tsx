@@ -12,6 +12,8 @@ interface HeroSectionProps {
   handleGenerateWorkout: () => void;
   isGenerating: boolean;
   setShowGenerateInput: (show: boolean) => void;
+  numberOfDays: number;
+  setNumberOfDays: (days: number) => void;
 }
 
 export const HeroSection = ({
@@ -19,7 +21,9 @@ export const HeroSection = ({
   setGeneratePrompt,
   handleGenerateWorkout,
   isGenerating,
-  setShowGenerateInput
+  setShowGenerateInput,
+  numberOfDays,
+  setNumberOfDays
 }: HeroSectionProps) => {
   const [showSubscription, setShowSubscription] = useState(true);
 
@@ -40,7 +44,6 @@ export const HeroSection = ({
         </p>
       </div>
       
-      {/* Email Subscription Form */}
       {showSubscription && (
         <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
           <div className="text-center mb-4">
@@ -51,40 +54,37 @@ export const HeroSection = ({
         </div>
       )}
 
-      {/* New Free Workout Generation Section */}
       <div className="w-full max-w-3xl bg-primary p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300">
         <div className="text-center mb-6">
           <h2 className="text-4xl font-oswald text-white mb-2 uppercase tracking-wider">
-            🎉 Generate Your First Week FREE! 🎉
+            🎉 Generate Your Custom Workout Plan! 🎉
           </h2>
           <p className="text-white text-xl">
-            Create a complete week of personalized workouts instantly! Our advanced computational algorithms analyze your goals and preferences to design the perfect progression.
+            Create up to 12 days of personalized workouts instantly! Our advanced computational algorithms analyze your goals and preferences to design the perfect progression.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-white mb-6">
           <div className="bg-black/20 p-4 rounded-lg">
-            <h3 className="font-oswald text-xl mb-2">Monday-Wednesday</h3>
-            <p>Progressive Overload & Technical Development</p>
+            <h3 className="font-oswald text-xl mb-2">Progressive Overload</h3>
+            <p>Technical Development & Strength</p>
           </div>
           <div className="bg-black/20 p-4 rounded-lg">
-            <h3 className="font-oswald text-xl mb-2">Thursday-Friday</h3>
-            <p>Metabolic Optimization & Power Output</p>
+            <h3 className="font-oswald text-xl mb-2">Metabolic Focus</h3>
+            <p>Optimization & Power Output</p>
           </div>
           <div className="bg-black/20 p-4 rounded-lg">
-            <h3 className="font-oswald text-xl mb-2">Weekend</h3>
-            <p>Active Recovery & Movement Restoration</p>
+            <h3 className="font-oswald text-xl mb-2">Recovery</h3>
+            <p>Movement Restoration</p>
           </div>
         </div>
       </div>
 
-      {/* Arrows pointing to generate section */}
       <div className="flex justify-center space-x-4">
         <ArrowDown className="w-8 h-8 text-primary animate-bounce" />
         <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-100" />
         <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200" />
       </div>
 
-      {/* Generate Search Section */}
       <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
         <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
         <GenerateWorkoutInput
@@ -93,6 +93,8 @@ export const HeroSection = ({
           handleGenerateWorkout={handleGenerateWorkout}
           isGenerating={isGenerating}
           setShowGenerateInput={setShowGenerateInput}
+          numberOfDays={numberOfDays}
+          setNumberOfDays={setNumberOfDays}
         />
       </div>
 

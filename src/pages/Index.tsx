@@ -30,6 +30,7 @@ const Index = () => {
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
+  const [numberOfDays, setNumberOfDays] = useState(7);
   const { toast } = useToast();
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
   const [isExporting, setIsExporting] = useState(false);
@@ -54,7 +55,10 @@ const Index = () => {
 
       console.log("Starting workout generation...");
       const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
-        body: { prompt: generatePrompt }
+        body: { 
+          prompt: generatePrompt,
+          numberOfDays 
+        }
       });
 
       console.log("Workout generation response:", { data, error });
@@ -172,6 +176,8 @@ const Index = () => {
             handleGenerateWorkout={handleGenerateWorkout}
             isGenerating={isGenerating}
             setShowGenerateInput={setShowGenerateInput}
+            numberOfDays={numberOfDays}
+            setNumberOfDays={setNumberOfDays}
           />
           <FeaturesSection />
           <SolutionsSection />

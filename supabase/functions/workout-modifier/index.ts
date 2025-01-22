@@ -23,8 +23,8 @@ serve(async (req) => {
     console.log('Received request data:', requestData);
 
     const { dayToModify, modificationPrompt, allWorkouts } = requestData;
-    const currentWorkout = allWorkouts[dayToModify];
 
+    // Enhanced validation
     if (!dayToModify || typeof dayToModify !== 'string') {
       throw new Error('Invalid or missing dayToModify');
     }
@@ -33,11 +33,20 @@ serve(async (req) => {
       throw new Error('Invalid or missing modificationPrompt');
     }
 
-    if (!currentWorkout || typeof currentWorkout !== 'object') {
-      throw new Error('No workout data provided for modification');
+    if (!allWorkouts || typeof allWorkouts !== 'object') {
+      console.error('allWorkouts data:', allWorkouts);
+      throw new Error('Invalid or missing allWorkouts object');
+    }
+
+    const currentWorkout = allWorkouts[dayToModify];
+    if (!currentWorkout) {
+      console.error('No workout found for day:', dayToModify);
+      console.error('Available workouts:', Object.keys(allWorkouts));
+      throw new Error(`No workout found for day: ${dayToModify}`);
     }
 
     if (!currentWorkout.workout || !currentWorkout.warmup) {
+      console.error('Invalid workout data:', currentWorkout);
       throw new Error('Current workout must contain at least workout and warmup fields');
     }
 

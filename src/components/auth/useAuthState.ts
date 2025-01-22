@@ -9,7 +9,7 @@ export const useAuthState = (
   onSuccess: () => void,
 ) => {
   const [error, setError] = useState<string>("");
-  const [view, setView] = useState<"sign_up" | "sign_in">("sign_up");
+  const [view, setView] = useState<"sign_up" | "sign_in">("sign_in");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,13 +37,25 @@ export const useAuthState = (
           .eq('id', session?.user?.id)
           .single();
 
-        if (profile?.trial_end_date && new Date(profile.trial_end_date) > new Date()) {
+        if (!profile?.trial_end_date) {
+          // New user - start trial
+          const trialEndDate = new Date();
+          trialEndDate.setDate(trialEndDate.getDate() + 7);
+          
+          await supabase
+            .from('profiles')
+            .update({ trial_end_date: trialEndDate.toISOString() })
+            .eq('id', session?.user?.id);
+
           toast({
             title: "Welcome!",
             description: "Your 7-day trial has started. Enjoy creating custom workouts!",
           });
-          onSuccess();
-          onOpenChange(false);
+        } else if (new Date(profile.trial_end_date) > new Date()) {
+          toast({
+            title: "Welcome back!",
+            description: "Continue creating custom workouts.",
+          });
         } else {
           toast({
             title: "Trial Expired",
@@ -51,6 +63,8 @@ export const useAuthState = (
             variant: "destructive",
           });
         }
+        onSuccess();
+        onOpenChange(false);
       }
       
       if (event === 'SIGNED_OUT') {

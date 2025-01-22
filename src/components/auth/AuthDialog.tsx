@@ -10,18 +10,18 @@ interface AuthDialogProps {
 }
 
 export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps) => {
-  const { error, view, setView } = useAuthState(isOpen, onOpenChange, onSuccess);
+  const { error, view } = useAuthState(isOpen, onOpenChange, onSuccess);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-oswald">
-            {view === "sign_up" ? "Start Your 7-Day Free Trial" : "Welcome Back"}
+          <DialogTitle className="text-center text-2xl font-oswald text-black">
+            {view === "sign_up" ? "Create Account" : "Welcome Back"}
           </DialogTitle>
         </DialogHeader>
         <AuthErrorAlert error={error} />
-        <AuthForm view={view} onViewChange={setView} />
+        <AuthForm view={view} />
       </DialogContent>
     </Dialog>
   );

@@ -4,10 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface AuthFormProps {
   view: "sign_up" | "sign_in";
-  onViewChange: (view: "sign_up" | "sign_in") => void;
 }
 
-export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
+export const AuthForm = ({ view }: AuthFormProps) => {
   return (
     <Auth
       supabaseClient={supabase}
@@ -19,8 +18,20 @@ export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
             colors: {
               brand: '#D4B96D',
               brandAccent: '#b39b5c',
+              inputBackground: 'white',
+              inputText: 'black',
+              inputPlaceholder: 'darkgray',
+              backgroundAccent: 'white',
+              backgroundSecondary: 'white',
+              backgroundPrimary: 'white',
             }
           }
+        },
+        className: {
+          container: 'bg-white text-black',
+          label: 'text-black',
+          button: 'bg-primary hover:bg-primary/90',
+          input: 'bg-white border-gray-300 text-black',
         }
       }}
       providers={[]}
@@ -29,14 +40,14 @@ export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
           sign_up: {
             email_label: "Email",
             password_label: "Create Password",
-            button_label: "Start Free Trial",
+            button_label: "Sign Up",
             link_text: "Already have an account? Sign in",
           },
           sign_in: {
             email_label: "Email",
             password_label: "Password",
             button_label: "Sign In",
-            link_text: "New here? Start your free trial",
+            link_text: "Don't have an account? Sign up",
           },
         },
       }}

@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { WeatherData } from "@/types/weather";
@@ -153,7 +152,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
             />
             <CommandEmpty>No locations found.</CommandEmpty>
             <CommandGroup>
-              {locations.map((loc, index) => (
+              {Array.isArray(locations) && locations.map((loc, index) => (
                 <CommandItem
                   key={index}
                   value={`${loc.name}, ${loc.admin1 ? `${loc.admin1}, ` : ''}${loc.country}`}

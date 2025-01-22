@@ -38,9 +38,14 @@ const Index = () => {
   return (
     <div className="relative min-h-screen backdrop-blur-sm">
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0 bg-fixed"
         style={{
           backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          transform: "scale(1)",
+          height: "100vh",
+          width: "100vw"
         }}
       />
       <div className="relative z-10">

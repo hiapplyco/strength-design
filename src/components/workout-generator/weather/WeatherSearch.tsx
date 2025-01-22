@@ -2,13 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import type { WeatherData } from "@/types/weather";
 import { useToast } from "@/hooks/use-toast";
 import { getWeatherDescription } from "./weather-utils";
 
 interface WeatherSearchProps {
-  onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
+  onWeatherUpdate: (weatherData: any | null, weatherPrompt: string) => void;
   renderTooltip: () => React.ReactNode;
 }
 
@@ -32,27 +30,73 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke("get-weather", {
-        body: { query: location },
-      });
-
-      if (error) throw error;
-
-      if (!data) {
-        throw new Error("No weather data found for this location");
+      // First, get coordinates using the Geocoding API
+      const geocodingResponse = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`
+      );
+      
+      if (!geocodingResponse.ok) {
+        throw new Error("Failed to find location");
       }
 
-      console.log("Weather data received:", data);
-      const weatherDescription = getWeatherDescription(data.weatherCode);
+      const geocodingData = await geocodingResponse.json();
+      
+      if (!geocodingData.results?.[0]) {
+        throw new Error("Location not found");
+      }
+
+      const { latitude, longitude, name, country } = geocodingData.results[0];
+      
+      // Then, get weather data using the Weather API
+      const weatherResponse = await fetch(
+        `https://api.open-meteo.com/v1/forecast?` +
+        `latitude=${latitude}&longitude=${longitude}` +
+        `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m` +
+        `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
+        `&timezone=auto`
+      );
+
+      if (!weatherResponse.ok) {
+        throw new Error("Failed to fetch weather data");
+      }
+
+      const weatherData = await weatherResponse.json();
+      
+      if (!weatherData.current) {
+        throw new Error("Weather data not available");
+      }
+
+      const transformedData = {
+        location: `${name}, ${country}`,
+        temperature: weatherData.current.temperature_2m,
+        humidity: weatherData.current.relative_humidity_2m,
+        windSpeed: weatherData.current.wind_speed_10m,
+        apparentTemperature: weatherData.current.apparent_temperature,
+        precipitation: weatherData.current.precipitation,
+        weatherCode: weatherData.current.weather_code,
+        windDirection: weatherData.current.wind_direction_10m,
+        windGusts: weatherData.current.wind_gusts_10m,
+        forecast: weatherData.daily ? {
+          dates: weatherData.daily.time,
+          weatherCodes: weatherData.daily.weather_code,
+          maxTemps: weatherData.daily.temperature_2m_max,
+          minTemps: weatherData.daily.temperature_2m_min,
+          precipitationProb: weatherData.daily.precipitation_probability_max,
+          maxWindSpeed: weatherData.daily.wind_speed_10m_max
+        } : null
+      };
+
+      const weatherDescription = getWeatherDescription(weatherData.current.weather_code);
       onWeatherUpdate(
-        data, 
-        `The weather in ${data.location} is ${weatherDescription} with a temperature of ${data.temperature}°C.`
+        transformedData, 
+        `The weather in ${name}, ${country} is ${weatherDescription} with a temperature of ${weatherData.current.temperature_2m}°C.`
       );
       
       toast({
         title: "Success",
-        description: `Weather data loaded for ${data.location}`,
+        description: `Weather data loaded for ${name}, ${country}`,
       });
+
     } catch (err) {
       console.error("Error fetching weather:", err);
       const errorMessage = err instanceof Error ? err.message : "Failed to fetch weather data";

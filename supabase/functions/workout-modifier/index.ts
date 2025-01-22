@@ -7,6 +7,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const cleanJsonText = (text: string): string => {
+  return text
+    .replace(/```json\s*|\s*```/g, '')           // Remove markdown code blocks
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')     // Remove comments
+    .replace(/,(\s*[}\]])/g, '$1')               // Remove trailing commas
+    .replace(/\s+/g, ' ')                        // Normalize whitespace
+    .replace(/\\n/g, ' ')                        // Replace escaped newlines
+    .replace(/\n/g, ' ')                         // Remove actual newlines
+    .trim();                                     // Remove leading/trailing whitespace
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -87,31 +98,41 @@ Ensure all sections are detailed and complete, maintaining the professional coac
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
+    if (!result || !result.response) {
+      throw new Error('Failed to generate response from Gemini');
+    }
+
     const response = result.response;
     const text = response.text();
     console.log('Received response from Gemini:', text);
 
     try {
-      const cleanedText = text
-        .replace(/```json\n?|\n?```/g, '')
-        .replace(/^\s+|\s+$/g, '')
-        .replace(/\\n/g, ' ')
-        .replace(/\n/g, ' ');
-
+      const cleanedText = cleanJsonText(text);
       console.log('Cleaned response:', cleanedText);
       
-      const modifiedWorkout = JSON.parse(cleanedText);
+      let modifiedWorkout;
+      try {
+        modifiedWorkout = JSON.parse(cleanedText);
+      } catch (parseError) {
+        console.error('Initial JSON parse failed, attempting to fix common issues:', parseError);
+        // Try to fix common JSON issues
+        const fixedText = cleanedText
+          .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
+          .replace(/'/g, '"') // Replace single quotes with double quotes
+          .replace(/\\/g, '\\\\'); // Escape backslashes
+        modifiedWorkout = JSON.parse(fixedText);
+      }
+
       console.log('Parsed workout:', modifiedWorkout);
 
       // Validate all required fields are present and non-empty
       const requiredFields = ['description', 'warmup', 'workout', 'notes', 'strength'];
-      const isValid = requiredFields.every(field => 
-        typeof modifiedWorkout[field] === 'string' && modifiedWorkout[field].length > 0
+      const missingFields = requiredFields.filter(field => 
+        !modifiedWorkout[field] || typeof modifiedWorkout[field] !== 'string' || !modifiedWorkout[field].trim()
       );
 
-      if (!isValid) {
-        console.error('Invalid workout structure:', modifiedWorkout);
-        throw new Error('Generated workout is missing required fields');
+      if (missingFields.length > 0) {
+        throw new Error(`Missing or invalid required fields: ${missingFields.join(', ')}`);
       }
 
       return new Response(JSON.stringify(modifiedWorkout), {

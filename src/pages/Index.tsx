@@ -37,10 +37,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleGenerateWorkout = async () => {
-    console.log("Starting handleGenerateWorkout function...");
-    
     if (!generatePrompt.trim()) {
-      console.log("No prompt provided, showing error toast");
       toast({
         title: "Error",
         description: "Please enter a prompt for workout generation",
@@ -50,73 +47,77 @@ const Index = () => {
     }
 
     try {
-      console.log("Setting isGenerating to true");
       setIsGenerating(true);
-      
-      console.log("Showing generating toast");
       toast({
         title: "Generating Workout",
         description: "Please wait while we create your personalized workout plan...",
       });
 
-      console.log("Checking user authentication...");
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log("User auth check result:", user ? "User authenticated" : "No user found");
-
-      if (user) {
-        console.log("Checking trial status for user:", user.id);
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('trial_end_date')
-          .eq('id', user.id)
-          .single();
-        
-        const isTrialValid = profile && new Date(profile.trial_end_date) > new Date();
-        console.log("Trial status:", isTrialValid ? "Valid" : "Invalid");
-        
-        if (!isTrialValid) {
-          console.log("Trial not valid, showing auth dialog");
-          setIsNewUser(false);
-          setShowAuthDialog(true);
-          setIsGenerating(false);
-          return;
-        }
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        console.error("Auth error:", authError);
+        throw new Error("Authentication failed. Please try logging in again.");
       }
 
-      console.log("Calling generate-weekly-workouts function with prompt:", generatePrompt);
-      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+      if (!user) {
+        console.log("No authenticated user found, showing auth dialog");
+        setIsNewUser(true);
+        setShowAuthDialog(true);
+        setIsGenerating(false);
+        return;
+      }
+
+      console.log("Checking trial status for user:", user.id);
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('trial_end_date')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError) {
+        console.error("Profile error:", profileError);
+        throw new Error("Failed to check trial status. Please try again.");
+      }
+
+      const isTrialValid = profile && new Date(profile.trial_end_date) > new Date();
+      console.log("Trial status:", isTrialValid ? "Valid" : "Invalid");
+      
+      if (!isTrialValid) {
+        console.log("Trial not valid, showing auth dialog");
+        setIsNewUser(false);
+        setShowAuthDialog(true);
+        setIsGenerating(false);
+        return;
+      }
+
+      console.log("Calling generate-weekly-workouts function");
+      const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
           prompt: generatePrompt,
           numberOfDays 
         }
       });
 
-      console.log("Function response received:", { data, error });
-
-      if (error) {
-        console.error("Error from function:", error);
-        throw error;
+      if (functionError) {
+        console.error("Function error:", functionError);
+        throw functionError;
       }
 
-      if (data) {
-        console.log("Workout data received:", data);
-        setGeneratedWorkouts(data);
-        
-        if (!user) {
-          console.log("No user found, showing auth dialog");
-          setIsNewUser(true);
-          setShowAuthDialog(true);
-        } else {
-          console.log("Saving workouts for user");
-          await saveWorkouts(data);
-        }
-
-        toast({
-          title: "Success",
-          description: "Your workout plan has been generated!",
-        });
-        triggerConfetti();
+      if (!data) {
+        throw new Error("No workout data received from the server");
       }
+
+      console.log("Workout data received:", data);
+      setGeneratedWorkouts(data);
+      await saveWorkouts(data);
+      
+      toast({
+        title: "Success",
+        description: "Your workout plan has been generated!",
+      });
+      triggerConfetti();
+
     } catch (error) {
       console.error('Error generating workouts:', error);
       toast({
@@ -125,7 +126,6 @@ const Index = () => {
         variant: "destructive",
       });
     } finally {
-      console.log("Setting isGenerating to false");
       setIsGenerating(false);
     }
   };

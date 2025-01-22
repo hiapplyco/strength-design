@@ -4,15 +4,30 @@ import { Input } from "@/components/ui/input";
 import { MapPin, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getWeatherDescription } from "./weather-utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface WeatherSearchProps {
   onWeatherUpdate: (weatherData: any | null, weatherPrompt: string) => void;
   renderTooltip: () => React.ReactNode;
 }
 
+interface LocationResult {
+  name: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+}
+
 export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchProps) {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
   const { toast } = useToast();
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -30,9 +45,8 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
     setIsLoading(true);
     
     try {
-      // First, get coordinates using the Geocoding API
       const geocodingResponse = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=5&language=en&format=json`
       );
       
       if (!geocodingResponse.ok) {
@@ -41,16 +55,34 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
 
       const geocodingData = await geocodingResponse.json();
       
-      if (!geocodingData.results?.[0]) {
-        throw new Error("Location not found");
+      if (!geocodingData.results?.length) {
+        throw new Error("No locations found");
       }
 
-      const { latitude, longitude, name, country } = geocodingData.results[0];
+      setLocationResults(geocodingData.results);
+      setShowLocationDialog(true);
+    } catch (err) {
+      console.error("Error searching locations:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to search locations";
       
-      // Then, get weather data using the Weather API
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLocationSelect = async (selectedLocation: LocationResult) => {
+    setIsLoading(true);
+    setShowLocationDialog(false);
+    
+    try {
       const weatherResponse = await fetch(
         `https://api.open-meteo.com/v1/forecast?` +
-        `latitude=${latitude}&longitude=${longitude}` +
+        `latitude=${selectedLocation.latitude}&longitude=${selectedLocation.longitude}` +
         `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m` +
         `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
         `&timezone=auto`
@@ -67,7 +99,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       }
 
       const transformedData = {
-        location: `${name}, ${country}`,
+        location: `${selectedLocation.name}, ${selectedLocation.country}`,
         temperature: weatherData.current.temperature_2m,
         humidity: weatherData.current.relative_humidity_2m,
         windSpeed: weatherData.current.wind_speed_10m,
@@ -89,12 +121,12 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       const weatherDescription = getWeatherDescription(weatherData.current.weather_code);
       onWeatherUpdate(
         transformedData, 
-        `The weather in ${name}, ${country} is ${weatherDescription} with a temperature of ${weatherData.current.temperature_2m}°C.`
+        `The weather in ${selectedLocation.name}, ${selectedLocation.country} is ${weatherDescription} with a temperature of ${weatherData.current.temperature_2m}°C.`
       );
       
       toast({
         title: "Success",
-        description: `Weather data loaded for ${name}, ${country}`,
+        description: `Weather data loaded for ${selectedLocation.name}, ${selectedLocation.country}`,
       });
 
     } catch (err) {
@@ -140,6 +172,26 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
           )}
         </Button>
       </form>
+
+      <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Location</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {locationResults.map((result, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => handleLocationSelect(result)}
+              >
+                {result.name}, {result.country}
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

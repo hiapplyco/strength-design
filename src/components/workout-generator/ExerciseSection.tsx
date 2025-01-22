@@ -26,7 +26,7 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
 
       {selectedExercises.length > 0 && (
         <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in">
-          <p className="font-semibold text-primary mb-2">Selected Equipment:</p>
+          <p className="font-semibold text-primary mb-2">Selected Exercises and Equipment:</p>
           <div className="flex flex-wrap gap-2">
             {selectedExercises.map((exercise, index) => (
               <span key={index} className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-sm">

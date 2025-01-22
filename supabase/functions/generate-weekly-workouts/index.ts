@@ -36,13 +36,13 @@ serve(async (req) => {
       schema.properties[dayKey] = {
         type: SchemaType.OBJECT,
         properties: {
-          description: { type: SchemaType.STRING, description: "Brief description of the workout focus" },
-          warmup: { type: SchemaType.STRING, description: "Detailed warmup routine" },
-          workout: { type: SchemaType.STRING, description: "Main workout details" },
-          strength: { type: SchemaType.STRING, description: "Strength component details" },
-          notes: { type: SchemaType.STRING, description: "Additional coaching notes", nullable: true },
+          description: { type: SchemaType.STRING },
+          warmup: { type: SchemaType.STRING },
+          workout: { type: SchemaType.STRING },
+          strength: { type: SchemaType.STRING },
+          notes: { type: SchemaType.STRING, nullable: true },
         },
-        required: ["description", "warmup", "workout", "strength"],
+        required: ["description", "warmup", "workout", "strength"]
       };
       schema.required.push(dayKey);
     }

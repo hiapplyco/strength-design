@@ -16,6 +16,7 @@ interface AuthDialogProps {
 
 export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }: AuthDialogProps) => {
   const [error, setError] = useState<string>("");
+  const [view, setView] = useState<"sign_up" | "sign_in">(isNewUser ? "sign_up" : "sign_in");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -63,9 +64,17 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
         return 'Please verify your email address before signing in.';
       case 'User not found':
         return 'No user found with these credentials.';
+      case 'User already registered':
+        setView("sign_in"); // Switch to sign in view
+        return 'An account with this email already exists. Please sign in instead.';
       default:
         return error.message;
     }
+  };
+
+  const handleViewChange = (newView: "sign_up" | "sign_in") => {
+    setView(newView);
+    setError(""); // Clear any existing errors when switching views
   };
 
   return (
@@ -73,7 +82,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-oswald">
-            {isNewUser ? "Start Your 7-Day Free Trial" : "Welcome Back"}
+            {view === "sign_up" ? "Start Your 7-Day Free Trial" : "Welcome Back"}
           </DialogTitle>
         </DialogHeader>
         {error && (
@@ -95,7 +104,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
             }
           }}
           providers={[]}
-          view={isNewUser ? "sign_up" : "sign_in"}
+          view={view}
           localization={{
             variables: {
               sign_up: {
@@ -112,6 +121,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
               },
             },
           }}
+          onViewChange={view => handleViewChange(view as "sign_up" | "sign_in")}
         />
       </DialogContent>
     </Dialog>

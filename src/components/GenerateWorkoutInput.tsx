@@ -7,8 +7,7 @@ import { FitnessSection } from "./workout-generator/FitnessSection";
 import { GenerateSection } from "./workout-generator/GenerateSection";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -77,13 +76,6 @@ export function GenerateWorkoutInput({
     setFitnessLevel("");
   };
 
-  const handleDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (value >= 1 && value <= 12) {
-      setNumberOfDays(value);
-    }
-  };
-
   const renderTooltip = (content: string) => (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
@@ -103,25 +95,11 @@ export function GenerateWorkoutInput({
     </TooltipProvider>
   );
 
+  const dayOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="days">Number of Days</Label>
-            {renderTooltip("Select how many days of workouts to generate (1-12 days)")}
-          </div>
-          <Input
-            id="days"
-            type="number"
-            min={1}
-            max={12}
-            value={numberOfDays}
-            onChange={handleDaysChange}
-            className="bg-white text-black placeholder:text-gray-500"
-          />
-        </div>
-
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
@@ -156,6 +134,29 @@ export function GenerateWorkoutInput({
             "Review your selections and generate a custom workout program tailored to your needs."
           )}
         />
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium">Number of Days</h3>
+            {renderTooltip("Select how many days of workouts to generate (1-12 days)")}
+          </div>
+          <ToggleGroup 
+            type="single" 
+            value={numberOfDays.toString()}
+            onValueChange={(value) => setNumberOfDays(parseInt(value || "7"))}
+            className="flex flex-wrap gap-2"
+          >
+            {dayOptions.map((day) => (
+              <ToggleGroupItem 
+                key={day} 
+                value={day.toString()}
+                className="px-3 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              >
+                {day}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
       </div>
     </div>
   );

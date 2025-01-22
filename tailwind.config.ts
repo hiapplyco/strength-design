@@ -80,8 +80,14 @@ export default {
           '100%': { transform: 'translateX(0)' }
         },
         gradient: {
-          '0%, 100%': { transform: 'translateX(-50%)' },
-          '50%': { transform: 'translateX(50%)' }
+          '0%, 100%': { 
+            backgroundPosition: '0% 50%',
+            opacity: '0.5'
+          },
+          '50%': { 
+            backgroundPosition: '100% 50%',
+            opacity: '0.8'
+          }
         }
       },
       animation: {

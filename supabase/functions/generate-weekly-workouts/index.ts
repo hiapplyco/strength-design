@@ -63,17 +63,23 @@ serve(async (req) => {
     
     console.log('Response received from Gemini:', result?.response ? 'Has response' : 'No response');
 
-    if (!result?.response?.text) {
+    if (!result?.response) {
       console.error('Invalid response from Gemini:', result);
       throw new Error('Invalid response from Gemini');
     }
 
-    const responseText = result.response.text.trim();
+    // Get the response text from the candidates
+    const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!responseText) {
+      console.error('No text content in Gemini response');
+      throw new Error('No text content in Gemini response');
+    }
+
     console.log('Raw response length:', responseText.length);
     console.log('First 100 chars of response:', responseText.substring(0, 100));
 
     try {
-      const workouts = JSON.parse(responseText);
+      const workouts = JSON.parse(responseText.trim());
       console.log('Successfully parsed workouts object with keys:', Object.keys(workouts));
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -24,7 +24,6 @@ export const useSubscription = () => {
         return;
       }
 
-      console.log("Creating checkout session");
       const response = await supabase.functions.invoke('create-checkout', {
         body: { subscriptionType: type }
       });

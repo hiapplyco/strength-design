@@ -23,8 +23,6 @@ serve(async (req) => {
     if (!priceId) {
       throw new Error('Invalid subscription type');
     }
-
-    console.log("Creating checkout session for price:", priceId);
     
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
@@ -40,7 +38,6 @@ serve(async (req) => {
       payment_method_types: ['card'],
     });
 
-    console.log("Checkout session created successfully");
     return new Response(
       JSON.stringify({ url: session.url }),
       { 

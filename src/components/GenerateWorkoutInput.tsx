@@ -12,7 +12,13 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
   setGeneratePrompt: (value: string) => void;
-  handleGenerateWorkout: () => void;
+  handleGenerateWorkout: (params: {
+    prompt: string;
+    weatherPrompt: string;
+    selectedExercises: Exercise[];
+    fitnessLevel: string;
+    prescribedExercises: string;
+  }) => Promise<void>;
   isGenerating: boolean;
   setShowGenerateInput: (value: boolean) => void;
   numberOfDays: number;
@@ -66,7 +72,13 @@ export function GenerateWorkoutInput({
     setGeneratePrompt(fullPrompt);
 
     try {
-      await handleGenerateWorkout();
+      await handleGenerateWorkout({
+        prompt: fullPrompt,
+        weatherPrompt,
+        selectedExercises,
+        fitnessLevel,
+        prescribedExercises
+      });
       handleClear();
     } catch (error) {
       console.error("Error generating workout:", error);

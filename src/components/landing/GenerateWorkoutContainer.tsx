@@ -5,6 +5,7 @@ import { triggerConfetti } from "@/utils/confetti";
 import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import type { Exercise } from "../exercise-search/types";
 
 interface WorkoutDay {
   description: string;
@@ -30,24 +31,22 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const { toast } = useToast();
 
-  const handleGenerateWorkout = async () => {
+  const handleGenerateWorkout = async (params: {
+    prompt: string;
+    weatherPrompt: string;
+    selectedExercises: Exercise[];
+    fitnessLevel: string;
+    prescribedExercises: string;
+  }) => {
     try {
       setIsGenerating(true);
-      console.log("Starting workout generation");
-
-      const params = {
-        prompt: generatePrompt,
-        numberOfDays,
-        weatherPrompt: "",
-        selectedExercises: [],
-        fitnessLevel: "",
-        prescribedExercises: ""
-      };
-
-      console.log("Calling generate-weekly-workouts function with params:", params);
+      console.log("Starting workout generation with params:", params);
 
       const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
-        body: params
+        body: {
+          ...params,
+          numberOfDays,
+        }
       });
 
       console.log("Function response received:", { 
@@ -58,7 +57,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
 
       if (functionError) {
         console.error("Function error:", functionError);
-        // Parse the error message from the response body if it exists
         let errorMessage = 'Error generating workouts';
         try {
           const errorBody = JSON.parse(functionError.message);

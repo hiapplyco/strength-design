@@ -20,18 +20,6 @@ const cleanJsonText = (text: string): string => {
   return cleaned;
 };
 
-const validateWorkout = (workout: any) => {
-  const requiredFields = ['description', 'warmup', 'workout', 'notes', 'strength'];
-  const missingFields = requiredFields.filter(field => 
-    !workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()
-  );
-  
-  if (missingFields.length > 0) {
-    throw new Error(`Missing or invalid required fields: ${missingFields.join(', ')}`);
-  }
-  return workout;
-};
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -70,7 +58,7 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     const config = getGeminiConfig();
     const model = genAI.getGenerativeModel({
-      model: config.model,
+      model: "gemini-1.5-flash",
       generationConfig: config.generationConfig,
     });
 
@@ -102,10 +90,7 @@ serve(async (req) => {
       throw new Error(`Invalid JSON structure: ${parseError.message}`);
     }
 
-    const validatedWorkout = validateWorkout(modifiedWorkout);
-    console.log('Validated workout:', validatedWorkout);
-
-    return new Response(JSON.stringify(validatedWorkout), {
+    return new Response(JSON.stringify(modifiedWorkout), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200
     });

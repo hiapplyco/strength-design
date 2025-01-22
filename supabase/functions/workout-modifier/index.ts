@@ -64,6 +64,7 @@ serve(async (req) => {
     console.log('Received response from Gemini');
 
     if (!result || !('response' in result)) {
+      console.error('Invalid response from Gemini:', result);
       throw new Error('Failed to generate response from Gemini');
     }
 

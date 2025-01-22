@@ -59,8 +59,9 @@ Ensure all string values are properly escaped.
 Do not use trailing commas.`;
 
     console.log('Sending prompt to Gemini with 60s timeout');
+    console.log('System prompt:', systemPrompt);
     
-    const timeoutMs = 60000; // Increased to 60 seconds
+    const timeoutMs = 60000; // 60 seconds timeout
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
     });
@@ -71,6 +72,7 @@ Do not use trailing commas.`;
     console.log('Response received:', result?.response ? 'Has response' : 'No response');
 
     if (!result?.response?.text) {
+      console.error('Invalid response from Gemini:', result);
       throw new Error('Invalid response from Gemini');
     }
 
@@ -80,7 +82,7 @@ Do not use trailing commas.`;
 
     try {
       const workouts = JSON.parse(responseText);
-      console.log('Successfully parsed workouts');
+      console.log('Successfully parsed workouts:', workouts);
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

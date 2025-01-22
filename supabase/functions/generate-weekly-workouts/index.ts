@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createWorkoutGenerationPrompt, getGeminiConfig } from "../../../src/utils/geminiPrompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,7 +20,6 @@ const cleanJsonText = (text: string): string => {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -32,7 +32,6 @@ serve(async (req) => {
     const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises } = requestBody;
     console.log('Parsed parameters:', { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises });
 
-    // Validate required fields
     if (!fitnessLevel) {
       console.error('Missing fitness level');
       return new Response(
@@ -63,42 +62,16 @@ serve(async (req) => {
 
     console.log('Initializing Gemini with API key');
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: 1,
-        topP: 0.95,
-        topK: 40,
-        maxOutputTokens: 8192,
-      }
+    const config = getGeminiConfig();
+    const model = genAI.getGenerativeModel(config);
+
+    const prompt = createWorkoutGenerationPrompt({
+      numberOfDays,
+      weatherPrompt,
+      selectedExercises,
+      fitnessLevel,
+      prescribedExercises
     });
-
-    // Construct prompt from user inputs
-    const prompt = `As an expert fitness coach, create a ${numberOfDays}-day workout program. 
-      ${weatherPrompt ? `Consider these weather conditions: ${weatherPrompt}` : ''}
-      ${selectedExercises?.length ? `Include these exercises: ${selectedExercises.map(e => e.name).join(", ")}` : ''}
-      ${fitnessLevel ? `This program is for a ${fitnessLevel} level individual` : ''}
-      ${prescribedExercises ? `Include these prescribed exercises/modifications: ${prescribedExercises}` : ''}
-
-      For each day, provide:
-      1. A brief description of the focus and stimulus
-      2. A warmup routine
-      3. The main workout
-      4. A strength component
-      5. Optional notes or modifications
-
-      Format each day as follows:
-      {
-        "day1": {
-          "description": "...",
-          "warmup": "...",
-          "workout": "...",
-          "strength": "...",
-          "notes": "..."
-        }
-      }
-
-      Ensure the response is a valid JSON object.`;
 
     console.log('Sending prompt to Gemini:', prompt);
 
@@ -131,17 +104,15 @@ serve(async (req) => {
         } catch (parseError) {
           console.error('Initial JSON parse failed:', parseError);
           console.log('Attempting to fix common JSON issues');
-          // Try to fix common JSON issues
           const fixedText = cleanedText
-            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
-            .replace(/'/g, '"') // Replace single quotes with double quotes
-            .replace(/\\/g, '\\\\'); // Escape backslashes
+            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
+            .replace(/'/g, '"')
+            .replace(/\\/g, '\\\\');
           console.log('Fixed text:', fixedText);
           workouts = JSON.parse(fixedText);
           console.log('Successfully parsed fixed JSON:', workouts);
         }
 
-        // Validate the structure of each day's workout
         const requiredFields = ['description', 'warmup', 'workout', 'strength', 'notes'];
         Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
           console.log(`Validating day ${day}:`, workout);

@@ -47,7 +47,7 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
     if (isSpeaking || isPaused) {
       handlePause();
     } else {
-      handleSpeakWorkout(title, formatWorkoutText());
+      handleSpeakWorkout(title, allWorkouts || {}, warmup, workout, notes || '');
     }
   };
 

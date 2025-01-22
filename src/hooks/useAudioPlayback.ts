@@ -8,7 +8,7 @@ export function useAudioPlayback() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
-  const handleSpeakWorkout = async (title: string, workoutText: string) => {
+  const handleSpeakWorkout = async (day: string, workouts: Record<string, any>, warmup: string, workout: string, notes: string) => {
     try {
       if (isPaused && audioRef.current) {
         audioRef.current.play();
@@ -22,8 +22,13 @@ export function useAudioPlayback() {
 
       const { data: monologueData, error: monologueError } = await supabase.functions.invoke('generate-workout-monologue', {
         body: {
-          dayToSpeak: title,
-          workoutText: `Important: When referring to this section, always say "workout of the day" instead of "WOD". Here's the workout: ${workoutText}`
+          dayToSpeak: day,
+          workoutPlan: {
+            [day]: workouts[day]
+          },
+          warmup,
+          wod: `Important: When referring to this section, always say "workout of the day" instead of "WOD". Here's the workout: ${workout}`,
+          notes
         }
       });
 

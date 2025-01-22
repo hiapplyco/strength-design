@@ -73,12 +73,17 @@ const Index = () => {
 
       if (functionError) {
         console.error("Function error:", functionError);
-        throw functionError;
+        throw new Error(functionError.message || 'Error generating workouts');
       }
 
       if (!data) {
         console.error("No data received from function");
         throw new Error("No workout data received");
+      }
+
+      if ('error' in data) {
+        console.error("API error:", data.error);
+        throw new Error(data.error);
       }
 
       console.log("Setting generated workouts");
@@ -95,7 +100,6 @@ const Index = () => {
 
     } catch (error) {
       console.error('Error in handleGenerateWorkout:', error);
-      setIsGenerating(false);
       toast({
         title: "Error",
         description: error.message || "Failed to generate workouts. Please try again.",

@@ -11,6 +11,7 @@ import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { triggerConfetti } from "@/utils/confetti";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 interface WorkoutDay {
   description: string;
@@ -46,9 +47,17 @@ const Index = () => {
 
     try {
       setIsGenerating(true);
+      toast({
+        title: "Generating Workout",
+        description: "Please wait while we create your personalized workout plan...",
+      });
+
+      console.log("Starting workout generation...");
       const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
         body: { prompt: generatePrompt }
       });
+
+      console.log("Workout generation response:", { data, error });
 
       if (error) throw error;
 
@@ -57,10 +66,16 @@ const Index = () => {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (user) {
+          console.log("Saving workouts for user:", user.id);
           await saveWorkouts(data);
         } else {
           setShowAuthDialog(true);
         }
+
+        toast({
+          title: "Success",
+          description: "Your workout plan has been generated!",
+        });
       }
     } catch (error) {
       console.error('Error generating workouts:', error);
@@ -76,18 +91,23 @@ const Index = () => {
 
   const saveWorkouts = async (workoutsToSave: WeeklyWorkouts) => {
     try {
+      console.log("Starting workout save process...");
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log("No user found, cannot save workouts");
+        return;
+      }
 
-      const workoutPromises = Object.entries(workoutsToSave).map(([day, workout]) => 
-        supabase.from('workouts').insert({
+      const workoutPromises = Object.entries(workoutsToSave).map(([day, workout]) => {
+        console.log(`Saving workout for day: ${day}`);
+        return supabase.from('workouts').insert({
           user_id: user.id,
           day,
           warmup: workout.warmup,
           wod: workout.workout,
           notes: workout.notes,
-        })
-      );
+        });
+      });
 
       await Promise.all(workoutPromises);
       setWorkouts(workoutsToSave);
@@ -164,6 +184,14 @@ const Index = () => {
         onSuccess={handleAuthSuccess}
       />
       <audio ref={audioRef} className="hidden" />
+      {isGenerating && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-lg font-medium">Generating your workout plan...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { getGeminiConfig } from "../shared/prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,14 +29,10 @@ serve(async (req) => {
     });
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: 0.7,
-        topK: 1,
-        topP: 1,
-        maxOutputTokens: 2048,
-      },
+    const config = getGeminiConfig();
+    const model = genAI.getGenerativeModel({
+      model: config.model,
+      generationConfig: config.generationConfig,
     });
 
     const systemPrompt = `Create a ${numberOfDays}-day workout program as a JSON object.
@@ -75,7 +72,6 @@ Example format:
     console.log('Response length:', responseText.length);
 
     try {
-      // First try direct JSON parse
       const workouts = JSON.parse(responseText);
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -84,7 +80,6 @@ Example format:
     } catch (directParseError) {
       console.log('Direct JSON parse failed, attempting to extract JSON');
       
-      // Try to extract JSON if direct parse fails
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         throw new Error('No valid JSON found in response');

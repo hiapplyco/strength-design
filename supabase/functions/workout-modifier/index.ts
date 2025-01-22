@@ -43,7 +43,6 @@ serve(async (req) => {
       throw new Error('Missing Gemini API key');
     }
 
-    // Parse and validate request body
     const requestData = await req.json();
     console.log('Received request data:', requestData);
 
@@ -65,23 +64,17 @@ serve(async (req) => {
       throw new Error('Current workout must contain at least workout and warmup fields');
     }
 
-    // Create prompt
     const prompt = createWorkoutModificationPrompt(dayToModify, modificationPrompt, currentWorkout);
     console.log('Generated prompt:', prompt);
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        temperature: 0.7,
-        topK: 1,
-        topP: 1,
-        maxOutputTokens: 2048,
-      },
+    const config = getGeminiConfig();
+    const model = genAI.getGenerativeModel({
+      model: config.model,
+      generationConfig: config.generationConfig,
     });
 
-    // Generate content with timeout
-    const timeoutMs = 30000; // 30 seconds timeout
+    const timeoutMs = 30000;
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Request timed out')), timeoutMs);
     });
@@ -90,7 +83,6 @@ serve(async (req) => {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
-    // Race between timeout and generation
     const result = await Promise.race([generationPromise, timeoutPromise]);
     if (!result || !('response' in result)) {
       throw new Error('Failed to generate response from Gemini');
@@ -99,7 +91,6 @@ serve(async (req) => {
     const text = result.response.text();
     console.log('Raw Gemini response:', text);
 
-    // Process response
     const cleanedText = cleanJsonText(text);
     console.log('Cleaned response:', cleanedText);
     
@@ -111,7 +102,6 @@ serve(async (req) => {
       throw new Error(`Invalid JSON structure: ${parseError.message}`);
     }
 
-    // Validate workout
     const validatedWorkout = validateWorkout(modifiedWorkout);
     console.log('Validated workout:', validatedWorkout);
 

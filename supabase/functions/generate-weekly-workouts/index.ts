@@ -70,7 +70,7 @@ For each training day, provide:
    - Tempo guidelines
    - Accessory work
 
-Return the response in this exact JSON format for ${numberOfDays} days:
+Return ONLY a valid JSON object with no additional text, following this exact format for ${numberOfDays} days:
 {
   "[Day Name]": {
     "description": "Brief overview of the day's focus",
@@ -85,33 +85,58 @@ Return the response in this exact JSON format for ${numberOfDays} days:
     const result = await model.generateContent(expertPrompt);
     const response = await result.response;
     const text = response.text();
-    console.log("Received response from Gemini");
+    console.log("Received response from Gemini:", text);
 
     let workouts;
     try {
-      // Extract JSON from the response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("No JSON found in response");
+      // First try direct JSON parsing
+      try {
+        workouts = JSON.parse(text);
+      } catch (e) {
+        // If direct parsing fails, try to extract JSON from the text
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          console.error("No JSON found in response");
+          throw new Error("No JSON found in response");
+        }
+        workouts = JSON.parse(jsonMatch[0]);
       }
-      workouts = JSON.parse(jsonMatch[0]);
       
+      // Validate the structure
+      if (!workouts || typeof workouts !== 'object') {
+        throw new Error("Invalid workout data structure");
+      }
+
       // Ensure we only return the requested number of days
       const limitedWorkouts: Record<string, any> = {};
       Object.entries(workouts)
         .slice(0, numberOfDays)
         .forEach(([key, value], index) => {
+          // Validate each workout day structure
+          if (!value || typeof value !== 'object') {
+            throw new Error(`Invalid structure for day ${key}`);
+          }
+          
+          const required = ['description', 'warmup', 'workout', 'strength', 'notes'];
+          for (const field of required) {
+            if (!(field in value)) {
+              throw new Error(`Missing required field '${field}' for day ${key}`);
+            }
+          }
+          
           limitedWorkouts[DAYS_OF_WEEK[index]] = value;
         });
       
       workouts = limitedWorkouts;
     } catch (error) {
       console.error("Error parsing Gemini response:", error);
-      throw new Error("Failed to parse workout data");
+      console.error("Raw response:", text);
+      throw new Error(`Failed to parse workout data: ${error.message}`);
     }
 
     const endTime = Date.now();
     console.log(`Workout generation completed in ${endTime - startTime}ms`);
+    console.log("Generated workouts:", JSON.stringify(workouts, null, 2));
 
     return new Response(JSON.stringify(workouts), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

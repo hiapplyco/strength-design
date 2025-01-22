@@ -31,7 +31,7 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     const config = getGeminiConfig();
     const model = genAI.getGenerativeModel({
-      model: config.model,
+      model: "gemini-1.5-flash",
       generationConfig: config.generationConfig,
     });
 
@@ -41,23 +41,22 @@ ${selectedExercises?.length ? `Include exercises: ${selectedExercises.map(e => e
 ${fitnessLevel ? `Fitness level: ${fitnessLevel}` : ''}
 ${prescribedExercises ? `Additional exercises: ${prescribedExercises}` : ''}
 
-Format as JSON with numbered days (day1, day2, etc). Each day must have:
-- description: Brief focus description
-- warmup: Detailed warmup
-- workout: Main workout
-- strength: Strength component
-- notes: Optional coaching notes
-
-Example format:
+IMPORTANT: Your response MUST be a valid, parseable JSON object with this exact structure:
 {
   "day1": {
-    "description": "Focus description",
-    "warmup": "Warmup details",
-    "workout": "Workout details",
-    "strength": "Strength focus",
-    "notes": "Optional notes"
+    "description": "string - Brief focus description",
+    "warmup": "string - Detailed warmup",
+    "workout": "string - Main workout",
+    "strength": "string - Strength component",
+    "notes": "string - Optional coaching notes"
   }
-}`;
+  // ... repeat for each day
+}
+
+Do not include any text outside of the JSON object.
+Do not include markdown code blocks.
+Ensure all string values are properly escaped.
+Do not use trailing commas.`;
 
     console.log('Sending prompt to Gemini');
     
@@ -69,10 +68,12 @@ Example format:
     }
 
     const responseText = result.response.text.trim();
-    console.log('Response length:', responseText.length);
+    console.log('Raw response length:', responseText.length);
+    console.log('Raw Gemini response:', responseText);
 
     try {
       const workouts = JSON.parse(responseText);
+      console.log('Successfully parsed workouts');
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -82,6 +83,7 @@ Example format:
       
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        console.error('No valid JSON found in response');
         throw new Error('No valid JSON found in response');
       }
 
@@ -91,13 +93,17 @@ Example format:
         .replace(/,(\s*[}\]])/g, '$1')
         .trim();
 
+      console.log('Cleaned JSON:', cleanedJson);
+
       try {
         const workouts = JSON.parse(cleanedJson);
+        console.log('Successfully parsed cleaned JSON');
         return new Response(JSON.stringify(workouts), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
         });
       } catch (extractedParseError) {
+        console.error('Failed to parse cleaned JSON:', extractedParseError);
         throw new Error(`Failed to parse JSON: ${extractedParseError.message}`);
       }
     }

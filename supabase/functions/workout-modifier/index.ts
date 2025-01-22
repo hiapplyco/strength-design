@@ -9,14 +9,24 @@ const corsHeaders = {
 };
 
 const cleanJsonText = (text: string): string => {
+  console.log('Starting JSON cleaning process. Input:', text);
+  
   // Remove code block markers and whitespace
-  let cleaned = text.replace(/```json\s*|\s*```/g, '').trim();
+  let cleaned = text.replace(/```json\s*|\s*```/g, '');
+  console.log('After removing code blocks:', cleaned);
+  
   // Remove comments
   cleaned = cleaned.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+  console.log('After removing comments:', cleaned);
+  
   // Fix trailing commas
   cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+  console.log('After fixing trailing commas:', cleaned);
+  
   // Normalize whitespace
-  cleaned = cleaned.replace(/\s+/g, ' ');
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  console.log('Final cleaned JSON:', cleaned);
+  
   return cleaned;
 };
 
@@ -85,8 +95,10 @@ serve(async (req) => {
     let modifiedWorkout;
     try {
       modifiedWorkout = JSON.parse(cleanedText);
+      console.log('Successfully parsed workout:', modifiedWorkout);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
+      console.error('Problematic JSON text:', cleanedText);
       throw new Error(`Invalid JSON structure: ${parseError.message}`);
     }
 

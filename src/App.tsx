@@ -17,9 +17,40 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+      },
     },
   },
 });
+
+// Create an error handler for console errors
+const handleConsoleError = (event: ErrorEvent) => {
+  const { toast } = useToast();
+  
+  // Check if it's an Edge Function error
+  if (event.message.includes('Edge Function')) {
+    toast({
+      title: "Server Error",
+      description: "The workout generation service is temporarily unavailable. Please try again later.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  // Check for accessibility warnings
+  if (event.message.includes('DialogContent')) {
+    console.warn('Accessibility warning:', event.message);
+    return;
+  }
+
+  // General error handling
+  toast({
+    title: "Error",
+    description: "An unexpected error occurred. Please try again.",
+    variant: "destructive",
+  });
+};
 
 const AppContent = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -27,6 +58,9 @@ const AppContent = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Add console error listener
+    window.addEventListener('error', handleConsoleError);
+
     // Get initial session
     const initializeAuth = async () => {
       try {
@@ -107,10 +141,12 @@ const AppContent = () => {
       }
     });
 
+    // Cleanup function
     return () => {
       subscription.unsubscribe();
+      window.removeEventListener('error', handleConsoleError);
     };
-  }, [toast, navigate]);
+  }, [toast, navigate, session]);
 
   return (
     <>

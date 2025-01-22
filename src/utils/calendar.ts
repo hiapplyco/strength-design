@@ -3,44 +3,47 @@ import { sanitizeText } from "@/utils/text";
 import { useToast } from "@/hooks/use-toast";
 
 export const exportToCalendar = async (
-  title: string,
-  warmup: string,
-  workout: string,
-  notes: string,
-  toast: ReturnType<typeof useToast>["toast"],
-  dayOffset: number = 0,
-  duration: number = 1
+  events: Array<{
+    title: string;
+    warmup: string;
+    workout: string;
+    notes: string;
+    dayOffset: number;
+  }>,
+  toast: ReturnType<typeof useToast>["toast"]
 ) => {
   try {
-    const eventContent = `Warmup:\n${sanitizeText(warmup)}\n\nWorkout:\n${sanitizeText(workout)}\n\nNotes:\n${sanitizeText(notes)}`;
-    
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1 + dayOffset);
-    tomorrow.setHours(6, 0, 0, 0);
-    
-    const event = {
-      start: [
-        tomorrow.getFullYear(),
-        tomorrow.getMonth() + 1,
-        tomorrow.getDate(),
-        tomorrow.getHours(),
-        tomorrow.getMinutes()
-      ] as [number, number, number, number, number],
-      duration: { days: duration },
-      title: `${sanitizeText(title)} Workout Plan`,
-      description: eventContent,
-      location: '',
-      status: 'CONFIRMED' as const,
-      busyStatus: 'BUSY' as const
-    };
+    const calendarEvents = events.map(({ title, warmup, workout, notes, dayOffset }) => {
+      const eventContent = `Warmup:\n${sanitizeText(warmup)}\n\nWorkout:\n${sanitizeText(workout)}\n\nNotes:\n${sanitizeText(notes)}`;
+      
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() + 1 + dayOffset);
+      startDate.setHours(6, 0, 0, 0);
+      
+      return {
+        start: [
+          startDate.getFullYear(),
+          startDate.getMonth() + 1,
+          startDate.getDate(),
+          startDate.getHours(),
+          startDate.getMinutes()
+        ] as [number, number, number, number, number],
+        duration: { hours: 1 },
+        title: `${sanitizeText(title)} Workout`,
+        description: eventContent,
+        location: '',
+        status: 'CONFIRMED' as const,
+        busyStatus: 'BUSY' as const
+      };
+    });
 
     return new Promise((resolve, reject) => {
-      createEvents([event], (error: Error | undefined, value: string) => {
+      createEvents(calendarEvents, (error: Error | undefined, value: string) => {
         if (error) {
           console.error(error);
           toast({
             title: "Error",
-            description: "Failed to create calendar event",
+            description: "Failed to create calendar events",
             variant: "destructive",
           });
           reject(error);
@@ -57,7 +60,7 @@ export const exportToCalendar = async (
 
         toast({
           title: "Success",
-          description: "Calendar event has been downloaded",
+          description: "Calendar events have been downloaded",
         });
         resolve(value);
       });
@@ -66,7 +69,7 @@ export const exportToCalendar = async (
     console.error('Error exporting calendar:', error);
     toast({
       title: "Error",
-      description: "Failed to export calendar event",
+      description: "Failed to export calendar events",
       variant: "destructive",
     });
     throw error;

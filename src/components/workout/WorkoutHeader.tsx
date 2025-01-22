@@ -35,7 +35,7 @@ export function WorkoutHeader({
   const { toast } = useToast();
 
   const formatDayTitle = (title: string) => {
-    const dayNumber = title.replace(/([A-Z])/g, ' $1').trim().split(' ')[1];
+    const dayNumber = title.match(/\d+/)?.[0] || "1";
     return `Day ${dayNumber}`;
   };
 
@@ -102,8 +102,8 @@ export function WorkoutHeader({
         onExport={onExport}
         onShare={() => {
           navigator.share?.({
-            title: `Workout for ${title}`,
-            text: `Check out this workout for ${title}!`,
+            title: `Workout for ${formatDayTitle(title)}`,
+            text: `Check out this workout for ${formatDayTitle(title)}!`,
           }).catch(console.error);
         }}
       />

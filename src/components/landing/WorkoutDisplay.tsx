@@ -50,14 +50,15 @@ export const WorkoutDisplay = ({
   };
 
   const formatDayTitle = (day: string) => {
-    return day.replace(/([A-Z])/g, ' $1').trim();
+    const dayNumber = day.match(/\d+/)?.[0] || "1";
+    return `Day${dayNumber}`;
   };
 
   const handleExportAllWorkouts = async () => {
     try {
       setIsExporting(true);
       const events = Object.entries(localWorkouts).map(([day, workout], index) => ({
-        title: formatDayTitle(day),
+        title: `Day ${index + 1}`,
         warmup: workout.warmup,
         workout: workout.workout,
         notes: workout.notes || '',
@@ -101,23 +102,23 @@ export const WorkoutDisplay = ({
         </div>
       </div>
       
-      <div className="pt-20">
+      <div className="pt-24">
         <h1 className="text-4xl font-oswald text-primary mb-8 italic">Your Weekly Workout Plan</h1>
         
         <div className="grid gap-8">
-          {Object.entries(localWorkouts).map(([day, workout]) => (
+          {Object.entries(localWorkouts).map(([day, workout], index) => (
             <div 
               key={day} 
               className="bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200"
             >
               <WorkoutHeader
-                title={formatDayTitle(day)}
+                title={`Day${index + 1}`}
                 isExporting={isExporting}
                 onExport={async () => {
                   try {
                     setIsExporting(true);
                     await exportToCalendar([{
-                      title: formatDayTitle(day),
+                      title: `Day ${index + 1}`,
                       warmup: workout.warmup,
                       workout: workout.workout,
                       notes: workout.notes || '',

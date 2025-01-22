@@ -6,6 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Cache for weather data with 5-minute expiration
+const weatherCache = new Map();
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -19,12 +23,34 @@ serve(async (req) => {
       throw new Error('Location query is required');
     }
 
-    // First, get location coordinates
-    console.log('Fetching location data for:', query);
-    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
-    const geoResponse = await fetch(geocodingUrl);
-    const geoData = await geoResponse.json();
+    // Check cache first
+    const cacheKey = `${query}-${numberOfDays}`;
+    const cachedData = weatherCache.get(cacheKey);
+    if (cachedData) {
+      const { data, timestamp } = cachedData;
+      if (Date.now() - timestamp < CACHE_EXPIRY) {
+        console.log('Returning cached weather data for:', query);
+        return new Response(JSON.stringify(data), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      weatherCache.delete(cacheKey); // Clear expired cache entry
+    }
 
+    // Fetch location data with error handling and timeout
+    console.log('Fetching location data for:', query);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+    const geoResponse = await fetch(geocodingUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    
+    if (!geoResponse.ok) {
+      throw new Error(`Geocoding API error: ${geoResponse.status}`);
+    }
+
+    const geoData = await geoResponse.json();
     if (!geoData.results?.[0]) {
       throw new Error('Location not found');
     }
@@ -32,7 +58,7 @@ serve(async (req) => {
     const { latitude, longitude, name, country } = geoData.results[0];
     console.log('Location found:', { latitude, longitude, name, country });
 
-    // Fetch detailed weather data including daily forecast
+    // Fetch weather data with optimized parameters
     const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
     weatherUrl.searchParams.append('latitude', latitude.toString());
     weatherUrl.searchParams.append('longitude', longitude.toString());
@@ -50,9 +76,6 @@ serve(async (req) => {
       'weather_code',
       'temperature_2m_max',
       'temperature_2m_min',
-      'apparent_temperature_max',
-      'apparent_temperature_min',
-      'precipitation_sum',
       'precipitation_probability_max',
       'wind_speed_10m_max'
     ].join(','));
@@ -61,13 +84,16 @@ serve(async (req) => {
 
     console.log('Fetching weather data from:', weatherUrl.toString());
     const weatherResponse = await fetch(weatherUrl);
-    const weatherData = await weatherResponse.json();
+    if (!weatherResponse.ok) {
+      throw new Error(`Weather API error: ${weatherResponse.status}`);
+    }
 
+    const weatherData = await weatherResponse.json();
     if (!weatherData.current) {
       throw new Error('Weather data not available');
     }
 
-    // Transform the data into our WeatherData format
+    // Transform and cache the data
     const transformedData = {
       location: `${name}, ${country}`,
       temperature: weatherData.current.temperature_2m,
@@ -88,8 +114,13 @@ serve(async (req) => {
       } : null
     };
 
-    console.log('Transformed weather data:', transformedData);
+    // Cache the result
+    weatherCache.set(cacheKey, {
+      data: transformedData,
+      timestamp: Date.now()
+    });
 
+    console.log('Weather data processed successfully');
     return new Response(JSON.stringify(transformedData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -100,7 +131,7 @@ serve(async (req) => {
         error: error.message,
         details: 'Failed to fetch weather data'
       }), {
-        status: 500,
+        status: error.name === 'AbortError' ? 408 : 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

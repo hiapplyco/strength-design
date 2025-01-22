@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { MapPin, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { WeatherData } from "@/types/weather";
+import { useToast } from "@/hooks/use-toast";
+import debounce from 'lodash/debounce';
 
 interface WeatherSectionProps {
   weatherData: WeatherData | null;
@@ -45,42 +47,60 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const handleLocationSearch = async () => {
-    if (!location.trim()) {
-      setError("Please enter a location");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      console.log("Fetching weather data for:", location);
-      const { data, error: apiError } = await supabase.functions.invoke("get-weather", {
-        body: { query: location },
-      });
-
-      if (apiError) {
-        console.error("Error fetching weather data:", apiError);
-        setError("Failed to fetch weather data. Please try again.");
+  // Debounced weather fetch function
+  const debouncedFetchWeather = useCallback(
+    debounce(async (searchLocation: string) => {
+      if (!searchLocation.trim()) {
+        setError("Please enter a location");
         return;
       }
 
-      if (!data) {
-        setError("No weather data found for this location");
-        return;
-      }
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        console.log("Fetching weather data for:", searchLocation);
+        const { data, error: apiError } = await supabase.functions.invoke("get-weather", {
+          body: { query: searchLocation },
+        });
 
-      console.log("Weather data received:", data);
-      const weatherDescription = getWeatherDescription(data.weatherCode);
-      onWeatherUpdate(data, `The weather in ${data.location} is ${weatherDescription} with a temperature of ${data.temperature}°C.`);
-    } catch (err) {
-      console.error("Error fetching weather data:", err);
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+        if (apiError) {
+          console.error("Error fetching weather data:", apiError);
+          throw new Error(apiError.message);
+        }
+
+        if (!data) {
+          throw new Error("No weather data found for this location");
+        }
+
+        console.log("Weather data received:", data);
+        const weatherDescription = getWeatherDescription(data.weatherCode);
+        onWeatherUpdate(data, `The weather in ${data.location} is ${weatherDescription} with a temperature of ${data.temperature}°C.`);
+        
+        toast({
+          title: "Weather Updated",
+          description: `Successfully loaded weather data for ${data.location}`,
+        });
+      } catch (err) {
+        console.error("Error fetching weather data:", err);
+        const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+        setError(errorMessage);
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }, 500),
+    []
+  );
+
+  const handleLocationSearch = () => {
+    debouncedFetchWeather(location);
   };
 
   const formatTemp = (temp: number | undefined) => {
@@ -103,13 +123,18 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
         <Input
           placeholder="Enter your location"
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          onChange={(e) => {
+            setLocation(e.target.value);
+            if (e.target.value.length >= 3) {
+              debouncedFetchWeather(e.target.value);
+            }
+          }}
           className="flex-1"
           onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
         />
         <Button 
           onClick={handleLocationSearch} 
-          disabled={isLoading}
+          disabled={isLoading || !location.trim()}
           className="min-w-[120px]"
         >
           {isLoading ? (

@@ -151,8 +151,6 @@ export function GenerateWorkoutInput({
         </div>
 
         <GenerateSection
-          generatePrompt={generatePrompt}
-          onGeneratePromptChange={setGeneratePrompt}
           onGenerate={handleGenerateWithWeather}
           onClear={handleClear}
           isGenerating={isGenerating}

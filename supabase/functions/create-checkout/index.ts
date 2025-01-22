@@ -19,6 +19,7 @@ serve(async (req) => {
   }
 
   try {
+    // Validate request method
     if (req.method !== 'POST') {
       return new Response(
         JSON.stringify({ error: 'Method not allowed' }),
@@ -26,21 +27,24 @@ serve(async (req) => {
       );
     }
 
+    // Get and validate subscription type
     const { subscriptionType } = await req.json();
     const priceId = PRICE_IDS[subscriptionType];
     
     if (!priceId) {
       return new Response(
-        JSON.stringify({ error: `Invalid subscription type: ${subscriptionType}` }),
+        JSON.stringify({ error: 'Invalid subscription type' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
+    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     );
 
+    // Validate authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -49,6 +53,7 @@ serve(async (req) => {
       );
     }
 
+    // Get user data
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
@@ -59,10 +64,12 @@ serve(async (req) => {
       );
     }
 
+    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
 
+    // Get or create customer
     const customers = await stripe.customers.list({
       email: user.email,
       limit: 1
@@ -71,6 +78,8 @@ serve(async (req) => {
     let customerId: string;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      
+      // Check for existing subscription
       const subscriptions = await stripe.subscriptions.list({
         customer: customerId,
         status: 'active',
@@ -94,20 +103,13 @@ serve(async (req) => {
       customerId = newCustomer.id;
     }
 
-    const origin = req.headers.get('origin');
-    if (!origin) {
-      return new Response(
-        JSON.stringify({ error: 'Origin header required' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
-    }
-
+    // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      success_url: `${origin}/`,
-      cancel_url: `${origin}/`,
+      success_url: `${req.headers.get('origin')}/`,
+      cancel_url: `${req.headers.get('origin')}/`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
       payment_method_types: ['card'],
@@ -115,26 +117,21 @@ serve(async (req) => {
 
     if (!session.url) {
       return new Response(
-        JSON.stringify({ error: 'Failed to create checkout session URL' }),
+        JSON.stringify({ error: 'Failed to create checkout session' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       );
     }
 
     return new Response(
       JSON.stringify({ url: session.url }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
+
   } catch (error) {
     console.error('Error in create-checkout:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
 });

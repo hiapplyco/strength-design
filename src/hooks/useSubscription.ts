@@ -11,7 +11,6 @@ export const useSubscription = () => {
 
   const handleSubscription = async (type: 'unlimited' | 'personalized') => {
     try {
-      console.log(`Starting ${type} subscription process...`);
       setLoadingStates(prev => ({ ...prev, [type]: true }));
       
       const { data: { session } } = await supabase.auth.getSession();
@@ -30,23 +29,20 @@ export const useSubscription = () => {
       });
 
       if (error) {
-        console.error('Stripe checkout error:', error);
+        console.error('Checkout error:', error);
         throw error;
       }
 
       if (!data?.url) {
-        console.error('No checkout URL in response');
         throw new Error('No checkout URL received');
       }
 
-      console.log('Received checkout URL:', data.url);
       window.location.assign(data.url);
       
     } catch (error: any) {
-      console.error('Subscription error:', error);
       toast({
         title: "Subscription Error",
-        description: error.message || "Failed to start subscription process. Please try again.",
+        description: error.message || "Failed to start subscription process",
         variant: "destructive",
       });
     } finally {

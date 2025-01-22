@@ -13,7 +13,6 @@ const corsHeaders = {
 serve(async (req) => {
   console.log('Function invoked with method:', req.method);
   
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
     return new Response(null, { 
@@ -84,21 +83,45 @@ serve(async (req) => {
       const workouts = JSON.parse(responseText.trim());
       console.log('Successfully parsed workouts object with keys:', Object.keys(workouts));
       
-      // Validate the workout structure
-      Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
-        console.log(`Validating workout for ${day}:`, workout);
-        if (!workout.description || !workout.warmup || !workout.workout || !workout.strength) {
-          console.error(`Invalid workout structure for ${day}:`, workout);
-          throw new Error(`Invalid workout structure for ${day}. Missing required fields.`);
+      // Enhanced validation of the workout structure
+      const requiredFields = ['description', 'warmup', 'workout', 'strength'];
+      const validatedWorkouts: Record<string, any> = {};
+      
+      // Ensure we have the correct number of days
+      for (let i = 1; i <= numberOfDays; i++) {
+        const dayKey = `day${i}`;
+        const workout = workouts[dayKey] || workouts[`Day${i}`]; // Handle both formats
+        
+        if (!workout) {
+          console.error(`Missing workout for ${dayKey}`);
+          throw new Error(`Missing workout for ${dayKey}`);
         }
-      });
 
-      return new Response(JSON.stringify(workouts), {
+        // Validate all required fields exist and are non-empty strings
+        for (const field of requiredFields) {
+          if (!workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()) {
+            console.error(`Invalid or missing ${field} for ${dayKey}:`, workout[field]);
+            throw new Error(`Invalid workout structure for ${dayKey}. Missing or invalid ${field} field.`);
+          }
+        }
+
+        // Normalize the workout structure
+        validatedWorkouts[dayKey] = {
+          description: workout.description.trim(),
+          warmup: workout.warmup.trim(),
+          workout: workout.workout.trim(),
+          strength: workout.strength.trim(),
+          notes: workout.notes?.trim() || "" // Optional field
+        };
+      }
+
+      console.log('Successfully validated all workouts');
+      return new Response(JSON.stringify(validatedWorkouts), {
         headers: corsHeaders,
         status: 200,
       });
     } catch (parseError) {
-      console.error('JSON parse error:', parseError);
+      console.error('JSON parse or validation error:', parseError);
       console.error('Problematic JSON text:', responseText);
       return new Response(JSON.stringify({ 
         error: 'Failed to parse workout data',

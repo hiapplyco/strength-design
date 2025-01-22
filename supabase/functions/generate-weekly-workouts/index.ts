@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+import { GoogleGenerativeAI, SchemaType } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createWorkoutGenerationPrompt, getGeminiConfig } from "../shared/prompts.ts";
+import { createWorkoutGenerationPrompt } from "../shared/prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,7 +16,6 @@ serve(async (req) => {
   try {
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
-      console.error('Missing Gemini API key');
       throw new Error('Missing Gemini API key');
     }
 
@@ -24,98 +23,93 @@ serve(async (req) => {
     console.log('Request params:', { weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays });
 
     if (!numberOfDays || numberOfDays < 1) {
-      console.error('Invalid number of days:', numberOfDays);
       throw new Error('Invalid number of days');
     }
 
-    const generationPrompt = createWorkoutGenerationPrompt({
-      numberOfDays,
-      weatherPrompt,
-      selectedExercises,
-      fitnessLevel,
-      prescribedExercises
-    });
+    const schema = {
+      type: SchemaType.OBJECT,
+      properties: {},
+      required: []
+    };
 
-    console.log('Generated prompt:', generationPrompt);
+    // Dynamically add properties for each day
+    for (let i = 1; i <= numberOfDays; i++) {
+      const dayKey = `day${i}`;
+      schema.properties[dayKey] = {
+        type: SchemaType.OBJECT,
+        properties: {
+          description: {
+            type: SchemaType.STRING,
+            description: "Brief description of the workout focus",
+            nullable: false,
+          },
+          warmup: {
+            type: SchemaType.STRING,
+            description: "Detailed warmup routine",
+            nullable: false,
+          },
+          workout: {
+            type: SchemaType.STRING,
+            description: "Main workout details",
+            nullable: false,
+          },
+          strength: {
+            type: SchemaType.STRING,
+            description: "Strength component details",
+            nullable: false,
+          },
+          notes: {
+            type: SchemaType.STRING,
+            description: "Additional coaching notes",
+            nullable: true,
+          },
+        },
+        required: ["description", "warmup", "workout", "strength"],
+      };
+      schema.required.push(dayKey);
+    }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const config = getGeminiConfig();
-    const model = genAI.getGenerativeModel(config);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        temperature: 1,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 8192,
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      },
+    });
 
-    console.log('Sending request to Gemini...');
+    console.log('Sending request to Gemini with schema...');
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: generationPrompt }] }],
+      contents: [{ role: "user", parts: [{ text: createWorkoutGenerationPrompt({
+        numberOfDays,
+        weatherPrompt,
+        selectedExercises,
+        fitnessLevel,
+        prescribedExercises
+      }) }] }],
     });
 
     if (!result || !result.response) {
-      console.error('No response from Gemini');
       throw new Error('Failed to generate response from Gemini');
     }
 
-    const response = result.response;
-    const text = response.text();
-    console.log('Raw response from Gemini:', text);
+    const workouts = JSON.parse(result.response.text());
+    console.log('Successfully generated workouts:', workouts);
 
-    try {
-      // Extract JSON from the response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.error('No JSON found in response');
-        throw new Error('Invalid response format');
-      }
+    return new Response(JSON.stringify(workouts), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    });
 
-      const jsonText = jsonMatch[0]
-        .replace(/```json\s*|\s*```/g, '') // Remove JSON code block markers
-        .replace(/\n/g, ' ') // Remove newlines
-        .trim();
-
-      console.log('Cleaned JSON text:', jsonText);
-      
-      let workouts;
-      try {
-        workouts = JSON.parse(jsonText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        console.log('Failed to parse text:', jsonText);
-        throw new Error(`Invalid JSON structure: ${parseError.message}`);
-      }
-
-      // Validate the workout structure
-      if (!workouts || typeof workouts !== 'object') {
-        console.error('Invalid workout structure:', workouts);
-        throw new Error('Invalid workout structure: not an object');
-      }
-
-      // Validate each workout day
-      Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
-        if (!workout || typeof workout !== 'object') {
-          throw new Error(`Invalid workout for ${day}: not an object`);
-        }
-        
-        const requiredFields = ['description', 'warmup', 'workout', 'strength'];
-        requiredFields.forEach(field => {
-          if (!workout[field] || typeof workout[field] !== 'string') {
-            throw new Error(`Missing or invalid ${field} for ${day}`);
-          }
-        });
-      });
-
-      console.log('Successfully validated workouts:', workouts);
-      return new Response(JSON.stringify(workouts), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
-
-    } catch (parseError) {
-      console.error('Error processing Gemini response:', parseError);
-      throw new Error(`Failed to process workout data: ${parseError.message}`);
-    }
   } catch (error) {
     console.error('Error in generate-weekly-workouts function:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
-      details: 'An error occurred while generating workouts',
-      raw_error: error.toString()
+      details: error.stack,
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

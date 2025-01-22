@@ -3,6 +3,8 @@ import { CloudSun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import debounce from 'lodash/debounce';
 
 interface WeatherData {
   temperature: number;
@@ -23,6 +25,7 @@ interface WeatherSectionProps {
 export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: WeatherSectionProps) {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const getWeatherDescription = (code: number) => {
     const weatherCodes: Record<number, string> = {
@@ -55,14 +58,35 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
   };
 
   const handleGetWeather = async () => {
-    if (!location.trim()) return;
+    if (!location.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a location",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(true);
+    toast({
+      title: "Loading",
+      description: "Fetching weather data...",
+    });
+
     try {
-      // First get location coordinates
-      const { data: locationData, error: locationError } = await supabase.functions.invoke('get-weather', {
+      // First get location coordinates with a timeout
+      const locationPromise = supabase.functions.invoke('get-weather', {
         body: { query: location }
       });
+      
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Location search timed out')), 5000);
+      });
+
+      const { data: locationData, error: locationError } = await Promise.race([
+        locationPromise,
+        timeoutPromise
+      ]) as any;
 
       if (locationError) throw locationError;
       if (!locationData.results?.[0]) throw new Error('Location not found');
@@ -74,13 +98,20 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
         firstResult.country
       ].filter(Boolean).join(", ");
 
-      // Then get weather data
-      const { data: weatherResponse, error: weatherError } = await supabase.functions.invoke('get-weather', {
+      // Then get weather data with a timeout
+      const weatherPromise = supabase.functions.invoke('get-weather', {
         body: { 
           latitude: firstResult.latitude,
           longitude: firstResult.longitude
         }
       });
+
+      const { data: weatherResponse, error: weatherError } = await Promise.race([
+        weatherPromise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Weather data fetch timed out')), 5000);
+        })
+      ]) as any;
 
       if (weatherError) throw weatherError;
 
@@ -113,12 +144,25 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
         - Overall safety modifications based on weather conditions`;
 
       onWeatherUpdate(weatherData, weatherPrompt);
+      toast({
+        title: "Success",
+        description: "Weather data updated successfully",
+      });
     } catch (error) {
       console.error('Error fetching weather:', error);
+      toast({
+        title: "Error",
+        description: error.message || 'Failed to fetch weather data. Please try again.',
+        variant: "destructive",
+      });
+      onWeatherUpdate(null, "");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Debounce the weather fetch to prevent too many API calls
+  const debouncedGetWeather = debounce(handleGetWeather, 500);
 
   return (
     <div className="space-y-4">
@@ -133,13 +177,14 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
           placeholder="Enter location (e.g., New York, London)"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleGetWeather()}
+          onKeyDown={(e) => e.key === 'Enter' && debouncedGetWeather()}
           className="flex-1 bg-white text-black placeholder:text-gray-500"
+          disabled={isLoading}
         />
         <Button 
-          onClick={handleGetWeather}
+          onClick={debouncedGetWeather}
           disabled={isLoading}
-          className="bg-primary text-white"
+          className="bg-primary text-white min-w-[120px]"
         >
           {isLoading ? "Loading..." : "Get Weather"}
         </Button>

@@ -18,25 +18,18 @@ type WeeklyWorkouts = Record<string, WorkoutDay>;
 interface WorkoutDisplayProps {
   workouts: WeeklyWorkouts;
   resetWorkouts: () => void;
-  isSpeaking: boolean;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
-  handleSpeakWorkout: (day: string, workouts: WeeklyWorkouts, warmup: string, workout: string, notes: string) => void;
-  audioRef: React.RefObject<HTMLAudioElement>;
 }
 
 export const WorkoutDisplay = ({
   workouts,
   resetWorkouts,
-  isSpeaking,
   isExporting,
   setIsExporting,
-  handleSpeakWorkout,
-  audioRef
 }: WorkoutDisplayProps) => {
   const { toast } = useToast();
   const [localWorkouts, setLocalWorkouts] = useState<WeeklyWorkouts>(workouts);
-  const [speakingDay, setSpeakingDay] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,11 +47,6 @@ export const WorkoutDisplay = ({
         description: updates.description || prev[day].description
       }
     }));
-  };
-
-  const handleSpeak = (day: string, workout: WorkoutDay) => {
-    setSpeakingDay(day);
-    handleSpeakWorkout(day, workouts, workout.warmup, workout.workout, workout.notes || '');
   };
 
   const formatDayTitle = (day: string) => {
@@ -124,9 +112,7 @@ export const WorkoutDisplay = ({
             >
               <WorkoutHeader
                 title={formatDayTitle(day)}
-                isSpeaking={isSpeaking && speakingDay === day}
                 isExporting={isExporting}
-                onSpeak={() => handleSpeak(day, workout)}
                 onExport={async () => {
                   try {
                     setIsExporting(true);
@@ -181,7 +167,6 @@ export const WorkoutDisplay = ({
           ))}
         </div>
       </div>
-      <audio ref={audioRef} className="hidden" />
     </div>
   );
 };

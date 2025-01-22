@@ -2,7 +2,6 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { useToast } from "@/hooks/use-toast";
-import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Loader2 } from "lucide-react";
@@ -26,7 +25,6 @@ export default function BestAppOfDay() {
   const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
-  const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
 
   const handleGenerateWorkout = async () => {
     if (!generatePrompt.trim()) {
@@ -134,11 +132,8 @@ export default function BestAppOfDay() {
         <WorkoutDisplay
           workouts={workouts}
           resetWorkouts={resetWorkouts}
-          isSpeaking={isSpeaking}
           isExporting={isExporting}
           setIsExporting={setIsExporting}
-          handleSpeakWorkout={handleSpeakWorkout}
-          audioRef={audioRef}
         />
       )}
       <AuthDialog 
@@ -154,7 +149,6 @@ export default function BestAppOfDay() {
           </div>
         </div>
       )}
-      <audio ref={audioRef} className="hidden" />
     </div>
   );
 }

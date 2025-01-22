@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
@@ -19,7 +18,6 @@ type WeeklyWorkouts = Record<string, WorkoutDay>;
 
 const Index = () => {
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
-  const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
   const [isExporting, setIsExporting] = useState(false);
 
   const resetWorkouts = () => {
@@ -31,11 +29,8 @@ const Index = () => {
       <WorkoutDisplay
         workouts={workouts}
         resetWorkouts={resetWorkouts}
-        isSpeaking={isSpeaking}
         isExporting={isExporting}
         setIsExporting={setIsExporting}
-        handleSpeakWorkout={handleSpeakWorkout}
-        audioRef={audioRef}
       />
     );
   }
@@ -69,7 +64,6 @@ const Index = () => {
           <TestimonialsSection />
         </div>
       </div>
-      <audio ref={audioRef} className="hidden" />
     </div>
   );
 };

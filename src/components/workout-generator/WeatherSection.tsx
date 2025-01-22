@@ -3,16 +3,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-interface WeatherData {
-  temperature: number;
-  humidity: number;
-  windSpeed: number;
-  location: string;
-  apparentTemperature: number;
-  precipitation: number;
-  weatherCode: number;
-}
+import type { WeatherData } from "@/types/weather";
 
 interface WeatherSectionProps {
   weatherData: WeatherData | null;

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "./exercise-search/types";
+import type { WeatherData } from "@/types/weather";
 import { WeatherSection } from "./workout-generator/WeatherSection";
 import { ExerciseSection } from "./workout-generator/ExerciseSection";
 import { FitnessSection } from "./workout-generator/FitnessSection";

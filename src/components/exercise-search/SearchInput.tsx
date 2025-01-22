@@ -24,7 +24,7 @@ export const SearchInput = ({ value, onChange, onClear }: SearchInputProps) => {
         placeholder={`Try searching: ${randomPlaceholder}...`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="flex-1 bg-white text-black placeholder:text-gray-500"
+        className="w-full bg-primary/10 text-black placeholder:text-gray-500"
       />
       {value && (
         <button

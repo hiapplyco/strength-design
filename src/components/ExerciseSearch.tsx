@@ -102,16 +102,18 @@ export const ExerciseSearch = ({
       <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col bg-white">
           <div className="space-y-4 flex-1 overflow-hidden">
-            <div className="flex justify-between items-center">
-              <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                onClear={handleClearSearch}
-              />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  onClear={handleClearSearch}
+                />
+              </div>
               <DialogClose asChild>
                 <Button 
                   variant="default"
-                  className="ml-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   Done
                 </Button>

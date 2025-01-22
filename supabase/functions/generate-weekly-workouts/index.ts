@@ -33,6 +33,7 @@ serve(async (req) => {
     });
     
     if (!prompt) {
+      console.error("No prompt provided");
       return new Response(
         JSON.stringify({ error: 'Prompt is required' }), 
         { 
@@ -44,6 +45,7 @@ serve(async (req) => {
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY not configured");
       return new Response(
         JSON.stringify({ error: 'GEMINI_API_KEY is not configured' }), 
         { 
@@ -53,6 +55,7 @@ serve(async (req) => {
       );
     }
 
+    console.log("Initializing Gemini API");
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
@@ -63,6 +66,7 @@ serve(async (req) => {
       maxOutputTokens: 8192,
     };
 
+    console.log("Starting chat with Gemini");
     const chat = model.startChat({
       generationConfig,
       history: [],
@@ -108,6 +112,7 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
           setTimeout(() => reject(new Error('Request timeout')), 25000)
         )
       ]);
+      console.log("Received response from Gemini");
     } catch (error) {
       console.error("Error during Gemini API call:", error);
       return new Response(
@@ -120,6 +125,7 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
     }
 
     if (!result) {
+      console.error("No response received from Gemini");
       return new Response(
         JSON.stringify({ error: 'No response received from Gemini API' }), 
         { 
@@ -130,10 +136,11 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
     }
 
     const text = result.response.text();
+    console.log("Raw response from Gemini:", text);
     
     try {
       const workouts = JSON.parse(text);
-      console.log("Successfully generated workouts:", workouts);
+      console.log("Successfully parsed workouts:", workouts);
       return new Response(
         JSON.stringify(workouts),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

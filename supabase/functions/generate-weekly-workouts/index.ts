@@ -22,9 +22,13 @@ serve(async (req) => {
     console.log("Starting workout generation process...");
     const startTime = Date.now();
     
-    const { prompt, numberOfDays = 7 } = await req.json();
+    const { prompt, numberOfDays = 7, weatherData, selectedExercises, fitnessLevel, prescribedExercises } = await req.json();
     console.log("Received prompt:", prompt);
     console.log("Number of days requested:", numberOfDays);
+    console.log("Weather data:", weatherData);
+    console.log("Selected exercises:", selectedExercises);
+    console.log("Fitness level:", fitnessLevel);
+    console.log("Prescribed exercises:", prescribedExercises);
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
@@ -34,41 +38,111 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
+    const weatherContext = weatherData ? `
+    WEATHER CONSIDERATIONS:
+    - Current conditions: ${weatherData.current}
+    - Temperature range: ${weatherData.tempRange}
+    - Precipitation chance: ${weatherData.precipitation}
+    - Air quality: ${weatherData.airQuality}
+    - UV index: ${weatherData.uvIndex}
+    - Wind conditions: ${weatherData.wind}
+    ` : '';
+
+    const exercisesContext = selectedExercises?.length > 0 ? `
+    EQUIPMENT AND EXERCISES AVAILABLE:
+    ${selectedExercises.map(exercise => `
+    - ${exercise.name}:
+      Instructions: ${exercise.instructions}
+      Equipment needed: ${exercise.equipment}
+      Primary muscles: ${exercise.primaryMuscles}
+      Force: ${exercise.force}
+    `).join('\n')}
+    ` : '';
+
+    const fitnessContext = fitnessLevel ? `
+    FITNESS PROFILE:
+    - Current level: ${fitnessLevel}
+    - Special considerations: ${prescribedExercises || 'None'}
+    ` : '';
+
     const expertPrompt = `You are a world-renowned coach and movement specialist with over 25 years of experience in athletic development, movement optimization, and performance enhancement. Your expertise spans across multiple domains including Olympic weightlifting, powerlifting, gymnastics, calisthenics, sport-specific conditioning, rehabilitation, injury prevention, movement screening and assessment, periodization and program design, and mental performance coaching.
 
 Based on your extensive expertise, create a comprehensive ${numberOfDays}-day progression plan considering this context: ${prompt}
 
+${weatherContext}
+${exercisesContext}
+${fitnessContext}
+
+PROGRAMMING PRINCIPLES TO CONSIDER:
+1. Progressive Overload
+   - Systematic increase in training demands
+   - Volume and intensity management
+   - Technical complexity progression
+   - Recovery requirements
+
+2. Movement Pattern Balance
+   - Push/pull ratios
+   - Anterior/posterior chain development
+   - Rotational/anti-rotational work
+   - Unilateral/bilateral balance
+
+3. Energy System Development
+   - Aerobic capacity building
+   - Anaerobic power development
+   - Work-to-rest ratios
+   - Metabolic conditioning
+
+4. Injury Prevention
+   - Joint preparation and mobility work
+   - Tissue loading strategies
+   - Movement pattern reinforcement
+   - Recovery protocols
+
+5. Skill Acquisition
+   - Technical progression
+   - Motor learning principles
+   - Feedback mechanisms
+   - Success metrics
+
 For each training day, provide:
 
 1. STRATEGIC OVERVIEW:
-   - Day's specific focus
+   - Day's specific focus within weekly progression
    - Connection to overall skill development
    - Expected adaptation and progress markers
+   - Integration with previous/future sessions
 
 2. DETAILED WARMUP PROTOCOL:
    - Movement preparation sequence
-   - Mobility/stability work
+   - Mobility/stability work specific to the day's focus
    - Progressive intensity building
    - Skill-specific activation drills
+   - Neural preparation elements
 
 3. MAIN WORKOUT:
-   - Clear movement standards
-   - Loading parameters with rationale
-   - Work-to-rest ratios
-   - Intensity guidelines
-   - Progression options
+   - Clear movement standards and technique requirements
+   - Loading parameters with scientific rationale
+   - Work-to-rest ratios based on energy system demands
+   - Intensity guidelines with RPE recommendations
+   - Progression and regression options
+   - Time domains with physiological justification
 
-4. COACHING NOTES:
+4. COMPREHENSIVE COACHING NOTES:
    - Technical execution priorities
-   - Common faults and corrections
-   - Performance metrics
-   - Recovery considerations
+   - Common faults and correction strategies
+   - Performance metrics and success indicators
+   - Recovery considerations and management
+   - Mental preparation strategies
+   - Long-term progression markers
+   - Safety considerations and contraindications
 
 5. STRENGTH DEVELOPMENT:
    - Primary movement patterns
-   - Loading schemes
-   - Tempo guidelines
-   - Accessory work
+   - Loading schemes with scientific backing
+   - Tempo and execution guidelines
+   - Accessory work recommendations
+   - Specific weakness addressing strategies
+   - Integration with skill work
 
 Return ONLY a valid JSON object with no additional text, following this exact format for ${numberOfDays} days:
 {
@@ -89,11 +163,9 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
 
     let workouts;
     try {
-      // First try direct JSON parsing
       try {
         workouts = JSON.parse(text);
       } catch (e) {
-        // If direct parsing fails, try to extract JSON from the text
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
           console.error("No JSON found in response");
@@ -102,17 +174,14 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
         workouts = JSON.parse(jsonMatch[0]);
       }
       
-      // Validate the structure
       if (!workouts || typeof workouts !== 'object') {
         throw new Error("Invalid workout data structure");
       }
 
-      // Ensure we only return the requested number of days
       const limitedWorkouts: Record<string, any> = {};
       Object.entries(workouts)
         .slice(0, numberOfDays)
         .forEach(([key, value], index) => {
-          // Validate each workout day structure
           if (!value || typeof value !== 'object') {
             throw new Error(`Invalid structure for day ${key}`);
           }

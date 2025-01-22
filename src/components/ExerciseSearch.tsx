@@ -96,7 +96,7 @@ export const ExerciseSearch = ({
         variant="outline"
         className="w-full flex items-center justify-between"
       >
-        <span>Search for Equipment</span>
+        <span>Search Exercises & Equipment</span>
         <Search className="h-4 w-4" />
       </Button>
 

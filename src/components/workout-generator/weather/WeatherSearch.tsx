@@ -169,7 +169,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
           placeholder="Enter city name..."
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="flex-1"
+          className="flex-1 bg-white text-black placeholder:text-gray-500"
         />
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (

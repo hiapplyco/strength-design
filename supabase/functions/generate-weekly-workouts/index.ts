@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createWorkoutGenerationPrompt, getGeminiConfig } from "../../../src/utils/geminiPrompts.ts";
+import { createWorkoutGenerationPrompt, getGeminiConfig } from "./prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,11 +21,15 @@ const cleanJsonText = (text: string): string => {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Starting request processing');
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!apiKey) {
+      throw new Error('Missing Gemini API key');
+    }
+
     const requestBody = await req.json();
     console.log('Raw request body:', JSON.stringify(requestBody, null, 2));
 
@@ -33,31 +37,11 @@ serve(async (req) => {
     console.log('Parsed parameters:', { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises });
 
     if (!fitnessLevel) {
-      console.error('Missing fitness level');
-      return new Response(
-        JSON.stringify({ error: 'Please select your fitness level' }), 
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-          status: 400 
-        }
-      );
+      throw new Error('Please select your fitness level');
     }
 
     if (!numberOfDays || numberOfDays < 1) {
-      console.error('Invalid number of days:', numberOfDays);
-      return new Response(
-        JSON.stringify({ error: 'Please select number of days' }), 
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-          status: 400 
-        }
-      );
-    }
-
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!apiKey) {
-      console.error('Missing Gemini API key');
-      throw new Error('Missing Gemini API key');
+      throw new Error('Please select number of days');
     }
 
     console.log('Initializing Gemini with API key');
@@ -75,76 +59,62 @@ serve(async (req) => {
 
     console.log('Sending prompt to Gemini:', prompt);
 
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    });
+
+    console.log('Received response from Gemini:', result);
+
+    if (!result || !result.response) {
+      throw new Error('Failed to generate response from Gemini');
+    }
+
+    const response = result.response;
+    const text = response.text();
+    console.log('Raw text from Gemini:', text);
+
     try {
-      console.log('Making API request to Gemini');
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      const cleanedText = cleanJsonText(text);
+      console.log('Cleaned response:', cleanedText);
+      
+      let workouts;
+      try {
+        workouts = JSON.parse(cleanedText);
+        console.log('Successfully parsed JSON:', workouts);
+      } catch (parseError) {
+        console.error('Initial JSON parse failed:', parseError);
+        console.log('Attempting to fix common JSON issues');
+        const fixedText = cleanedText
+          .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
+          .replace(/'/g, '"')
+          .replace(/\\/g, '\\\\');
+        console.log('Fixed text:', fixedText);
+        workouts = JSON.parse(fixedText);
+        console.log('Successfully parsed fixed JSON:', workouts);
+      }
+
+      const requiredFields = ['description', 'warmup', 'workout', 'strength', 'notes'];
+      Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
+        console.log(`Validating day ${day}:`, workout);
+        const missingFields = requiredFields.filter(field => 
+          !workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()
+        );
+
+        if (missingFields.length > 0) {
+          console.error(`Validation failed for day ${day}. Missing fields:`, missingFields);
+          throw new Error(`Day ${day} is missing or has invalid required fields: ${missingFields.join(', ')}`);
+        }
       });
 
-      console.log('Received response from Gemini:', result);
-
-      if (!result || !result.response) {
-        console.error('Failed to generate response from Gemini');
-        throw new Error('Failed to generate response from Gemini');
-      }
-
-      const response = result.response;
-      const text = response.text();
-      
-      console.log('Raw text from Gemini:', text);
-
-      try {
-        const cleanedText = cleanJsonText(text);
-        console.log('Cleaned response:', cleanedText);
-        
-        let workouts;
-        try {
-          workouts = JSON.parse(cleanedText);
-          console.log('Successfully parsed JSON:', workouts);
-        } catch (parseError) {
-          console.error('Initial JSON parse failed:', parseError);
-          console.log('Attempting to fix common JSON issues');
-          const fixedText = cleanedText
-            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
-            .replace(/'/g, '"')
-            .replace(/\\/g, '\\\\');
-          console.log('Fixed text:', fixedText);
-          workouts = JSON.parse(fixedText);
-          console.log('Successfully parsed fixed JSON:', workouts);
-        }
-
-        const requiredFields = ['description', 'warmup', 'workout', 'strength', 'notes'];
-        Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
-          console.log(`Validating day ${day}:`, workout);
-          const missingFields = requiredFields.filter(field => 
-            !workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()
-          );
-
-          if (missingFields.length > 0) {
-            console.error(`Validation failed for day ${day}. Missing fields:`, missingFields);
-            throw new Error(`Day ${day} is missing or has invalid required fields: ${missingFields.join(', ')}`);
-          }
-        });
-
-        console.log('All validation passed, returning workouts');
-        return new Response(
-          JSON.stringify(workouts),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      } catch (error) {
-        console.error("Failed to parse Gemini response:", error);
-        return new Response(
-          JSON.stringify({ error: 'Failed to generate workout plan', details: error.message }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 500 
-          }
-        );
-      }
-    } catch (geminiError) {
-      console.error("Error calling Gemini API:", geminiError);
+      console.log('All validation passed, returning workouts');
       return new Response(
-        JSON.stringify({ error: 'Failed to generate response from Gemini', details: geminiError.message }),
+        JSON.stringify(workouts),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (error) {
+      console.error("Failed to parse Gemini response:", error);
+      return new Response(
+        JSON.stringify({ error: 'Failed to generate workout plan', details: error.message }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500 

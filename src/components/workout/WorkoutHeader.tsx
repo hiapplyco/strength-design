@@ -1,11 +1,10 @@
-import { CardHeader } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { modifyWorkout } from "@/utils/workout";
-import { HeaderActions } from "./header/HeaderActions";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { HeaderActions } from "./header/HeaderActions";
+import { WorkoutModifier } from "./WorkoutModifier";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { triggerConfetti } from "@/utils/confetti";
 
 interface WorkoutHeaderProps {
   title: string;
@@ -14,164 +13,105 @@ interface WorkoutHeaderProps {
   isExporting: boolean;
   onSpeak: () => void;
   onExport: () => void;
-  warmup?: string;
-  workout?: string;
+  warmup: string;
+  workout: string;
   notes?: string;
-  strength?: string;
+  strength: string;
   allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>;
   onUpdate?: (updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => void;
 }
 
-export function WorkoutHeader({ 
-  title, 
-  isSpeaking, 
+export function WorkoutHeader({
+  title,
+  isSpeaking,
   isPaused,
-  isExporting, 
-  onSpeak, 
+  isExporting,
+  onSpeak,
   onExport,
-  warmup = "",
-  workout = "",
-  notes = "",
-  strength = "",
+  warmup,
+  workout,
+  notes,
+  strength,
   allWorkouts,
   onUpdate
 }: WorkoutHeaderProps) {
+  const [showModifier, setShowModifier] = useState(false);
   const { toast } = useToast();
-  const [isModifying, setIsModifying] = useState(false);
-  const [showModifyDialog, setShowModifyDialog] = useState(false);
-  const [modificationPrompt, setModificationPrompt] = useState("");
 
-  const formatWorkoutText = () => {
-    const sections = [
-      `${title}`,
-      strength && `Strength:\n${strength}`,
-      warmup && `Warmup:\n${warmup}`,
-      workout && `Workout:\n${workout}`,
-      notes && `Notes:\n${notes}`
-    ].filter(Boolean);
-
-    return sections.join('\n\n');
-  };
-
-  const handleShare = async () => {
-    const workoutText = formatWorkoutText();
-
+  const handleModify = async (modificationPrompt: string) => {
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `${title}`,
-          text: workoutText,
-        });
+      const response = await fetch('https://ulnsvkrrdcmfiguibkpx.supabase.co/functions/v1/workout-modifier', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dayToModify: title,
+          modificationPrompt,
+          allWorkouts
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to modify workout');
+      }
+
+      const modifiedWorkout = await response.json();
+      
+      if (onUpdate) {
+        onUpdate(modifiedWorkout);
+        triggerConfetti(); // Trigger confetti on successful modification
         toast({
           title: "Success",
-          description: "Workout shared successfully",
-        });
-      } else {
-        await navigator.clipboard.writeText(workoutText);
-        toast({
-          title: "Copied to clipboard",
-          description: "The workout details have been copied to your clipboard",
+          description: "Workout modified successfully!",
         });
       }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      toast({
-        title: "Sharing failed",
-        description: "Unable to share the workout. The details have been copied to your clipboard instead.",
-        variant: "destructive",
-      });
-      try {
-        await navigator.clipboard.writeText(workoutText);
-      } catch (clipboardError) {
-        console.error('Clipboard fallback failed:', clipboardError);
-      }
-    }
-  };
-
-  const handleModify = async () => {
-    if (!allWorkouts || !onUpdate || !modificationPrompt.trim()) return;
-    
-    setIsModifying(true);
-    setShowModifyDialog(false);
-    
-    try {
-      const updates = await modifyWorkout(title, modificationPrompt, allWorkouts);
       
-      const convertedUpdates = {
-        ...updates,
-        workout: updates.workout,
-        strength: strength // Preserve strength when modifying
-      };
-
-      onUpdate(convertedUpdates);
-
-      toast({
-        title: "Success",
-        description: `${title}'s workout has been modified`,
-      });
-    } catch (error) {
+      setShowModifier(false);
+    } catch (error: any) {
       console.error('Error modifying workout:', error);
       toast({
         title: "Error",
-        description: "Failed to modify workout",
+        description: error.message || "Failed to modify workout",
         variant: "destructive",
       });
-    } finally {
-      setIsModifying(false);
-      setModificationPrompt("");
     }
   };
 
   return (
-    <>
-      <CardHeader className="relative border-b-[4px] border-primary bg-card rounded-t-[20px]">
-        <div className="flex items-center justify-between">
-          <h3 className="text-primary italic text-2xl font-collegiate uppercase tracking-wider">
-            {title}
-          </h3>
-          <HeaderActions
-            onShare={handleShare}
-            onSpeak={onSpeak}
-            onExport={onExport}
-            onModify={() => setShowModifyDialog(true)}
-            isSpeaking={isSpeaking}
-            isPaused={isPaused}
-            isExporting={isExporting}
-            isModifying={isModifying}
-            showModify={!!allWorkouts && !!onUpdate}
-          />
-        </div>
-      </CardHeader>
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 border-b">
+      <div className="flex items-center gap-4">
+        <h2 className="text-2xl font-oswald text-primary">{title}</h2>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowModifier(true)}
+          className="text-sm"
+        >
+          Modify
+        </Button>
+      </div>
 
-      <Dialog open={showModifyDialog} onOpenChange={setShowModifyDialog}>
-        <DialogContent className="sm:max-w-md">
+      <HeaderActions
+        isSpeaking={isSpeaking}
+        isPaused={isPaused}
+        isExporting={isExporting}
+        onSpeak={onSpeak}
+        onExport={onExport}
+      />
+
+      <Dialog open={showModifier} onOpenChange={setShowModifier}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Modify Workout</DialogTitle>
+            <DialogTitle>Modify Workout for {title}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <Input
-              placeholder="Add equipment, notes, or change it up..."
-              value={modificationPrompt}
-              onChange={(e) => setModificationPrompt(e.target.value)}
-              className="border-2 border-primary bg-[#222222] text-white placeholder:text-gray-400"
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowModifyDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleModify}
-                disabled={!modificationPrompt.trim()}
-              >
-                Modify
-              </Button>
-            </div>
-          </div>
+          <WorkoutModifier
+            onModify={handleModify}
+            currentWorkout={{ warmup, workout, notes: notes || '', strength }}
+          />
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

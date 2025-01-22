@@ -50,7 +50,7 @@ Notes: ${currentWorkout.notes || 'None'}
 
 Modification request: ${modificationPrompt}
 
-Please provide a modified version of this workout that addresses the request. Return the response in this exact JSON format:
+Please provide a modified version of this workout that addresses the request. Return the response in this exact JSON format without any markdown formatting or code blocks:
 {
   "warmup": "modified warmup here",
   "workout": "modified workout here",
@@ -85,7 +85,8 @@ Please provide a modified version of this workout that addresses the request. Re
     const text = result.response.text();
     console.log('Raw Gemini response:', text);
 
-    const cleanedText = text.trim();
+    // Clean the response text by removing any markdown formatting
+    const cleanedText = text.replace(/```json\n|\n```/g, '').trim();
     console.log('Cleaned response:', cleanedText);
     
     let modifiedWorkout;

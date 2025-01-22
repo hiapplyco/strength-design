@@ -28,16 +28,11 @@ export const useSubscription = () => {
         body: { subscriptionType: type }
       });
 
-      if (error) {
-        console.error('Checkout error:', error);
-        throw error;
+      if (error || !data?.url) {
+        throw new Error(error?.message || 'No checkout URL received');
       }
 
-      if (!data?.url) {
-        throw new Error('No checkout URL received');
-      }
-
-      window.location.assign(data.url);
+      window.location.href = data.url;
       
     } catch (error: any) {
       toast({

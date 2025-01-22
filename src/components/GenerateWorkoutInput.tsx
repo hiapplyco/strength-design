@@ -46,7 +46,7 @@ export function GenerateWorkoutInput({
     }
   };
 
-  const handleGenerateWithWeather = () => {
+  const handleGenerateWithWeather = async () => {
     const exercisesPrompt = selectedExercises.length > 0 
       ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
       : "";
@@ -61,7 +61,13 @@ export function GenerateWorkoutInput({
     
     const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}${fitnessPrompt}${prescribedPrompt}`;
     setGeneratePrompt(fullPrompt);
-    handleGenerateWorkout();
+
+    try {
+      await handleGenerateWorkout();
+      handleClear();
+    } catch (error) {
+      console.error("Error generating workout:", error);
+    }
   };
 
   const handleClear = () => {

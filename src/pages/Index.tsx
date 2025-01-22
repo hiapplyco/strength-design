@@ -65,7 +65,11 @@ const Index = () => {
       const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
           prompt: generatePrompt,
-          numberOfDays 
+          numberOfDays,
+          weatherPrompt: "",
+          selectedExercises: [],
+          fitnessLevel: "",
+          prescribedExercises: ""
         }
       });
 
@@ -126,8 +130,10 @@ const Index = () => {
           user_id: user.id,
           day,
           warmup: workout.warmup,
-          wod: workout.workout,
+          workout: workout.workout,
           notes: workout.notes,
+          strength: workout.strength,
+          description: workout.description
         });
       });
 
@@ -145,7 +151,7 @@ const Index = () => {
         description: "Failed to save workouts. Please try again.",
         variant: "destructive",
       });
-      throw error; // Re-throw to be caught by the calling function
+      throw error;
     }
   };
 
@@ -162,6 +168,7 @@ const Index = () => {
     setWorkouts(null);
     setGeneratePrompt("");
     setGeneratedWorkouts(null);
+    setShowGenerateInput(true);
   };
 
   if (workouts) {

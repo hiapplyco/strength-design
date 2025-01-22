@@ -249,32 +249,38 @@ export type Database = {
         Row: {
           created_at: string
           day: string
+          description: string | null
           id: string
           notes: string | null
+          strength: string | null
           updated_at: string
           user_id: string
           warmup: string
-          wod: string
+          workout: string
         }
         Insert: {
           created_at?: string
           day: string
+          description?: string | null
           id?: string
           notes?: string | null
+          strength?: string | null
           updated_at?: string
           user_id: string
           warmup: string
-          wod: string
+          workout: string
         }
         Update: {
           created_at?: string
           day?: string
+          description?: string | null
           id?: string
           notes?: string | null
+          strength?: string | null
           updated_at?: string
           user_id?: string
           warmup?: string
-          wod?: string
+          workout?: string
         }
         Relationships: [
           {
@@ -285,6 +291,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      workouts_backup: {
+        Row: {
+          created_at: string | null
+          day: string | null
+          id: string | null
+          notes: string | null
+          updated_at: string | null
+          user_id: string | null
+          warmup: string | null
+          wod: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day?: string | null
+          id?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          warmup?: string | null
+          wod?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day?: string | null
+          id?: string | null
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          warmup?: string | null
+          wod?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {

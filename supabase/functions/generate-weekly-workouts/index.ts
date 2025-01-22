@@ -14,7 +14,23 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, numberOfDays = 7 } = await req.json();
+    const {
+      prompt,
+      numberOfDays = 7,
+      weatherPrompt = "",
+      selectedExercises = [],
+      fitnessLevel = "",
+      prescribedExercises = ""
+    } = await req.json();
+    
+    console.log("Received request with:", {
+      prompt,
+      numberOfDays,
+      weatherPrompt,
+      selectedExercises,
+      fitnessLevel,
+      prescribedExercises
+    });
     
     if (!prompt) {
       return new Response(
@@ -52,8 +68,24 @@ serve(async (req) => {
       history: [],
     });
 
+    const exercisesPrompt = selectedExercises.length > 0 
+      ? `Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
+      : "";
+    
+    const fitnessPrompt = fitnessLevel 
+      ? `Consider this fitness profile: ${fitnessLevel}.`
+      : "";
+
+    const prescribedPrompt = prescribedExercises
+      ? `Please incorporate these prescribed exercises/restrictions: ${prescribedExercises}.`
+      : "";
+
     const expertPrompt = `
 As an expert coach with deep expertise in exercise programming and movement optimization, create a ${numberOfDays}-day workout plan based on this context: ${prompt}
+${weatherPrompt ? `Weather conditions to consider: ${weatherPrompt}` : ""}
+${exercisesPrompt}
+${fitnessPrompt}
+${prescribedPrompt}
 
 Return ONLY a valid JSON object with no additional text, following this exact format for ${numberOfDays} days:
 {
@@ -65,6 +97,8 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
     "notes": "Coaching notes and considerations (1-2 paragraphs)"
   }
 }`;
+
+    console.log("Sending prompt to Gemini:", expertPrompt);
 
     let result;
     try {
@@ -99,6 +133,7 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
     
     try {
       const workouts = JSON.parse(text);
+      console.log("Successfully generated workouts:", workouts);
       return new Response(
         JSON.stringify(workouts),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

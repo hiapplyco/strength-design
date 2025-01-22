@@ -80,84 +80,18 @@ serve(async (req) => {
     - Special considerations: ${prescribedExercises || 'None'}
     ` : '';
 
-    const expertPrompt = `You are a world-renowned coach and movement specialist with over 25 years of experience in athletic development, movement optimization, and performance enhancement. Your expertise spans across multiple domains including Olympic weightlifting, powerlifting, gymnastics, calisthenics, sport-specific conditioning, rehabilitation, injury prevention, movement screening and assessment, periodization and program design, and mental performance coaching.
-
-Based on your extensive expertise, create a comprehensive ${numberOfDays}-day progression plan considering this context: ${prompt}
+    const expertPrompt = `You are a world-renowned coach and movement specialist. Your task is to create a ${numberOfDays}-day workout plan based on this context: ${prompt}
 
 ${weatherContext}
 ${exercisesContext}
 ${fitnessContext}
 
-PROGRAMMING PRINCIPLES TO CONSIDER:
-1. Progressive Overload
-   - Systematic increase in training demands
-   - Volume and intensity management
-   - Technical complexity progression
-   - Recovery requirements
-
-2. Movement Pattern Balance
-   - Push/pull ratios
-   - Anterior/posterior chain development
-   - Rotational/anti-rotational work
-   - Unilateral/bilateral balance
-
-3. Energy System Development
-   - Aerobic capacity building
-   - Anaerobic power development
-   - Work-to-rest ratios
-   - Metabolic conditioning
-
-4. Injury Prevention
-   - Joint preparation and mobility work
-   - Tissue loading strategies
-   - Movement pattern reinforcement
-   - Recovery protocols
-
-5. Skill Acquisition
-   - Technical progression
-   - Motor learning principles
-   - Feedback mechanisms
-   - Success metrics
-
-For each training day, provide:
-
-1. STRATEGIC OVERVIEW:
-   - Day's specific focus within weekly progression
-   - Connection to overall skill development
-   - Expected adaptation and progress markers
-   - Integration with previous/future sessions
-
-2. DETAILED WARMUP PROTOCOL:
-   - Movement preparation sequence
-   - Mobility/stability work specific to the day's focus
-   - Progressive intensity building
-   - Skill-specific activation drills
-   - Neural preparation elements
-
-3. MAIN WORKOUT:
-   - Clear movement standards and technique requirements
-   - Loading parameters with scientific rationale
-   - Work-to-rest ratios based on energy system demands
-   - Intensity guidelines with RPE recommendations
-   - Progression and regression options
-   - Time domains with physiological justification
-
-4. COMPREHENSIVE COACHING NOTES:
-   - Technical execution priorities
-   - Common faults and correction strategies
-   - Performance metrics and success indicators
-   - Recovery considerations and management
-   - Mental preparation strategies
-   - Long-term progression markers
-   - Safety considerations and contraindications
-
-5. STRENGTH DEVELOPMENT:
-   - Primary movement patterns
-   - Loading schemes with scientific backing
-   - Tempo and execution guidelines
-   - Accessory work recommendations
-   - Specific weakness addressing strategies
-   - Integration with skill work
+For each training day, provide a JSON object with:
+1. description: Brief overview of the day's focus
+2. warmup: Detailed warmup protocol
+3. workout: Main workout details
+4. strength: Strength work details
+5. notes: Coaching notes and considerations
 
 Return ONLY a valid JSON object with no additional text, following this exact format for ${numberOfDays} days:
 {
@@ -178,61 +112,66 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
       history: [],
     });
 
+    console.log("Chat session created, sending message...");
     const result = await chatSession.sendMessage(expertPrompt);
     console.log("Received response from Gemini");
     
     const text = result.response.text();
+    console.log("Raw response:", text);
     console.log("Response text length:", text.length);
 
     let workouts;
     try {
-      console.log("Parsing response as JSON...");
-      try {
-        workouts = JSON.parse(text);
-      } catch (e) {
-        console.log("Initial JSON parse failed, attempting to extract JSON from text...");
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          console.error("No JSON found in response");
-          throw new Error("No JSON found in response");
-        }
-        workouts = JSON.parse(jsonMatch[0]);
-      }
-      
-      if (!workouts || typeof workouts !== 'object') {
-        throw new Error("Invalid workout data structure");
-      }
-
-      const limitedWorkouts: Record<string, any> = {};
-      Object.entries(workouts)
-        .slice(0, numberOfDays)
-        .forEach(([key, value], index) => {
-          if (!value || typeof value !== 'object') {
-            throw new Error(`Invalid structure for day ${key}`);
-          }
-          
-          const required = ['description', 'warmup', 'workout', 'strength', 'notes'];
-          for (const field of required) {
-            if (!(field in value)) {
-              throw new Error(`Missing required field '${field}' for day ${key}`);
-            }
-          }
-          
-          limitedWorkouts[DAYS_OF_WEEK[index]] = value;
-        });
-      
-      workouts = limitedWorkouts;
+      console.log("Attempting to parse response as JSON...");
+      workouts = JSON.parse(text);
+      console.log("Successfully parsed JSON response");
     } catch (error) {
-      console.error("Error parsing Gemini response:", error);
-      console.error("Raw response:", text);
-      throw new Error(`Failed to parse workout data: ${error.message}`);
+      console.error("Failed to parse initial JSON response:", error);
+      console.log("Attempting to extract JSON from text...");
+      
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error("No JSON found in response");
+        throw new Error("Failed to generate valid workout data. Please try again.");
+      }
+      
+      try {
+        workouts = JSON.parse(jsonMatch[0]);
+        console.log("Successfully parsed extracted JSON");
+      } catch (error) {
+        console.error("Failed to parse extracted JSON:", error);
+        throw new Error("Invalid workout data format. Please try again.");
+      }
     }
+
+    if (!workouts || typeof workouts !== 'object') {
+      console.error("Invalid workout data structure:", workouts);
+      throw new Error("Invalid workout data structure");
+    }
+
+    const limitedWorkouts: Record<string, any> = {};
+    Object.entries(workouts)
+      .slice(0, numberOfDays)
+      .forEach(([key, value], index) => {
+        if (!value || typeof value !== 'object') {
+          throw new Error(`Invalid structure for day ${key}`);
+        }
+        
+        const required = ['description', 'warmup', 'workout', 'strength', 'notes'];
+        for (const field of required) {
+          if (!(field in value)) {
+            throw new Error(`Missing required field '${field}' for day ${key}`);
+          }
+        }
+        
+        limitedWorkouts[DAYS_OF_WEEK[index]] = value;
+      });
 
     const endTime = Date.now();
     console.log(`Workout generation completed in ${endTime - startTime}ms`);
-    console.log("Generated workouts:", JSON.stringify(workouts, null, 2));
+    console.log("Generated workouts:", JSON.stringify(limitedWorkouts, null, 2));
 
-    return new Response(JSON.stringify(workouts), {
+    return new Response(JSON.stringify(limitedWorkouts), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

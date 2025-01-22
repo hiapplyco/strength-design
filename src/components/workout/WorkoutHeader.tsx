@@ -8,10 +8,7 @@ import { triggerConfetti } from "@/utils/confetti";
 
 interface WorkoutHeaderProps {
   title: string;
-  isSpeaking: boolean;
-  isPaused?: boolean;
   isExporting: boolean;
-  onSpeak: () => void;
   onExport: () => void;
   warmup: string;
   workout: string;
@@ -23,10 +20,7 @@ interface WorkoutHeaderProps {
 
 export function WorkoutHeader({
   title,
-  isSpeaking,
-  isPaused,
   isExporting,
-  onSpeak,
   onExport,
   warmup,
   workout,
@@ -41,7 +35,6 @@ export function WorkoutHeader({
   const { toast } = useToast();
 
   const formatDayTitle = (title: string) => {
-    // Convert camelCase to "Day X" format
     const dayNumber = title.replace(/([A-Z])/g, ' $1').trim().split(' ')[1];
     return `Day ${dayNumber}`;
   };
@@ -105,13 +98,8 @@ export function WorkoutHeader({
       </div>
 
       <HeaderActions
-        isSpeaking={isSpeaking}
-        isPaused={isPaused}
         isExporting={isExporting}
-        onSpeak={onSpeak}
         onExport={onExport}
-        onModify={() => setShowModifier(true)}
-        showModify={false}
         onShare={() => {
           navigator.share?.({
             title: `Workout for ${title}`,

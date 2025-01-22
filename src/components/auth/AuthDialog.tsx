@@ -20,6 +20,21 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check if user is already signed in when dialog opens
+    if (isOpen) {
+      const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log("User already signed in, closing dialog");
+          onOpenChange(false);
+          onSuccess();
+        }
+      };
+      checkSession();
+    }
+  }, [isOpen, onOpenChange, onSuccess]);
+
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
         const { data: profile } = await supabase
@@ -121,7 +136,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
               },
             },
           }}
-          viewChange={(view) => handleViewChange(view as "sign_up" | "sign_in")}
+          view={view}
         />
       </DialogContent>
     </Dialog>

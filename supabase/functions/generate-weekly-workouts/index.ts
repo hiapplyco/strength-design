@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI, SchemaType } from "https://esm.sh/@google/generative-ai@0.1.3";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createWorkoutGenerationPrompt } from "../shared/prompts.ts";
 
@@ -25,28 +25,6 @@ serve(async (req) => {
       throw new Error('Invalid number of days');
     }
 
-    const schema = {
-      type: SchemaType.OBJECT,
-      properties: {},
-      required: []
-    };
-
-    for (let i = 1; i <= numberOfDays; i++) {
-      const dayKey = `day${i}`;
-      schema.properties[dayKey] = {
-        type: SchemaType.OBJECT,
-        properties: {
-          description: { type: SchemaType.STRING },
-          warmup: { type: SchemaType.STRING },
-          workout: { type: SchemaType.STRING },
-          strength: { type: SchemaType.STRING },
-          notes: { type: SchemaType.STRING, nullable: true },
-        },
-        required: ["description", "warmup", "workout", "strength"]
-      };
-      schema.required.push(dayKey);
-    }
-
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -54,8 +32,6 @@ serve(async (req) => {
         temperature: 1,
         topP: 0.95,
         topK: 40,
-        responseMimeType: "application/json",
-        responseSchema: schema,
       },
     });
 

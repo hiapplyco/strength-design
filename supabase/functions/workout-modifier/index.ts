@@ -8,6 +8,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const cleanJsonText = (text: string): string => {
+  return text
+    .replace(/```json\s*|\s*```/g, '')           
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')     
+    .replace(/,(\s*[}\]])/g, '$1')               
+    .replace(/\s+/g, ' ')                        
+    .replace(/\\n/g, ' ')                        
+    .replace(/\n/g, ' ')                         
+    .trim();                                     
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -19,11 +30,17 @@ serve(async (req) => {
       throw new Error('Missing Gemini API key');
     }
 
-    const { day, modificationPrompt, currentWorkout } = await req.json();
-    console.log('Received modification request:', { day, modificationPrompt, currentWorkout });
+    const { dayToModify, modificationPrompt, allWorkouts } = await req.json();
+    console.log('Received request to modify workout:', { dayToModify, modificationPrompt });
 
-    const prompt = createWorkoutModificationPrompt(day, modificationPrompt, currentWorkout);
-    console.log('Generated prompt:', prompt);
+    if (!allWorkouts || !allWorkouts[dayToModify]) {
+      throw new Error('No workout data provided for modification');
+    }
+
+    const currentWorkout = allWorkouts[dayToModify];
+    const prompt = createWorkoutModificationPrompt(dayToModify, modificationPrompt, currentWorkout);
+
+    console.log('Sending prompt to Gemini:', prompt);
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const config = getGeminiConfig();
@@ -42,19 +59,35 @@ serve(async (req) => {
     console.log('Received response from Gemini:', text);
 
     try {
-      const cleanedText = text
-        .replace(/```json\s*|\s*```/g, '')
-        .replace(/\n/g, ' ')
-        .trim();
-
+      const cleanedText = cleanJsonText(text);
       console.log('Cleaned response:', cleanedText);
       
-      const modifiedWorkout = JSON.parse(cleanedText);
-      console.log('Parsed modified workout:', modifiedWorkout);
+      let modifiedWorkout;
+      try {
+        modifiedWorkout = JSON.parse(cleanedText);
+      } catch (parseError) {
+        console.error('Initial JSON parse failed, attempting to fix common issues:', parseError);
+        const fixedText = cleanedText
+          .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":')
+          .replace(/'/g, '"')
+          .replace(/\\/g, '\\\\');
+        modifiedWorkout = JSON.parse(fixedText);
+      }
+
+      console.log('Parsed workout:', modifiedWorkout);
+
+      const requiredFields = ['description', 'warmup', 'workout', 'notes', 'strength'];
+      const missingFields = requiredFields.filter(field => 
+        !modifiedWorkout[field] || typeof modifiedWorkout[field] !== 'string' || !modifiedWorkout[field].trim()
+      );
+
+      if (missingFields.length > 0) {
+        throw new Error(`Missing or invalid required fields: ${missingFields.join(', ')}`);
+      }
 
       return new Response(JSON.stringify(modifiedWorkout), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+        status: 200
       });
     } catch (parseError) {
       console.error('Error parsing Gemini response:', parseError);
@@ -63,7 +96,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in workout-modifier function:', error);
     return new Response(JSON.stringify({ 
-      error: error.message || 'Failed to modify workout',
+      error: error.message,
+      details: 'Failed to modify workout'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

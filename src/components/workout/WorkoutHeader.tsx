@@ -40,6 +40,12 @@ export function WorkoutHeader({
   const [isModifying, setIsModifying] = useState(false);
   const { toast } = useToast();
 
+  const formatDayTitle = (title: string) => {
+    // Convert camelCase to "Day X" format
+    const dayNumber = title.replace(/([A-Z])/g, ' $1').trim().split(' ')[1];
+    return `Day ${dayNumber}`;
+  };
+
   const handleModify = async (prompt: string) => {
     setIsModifying(true);
     try {
@@ -87,14 +93,14 @@ export function WorkoutHeader({
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 border-b">
       <div className="flex items-center gap-4">
-        <h2 className="text-2xl font-oswald text-primary">{title}</h2>
+        <h2 className="text-2xl font-oswald text-primary">{formatDayTitle(title)}</h2>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowModifier(true)}
           className="text-sm"
         >
-          Edit
+          Edit Workout
         </Button>
       </div>
 
@@ -105,7 +111,7 @@ export function WorkoutHeader({
         onSpeak={onSpeak}
         onExport={onExport}
         onModify={() => setShowModifier(true)}
-        showModify={true}
+        showModify={false}
         onShare={() => {
           navigator.share?.({
             title: `Workout for ${title}`,
@@ -117,7 +123,7 @@ export function WorkoutHeader({
       <Dialog open={showModifier} onOpenChange={setShowModifier}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Modify Workout for {title}</DialogTitle>
+            <DialogTitle>Modify Workout for {formatDayTitle(title)}</DialogTitle>
           </DialogHeader>
           <WorkoutModifier
             title={title}

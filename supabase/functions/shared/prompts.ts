@@ -30,16 +30,16 @@ export const createWorkoutGenerationPrompt = ({
     4. A strength component
     5. Optional notes or modifications
 
-    Format each day as follows:
+    Return the response in this exact JSON format:
     {
       "day1": {
-        "description": "...",
-        "warmup": "...",
-        "workout": "...",
-        "strength": "...",
-        "notes": "..."
+        "description": "Focus of the day",
+        "warmup": "Warmup routine",
+        "workout": "Main workout",
+        "strength": "Strength component",
+        "notes": "Optional notes"
       }
     }
 
-    Return ONLY a valid JSON object with the workout plan. Do not include any additional text or explanations outside of the JSON structure.`;
+    Respond only with the JSON object, no additional text.`;
 };

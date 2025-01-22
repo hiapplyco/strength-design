@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import type { WeatherData } from "@/types/weather";
 import { useToast } from "@/hooks/use-toast";
 import debounce from 'lodash/debounce';
-import { getWeatherDescription } from "./weather-utils";
 import {
   Command,
   CommandEmpty,
@@ -49,7 +48,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       const response = await fetch(geocodingUrl);
       const data = await response.json();
       
-      if (data.results) {
+      if (data.results && Array.isArray(data.results)) {
         setLocations(data.results.map((result: any) => ({
           name: result.name,
           country: result.country,
@@ -152,7 +151,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
             />
             <CommandEmpty>No locations found.</CommandEmpty>
             <CommandGroup>
-              {Array.isArray(locations) && locations.map((loc, index) => (
+              {locations.map((loc, index) => (
                 <CommandItem
                   key={index}
                   value={`${loc.name}, ${loc.admin1 ? `${loc.admin1}, ` : ''}${loc.country}`}

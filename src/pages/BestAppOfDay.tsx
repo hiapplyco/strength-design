@@ -83,8 +83,10 @@ export default function BestAppOfDay() {
           user_id: user.id,
           day,
           warmup: workout.warmup,
-          wod: workout.workout,
+          workout: workout.workout,
           notes: workout.notes,
+          strength: workout.strength,
+          description: workout.description
         });
       });
 
@@ -143,6 +145,7 @@ export default function BestAppOfDay() {
         isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         onSuccess={handleAuthSuccess}
+        isNewUser={false}
       />
       {isGenerating && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

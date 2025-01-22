@@ -4,6 +4,7 @@ import { SearchInput } from "./exercise-search/SearchInput";
 import { SearchResults } from "./exercise-search/SearchResults";
 import { Dialog, DialogContent, DialogClose } from "./ui/dialog";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import { Search } from "lucide-react";
 import type { Exercise } from "./exercise-search/types";
 

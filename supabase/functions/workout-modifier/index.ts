@@ -42,7 +42,12 @@ serve(async (req) => {
       throw new Error('Current workout must contain at least workout and warmup fields');
     }
 
-    const prompt = createWorkoutModificationPrompt(dayToModify, modificationPrompt, currentWorkout);
+    const prompt = createWorkoutModificationPrompt(dayToModify, modificationPrompt, {
+      warmup: currentWorkout.warmup,
+      workout: currentWorkout.workout,
+      notes: currentWorkout.notes || '',
+      strength: currentWorkout.strength || ''
+    });
     console.log('Generated prompt:', prompt);
 
     const genAI = new GoogleGenerativeAI(apiKey);

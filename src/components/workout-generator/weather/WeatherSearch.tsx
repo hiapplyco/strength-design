@@ -19,6 +19,7 @@ interface WeatherSearchProps {
 interface LocationResult {
   name: string;
   country: string;
+  admin1?: string; // State/region field from the API
   latitude: number;
   longitude: number;
 }
@@ -29,6 +30,15 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
   const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const { toast } = useToast();
+
+  const formatLocation = (result: LocationResult) => {
+    const parts = [result.name];
+    if (result.admin1) {
+      parts.push(result.admin1);
+    }
+    parts.push(result.country);
+    return parts.join(", ");
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +109,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       }
 
       const transformedData = {
-        location: `${selectedLocation.name}, ${selectedLocation.country}`,
+        location: formatLocation(selectedLocation),
         temperature: weatherData.current.temperature_2m,
         humidity: weatherData.current.relative_humidity_2m,
         windSpeed: weatherData.current.wind_speed_10m,
@@ -121,12 +131,12 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       const weatherDescription = getWeatherDescription(weatherData.current.weather_code);
       onWeatherUpdate(
         transformedData, 
-        `The weather in ${selectedLocation.name}, ${selectedLocation.country} is ${weatherDescription} with a temperature of ${weatherData.current.temperature_2m}°C.`
+        `The weather in ${formatLocation(selectedLocation)} is ${weatherDescription} with a temperature of ${weatherData.current.temperature_2m}°C.`
       );
       
       toast({
         title: "Success",
-        description: `Weather data loaded for ${selectedLocation.name}, ${selectedLocation.country}`,
+        description: `Weather data loaded for ${formatLocation(selectedLocation)}`,
       });
 
     } catch (err) {
@@ -186,7 +196,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
                 className="w-full justify-start"
                 onClick={() => handleLocationSelect(result)}
               >
-                {result.name}, {result.country}
+                {formatLocation(result)}
               </Button>
             ))}
           </div>

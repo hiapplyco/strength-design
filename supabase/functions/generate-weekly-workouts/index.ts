@@ -6,14 +6,20 @@ import { createWorkoutGenerationPrompt, getGeminiConfig } from "../shared/prompt
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
 };
 
 serve(async (req) => {
   console.log('Function invoked with method:', req.method);
   
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      status: 204, 
+      headers: corsHeaders 
+    });
   }
 
   try {
@@ -21,6 +27,10 @@ serve(async (req) => {
     if (!apiKey) {
       console.error('Missing Gemini API key');
       throw new Error('Missing Gemini API key');
+    }
+
+    if (req.method !== 'POST') {
+      throw new Error(`HTTP method ${req.method} not allowed`);
     }
 
     console.log('Parsing request body...');
@@ -84,13 +94,20 @@ serve(async (req) => {
       });
 
       return new Response(JSON.stringify(workouts), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: corsHeaders,
         status: 200,
       });
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
       console.error('Problematic JSON text:', responseText);
-      throw new Error(`Failed to parse JSON: ${parseError.message}`);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to parse workout data',
+        details: parseError.message,
+        type: 'ParseError'
+      }), {
+        headers: corsHeaders,
+        status: 400,
+      });
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
@@ -100,8 +117,8 @@ serve(async (req) => {
       timestamp: new Date().toISOString(),
       type: error.name || 'UnknownError'
     }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: error.status || 500,
+      headers: corsHeaders,
     });
   }
 });

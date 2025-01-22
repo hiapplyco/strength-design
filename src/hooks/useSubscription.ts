@@ -26,25 +26,20 @@ export const useSubscription = () => {
         return;
       }
 
-      console.log('Creating checkout session...');
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { subscriptionType: type }
       });
 
       if (error) {
         console.error('Checkout error:', error);
-        setLoadingStates(prev => ({ ...prev, [type]: false }));
         throw error;
       }
 
       if (!data?.url) {
-        setLoadingStates(prev => ({ ...prev, [type]: false }));
         throw new Error('No checkout URL received');
       }
 
-      console.log('Redirecting to Stripe...');
-      // Clear loading state before redirecting
-      setLoadingStates(prev => ({ ...prev, [type]: false }));
+      // Redirect to Stripe
       window.location.href = data.url;
       
     } catch (error: any) {
@@ -54,6 +49,7 @@ export const useSubscription = () => {
         description: error.message || "Failed to start subscription process. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setLoadingStates(prev => ({ ...prev, [type]: false }));
     }
   };

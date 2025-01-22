@@ -52,48 +52,15 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     })
 
-    // Find or create customer
-    let customer
-    const customers = await stripe.customers.list({
-      email: user.email,
-      limit: 1
-    })
-
-    if (customers.data.length > 0) {
-      customer = customers.data[0]
-      console.log('Found existing customer:', customer.id)
-      
-      // Check if already subscribed
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customer.id,
-        status: 'active',
-        price: priceId,
-        limit: 1
-      })
-
-      if (subscriptions.data.length > 0) {
-        throw new Error("You are already subscribed to this plan")
-      }
-    } else {
-      // Create new customer
-      customer = await stripe.customers.create({
-        email: user.email,
-        metadata: {
-          supabase_user_id: user.id
-        }
-      })
-      console.log('Created new customer:', customer.id)
-    }
-
     const origin = req.headers.get('origin')
     if (!origin) {
       throw new Error('No origin header')
     }
 
-    // Create checkout session
+    // Create checkout session directly without customer checks
     console.log('Creating checkout session...')
     const session = await stripe.checkout.sessions.create({
-      customer: customer.id,
+      customer_email: user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
       success_url: `${origin}/`,

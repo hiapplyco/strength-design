@@ -14,10 +14,14 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting generate-weekly-workouts function');
+    
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
+      console.error('Missing Gemini API key');
       throw new Error('Missing Gemini API key');
     }
+    console.log('Gemini API key found');
 
     const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
     console.log('Request params:', { weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays });
@@ -26,6 +30,7 @@ serve(async (req) => {
       throw new Error('Invalid number of days');
     }
 
+    // Create dynamic schema based on number of days
     const schema = {
       type: SchemaType.OBJECT,
       properties: {},
@@ -69,6 +74,7 @@ serve(async (req) => {
       schema.required.push(dayKey);
     }
 
+    console.log('Initializing Gemini AI with schema');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -82,7 +88,7 @@ serve(async (req) => {
       },
     });
 
-    console.log('Sending request to Gemini with schema...');
+    console.log('Sending request to Gemini with prompt');
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: createWorkoutGenerationPrompt({
         numberOfDays,
@@ -94,9 +100,11 @@ serve(async (req) => {
     });
 
     if (!result || !result.response) {
+      console.error('No response from Gemini');
       throw new Error('Failed to generate response from Gemini');
     }
 
+    console.log('Parsing Gemini response');
     const workouts = JSON.parse(result.response.text());
     console.log('Successfully generated workouts:', workouts);
 

@@ -6,13 +6,15 @@ interface GenerateSectionProps {
   onClear: () => void;
   isGenerating: boolean;
   renderTooltip: () => React.ReactNode;
+  isValid: boolean;
 }
 
 export function GenerateSection({ 
   onGenerate, 
   onClear,
   isGenerating,
-  renderTooltip
+  renderTooltip,
+  isValid
 }: GenerateSectionProps) {
   return (
     <div className="space-y-4">
@@ -25,8 +27,8 @@ export function GenerateSection({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Button 
           onClick={onGenerate} 
-          disabled={isGenerating}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-colors disabled:opacity-50"
+          disabled={isGenerating || !isValid}
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isGenerating ? (
             <>

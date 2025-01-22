@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "./exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 import { WeatherSection } from "./workout-generator/WeatherSection";
@@ -46,7 +45,11 @@ export function GenerateWorkoutInput({
     }
   };
 
+  const isValid = fitnessLevel !== "" && numberOfDays > 0;
+
   const handleGenerateWithWeather = async () => {
+    if (!isValid) return;
+
     const exercisesPrompt = selectedExercises.length > 0 
       ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
       : "";
@@ -59,7 +62,7 @@ export function GenerateWorkoutInput({
       ? ` Please incorporate these prescribed exercises/restrictions: ${prescribedExercises}.`
       : "";
     
-    const fullPrompt = `${generatePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${exercisesPrompt}${fitnessPrompt}${prescribedPrompt}`;
+    const fullPrompt = `${weatherPrompt}${exercisesPrompt}${fitnessPrompt}${prescribedPrompt}`;
     setGeneratePrompt(fullPrompt);
 
     try {
@@ -154,6 +157,7 @@ export function GenerateWorkoutInput({
           onGenerate={handleGenerateWithWeather}
           onClear={handleClear}
           isGenerating={isGenerating}
+          isValid={isValid}
           renderTooltip={() => renderTooltip(
             "Review your selections and generate a custom workout program tailored to your needs."
           )}

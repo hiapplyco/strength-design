@@ -36,18 +36,10 @@ export const Navbar = () => {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error signing out:", error);
-        toast({
-          variant: "destructive",
-          title: "Error signing out",
-          description: error.message,
-        });
-      }
+      await supabase.auth.signOut();
       setIsMobileMenuOpen(false); // Close mobile menu after sign out
     } catch (error) {
-      console.error("Unexpected error during sign out:", error);
+      console.error("Error signing out:", error);
       toast({
         variant: "destructive",
         title: "Error signing out",

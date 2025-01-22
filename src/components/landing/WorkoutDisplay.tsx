@@ -75,7 +75,10 @@ export const WorkoutDisplay = ({
       
       <div className="grid gap-8">
         {Object.entries(localWorkouts).map(([day, workout]) => (
-          <div key={day} className="bg-card rounded-xl border-2 border-primary shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow">
+          <div 
+            key={day} 
+            className="bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200"
+          >
             <WorkoutHeader
               title={formatDayTitle(day)}
               isSpeaking={isSpeaking && speakingDay === day}

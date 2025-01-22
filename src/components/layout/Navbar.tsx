@@ -22,12 +22,15 @@ export const Navbar = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("Auth state changed:", _event, session?.user?.id);
       setUser(session?.user || null);
       if (_event === 'SIGNED_OUT') {
         toast({
           title: "Signed out successfully",
           description: "Come back soon!",
         });
+        // Ensure mobile menu is closed after sign out
+        setIsMobileMenuOpen(false);
       }
     });
 
@@ -36,8 +39,11 @@ export const Navbar = () => {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
-      setIsMobileMenuOpen(false); // Close mobile menu after sign out
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // The rest will be handled by the auth state change listener
+      console.log("Sign out initiated");
     } catch (error) {
       console.error("Error signing out:", error);
       toast({

@@ -40,10 +40,22 @@ export const Navbar = () => {
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (error) {
+        console.error("Error during sign out:", error.message);
+        throw error;
+      }
       
-      // The rest will be handled by the auth state change listener
-      console.log("Sign out initiated");
+      // Force clear the user state immediately
+      setUser(null);
+      // Close mobile menu
+      setIsMobileMenuOpen(false);
+      
+      // Show immediate feedback to user
+      toast({
+        title: "Signing out...",
+        description: "Please wait...",
+      });
+      
     } catch (error) {
       console.error("Error signing out:", error);
       toast({

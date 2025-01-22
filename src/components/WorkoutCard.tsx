@@ -34,7 +34,13 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
   const handleExportCalendar = async () => {
     try {
       setIsExporting(true);
-      await exportToCalendar(title, warmup, workout, notes || '', toast);
+      await exportToCalendar([{
+        title,
+        warmup,
+        workout,
+        notes: notes || '',
+        dayOffset: 0
+      }], toast);
     } finally {
       setIsExporting(false);
     }

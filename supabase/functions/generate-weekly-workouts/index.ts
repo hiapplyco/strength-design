@@ -23,18 +23,23 @@ serve(async (req) => {
     const startTime = Date.now();
     
     const { prompt, numberOfDays = 7, weatherData, selectedExercises, fitnessLevel, prescribedExercises } = await req.json();
-    console.log("Received prompt:", prompt);
-    console.log("Number of days requested:", numberOfDays);
-    console.log("Weather data:", weatherData);
-    console.log("Selected exercises:", selectedExercises);
-    console.log("Fitness level:", fitnessLevel);
-    console.log("Prescribed exercises:", prescribedExercises);
+    
+    // Detailed logging of all inputs
+    console.log("Input validation:");
+    console.log("- Prompt:", prompt || "Not provided");
+    console.log("- Number of days:", numberOfDays);
+    console.log("- Weather data:", weatherData || "Not provided");
+    console.log("- Selected exercises:", selectedExercises?.length || 0, "exercises");
+    console.log("- Fitness level:", fitnessLevel || "Not provided");
+    console.log("- Prescribed exercises:", prescribedExercises || "Not provided");
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY not found in environment variables");
       throw new Error('GEMINI_API_KEY is not set');
     }
 
+    console.log("Initializing Gemini AI...");
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -156,16 +161,22 @@ Return ONLY a valid JSON object with no additional text, following this exact fo
 }`;
 
     console.log("Sending prompt to Gemini...");
+    console.log("Prompt length:", expertPrompt.length);
+    
     const result = await model.generateContent(expertPrompt);
+    console.log("Received response from Gemini");
+    
     const response = await result.response;
     const text = response.text();
-    console.log("Received response from Gemini:", text);
+    console.log("Response text length:", text.length);
 
     let workouts;
     try {
+      console.log("Parsing response as JSON...");
       try {
         workouts = JSON.parse(text);
       } catch (e) {
+        console.log("Initial JSON parse failed, attempting to extract JSON from text...");
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
           console.error("No JSON found in response");

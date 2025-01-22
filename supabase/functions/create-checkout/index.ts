@@ -8,7 +8,10 @@ const PRICE_IDS = {
 };
 
 serve(async (req) => {
-  const origin = req.headers.get('origin') || '';
+  // Get the origin from the request headers or URL
+  const url = new URL(req.url);
+  const origin = url.origin;
+  
   const corsHeaders = {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -120,6 +123,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    console.error('Stripe checkout error:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }

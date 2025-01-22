@@ -28,13 +28,14 @@ export const useSubscription = () => {
         body: { subscriptionType: type }
       });
 
-      if (error || !data?.url) {
-        throw new Error(error?.message || 'No checkout URL received');
-      }
+      if (error) throw new Error(error.message);
+      if (!data?.url) throw new Error('No checkout URL received');
 
+      // Use window.location.href for the redirect
       window.location.href = data.url;
       
     } catch (error: any) {
+      console.error('Subscription error:', error);
       toast({
         title: "Subscription Error",
         description: error.message || "Failed to start subscription process",

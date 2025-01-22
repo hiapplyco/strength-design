@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioPlayback } from "@/hooks/useAudioPlayback";
@@ -29,12 +29,23 @@ const Index = () => {
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(true);
   const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [numberOfDays, setNumberOfDays] = useState(7);
   const { toast } = useToast();
   const { isSpeaking, audioRef, handleSpeakWorkout } = useAudioPlayback();
   const [isExporting, setIsExporting] = useState(false);
   const navigate = useNavigate();
+
+  const checkTrialStatus = async (userId: string) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('trial_end_date')
+      .eq('id', userId)
+      .single();
+
+    return profile && new Date(profile.trial_end_date) > new Date();
+  };
 
   const handleGenerateWorkout = async () => {
     if (!generatePrompt.trim()) {
@@ -54,6 +65,17 @@ const Index = () => {
       });
 
       console.log("Starting workout generation...");
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const isTrialValid = await checkTrialStatus(user.id);
+        if (!isTrialValid) {
+          setIsNewUser(false);
+          setShowAuthDialog(true);
+          return;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
         body: { 
           prompt: generatePrompt,
@@ -67,13 +89,11 @@ const Index = () => {
 
       if (data) {
         setGeneratedWorkouts(data);
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (user) {
-          console.log("Saving workouts for user:", user.id);
-          await saveWorkouts(data);
-        } else {
+        if (!user) {
+          setIsNewUser(true);
           setShowAuthDialog(true);
+        } else {
+          await saveWorkouts(data);
         }
 
         toast({
@@ -188,6 +208,7 @@ const Index = () => {
         isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         onSuccess={handleAuthSuccess}
+        isNewUser={isNewUser}
       />
       <audio ref={audioRef} className="hidden" />
       {isGenerating && (

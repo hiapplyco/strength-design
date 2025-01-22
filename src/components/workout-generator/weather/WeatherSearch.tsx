@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getWeatherDescription } from "./weather-utils";
 import {
@@ -19,7 +19,7 @@ interface WeatherSearchProps {
 interface LocationResult {
   name: string;
   country: string;
-  admin1?: string; // State/region field from the API
+  admin1?: string;
   latitude: number;
   longitude: number;
 }
@@ -27,6 +27,7 @@ interface LocationResult {
 export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchProps) {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const { toast } = useToast();
@@ -87,6 +88,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
 
   const handleLocationSelect = async (selectedLocation: LocationResult) => {
     setIsLoading(true);
+    setIsWeatherLoading(true);
     setShowLocationDialog(false);
     
     try {
@@ -152,6 +154,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       onWeatherUpdate(null, "");
     } finally {
       setIsLoading(false);
+      setIsWeatherLoading(false);
     }
   };
 
@@ -164,14 +167,29 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
       </div>
       
       <form onSubmit={handleSearch} className="flex gap-2">
-        <Input
-          type="text"
-          placeholder="Enter city name..."
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="flex-1 bg-white text-black placeholder:text-gray-500"
-        />
-        <Button type="submit" disabled={isLoading}>
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            placeholder="Enter city name..."
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="bg-white text-black placeholder:text-gray-500 rounded-full border-2 border-primary focus-visible:ring-primary pr-10"
+          />
+          {location && (
+            <button
+              type="button"
+              onClick={() => setLocation("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-primary/20 rounded-full transition-colors"
+            >
+              <X className="h-4 w-4 text-primary" />
+            </button>
+          )}
+        </div>
+        <Button 
+          type="submit" 
+          disabled={isLoading}
+          className="rounded-full"
+        >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -183,6 +201,13 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
         </Button>
       </form>
 
+      {isWeatherLoading && (
+        <div className="flex items-center justify-center p-8 bg-primary/10 rounded-xl animate-pulse">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-primary font-medium">Loading weather data...</span>
+        </div>
+      )}
+
       <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
         <DialogContent>
           <DialogHeader>
@@ -193,7 +218,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
               <Button
                 key={index}
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start rounded-full"
                 onClick={() => handleLocationSelect(result)}
               >
                 {formatLocation(result)}

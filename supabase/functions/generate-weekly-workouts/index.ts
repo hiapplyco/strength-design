@@ -27,7 +27,7 @@ serve(async (req) => {
   try {
     console.log('Starting request processing');
     const requestBody = await req.json();
-    console.log('Received request body:', JSON.stringify(requestBody, null, 2));
+    console.log('Raw request body:', JSON.stringify(requestBody, null, 2));
 
     const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises } = requestBody;
     console.log('Parsed parameters:', { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises });
@@ -103,6 +103,7 @@ serve(async (req) => {
     console.log('Sending prompt to Gemini:', prompt);
 
     try {
+      console.log('Making API request to Gemini');
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
@@ -126,8 +127,10 @@ serve(async (req) => {
         let workouts;
         try {
           workouts = JSON.parse(cleanedText);
+          console.log('Successfully parsed JSON:', workouts);
         } catch (parseError) {
-          console.error('Initial JSON parse failed, attempting to fix common issues:', parseError);
+          console.error('Initial JSON parse failed:', parseError);
+          console.log('Attempting to fix common JSON issues');
           // Try to fix common JSON issues
           const fixedText = cleanedText
             .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
@@ -135,22 +138,24 @@ serve(async (req) => {
             .replace(/\\/g, '\\\\'); // Escape backslashes
           console.log('Fixed text:', fixedText);
           workouts = JSON.parse(fixedText);
+          console.log('Successfully parsed fixed JSON:', workouts);
         }
-
-        console.log('Parsed workouts:', workouts);
 
         // Validate the structure of each day's workout
         const requiredFields = ['description', 'warmup', 'workout', 'strength', 'notes'];
         Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
+          console.log(`Validating day ${day}:`, workout);
           const missingFields = requiredFields.filter(field => 
             !workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()
           );
 
           if (missingFields.length > 0) {
+            console.error(`Validation failed for day ${day}. Missing fields:`, missingFields);
             throw new Error(`Day ${day} is missing or has invalid required fields: ${missingFields.join(', ')}`);
           }
         });
 
+        console.log('All validation passed, returning workouts');
         return new Response(
           JSON.stringify(workouts),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

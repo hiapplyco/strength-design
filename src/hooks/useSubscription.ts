@@ -14,7 +14,7 @@ export const useSubscription = () => {
       console.log(`Starting ${type} subscription process...`);
       setLoadingStates(prev => ({ ...prev, [type]: true }));
       
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         toast({
@@ -29,14 +29,8 @@ export const useSubscription = () => {
         body: { subscriptionType: type }
       });
 
-      if (error) {
-        console.error('Checkout error:', error);
-        throw error;
-      }
-
-      if (!data?.url) {
-        throw new Error('No checkout URL received');
-      }
+      if (error) throw error;
+      if (!data?.url) throw new Error('No checkout URL received');
 
       console.log('Redirecting to checkout:', data.url);
       window.location.href = data.url;

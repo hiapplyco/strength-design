@@ -48,50 +48,19 @@ const Index = () => {
 
     try {
       setIsGenerating(true);
-      toast({
-        title: "Generating Workout",
-        description: "Please wait while we create your personalized workout plan...",
-      });
-
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      if (authError) {
-        console.error("Auth error:", authError);
-        throw new Error("Authentication failed. Please try logging in again.");
-      }
-
+      // Check user authentication first
+      const { data: { user } } = await supabase.auth.getUser();
+      
       if (!user) {
-        console.log("No authenticated user found, showing auth dialog");
+        console.log("No user found, showing auth dialog");
         setIsNewUser(true);
         setShowAuthDialog(true);
         setIsGenerating(false);
         return;
       }
 
-      console.log("Checking trial status for user:", user.id);
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('trial_end_date')
-        .eq('id', user.id)
-        .single();
-      
-      if (profileError) {
-        console.error("Profile error:", profileError);
-        throw new Error("Failed to check trial status. Please try again.");
-      }
-
-      const isTrialValid = profile && new Date(profile.trial_end_date) > new Date();
-      console.log("Trial status:", isTrialValid ? "Valid" : "Invalid");
-      
-      if (!isTrialValid) {
-        console.log("Trial not valid, showing auth dialog");
-        setIsNewUser(false);
-        setShowAuthDialog(true);
-        setIsGenerating(false);
-        return;
-      }
-
-      console.log("Calling generate-weekly-workouts function");
+      // Generate workout
       const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: { 
           prompt: generatePrompt,
@@ -105,10 +74,9 @@ const Index = () => {
       }
 
       if (!data) {
-        throw new Error("No workout data received from the server");
+        throw new Error("No workout data received");
       }
 
-      console.log("Workout data received:", data);
       setGeneratedWorkouts(data);
       await saveWorkouts(data);
       
@@ -119,7 +87,7 @@ const Index = () => {
       triggerConfetti();
 
     } catch (error) {
-      console.error('Error generating workouts:', error);
+      console.error('Error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to generate workouts. Please try again.",
@@ -132,15 +100,13 @@ const Index = () => {
 
   const saveWorkouts = async (workoutsToSave: WeeklyWorkouts) => {
     try {
-      console.log("Starting workout save process...");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log("No user found, cannot save workouts");
+        setShowAuthDialog(true);
         return;
       }
 
       const workoutPromises = Object.entries(workoutsToSave).map(([day, workout]) => {
-        console.log(`Saving workout for day: ${day}`);
         return supabase.from('workouts').insert({
           user_id: user.id,
           day,
@@ -154,9 +120,8 @@ const Index = () => {
       setWorkouts(workoutsToSave);
       toast({
         title: "Success",
-        description: "Workouts generated and saved successfully!",
+        description: "Workouts saved successfully!",
       });
-      triggerConfetti();
     } catch (error) {
       console.error('Error saving workouts:', error);
       toast({

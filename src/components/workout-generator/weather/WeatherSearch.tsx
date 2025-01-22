@@ -12,12 +12,12 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 
 interface WeatherSearchProps {
   onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
@@ -152,7 +152,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
             />
             <CommandEmpty>No locations found.</CommandEmpty>
             <CommandGroup>
-              {locations.map((loc, index) => (
+              {(locations || []).map((loc, index) => (
                 <CommandItem
                   key={index}
                   value={`${loc.name}, ${loc.admin1 ? `${loc.admin1}, ` : ''}${loc.country}`}

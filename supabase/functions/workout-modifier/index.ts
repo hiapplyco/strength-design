@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { createWorkoutModificationPrompt, getGeminiConfig } from "../shared/prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,19 +41,34 @@ serve(async (req) => {
       throw new Error('Current workout must contain at least workout and warmup fields');
     }
 
-    const prompt = createWorkoutModificationPrompt(dayToModify, modificationPrompt, {
-      warmup: currentWorkout.warmup,
-      workout: currentWorkout.workout,
-      notes: currentWorkout.notes || '',
-      strength: currentWorkout.strength || ''
-    });
+    const prompt = `You are a professional fitness trainer. I want you to modify the following workout for ${dayToModify}:
+
+Current workout:
+Warmup: ${currentWorkout.warmup}
+Workout: ${currentWorkout.workout}
+Notes: ${currentWorkout.notes || 'None'}
+
+Modification request: ${modificationPrompt}
+
+Please provide a modified version of this workout that addresses the request. Return the response in this exact JSON format:
+{
+  "warmup": "modified warmup here",
+  "workout": "modified workout here",
+  "notes": "any additional notes or guidance",
+  "description": "brief description of the modified workout"
+}`;
+
     console.log('Generated prompt:', prompt);
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const config = getGeminiConfig();
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      generationConfig: config.generationConfig,
+      generationConfig: {
+        temperature: 0.7,
+        topK: 1,
+        topP: 1,
+        maxOutputTokens: 1024,
+      },
     });
 
     console.log('Starting Gemini request');

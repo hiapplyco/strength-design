@@ -1,40 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn, LogOut, UserRound, Home, Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
+import { User } from "@supabase/supabase-js";
 
 export const Navbar = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Check initial auth state
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    setUser(session?.user || null);
-  });
+  useEffect(() => {
+    // Check initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
 
-  // Listen for auth changes
-  supabase.auth.onAuthStateChange((_event, session) => {
-    setUser(session?.user || null);
-  });
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+      if (_event === 'SIGNED_OUT') {
+        toast({
+          title: "Signed out successfully",
+          description: "Come back soon!",
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [toast]);
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+        toast({
+          variant: "destructive",
+          title: "Error signing out",
+          description: error.message,
+        });
+      }
+      setIsMobileMenuOpen(false); // Close mobile menu after sign out
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error);
       toast({
         variant: "destructive",
         title: "Error signing out",
-        description: error.message,
-      });
-    } else {
-      toast({
-        title: "Signed out successfully",
-        description: "Come back soon!",
+        description: "An unexpected error occurred",
       });
     }
   };

@@ -27,6 +27,7 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   const [isNewUser, setIsNewUser] = useState(true);
   const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [numberOfDays, setNumberOfDays] = useState(7);
+  const [showGenerateInput, setShowGenerateInput] = useState(true);
   const { toast } = useToast();
 
   const handleGenerateWorkout = async () => {
@@ -169,6 +170,7 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
         isGenerating={isGenerating}
         numberOfDays={numberOfDays}
         setNumberOfDays={setNumberOfDays}
+        setShowGenerateInput={setShowGenerateInput}
       />
       <AuthDialog 
         isOpen={showAuthDialog}

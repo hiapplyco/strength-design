@@ -14,6 +14,7 @@ interface HeroSectionProps {
   setShowGenerateInput: (show: boolean) => void;
   numberOfDays: number;
   setNumberOfDays: (days: number) => void;
+  children?: React.ReactNode;
 }
 
 export const HeroSection = ({
@@ -23,7 +24,8 @@ export const HeroSection = ({
   isGenerating,
   setShowGenerateInput,
   numberOfDays,
-  setNumberOfDays
+  setNumberOfDays,
+  children
 }: HeroSectionProps) => {
   const [showSubscription, setShowSubscription] = useState(true);
 
@@ -87,15 +89,7 @@ export const HeroSection = ({
 
       <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
         <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
-        <GenerateWorkoutInput
-          generatePrompt={generatePrompt}
-          setGeneratePrompt={setGeneratePrompt}
-          handleGenerateWorkout={handleGenerateWorkout}
-          isGenerating={isGenerating}
-          setShowGenerateInput={setShowGenerateInput}
-          numberOfDays={numberOfDays}
-          setNumberOfDays={setNumberOfDays}
-        />
+        {children}
       </div>
 
       <div className="flex gap-4 mt-8">

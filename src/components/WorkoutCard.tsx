@@ -47,7 +47,6 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
     if (isSpeaking || isPaused) {
       handlePause();
     } else {
-      // Pass only the title and the formatted text to match the expected signature
       handleSpeakWorkout(title, formatWorkoutText());
     }
   };

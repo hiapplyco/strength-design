@@ -100,8 +100,8 @@ export const ExerciseSearch = ({
       />
 
       <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col bg-white">
-          <div className="space-y-4 flex-1 overflow-hidden">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] p-0 gap-0 bg-background border-none">
+          <div className="sticky top-0 z-10 bg-background p-4 border-b">
             <div className="flex gap-2 items-center">
               <div className="flex-1">
                 <SearchInput
@@ -119,14 +119,14 @@ export const ExerciseSearch = ({
                 </Button>
               </DialogClose>
             </div>
-            <div className="overflow-y-auto flex-1 max-h-[calc(80vh-150px)]">
-              <SearchResults
-                results={searchResults}
-                selectedExercises={selectedExercises}
-                onExerciseSelect={handleExerciseSelect}
-                sanitizeText={sanitizeText}
-              />
-            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <SearchResults
+              results={searchResults}
+              selectedExercises={selectedExercises}
+              onExerciseSelect={handleExerciseSelect}
+              sanitizeText={sanitizeText}
+            />
           </div>
         </DialogContent>
       </Dialog>

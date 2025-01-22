@@ -29,11 +29,18 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
 
     setIsLoading(true);
     try {
-      const response = await supabase.functions.invoke("get-weather", {
+      const { data, error } = await supabase.functions.invoke("get-weather", {
         body: { query: location },
       });
-      const weatherData = await response.json();
-      onWeatherUpdate(weatherData, `The weather in ${location} is ${weatherData.current.weather[0].description}.`);
+
+      if (error) {
+        console.error("Error fetching weather data:", error);
+        return;
+      }
+
+      if (data) {
+        onWeatherUpdate(data, `The weather in ${location} is ${data.current?.weather[0]?.description || 'available'}.`);
+      }
     } catch (error) {
       console.error("Error fetching weather data:", error);
     } finally {

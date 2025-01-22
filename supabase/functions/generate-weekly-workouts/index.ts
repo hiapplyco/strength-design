@@ -32,7 +32,7 @@ serve(async (req) => {
 
     const exercisesList = selectedExercises?.map(e => e.name).join(", ") || '';
     
-    const systemPrompt = `You are a professional fitness coach creating a ${numberOfDays}-day workout program.
+    const systemPrompt = `As a professional fitness coach, create a ${numberOfDays}-day workout program.
     Weather conditions: ${weatherPrompt || 'Not specified'}
     Exercises to include: ${exercisesList || 'No specific exercises required'}
     Fitness level: ${fitnessLevel || 'Not specified'}
@@ -45,39 +45,37 @@ serve(async (req) => {
     4. Strength focus
     5. Optional notes
 
-    Respond with ONLY a JSON object in this format:
-    {
-      "Monday": {
-        "description": "Focus of the day",
-        "warmup": "Warmup routine",
-        "workout": "Main workout",
-        "strength": "Strength component",
-        "notes": "Optional notes"
-      }
-    }`;
+    Format the response as a JSON object with numbered days as keys (day1, day2, etc).
+    Each day should have these exact fields: description, warmup, workout, strength, notes.
+    Keep the response concise and focused on the workout details.`;
 
     console.log('Sending prompt to Gemini');
     
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
-    });
+    const result = await model.generateContent(systemPrompt);
+    console.log('Received response from Gemini');
 
     if (!result?.response?.text) {
       throw new Error('No response from Gemini');
     }
 
-    console.log('Received response from Gemini');
+    const responseText = result.response.text;
+    console.log('Raw response:', responseText);
 
-    // Clean up the response text to ensure valid JSON
-    const cleanedText = result.response.text
+    // Extract JSON from the response
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No valid JSON found in response');
+    }
+
+    const cleanedJson = jsonMatch[0]
       .replace(/```json\s*|\s*```/g, '')  // Remove markdown code blocks
       .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')  // Remove comments
       .replace(/,(\s*[}\]])/g, '$1')  // Remove trailing commas
       .trim();
 
-    console.log('Parsing response as JSON');
+    console.log('Cleaned JSON:', cleanedJson);
     
-    const workouts = JSON.parse(cleanedText);
+    const workouts = JSON.parse(cleanedJson);
 
     return new Response(JSON.stringify(workouts), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

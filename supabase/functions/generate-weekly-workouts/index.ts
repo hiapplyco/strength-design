@@ -9,23 +9,30 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('Function invoked with method:', req.method);
+  
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
+      console.error('Missing Gemini API key');
       throw new Error('Missing Gemini API key');
     }
 
+    console.log('Parsing request body...');
     const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
     
-    console.log('Starting workout generation with params:', {
+    console.log('Request parameters:', {
+      hasPrompt: !!prompt,
       hasWeather: !!weatherPrompt,
       exerciseCount: selectedExercises?.length,
       fitnessLevel,
-      days: numberOfDays
+      numberOfDays,
+      hasPrescribed: !!prescribedExercises
     });
 
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -51,25 +58,20 @@ IMPORTANT: Your response MUST be a valid, parseable JSON object with this exact 
     "notes": "string - Optional coaching notes"
   }
   // ... repeat for each day
-}
+}`;
 
-Do not include any text outside of the JSON object.
-Do not include markdown code blocks.
-Ensure all string values are properly escaped.
-Do not use trailing commas.`;
-
-    console.log('Sending prompt to Gemini with 60s timeout');
-    console.log('System prompt:', systemPrompt);
+    console.log('Sending prompt to Gemini:', systemPrompt);
     
-    const timeoutMs = 60000; // 60 seconds timeout
+    const timeoutMs = 60000;
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
     });
 
+    console.log('Starting Gemini request with timeout...');
     const generationPromise = model.generateContent(systemPrompt);
     const result = await Promise.race([generationPromise, timeoutPromise]);
     
-    console.log('Response received:', result?.response ? 'Has response' : 'No response');
+    console.log('Response received from Gemini:', result?.response ? 'Has response' : 'No response');
 
     if (!result?.response?.text) {
       console.error('Invalid response from Gemini:', result);
@@ -78,11 +80,11 @@ Do not use trailing commas.`;
 
     const responseText = result.response.text.trim();
     console.log('Raw response length:', responseText.length);
-    console.log('Raw Gemini response:', responseText);
+    console.log('First 100 chars of response:', responseText.substring(0, 100));
 
     try {
       const workouts = JSON.parse(responseText);
-      console.log('Successfully parsed workouts:', workouts);
+      console.log('Successfully parsed workouts object with keys:', Object.keys(workouts));
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -94,6 +96,7 @@ Do not use trailing commas.`;
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
+    console.error('Error stack:', error.stack);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
       details: error.stack,

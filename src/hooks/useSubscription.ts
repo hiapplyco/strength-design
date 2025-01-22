@@ -33,15 +33,20 @@ export const useSubscription = () => {
 
       if (error) {
         console.error('Checkout error:', error);
+        setLoadingStates(prev => ({ ...prev, [type]: false }));
         throw error;
       }
 
       if (!data?.url) {
+        setLoadingStates(prev => ({ ...prev, [type]: false }));
         throw new Error('No checkout URL received');
       }
 
       console.log('Redirecting to Stripe...');
+      // Clear loading state before redirecting
+      setLoadingStates(prev => ({ ...prev, [type]: false }));
       window.location.href = data.url;
+      
     } catch (error: any) {
       console.error('Error creating checkout session:', error);
       toast({

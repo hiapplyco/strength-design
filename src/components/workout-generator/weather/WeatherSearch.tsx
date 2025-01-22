@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { WeatherData } from "@/types/weather";
 import { useToast } from "@/hooks/use-toast";
 import debounce from 'lodash/debounce';
+import { getWeatherDescription } from "./weather-utils";
 import {
   Command,
   CommandEmpty,

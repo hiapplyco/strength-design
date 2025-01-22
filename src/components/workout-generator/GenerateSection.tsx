@@ -1,10 +1,7 @@
 import { Send, Loader2, Check, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 
 interface GenerateSectionProps {
-  generatePrompt: string;
-  onGeneratePromptChange: (value: string) => void;
   onGenerate: () => void;
   onClear: () => void;
   isGenerating: boolean;
@@ -12,8 +9,6 @@ interface GenerateSectionProps {
 }
 
 export function GenerateSection({ 
-  generatePrompt, 
-  onGeneratePromptChange, 
   onGenerate, 
   onClear,
   isGenerating,
@@ -26,12 +21,6 @@ export function GenerateSection({
         <h3 className="font-oswald text-lg">Create Your Workout</h3>
         {renderTooltip()}
       </div>
-      <Input
-        placeholder="e.g., 'Focus on Olympic lifts this cycle, with emphasis on technique and progressive loading'"
-        value={generatePrompt}
-        onChange={(e) => onGeneratePromptChange(e.target.value)}
-        className="bg-white text-black placeholder:text-gray-500"
-      />
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Button 

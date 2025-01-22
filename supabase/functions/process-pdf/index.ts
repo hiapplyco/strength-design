@@ -38,7 +38,7 @@ serve(async (req) => {
           mimeType: "application/pdf"
         }
       },
-      "Extract and summarize any exercise prescriptions or medical recommendations from this document."
+      "Extract and return all text content from this document without any analysis or summary. Just return the raw text content."
     ]);
 
     const response = await result.response;

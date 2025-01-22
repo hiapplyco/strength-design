@@ -13,7 +13,6 @@ const PRICE_IDS = {
 };
 
 serve(async (req) => {
-  // Always return CORS headers for OPTIONS requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: {
@@ -30,23 +29,19 @@ serve(async (req) => {
 
     console.log('Starting checkout process...');
     
-    // Parse request body
     const { subscriptionType } = await req.json();
     console.log('Subscription type:', subscriptionType);
     
-    // Validate subscription type early
     const priceId = PRICE_IDS[subscriptionType];
     if (!priceId) {
       throw new Error(`Invalid subscription type: ${subscriptionType}`);
     }
 
-    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     );
 
-    // Validate authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('Authentication required');
@@ -62,12 +57,10 @@ serve(async (req) => {
 
     console.log('User authenticated:', user.email);
 
-    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
 
-    // Find or create customer
     console.log('Looking for existing customer...');
     const customers = await stripe.customers.list({
       email: user.email,
@@ -79,7 +72,6 @@ serve(async (req) => {
       customerId = customers.data[0].id;
       console.log('Found existing customer:', customerId);
       
-      // Check for active subscription
       const subscriptions = await stripe.subscriptions.list({
         customer: customerId,
         status: 'active',
@@ -91,7 +83,6 @@ serve(async (req) => {
         throw new Error('You already have an active subscription to this plan');
       }
     } else {
-      // Create new customer
       const newCustomer = await stripe.customers.create({
         email: user.email,
         metadata: {
@@ -102,13 +93,11 @@ serve(async (req) => {
       console.log('Created new customer:', customerId);
     }
 
-    // Validate origin
     const origin = req.headers.get('origin');
     if (!origin) {
       throw new Error('Origin header required');
     }
 
-    // Create checkout session
     console.log('Creating checkout session...');
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

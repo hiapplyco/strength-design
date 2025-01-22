@@ -19,33 +19,45 @@ const cleanJsonText = (text: string): string => {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises } = await req.json();
+    console.log('Received request with params:', { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises });
 
     // Validate required fields
     if (!fitnessLevel) {
+      console.error('Missing fitness level');
       return new Response(
         JSON.stringify({ error: 'Please select your fitness level' }), 
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 400 
+        }
       );
     }
 
     if (!numberOfDays || numberOfDays < 1) {
+      console.error('Invalid number of days:', numberOfDays);
       return new Response(
         JSON.stringify({ error: 'Please select number of days' }), 
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 400 
+        }
       );
     }
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
+      console.error('Missing Gemini API key');
       throw new Error('Missing Gemini API key');
     }
 
+    console.log('Initializing Gemini with API key');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-pro",
@@ -91,6 +103,7 @@ serve(async (req) => {
     });
 
     if (!result || !result.response) {
+      console.error('Failed to generate response from Gemini');
       throw new Error('Failed to generate response from Gemini');
     }
 

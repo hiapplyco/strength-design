@@ -35,24 +35,19 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       setIsGenerating(true);
       console.log("Starting workout generation");
 
-      console.log("Calling generate-weekly-workouts function with params:", {
+      const params = {
         prompt: generatePrompt,
         numberOfDays,
         weatherPrompt: "",
         selectedExercises: [],
         fitnessLevel: "",
         prescribedExercises: ""
-      });
+      };
+
+      console.log("Calling generate-weekly-workouts function with params:", params);
 
       const { data, error: functionError } = await supabase.functions.invoke('generate-weekly-workouts', {
-        body: { 
-          prompt: generatePrompt,
-          numberOfDays,
-          weatherPrompt: "",
-          selectedExercises: [],
-          fitnessLevel: "",
-          prescribedExercises: ""
-        }
+        body: params
       });
 
       console.log("Function response received:", { 
@@ -63,7 +58,15 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
 
       if (functionError) {
         console.error("Function error:", functionError);
-        throw new Error(functionError.message || 'Error generating workouts');
+        // Parse the error message from the response body if it exists
+        let errorMessage = 'Error generating workouts';
+        try {
+          const errorBody = JSON.parse(functionError.message);
+          errorMessage = errorBody.error || errorMessage;
+        } catch (e) {
+          errorMessage = functionError.message || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       if (!data) {

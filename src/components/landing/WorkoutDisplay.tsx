@@ -54,6 +54,13 @@ export const WorkoutDisplay = ({
     handleSpeakWorkout(day, workouts, workout.warmup, workout.workout, workout.notes || '');
   };
 
+  const formatDayTitle = (day: string) => {
+    return day
+      .split(/(?=[A-Z])/)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 animate-fade-in">
       <Button 
@@ -68,9 +75,9 @@ export const WorkoutDisplay = ({
       
       <div className="grid gap-8">
         {Object.entries(localWorkouts).map(([day, workout]) => (
-          <div key={day} className="bg-card rounded-xl">
+          <div key={day} className="bg-card rounded-xl border-2 border-primary shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-shadow">
             <WorkoutHeader
-              title={day}
+              title={formatDayTitle(day)}
               isSpeaking={isSpeaking && speakingDay === day}
               isExporting={isExporting}
               onSpeak={() => handleSpeak(day, workout)}

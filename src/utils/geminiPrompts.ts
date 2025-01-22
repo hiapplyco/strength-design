@@ -23,25 +23,26 @@ export const createWorkoutGenerationPrompt = ({
     ${fitnessLevel ? `This program is for a ${fitnessLevel} level individual` : ''}
     ${prescribedExercises ? `Include these prescribed exercises/modifications: ${prescribedExercises}` : ''}
 
-    For each day, provide:
-    1. A brief description of the focus and stimulus
-    2. A warmup routine
-    3. The main workout
-    4. A strength component
-    5. Optional notes or modifications
-
-    Format each day as follows:
+    For each day, provide a detailed workout program in this exact format:
     {
       "day1": {
-        "description": "...",
-        "warmup": "...",
-        "workout": "...",
-        "strength": "...",
-        "notes": "..."
+        "description": "Brief focus description",
+        "warmup": "1. Dynamic stretching\n2. Mobility work\n3. Movement prep",
+        "workout": "1. Main movement pattern\n2. Conditioning piece\n3. Accessory work\nInclude sets, reps, and rest periods",
+        "strength": "Primary lift focus with sets/reps scheme",
+        "notes": "Scaling options and movement tips"
       }
     }
 
-    Ensure the response is a valid JSON object.`;
+    IMPORTANT FORMATTING RULES:
+    1. Use line breaks (\n) to separate movements
+    2. Number each movement step
+    3. Include specific details for sets, reps, and rest periods
+    4. Format as valid JSON without markdown
+    5. Ensure proper exercise progression
+    6. Include clear movement standards
+
+    Return ONLY the JSON object with no additional text or markdown.`;
 };
 
 export const createWorkoutModificationPrompt = (
@@ -70,28 +71,22 @@ Consider:
 5. Energy system demands
 6. Recovery implications
 
-Provide a complete, modified workout that includes ALL of the following sections:
-
-1. Brief description explaining focus and stimulus
-2. Detailed warmup sequence
-3. Complete workout with:
-   - Clear movement standards
-   - Loading parameters
-   - Work/rest ratios
-   - Scaling options
-4. Strength focus with specific movement patterns
-5. Comprehensive coaching notes
-
 Return ONLY a JSON object with the modified workout in this exact format:
 {
-    "description": "Brief workout description",
-    "warmup": "Detailed warmup plan",
-    "workout": "Complete workout details",
-    "notes": "Comprehensive coaching notes",
-    "strength": "Specific strength focus"
+    "description": "Brief focus description",
+    "warmup": "1. Movement prep\n2. Mobility work\n3. Specific preparation",
+    "workout": "1. Main movement\n2. Conditioning\n3. Accessory work\nInclude specific sets/reps/rest",
+    "notes": "Coaching cues and scaling options",
+    "strength": "Primary movement focus"
 }
 
-Ensure all sections are detailed and complete, maintaining the professional coaching standard of the original workout.`;
+IMPORTANT:
+1. Use line breaks (\n) to separate movements
+2. Number each step
+3. Include specific details
+4. Format as valid JSON without markdown
+5. Maintain exercise progression
+6. Provide clear standards`;
 };
 
 export const getGeminiConfig = () => ({

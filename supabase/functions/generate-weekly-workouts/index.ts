@@ -72,6 +72,14 @@ serve(async (req) => {
     try {
       const workouts = JSON.parse(responseText.trim());
       console.log('Successfully parsed workouts object with keys:', Object.keys(workouts));
+      
+      // Validate the workout structure
+      Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
+        if (!workout.description || !workout.warmup || !workout.workout || !workout.strength) {
+          throw new Error(`Invalid workout structure for ${day}. Missing required fields.`);
+        }
+      });
+
       return new Response(JSON.stringify(workouts), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

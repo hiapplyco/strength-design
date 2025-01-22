@@ -38,7 +38,7 @@ const Index = () => {
   return (
     <div className="relative min-h-screen">
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-70 z-0"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0"
         style={{
           backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
         }}

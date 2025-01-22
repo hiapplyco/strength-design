@@ -52,18 +52,21 @@ serve(async (req) => {
     console.log('Sending prompt to Gemini');
     
     const result = await model.generateContent(systemPrompt);
-    console.log('Received response from Gemini');
+    console.log('Received response from Gemini:', result);
 
     if (!result?.response?.text) {
-      throw new Error('No response from Gemini');
+      console.error('Invalid response structure:', result);
+      throw new Error('Invalid response from Gemini');
     }
 
     const responseText = result.response.text;
+    console.log('Response text type:', typeof responseText);
     console.log('Raw response:', responseText);
 
     // Extract JSON from the response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('No JSON found in response:', responseText);
       throw new Error('No valid JSON found in response');
     }
 
@@ -75,12 +78,16 @@ serve(async (req) => {
 
     console.log('Cleaned JSON:', cleanedJson);
     
-    const workouts = JSON.parse(cleanedJson);
-
-    return new Response(JSON.stringify(workouts), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    try {
+      const workouts = JSON.parse(cleanedJson);
+      return new Response(JSON.stringify(workouts), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      throw new Error(`Failed to parse response as JSON: ${parseError.message}`);
+    }
 
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);

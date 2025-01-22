@@ -9,13 +9,13 @@ const corsHeaders = {
 
 const cleanJsonText = (text: string): string => {
   return text
-    .replace(/```json\s*|\s*```/g, '')           // Remove markdown code blocks
-    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')     // Remove comments
-    .replace(/,(\s*[}\]])/g, '$1')               // Remove trailing commas
-    .replace(/\s+/g, ' ')                        // Normalize whitespace
-    .replace(/\\n/g, ' ')                        // Replace escaped newlines
-    .replace(/\n/g, ' ')                         // Remove actual newlines
-    .trim();                                     // Remove leading/trailing whitespace
+    .replace(/```json\s*|\s*```/g, '')           
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')     
+    .replace(/,(\s*[}\]])/g, '$1')               
+    .replace(/\s+/g, ' ')                        
+    .replace(/\\n/g, ' ')                        
+    .replace(/\n/g, ' ')                         
+    .trim();                                     
 };
 
 serve(async (req) => {
@@ -25,8 +25,12 @@ serve(async (req) => {
   }
 
   try {
-    const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises } = await req.json();
-    console.log('Received request with params:', { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises });
+    console.log('Starting request processing');
+    const requestBody = await req.json();
+    console.log('Received request body:', requestBody);
+
+    const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises } = requestBody;
+    console.log('Parsed parameters:', { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises });
 
     // Validate required fields
     if (!fitnessLevel) {
@@ -72,7 +76,7 @@ serve(async (req) => {
     // Construct prompt from user inputs
     const prompt = `As an expert fitness coach, create a ${numberOfDays}-day workout program. 
       ${weatherPrompt ? `Consider these weather conditions: ${weatherPrompt}` : ''}
-      ${selectedExercises?.length ? `Include these exercises: ${selectedExercises.join(", ")}` : ''}
+      ${selectedExercises?.length ? `Include these exercises: ${selectedExercises.map(e => e.name).join(", ")}` : ''}
       ${fitnessLevel ? `This program is for a ${fitnessLevel} level individual` : ''}
       ${prescribedExercises ? `Include these prescribed exercises/modifications: ${prescribedExercises}` : ''}
 
@@ -102,6 +106,8 @@ serve(async (req) => {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
 
+    console.log('Received response from Gemini:', result);
+
     if (!result || !result.response) {
       console.error('Failed to generate response from Gemini');
       throw new Error('Failed to generate response from Gemini');
@@ -110,7 +116,7 @@ serve(async (req) => {
     const response = result.response;
     const text = response.text();
     
-    console.log('Received response from Gemini:', text);
+    console.log('Raw text from Gemini:', text);
 
     try {
       const cleanedText = cleanJsonText(text);
@@ -126,6 +132,7 @@ serve(async (req) => {
           .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
           .replace(/'/g, '"') // Replace single quotes with double quotes
           .replace(/\\/g, '\\\\'); // Escape backslashes
+        console.log('Fixed text:', fixedText);
         workouts = JSON.parse(fixedText);
       }
 
@@ -150,7 +157,7 @@ serve(async (req) => {
     } catch (error) {
       console.error("Failed to parse Gemini response:", error);
       return new Response(
-        JSON.stringify({ error: 'Failed to generate workout plan' }),
+        JSON.stringify({ error: 'Failed to generate workout plan', details: error.message }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500 

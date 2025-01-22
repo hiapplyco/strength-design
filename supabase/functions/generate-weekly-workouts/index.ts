@@ -26,6 +26,11 @@ serve(async (req) => {
     const { prompt, numberOfDays = 7 } = await req.json();
     console.log("Request parameters:", { prompt, numberOfDays });
 
+    if (!prompt) {
+      console.error("No prompt provided");
+      throw new Error('Prompt is required');
+    }
+
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
       console.error("GEMINI_API_KEY not found");
@@ -73,12 +78,23 @@ Important:
     console.log("Sending prompt to Gemini");
     console.log("Prompt length:", expertPrompt.length);
     
-    const result = await Promise.race([
-      chat.sendMessage(expertPrompt),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('API request timeout')), 25000)
-      )
-    ]);
+    let result;
+    try {
+      result = await Promise.race([
+        chat.sendMessage(expertPrompt),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('API request timeout')), 25000)
+        )
+      ]);
+    } catch (error) {
+      console.error("Error during Gemini API call:", error);
+      throw new Error(`Gemini API error: ${error.message}`);
+    }
+
+    if (!result) {
+      console.error("No response from Gemini");
+      throw new Error('No response received from Gemini API');
+    }
 
     console.log("Received response from Gemini");
     const text = result.response.text();
@@ -98,7 +114,7 @@ Important:
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         console.error("No JSON found in response");
-        throw new Error("Failed to generate valid workout data");
+        throw new Error("Failed to generate valid workout data: No JSON found in response");
       }
       
       try {
@@ -106,13 +122,13 @@ Important:
         console.log("Successfully parsed extracted JSON");
       } catch (error) {
         console.error("Failed to parse extracted JSON:", error);
-        throw new Error("Invalid workout data format");
+        throw new Error("Invalid workout data format: Failed to parse JSON");
       }
     }
 
     if (!workouts || typeof workouts !== 'object') {
       console.error("Invalid workout data structure:", workouts);
-      throw new Error("Invalid workout data structure");
+      throw new Error("Invalid workout data structure: Response is not an object");
     }
 
     const limitedWorkouts: Record<string, any> = {};
@@ -123,7 +139,7 @@ Important:
         console.log(`Processing workout for ${dayName}`);
         
         if (!value || typeof value !== 'object') {
-          throw new Error(`Invalid structure for day ${key}`);
+          throw new Error(`Invalid structure for day ${key}: Value is not an object`);
         }
         
         const required = ['description', 'warmup', 'workout', 'strength', 'notes'];

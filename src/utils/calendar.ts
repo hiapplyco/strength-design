@@ -8,7 +8,8 @@ export const exportToCalendar = async (
   workout: string,
   notes: string,
   toast: ReturnType<typeof useToast>["toast"],
-  dayOffset: number = 0
+  dayOffset: number = 0,
+  duration: number = 1
 ) => {
   try {
     const eventContent = `Warmup:\n${sanitizeText(warmup)}\n\nWorkout:\n${sanitizeText(workout)}\n\nNotes:\n${sanitizeText(notes)}`;
@@ -25,8 +26,8 @@ export const exportToCalendar = async (
         tomorrow.getHours(),
         tomorrow.getMinutes()
       ] as [number, number, number, number, number],
-      duration: { hours: 1 },
-      title: `${sanitizeText(title)} Workout`,
+      duration: { days: duration },
+      title: `${sanitizeText(title)} Workout Plan`,
       description: eventContent,
       location: '',
       status: 'CONFIRMED' as const,
@@ -49,7 +50,7 @@ export const exportToCalendar = async (
         const blob = new Blob([value], { type: 'text/calendar;charset=utf-8' });
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
-        link.setAttribute('download', `${title.toLowerCase()}-workout.ics`);
+        link.setAttribute('download', `workout-plan.ics`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -71,34 +71,32 @@ export const WorkoutDisplay = ({
   const handleExportAllWorkouts = async () => {
     try {
       setIsExporting(true);
-      const exportPromises = Object.entries(localWorkouts).map(([day, workout], index) => {
-        // Add a delay for each subsequent export to prevent rate limiting
-        return new Promise(resolve => 
-          setTimeout(() => 
-            resolve(exportToCalendar(
-              formatDayTitle(day), 
-              workout.warmup, 
-              workout.workout, 
-              workout.notes || '', 
-              toast,
-              index // Pass the index to offset each day's event
-            )),
-            index * 1000 // Delay each export by 1 second
-          )
-        );
-      });
+      // Combine all workouts into one description
+      const combinedDescription = Object.entries(localWorkouts)
+        .map(([day, workout]) => {
+          return `${formatDayTitle(day)}:\n\nWarmup:\n${workout.warmup}\n\nWorkout:\n${workout.workout}\n\nNotes:\n${workout.notes || ''}\n\n---\n`;
+        })
+        .join('\n');
 
-      await Promise.all(exportPromises);
-      
+      await exportToCalendar(
+        'Weekly Workout Plan',
+        '', // warmup
+        combinedDescription, // all workouts in the description
+        '', // notes
+        toast,
+        0, // no offset needed
+        Object.keys(localWorkouts).length // duration in days
+      );
+
       toast({
         title: "Success",
-        description: "All workouts have been exported to your calendar",
+        description: "Workout plan has been exported to your calendar",
       });
     } catch (error) {
       console.error('Error exporting workouts:', error);
       toast({
         title: "Error",
-        description: "Failed to export some workouts. Please try again.",
+        description: "Failed to export workouts. Please try again.",
         variant: "destructive",
       });
     } finally {

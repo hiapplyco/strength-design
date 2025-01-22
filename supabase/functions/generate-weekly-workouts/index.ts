@@ -29,8 +29,8 @@ serve(async (req) => {
       throw new Error('Invalid or missing fitnessLevel');
     }
 
-    if (!numberOfDays || typeof numberOfDays !== 'number') {
-      throw new Error('Invalid or missing numberOfDays');
+    if (!numberOfDays || typeof numberOfDays !== 'number' || numberOfDays < 1 || numberOfDays > 12) {
+      throw new Error('Invalid numberOfDays: must be a number between 1 and 12');
     }
 
     const generationPrompt = createWorkoutGenerationPrompt({
@@ -52,12 +52,18 @@ serve(async (req) => {
     });
 
     if (!result || !result.response) {
+      console.error('No response from Gemini');
       throw new Error('Failed to generate response from Gemini');
     }
 
     const response = result.response;
     const text = response.text();
     console.log('Received response from Gemini:', text);
+
+    if (!text || text.trim() === '') {
+      console.error('Empty response from Gemini');
+      throw new Error('Empty response from Gemini');
+    }
 
     try {
       const cleanedText = text
@@ -67,15 +73,31 @@ serve(async (req) => {
 
       console.log('Cleaned response:', cleanedText);
       
-      const workouts = JSON.parse(cleanedText);
+      let workouts;
+      try {
+        workouts = JSON.parse(cleanedText);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error(`Invalid JSON structure: ${parseError.message}`);
+      }
+
       console.log('Parsed workouts:', workouts);
+
+      if (!workouts || typeof workouts !== 'object') {
+        throw new Error('Invalid workout data structure');
+      }
 
       // Validate the workout structure
       Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
+        if (!workout || typeof workout !== 'object') {
+          throw new Error(`Invalid workout data for ${day}`);
+        }
+
         const requiredFields = ['description', 'warmup', 'workout', 'strength'];
-        const missingFields = requiredFields.filter(field => 
-          !workout[field] || typeof workout[field] !== 'string' || !workout[field].trim()
-        );
+        const missingFields = requiredFields.filter(field => {
+          const value = workout[field];
+          return !value || typeof value !== 'string' || !value.trim();
+        });
         
         if (missingFields.length > 0) {
           throw new Error(`Missing or invalid required fields for ${day}: ${missingFields.join(', ')}`);
@@ -88,13 +110,14 @@ serve(async (req) => {
       });
     } catch (parseError) {
       console.error('Error parsing Gemini response:', parseError);
-      throw new Error(`Invalid JSON structure: ${parseError.message}`);
+      throw new Error(`Failed to parse workout data: ${parseError.message}`);
     }
   } catch (error) {
     console.error('Error in generate-weekly-workouts function:', error);
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
-      details: error.stack
+      details: error.stack,
+      timestamp: new Date().toISOString()
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

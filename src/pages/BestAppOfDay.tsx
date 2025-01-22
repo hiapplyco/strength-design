@@ -145,7 +145,6 @@ export default function BestAppOfDay() {
         isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         onSuccess={handleAuthSuccess}
-        isNewUser={false}
       />
       {isGenerating && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

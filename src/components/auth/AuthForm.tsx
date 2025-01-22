@@ -11,6 +11,7 @@ export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
   return (
     <Auth
       supabaseClient={supabase}
+      view={view}
       appearance={{
         theme: ThemeSupa,
         variables: {
@@ -23,7 +24,6 @@ export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
         }
       }}
       providers={[]}
-      view={view}
       localization={{
         variables: {
           sign_up: {
@@ -40,7 +40,6 @@ export const AuthForm = ({ view, onViewChange }: AuthFormProps) => {
           },
         },
       }}
-      onViewChange={({ view }) => onViewChange(view as "sign_up" | "sign_in")}
     />
   );
 };

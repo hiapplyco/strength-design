@@ -16,7 +16,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [isNewUser, setIsNewUser] = useState(true);
   const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [numberOfDays, setNumberOfDays] = useState(7);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
@@ -94,7 +93,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
         isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         onSuccess={handleAuthSuccess}
-        isNewUser={isNewUser}
       />
       {isGenerating && <LoadingIndicator />}
     </>

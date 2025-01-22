@@ -49,58 +49,60 @@ export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: 
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const fetchWeather = async (searchLocation: string) => {
+    if (!searchLocation.trim()) {
+      setError("Please enter a location");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      console.log("Fetching weather data for:", searchLocation);
+      const { data, error: apiError } = await supabase.functions.invoke("get-weather", {
+        body: { query: searchLocation },
+      });
+
+      if (apiError) {
+        console.error("Error fetching weather data:", apiError);
+        throw new Error(apiError.message);
+      }
+
+      if (!data) {
+        throw new Error("No weather data found for this location");
+      }
+
+      console.log("Weather data received:", data);
+      const weatherDescription = getWeatherDescription(data.weatherCode);
+      onWeatherUpdate(data, `The weather in ${data.location} is ${weatherDescription} with a temperature of ${data.temperature}°C.`);
+      
+      toast({
+        title: "Weather Updated",
+        description: `Successfully loaded weather data for ${data.location}`,
+      });
+    } catch (err) {
+      console.error("Error fetching weather data:", err);
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Debounced weather fetch function
   const debouncedFetchWeather = useCallback(
-    debounce(async (searchLocation: string) => {
-      if (!searchLocation.trim()) {
-        setError("Please enter a location");
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        console.log("Fetching weather data for:", searchLocation);
-        const { data, error: apiError } = await supabase.functions.invoke("get-weather", {
-          body: { query: searchLocation },
-        });
-
-        if (apiError) {
-          console.error("Error fetching weather data:", apiError);
-          throw new Error(apiError.message);
-        }
-
-        if (!data) {
-          throw new Error("No weather data found for this location");
-        }
-
-        console.log("Weather data received:", data);
-        const weatherDescription = getWeatherDescription(data.weatherCode);
-        onWeatherUpdate(data, `The weather in ${data.location} is ${weatherDescription} with a temperature of ${data.temperature}°C.`);
-        
-        toast({
-          title: "Weather Updated",
-          description: `Successfully loaded weather data for ${data.location}`,
-        });
-      } catch (err) {
-        console.error("Error fetching weather data:", err);
-        const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
-        setError(errorMessage);
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }, 500),
+    debounce(fetchWeather, 500),
     []
   );
 
   const handleLocationSearch = () => {
-    debouncedFetchWeather(location);
+    fetchWeather(location);
   };
 
   const formatTemp = (temp: number | undefined) => {

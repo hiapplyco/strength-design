@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { getGeminiConfig } from "../shared/prompts.ts";
+import { createWorkoutGenerationPrompt, getGeminiConfig } from "../shared/prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -42,23 +42,13 @@ serve(async (req) => {
       generationConfig: config.generationConfig,
     });
 
-    const systemPrompt = `Create a ${numberOfDays}-day workout program as a JSON object.
-${weatherPrompt ? `Weather conditions: ${weatherPrompt}` : ''}
-${selectedExercises?.length ? `Include exercises: ${selectedExercises.map(e => e.name).join(', ')}` : ''}
-${fitnessLevel ? `Fitness level: ${fitnessLevel}` : ''}
-${prescribedExercises ? `Additional exercises: ${prescribedExercises}` : ''}
-
-IMPORTANT: Your response MUST be a valid, parseable JSON object with this exact structure:
-{
-  "day1": {
-    "description": "string - Brief focus description",
-    "warmup": "string - Detailed warmup",
-    "workout": "string - Main workout",
-    "strength": "string - Strength component",
-    "notes": "string - Optional coaching notes"
-  }
-  // ... repeat for each day
-}`;
+    const systemPrompt = createWorkoutGenerationPrompt({
+      numberOfDays,
+      weatherPrompt,
+      selectedExercises,
+      fitnessLevel,
+      prescribedExercises
+    });
 
     console.log('Sending prompt to Gemini:', systemPrompt);
     
@@ -67,7 +57,7 @@ IMPORTANT: Your response MUST be a valid, parseable JSON object with this exact 
       setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
     });
 
-    console.log('Starting Gemini request with timeout...');
+    console.log('Starting Gemini request...');
     const generationPromise = model.generateContent(systemPrompt);
     const result = await Promise.race([generationPromise, timeoutPromise]);
     

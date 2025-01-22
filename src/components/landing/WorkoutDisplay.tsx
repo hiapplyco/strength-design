@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CalendarDays } from "lucide-react";
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
 import { exportToCalendar } from "@/utils/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface WorkoutDay {
   description: string;
@@ -37,6 +37,13 @@ export const WorkoutDisplay = ({
   const { toast } = useToast();
   const [localWorkouts, setLocalWorkouts] = useState<WeeklyWorkouts>(workouts);
   const [speakingDay, setSpeakingDay] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [workouts]);
 
   const handleUpdate = (day: string, updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => {
     setLocalWorkouts(prev => ({
@@ -61,15 +68,65 @@ export const WorkoutDisplay = ({
       .join(' ');
   };
 
+  const handleExportAllWorkouts = async () => {
+    try {
+      setIsExporting(true);
+      const exportPromises = Object.entries(localWorkouts).map(([day, workout], index) => {
+        // Add a delay for each subsequent export to prevent rate limiting
+        return new Promise(resolve => 
+          setTimeout(() => 
+            resolve(exportToCalendar(
+              formatDayTitle(day), 
+              workout.warmup, 
+              workout.workout, 
+              workout.notes || '', 
+              toast,
+              index // Pass the index to offset each day's event
+            )),
+            index * 1000 // Delay each export by 1 second
+          )
+        );
+      });
+
+      await Promise.all(exportPromises);
+      
+      toast({
+        title: "Success",
+        description: "All workouts have been exported to your calendar",
+      });
+    } catch (error) {
+      console.error('Error exporting workouts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to export some workouts. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8 animate-fade-in">
-      <Button 
-        variant="ghost" 
-        className="mb-8 flex items-center gap-2"
-        onClick={resetWorkouts}
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Home
-      </Button>
+    <div className="container mx-auto px-4 py-8 animate-fade-in" ref={containerRef}>
+      <div className="flex justify-between items-center mb-8">
+        <Button 
+          variant="ghost" 
+          className="flex items-center gap-2"
+          onClick={resetWorkouts}
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Home
+        </Button>
+        
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={handleExportAllWorkouts}
+          disabled={isExporting}
+        >
+          <CalendarDays className="w-4 h-4" />
+          Export All to Calendar
+        </Button>
+      </div>
       
       <h1 className="text-4xl font-oswald text-primary mb-8 italic">Your Weekly Workout Plan</h1>
       

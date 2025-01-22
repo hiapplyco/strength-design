@@ -7,13 +7,14 @@ export const exportToCalendar = async (
   warmup: string,
   workout: string,
   notes: string,
-  toast: ReturnType<typeof useToast>["toast"]
+  toast: ReturnType<typeof useToast>["toast"],
+  dayOffset: number = 0
 ) => {
   try {
     const eventContent = `Warmup:\n${sanitizeText(warmup)}\n\nWorkout:\n${sanitizeText(workout)}\n\nNotes:\n${sanitizeText(notes)}`;
     
     const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setDate(tomorrow.getDate() + 1 + dayOffset);
     tomorrow.setHours(6, 0, 0, 0);
     
     const event = {

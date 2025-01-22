@@ -44,26 +44,12 @@ serve(async (req) => {
       throw new Error('Missing Gemini API key');
     }
 
-    // Parse and validate request body
-    const requestData = await req.json();
-    console.log('Received request data:', requestData);
+    // Parse request
+    const { dayToModify, modificationPrompt, currentWorkout } = await req.json();
+    console.log('Received modification request:', { dayToModify, modificationPrompt });
 
-    const { dayToModify, modificationPrompt, currentWorkout } = requestData;
-
-    if (!dayToModify || typeof dayToModify !== 'string') {
-      throw new Error('Invalid or missing dayToModify');
-    }
-
-    if (!modificationPrompt || typeof modificationPrompt !== 'string') {
-      throw new Error('Invalid or missing modificationPrompt');
-    }
-
-    if (!currentWorkout || typeof currentWorkout !== 'object') {
+    if (!currentWorkout) {
       throw new Error('No workout data provided for modification');
-    }
-
-    if (!currentWorkout.workout || !currentWorkout.warmup) {
-      throw new Error('Current workout must contain at least workout and warmup fields');
     }
 
     // Create prompt

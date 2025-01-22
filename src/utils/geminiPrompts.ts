@@ -95,7 +95,7 @@ Ensure all sections are detailed and complete, maintaining the professional coac
 };
 
 export const getGeminiConfig = () => ({
-  model: "gemini-1.5-pro",
+  model: "gemini-1.5-flash",
   generationConfig: {
     temperature: 1,
     topP: 0.95,

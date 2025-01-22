@@ -33,7 +33,6 @@ const validateWorkout = (workout: any) => {
 };
 
 serve(async (req) => {
-  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -70,10 +69,16 @@ serve(async (req) => {
     const prompt = createWorkoutModificationPrompt(dayToModify, modificationPrompt, currentWorkout);
     console.log('Generated prompt:', prompt);
 
-    // Initialize Gemini with config from shared prompts
     const genAI = new GoogleGenerativeAI(apiKey);
-    const config = getGeminiConfig();
-    const model = genAI.getGenerativeModel(config);
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        temperature: 0.7,
+        topK: 1,
+        topP: 1,
+        maxOutputTokens: 2048,
+      },
+    });
 
     // Generate content with timeout
     const timeoutMs = 30000; // 30 seconds timeout
@@ -114,7 +119,6 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200
     });
-
   } catch (error) {
     console.error('Error in workout-modifier:', error);
     return new Response(JSON.stringify({ 

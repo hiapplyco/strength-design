@@ -60,9 +60,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
-        heading: ["var(--font-heading)", ...fontFamily.sans],
-        collegiate: ["Collegiate", ...fontFamily.sans],
+        sans: ["Oswald", ...fontFamily.sans],
+        heading: ["Oswald", ...fontFamily.sans],
+        collegiate: ["Oswald", ...fontFamily.sans],
         oswald: ["Oswald", ...fontFamily.sans],
       },
       keyframes: {

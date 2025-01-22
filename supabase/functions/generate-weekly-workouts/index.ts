@@ -50,7 +50,7 @@ serve(async (req) => {
       prescribedExercises
     });
 
-    console.log('Sending prompt to Gemini:', systemPrompt);
+    console.log('Generated system prompt:', systemPrompt);
     
     const result = await model.generateContent(systemPrompt);
     console.log('Response received from Gemini:', result?.response ? 'Has response' : 'No response');
@@ -70,12 +70,15 @@ serve(async (req) => {
     console.log('First 100 chars of response:', responseText.substring(0, 100));
 
     try {
+      console.log('Attempting to parse response as JSON...');
       const workouts = JSON.parse(responseText.trim());
       console.log('Successfully parsed workouts object with keys:', Object.keys(workouts));
       
       // Validate the workout structure
       Object.entries(workouts).forEach(([day, workout]: [string, any]) => {
+        console.log(`Validating workout for ${day}:`, workout);
         if (!workout.description || !workout.warmup || !workout.workout || !workout.strength) {
+          console.error(`Invalid workout structure for ${day}:`, workout);
           throw new Error(`Invalid workout structure for ${day}. Missing required fields.`);
         }
       });

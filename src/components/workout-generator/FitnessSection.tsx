@@ -2,6 +2,7 @@ import { Activity } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
+import { PdfUploadSection } from "./PdfUploadSection";
 
 interface FitnessSectionProps {
   fitnessLevel: string;
@@ -44,6 +45,7 @@ export function FitnessSection({
         <Label htmlFor="prescribed-exercises" className="text-sm font-medium">
           Prescribed Exercises (Optional)
         </Label>
+        <PdfUploadSection onExtractedText={onPrescribedExercisesChange} />
         <Textarea
           id="prescribed-exercises"
           placeholder="Enter any prescribed exercises, PT recommendations, or medical restrictions..."

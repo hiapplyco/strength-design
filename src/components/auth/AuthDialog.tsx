@@ -121,7 +121,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess, isNewUser = true }
               },
             },
           }}
-          onChange={view => handleViewChange(view as "sign_up" | "sign_in")}
+          onViewChange={handleViewChange}
         />
       </DialogContent>
     </Dialog>

@@ -55,7 +55,8 @@ serve(async (req) => {
       history: [],
     });
 
-    const expertPrompt = `You are a world-renowned coach and movement specialist. Create a ${numberOfDays}-day workout plan based on this context: ${prompt}
+    const expertPrompt = `
+As an expert coach with deep expertise in exercise programming and movement optimization, create a ${numberOfDays}-day workout plan based on this context: ${prompt}
 
 Return ONLY a valid JSON object with no additional text, following this exact format for ${numberOfDays} days:
 {

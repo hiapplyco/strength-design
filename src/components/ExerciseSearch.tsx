@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { SearchInput } from "./exercise-search/SearchInput";
 import { SearchResults } from "./exercise-search/SearchResults";
-import { Dialog, DialogContent } from "./ui/dialog";
+import { Dialog, DialogContent, DialogClose } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Search } from "lucide-react";
 import type { Exercise } from "./exercise-search/types";
@@ -84,6 +84,11 @@ export const ExerciseSearch = ({
       .trim();
   };
 
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    handleClearSearch();
+  };
+
   return (
     <div className={cn("space-y-4", className)}>
       <Button 
@@ -95,14 +100,24 @@ export const ExerciseSearch = ({
         <Search className="h-4 w-4" />
       </Button>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-hidden flex flex-col">
           <div className="space-y-4 flex-1 overflow-hidden">
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onClear={handleClearSearch}
-            />
+            <div className="flex justify-between items-center">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onClear={handleClearSearch}
+              />
+              <DialogClose asChild>
+                <Button 
+                  variant="default"
+                  className="ml-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  Done
+                </Button>
+              </DialogClose>
+            </div>
             <div className="overflow-y-auto flex-1 max-h-[calc(80vh-150px)]">
               <SearchResults
                 results={searchResults}

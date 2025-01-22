@@ -14,67 +14,39 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting generate-weekly-workouts function');
-    
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
-      console.error('Missing Gemini API key');
       throw new Error('Missing Gemini API key');
     }
-    console.log('Gemini API key found');
 
     const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
-    console.log('Request params:', { weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays });
 
     if (!numberOfDays || numberOfDays < 1) {
       throw new Error('Invalid number of days');
     }
 
-    // Create dynamic schema based on number of days
     const schema = {
       type: SchemaType.OBJECT,
       properties: {},
       required: []
     };
 
-    // Dynamically add properties for each day
     for (let i = 1; i <= numberOfDays; i++) {
       const dayKey = `day${i}`;
       schema.properties[dayKey] = {
         type: SchemaType.OBJECT,
         properties: {
-          description: {
-            type: SchemaType.STRING,
-            description: "Brief description of the workout focus",
-            nullable: false,
-          },
-          warmup: {
-            type: SchemaType.STRING,
-            description: "Detailed warmup routine",
-            nullable: false,
-          },
-          workout: {
-            type: SchemaType.STRING,
-            description: "Main workout details",
-            nullable: false,
-          },
-          strength: {
-            type: SchemaType.STRING,
-            description: "Strength component details",
-            nullable: false,
-          },
-          notes: {
-            type: SchemaType.STRING,
-            description: "Additional coaching notes",
-            nullable: true,
-          },
+          description: { type: SchemaType.STRING, description: "Brief description of the workout focus" },
+          warmup: { type: SchemaType.STRING, description: "Detailed warmup routine" },
+          workout: { type: SchemaType.STRING, description: "Main workout details" },
+          strength: { type: SchemaType.STRING, description: "Strength component details" },
+          notes: { type: SchemaType.STRING, description: "Additional coaching notes", nullable: true },
         },
         required: ["description", "warmup", "workout", "strength"],
       };
       schema.required.push(dayKey);
     }
 
-    console.log('Initializing Gemini AI with schema');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -88,25 +60,26 @@ serve(async (req) => {
       },
     });
 
-    console.log('Sending request to Gemini with prompt');
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: createWorkoutGenerationPrompt({
-        numberOfDays,
-        weatherPrompt,
-        selectedExercises,
-        fitnessLevel,
-        prescribedExercises
-      }) }] }],
+      contents: [{ 
+        role: "user", 
+        parts: [{ 
+          text: createWorkoutGenerationPrompt({
+            numberOfDays,
+            weatherPrompt,
+            selectedExercises,
+            fitnessLevel,
+            prescribedExercises
+          }) 
+        }] 
+      }],
     });
 
-    if (!result || !result.response) {
-      console.error('No response from Gemini');
+    if (!result?.response) {
       throw new Error('Failed to generate response from Gemini');
     }
 
-    console.log('Parsing Gemini response');
     const workouts = JSON.parse(result.response.text());
-    console.log('Successfully generated workouts:', workouts);
 
     return new Response(JSON.stringify(workouts), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -114,11 +87,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in generate-weekly-workouts function:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message || 'Failed to generate workouts',
-      details: error.stack,
-    }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

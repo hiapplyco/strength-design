@@ -37,19 +37,9 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleGenerateWorkout = async () => {
-    if (!generatePrompt.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a prompt for workout generation",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsGenerating(true);
-      console.log("Starting workout generation with prompt:", generatePrompt);
-      console.log("Number of days requested:", numberOfDays);
+      console.log("Starting workout generation");
       
       const { data: { user } } = await supabase.auth.getUser();
       console.log("Auth check result:", user ? "User found" : "No user");

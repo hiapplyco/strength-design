@@ -15,6 +15,7 @@ export const useSubscription = () => {
       
       // Check authentication status
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("Auth session:", session?.user?.id);
       
       if (!session?.access_token) {
         toast({
@@ -25,6 +26,8 @@ export const useSubscription = () => {
         return;
       }
 
+      console.log("Making request to create-checkout function");
+      
       // Make the request to the edge function with the auth token
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`,
@@ -34,23 +37,28 @@ export const useSubscription = () => {
             'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ subscriptionType: type })
+          body: JSON.stringify({ 
+            subscriptionType: type,
+            userId: session.user.id 
+          })
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
-      }
-
-      const data = await response.json();
+      console.log("Response status:", response.status);
       
-      if (!data?.url) {
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to create checkout session');
+      }
+      
+      if (!responseData?.url) {
         throw new Error('No checkout URL received');
       }
 
       // Redirect to Stripe checkout
-      window.location.href = data.url;
+      window.location.href = responseData.url;
       
     } catch (error: any) {
       console.error('Subscription error:', error);

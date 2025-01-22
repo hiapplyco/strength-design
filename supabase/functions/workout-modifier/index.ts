@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -22,7 +23,8 @@ serve(async (req) => {
     const requestData = await req.json();
     console.log('Received request data:', requestData);
 
-    const { dayToModify, modificationPrompt, currentWorkout } = requestData;
+    const { dayToModify, modificationPrompt, allWorkouts } = requestData;
+    const currentWorkout = allWorkouts[dayToModify];
 
     if (!dayToModify || typeof dayToModify !== 'string') {
       throw new Error('Invalid or missing dayToModify');
@@ -50,17 +52,10 @@ serve(async (req) => {
       generationConfig: config.generationConfig,
     });
 
-    const timeoutMs = 60000; // 60 seconds timeout
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timed out after 60 seconds')), timeoutMs);
-    });
-
-    const generationPromise = model.generateContent({
+    console.log('Starting Gemini request');
+    const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
-
-    console.log('Starting Gemini request with 60s timeout');
-    const result = await Promise.race([generationPromise, timeoutPromise]);
     console.log('Received response from Gemini');
 
     if (!result || !('response' in result)) {

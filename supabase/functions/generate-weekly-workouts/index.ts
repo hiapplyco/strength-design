@@ -64,12 +64,12 @@ serve(async (req) => {
     console.log('Initializing Gemini with API key');
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro",
+      model: "gemini-1.5-flash",
       generationConfig: {
-        temperature: 0.7,
-        topK: 40,
+        temperature: 1,
         topP: 0.95,
-        maxOutputTokens: 2048,
+        topK: 40,
+        maxOutputTokens: 8192,
       }
     });
 

@@ -26,10 +26,11 @@ serve(async (req) => {
       hasPrescribedExercises: !!prescribedExercises
     });
     
-    if (!prompt) {
-      console.error("No prompt provided");
+    // Check if we have any input parameters to work with
+    if (!weatherPrompt && !selectedExercises?.length && !fitnessLevel && !prescribedExercises && !prompt) {
+      console.error("No workout parameters provided");
       return new Response(
-        JSON.stringify({ error: 'Prompt is required' }), 
+        JSON.stringify({ error: 'Please provide some workout parameters (exercises, fitness level, or specific requirements)' }), 
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400 
@@ -66,7 +67,10 @@ serve(async (req) => {
       history: [],
     });
 
-    const prompt_template = `As an expert fitness coach, create a ${numberOfDays}-day workout program. ${prompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${selectedExercises?.length ? ` Include these exercises: ${selectedExercises.join(", ")}` : ""}${fitnessLevel ? ` Consider this fitness level: ${fitnessLevel}` : ""}${prescribedExercises ? ` Include these prescribed exercises: ${prescribedExercises}` : ""}
+    // Construct base prompt if no direct prompt is provided
+    const basePrompt = prompt || "Create a balanced workout program focusing on strength and conditioning";
+
+    const prompt_template = `As an expert fitness coach, create a ${numberOfDays}-day workout program. ${basePrompt}${weatherPrompt ? ` ${weatherPrompt}` : ""}${selectedExercises?.length ? ` Include these exercises: ${selectedExercises.join(", ")}` : ""}${fitnessLevel ? ` Consider this fitness level: ${fitnessLevel}` : ""}${prescribedExercises ? ` Include these prescribed exercises: ${prescribedExercises}` : ""}
 
     For each day, provide:
     1. A brief description of the focus and stimulus

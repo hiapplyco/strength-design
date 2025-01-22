@@ -124,17 +124,6 @@ export function GenerateWorkoutInput({
           )}
         />
 
-        <GenerateSection
-          generatePrompt={generatePrompt}
-          onGeneratePromptChange={setGeneratePrompt}
-          onGenerate={handleGenerateWithWeather}
-          onClear={handleClear}
-          isGenerating={isGenerating}
-          renderTooltip={() => renderTooltip(
-            "Review your selections and generate a custom workout program tailored to your needs."
-          )}
-        />
-
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium">Number of Days</h3>
@@ -157,6 +146,17 @@ export function GenerateWorkoutInput({
             ))}
           </ToggleGroup>
         </div>
+
+        <GenerateSection
+          generatePrompt={generatePrompt}
+          onGeneratePromptChange={setGeneratePrompt}
+          onGenerate={handleGenerateWithWeather}
+          onClear={handleClear}
+          isGenerating={isGenerating}
+          renderTooltip={() => renderTooltip(
+            "Review your selections and generate a custom workout program tailored to your needs."
+          )}
+        />
       </div>
     </div>
   );

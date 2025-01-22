@@ -23,7 +23,7 @@ export function WorkoutModifier({
         placeholder={`Examples: "Make ${title}'s workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
         value={modificationPrompt}
         onChange={(e) => onModificationPromptChange(e.target.value)}
-        className="border-2 border-primary bg-white text-foreground placeholder:text-gray-400 rounded-[20px]"
+        className="border-2 border-primary bg-white text-black placeholder:text-gray-400 rounded-[20px]"
       />
       <Button 
         onClick={onModify}

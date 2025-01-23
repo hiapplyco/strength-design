@@ -19,54 +19,16 @@ export const useAuthState = (
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         console.log("User already signed in, closing dialog");
+        await supabase.auth.signOut(); // Sign out if there's an existing session
         onOpenChange(false);
-        onSuccess();
       }
     };
     checkSession();
-  }, [isOpen, onOpenChange, onSuccess]);
+  }, [isOpen, onOpenChange]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
-      
-      // Handle both INITIAL_SESSION and SIGNED_IN states
-      if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('trial_end_date')
-          .eq('id', session?.user?.id)
-          .single();
-
-        if (!profile?.trial_end_date) {
-          // New user - start trial
-          const trialEndDate = new Date();
-          trialEndDate.setDate(trialEndDate.getDate() + 7);
-          
-          await supabase
-            .from('profiles')
-            .update({ trial_end_date: trialEndDate.toISOString() })
-            .eq('id', session?.user?.id);
-
-          toast({
-            title: "Welcome!",
-            description: "Your 7-day trial has started. Enjoy creating custom workouts!",
-          });
-        } else if (new Date(profile.trial_end_date) > new Date()) {
-          toast({
-            title: "Welcome back!",
-            description: "Continue creating custom workouts.",
-          });
-        } else {
-          toast({
-            title: "Trial Expired",
-            description: "Your trial period has ended. Please subscribe to continue.",
-            variant: "destructive",
-          });
-        }
-        onSuccess();
-        onOpenChange(false);
-      }
       
       if (event === 'SIGNED_OUT') {
         toast({
@@ -78,7 +40,7 @@ export const useAuthState = (
     });
 
     return () => subscription.unsubscribe();
-  }, [onSuccess, onOpenChange, toast]);
+  }, [toast]);
 
   const getErrorMessage = (error: AuthError) => {
     switch (error.message) {

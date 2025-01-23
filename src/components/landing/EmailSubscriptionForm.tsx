@@ -34,8 +34,8 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
       if (error) throw error;
 
       toast({
-        title: "Success!",
-        description: "Thank you for subscribing to our updates.",
+        title: "Thank you!",
+        description: "You'll receive updates about our latest features.",
       });
       triggerConfetti();
       setEmail("");
@@ -44,8 +44,8 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
       toast({
         title: "Error",
         description: error.message === "duplicate key value violates unique constraint \"email_subscriptions_email_key\""
-          ? "This email is already subscribed"
-          : "Failed to subscribe. Please try again.",
+          ? "This email is already registered for updates"
+          : "Failed to submit email. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -57,7 +57,7 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
     <form onSubmit={handleSubmit} className="flex gap-2 max-w-md mx-auto">
       <Input
         type="email"
-        placeholder="Enter your email"
+        placeholder="Enter your email for updates"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         className="flex-1 bg-white text-black placeholder:text-gray-500 border border-border"
@@ -67,7 +67,7 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
         disabled={isSubmitting}
         className="bg-primary text-primary-foreground hover:bg-primary/90"
       >
-        {isSubmitting ? "Subscribing..." : "Subscribe"}
+        {isSubmitting ? "Sending..." : "Send"}
       </Button>
     </form>
   );

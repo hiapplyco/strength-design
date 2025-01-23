@@ -30,7 +30,8 @@ export const useAuthState = (
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
-      if (event === 'SIGNED_IN') {
+      // Handle both INITIAL_SESSION and SIGNED_IN states
+      if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('trial_end_date')

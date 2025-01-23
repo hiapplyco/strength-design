@@ -19,6 +19,23 @@ export const HeroSection = ({
         </p>
       </div>
 
+      <div className="max-w-3xl mx-auto text-center space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
+            <h3 className="text-xl font-oswald text-primary mb-2">1. Choose Days</h3>
+            <p>Select how many days you want to train per week</p>
+          </div>
+          <div className="p-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
+            <h3 className="text-xl font-oswald text-primary mb-2">2. Set Focus</h3>
+            <p>Tell us your training goals and preferences</p>
+          </div>
+          <div className="p-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
+            <h3 className="text-xl font-oswald text-primary mb-2">3. Generate</h3>
+            <p>Get your personalized workout program instantly</p>
+          </div>
+        </div>
+      </div>
+
       <div className="w-full relative">
         <div className="relative z-10 max-w-7xl mx-auto transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">
           {children}

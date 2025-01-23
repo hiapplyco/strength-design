@@ -1,9 +1,7 @@
-import { useSubscription } from "@/hooks/useSubscription";
 import { PricingCard } from "./PricingCard";
+import { ContactForm } from "./ContactForm";
 
 export const TestimonialsSection = () => {
-  const { loadingStates, handleSubscription } = useSubscription();
-
   const pricingData = {
     pro: {
       title: "Pro Access",
@@ -14,7 +12,7 @@ export const TestimonialsSection = () => {
         "Basic progress tracking and analytics",
         "Perfect for individual enthusiasts and smaller training operations"
       ],
-      buttonText: "Choose Pro"
+      buttonText: "Contact Us"
     },
     pro_plus: {
       title: "Pro Plus",
@@ -25,7 +23,7 @@ export const TestimonialsSection = () => {
         "Automated personalized strength programs with dynamic adjustments",
         "Advanced analytics and business insights for fitness professionals"
       ],
-      buttonText: "Go Pro Plus"
+      buttonText: "Contact Us"
     }
   };
 
@@ -37,16 +35,38 @@ export const TestimonialsSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <PricingCard
           {...pricingData.pro}
-          isLoading={loadingStates.pro}
-          onSubscribe={() => handleSubscription('pro')}
+          isLoading={false}
+          onSubscribe={() => {
+            const dialog = document.getElementById('contact-dialog') as HTMLDialogElement;
+            if (dialog) {
+              dialog.showModal();
+            }
+          }}
         />
         <PricingCard
           {...pricingData.pro_plus}
           isHighlighted
-          isLoading={loadingStates.pro_plus}
-          onSubscribe={() => handleSubscription('pro_plus')}
+          isLoading={false}
+          onSubscribe={() => {
+            const dialog = document.getElementById('contact-dialog') as HTMLDialogElement;
+            if (dialog) {
+              dialog.showModal();
+            }
+          }}
         />
       </div>
+      
+      <dialog id="contact-dialog" className="modal p-6 rounded-lg bg-white shadow-xl max-w-md w-full">
+        <ContactForm 
+          subscriptionType="pro" 
+          onSuccess={() => {
+            const dialog = document.getElementById('contact-dialog') as HTMLDialogElement;
+            if (dialog) {
+              dialog.close();
+            }
+          }} 
+        />
+      </dialog>
     </section>
   );
 };

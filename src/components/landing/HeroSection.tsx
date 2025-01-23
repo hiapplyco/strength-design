@@ -56,14 +56,14 @@ export const HeroSection = ({
         </div>
       )}
 
-      <div className="w-full max-w-3xl relative">
-        <div className="absolute inset-0 bg-cover bg-center opacity-10"
+      <div className="w-full relative">
+        <div className="absolute inset-0 bg-cover bg-center opacity-30"
              style={{
                backgroundImage: "url('/lovable-uploads/0dee3043-625d-4bc1-860b-e3f952039e56.png')",
                backgroundSize: "cover",
                backgroundPosition: "center",
              }} />
-        <div className="bg-primary p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300 relative z-10">
+        <div className="bg-primary/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300 relative z-10 max-w-7xl mx-auto">
           <div className="text-center mb-6">
             <h2 className="text-4xl font-oswald text-white mb-2 uppercase tracking-wider">
               Generate Your Custom Workout Plan

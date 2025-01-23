@@ -116,7 +116,7 @@ export function GenerateWorkoutInput({
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="flex flex-col w-full gap-6 bg-muted/90 backdrop-blur-sm p-6 rounded-xl shadow-lg">
+      <div className="flex flex-col w-full gap-6 bg-black/90 dark:bg-black/90 backdrop-blur-sm p-6 rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] transform hover:scale-[0.99] transition-all duration-200">
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
@@ -145,7 +145,7 @@ export function GenerateWorkoutInput({
 
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium">How many days would you like to train?</h3>
+            <h3 className="text-sm font-medium text-white">How many days would you like to train?</h3>
             {renderTooltip("Select how many days of workouts to generate (1-12 days)")}
           </div>
           <ToggleGroup 
@@ -158,7 +158,7 @@ export function GenerateWorkoutInput({
               <ToggleGroupItem 
                 key={day} 
                 value={day.toString()}
-                className="px-3 py-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                className="px-3 py-2 bg-white/10 text-white data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-white/20"
               >
                 {day}
               </ToggleGroupItem>

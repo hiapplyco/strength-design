@@ -18,10 +18,8 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
           Scale from individual training to managing thousands of athletes while maintaining scientific rigor and personalization.
         </p>
         
-        <div className="flex flex-wrap justify-center gap-4 mt-8">
-          <ContactDialog buttonText="Enterprise Solution" variant="destructive" />
-          <ContactDialog buttonText="Affiliate Program" variant="secondary" />
-          <ContactDialog buttonText="Custom Integration" variant="outline" />
+        <div className="flex justify-center mt-8">
+          <ContactDialog buttonText="Schedule a Demo" variant="destructive" />
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { generateWorkout, saveWorkouts } from "@/utils/workoutGeneration";
+import { ContactDialog } from "./ContactDialog";
 import type { WeeklyWorkouts } from "@/utils/workoutGeneration";
 import type { Exercise } from "../exercise-search/types";
 
@@ -89,6 +90,9 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
         setNumberOfDays={setNumberOfDays}
         setShowGenerateInput={setShowGenerateInput}
       />
+      <div className="mt-8 flex justify-center">
+        <ContactDialog buttonText="Get Enterprise Access" variant="secondary" />
+      </div>
       <AuthDialog 
         isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}

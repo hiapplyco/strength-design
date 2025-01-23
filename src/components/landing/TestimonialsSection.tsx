@@ -7,6 +7,9 @@ export const TestimonialsSection = () => {
       <p className="text-center text-gray-800 dark:text-white text-lg mb-8 max-w-2xl mx-auto">
         Join thousands of fitness professionals using our platform to create personalized workout programs.
       </p>
+      <div className="flex justify-center">
+        <ContactDialog buttonText="Start Your Journey" variant="outline" />
+      </div>
     </section>
   );
 };

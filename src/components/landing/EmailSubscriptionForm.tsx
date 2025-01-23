@@ -26,31 +26,29 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
     }
 
     setIsSubmitting(true);
-    try {
-      const { error } = await supabase
-        .from("email_subscriptions")
-        .insert([{ email }]);
 
-      if (error) throw error;
+    const { error } = await supabase
+      .from("email_subscriptions")
+      .insert([{ email }]);
 
-      toast({
-        title: "Thank you!",
-        description: "You'll receive updates about our latest features.",
-      });
-      triggerConfetti();
-      setEmail("");
-      onSuccessfulSubscribe();
-    } catch (error: any) {
+    setIsSubmitting(false);
+
+    if (error) {
       toast({
         title: "Error",
-        description: error.message === "duplicate key value violates unique constraint \"email_subscriptions_email_key\""
-          ? "This email is already registered for updates"
-          : "Failed to submit email. Please try again.",
+        description: "Failed to submit email. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
+
+    toast({
+      title: "Thank you!",
+      description: "You'll receive updates about our latest features.",
+    });
+    triggerConfetti();
+    setEmail("");
+    onSuccessfulSubscribe();
   };
 
   return (

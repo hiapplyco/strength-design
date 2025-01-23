@@ -52,15 +52,7 @@ const Index = () => {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-20 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
               strength.design
             </h1>
-            <HeroSection
-              generatePrompt=""
-              setGeneratePrompt={() => {}}
-              handleGenerateWorkout={() => {}}
-              isGenerating={false}
-              setShowGenerateInput={() => {}}
-              numberOfDays={7}
-              setNumberOfDays={() => {}}
-            >
+            <HeroSection>
               <GenerateWorkoutContainer setWorkouts={setWorkouts} />
             </HeroSection>
           </div>

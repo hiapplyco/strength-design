@@ -95,9 +95,12 @@ export const HeroSection = ({
         <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200" />
       </div>
 
-      <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
-        <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
-        {children}
+      <div className="w-full max-w-3xl relative">
+        <div className="absolute inset-0 rounded-[20px] p-[4px] bg-gradient-to-r from-accent via-destructive to-primary animate-gradient" />
+        <div className="w-full bg-card/90 backdrop-blur-sm p-8 rounded-[16px] shadow-lg relative">
+          <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
+          {children}
+        </div>
       </div>
 
       <div className="flex gap-4 mt-8">

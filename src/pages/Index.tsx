@@ -36,10 +36,10 @@ const Index = () => {
   }
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-[#F1F1F1]">
       <div className="flex flex-col">
-        {/* Hero Section with background */}
-        <section className="min-h-screen relative bg-gradient-to-b from-black/20 to-[#1A1F2C]">
+        {/* Hero Section with background image */}
+        <section className="min-h-screen relative">
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-30"
             style={{
@@ -59,21 +59,21 @@ const Index = () => {
         </section>
 
         {/* Features Section */}
-        <section className="relative bg-gradient-to-r from-[#243949] to-[#517fa4]">
+        <section className="relative">
           <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <FeaturesSection />
           </div>
         </section>
 
         {/* Solutions Section */}
-        <section className="relative bg-gradient-to-tr from-[#accbee] to-[#e7f0fd]">
+        <section className="relative">
           <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <SolutionsSection />
           </div>
         </section>
 
         {/* Final Section */}
-        <section className="relative bg-gradient-to-br from-[#e6e9f0] to-[#eef1f5]">
+        <section className="relative">
           <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <TestimonialsSection />
           </div>

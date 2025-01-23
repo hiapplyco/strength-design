@@ -24,7 +24,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
               Limited Time Offer
             </div>
             <h3 className="text-2xl md:text-3xl font-oswald text-white mb-4">
-              Try Our AI Workout Generator Free
+              Try Our Evidence-Based Programming Free
             </h3>
             <p className="text-gray-300 mb-6">
               Experience enterprise-grade programming technology. Generate custom workouts powered by exercise science - no credit card required.

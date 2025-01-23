@@ -59,21 +59,21 @@ const Index = () => {
         </section>
 
         {/* Features Section */}
-        <section className="bg-[#403E43] relative">
+        <section className="relative bg-gradient-to-r from-[#243949] to-[#517fa4]">
           <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <FeaturesSection />
           </div>
         </section>
 
         {/* Solutions Section */}
-        <section className="bg-[#8A898C] relative">
+        <section className="relative bg-gradient-to-tr from-[#accbee] to-[#e7f0fd]">
           <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <SolutionsSection />
           </div>
         </section>
 
         {/* Final Section */}
-        <section className="bg-[#9F9EA1] relative">
+        <section className="relative bg-gradient-to-br from-[#e6e9f0] to-[#eef1f5]">
           <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <TestimonialsSection />
           </div>

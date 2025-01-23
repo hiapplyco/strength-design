@@ -1,3 +1,4 @@
+import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
 import { useSubscription } from "@/hooks/useSubscription";
 import { PricingCard } from "./PricingCard";
 
@@ -47,6 +48,10 @@ export const TestimonialsSection = () => {
           onSubscribe={() => handleSubscription('personalized')}
         />
       </div>
+      <h2 className="text-4xl md:text-5xl font-oswald text-primary text-center mb-16">
+        Stay Updated
+      </h2>
+      <EmailSubscriptionForm onSuccessfulSubscribe={() => {}} />
     </section>
   );
 };

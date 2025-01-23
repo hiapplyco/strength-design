@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders, status: 204 });
   }
@@ -18,11 +19,17 @@ serve(async (req) => {
     const file = formData.get('file');
 
     if (!file || !(file instanceof File)) {
-      throw new Error('No file uploaded');
+      return new Response(
+        JSON.stringify({ error: 'No file uploaded' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     if (file.type !== 'application/pdf') {
-      throw new Error('Only PDF files are supported');
+      return new Response(
+        JSON.stringify({ error: 'Only PDF files are supported' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     const arrayBuffer = await file.arrayBuffer();
@@ -59,6 +66,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error processing PDF:', error);
+    
     return new Response(
       JSON.stringify({ 
         error: error.message || 'Failed to process PDF',

@@ -8,7 +8,7 @@ export const SolutionsSection = () => {
           <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
             Designed for Trainers, Coaches and Enthusiasts Alike
           </h2>
-          <p className="text-lg text-destructive">
+          <p className="text-lg text-gray-800 dark:text-white">
             Our platform helps you deliver personalized strength programs anywhere, anytime
           </p>
         </div>

@@ -86,7 +86,7 @@ export const HeroSection = ({
       <Button
         variant="ghost"
         size="lg"
-        className="animate-bounce text-gray-800 dark:text-white"
+        className="text-gray-800 dark:text-white animate-bounce"
         onClick={() => {
           const element = document.getElementById('features');
           element?.scrollIntoView({ behavior: 'smooth' });

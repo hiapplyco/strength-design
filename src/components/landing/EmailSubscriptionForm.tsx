@@ -27,28 +27,36 @@ export const EmailSubscriptionForm = ({ onSuccessfulSubscribe }: EmailSubscripti
 
     setIsSubmitting(true);
 
-    const { error } = await supabase
-      .from("email_subscriptions")
-      .insert([{ email }]);
+    try {
+      const { error } = await supabase
+        .from("email_subscriptions")
+        .insert([{ email }]);
 
-    setIsSubmitting(false);
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to submit email. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
+      toast({
+        title: "Thank you!",
+        description: "You'll receive updates about our latest features.",
+      });
+      triggerConfetti();
+      setEmail("");
+      onSuccessfulSubscribe();
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to submit email. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast({
-      title: "Thank you!",
-      description: "You'll receive updates about our latest features.",
-    });
-    triggerConfetti();
-    setEmail("");
-    onSuccessfulSubscribe();
   };
 
   return (

@@ -45,6 +45,7 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
       setEmail("");
       onSuccess();
     } catch (error: any) {
+      console.error("Contact submission error:", error);
       toast({
         title: "Error",
         description: "Failed to submit form. Please try again.",

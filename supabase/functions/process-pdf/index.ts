@@ -5,12 +5,13 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders, status: 204 });
   }
 
   try {
@@ -18,21 +19,29 @@ serve(async (req) => {
     const file = formData.get('file');
 
     if (!file || !(file instanceof File)) {
-      throw new Error('No file uploaded');
+      console.error('No file uploaded');
+      return new Response(
+        JSON.stringify({ error: 'No file uploaded' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
     if (file.type !== 'application/pdf') {
-      throw new Error('Only PDF files are supported');
+      console.error('Invalid file type:', file.type);
+      return new Response(
+        JSON.stringify({ error: 'Only PDF files are supported' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
+    console.log('Processing PDF file:', file.name);
     const arrayBuffer = await file.arrayBuffer();
     const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-
-    console.log('Processing PDF with Gemini...');
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
+    console.log('Sending request to Gemini API');
     const result = await model.generateContent([
       {
         inlineData: {
@@ -44,7 +53,6 @@ serve(async (req) => {
     ]);
 
     console.log('Received response from Gemini');
-
     const response = await result.response;
     const text = response.text();
 
@@ -59,8 +67,12 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error processing PDF:', error);
+    
     return new Response(
-      JSON.stringify({ error: error.message || 'Failed to process PDF' }),
+      JSON.stringify({ 
+        error: error.message || 'Failed to process PDF',
+        details: error.stack
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 

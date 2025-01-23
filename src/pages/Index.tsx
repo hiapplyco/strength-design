@@ -36,7 +36,7 @@ const Index = () => {
   }
 
   return (
-    <div className="relative min-h-screen backdrop-blur-sm">
+    <div className="relative min-h-screen backdrop-blur-sm pt-16"> {/* Added pt-16 for header spacing */}
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0 bg-fixed"
         style={{
@@ -45,12 +45,13 @@ const Index = () => {
           backgroundPosition: "center",
           transform: "scale(1)",
           height: "100vh",
-          width: "100vw"
+          width: "100vw",
+          top: "0" // Ensure background starts from the very top
         }}
       />
       <div className="relative z-10">
         <div className="max-w-[1400px] mx-auto px-4 animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-6 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-20 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
             strength.design
           </h1>
           <HeroSection

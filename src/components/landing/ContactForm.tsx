@@ -15,7 +15,10 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
   const [email, setEmail] = useState("");
   const { toast } = useToast();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!name.trim() || !email.trim()) {
       toast({
         title: "Error",
@@ -43,6 +46,7 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
       setEmail("");
       onSuccess();
     } catch (error: any) {
+      console.error('Submission error:', error);
       toast({
         title: "Error",
         description: "Failed to submit form. Please try again.",
@@ -52,7 +56,7 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
   };
 
   return (
-    <div className="space-y-4" onMouseDown={(e) => e.stopPropagation()}>
+    <form onSubmit={handleSubmit} className="space-y-4" onClick={(e) => e.stopPropagation()}>
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</label>
         <Input
@@ -76,14 +80,14 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
         />
       </div>
       <Button 
-        className="w-full" 
-        onClick={handleSubmit}
+        type="submit"
+        className="w-full"
       >
         Submit
       </Button>
       <p className="text-sm text-center text-gray-600">
         We'll reach out to you shortly to discuss how we can help achieve your fitness goals.
       </p>
-    </div>
+    </form>
   );
 };

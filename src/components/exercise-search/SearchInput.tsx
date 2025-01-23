@@ -14,7 +14,7 @@ export const SearchInput = ({ value, onChange, onClear }: SearchInputProps) => {
         placeholder="Search for exercises or equipment..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-primary/10 text-white placeholder:text-gray-400 rounded-full border-2 border-primary focus-visible:ring-primary"
+        className="w-full bg-primary/10 dark:text-white text-foreground placeholder:text-gray-400 rounded-full border-2 border-primary focus-visible:ring-primary"
       />
       {value && (
         <button

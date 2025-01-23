@@ -63,7 +63,7 @@ export const HeroSection = ({
                backgroundSize: "cover",
                backgroundPosition: "center",
              }} />
-        <div className="bg-primary/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300 relative z-10 max-w-7xl mx-auto">
+        <div className="bg-white/5 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300 relative z-10 max-w-7xl mx-auto">
           <div className="text-center mb-6">
             <h2 className="text-4xl font-oswald text-white mb-2 uppercase tracking-wider">
               Generate Your Custom Workout Plan
@@ -73,15 +73,15 @@ export const HeroSection = ({
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-white mb-6">
-            <div className="bg-black/20 p-4 rounded-lg">
+            <div className="bg-black/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
               <h3 className="font-oswald text-xl mb-2">Step 1</h3>
               <p>Input your fitness level and goals for technical development & strength progression</p>
             </div>
-            <div className="bg-black/20 p-4 rounded-lg">
+            <div className="bg-black/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
               <h3 className="font-oswald text-xl mb-2">Step 2</h3>
               <p>Select your preferred exercises and equipment availability</p>
             </div>
-            <div className="bg-black/20 p-4 rounded-lg">
+            <div className="bg-black/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
               <h3 className="font-oswald text-xl mb-2">Step 3</h3>
               <p>Get your personalized workout plan with built-in progression</p>
             </div>

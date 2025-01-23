@@ -55,6 +55,11 @@ export function GenerateWorkoutInput({
   const handleGenerateWithWeather = async () => {
     if (!isValid) return;
 
+    // Track the conversion event
+    if (typeof window !== 'undefined' && window.gtagSendEvent) {
+      window.gtagSendEvent();
+    }
+
     const prompts = {
       exercises: selectedExercises.length > 0 
         ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 

@@ -13,6 +13,16 @@
       gtag('js', new Date());
       gtag('config', 'AW-11083056303');
     </script>
+    <!-- Google tag (gtag.js) event - delayed navigation helper -->
+    <script>
+      function gtagSendEvent() {
+        gtag('event', 'ads_conversion_Sign_up_1', {
+          'event_callback': function() {},
+          'event_timeout': 2000
+        });
+        return false;
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

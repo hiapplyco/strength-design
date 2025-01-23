@@ -19,4 +19,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    '%VITE_GOOGLE_ADS_ID%': JSON.stringify(process.env.GOOGLE_ADS_ID),
+  },
 }));

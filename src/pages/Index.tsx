@@ -36,17 +36,17 @@ const Index = () => {
   }
 
   return (
-    <div className="relative min-h-screen backdrop-blur-sm pt-16"> {/* Added pt-16 for header spacing */}
+    <div className="relative min-h-screen backdrop-blur-sm pt-16">
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0 bg-fixed"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0"
         style={{
           backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          transform: "scale(1)",
+          backgroundAttachment: "fixed",
           height: "100vh",
           width: "100vw",
-          top: "0" // Ensure background starts from the very top
+          top: "0"
         }}
       />
       <div className="relative z-10">

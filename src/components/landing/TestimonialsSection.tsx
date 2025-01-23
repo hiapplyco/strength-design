@@ -1,3 +1,5 @@
+import { ContactDialog } from "./ContactDialog";
+
 export const TestimonialsSection = () => {
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">

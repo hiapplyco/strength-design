@@ -40,11 +40,12 @@ const Index = () => {
       <div className="flex flex-col">
         <section className="min-h-screen relative">
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-10"
+            className="fixed inset-0 bg-cover bg-center opacity-20 bg-fixed"
             style={{
               backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
+              backgroundAttachment: "fixed",
             }}
           />
           <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">

@@ -32,10 +32,10 @@ export const HeroSection = ({
   return (
     <section className="flex flex-col items-center justify-center space-y-8 pt-12 pb-20">
       <div className="space-y-4 text-center">
-        <h1 className="text-6xl md:text-7xl font-oswald text-primary tracking-tight max-w-4xl">
+        <h1 className="text-6xl md:text-7xl font-oswald text-primary tracking-tight max-w-4xl dark:text-white">
           Design Smarter Strength Programs From Anywhere
         </h1>
-        <p className="text-xl md:text-2xl text-destructive max-w-2xl mx-auto">
+        <p className="text-xl md:text-2xl text-destructive max-w-2xl mx-auto dark:text-red-400">
           Empower your fitness business and members with science-backed, data-driven workouts tailored for every goal
         </p>
       </div>
@@ -43,8 +43,8 @@ export const HeroSection = ({
       {showSubscription && (
         <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
           <div className="text-center mb-4">
-            <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
-            <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
+            <h2 className="text-2xl font-oswald text-primary dark:text-white">Stay Updated</h2>
+            <p className="text-black dark:text-gray-200">Subscribe to receive updates about our latest features and releases</p>
           </div>
           <EmailSubscriptionForm onSuccessfulSubscribe={() => setShowSubscription(false)} />
         </div>
@@ -84,14 +84,14 @@ export const HeroSection = ({
       </div>
 
       <div className="flex justify-center space-x-4">
-        <ArrowDown className="w-8 h-8 text-primary animate-bounce" />
-        <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-100" />
-        <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200" />
+        <ArrowDown className="w-8 h-8 text-primary animate-bounce dark:text-white" />
+        <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-100 dark:text-white" />
+        <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200 dark:text-white" />
       </div>
 
       <div className="w-full max-w-3xl">
-        <div className="w-full bg-card/90 backdrop-blur-sm p-8 rounded-lg shadow-lg border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
-          <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
+        <div className="w-full bg-card/90 backdrop-blur-sm p-8 rounded-lg shadow-lg border-[6px] border-white dark:border-gray-200 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
+          <h2 className="text-2xl font-oswald text-primary dark:text-white mb-4">Generate Custom Workouts</h2>
           {children}
         </div>
       </div>

@@ -20,6 +20,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    GOOGLE_ADS_ID: `'${process.env.GOOGLE_ADS_ID}'`,
+    GOOGLE_ADS_ID: `'AW-11083056303'`,
   },
 }));

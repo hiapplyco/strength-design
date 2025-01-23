@@ -36,19 +36,18 @@ const Index = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#F1F1F1]">
+    <div className="relative min-h-screen bg-black">
       <div className="flex flex-col">
-        {/* Hero Section with background image */}
         <section className="min-h-screen relative">
           <div 
-            className="absolute inset-0 bg-cover bg-center opacity-30"
+            className="absolute inset-0 bg-cover bg-center opacity-10"
             style={{
               backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           />
-          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
+          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-20 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
               strength.design
             </h1>
@@ -58,23 +57,20 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Features Section */}
         <section className="relative">
-          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
+          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
             <FeaturesSection />
           </div>
         </section>
 
-        {/* Solutions Section */}
         <section className="relative">
-          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
+          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
             <SolutionsSection />
           </div>
         </section>
 
-        {/* Final Section */}
         <section className="relative">
-          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
+          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
             <TestimonialsSection />
           </div>
         </section>

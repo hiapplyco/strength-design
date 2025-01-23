@@ -3,14 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Home, Sun, Moon, Menu } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Home, Menu } from "lucide-react";
 
 export const Navbar = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showEmailInput, setShowEmailInput] = useState(false);
 
@@ -51,16 +49,12 @@ export const Navbar = () => {
     }
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-sm border-b border-border shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-border shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo and Brand */}
@@ -74,19 +68,6 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="hover:bg-accent"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </Button>
-
             {showEmailInput ? (
               <div className="flex items-center gap-2">
                 <Input
@@ -126,20 +107,6 @@ export const Navbar = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 space-y-2 animate-fade-in">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              className="w-full justify-start"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 mr-2" />
-              ) : (
-                <Moon className="h-5 w-5 mr-2" />
-              )}
-              {theme === "dark" ? "Light Mode" : "Dark Mode"}
-            </Button>
-
             {showEmailInput ? (
               <div className="space-y-2">
                 <Input

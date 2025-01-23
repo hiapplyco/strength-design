@@ -1,66 +1,52 @@
+import { useSubscription } from "@/hooks/useSubscription";
 import { PricingCard } from "./PricingCard";
-import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useState } from "react";
 
 export const TestimonialsSection = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+  const { loadingStates, handleSubscription } = useSubscription();
+
   const pricingData = {
-    pro: {
-      title: "Pro Access",
+    unlimited: {
+      title: "Unlimited Access",
       price: "$24.99",
       features: [
-        "Upload up to 4 photos",
+        "Unlimited access to our entire library of science-based workout templates",
         "Data-driven insights to guide your training",
         "Basic progress tracking and analytics",
         "Perfect for individual enthusiasts and smaller training operations"
       ],
-      buttonText: "Contact Us"
+      buttonText: "Choose Unlimited"
     },
-    pro_plus: {
-      title: "Pro Plus",
+    personalized: {
+      title: "Personalized Dashboards",
       price: "$99.99",
       features: [
-        "Unlimited photo uploads",
         "Individualized member dashboards with comprehensive performance metrics",
         "Automated personalized strength programs with dynamic adjustments",
+        "Real-time performance tracking and team management capabilities",
         "Advanced analytics and business insights for fitness professionals"
       ],
-      buttonText: "Contact Us"
+      buttonText: "Go Personalized"
     }
   };
 
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
       <h2 className="text-4xl md:text-5xl font-oswald text-primary text-center mb-16">
-        Flexible Pricing for Every Goal
+        Flexible Pricing for Every Fitness Goal
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <PricingCard
-          {...pricingData.pro}
-          isLoading={false}
-          onSubscribe={() => setIsDialogOpen(true)}
+          {...pricingData.unlimited}
+          isLoading={loadingStates.unlimited}
+          onSubscribe={() => handleSubscription('unlimited')}
         />
         <PricingCard
-          {...pricingData.pro_plus}
+          {...pricingData.personalized}
           isHighlighted
-          isLoading={false}
-          onSubscribe={() => setIsDialogOpen(true)}
+          isLoading={loadingStates.personalized}
+          onSubscribe={() => handleSubscription('personalized')}
         />
       </div>
-      
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-white p-6">
-          <div className="text-center mb-4">
-            <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
-            <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
-          </div>
-          <EmailSubscriptionForm 
-            onSuccessfulSubscribe={() => setIsDialogOpen(false)} 
-          />
-        </DialogContent>
-      </Dialog>
     </section>
   );
 };

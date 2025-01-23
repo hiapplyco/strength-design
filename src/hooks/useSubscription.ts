@@ -4,18 +4,19 @@ import { useToast } from "@/hooks/use-toast";
 
 export const useSubscription = () => {
   const [loadingStates, setLoadingStates] = useState({
-    pro: false,
-    pro_plus: false
+    unlimited: false,
+    personalized: false
   });
   const { toast } = useToast();
 
-  const handleSubscription = async (type: 'pro' | 'pro_plus') => {
+  const handleSubscription = async (type: 'unlimited' | 'personalized') => {
     try {
+      console.log(`Starting ${type} subscription process...`);
       setLoadingStates(prev => ({ ...prev, [type]: true }));
       
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (!session?.access_token) {
+      if (!session) {
         toast({
           title: "Authentication required",
           description: "Please sign in to subscribe to a plan",
@@ -24,26 +25,24 @@ export const useSubscription = () => {
         return;
       }
 
-      const response = await supabase.functions.invoke('create-checkout', {
+      console.log('Creating checkout session...');
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { subscriptionType: type }
       });
-      
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to create checkout session');
-      }
-      
-      const { data } = response;
+
+      if (error) throw error;
+
       if (!data?.url) {
         throw new Error('No checkout URL received');
       }
 
+      console.log('Redirecting to Stripe...');
       window.location.href = data.url;
-      
     } catch (error: any) {
-      console.error('Subscription error:', error);
+      console.error('Error creating checkout session:', error);
       toast({
         title: "Subscription Error",
-        description: error.message || "Failed to start subscription process",
+        description: error.message || "Failed to start subscription process. Please try again.",
         variant: "destructive",
       });
     } finally {

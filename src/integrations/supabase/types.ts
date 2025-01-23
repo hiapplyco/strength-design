@@ -90,57 +90,22 @@ export type Database = {
         }
         Relationships: []
       }
-      photos: {
-        Row: {
-          created_at: string
-          id: string
-          storage_path: string
-          title: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          storage_path: string
-          title?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          storage_path?: string
-          title?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "photos_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           created_at: string
           id: string
-          tier: string | null
           trial_end_date: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           id: string
-          tier?: string | null
           trial_end_date?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
-          tier?: string | null
           trial_end_date?: string | null
           updated_at?: string
         }

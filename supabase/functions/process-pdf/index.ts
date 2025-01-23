@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +14,7 @@ serve(async (req) => {
   const formData = await req.formData();
   const file = formData.get('file');
 
-  if (!file || !(file instanceof File)) {
+  if (!file) {
     return new Response(
       JSON.stringify({ error: 'No file uploaded' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -25,23 +24,29 @@ serve(async (req) => {
   const arrayBuffer = await file.arrayBuffer();
   const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-  const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
+  const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY'));
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-  const result = await model.generateContent([
-    {
-      inlineData: {
-        data: base64Data,
-        mimeType: "application/pdf"
+  const result = await model.generateContent({
+    contents: [
+      {
+        parts: [
+          {
+            inlineData: {
+              data: base64Data,
+              mimeType: "application/pdf"
+            }
+          },
+          {
+            text: "Extract and return all text content from this document without any analysis or summary. Just return the raw text content."
+          }
+        ]
       }
-    },
-    "Extract and return all text content from this document without any analysis or summary. Just return the raw text content."
-  ]);
-
-  const text = result.response.text();
+    ]
+  });
 
   return new Response(
-    JSON.stringify({ text }),
+    JSON.stringify({ text: result.response.text() }),
     { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
 });

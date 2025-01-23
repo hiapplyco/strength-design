@@ -90,7 +90,7 @@ export const HeroSection = ({
       </div>
 
       <div className="w-full max-w-3xl">
-        <div className="w-full bg-card/90 backdrop-blur-sm p-8 rounded-lg shadow-lg border-[6px] border-white dark:border-gray-200 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
+        <div className="w-full bg-card/90 backdrop-blur-sm p-8 rounded-lg shadow-lg border-[6px] border-white dark:border-gray-200 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,0.8),12px_12px_0px_0px_rgba(196,160,82,0.8)]">
           <h2 className="text-2xl font-oswald text-primary dark:text-white mb-4">Generate Custom Workouts</h2>
           {children}
         </div>

@@ -20,6 +20,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    '%VITE_GOOGLE_ADS_ID%': JSON.stringify(process.env.GOOGLE_ADS_ID),
+    GOOGLE_ADS_ID: `'${process.env.GOOGLE_ADS_ID}'`,
   },
 }));

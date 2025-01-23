@@ -27,6 +27,13 @@ export const TestimonialsSection = () => {
     }
   };
 
+  const handleDialogClick = (e: React.MouseEvent) => {
+    const dialog = document.getElementById('contact-dialog') as HTMLDialogElement;
+    if (dialog && e.target === dialog) {
+      dialog.close();
+    }
+  };
+
   return (
     <section className="py-20 bg-card rounded-3xl px-6 md:px-12">
       <h2 className="text-4xl md:text-5xl font-oswald text-primary text-center mb-16">
@@ -56,7 +63,11 @@ export const TestimonialsSection = () => {
         />
       </div>
       
-      <dialog id="contact-dialog" className="modal p-6 rounded-lg bg-white shadow-xl max-w-md w-full">
+      <dialog 
+        id="contact-dialog" 
+        className="modal p-6 rounded-lg bg-white shadow-xl max-w-md w-full backdrop:bg-black backdrop:bg-opacity-50"
+        onClick={handleDialogClick}
+      >
         <ContactForm 
           subscriptionType="pro" 
           onSuccess={() => {

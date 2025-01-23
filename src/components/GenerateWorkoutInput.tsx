@@ -5,9 +5,8 @@ import { WeatherSection } from "./workout-generator/WeatherSection";
 import { ExerciseSection } from "./workout-generator/ExerciseSection";
 import { FitnessSection } from "./workout-generator/FitnessSection";
 import { GenerateSection } from "./workout-generator/GenerateSection";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HelpCircle } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { DaysSelection } from "./workout-generator/DaysSelection";
+import { TooltipWrapper } from "./workout-generator/TooltipWrapper";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -96,22 +95,7 @@ export function GenerateWorkoutInput({
   };
 
   const renderTooltip = (content: string) => (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button className="p-1 hover:bg-primary/10 rounded-full transition-colors">
-            <HelpCircle className="h-4 w-4 text-primary" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent 
-          side="right" 
-          align="start" 
-          className="max-w-xs bg-primary text-primary-foreground p-2 text-sm"
-        >
-          <p>{content}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <TooltipWrapper content={content} />
   );
 
   return (
@@ -143,28 +127,11 @@ export function GenerateWorkoutInput({
           )}
         />
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium text-white">How many days would you like to train?</h3>
-            {renderTooltip("Select how many days of workouts to generate (1-12 days)")}
-          </div>
-          <ToggleGroup 
-            type="single" 
-            value={numberOfDays.toString()}
-            onValueChange={(value) => setNumberOfDays(parseInt(value || "7"))}
-            className="flex flex-wrap gap-2"
-          >
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((day) => (
-              <ToggleGroupItem 
-                key={day} 
-                value={day.toString()}
-                className="px-3 py-2 bg-white/10 text-white data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-white/20"
-              >
-                {day}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
+        <DaysSelection
+          numberOfDays={numberOfDays}
+          setNumberOfDays={setNumberOfDays}
+          renderTooltip={renderTooltip}
+        />
 
         <GenerateSection
           onGenerate={handleGenerateWithWeather}

@@ -36,8 +36,8 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
       if (error) throw error;
 
       toast({
-        title: "Success!",
-        description: "Thank you for your interest. We'll reach out to you shortly.",
+        title: "Thank you!",
+        description: "We'll reach out to you shortly to discuss your fitness goals.",
       });
       triggerConfetti();
       

@@ -1,7 +1,11 @@
 import { PricingCard } from "./PricingCard";
 import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export const TestimonialsSection = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
   const pricingData = {
     pro: {
       title: "Pro Access",
@@ -36,49 +40,27 @@ export const TestimonialsSection = () => {
         <PricingCard
           {...pricingData.pro}
           isLoading={false}
-          onSubscribe={() => {
-            const dialog = document.getElementById('subscription-dialog') as HTMLDialogElement;
-            if (dialog) {
-              dialog.showModal();
-            }
-          }}
+          onSubscribe={() => setIsDialogOpen(true)}
         />
         <PricingCard
           {...pricingData.pro_plus}
           isHighlighted
           isLoading={false}
-          onSubscribe={() => {
-            const dialog = document.getElementById('subscription-dialog') as HTMLDialogElement;
-            if (dialog) {
-              dialog.showModal();
-            }
-          }}
+          onSubscribe={() => setIsDialogOpen(true)}
         />
       </div>
       
-      <dialog 
-        id="subscription-dialog" 
-        className="modal p-6 rounded-lg bg-white shadow-xl max-w-md w-full backdrop:bg-black backdrop:bg-opacity-50"
-        onClick={(e) => {
-          const dialog = e.target as HTMLDialogElement;
-          if (dialog && e.target === dialog) {
-            dialog.close();
-          }
-        }}
-      >
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
-          <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
-        </div>
-        <EmailSubscriptionForm 
-          onSuccessfulSubscribe={() => {
-            const dialog = document.getElementById('subscription-dialog') as HTMLDialogElement;
-            if (dialog) {
-              dialog.close();
-            }
-          }} 
-        />
-      </dialog>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="bg-white p-6">
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
+            <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
+          </div>
+          <EmailSubscriptionForm 
+            onSuccessfulSubscribe={() => setIsDialogOpen(false)} 
+          />
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

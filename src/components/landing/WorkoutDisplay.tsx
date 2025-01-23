@@ -139,28 +139,28 @@ export const WorkoutDisplay = ({
               <div className="p-6 space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold text-destructive mb-2">Description</h3>
-                  <p className="text-white">{workout.description}</p>
+                  <p className="text-muted-foreground">{workout.description}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-lg font-semibold text-destructive mb-2">Warm-up</h3>
-                  <p className="text-white whitespace-pre-line">{workout.warmup}</p>
+                  <p className="text-muted-foreground whitespace-pre-line">{workout.warmup}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-lg font-semibold text-destructive mb-2">Workout</h3>
-                  <p className="text-white whitespace-pre-line">{workout.workout}</p>
+                  <p className="text-muted-foreground whitespace-pre-line">{workout.workout}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-lg font-semibold text-destructive mb-2">Strength Focus</h3>
-                  <p className="text-white">{workout.strength}</p>
+                  <p className="text-muted-foreground">{workout.strength}</p>
                 </div>
                 
                 {workout.notes && (
                   <div>
                     <h3 className="text-lg font-semibold text-destructive mb-2">Coaching Notes</h3>
-                    <p className="text-white">{workout.notes}</p>
+                    <p className="text-muted-foreground">{workout.notes}</p>
                   </div>
                 )}
               </div>

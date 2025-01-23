@@ -56,27 +56,35 @@ export const HeroSection = ({
         </div>
       )}
 
-      <div className="w-full max-w-3xl bg-primary p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300">
-        <div className="text-center mb-6">
-          <h2 className="text-4xl font-oswald text-white mb-2 uppercase tracking-wider">
-            🎉 Generate Your Custom Workout Plan! 🎉
-          </h2>
-          <p className="text-white text-xl">
-            Create up to 12 days of personalized workouts instantly! Our advanced computational algorithms analyze your goals and preferences to design the perfect progression.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-white mb-6">
-          <div className="bg-black/20 p-4 rounded-lg">
-            <h3 className="font-oswald text-xl mb-2">Progressive Overload</h3>
-            <p>Technical Development & Strength</p>
+      <div className="w-full max-w-3xl relative">
+        <div className="absolute inset-0 bg-cover bg-center opacity-10"
+             style={{
+               backgroundImage: "url('/lovable-uploads/0dee3043-625d-4bc1-860b-e3f952039e56.png')",
+               backgroundSize: "cover",
+               backgroundPosition: "center",
+             }} />
+        <div className="bg-primary p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300 relative z-10">
+          <div className="text-center mb-6">
+            <h2 className="text-4xl font-oswald text-white mb-2 uppercase tracking-wider">
+              Generate Your Custom Workout Plan
+            </h2>
+            <p className="text-white text-xl">
+              Create up to 12 days of personalized workouts instantly with our advanced computational algorithms
+            </p>
           </div>
-          <div className="bg-black/20 p-4 rounded-lg">
-            <h3 className="font-oswald text-xl mb-2">Metabolic Focus</h3>
-            <p>Optimization & Power Output</p>
-          </div>
-          <div className="bg-black/20 p-4 rounded-lg">
-            <h3 className="font-oswald text-xl mb-2">Recovery</h3>
-            <p>Movement Restoration</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-white mb-6">
+            <div className="bg-black/20 p-4 rounded-lg">
+              <h3 className="font-oswald text-xl mb-2">Step 1</h3>
+              <p>Input your fitness level and goals for technical development & strength progression</p>
+            </div>
+            <div className="bg-black/20 p-4 rounded-lg">
+              <h3 className="font-oswald text-xl mb-2">Step 2</h3>
+              <p>Select your preferred exercises and equipment availability</p>
+            </div>
+            <div className="bg-black/20 p-4 rounded-lg">
+              <h3 className="font-oswald text-xl mb-2">Step 3</h3>
+              <p>Get your personalized workout plan with built-in progression</p>
+            </div>
           </div>
         </div>
       </div>

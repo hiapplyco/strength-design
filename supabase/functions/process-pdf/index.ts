@@ -28,6 +28,8 @@ serve(async (req) => {
     const arrayBuffer = await file.arrayBuffer();
     const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
+    console.log('Processing PDF with Gemini...');
+
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
@@ -41,8 +43,12 @@ serve(async (req) => {
       "Extract and return all text content from this document without any analysis or summary. Just return the raw text content."
     ]);
 
+    console.log('Received response from Gemini');
+
     const response = await result.response;
     const text = response.text();
+
+    console.log('Successfully extracted text from PDF');
 
     return new Response(
       JSON.stringify({ text }),

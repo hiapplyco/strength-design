@@ -90,7 +90,7 @@ export const ContactDialog = ({ buttonText, variant = "default" }: ContactDialog
           </div>
 
           <Button type="submit" className="w-full" variant="destructive">
-            Get Custom Pricing
+            {buttonText}
           </Button>
         </form>
       </DialogContent>

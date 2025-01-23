@@ -16,7 +16,7 @@ serve(async (req) => {
     console.log('Received modification request for:', dayToModify);
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-    console.log('Initializing Gemini API');
+    console.log('Initialized Gemini API');
     
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     console.log('Model initialized');
@@ -31,8 +31,6 @@ Return a JSON object with: warmup, workout, notes, description, and strength fie
 
     const result = await model.generateContent(prompt);
     console.log('Content generated');
-
-    if (!result?.response) throw new Error('No response from Gemini');
 
     const text = result.response.text();
     const modifiedWorkout = JSON.parse(text.trim());

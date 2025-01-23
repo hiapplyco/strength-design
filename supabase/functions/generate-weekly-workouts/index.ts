@@ -16,21 +16,22 @@ serve(async (req) => {
     const params = await req.json();
     console.log('Received params:', params);
 
+    // Initialize the API properly
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-    console.log('Initializing Gemini API');
+    console.log('Initialized Gemini API');
     
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     console.log('Model initialized');
 
     const prompt = createWorkoutGenerationPrompt(params);
-    console.log('Generated prompt');
+    console.log('Generated prompt:', prompt);
 
     const result = await model.generateContent(prompt);
     console.log('Content generated');
 
-    if (!result?.response) throw new Error('No response from Gemini');
-
     const text = result.response.text();
+    console.log('Response text:', text);
+    
     const workouts = JSON.parse(text.trim());
 
     return new Response(

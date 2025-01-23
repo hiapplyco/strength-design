@@ -20,7 +20,7 @@ serve(async (req) => {
     const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-    console.log('Initializing Gemini API');
+    console.log('Initialized Gemini API');
     
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     console.log('Model initialized');
@@ -37,7 +37,6 @@ serve(async (req) => {
         }]
       }]
     });
-    console.log('Content generated');
 
     return new Response(
       JSON.stringify({ text: result.response.text() }),

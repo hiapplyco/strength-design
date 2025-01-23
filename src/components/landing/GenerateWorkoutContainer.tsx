@@ -80,7 +80,7 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   };
 
   return (
-    <>
+    <div id="generate-workout">
       <GenerateWorkoutInput
         generatePrompt={generatePrompt}
         setGeneratePrompt={setGeneratePrompt}
@@ -99,6 +99,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
         onSuccess={handleAuthSuccess}
       />
       {isGenerating && <LoadingIndicator />}
-    </>
+    </div>
   );
 }

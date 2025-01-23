@@ -47,7 +47,7 @@ export const HeroSection = ({
       </div>
       
       {showSubscription && (
-        <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
+        <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg relative before:absolute before:-inset-[2px] before:bg-gradient-to-r before:from-[#9b87f5] before:via-[#D946EF] before:to-[#8B5CF6] before:rounded-xl before:-z-10">
           <div className="text-center mb-4">
             <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
             <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
@@ -95,7 +95,7 @@ export const HeroSection = ({
         <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200" />
       </div>
 
-      <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
+      <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg relative before:absolute before:-inset-[2px] before:bg-gradient-to-r before:from-[#9b87f5] before:via-[#D946EF] before:to-[#8B5CF6] before:rounded-xl before:-z-10">
         <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
         {children}
       </div>

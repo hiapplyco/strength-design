@@ -1,6 +1,5 @@
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { Button } from "@/components/ui/button";
-import { EmailSubscriptionForm } from "./EmailSubscriptionForm";
 import { useState } from "react";
 import { ArrowDown } from "lucide-react";
 
@@ -25,8 +24,6 @@ export const HeroSection = ({
   setNumberOfDays,
   children
 }: HeroSectionProps) => {
-  const [showSubscription, setShowSubscription] = useState(true);
-
   return (
     <section className="flex flex-col items-center justify-center space-y-8 pt-12 pb-20">
       <div className="space-y-4 text-center">
@@ -37,16 +34,6 @@ export const HeroSection = ({
           Empower your fitness business and members with science-backed, data-driven workouts tailored for every goal
         </p>
       </div>
-      
-      {showSubscription && (
-        <div className="w-full max-w-3xl transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">
-          <div className="text-center mb-4">
-            <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
-            <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
-          </div>
-          <EmailSubscriptionForm onSuccessfulSubscribe={() => setShowSubscription(false)} />
-        </div>
-      )}
 
       <div className="w-full relative">
         <div className="relative z-10 max-w-7xl mx-auto transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">

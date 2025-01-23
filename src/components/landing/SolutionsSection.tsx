@@ -17,17 +17,17 @@ export const SolutionsSection = () => {
           <div className="bg-card/30 backdrop-blur-sm p-8 rounded-xl space-y-4 border border-white/10">
             <Users className="w-12 h-12 text-primary" />
             <h3 className="text-2xl font-oswald text-primary">Coaches & Trainers</h3>
-            <p className="text-white">Efficiently manage multiple clients, analyze progress, and adapt workouts in real-time.</p>
+            <p className="text-gray-800 dark:text-white">Efficiently manage multiple clients, analyze progress, and adapt workouts in real-time.</p>
           </div>
           <div className="bg-card/30 backdrop-blur-sm p-8 rounded-xl space-y-4 border border-white/10">
             <Building2 className="w-12 h-12 text-primary" />
             <h3 className="text-2xl font-oswald text-primary">Group Fitness & Gyms</h3>
-            <p className="text-white">Scale personalized programs to all of your participants, providing dynamic dashboards and progress tracking.</p>
+            <p className="text-gray-800 dark:text-white">Scale personalized programs to all of your participants, providing dynamic dashboards and progress tracking.</p>
           </div>
           <div className="bg-card/30 backdrop-blur-sm p-8 rounded-xl space-y-4 border border-white/10">
             <PersonStanding className="w-12 h-12 text-primary" />
             <h3 className="text-2xl font-oswald text-primary">Fitness Enthusiasts</h3>
-            <p className="text-white">Take the guesswork out of training with expertly crafted plans tailored to your goals.</p>
+            <p className="text-gray-800 dark:text-white">Take the guesswork out of training with expertly crafted plans tailored to your goals.</p>
           </div>
         </div>
       </div>

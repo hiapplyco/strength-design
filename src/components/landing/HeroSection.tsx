@@ -31,7 +31,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
-                onClick={() => document.getElementById('workout-generator')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('generate-workout')?.scrollIntoView({ behavior: 'smooth' })}
                 className="w-full sm:w-auto bg-destructive hover:bg-destructive/90 text-white font-oswald text-lg px-8 py-6"
               >
                 Generate Free Workout

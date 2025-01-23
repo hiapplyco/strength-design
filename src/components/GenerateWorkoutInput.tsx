@@ -100,7 +100,7 @@ export function GenerateWorkoutInput({
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="flex flex-col w-full gap-6 bg-black/90 dark:bg-black/90 backdrop-blur-sm p-6 rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] transform hover:scale-[0.99] transition-all duration-200">
+      <div className="flex flex-col w-full gap-6 bg-black/90 dark:bg-black/90 backdrop-blur-sm p-6 rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] transform hover:scale-[0.99] transition-all duration-200 text-white">
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}

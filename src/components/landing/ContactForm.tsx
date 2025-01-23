@@ -13,6 +13,7 @@ interface ContactFormProps {
 export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async () => {
@@ -26,6 +27,7 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
     }
 
     try {
+      setIsSubmitting(true);
       const { error } = await supabase
         .from("contact_submissions")
         .insert([{ name, email, subscription_type: subscriptionType }]);
@@ -48,6 +50,8 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
         description: "Failed to submit form. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -62,6 +66,7 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="bg-white text-black placeholder:text-gray-400"
+          disabled={isSubmitting}
         />
       </div>
       <div className="space-y-2">
@@ -73,13 +78,15 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="bg-white text-black placeholder:text-gray-400"
+          disabled={isSubmitting}
         />
       </div>
       <Button 
         className="w-full" 
         onClick={handleSubmit}
+        disabled={isSubmitting}
       >
-        Submit
+        {isSubmitting ? "Submitting..." : "Submit"}
       </Button>
       <p className="text-sm text-center text-gray-600">
         We'll reach out to you shortly to discuss how we can help achieve your fitness goals.

@@ -17,6 +17,8 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting form with:", { name, email, subscriptionType });
+
     if (!name || !email) {
       toast({
         title: "Error",
@@ -26,15 +28,19 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
       return;
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("contact_submissions")
       .insert([{ 
         name, 
         email, 
         subscription_type: subscriptionType 
-      }]);
+      }])
+      .select();
+
+    console.log("Supabase response:", { data, error });
 
     if (error) {
+      console.error("Submission error:", error);
       toast({
         title: "Error",
         description: "Failed to submit. Please try again.",
@@ -50,6 +56,12 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
     triggerConfetti();
     setName("");
     setEmail("");
+    
+    // Ensure dialog closes
+    const dialog = document.getElementById('contact-dialog') as HTMLDialogElement;
+    if (dialog) {
+      dialog.close();
+    }
     onSuccess();
   };
 

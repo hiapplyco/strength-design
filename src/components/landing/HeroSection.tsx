@@ -12,26 +12,27 @@ export const HeroSection = ({
     <section className="flex flex-col items-center justify-center space-y-8 pt-12 pb-20">
       <div className="space-y-4 text-center">
         <h1 className="text-4xl md:text-6xl font-oswald text-primary">
-          AI-Powered Workout Generator
+          Intelligent Strength Programming
         </h1>
         <p className="text-lg md:text-xl max-w-3xl mx-auto">
-          Empower your fitness business and members with science-backed, data-driven workouts tailored for every goal
+          Transform your training methodology with data-driven strength programs that adapt and scale. 
+          Built for coaches who demand excellence and athletes who pursue it.
         </p>
       </div>
 
       <div className="max-w-3xl mx-auto text-center space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
-            <h3 className="text-xl font-oswald text-primary mb-2">1. Choose Days</h3>
-            <p>Select how many days you want to train per week</p>
+            <h3 className="text-xl font-oswald text-primary mb-2">Scientific Programming</h3>
+            <p>Leverage exercise science and real-time metrics to optimize strength gains</p>
           </div>
           <div className="p-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
-            <h3 className="text-xl font-oswald text-primary mb-2">2. Set Focus</h3>
-            <p>Tell us your training goals and preferences</p>
+            <h3 className="text-xl font-oswald text-primary mb-2">Personalized Focus</h3>
+            <p>Tailor programs to individual goals, experience levels, and progression rates</p>
           </div>
           <div className="p-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
-            <h3 className="text-xl font-oswald text-primary mb-2">3. Generate</h3>
-            <p>Get your personalized workout program instantly</p>
+            <h3 className="text-xl font-oswald text-primary mb-2">Scale Excellence</h3>
+            <p>Efficiently manage multiple athletes while maintaining program quality</p>
           </div>
         </div>
       </div>

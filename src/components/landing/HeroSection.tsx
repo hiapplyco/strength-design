@@ -17,9 +17,28 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
           Transform athlete performance with data-driven strength programs built on exercise science.
           Scale from individual training to managing thousands of athletes while maintaining scientific rigor and personalization.
         </p>
-        
-        <div className="flex justify-center mt-8">
-          <ContactDialog buttonText="Schedule a Demo" variant="destructive" />
+
+        <div className="mt-12 max-w-2xl mx-auto px-4">
+          <div className="bg-black/90 border-2 border-destructive rounded-xl p-8 backdrop-blur-sm transform hover:scale-[1.02] transition-all">
+            <div className="inline-block bg-destructive text-white px-3 py-1 rounded-full text-sm font-bold mb-4">
+              Limited Time Offer
+            </div>
+            <h3 className="text-2xl md:text-3xl font-oswald text-white mb-4">
+              Try Our AI Workout Generator Free
+            </h3>
+            <p className="text-gray-300 mb-6">
+              Experience enterprise-grade programming technology. Generate custom workouts powered by exercise science - no credit card required.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                onClick={() => document.getElementById('workout-generator')?.scrollIntoView({ behavior: 'smooth' })}
+                className="w-full sm:w-auto bg-destructive hover:bg-destructive/90 text-white font-oswald text-lg px-8 py-6"
+              >
+                Generate Free Workout
+              </Button>
+              <ContactDialog buttonText="Schedule a Demo" variant="outline" />
+            </div>
+          </div>
         </div>
       </div>
 

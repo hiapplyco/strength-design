@@ -73,9 +73,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
         ))}
       </div>
 
-      <div className="relative flex flex-col w-full bg-black/90 backdrop-blur-sm p-4 rounded-xl before:absolute before:inset-0 before:p-[2px] before:bg-white before:rounded-xl before:-z-[1] after:absolute after:inset-[2px] after:bg-black/90 after:-z-[1]">
-        <div className="absolute inset-[-6px] bg-red-600 rounded-xl -z-[2]" />
-        <div className="absolute inset-[-8px] bg-[#C4A052] rounded-xl -z-[3]" />
+      <div className="w-full max-w-3xl">
         {children}
       </div>
 

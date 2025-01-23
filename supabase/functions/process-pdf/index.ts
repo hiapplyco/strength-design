@@ -11,42 +11,46 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const formData = await req.formData();
-  const file = formData.get('file');
+  try {
+    const formData = await req.formData();
+    const file = formData.get('file');
+    if (!file) throw new Error('No file uploaded');
 
-  if (!file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+    const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
+    console.log('Initializing Gemini API');
+    
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    console.log('Model initialized');
+
+    const result = await model.generateContent({
+      contents: [{
+        parts: [{
+          inlineData: {
+            data: base64Data,
+            mimeType: "application/pdf"
+          }
+        }, {
+          text: "Extract and return all text content from this document."
+        }]
+      }]
+    });
+    console.log('Content generated');
+
     return new Response(
-      JSON.stringify({ error: 'No file uploaded' }),
+      JSON.stringify({ text: result.response.text() }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  }
-
-  const arrayBuffer = await file.arrayBuffer();
-  const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-
-  const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY'));
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-  const result = await model.generateContent({
-    contents: [
-      {
-        parts: [
-          {
-            inlineData: {
-              data: base64Data,
-              mimeType: "application/pdf"
-            }
-          },
-          {
-            text: "Extract and return all text content from this document without any analysis or summary. Just return the raw text content."
-          }
-        ]
+  } catch (error) {
+    console.error('PDF processing error:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
-    ]
-  });
-
-  return new Response(
-    JSON.stringify({ text: result.response.text() }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+    );
+  }
 });

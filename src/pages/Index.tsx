@@ -38,7 +38,7 @@ const Index = () => {
   return (
     <div className="relative min-h-screen">
       <div className="flex flex-col">
-        {/* Hero Section with first background */}
+        {/* Hero Section with background */}
         <section className="min-h-screen relative bg-gradient-to-b from-black/20 to-[#1A1F2C]">
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-30"
@@ -66,44 +66,22 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Color block separator */}
-        <div className="w-full h-32 bg-[#403E43]" />
-
-        {/* Features Section with second background */}
-        <section className="min-h-screen relative bg-gradient-to-b from-[#403E43] to-[#221F26]">
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-30"
-            style={{
-              backgroundImage: "url('/lovable-uploads/a09038ea-8dad-4a19-9c55-f804cd3badb6.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
+        {/* Features Section */}
+        <section className="bg-[#403E43] relative">
           <div className="relative z-10">
             <FeaturesSection />
           </div>
         </section>
 
-        {/* Color block separator */}
-        <div className="w-full h-32 bg-[#8A898C]" />
-
-        {/* Solutions Section with third background */}
-        <section className="min-h-screen relative bg-gradient-to-b from-[#8A898C] to-[#9F9EA1]">
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-30"
-            style={{
-              backgroundImage: "url('/lovable-uploads/19d6c783-93a0-4ce9-9061-aeb01769cf8f.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
+        {/* Solutions Section */}
+        <section className="bg-[#8A898C] relative">
           <div className="relative z-10">
             <SolutionsSection />
           </div>
         </section>
 
         {/* Final Section */}
-        <section className="relative bg-[#9F9EA1]">
+        <section className="bg-[#9F9EA1] relative">
           <div className="relative z-10">
             <TestimonialsSection />
           </div>

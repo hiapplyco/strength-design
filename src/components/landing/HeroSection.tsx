@@ -29,12 +29,6 @@ export const HeroSection = ({
 }: HeroSectionProps) => {
   const [showSubscription, setShowSubscription] = useState(true);
 
-  const handleOpenChange = (open: boolean) => {
-    if (open) {
-      triggerConfetti();
-    }
-  };
-
   return (
     <section className="flex flex-col items-center justify-center space-y-8 pt-12 pb-20">
       <div className="space-y-4 text-center">
@@ -95,43 +89,11 @@ export const HeroSection = ({
         <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200" />
       </div>
 
-      <div className="w-full max-w-3xl relative">
-        <div className="absolute inset-0 rounded-[20px] p-[4px] bg-gradient-to-r from-accent via-destructive to-primary animate-gradient" />
-        <div className="w-full bg-card/90 backdrop-blur-sm p-8 rounded-[16px] shadow-lg relative">
+      <div className="w-full max-w-3xl">
+        <div className="w-full bg-card/90 backdrop-blur-sm p-8 rounded-lg shadow-lg border-[6px] border-black transform -skew-x-12 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
           <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
           {children}
         </div>
-      </div>
-
-      <div className="flex gap-4 mt-8">
-        <Dialog onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            <Button size="lg" className="bg-primary text-white">
-              View All Features
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-oswald text-primary mb-4">
-                STRENGTH.DESIGN: Redefining Fitness Programming for a Stronger Future
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 text-black">
-              <p className="leading-relaxed">
-                STRENGTH.DESIGN is the ultimate tool for coaches, athletes, and fitness enthusiasts to revolutionize the way they approach training. Built on cutting-edge science, real-world data, and the principles of periodization, our platform empowers you to design precision-tailored programs that drive results.
-              </p>
-              <p className="leading-relaxed">
-                Whether you're preparing for the CrossFit Open, improving Olympic lifts, or simply building functional strength, STRENGTH.DESIGN equips you with scalable tools to train smarter.
-              </p>
-              <blockquote className="border-l-4 border-primary pl-4 italic">
-                "I've cut my programming time in half while delivering more effective workouts," says elite CrossFit coach Sarah P. "My athletes are setting PRs every week!"
-              </blockquote>
-              <p className="leading-relaxed">
-                From algorithm-driven periodization to real-time feedback tools, Strength.Design doesn't just optimize programming—it creates opportunities to grow your coaching business and connect with athletes worldwide. Your expertise, amplified by science, is the future of fitness.
-              </p>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </section>
   );

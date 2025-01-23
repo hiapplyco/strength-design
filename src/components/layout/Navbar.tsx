@@ -1,63 +1,54 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { LogIn, LogOut, UserRound, Home, Sun, Moon, Menu } from "lucide-react";
+import { Home, Sun, Moon, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
-import { User } from "@supabase/supabase-js";
 
 export const Navbar = () => {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(false);
 
-  useEffect(() => {
-    // Check initial auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-      setUser(session?.user || null);
-      
-      if (event === 'SIGNED_OUT') {
-        setIsMobileMenuOpen(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    try {
+  const handleSubmit = async () => {
+    if (!email.trim()) {
       toast({
-        title: "Signing out...",
-        description: "Please wait...",
+        title: "Error",
+        description: "Please enter your email",
+        variant: "destructive",
       });
+      return;
+    }
 
-      const { error } = await supabase.auth.signOut();
+    try {
+      setIsSubmitting(true);
+      const { error } = await supabase
+        .from("lead_gen")
+        .insert([{ email }]);
+
       if (error) throw error;
 
-      setUser(null);
-      setIsMobileMenuOpen(false);
-      
-    } catch (error) {
-      console.error("Error signing out:", error);
       toast({
-        variant: "destructive",
-        title: "Error signing out",
-        description: "An unexpected error occurred",
+        title: "Success!",
+        description: "Thank you for signing up. We'll keep you updated!",
       });
+      
+      setEmail("");
+      setShowEmailInput(false);
+    } catch (error: any) {
+      console.error("Lead submission error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const handleAuthSuccess = () => {
-    setShowAuthDialog(false);
   };
 
   const toggleTheme = () => {
@@ -89,22 +80,26 @@ export const Navbar = () => {
               )}
             </Button>
 
-            {user ? (
+            {showEmailInput ? (
               <div className="flex items-center gap-2">
-                <UserRound className="h-5 w-5" />
-                <Button
-                  variant="ghost"
-                  className="hover:bg-destructive hover:text-white"
-                  onClick={handleSignOut}
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-64"
+                  disabled={isSubmitting}
+                />
+                <Button 
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
                 >
-                  <LogOut className="h-5 w-5 mr-2" />
-                  Sign Out
+                  {isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
               </div>
             ) : (
-              <Button onClick={() => setShowAuthDialog(true)}>
-                <LogIn className="h-5 w-5 mr-2" />
-                Sign In
+              <Button onClick={() => setShowEmailInput(true)}>
+                Sign Up
               </Button>
             )}
           </div>
@@ -138,33 +133,34 @@ export const Navbar = () => {
               {theme === "dark" ? "Light Mode" : "Dark Mode"}
             </Button>
 
-            {user ? (
-              <Button
-                variant="ghost"
-                className="w-full justify-start hover:bg-destructive hover:text-white"
-                onClick={handleSignOut}
-              >
-                <LogOut className="h-5 w-5 mr-2" />
-                Sign Out
-              </Button>
+            {showEmailInput ? (
+              <div className="space-y-2">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
+                />
+                <Button 
+                  className="w-full"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </Button>
+              </div>
             ) : (
               <Button
                 className="w-full justify-start"
-                onClick={() => setShowAuthDialog(true)}
+                onClick={() => setShowEmailInput(true)}
               >
-                <LogIn className="h-5 w-5 mr-2" />
-                Sign In
+                Sign Up
               </Button>
             )}
           </div>
         )}
       </div>
-
-      <AuthDialog
-        isOpen={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
-        onSuccess={handleAuthSuccess}
-      />
     </nav>
   );
 };

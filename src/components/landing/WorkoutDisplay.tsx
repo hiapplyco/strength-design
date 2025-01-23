@@ -102,7 +102,7 @@ export const WorkoutDisplay = ({
         </div>
       </div>
       
-      <div className="pt-24">
+      <div className="pt-32">
         <h1 className="text-4xl font-oswald text-primary mb-8 italic">Your Weekly Workout Plan</h1>
         
         <div className="grid gap-8">

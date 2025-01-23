@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
+import { ContactDialog } from "./ContactDialog";
 
 interface HeroSectionProps {
   children?: React.ReactNode;
@@ -16,6 +17,12 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
           Transform athlete performance with data-driven strength programs built on exercise science.
           Scale from individual training to managing thousands of athletes while maintaining scientific rigor and personalization.
         </p>
+        
+        <div className="flex flex-wrap justify-center gap-4 mt-8">
+          <ContactDialog buttonText="Enterprise Solution" variant="destructive" />
+          <ContactDialog buttonText="Affiliate Program" variant="secondary" />
+          <ContactDialog buttonText="Custom Integration" variant="outline" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">

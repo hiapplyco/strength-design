@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Home, Menu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export const Navbar = () => {
   const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showEmailInput, setShowEmailInput] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     if (!email.trim()) {
@@ -49,8 +51,8 @@ export const Navbar = () => {
     }
   };
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleHomeClick = () => {
+    navigate('/');
   };
 
   return (
@@ -61,7 +63,7 @@ export const Navbar = () => {
           <div className="flex items-center space-x-4">
             <Home 
               className="h-6 w-6 text-primary cursor-pointer hover:text-primary/80 transition-colors" 
-              onClick={scrollToTop}
+              onClick={handleHomeClick}
             />
             <span className="text-2xl font-collegiate text-primary tracking-wider">STRENGTH.DESIGN</span>
           </div>

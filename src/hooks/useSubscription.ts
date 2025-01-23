@@ -4,12 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 
 export const useSubscription = () => {
   const [loadingStates, setLoadingStates] = useState({
-    unlimited: false,
-    personalized: false
+    pro: false,
+    pro_plus: false
   });
   const { toast } = useToast();
 
-  const handleSubscription = async (type: 'unlimited' | 'personalized') => {
+  const handleSubscription = async (type: 'pro' | 'pro_plus') => {
     try {
       setLoadingStates(prev => ({ ...prev, [type]: true }));
       

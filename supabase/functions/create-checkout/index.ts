@@ -2,8 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@14.21.0';
 
 const PRICE_IDS = {
-  unlimited: "price_1QjidsC3HTLX6YIcMQZNNZjb",
-  personalized: "price_1QjiebC3HTLX6YIcokWaSnIW"
+  pro: "price_1QjidsC3HTLX6YIcMQZNNZjb",
+  pro_plus: "price_1QjiebC3HTLX6YIcokWaSnIW"
 };
 
 const corsHeaders = {

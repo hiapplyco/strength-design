@@ -95,10 +95,7 @@ export function GenerateWorkoutInput({
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4">
-      <div className="flex flex-col w-full gap-6 bg-black/90 dark:bg-black/90 backdrop-blur-sm p-4 rounded-[2rem] relative text-white before:absolute before:inset-0 before:p-[2px] before:bg-white before:rounded-[2rem] before:-z-[1] after:absolute after:inset-[2px] after:bg-black/90 after:rounded-[2rem] after:-z-[1]">
-        <div className="absolute inset-[-6px] translate-x-[2px] translate-y-[2px] bg-red-600 rounded-[2rem] -z-[2]" />
-        <div className="absolute inset-[-12px] translate-x-[4px] translate-y-[4px] bg-[#C4A052] rounded-[2rem] -z-[3]" />
-        
+      <div className="bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 p-6 space-y-6">
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}

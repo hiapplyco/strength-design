@@ -17,7 +17,6 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.stopPropagation();
 
     if (!name.trim() || !email.trim()) {
       toast({
@@ -28,35 +27,24 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
       return;
     }
 
-    try {
-      const { error } = await supabase
-        .from("contact_submissions")
-        .insert([{ name, email, subscription_type: subscriptionType }]);
+    const { error } = await supabase
+      .from("contact_submissions")
+      .insert([{ name, email, subscription_type: subscriptionType }]);
 
-      if (error) throw error;
-
+    if (!error) {
       toast({
         title: "Thank you!",
         description: "We'll reach out to you shortly to discuss your fitness goals.",
       });
       triggerConfetti();
-      
-      // Reset form and notify parent
       setName("");
       setEmail("");
       onSuccess();
-    } catch (error: any) {
-      console.error('Submission error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit form. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" onClick={(e) => e.stopPropagation()}>
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</label>
         <Input

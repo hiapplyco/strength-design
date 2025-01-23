@@ -91,8 +91,8 @@ export function GenerateWorkoutInput({
   return (
     <div className="w-full max-w-2xl mx-auto px-4">
       <div className="flex flex-col w-full gap-6 bg-black/90 dark:bg-black/90 backdrop-blur-sm p-4 rounded-xl relative text-white before:absolute before:inset-0 before:p-[2px] before:bg-white before:rounded-xl before:-z-[1] after:absolute after:inset-[2px] after:bg-black/90 after:-z-[1]">
-        <div className="absolute inset-[-6px] bg-red-600 rounded-xl -z-[2]" />
-        <div className="absolute inset-[-8px] bg-[#C4A052] rounded-xl -z-[3]" />
+        <div className="absolute inset-[-2px] bg-red-600 rounded-xl -z-[2]" />
+        <div className="absolute inset-[-4px] bg-[#C4A052] rounded-xl -z-[3]" />
         
         <WeatherSection 
           weatherData={weatherData}

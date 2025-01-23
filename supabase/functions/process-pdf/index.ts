@@ -5,13 +5,12 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders, status: 204 });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -19,17 +18,11 @@ serve(async (req) => {
     const file = formData.get('file');
 
     if (!file || !(file instanceof File)) {
-      return new Response(
-        JSON.stringify({ error: 'No file uploaded' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+      throw new Error('No file uploaded');
     }
 
     if (file.type !== 'application/pdf') {
-      return new Response(
-        JSON.stringify({ error: 'Only PDF files are supported' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      );
+      throw new Error('Only PDF files are supported');
     }
 
     const arrayBuffer = await file.arrayBuffer();
@@ -66,12 +59,8 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error processing PDF:', error);
-    
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Failed to process PDF',
-        details: error.stack
-      }),
+      JSON.stringify({ error: error.message || 'Failed to process PDF' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 

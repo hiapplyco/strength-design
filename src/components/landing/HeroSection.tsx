@@ -78,7 +78,7 @@ export const HeroSection = ({
       </div>
 
       <div className="w-full relative">
-        <div className="relative z-10 max-w-7xl mx-auto transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">
+        <div className="relative z-10 max-w-7xl mx-auto transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-4 md:p-6 rounded-xl mt-8">
           {children}
         </div>
       </div>

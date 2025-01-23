@@ -13,11 +13,11 @@ interface ContactFormProps {
 export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!name || !email) {
       toast({
         title: "Error",
@@ -27,21 +27,30 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
       return;
     }
 
-    const { error } = await supabase
-      .from("contact_submissions")
-      .insert([{ 
-        name, 
-        email, 
-        subscription_type: subscriptionType 
-      }]);
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("contact_submissions")
+        .insert([{ name, email, subscription_type: subscriptionType }]);
 
-    if (!error) {
+      if (error) throw error;
+
       toast({
-        title: "Thank you!",
-        description: "We'll reach out to you shortly to discuss your fitness goals.",
+        title: "Success!",
+        description: "Thank you for your interest. We'll be in touch soon.",
       });
       triggerConfetti();
+      setName("");
+      setEmail("");
       onSuccess();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to submit. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -69,8 +78,12 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
           className="bg-white text-black placeholder:text-gray-400"
         />
       </div>
-      <Button type="submit" className="w-full">
-        Submit
+      <Button 
+        type="submit" 
+        disabled={isSubmitting}
+        className="w-full"
+      >
+        {isSubmitting ? "Submitting..." : "Submit"}
       </Button>
       <p className="text-sm text-center text-gray-600">
         We'll reach out to you shortly to discuss how we can help achieve your fitness goals.

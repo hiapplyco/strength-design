@@ -60,21 +60,21 @@ const Index = () => {
 
         {/* Features Section */}
         <section className="bg-[#403E43] relative">
-          <div className="relative z-10">
+          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <FeaturesSection />
           </div>
         </section>
 
         {/* Solutions Section */}
         <section className="bg-[#8A898C] relative">
-          <div className="relative z-10">
+          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <SolutionsSection />
           </div>
         </section>
 
         {/* Final Section */}
         <section className="bg-[#9F9EA1] relative">
-          <div className="relative z-10">
+          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
             <TestimonialsSection />
           </div>
         </section>

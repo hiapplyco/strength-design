@@ -66,7 +66,6 @@ export const TestimonialsSection = () => {
       <dialog 
         id="contact-dialog" 
         className="modal p-6 rounded-lg bg-white shadow-xl max-w-md w-full backdrop:bg-black backdrop:bg-opacity-50"
-        onClick={handleDialogClick}
       >
         <ContactForm 
           subscriptionType="pro" 

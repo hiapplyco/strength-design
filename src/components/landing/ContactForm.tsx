@@ -18,7 +18,7 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !email.trim()) {
+    if (!name || !email) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -29,7 +29,11 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
 
     const { error } = await supabase
       .from("contact_submissions")
-      .insert([{ name, email, subscription_type: subscriptionType }]);
+      .insert([{ 
+        name, 
+        email, 
+        subscription_type: subscriptionType 
+      }]);
 
     if (!error) {
       toast({
@@ -37,8 +41,6 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
         description: "We'll reach out to you shortly to discuss your fitness goals.",
       });
       triggerConfetti();
-      setName("");
-      setEmail("");
       onSuccess();
     }
   };
@@ -67,10 +69,7 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
           className="bg-white text-black placeholder:text-gray-400"
         />
       </div>
-      <Button 
-        type="submit"
-        className="w-full"
-      >
+      <Button type="submit" className="w-full">
         Submit
       </Button>
       <p className="text-sm text-center text-gray-600">

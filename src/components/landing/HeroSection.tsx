@@ -46,7 +46,7 @@ export const HeroSection = ({
             <div>
               <h3 className="text-xl font-oswald text-primary mb-2">Environmental & Equipment Analysis</h3>
               <p className="text-gray-300">
-                Start by inputting your location and available equipment. Our AI analyzes environmental factors and equipment accessibility to create workouts optimized for your specific training conditions.
+                Start by inputting your location and available equipment. Our Program analyzes environmental factors and equipment accessibility to create workouts optimized for your specific training conditions.
               </p>
             </div>
           </div>
@@ -70,7 +70,7 @@ export const HeroSection = ({
             <div>
               <h3 className="text-xl font-oswald text-accent mb-2">Program Generation & Optimization</h3>
               <p className="text-gray-300">
-                Select your training frequency and let our AI generate a comprehensive strength program. Each workout is scientifically structured with proper progression, deload periods, and exercise selection tailored to your goals.
+                Select your training frequency and let our Models generate a comprehensive strength program. Each workout is scientifically structured with proper progression, deload periods, and exercise selection tailored to your goals.
               </p>
             </div>
           </div>

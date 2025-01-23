@@ -100,16 +100,6 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
       <div className="w-full max-w-3xl">
         {children}
       </div>
-
-      <Button
-        variant="ghost"
-        size="lg"
-        className="text-gray-800 dark:text-white animate-bounce"
-        onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-      >
-        <ArrowDown className="h-4 w-4 mr-2" />
-        Explore Scientific Programming
-      </Button>
     </section>
   );
 };

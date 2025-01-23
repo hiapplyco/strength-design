@@ -47,7 +47,7 @@ export const HeroSection = ({
       </div>
       
       {showSubscription && (
-        <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
+        <div className="w-full max-w-3xl transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">
           <div className="text-center mb-4">
             <h2 className="text-2xl font-oswald text-primary">Stay Updated</h2>
             <p className="text-black">Subscribe to receive updates about our latest features and releases</p>
@@ -57,31 +57,32 @@ export const HeroSection = ({
       )}
 
       <div className="w-full relative">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30"
+        <div className="absolute inset-0 bg-cover bg-center opacity-10"
              style={{
                backgroundImage: "url('/lovable-uploads/0dee3043-625d-4bc1-860b-e3f952039e56.png')",
                backgroundSize: "cover",
                backgroundPosition: "center",
+               transform: "scale(1.05)",
              }} />
-        <div className="bg-white/5 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg transform hover:scale-105 transition-transform duration-300 relative z-10 max-w-7xl mx-auto">
+        <div className="relative z-10 max-w-7xl mx-auto transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">
           <div className="text-center mb-6">
-            <h2 className="text-4xl font-oswald text-white mb-2 uppercase tracking-wider">
+            <h2 className="text-4xl font-oswald text-primary mb-2 uppercase tracking-wider">
               Generate Your Custom Workout Plan
             </h2>
-            <p className="text-white text-xl">
+            <p className="text-black text-xl">
               Create up to 12 days of personalized workouts instantly with our advanced computational algorithms
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-white mb-6">
-            <div className="bg-black/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-black mb-6">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg border-2 border-black">
               <h3 className="font-oswald text-xl mb-2">Step 1</h3>
               <p>Input your fitness level and goals for technical development & strength progression</p>
             </div>
-            <div className="bg-black/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg border-2 border-black">
               <h3 className="font-oswald text-xl mb-2">Step 2</h3>
               <p>Select your preferred exercises and equipment availability</p>
             </div>
-            <div className="bg-black/10 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+            <div className="bg-white/80 backdrop-blur-sm p-4 rounded-lg border-2 border-black">
               <h3 className="font-oswald text-xl mb-2">Step 3</h3>
               <p>Get your personalized workout plan with built-in progression</p>
             </div>
@@ -95,7 +96,7 @@ export const HeroSection = ({
         <ArrowDown className="w-8 h-8 text-primary animate-bounce delay-200" />
       </div>
 
-      <div className="w-full max-w-3xl bg-card/90 backdrop-blur-sm p-8 rounded-xl mt-8 shadow-lg">
+      <div className="w-full max-w-3xl transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">
         <h2 className="text-2xl font-oswald text-primary mb-4">Generate Custom Workouts</h2>
         {children}
       </div>
@@ -103,7 +104,7 @@ export const HeroSection = ({
       <div className="flex gap-4 mt-8">
         <Dialog onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
-            <Button size="lg" className="bg-primary text-white">
+            <Button size="lg" className="bg-primary text-white transform hover:scale-[0.98] transition-transform duration-200 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               View All Features
             </Button>
           </DialogTrigger>

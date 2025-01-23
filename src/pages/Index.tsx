@@ -36,39 +36,78 @@ const Index = () => {
   }
 
   return (
-    <div className="relative min-h-screen backdrop-blur-sm pt-16">
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-30 z-0"
-        style={{
-          backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-          height: "100vh",
-          width: "100vw",
-          top: "0"
-        }}
-      />
-      <div className="relative z-10">
-        <div className="max-w-[1400px] mx-auto px-4 animate-fade-in">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-20 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
-            strength.design
-          </h1>
-          <HeroSection
-            generatePrompt=""
-            setGeneratePrompt={() => {}}
-            handleGenerateWorkout={() => {}}
-            isGenerating={false}
-            setShowGenerateInput={() => {}}
-            numberOfDays={7}
-            setNumberOfDays={() => {}}
-          >
-            <GenerateWorkoutContainer setWorkouts={setWorkouts} />
-          </HeroSection>
-          <FeaturesSection />
-          <SolutionsSection />
-          <TestimonialsSection />
-        </div>
+    <div className="relative min-h-screen">
+      <div className="flex flex-col">
+        {/* Hero Section with first background */}
+        <section className="min-h-screen relative bg-gradient-to-b from-black/20 to-[#1A1F2C]">
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{
+              backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div className="relative z-10 max-w-[1400px] mx-auto px-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-20 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
+              strength.design
+            </h1>
+            <HeroSection
+              generatePrompt=""
+              setGeneratePrompt={() => {}}
+              handleGenerateWorkout={() => {}}
+              isGenerating={false}
+              setShowGenerateInput={() => {}}
+              numberOfDays={7}
+              setNumberOfDays={() => {}}
+            >
+              <GenerateWorkoutContainer setWorkouts={setWorkouts} />
+            </HeroSection>
+          </div>
+        </section>
+
+        {/* Color block separator */}
+        <div className="w-full h-32 bg-[#403E43]" />
+
+        {/* Features Section with second background */}
+        <section className="min-h-screen relative bg-gradient-to-b from-[#403E43] to-[#221F26]">
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{
+              backgroundImage: "url('/lovable-uploads/a09038ea-8dad-4a19-9c55-f804cd3badb6.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div className="relative z-10">
+            <FeaturesSection />
+          </div>
+        </section>
+
+        {/* Color block separator */}
+        <div className="w-full h-32 bg-[#8A898C]" />
+
+        {/* Solutions Section with third background */}
+        <section className="min-h-screen relative bg-gradient-to-b from-[#8A898C] to-[#9F9EA1]">
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{
+              backgroundImage: "url('/lovable-uploads/19d6c783-93a0-4ce9-9061-aeb01769cf8f.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+          <div className="relative z-10">
+            <SolutionsSection />
+          </div>
+        </section>
+
+        {/* Final Section */}
+        <section className="relative bg-[#9F9EA1]">
+          <div className="relative z-10">
+            <TestimonialsSection />
+          </div>
+        </section>
       </div>
     </div>
   );

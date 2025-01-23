@@ -57,16 +57,6 @@ export const HeroSection = ({
       )}
 
       <div className="w-full relative">
-        <div className="fixed inset-0 bg-cover bg-center opacity-30 -z-10"
-             style={{
-               backgroundImage: "url('/lovable-uploads/a09038ea-8dad-4a19-9c55-f804cd3badb6.png')",
-               backgroundSize: "cover",
-               backgroundPosition: "center",
-               backgroundAttachment: "fixed",
-               height: "100vh",
-               width: "100vw",
-               top: "33vh"
-             }} />
         <div className="relative z-10 max-w-7xl mx-auto transform hover:scale-[0.99] transition-transform duration-200 border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-white/90 backdrop-blur-sm p-8 rounded-xl mt-8">
           <div className="text-center mb-6">
             <h2 className="text-4xl font-oswald text-primary mb-2 uppercase tracking-wider">

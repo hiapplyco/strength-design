@@ -3,15 +3,6 @@ import { Users, Building2, PersonStanding } from "lucide-react";
 export const SolutionsSection = () => {
   return (
     <section className="py-20 relative">
-      <div 
-        className="fixed bottom-0 left-0 right-0 w-full h-screen bg-cover bg-center opacity-30 -z-10"
-        style={{
-          backgroundImage: "url('/lovable-uploads/19d6c783-93a0-4ce9-9061-aeb01769cf8f.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed"
-        }} 
-      />
       <div className="relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">

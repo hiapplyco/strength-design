@@ -2,13 +2,11 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
 import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
-import { generateWorkout, saveWorkouts } from "@/utils/workoutGeneration";
+import { generateWorkout } from "@/utils/workoutGeneration";
 import { ContactDialog } from "./ContactDialog";
 import type { WeeklyWorkouts } from "@/utils/workoutGeneration";
 import type { Exercise } from "../exercise-search/types";
-import { supabase } from "@/integrations/supabase/client";
 
 interface GenerateWorkoutContainerProps {
   setWorkouts: (workouts: WeeklyWorkouts | null) => void;
@@ -17,8 +15,6 @@ interface GenerateWorkoutContainerProps {
 export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContainerProps) {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [numberOfDays, setNumberOfDays] = useState(7);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const { toast } = useToast();
@@ -40,33 +36,12 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       });
 
       console.log("Generated workouts:", workouts);
-      setGeneratedWorkouts(workouts);
       setWorkouts(workouts);
-
-      // Check if user is authenticated and save workouts
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        console.log("User is authenticated, saving workouts");
-        const saved = await saveWorkouts(workouts);
-        if (saved) {
-          toast({
-            title: "Success",
-            description: "Your workout plan has been generated and saved!",
-          });
-        } else {
-          toast({
-            title: "Note",
-            description: "Workout plan generated but couldn't be saved. Please log in to save your workouts.",
-          });
-          setShowAuthDialog(true);
-        }
-      } else {
-        toast({
-          title: "Success",
-          description: "Your workout plan has been generated! Log in to save it.",
-        });
-        setShowAuthDialog(true);
-      }
+      
+      toast({
+        title: "Success",
+        description: "Your workout plan has been generated!",
+      });
       
       triggerConfetti();
 
@@ -89,22 +64,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
     }
   };
 
-  const handleAuthSuccess = async () => {
-    console.log("Auth success handler called");
-    setShowAuthDialog(false);
-    if (generatedWorkouts) {
-      console.log("Saving generated workouts after auth");
-      const saved = await saveWorkouts(generatedWorkouts);
-      if (saved) {
-        setWorkouts(generatedWorkouts);
-        toast({
-          title: "Success",
-          description: "Your workouts have been saved!",
-        });
-      }
-    }
-  };
-
   return (
     <div id="generate-workout">
       <GenerateWorkoutInput
@@ -119,11 +78,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       <div className="mt-8 flex justify-center">
         <ContactDialog buttonText="Get Enterprise Access" variant="secondary" />
       </div>
-      <AuthDialog 
-        isOpen={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
-        onSuccess={handleAuthSuccess}
-      />
       {isGenerating && <LoadingIndicator />}
     </div>
   );

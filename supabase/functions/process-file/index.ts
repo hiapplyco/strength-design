@@ -9,8 +9,12 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders, status: 204 });
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 204 
+    });
   }
 
   try {
@@ -21,10 +25,12 @@ serve(async (req) => {
       throw new Error('No file uploaded');
     }
 
+    console.log('Processing file:', file.name, 'Type:', file.type);
+
     const arrayBuffer = await file.arrayBuffer();
     const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-    console.log('Processing file with Gemini...');
+    console.log('File converted to base64, sending to Gemini...');
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
@@ -49,7 +55,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ text }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 200 
       }
     );
@@ -61,7 +70,10 @@ serve(async (req) => {
         details: error.stack
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 500 
       }
     );

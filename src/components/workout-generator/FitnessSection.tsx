@@ -1,9 +1,10 @@
-import { Activity } from "lucide-react";
+import { Activity, Loader2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { PdfUploadSection } from "./PdfUploadSection";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface FitnessSectionProps {
   fitnessLevel: string;
@@ -21,12 +22,16 @@ export function FitnessSection({
   onPrescribedExercisesChange = () => {}
 }: FitnessSectionProps) {
   const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleFileSelect = async (file: File | null) => {
     if (!file) {
       onPrescribedExercisesChange('');
       return;
     }
+
+    setIsProcessing(true);
+    console.log('Starting file processing...');
 
     try {
       const formData = new FormData();
@@ -37,11 +42,15 @@ export function FitnessSection({
         body: formData
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
         throw new Error('Failed to process file');
       }
 
       const data = await response.json();
+      console.log('Processed data:', data);
+      
       onPrescribedExercisesChange(data.text || '');
       
       toast({
@@ -55,6 +64,8 @@ export function FitnessSection({
         description: "Failed to process file. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -84,7 +95,17 @@ export function FitnessSection({
         <Label htmlFor="prescribed-exercises" className="text-sm font-medium">
           Prescribed Exercises (Optional)
         </Label>
-        <PdfUploadSection onFileSelect={handleFileSelect} />
+        <div className="relative">
+          <PdfUploadSection onFileSelect={handleFileSelect} />
+          {isProcessing && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded">
+              <div className="flex items-center gap-2 text-white">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Analyzing document...</span>
+              </div>
+            </div>
+          )}
+        </div>
         <Textarea
           id="prescribed-exercises"
           placeholder="Enter any prescribed exercises, PT recommendations, or medical restrictions..."

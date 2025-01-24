@@ -18,10 +18,13 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Received request:', req.method);
+    
     const formData = await req.formData();
     const file = formData.get('file');
 
     if (!file || !(file instanceof File)) {
+      console.error('No file uploaded or invalid file');
       throw new Error('No file uploaded');
     }
 
@@ -32,8 +35,15 @@ serve(async (req) => {
 
     console.log('File converted to base64, sending to Gemini...');
 
-    const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!apiKey) {
+      throw new Error('Gemini API key not configured');
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+    console.log('Sending request to Gemini...');
 
     const result = await model.generateContent([
       {

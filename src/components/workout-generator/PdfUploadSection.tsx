@@ -1,48 +1,36 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { validateFileType } from "@/utils/geminiPrompts";
-import { useToast } from "@/hooks/use-toast";
 
 interface PdfUploadSectionProps {
-  onFileSelect: (file: File | null) => void;
+  onFileSelect: (file: File) => Promise<void>;
 }
 
 export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
-  const { toast } = useToast();
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      onFileSelect(null);
+    if (!file) return;
+
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload a PDF or image file (JPG, PNG)');
+      event.target.value = '';
       return;
     }
 
-    try {
-      validateFileType(file);
-      onFileSelect(file);
-    } catch (error) {
-      toast({
-        title: "File Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      event.target.value = '';
-      onFileSelect(null);
-    }
+    await onFileSelect(file);
   };
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="pdf">Upload Document or Image</Label>
       <Input
         id="pdf"
         type="file"
-        accept=".pdf,.jpg,.jpeg,.png,.heic"
+        accept=".pdf,.jpg,.jpeg,.png"
         onChange={handleFileChange}
         className="cursor-pointer"
       />
       <p className="text-sm text-muted-foreground">
-        Supported formats: PDF, JPG, PNG, HEIC
+        Supported formats: PDF, JPG, PNG
       </p>
     </div>
   );

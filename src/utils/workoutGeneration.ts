@@ -44,24 +44,27 @@ export const generateWorkout = async (params: GenerateWorkoutParams): Promise<We
   return data;
 };
 
-export const saveWorkouts = async (workouts: WeeklyWorkouts) => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return false;
-  }
-
+export const saveWorkoutNoAuth = async (workouts: WeeklyWorkouts) => {
+  console.log("Saving workouts without auth:", workouts);
+  
   const workoutPromises = Object.entries(workouts).map(([day, workout]) => {
     return supabase.from('workouts').insert({
-      user_id: user.id,
       day,
       warmup: workout.warmup,
       workout: workout.workout,
       notes: workout.notes,
       strength: workout.strength,
-      description: workout.description
+      description: workout.description,
+      user_id: '00000000-0000-0000-0000-000000000000' // Default user ID for non-authenticated workouts
     });
   });
 
-  await Promise.all(workoutPromises);
-  return true;
+  try {
+    await Promise.all(workoutPromises);
+    console.log("Successfully saved all workouts");
+    return true;
+  } catch (error) {
+    console.error("Error saving workouts:", error);
+    return false;
+  }
 };

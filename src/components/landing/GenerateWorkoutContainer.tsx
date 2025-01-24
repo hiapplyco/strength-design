@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
 import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
-import { generateWorkout } from "@/utils/workoutGeneration";
+import { generateWorkout, saveWorkoutNoAuth } from "@/utils/workoutGeneration";
 import { ContactDialog } from "./ContactDialog";
 import type { WeeklyWorkouts } from "@/utils/workoutGeneration";
 import type { Exercise } from "../exercise-search/types";
@@ -38,9 +38,14 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       console.log("Generated workouts:", workouts);
       setWorkouts(workouts);
       
+      // Save workouts without authentication
+      const saved = await saveWorkoutNoAuth(workouts);
+      
       toast({
         title: "Success",
-        description: "Your workout plan has been generated!",
+        description: saved 
+          ? "Your workout plan has been generated and saved!"
+          : "Your workout plan has been generated! (Note: Unable to save to database)",
       });
       
       triggerConfetti();

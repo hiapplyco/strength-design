@@ -4,7 +4,6 @@ import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 console.log("Process File Edge Function initialized");
@@ -20,6 +19,25 @@ serve(async (req) => {
 
   try {
     console.log("Processing new request");
+
+    // Check for authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error("Missing authorization header");
+      return new Response(
+        JSON.stringify({ 
+          error: true, 
+          message: 'Missing authorization header' 
+        }), 
+        { 
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
 
     if (req.method !== 'POST') {
       throw new Error(`Method ${req.method} not allowed`);

@@ -5,6 +5,7 @@ import { Textarea } from "../ui/textarea";
 import { PdfUploadSection } from "./PdfUploadSection";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FitnessSectionProps {
   fitnessLevel: string;
@@ -38,8 +39,17 @@ export function FitnessSection({
       formData.append('file', file);
 
       console.log('[FitnessSection] Sending file to Supabase Edge Function...');
+      
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('photos')
+        .getPublicUrl('public/anon-key.txt');
+
       const response = await fetch('https://ulnsvkrrdcmfiguibkpx.supabase.co/functions/v1/process-file', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.VITE_SUPABASE_ANON_KEY}`,
+        },
         body: formData
       });
 

@@ -19,6 +19,12 @@ export function FitnessSection({
   prescribedExercises = "",
   onPrescribedExercisesChange = () => {}
 }: FitnessSectionProps) {
+  const handleFileSelect = (file: File | null) => {
+    // If there's a file, we can process its contents here
+    // For now, we'll just pass an empty string if no file is selected
+    onPrescribedExercisesChange(file ? '' : '');
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -45,7 +51,7 @@ export function FitnessSection({
         <Label htmlFor="prescribed-exercises" className="text-sm font-medium">
           Prescribed Exercises (Optional)
         </Label>
-        <PdfUploadSection onExtractedText={onPrescribedExercisesChange} />
+        <PdfUploadSection onFileSelect={handleFileSelect} />
         <Textarea
           id="prescribed-exercises"
           placeholder="Enter any prescribed exercises, PT recommendations, or medical restrictions..."

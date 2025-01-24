@@ -33,16 +33,16 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="pdf">Upload Image (JPG or PNG)</Label>
+      <Label htmlFor="pdf">Upload Document or Image</Label>
       <Input
         id="pdf"
         type="file"
-        accept=".jpg,.jpeg,.png"
+        accept=".pdf,.jpg,.jpeg,.png,.heic"
         onChange={handleFileChange}
         className="cursor-pointer"
       />
       <p className="text-sm text-muted-foreground">
-        Supported formats: JPG, PNG
+        Supported formats: PDF, JPG, PNG, HEIC
       </p>
     </div>
   );

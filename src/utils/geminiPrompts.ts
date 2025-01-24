@@ -89,6 +89,22 @@ IMPORTANT:
 6. Provide clear standards`;
 };
 
+export const validateFileType = (file: File) => {
+  const allowedTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/heic',
+    'image/heif'
+  ];
+  
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('Invalid file type. Please upload a PDF or image file (JPG, PNG, HEIC).');
+  }
+  return true;
+};
+
 export const getGeminiConfig = () => ({
   model: "gemini-1.5-flash",
   generationConfig: {
@@ -98,11 +114,3 @@ export const getGeminiConfig = () => ({
     maxOutputTokens: 8192,
   }
 });
-
-export const validateFileType = (file: File) => {
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-  if (!allowedTypes.includes(file.type)) {
-    throw new Error('Invalid file type. Please upload a JPG or PNG image.');
-  }
-  return true;
-};

@@ -3,6 +3,7 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 import { PdfUploadSection } from "./PdfUploadSection";
+import { useToast } from "@/hooks/use-toast";
 
 interface FitnessSectionProps {
   fitnessLevel: string;
@@ -19,10 +20,42 @@ export function FitnessSection({
   prescribedExercises = "",
   onPrescribedExercisesChange = () => {}
 }: FitnessSectionProps) {
-  const handleFileSelect = (file: File | null) => {
-    // If there's a file, we can process its contents here
-    // For now, we'll just pass an empty string if no file is selected
-    onPrescribedExercisesChange(file ? '' : '');
+  const { toast } = useToast();
+
+  const handleFileSelect = async (file: File | null) => {
+    if (!file) {
+      onPrescribedExercisesChange('');
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/process-file', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process file');
+      }
+
+      const data = await response.json();
+      onPrescribedExercisesChange(data.text || '');
+      
+      toast({
+        title: "Success",
+        description: "File processed successfully",
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process file. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

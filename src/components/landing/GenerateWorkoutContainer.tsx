@@ -8,6 +8,7 @@ import { generateWorkout, saveWorkouts } from "@/utils/workoutGeneration";
 import { ContactDialog } from "./ContactDialog";
 import type { WeeklyWorkouts } from "@/utils/workoutGeneration";
 import type { Exercise } from "../exercise-search/types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GenerateWorkoutContainerProps {
   setWorkouts: (workouts: WeeklyWorkouts | null) => void;
@@ -41,11 +42,32 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       console.log("Generated workouts:", workouts);
       setGeneratedWorkouts(workouts);
       setWorkouts(workouts);
+
+      // Check if user is authenticated and save workouts
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log("User is authenticated, saving workouts");
+        const saved = await saveWorkouts(workouts);
+        if (saved) {
+          toast({
+            title: "Success",
+            description: "Your workout plan has been generated and saved!",
+          });
+        } else {
+          toast({
+            title: "Note",
+            description: "Workout plan generated but couldn't be saved. Please log in to save your workouts.",
+          });
+          setShowAuthDialog(true);
+        }
+      } else {
+        toast({
+          title: "Success",
+          description: "Your workout plan has been generated! Log in to save it.",
+        });
+        setShowAuthDialog(true);
+      }
       
-      toast({
-        title: "Success",
-        description: "Your workout plan has been generated!",
-      });
       triggerConfetti();
 
     } catch (error: any) {
@@ -75,6 +97,10 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       const saved = await saveWorkouts(generatedWorkouts);
       if (saved) {
         setWorkouts(generatedWorkouts);
+        toast({
+          title: "Success",
+          description: "Your workouts have been saved!",
+        });
       }
     }
   };

@@ -20,6 +20,16 @@ export const useErrorHandler = () => {
       return;
     }
 
+    // Check for file validation errors
+    if (event.message.includes('Invalid file type')) {
+      toast({
+        title: "File Error",
+        description: "Please upload only JPG or PNG images.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // General error handling
     toast({
       title: "Error",

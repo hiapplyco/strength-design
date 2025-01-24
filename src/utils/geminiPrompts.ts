@@ -98,3 +98,11 @@ export const getGeminiConfig = () => ({
     maxOutputTokens: 8192,
   }
 });
+
+export const validateFileType = (file: File) => {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('Invalid file type. Please upload a JPG or PNG image.');
+  }
+  return true;
+};

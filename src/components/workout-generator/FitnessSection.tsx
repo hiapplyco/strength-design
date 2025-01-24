@@ -31,28 +31,42 @@ export function FitnessSection({
     }
 
     setIsProcessing(true);
-    console.log('[FitnessSection] Starting file processing...');
+    console.log('[FitnessSection] Starting file processing...', { fileName: file.name, fileSize: file.size });
 
     try {
       const formData = new FormData();
       formData.append('file', file);
 
-      console.log('[FitnessSection] Sending file to process-file function...');
-      const response = await fetch('/api/process-file', {
+      console.log('[FitnessSection] Sending file to Supabase Edge Function...');
+      const response = await fetch('https://ulnsvkrrdcmfiguibkpx.supabase.co/functions/v1/process-file', {
         method: 'POST',
         body: formData
       });
 
       console.log('[FitnessSection] Response status:', response.status);
+      
+      const responseText = await response.text();
+      console.log('[FitnessSection] Raw response:', responseText);
 
       if (!response.ok) {
-        throw new Error('Failed to process file');
+        throw new Error(`Failed to process file: ${responseText}`);
       }
 
-      const data = await response.json();
-      console.log('[FitnessSection] Processed data received');
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('[FitnessSection] Error parsing JSON response:', e);
+        throw new Error('Invalid response format from server');
+      }
+
+      console.log('[FitnessSection] Processed data received:', data);
       
-      onPrescribedExercisesChange(data.text || '');
+      if (!data.text) {
+        throw new Error('No text content in response');
+      }
+
+      onPrescribedExercisesChange(data.text);
       
       toast({
         title: "Success",
@@ -60,9 +74,11 @@ export function FitnessSection({
       });
     } catch (error) {
       console.error('[FitnessSection] Error processing file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process file';
+      
       toast({
-        title: "Error",
-        description: "Failed to process file. Please try again.",
+        title: "Error Processing File",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

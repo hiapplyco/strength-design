@@ -1,92 +1,93 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+}
+
+console.log("Process File Edge Function initialized");
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
+    console.log("Handling CORS preflight request");
+    return new Response(null, {
       headers: corsHeaders,
-      status: 204 
-    });
+    })
   }
 
   try {
-    console.log('[process-file] Request received:', req.method);
-    
-    const formData = await req.formData();
-    const file = formData.get('file');
+    console.log("Processing new request");
 
-    if (!file || !(file instanceof File)) {
-      console.error('[process-file] No file uploaded or invalid file');
-      throw new Error('No file uploaded');
+    if (req.method !== 'POST') {
+      throw new Error(`Method ${req.method} not allowed`);
     }
 
-    console.log('[process-file] Processing file:', file.name, 'Type:', file.type);
-
-    const arrayBuffer = await file.arrayBuffer();
-    const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-
-    console.log('[process-file] File converted to base64, configuring Gemini...');
-
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    // Get the API key from environment variables
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
-      console.error('[process-file] Gemini API key not configured');
-      throw new Error('Gemini API key not configured');
+      console.error("GEMINI_API_KEY not found in environment variables");
+      throw new Error('API key not configured');
     }
 
+    // Initialize Gemini
+    console.log("Initializing Gemini API");
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-    console.log('[process-file] Sending request to Gemini...');
+    // Get form data
+    const formData = await req.formData();
+    const file = formData.get('file');
+    
+    if (!file || !(file instanceof File)) {
+      throw new Error('No file provided');
+    }
 
+    console.log("File received:", file.name, file.type, file.size);
+
+    // Read file content
+    const fileContent = await file.text();
+    console.log("File content length:", fileContent.length);
+
+    // Process with Gemini
+    console.log("Sending to Gemini API");
     const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type
-        }
-      },
-      "Extract and return all text content from this document without any analysis or summary. Just return the raw text content."
+      "Extract and summarize the exercise-related information from this text. Focus on any specific exercises, restrictions, or recommendations:",
+      fileContent
     ]);
-
-    console.log('[process-file] Received response from Gemini');
-
+    
+    console.log("Received response from Gemini");
     const response = await result.response;
     const text = response.text();
-
-    console.log('[process-file] Successfully extracted text:', text.substring(0, 100) + '...');
-
+    
+    console.log("Processing complete, returning response");
     return new Response(
       JSON.stringify({ text }),
       { 
         headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
+          ...corsHeaders,
+          'Content-Type': 'application/json',
         },
-        status: 200 
-      }
-    );
+      },
+    )
+
   } catch (error) {
-    console.error('[process-file] Error:', error.message, error.stack);
+    console.error("Error processing request:", error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Failed to process file',
-        details: error.stack
+        error: true, 
+        message: error instanceof Error ? error.message : 'An unknown error occurred',
+        details: error instanceof Error ? error.stack : undefined
       }),
       { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json'
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
         },
-        status: 500 
-      }
-    );
+      },
+    )
   }
-});
+})

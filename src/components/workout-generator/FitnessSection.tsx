@@ -1,49 +1,23 @@
-import { Activity, Loader2 } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Label } from "../ui/label";
-import { Textarea } from "../ui/textarea";
-import { PdfUploadSection } from "./PdfUploadSection";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { PdfUploadSection } from "./PdfUploadSection";
+import { ExerciseSection } from "./ExerciseSection";
+import { TooltipWrapper } from "./TooltipWrapper";
 
-interface FitnessSectionProps {
-  fitnessLevel: string;
-  onFitnessLevelChange: (value: string) => void;
-  renderTooltip: () => React.ReactNode;
-  prescribedExercises?: string;
-  onPrescribedExercisesChange?: (value: string) => void;
-}
-
-export function FitnessSection({ 
-  fitnessLevel, 
-  onFitnessLevelChange, 
-  renderTooltip,
-  prescribedExercises = "",
-  onPrescribedExercisesChange = () => {}
-}: FitnessSectionProps) {
-  const { toast } = useToast();
+export const FitnessSection = () => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [exercises, setExercises] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFileSelect = async (file: File | null) => {
-    if (!file) {
-      onPrescribedExercisesChange('');
-      return;
-    }
-
-    setIsProcessing(true);
-    console.log('[FitnessSection] Starting file processing...', { fileName: file.name, fileSize: file.size });
-
+  const handleFileSelect = async (file: File) => {
     try {
+      setIsProcessing(true);
+      setError(null);
+      console.log("[FitnessSection] Sending file to Supabase Edge Function...");
+
       const formData = new FormData();
       formData.append('file', file);
-
-      console.log('[FitnessSection] Sending file to Supabase Edge Function...');
-      
-      const { data: { publicUrl } } = supabase
-        .storage
-        .from('photos')
-        .getPublicUrl('public/anon-key.txt');
 
       const response = await fetch('https://ulnsvkrrdcmfiguibkpx.supabase.co/functions/v1/process-file', {
         method: 'POST',
@@ -53,94 +27,71 @@ export function FitnessSection({
         body: formData
       });
 
-      console.log('[FitnessSection] Response status:', response.status);
-      
-      const responseText = await response.text();
-      console.log('[FitnessSection] Raw response:', responseText);
+      console.log("[FitnessSection] Response status:", response.status);
+      const rawResponse = await response.text();
+      console.log("[FitnessSection] Raw response:", rawResponse);
 
       if (!response.ok) {
-        throw new Error(`Failed to process file: ${responseText}`);
+        throw new Error(`Failed to process file: ${rawResponse}`);
       }
 
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('[FitnessSection] Error parsing JSON response:', e);
-        throw new Error('Invalid response format from server');
+      const data = JSON.parse(rawResponse);
+      if (data.exercises && Array.isArray(data.exercises)) {
+        setExercises(data.exercises);
+        setSelectedFile(file);
+      } else {
+        throw new Error('Invalid response format');
       }
-
-      console.log('[FitnessSection] Processed data received:', data);
-      
-      if (!data.text) {
-        throw new Error('No text content in response');
-      }
-
-      onPrescribedExercisesChange(data.text);
-      
-      toast({
-        title: "Success",
-        description: "File processed successfully",
-      });
-    } catch (error) {
-      console.error('[FitnessSection] Error processing file:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process file';
-      
-      toast({
-        title: "Error Processing File",
-        description: errorMessage,
-        variant: "destructive",
-      });
+    } catch (err) {
+      console.log("[FitnessSection] Error processing file:", err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      setSelectedFile(null);
+      setExercises([]);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Activity className="h-5 w-5 text-primary" />
-        <h3 className="font-oswald text-lg">Your Experience Level</h3>
-        {renderTooltip()}
-      </div>
-      <RadioGroup value={fitnessLevel} onValueChange={onFitnessLevelChange} className="flex flex-col space-y-2">
-        <div className="flex items-center">
-          <RadioGroupItem value="beginner" id="fitness-beginner" />
-          <Label htmlFor="fitness-beginner" className="ml-2">Beginner</Label>
-        </div>
-        <div className="flex items-center">
-          <RadioGroupItem value="intermediate" id="fitness-intermediate" />
-          <Label htmlFor="fitness-intermediate" className="ml-2">Intermediate</Label>
-        </div>
-        <div className="flex items-center">
-          <RadioGroupItem value="advanced" id="fitness-advanced" />
-          <Label htmlFor="fitness-advanced" className="ml-2">Advanced</Label>
-        </div>
-      </RadioGroup>
+  const handleExerciseRemove = (index: number) => {
+    setExercises(prev => prev.filter((_, i) => i !== index));
+  };
 
-      <div className="space-y-2">
-        <Label htmlFor="prescribed-exercises" className="text-sm font-medium">
-          Prescribed Exercises (Optional)
-        </Label>
-        <div className="relative">
-          <PdfUploadSection onFileSelect={handleFileSelect} />
-          {isProcessing && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded">
-              <div className="flex items-center gap-2 text-white">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Analyzing document...</span>
-              </div>
+  const handleExerciseAdd = (exercise: string) => {
+    setExercises(prev => [...prev, exercise]);
+  };
+
+  return (
+    <Card className="w-full">
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          <TooltipWrapper
+            content="Upload a PDF file containing your previous workouts or exercise history"
+            side="right"
+          >
+            <div>
+              <PdfUploadSection
+                selectedFile={selectedFile}
+                onFileSelect={handleFileSelect}
+                isProcessing={isProcessing}
+                error={error}
+              />
             </div>
-          )}
+          </TooltipWrapper>
+
+          <TooltipWrapper
+            content="Add or remove exercises that you'd like to include in your workout"
+            side="right"
+          >
+            <div>
+              <ExerciseSection
+                exercises={exercises}
+                onExerciseAdd={handleExerciseAdd}
+                onExerciseRemove={handleExerciseRemove}
+              />
+            </div>
+          </TooltipWrapper>
         </div>
-        <Textarea
-          id="prescribed-exercises"
-          placeholder="Enter any prescribed exercises, PT recommendations, or medical restrictions..."
-          value={prescribedExercises}
-          onChange={(e) => onPrescribedExercisesChange(e.target.value)}
-          className="min-h-[100px] resize-y bg-white text-black placeholder:text-gray-500"
-        />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
-}
+};

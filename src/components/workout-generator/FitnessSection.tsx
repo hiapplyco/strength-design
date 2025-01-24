@@ -31,25 +31,26 @@ export function FitnessSection({
     }
 
     setIsProcessing(true);
-    console.log('Starting file processing...');
+    console.log('[FitnessSection] Starting file processing...');
 
     try {
       const formData = new FormData();
       formData.append('file', file);
 
+      console.log('[FitnessSection] Sending file to process-file function...');
       const response = await fetch('/api/process-file', {
         method: 'POST',
         body: formData
       });
 
-      console.log('Response status:', response.status);
+      console.log('[FitnessSection] Response status:', response.status);
 
       if (!response.ok) {
         throw new Error('Failed to process file');
       }
 
       const data = await response.json();
-      console.log('Processed data:', data);
+      console.log('[FitnessSection] Processed data received');
       
       onPrescribedExercisesChange(data.text || '');
       
@@ -58,7 +59,7 @@ export function FitnessSection({
         description: "File processed successfully",
       });
     } catch (error) {
-      console.error('Error processing file:', error);
+      console.error('[FitnessSection] Error processing file:', error);
       toast({
         title: "Error",
         description: "Failed to process file. Please try again.",

@@ -18,32 +18,33 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Received request:', req.method);
+    console.log('[process-file] Request received:', req.method);
     
     const formData = await req.formData();
     const file = formData.get('file');
 
     if (!file || !(file instanceof File)) {
-      console.error('No file uploaded or invalid file');
+      console.error('[process-file] No file uploaded or invalid file');
       throw new Error('No file uploaded');
     }
 
-    console.log('Processing file:', file.name, 'Type:', file.type);
+    console.log('[process-file] Processing file:', file.name, 'Type:', file.type);
 
     const arrayBuffer = await file.arrayBuffer();
     const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-    console.log('File converted to base64, sending to Gemini...');
+    console.log('[process-file] File converted to base64, configuring Gemini...');
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
+      console.error('[process-file] Gemini API key not configured');
       throw new Error('Gemini API key not configured');
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-    console.log('Sending request to Gemini...');
+    console.log('[process-file] Sending request to Gemini...');
 
     const result = await model.generateContent([
       {
@@ -55,12 +56,12 @@ serve(async (req) => {
       "Extract and return all text content from this document without any analysis or summary. Just return the raw text content."
     ]);
 
-    console.log('Received response from Gemini');
+    console.log('[process-file] Received response from Gemini');
 
     const response = await result.response;
     const text = response.text();
 
-    console.log('Successfully extracted text from file');
+    console.log('[process-file] Successfully extracted text:', text.substring(0, 100) + '...');
 
     return new Response(
       JSON.stringify({ text }),
@@ -73,7 +74,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error processing file:', error);
+    console.error('[process-file] Error:', error.message, error.stack);
     return new Response(
       JSON.stringify({ 
         error: error.message || 'Failed to process file',

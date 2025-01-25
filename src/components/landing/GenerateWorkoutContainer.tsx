@@ -88,43 +88,52 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     }
   };
 
-  const handleGenerateWorkout = () => {
-    // Set loading state immediately when button is clicked
+  const handleGenerateWorkout = async () => {
     setIsLoading(true);
     
-    // Wrap the async operation in an immediately invoked async function
-    (async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
-          body: {
-            numberOfDays: 7,
-            selectedExercises: [],
-            prescribedExercises: prescribedExercises,
-          }
-        });
-
-        if (error) throw error;
-
-        console.log('Generated workout data:', data);
-        setWorkouts(data);
-
-        await saveGenerationInputs({
-          selectedExercises: [],
+    try {
+      console.log('Starting workout generation...');
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+        body: {
           numberOfDays: 7,
+          selectedExercises: [],
           prescribedExercises: prescribedExercises,
-        });
+        }
+      });
 
-      } catch (error) {
-        console.error('Error generating workout:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate workout. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
       }
-    })();
+
+      if (!data) {
+        throw new Error('No data received from workout generation');
+      }
+
+      console.log('Generated workout data:', data);
+      setWorkouts(data);
+
+      await saveGenerationInputs({
+        selectedExercises: [],
+        numberOfDays: 7,
+        prescribedExercises: prescribedExercises,
+      });
+
+      toast({
+        title: "Success",
+        description: "Workout generated successfully!",
+      });
+
+    } catch (error) {
+      console.error('Error generating workout:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate workout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -160,7 +169,7 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
             disabled={isLoading}
             className="w-full"
           >
-            {isLoading ? "Generating..." : "Generate"}
+            {isLoading ? "Generating..." : "Generate Workout"}
           </Button>
         </CardContent>
       </Card>

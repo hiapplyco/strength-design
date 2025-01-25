@@ -4,6 +4,7 @@ interface WorkoutGenerationParams {
   selectedExercises?: Array<{ name: string; instructions: string[] }>;
   fitnessLevel: string;
   prescribedExercises?: string;
+  injuries?: string;
 }
 
 export const createWorkoutGenerationPrompt = ({
@@ -11,37 +12,41 @@ export const createWorkoutGenerationPrompt = ({
   weatherPrompt,
   selectedExercises,
   fitnessLevel,
-  prescribedExercises
+  prescribedExercises,
+  injuries
 }: WorkoutGenerationParams): string => {
   const exercisesPrompt = selectedExercises?.length 
-    ? `Include these exercises: ${selectedExercises.map(e => e.name).join(", ")}` 
+    ? `**Specific Exercises:** Include these specific exercises: ${selectedExercises.map(e => e.name).join(", ")}.` 
     : '';
   
-  return `As an expert fitness coach, create a ${numberOfDays}-day workout program. 
-    ${weatherPrompt ? `Consider these weather conditions: ${weatherPrompt}` : ''}
-    ${exercisesPrompt}
-    ${fitnessLevel ? `This program is for a ${fitnessLevel} level individual` : ''}
-    ${prescribedExercises ? `Include these prescribed exercises/modifications: ${prescribedExercises}` : ''}
+  return `As an expert fitness coach, create a ${numberOfDays}-day workout program tailored to the following specifications:
 
-    For each day, provide a detailed workout program in this exact format:
+    ${weatherPrompt ? `**Weather Conditions:** ${weatherPrompt}` : ''}
+    ${exercisesPrompt}
+    ${fitnessLevel ? `**Fitness Level:** This program is for a ${fitnessLevel} level individual.` : ''}
+    ${prescribedExercises ? `**Prescribed Exercises/Modifications:** Include these: ${prescribedExercises}.` : ''}
+    ${injuries ? `**Health Considerations:** Please consider these conditions: ${injuries}.` : ''}
+
+    For each day, provide a detailed workout program in the following exact JSON format:
     {
-      "day1": {
-        "description": "Brief focus description",
-        "warmup": "1. Dynamic stretching\n2. Mobility work\n3. Movement prep",
-        "workout": "1. Main movement pattern\n2. Conditioning piece\n3. Accessory work\nInclude sets, reps, and rest periods",
-        "strength": "Primary lift focus with sets/reps scheme",
-        "notes": "Scaling options and movement tips"
+      "dayX": {
+        "description": "Brief focus description for the day (e.g., strength, endurance, recovery).",
+        "warmup": "1. Dynamic stretching\\n2. Mobility work\\n3. Movement prep",
+        "workout": "1. Main movement pattern\\n2. Conditioning piece\\n3. Accessory work\\nInclude sets, reps, and rest periods.",
+        "strength": "Primary lift focus with sets/reps scheme.",
+        "notes": "Scaling options, movement tips, and safety considerations."
       }
     }
 
     IMPORTANT FORMATTING RULES:
-    1. Use line breaks (\n) to separate movements
+    1. Use line breaks (\\n) to separate movements
     2. Number each movement step
     3. Include specific details for sets, reps, and rest periods
     4. Format as valid JSON without markdown
     5. Ensure proper exercise progression
     6. Include clear movement standards
 
+    Ensure the program is balanced, progressive, and aligned with the individual's fitness level and goals.
     Return ONLY the JSON object with no additional text or markdown.`;
 };
 
@@ -54,39 +59,39 @@ export const createWorkoutModificationPrompt = (
     notes?: string;
   }
 ): string => {
-  return `As an expert coach with deep expertise in exercise programming and movement optimization, modify this workout based on the following request while maintaining its core purpose and progression:
+  return `As an expert fitness coach with deep expertise in exercise programming and movement optimization, modify the following workout based on the provided request while maintaining its core purpose and progression:
 
-CURRENT WORKOUT FOR ${dayToModify}:
-Warmup: ${currentWorkout.warmup}
-Workout: ${currentWorkout.workout}
-Notes: ${currentWorkout.notes || 'None provided'}
+    **CURRENT WORKOUT FOR ${dayToModify}:**
+    - Warmup: ${currentWorkout.warmup}
+    - Workout: ${currentWorkout.workout}
+    - Notes: ${currentWorkout.notes || 'None provided'}
 
-MODIFICATION REQUEST: ${modificationPrompt}
+    **MODIFICATION REQUEST:** ${modificationPrompt}
 
-Consider:
-1. Movement pattern integrity
-2. Exercise progression/regression needs
-3. Equipment modifications
-4. Safety and technique priorities
-5. Energy system demands
-6. Recovery implications
+    Consider the following factors when making modifications:
+    1. **Movement Pattern Integrity:** Ensure the modifications align with the original movement patterns.
+    2. **Exercise Progression/Regression:** Adjust exercises to match the individual's fitness level or goals.
+    3. **Equipment Modifications:** Account for available equipment or lack thereof.
+    4. **Safety and Technique:** Prioritize safe movement execution and proper technique.
+    5. **Energy System Demands:** Maintain the intended energy system focus (e.g., aerobic, anaerobic).
+    6. **Recovery Implications:** Ensure the modifications do not overstress the individual or hinder recovery.
 
-Return ONLY a JSON object with the modified workout in this exact format:
-{
-    "description": "Brief focus description",
-    "warmup": "1. Movement prep\n2. Mobility work\n3. Specific preparation",
-    "workout": "1. Main movement\n2. Conditioning\n3. Accessory work\nInclude specific sets/reps/rest",
-    "notes": "Coaching cues and scaling options",
-    "strength": "Primary movement focus"
-}
+    Return ONLY a JSON object with the modified workout in this exact format:
+    {
+        "description": "Brief focus description",
+        "warmup": "1. Movement prep\\n2. Mobility work\\n3. Specific preparation",
+        "workout": "1. Main movement\\n2. Conditioning\\n3. Accessory work\\nInclude specific sets/reps/rest",
+        "notes": "Coaching cues and scaling options",
+        "strength": "Primary movement focus"
+    }
 
-IMPORTANT:
-1. Use line breaks (\n) to separate movements
-2. Number each step
-3. Include specific details
-4. Format as valid JSON without markdown
-5. Maintain exercise progression
-6. Provide clear standards`;
+    IMPORTANT:
+    1. Use line breaks (\\n) to separate movements
+    2. Number each step
+    3. Include specific details
+    4. Format as valid JSON without markdown
+    5. Maintain exercise progression
+    6. Provide clear standards`;
 };
 
 export const validateFileType = (file: File) => {

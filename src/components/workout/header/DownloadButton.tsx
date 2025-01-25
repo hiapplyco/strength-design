@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface DownloadButtonProps {
-  onDownload: (format: 'txt' | 'docx' | 'pdf') => void;
+  onDownload: (format: 'txt' | 'pdf' | 'csv') => void;
 }
 
 export function DownloadButton({ onDownload }: DownloadButtonProps) {
@@ -27,9 +27,9 @@ export function DownloadButton({ onDownload }: DownloadButtonProps) {
           <FileText className="mr-2 h-4 w-4" />
           Download as TXT
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onDownload('docx')}>
+        <DropdownMenuItem onClick={() => onDownload('csv')}>
           <FileText className="mr-2 h-4 w-4" />
-          Download as DOCX
+          Download as CSV
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onDownload('pdf')}>
           <FileText className="mr-2 h-4 w-4" />

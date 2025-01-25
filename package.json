@@ -52,6 +52,7 @@
     "embla-carousel-react": "^8.3.0",
     "ics": "^3.7.2",
     "input-otp": "^1.2.4",
+    "jspdf": "^2.5.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.462.0",
     "marked": "^15.0.6",

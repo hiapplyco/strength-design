@@ -1,6 +1,7 @@
 import { marked } from 'marked';
 import { toast } from "@/hooks/use-toast";
 import { formatWorkoutToMarkdown } from './workout-formatting';
+import { jsPDF } from 'jspdf';
 
 export const exportToExcel = (content: string) => {
   try {
@@ -32,7 +33,7 @@ export const exportToExcel = (content: string) => {
   }
 };
 
-export const downloadWorkout = async (format: 'txt' | 'docx' | 'pdf' | 'csv', content: string) => {
+export const downloadWorkout = async (format: 'txt' | 'pdf' | 'csv', content: string) => {
   try {
     const formattedContent = formatWorkoutToMarkdown(content);
     let blob: Blob;
@@ -51,53 +52,52 @@ export const downloadWorkout = async (format: 'txt' | 'docx' | 'pdf' | 'csv', co
         blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
         filename = 'workout.csv';
         break;
-      case 'docx':
-        const htmlContent = marked(formattedContent);
-        const docContent = `
-          <!DOCTYPE html>
-          <html xmlns:w="urn:schemas-microsoft-com:office:word">
-          <head>
-            <meta charset="utf-8">
-            <title>Workout Plan</title>
-            <style>
-              body { font-family: Arial, sans-serif; }
-              h1 { color: #333; }
-              h2 { color: #666; }
-            </style>
-          </head>
-          <body>
-            ${htmlContent}
-          </body>
-          </html>
-        `;
-        blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-        filename = 'workout.docx';
-        break;
       case 'pdf':
-        const pdfContent = marked(formattedContent);
-        const styledHtml = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body { 
-                font-family: Arial, sans-serif; 
-                line-height: 1.6; 
-                margin: 2cm;
+        const doc = new jsPDF();
+        
+        // Split content into sections
+        const sections = formattedContent.split('\n\n');
+        let yOffset = 20;
+        
+        sections.forEach((section, index) => {
+          if (yOffset > 270) { // Check if we need a new page
+            doc.addPage();
+            yOffset = 20;
+          }
+          
+          if (section.startsWith('#')) {
+            // It's a heading
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text(section.replace('#', '').trim(), 20, yOffset);
+            yOffset += 10;
+          } else if (section.startsWith('##')) {
+            // It's a subheading
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text(section.replace('##', '').trim(), 20, yOffset);
+            yOffset += 8;
+          } else {
+            // Regular text
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            
+            // Split long text into multiple lines
+            const lines = doc.splitTextToSize(section, 170);
+            lines.forEach(line => {
+              if (yOffset > 270) {
+                doc.addPage();
+                yOffset = 20;
               }
-              h1 { color: #333; margin-top: 1em; }
-              h2 { color: #666; margin-top: 0.8em; }
-              ul { padding-left: 20px; }
-              p { margin: 0.5em 0; }
-            </style>
-          </head>
-          <body>
-            ${pdfContent}
-          </body>
-          </html>
-        `;
-        blob = new Blob([styledHtml], { type: 'application/pdf' });
+              doc.text(line, 20, yOffset);
+              yOffset += 7;
+            });
+          }
+          
+          yOffset += 10; // Add space between sections
+        });
+        
+        blob = new Blob([doc.output('blob')], { type: 'application/pdf' });
         filename = 'workout.pdf';
         break;
       default:

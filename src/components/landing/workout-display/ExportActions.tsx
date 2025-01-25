@@ -21,7 +21,7 @@ export const ExportActions = ({
   isExporting,
   workoutText
 }: ExportActionsProps) => {
-  const handleExport = async (format: 'txt' | 'docx' | 'pdf' | 'csv') => {
+  const handleExport = async (format: 'txt' | 'pdf' | 'csv') => {
     await downloadWorkout(format, workoutText);
   };
 
@@ -52,10 +52,6 @@ export const ExportActions = ({
           <DropdownMenuItem onClick={() => handleExport('csv')}>
             <FileText className="w-4 h-4 mr-2" />
             Export as CSV
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleExport('docx')}>
-            <FileText className="w-4 h-4 mr-2" />
-            Export as DOCX
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleExport('pdf')}>
             <FileText className="w-4 h-4 mr-2" />

@@ -22,21 +22,25 @@ serve(async (req) => {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const uint8Array = new Uint8Array(arrayBuffer);
 
-    console.log('Processing file with Gemini...');
+    console.log('Processing file with Gemini...', file.type);
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+
+    const prompt = "Extract and summarize the exercise-related information from this document. Focus on any specific exercises, restrictions, or recommendations:";
 
     const result = await model.generateContent([
+      prompt,
       {
         inlineData: {
-          data: base64Data,
-          mimeType: file.type
+          mimeType: file.type,
+          data: Array.from(uint8Array)
+            .map(byte => String.fromCharCode(byte))
+            .join('')
         }
-      },
-      "Extract and summarize the exercise-related information from this document. Focus on any specific exercises, restrictions, or recommendations:"
+      }
     ]);
 
     console.log('Received response from Gemini');

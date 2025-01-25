@@ -60,7 +60,7 @@ export function GenerateWorkoutInput({
   const isValid = fitnessLevel !== "" && numberOfDays > 0;
 
   const handleGenerateWithWeather = async () => {
-    if (!isValid || isGenerating) return;
+    if (!isValid) return;
 
     if (typeof window !== 'undefined' && window.gtagSendEvent) {
       window.gtagSendEvent();
@@ -129,6 +129,14 @@ export function GenerateWorkoutInput({
     setInjuries("");
   };
 
+  const startGenerating = () => {
+    setIsGenerating(true);
+    // Force a small delay so React can paint before we do the heavy lifting
+    requestAnimationFrame(() => {
+      handleGenerateWithWeather();
+    });
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto px-4">
       <div className={`relative bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 p-6 space-y-6 ${isGenerating ? 'before:absolute before:inset-0 before:rounded-lg before:border-4 before:border-primary before:animate-[gradient_3s_ease_infinite] before:bg-gradient-to-r before:from-transparent before:via-primary/20 before:to-transparent' : ''}`}>
@@ -169,11 +177,7 @@ export function GenerateWorkoutInput({
         />
 
         <GenerateSection
-          onGenerate={() => {
-            requestAnimationFrame(() => {
-              handleGenerateWithWeather();
-            });
-          }}
+          onGenerate={startGenerating}
           onClear={handleClear}
           isGenerating={isGenerating}
           isValid={isValid}

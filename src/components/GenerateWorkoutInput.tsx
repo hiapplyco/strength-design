@@ -131,13 +131,7 @@ export function GenerateWorkoutInput({
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4">
-      <div className="bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 p-6 space-y-6">
-        {isGenerating && (
-          <div className="h-1 bg-gray-200 rounded overflow-hidden">
-            <div className="h-full bg-primary animate-pulse transition-all duration-300" />
-          </div>
-        )}
-        
+      <div className={`relative bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 p-6 space-y-6 ${isGenerating ? 'before:absolute before:inset-0 before:rounded-lg before:border-4 before:border-primary before:animate-[gradient_3s_ease_infinite] before:bg-gradient-to-r before:from-transparent before:via-primary/20 before:to-transparent' : ''}`}>
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
@@ -175,7 +169,11 @@ export function GenerateWorkoutInput({
         />
 
         <GenerateSection
-          onGenerate={handleGenerateWithWeather}
+          onGenerate={() => {
+            requestAnimationFrame(() => {
+              handleGenerateWithWeather();
+            });
+          }}
           onClear={handleClear}
           isGenerating={isGenerating}
           isValid={isValid}

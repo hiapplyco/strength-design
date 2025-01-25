@@ -21,6 +21,7 @@ interface GenerateWorkoutInputProps {
     prescribedExercises: string;
   }) => Promise<void>;
   isGenerating: boolean;
+  setIsGenerating: (value: boolean) => void;
   setShowGenerateInput: (value: boolean) => void;
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
@@ -31,6 +32,7 @@ export function GenerateWorkoutInput({
   setGeneratePrompt,
   handleGenerateWorkout,
   isGenerating,
+  setIsGenerating,
   setShowGenerateInput,
   numberOfDays,
   setNumberOfDays

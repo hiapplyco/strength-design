@@ -235,6 +235,50 @@ export type Database = {
           },
         ]
       }
+      workout_generation_inputs: {
+        Row: {
+          created_at: string
+          fitness_level: string | null
+          id: string
+          number_of_days: number | null
+          prescribed_exercises: string | null
+          selected_exercises: Json | null
+          user_id: string | null
+          weather_data: Json | null
+          weather_prompt: string | null
+        }
+        Insert: {
+          created_at?: string
+          fitness_level?: string | null
+          id?: string
+          number_of_days?: number | null
+          prescribed_exercises?: string | null
+          selected_exercises?: Json | null
+          user_id?: string | null
+          weather_data?: Json | null
+          weather_prompt?: string | null
+        }
+        Update: {
+          created_at?: string
+          fitness_level?: string | null
+          id?: string
+          number_of_days?: number | null
+          prescribed_exercises?: string | null
+          selected_exercises?: Json | null
+          user_id?: string | null
+          weather_data?: Json | null
+          weather_prompt?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_generation_inputs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workout_history: {
         Row: {
           created_at: string

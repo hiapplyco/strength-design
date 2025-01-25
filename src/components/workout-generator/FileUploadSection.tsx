@@ -25,24 +25,24 @@ export function FileUploadSection({
       <CardHeader className="p-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-0 space-y-2">
+      <CardContent className="p-0">
         {isAnalyzing ? (
           <FileAnalysisState 
             title={`Analyzing ${title}`}
             steps={analysisSteps}
           />
         ) : (
-          <>
+          <div className="space-y-2">
             <PdfUploadSection onFileSelect={onFileSelect} />
             
             {content && (
-              <ScrollArea className="h-[60px] w-full rounded-md border border-input/50 bg-muted/30 p-2">
+              <ScrollArea className="h-[60px] w-full rounded-md border border-input/50 bg-background/5 p-2">
                 <p className="text-xs text-muted-foreground">
                   {content}
                 </p>
               </ScrollArea>
             )}
-          </>
+          </div>
         )}
       </CardContent>
     </Card>

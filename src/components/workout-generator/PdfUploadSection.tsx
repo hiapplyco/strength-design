@@ -59,15 +59,15 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
   };
 
   return (
-    <div className="space-y-1">
+    <div className="w-full">
       <Input
         id="pdf"
         type="file"
         accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
         onChange={handleFileChange}
-        className="cursor-pointer text-xs h-8 file:text-xs file:font-medium py-0"
+        className="cursor-pointer text-xs h-8 file:text-xs file:font-medium py-0 w-full bg-background/5 hover:bg-background/10 transition-colors"
       />
-      <p className="text-[10px] text-muted-foreground/70">
+      <p className="text-[10px] text-muted-foreground/70 mt-1">
         PDF, JPG, PNG, WEBP, HEIC, HEIF (max 4MB)
       </p>
     </div>

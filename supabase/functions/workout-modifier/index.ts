@@ -7,118 +7,127 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Validate workout structure using type predicate
+function isValidWorkout(workout: unknown): workout is { 
+  warmup: unknown; 
+  workout: unknown; 
+  notes?: unknown 
+} {
+  return !!workout && 
+         typeof workout === 'object' && 
+         'warmup' in workout && 
+         'workout' in workout;
+}
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!apiKey) {
-      throw new Error('Missing Gemini API key');
-    }
+    const apiKey = Deno.env.get('GEMINI_API_KEY') ?? '';
+    if (!apiKey) throw new Error('GEMINI_API_KEY environment variable not set');
 
-    const requestData = await req.json();
-    console.log('Received request data:', requestData);
+    const requestData = await req.json().catch(() => {
+      throw new Error('Invalid JSON payload');
+    });
 
     const { dayToModify, modificationPrompt, allWorkouts } = requestData;
-
-    // Enhanced validation
-    if (!dayToModify || typeof dayToModify !== 'string') {
-      throw new Error('Invalid or missing dayToModify');
+    
+    // Structural validation
+    if (typeof dayToModify !== 'string' || !dayToModify.startsWith('day')) {
+      throw new Error(`Invalid day format: '${dayToModify}'. Use 'dayX' format`);
+    }
+    
+    if (typeof modificationPrompt !== 'string' || modificationPrompt.length < 10) {
+      throw new Error('Modification prompt must be at least 10 characters');
     }
 
-    if (!modificationPrompt || typeof modificationPrompt !== 'string') {
-      throw new Error('Invalid or missing modificationPrompt');
-    }
-
-    if (!allWorkouts || typeof allWorkouts !== 'object') {
-      console.error('allWorkouts data:', allWorkouts);
-      throw new Error('Invalid or missing allWorkouts object');
+    if (!allWorkouts || typeof allWorkouts !== 'object' || Array.isArray(allWorkouts)) {
+      throw new Error('allWorkouts must be an object mapping days to workouts');
     }
 
     const currentWorkout = allWorkouts[dayToModify];
-    if (!currentWorkout) {
-      console.error('No workout found for day:', dayToModify);
-      console.error('Available workouts:', Object.keys(allWorkouts));
-      throw new Error(`No workout found for day: ${dayToModify}`);
+    if (!isValidWorkout(currentWorkout)) {
+      throw new Error(`Invalid workout structure for ${dayToModify}`);
     }
 
-    if (!currentWorkout.workout || !currentWorkout.warmup) {
-      console.error('Invalid workout data:', currentWorkout);
-      throw new Error('Current workout must contain at least workout and warmup fields');
-    }
+    const prompt = `PROFESSIONAL WORKOUT MODIFICATION REQUEST
+Current Day: ${dayToModify}
+Original Workout Details:
+- Warmup: ${currentWorkout.warmup}
+- Main Workout: ${currentWorkout.workout}
+- Notes: ${currentWorkout.notes || 'No additional notes'}
 
-    const prompt = `You are a professional fitness trainer. I want you to modify the following workout for ${dayToModify}:
+Modification Instructions: "${modificationPrompt}"
 
-Current workout:
-Warmup: ${currentWorkout.warmup}
-Workout: ${currentWorkout.workout}
-Notes: ${currentWorkout.notes || 'None'}
+REQUIRED ACTIONS:
+1. Analyze current workout structure
+2. Maintain original workout intent where possible
+3. Implement requested changes scientifically
+4. Preserve exercise progression logic
+5. Add modification rationale in notes
 
-Modification request: ${modificationPrompt}
-
-Please provide a modified version of this workout that addresses the request. Return the response in this exact JSON format without any markdown formatting or code blocks:
+STRICT OUTPUT FORMAT (JSON ONLY):
 {
-  "warmup": "modified warmup here",
-  "workout": "modified workout here",
-  "notes": "any additional notes or guidance",
-  "description": "brief description of the modified workout"
-}`;
+  "warmup": ["array", "of", "modified", "warmup", "steps"],
+  "workout": ["array", "of", "updated", "exercises"],
+  "notes": ["array", "of", "professional", "notes"],
+  "description": "string explaining changes"
+}
 
-    console.log('Generated prompt:', prompt);
+CRITICAL RULES:
+- Use double quotes ONLY
+- No markdown formatting
+- No text outside JSON
+- Escape special characters
+- Maintain array formatting`;
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
-        temperature: 0.7,
-        topK: 1,
-        topP: 1,
+        temperature: 0.5,  // Lowered for more consistent modifications
+        topK: 20,
+        topP: 0.9,
         maxOutputTokens: 1024,
+        response_mime_type: "application/json",
       },
     });
 
-    console.log('Starting Gemini request');
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
-    console.log('Received response from Gemini');
 
-    if (!result || !('response' in result)) {
-      console.error('Invalid response from Gemini:', result);
-      throw new Error('Failed to generate response from Gemini');
+    if (!result.response?.text) {
+      throw new Error('Empty response from Gemini API');
     }
 
-    const text = result.response.text();
-    console.log('Raw Gemini response:', text);
+    // Robust JSON extraction with multiple fallbacks
+    const rawText = result.response.text();
+    const jsonText = rawText
+      .replace(/```(json)?/g, '')  // Remove code blocks
+      .replace(/[\r\n]+/g, ' ')    // Collapse newlines
+      .replace(/\s+/g, ' ')        // Collapse whitespace
+      .trim();
 
-    // Clean the response text by removing any markdown formatting
-    const cleanedText = text.replace(/```json\n|\n```/g, '').trim();
-    console.log('Cleaned response:', cleanedText);
+    const modifiedWorkout = JSON.parse(jsonText);
     
-    let modifiedWorkout;
-    try {
-      modifiedWorkout = JSON.parse(cleanedText);
-      console.log('Successfully parsed workout:', modifiedWorkout);
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      console.error('Problematic JSON text:', cleanedText);
-      throw new Error(`Invalid JSON structure: ${parseError.message}`);
+    // Validate response structure
+    if (!modifiedWorkout.warmup || !modifiedWorkout.workout) {
+      throw new Error('Invalid modified workout structure from AI');
     }
 
     return new Response(JSON.stringify(modifiedWorkout), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
     });
+
   } catch (error) {
-    console.error('Error in workout-modifier:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message || 'Failed to modify workout',
-      details: error.stack,
-      timestamp: new Date().toISOString(),
-      type: error.name || 'UnknownError'
+    console.error(`Error: ${error.message}`);
+    return new Response(JSON.stringify({
+      error: error.message,
+      type: error.name,
+      timestamp: new Date().toISOString()
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

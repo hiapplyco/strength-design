@@ -13,32 +13,51 @@ export const createWorkoutGenerationPrompt = ({
   fitnessLevel,
   prescribedExercises
 }: WorkoutGenerationParams): string => {
-  const exercisesPrompt = selectedExercises?.length 
-    ? `Include these exercises: ${selectedExercises.map(e => e.name).join(", ")}` 
+  const exerciseList = selectedExercises?.length 
+    ? `INCLUDED EXERCISES: ${selectedExercises.map(e => e.name).join(", ")}`
     : '';
+
+  const weatherConsideration = weatherPrompt
+    ? `WEATHER ADAPTATIONS: Account for ${weatherPrompt.toLowerCase()} conditions`
+    : '';
+
+  const prescription = prescribedExercises
+    ? `REQUIRED MODIFICATIONS: Incorporate ${prescribedExercises}`
+    : '';
+
+  return `As an elite fitness coach, design a scientifically-grounded ${numberOfDays}-day training program.
   
-  return `As an expert fitness coach, create a ${numberOfDays}-day workout program. 
-    ${weatherPrompt ? `Consider these weather conditions: ${weatherPrompt}` : ''}
-    ${exercisesPrompt}
-    ${fitnessLevel ? `This program is for a ${fitnessLevel} level individual` : ''}
-    ${prescribedExercises ? `Include these prescribed exercises/modifications: ${prescribedExercises}` : ''}
+PROGRAM PARAMETERS:
+- Target fitness level: ${fitnessLevel}
+${weatherConsideration ? `- ${weatherConsideration}\n` : ''}${exerciseList ? `- ${exerciseList}\n` : ''}${prescription ? `- ${prescription}\n` : ''}
 
-    IMPORTANT: Your response MUST be a valid, parseable JSON object with the following structure:
-    {
-      "day1": {
-        "description": "string - Brief focus description",
-        "warmup": "string - Detailed warmup routine",
-        "workout": "string - Main workout details",
-        "strength": "string - Strength component",
-        "notes": "string - Optional coaching notes"
-      },
-      // ... repeat for each day
-    }
+DAILY STRUCTURE REQUIREMENTS:
+1. Focus description: Scientific training stimulus and physiological adaptation
+2. Warmup: Progressive activation sequence
+3. Workout: Periodized prescription with sets/reps/tempo
+4. Strength component: Compound movement pattern focus
+5. Notes: Regeneration strategies or scaling options
 
-    Do not include any text outside of the JSON object.
-    Do not include markdown code blocks.
-    Ensure all string values are properly escaped.
-    Do not use trailing commas.`;
+FORMAT SPECIFICATION:
+Generate valid JSON following this exact structure:
+{
+  "day1": {
+    "description": "string",
+    "warmup": "string",
+    "workout": "string",
+    "strength": "string",
+    "notes": "string"
+  }
+  // ... Repeat for each day
+}
+
+CRITICAL INSTRUCTIONS:
+- Use double quotes for all strings
+- Maintain consistent JSON syntax
+- Avoid markdown formatting
+- Ensure proper escape characters
+- Include all 5 required sections per day
+- Prioritize exercise science principles`;
 };
 
 export const getGeminiConfig = () => ({

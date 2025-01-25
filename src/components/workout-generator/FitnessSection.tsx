@@ -41,7 +41,7 @@ export function FitnessSection({
       <div className="space-y-2">
         <Label>Injuries or Health Considerations</Label>
         <Textarea
-          placeholder="Anything that this AI needs to know about your health"
+          placeholder="List any injuries, medical conditions, or movement limitations that may affect your workout (e.g., knee pain, lower back issues, pregnancy)"
           value={injuries}
           onChange={(e) => onInjuriesChange(e.target.value)}
           className="min-h-[80px]"

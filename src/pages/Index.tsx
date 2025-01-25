@@ -107,6 +107,7 @@ const Index = () => {
                   setGeneratePrompt={setGeneratePrompt}
                   handleGenerateWorkout={handleGenerateWorkout}
                   isGenerating={isGenerating}
+                  setIsGenerating={setIsGenerating}
                   setShowGenerateInput={setShowGenerateInput}
                   numberOfDays={numberOfDays}
                   setNumberOfDays={setNumberOfDays}

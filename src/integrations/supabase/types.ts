@@ -240,6 +240,7 @@ export type Database = {
           created_at: string
           fitness_level: string | null
           id: string
+          injuries: string | null
           number_of_days: number | null
           prescribed_exercises: string | null
           selected_exercises: Json | null
@@ -251,6 +252,7 @@ export type Database = {
           created_at?: string
           fitness_level?: string | null
           id?: string
+          injuries?: string | null
           number_of_days?: number | null
           prescribed_exercises?: string | null
           selected_exercises?: Json | null
@@ -262,6 +264,7 @@ export type Database = {
           created_at?: string
           fitness_level?: string | null
           id?: string
+          injuries?: string | null
           number_of_days?: number | null
           prescribed_exercises?: string | null
           selected_exercises?: Json | null

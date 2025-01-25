@@ -40,6 +40,7 @@ export function GenerateWorkoutInput({
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [fitnessLevel, setFitnessLevel] = useState<string>("");
   const [prescribedExercises, setPrescribedExercises] = useState<string>("");
+  const [injuries, setInjuries] = useState<string>("");
   const { toast } = useToast();
 
   const handleWeatherUpdate = (weatherData: WeatherData | null, weatherPrompt: string) => {
@@ -70,10 +71,11 @@ export function GenerateWorkoutInput({
         ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
         : "",
       fitness: fitnessLevel ? ` Consider this fitness profile: ${fitnessLevel}.` : "",
-      prescribed: prescribedExercises ? ` Please incorporate these prescribed exercises/restrictions: ${prescribedExercises}.` : ""
+      prescribed: prescribedExercises ? ` Please incorporate these prescribed exercises/restrictions: ${prescribedExercises}.` : "",
+      injuries: injuries ? ` Please consider these health conditions/injuries: ${injuries}.` : ""
     };
     
-    const fullPrompt = `${weatherPrompt}${prompts.exercises}${prompts.fitness}${prompts.prescribed}`;
+    const fullPrompt = `${weatherPrompt}${prompts.exercises}${prompts.fitness}${prompts.prescribed}${prompts.injuries}`;
     
     try {
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
@@ -83,6 +85,7 @@ export function GenerateWorkoutInput({
           selectedExercises,
           fitnessLevel,
           prescribedExercises,
+          injuries,
           numberOfDays
         }
       });
@@ -123,6 +126,7 @@ export function GenerateWorkoutInput({
     setSelectedExercises([]);
     setFitnessLevel("");
     setPrescribedExercises("");
+    setInjuries("");
   };
 
   return (
@@ -149,6 +153,8 @@ export function GenerateWorkoutInput({
           onFitnessLevelChange={setFitnessLevel}
           prescribedExercises={prescribedExercises}
           onPrescribedExercisesChange={setPrescribedExercises}
+          injuries={injuries}
+          onInjuriesChange={setInjuries}
           renderTooltip={() => (
             <TooltipWrapper content="Share your fitness level and any prescribed exercises to receive personalized workouts that match your capabilities and requirements." />
           )}

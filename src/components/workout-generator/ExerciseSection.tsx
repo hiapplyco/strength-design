@@ -14,11 +14,6 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
   const [showSearch, setShowSearch] = useState(false);
 
   const handleRemoveExercise = (exerciseToRemove: Exercise) => {
-    // We'll update the selected exercises list by filtering out the removed exercise
-    const updatedExercises = selectedExercises.filter(
-      exercise => exercise.name !== exerciseToRemove.name
-    );
-    // Call onExerciseSelect with the filtered list
     onExerciseSelect(exerciseToRemove);
   };
 
@@ -30,7 +25,10 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
         {renderTooltip()}
       </div>
       
-      <ExerciseSearch onExerciseSelect={onExerciseSelect} />
+      <ExerciseSearch 
+        onExerciseSelect={onExerciseSelect} 
+        selectedExercises={selectedExercises}
+      />
 
       {selectedExercises.length > 0 && (
         <div className="bg-primary/10 rounded-lg p-4 text-sm animate-fade-in">

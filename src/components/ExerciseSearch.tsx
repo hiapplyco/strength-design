@@ -12,19 +12,28 @@ interface ExerciseSearchProps {
   onExerciseSelect?: (exercise: Exercise) => void;
   className?: string;
   embedded?: boolean;
+  selectedExercises?: Exercise[];
 }
 
 export const ExerciseSearch = ({ 
   onExerciseSelect, 
   className, 
-  embedded = false 
+  embedded = false,
+  selectedExercises: externalSelectedExercises = [] 
 }: ExerciseSearchProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [searchResults, setSearchResults] = useState<Exercise[]>([]);
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [selectedExerciseNames, setSelectedExerciseNames] = useState<string[]>(
+    externalSelectedExercises.map(ex => ex.name)
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Update internal selection state when external selection changes
+  useEffect(() => {
+    setSelectedExerciseNames(externalSelectedExercises.map(ex => ex.name));
+  }, [externalSelectedExercises]);
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -68,14 +77,12 @@ export const ExerciseSearch = ({
   }, [searchQuery, exercises]);
 
   const handleExerciseSelect = (exercise: Exercise) => {
-    if (selectedExercises.includes(exercise.name)) {
-      setSelectedExercises(prev => prev.filter(name => name !== exercise.name));
-      // Call onExerciseSelect with the exercise to notify parent of deselection
-      onExerciseSelect?.(exercise);
+    if (selectedExerciseNames.includes(exercise.name)) {
+      setSelectedExerciseNames(prev => prev.filter(name => name !== exercise.name));
     } else {
-      setSelectedExercises(prev => [...prev, exercise.name]);
-      onExerciseSelect?.(exercise);
+      setSelectedExerciseNames(prev => [...prev, exercise.name]);
     }
+    onExerciseSelect?.(exercise);
   };
 
   const handleClearSearch = () => {
@@ -129,7 +136,7 @@ export const ExerciseSearch = ({
           <div className="flex-1 overflow-y-auto p-4">
             <SearchResults
               results={searchResults}
-              selectedExercises={selectedExercises}
+              selectedExercises={selectedExerciseNames}
               onExerciseSelect={handleExerciseSelect}
               sanitizeText={sanitizeText}
             />

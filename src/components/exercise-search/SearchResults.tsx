@@ -63,7 +63,10 @@ export const SearchResults = ({
                     <Switch
                       checked={isSelected}
                       onCheckedChange={() => onExerciseSelect(exercise)}
-                      className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-[#C4A052]"
+                      className={cn(
+                        "bg-[#C4A052]",
+                        isSelected && "!bg-green-500"
+                      )}
                     />
                   </div>
                 </TableCell>

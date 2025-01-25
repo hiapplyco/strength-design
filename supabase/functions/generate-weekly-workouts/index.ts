@@ -6,7 +6,6 @@ import { createWorkoutGenerationPrompt, getGeminiConfig } from "../shared/prompt
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json'
 };
 
@@ -69,7 +68,7 @@ serve(async (req) => {
       throw new Error('Invalid response from Gemini');
     }
 
-    const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
+    const responseText = result.response.text();
     if (!responseText) {
       console.error('No text content in Gemini response');
       throw new Error('No text content in Gemini response');
@@ -78,9 +77,16 @@ serve(async (req) => {
     console.log('Raw response length:', responseText.length);
     console.log('First 100 chars of response:', responseText.substring(0, 100));
 
+    // Clean the response text by removing markdown and normalizing
+    const cleanedText = responseText
+      .replace(/```(json)?/g, '')  // Remove code blocks
+      .replace(/[\r\n]+/g, ' ')    // Collapse newlines
+      .replace(/\s+/g, ' ')        // Normalize whitespace
+      .trim();                     // Remove leading/trailing whitespace
+
     try {
       console.log('Attempting to parse response as JSON...');
-      const workouts = JSON.parse(responseText.trim());
+      const workouts = JSON.parse(cleanedText);
       console.log('Successfully parsed workouts object with keys:', Object.keys(workouts));
       
       // Enhanced validation of the workout structure
@@ -122,7 +128,7 @@ serve(async (req) => {
       });
     } catch (parseError) {
       console.error('JSON parse or validation error:', parseError);
-      console.error('Problematic JSON text:', responseText);
+      console.error('Problematic JSON text:', cleanedText);
       return new Response(JSON.stringify({ 
         error: 'Failed to parse workout data',
         details: parseError.message,

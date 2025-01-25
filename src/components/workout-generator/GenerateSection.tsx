@@ -38,7 +38,7 @@ export function GenerateSection({
           ) : (
             <>
               <Check className="mr-2 h-4 w-4" />
-              Generate Workout
+              Generate
             </>
           )}
         </Button>

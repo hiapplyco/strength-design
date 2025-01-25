@@ -31,10 +31,8 @@ serve(async (req) => {
 
     const prompt = "Extract and summarize the exercise-related information from this document. Focus on any specific exercises, restrictions, or recommendations:";
 
-    // Convert the file data to base64
-    const base64Data = Array.from(uint8Array)
-      .map(byte => String.fromCharCode(byte))
-      .join('');
+    // Convert the file data to base64 properly
+    const base64Data = btoa(String.fromCharCode.apply(null, uint8Array));
 
     const result = await model.generateContent([
       prompt,

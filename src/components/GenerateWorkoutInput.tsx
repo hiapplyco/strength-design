@@ -47,7 +47,8 @@ export function GenerateWorkoutInput({
   const [fitnessLevel, setFitnessLevel] = useState<string>("");
   const [prescribedExercises, setPrescribedExercises] = useState<string>("");
   const [injuries, setInjuries] = useState<string>("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
+  const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
   const { toast } = useToast();
 
   const handleWeatherUpdate = (weatherData: WeatherData | null, weatherPrompt: string) => {
@@ -64,9 +65,9 @@ export function GenerateWorkoutInput({
     });
   };
 
-  const handleFileSelect = async (file: File) => {
+  const handlePrescribedFileSelect = async (file: File) => {
     try {
-      setIsAnalyzing(true);
+      setIsAnalyzingPrescribed(true);
       const formData = new FormData();
       formData.append('file', file);
 
@@ -84,7 +85,7 @@ export function GenerateWorkoutInput({
       
       toast({
         title: "Success",
-        description: "File processed successfully",
+        description: "Exercise program processed successfully",
       });
     } catch (error) {
       console.error('Error processing file:', error);
@@ -94,7 +95,41 @@ export function GenerateWorkoutInput({
         variant: "destructive",
       });
     } finally {
-      setIsAnalyzing(false);
+      setIsAnalyzingPrescribed(false);
+    }
+  };
+
+  const handleInjuriesFileSelect = async (file: File) => {
+    try {
+      setIsAnalyzingInjuries(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await supabase.functions.invoke('process-file', {
+        body: formData,
+      });
+
+      if (response.error) {
+        console.error('Edge Function error:', response.error);
+        throw response.error;
+      }
+
+      const { text } = response.data;
+      setInjuries(text);
+      
+      toast({
+        title: "Success",
+        description: "Medical document processed successfully",
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process file. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzingInjuries(false);
     }
   };
 
@@ -213,30 +248,71 @@ export function GenerateWorkoutInput({
             <CardTitle className="text-base font-medium">Upload Exercise Program</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {isAnalyzing ? (
-              <LoadingIndicator className="py-4">
-                <h3 className="text-2xl font-oswald text-amber-700 text-center">Analyzing Your Document</h3>
-                <div className="space-y-2">
-                  {["Processing file", "Extracting exercises", "Analyzing content"].map((step, i) => (
-                    <div key={step} className="flex items-center space-x-3">
-                      <div className={`h-2 w-2 rounded-full ${
-                        i === 0 ? "bg-amber-600 animate-pulse" :
-                        i === 1 ? "bg-amber-400" :
-                        "bg-amber-200"
-                      }`}/>
-                      <span className="text-amber-700">{step}</span>
-                    </div>
-                  ))}
-                </div>
-              </LoadingIndicator>
+            {isAnalyzingPrescribed ? (
+              <div className="bg-white/20 backdrop-blur-sm p-8 rounded-lg shadow-xl">
+                <LoadingIndicator className="py-4">
+                  <h3 className="text-2xl font-oswald text-amber-700 text-center">Analyzing Your Exercise Program</h3>
+                  <div className="space-y-2">
+                    {["Processing file", "Extracting exercises", "Analyzing content"].map((step, i) => (
+                      <div key={step} className="flex items-center space-x-3">
+                        <div className={`h-2 w-2 rounded-full ${
+                          i === 0 ? "bg-amber-600 animate-pulse" :
+                          i === 1 ? "bg-amber-400" :
+                          "bg-amber-200"
+                        }`}/>
+                        <span className="text-amber-700">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </LoadingIndicator>
+              </div>
             ) : (
               <>
-                <PdfUploadSection onFileSelect={handleFileSelect} />
+                <PdfUploadSection onFileSelect={handlePrescribedFileSelect} />
                 
                 {prescribedExercises && (
                   <ScrollArea className="h-[100px] w-full rounded-md border p-4">
                     <p className="text-sm text-muted-foreground whitespace-pre-line">
                       {prescribedExercises}
+                    </p>
+                  </ScrollArea>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-none bg-muted/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Upload Medical Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isAnalyzingInjuries ? (
+              <div className="bg-white/20 backdrop-blur-sm p-8 rounded-lg shadow-xl">
+                <LoadingIndicator className="py-4">
+                  <h3 className="text-2xl font-oswald text-amber-700 text-center">Analyzing Medical Document</h3>
+                  <div className="space-y-2">
+                    {["Processing file", "Extracting conditions", "Analyzing restrictions"].map((step, i) => (
+                      <div key={step} className="flex items-center space-x-3">
+                        <div className={`h-2 w-2 rounded-full ${
+                          i === 0 ? "bg-amber-600 animate-pulse" :
+                          i === 1 ? "bg-amber-400" :
+                          "bg-amber-200"
+                        }`}/>
+                        <span className="text-amber-700">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </LoadingIndicator>
+              </div>
+            ) : (
+              <>
+                <PdfUploadSection onFileSelect={handleInjuriesFileSelect} />
+                
+                {injuries && (
+                  <ScrollArea className="h-[100px] w-full rounded-md border p-4">
+                    <p className="text-sm text-muted-foreground whitespace-pre-line">
+                      {injuries}
                     </p>
                   </ScrollArea>
                 )}

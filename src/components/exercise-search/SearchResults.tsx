@@ -71,10 +71,10 @@ export const SearchResults = ({
                     )}
                   >
                     {isSelected ? (
-                      <div className="flex items-center justify-center w-full">
+                      <div className="flex items-center justify-between w-full">
                         <Check className="h-4 w-4 text-white" />
                         <X 
-                          className="h-4 w-4 text-white ml-2 hover:text-red-200" 
+                          className="h-4 w-4 text-red-500 hover:text-red-300 transition-colors duration-200" 
                           onClick={(e) => {
                             e.stopPropagation();
                             onExerciseSelect(exercise);

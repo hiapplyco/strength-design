@@ -60,7 +60,7 @@ export function GenerateWorkoutInput({
   const isValid = fitnessLevel !== "" && numberOfDays > 0;
 
   const handleGenerateWithWeather = async () => {
-    if (!isValid) return;
+    if (!isValid || isGenerating) return;
 
     if (typeof window !== 'undefined' && window.gtagSendEvent) {
       window.gtagSendEvent();
@@ -132,6 +132,12 @@ export function GenerateWorkoutInput({
   return (
     <div className="w-full max-w-2xl mx-auto px-4">
       <div className="bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 p-6 space-y-6">
+        {isGenerating && (
+          <div className="h-1 bg-gray-200 rounded overflow-hidden">
+            <div className="h-full bg-primary animate-pulse transition-all duration-300" />
+          </div>
+        )}
+        
         <WeatherSection 
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}

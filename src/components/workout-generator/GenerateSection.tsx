@@ -26,9 +26,15 @@ export function GenerateSection({
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Button 
-          onClick={onGenerate} 
+          onClick={() => {
+            if (isValid && !isGenerating) {
+              requestAnimationFrame(() => {
+                onGenerate();
+              });
+            }
+          }}
           disabled={isGenerating || !isValid}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-all duration-200 ${isGenerating ? 'opacity-75' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {isGenerating ? (
             <>
@@ -45,7 +51,8 @@ export function GenerateSection({
         <Button 
           onClick={onClear}
           variant="outline"
-          className="w-full hover:bg-destructive/10"
+          disabled={isGenerating}
+          className="w-full hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <X className="h-4 w-4 mr-2" />
           Clear All

@@ -64,7 +64,7 @@ export const SearchResults = ({
                     variant="default"
                     onClick={() => onExerciseSelect(exercise)}
                     className={cn(
-                      "w-full transition-colors duration-200 group",
+                      "w-full transition-colors duration-200 group min-w-[100px]",
                       isSelected 
                         ? "bg-green-500 hover:bg-red-500" 
                         : "bg-[#C4A052] hover:bg-[#B38E3B]"
@@ -75,7 +75,7 @@ export const SearchResults = ({
                         <>
                           <Check className="h-4 w-4 group-hover:hidden" />
                           <X className="h-4 w-4 hidden group-hover:block" />
-                          <span className="hidden group-hover:block">Remove</span>
+                          <span className="group-hover:block">Remove</span>
                         </>
                       ) : (
                         <>

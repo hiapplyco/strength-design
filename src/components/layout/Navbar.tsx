@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +70,12 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/pricing')}
+            >
+              Pricing
+            </Button>
             {showEmailInput ? (
               <div className="flex items-center gap-2">
                 <Input
@@ -109,6 +115,16 @@ export const Navbar = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 space-y-2 animate-fade-in">
+            <Button
+              className="w-full justify-start"
+              variant="ghost"
+              onClick={() => {
+                navigate('/pricing');
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Pricing
+            </Button>
             {showEmailInput ? (
               <div className="space-y-2">
                 <Input

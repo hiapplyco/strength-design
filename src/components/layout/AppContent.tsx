@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
+import Pricing from "@/pages/Pricing";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useAuthStateManager } from "@/hooks/useAuthStateManager";
 
@@ -27,6 +28,7 @@ export const AppContent = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/best-app-of-day" element={<BestAppOfDay />} />
+        <Route path="/pricing" element={<Pricing />} />
       </Routes>
     </>
   );

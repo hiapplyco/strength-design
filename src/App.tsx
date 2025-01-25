@@ -3,7 +3,7 @@ import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Toaster } from "@/components/ui/toaster";
-import AppContent from "./components/layout/AppContent";
+import { AppContent } from "./components/layout/AppContent";
 
 const queryClient = new QueryClient();
 

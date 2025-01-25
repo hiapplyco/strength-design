@@ -4,7 +4,7 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
-import { GenerateWorkoutContainer } from "@/components/landing/GenerateWorkoutContainer";
+import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 
 interface WorkoutDay {
   description: string;
@@ -19,9 +19,44 @@ type WeeklyWorkouts = Record<string, WorkoutDay>;
 const Index = () => {
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showGenerateInput, setShowGenerateInput] = useState(true);
+  const [generatePrompt, setGeneratePrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [numberOfDays, setNumberOfDays] = useState(7);
 
   const resetWorkouts = () => {
     setWorkouts(null);
+  };
+
+  const handleGenerateWorkout = async (params: {
+    prompt: string;
+    weatherPrompt: string;
+    selectedExercises: any[];
+    fitnessLevel: string;
+    prescribedExercises: string;
+  }) => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/generate-workout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate workout');
+      }
+
+      const data = await response.json();
+      setWorkouts(data);
+      setShowGenerateInput(false);
+    } catch (error) {
+      console.error('Error generating workout:', error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (workouts) {
@@ -53,7 +88,17 @@ const Index = () => {
               strength.design
             </h1>
             <HeroSection>
-              <GenerateWorkoutContainer setWorkouts={setWorkouts} />
+              {showGenerateInput && (
+                <GenerateWorkoutInput
+                  generatePrompt={generatePrompt}
+                  setGeneratePrompt={setGeneratePrompt}
+                  handleGenerateWorkout={handleGenerateWorkout}
+                  isGenerating={isGenerating}
+                  setShowGenerateInput={setShowGenerateInput}
+                  numberOfDays={numberOfDays}
+                  setNumberOfDays={setNumberOfDays}
+                />
+              )}
             </HeroSection>
           </div>
         </section>

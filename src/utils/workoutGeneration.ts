@@ -18,6 +18,7 @@ interface GenerateWorkoutParams {
   fitnessLevel: string;
   prescribedExercises: string;
   numberOfDays: number;
+  injuries?: string;
 }
 
 export const generateWorkout = async (params: GenerateWorkoutParams): Promise<WeeklyWorkouts> => {
@@ -37,6 +38,15 @@ export const generateWorkout = async (params: GenerateWorkoutParams): Promise<We
   if (!data) {
     console.error("No data received from Edge Function");
     throw new Error("No workout data received");
+  }
+
+  // Validate that we have the correct number of days
+  const expectedDays = Array.from({ length: params.numberOfDays }, (_, i) => `day${i + 1}`);
+  const missingDays = expectedDays.filter(day => !data[day]);
+  
+  if (missingDays.length > 0) {
+    console.error("Missing days in response:", missingDays);
+    throw new Error(`Missing workouts for days: ${missingDays.join(', ')}`);
   }
 
   return data;

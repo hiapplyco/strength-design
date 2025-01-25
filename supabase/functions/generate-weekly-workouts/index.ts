@@ -56,7 +56,7 @@ serve(async (req) => {
       injuries
     });
 
-    console.log('Sending request to Gemini...');
+    console.log('Sending request to Gemini with numberOfDays:', numberOfDays);
     const result = await model.generateContent(systemPrompt);
     console.log('Received response from Gemini');
 
@@ -75,10 +75,7 @@ serve(async (req) => {
     
     const cleanJson = (text: string): string => {
       try {
-        // Remove markdown code blocks and comments
         let cleaned = text.replace(/```(json)?|```/g, '').trim();
-        
-        // Find the first { and last } to extract the JSON object
         const start = cleaned.indexOf('{');
         const end = cleaned.lastIndexOf('}');
         
@@ -88,26 +85,16 @@ serve(async (req) => {
         }
 
         cleaned = cleaned.slice(start, end + 1);
-
-        // Fix common JSON formatting issues
         cleaned = cleaned
-          // Ensure property names are properly quoted
           .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
-          // Replace single quotes with double quotes
           .replace(/'/g, '"')
-          // Remove trailing commas
           .replace(/,(\s*[}\]])/g, '$1')
-          // Fix escaped quotes within strings
           .replace(/\\"/g, '"')
           .replace(/"([^"]*)""/g, '"$1"')
-          // Remove any invalid control characters
           .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-          // Ensure proper spacing after colons
           .replace(/":"/g, '": "')
-          // Fix multiple spaces
           .replace(/\s+/g, ' ');
 
-        // Validate JSON structure
         JSON.parse(cleaned);
         return cleaned;
       } catch (error) {
@@ -124,7 +111,7 @@ serve(async (req) => {
       const workouts = JSON.parse(cleanedText);
       console.log('Successfully parsed JSON with keys:', Object.keys(workouts));
 
-      // Validate workout structure
+      // Validate workout structure for the requested number of days
       for (let i = 1; i <= numberOfDays; i++) {
         const dayKey = `day${i}`;
         const workout = workouts[dayKey];

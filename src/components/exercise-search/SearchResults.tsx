@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, Check } from "lucide-react";
+import { Plus, Check, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -62,17 +62,25 @@ export const SearchResults = ({
                 <TableCell>
                   <Button
                     variant={isSelected ? "default" : "default"}
-                    onClick={() => !isSelected && onExerciseSelect(exercise)}
+                    onClick={() => onExerciseSelect(exercise)}
                     className={cn(
                       "w-full transition-all duration-200",
                       isSelected 
                         ? "bg-green-500 hover:bg-green-600" 
                         : "bg-primary hover:bg-primary/90"
                     )}
-                    disabled={isSelected}
                   >
                     {isSelected ? (
-                      <Check className="h-4 w-4 text-white" />
+                      <div className="flex items-center justify-center w-full">
+                        <Check className="h-4 w-4 text-white" />
+                        <X 
+                          className="h-4 w-4 text-white ml-2 hover:text-red-200" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onExerciseSelect(exercise);
+                          }}
+                        />
+                      </div>
                     ) : (
                       <>
                         <Plus className="h-4 w-4 mr-2" />

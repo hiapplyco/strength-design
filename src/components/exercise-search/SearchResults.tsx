@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -32,7 +32,7 @@ export const SearchResults = ({
           <TableRow>
             <TableHead>Exercise</TableHead>
             <TableHead>Instructions</TableHead>
-            <TableHead className="w-[100px]">Select</TableHead>
+            <TableHead className="w-[100px] text-center">Select</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -60,13 +60,19 @@ export const SearchResults = ({
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center">
-                    <Switch
-                      checked={isSelected}
-                      onCheckedChange={() => onExerciseSelect(exercise)}
+                    <Button
+                      onClick={() => onExerciseSelect(exercise)}
+                      variant="outline"
+                      size="sm"
                       className={cn(
-                        "data-[state=unchecked]:bg-[#C4A052] data-[state=checked]:bg-green-500"
+                        "w-24 transition-colors duration-200",
+                        isSelected
+                          ? "bg-green-500 hover:bg-green-600 text-white border-green-500"
+                          : "bg-[#C4A052] hover:bg-[#B3913A] text-white border-[#C4A052]"
                       )}
-                    />
+                    >
+                      {isSelected ? "Selected" : "Select"}
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

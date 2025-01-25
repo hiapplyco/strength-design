@@ -67,7 +67,7 @@ export const SearchResults = ({
                       "w-full transition-all duration-200",
                       isSelected 
                         ? "bg-green-500 hover:bg-green-600" 
-                        : "bg-primary hover:bg-primary/90"
+                        : "bg-[#C4A052] hover:bg-[#B38E3B]"
                     )}
                   >
                     {isSelected ? (

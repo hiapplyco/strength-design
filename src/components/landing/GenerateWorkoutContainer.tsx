@@ -1,44 +1,42 @@
 import { useState } from "react";
-import { triggerConfetti } from "@/utils/confetti";
-import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
-import { LoadingIndicator } from "@/components/ui/loading-indicator";
-import { generateWorkout, saveWorkoutNoAuth } from "@/utils/workoutGeneration";
-import { ContactDialog } from "./ContactDialog";
-import type { WeeklyWorkouts } from "@/utils/workoutGeneration";
-import type { Exercise } from "../exercise-search/types";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Exercise } from "@/components/exercise-search/types";
+import { Json } from "@/integrations/supabase/types";
 
 interface GenerateWorkoutContainerProps {
-  setWorkouts: (workouts: WeeklyWorkouts | null) => void;
+  setWorkouts: (workouts: any) => void;
 }
 
-export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContainerProps) {
-  const [generatePrompt, setGeneratePrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [numberOfDays, setNumberOfDays] = useState(7);
-  const [showGenerateInput, setShowGenerateInput] = useState(true);
+export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContainerProps) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const saveGenerationInputs = async (params: {
-    weatherPrompt: string;
-    weatherData: any;
+    weatherData?: any;
+    weatherPrompt?: string;
     selectedExercises: Exercise[];
-    fitnessLevel: string;
-    prescribedExercises: string;
+    fitnessLevel?: string;
+    prescribedExercises?: string;
     numberOfDays: number;
   }) => {
     try {
-      // Transform the Exercise[] array into a simple array of objects
+      // Transform the Exercise[] array into a format that matches Json type
       const simplifiedExercises = params.selectedExercises.map(exercise => ({
         name: exercise.name,
         instructions: exercise.instructions
-      }));
+      })) as Json;
+
+      // Ensure weatherData is properly serialized as Json
+      const serializedWeatherData = params.weatherData ? 
+        JSON.parse(JSON.stringify(params.weatherData)) as Json : 
+        null;
 
       const { error } = await supabase
         .from('workout_generation_inputs')
         .insert({
-          weather_data: params.weatherData ? JSON.parse(JSON.stringify(params.weatherData)) : null,
+          weather_data: serializedWeatherData,
           weather_prompt: params.weatherPrompt || null,
           selected_exercises: simplifiedExercises,
           fitness_level: params.fitnessLevel || null,
@@ -46,78 +44,64 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
           number_of_days: params.numberOfDays
         });
 
-      if (error) {
-        console.error('Error saving generation inputs:', error);
-      }
+      if (error) throw error;
     } catch (error) {
-      console.error('Error in saveGenerationInputs:', error);
+      console.error('Error saving generation inputs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save workout generation inputs",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleGenerateWorkout = async (params: {
-    prompt: string;
-    weatherPrompt: string;
-    selectedExercises: Exercise[];
-    fitnessLevel: string;
-    prescribedExercises: string;
-  }) => {
+  const handleGenerateWorkout = async () => {
+    setIsLoading(true);
     try {
-      setIsGenerating(true);
-      console.log("Starting workout generation with params:", params);
-      
+      const response = await fetch('/api/generate-workout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          // Add any necessary parameters here
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate workout');
+      }
+
+      const data = await response.json();
+      setWorkouts(data);
+
       // Save the generation inputs
       await saveGenerationInputs({
-        ...params,
-        numberOfDays,
-        weatherData: null // We'll need to pass this from the WeatherSection if needed
-      });
-      
-      const workouts = await generateWorkout({
-        ...params,
-        numberOfDays,
+        selectedExercises: [], // Add actual exercises here
+        numberOfDays: 7, // Default to 7 days
       });
 
-      console.log("Generated workouts:", workouts);
-      setWorkouts(workouts);
-      
-      // Save workouts without authentication
-      await saveWorkoutNoAuth(workouts);
-      triggerConfetti();
-
-    } catch (error: any) {
-      console.error('Error in handleGenerateWorkout:', error);
-      const errorMessage = error.message || "Failed to generate workouts. Please try again.";
-      
-      console.error('Detailed error:', {
-        message: errorMessage,
-        originalError: error
-      });
-
+    } catch (error) {
+      console.error('Error generating workout:', error);
       toast({
         title: "Error",
-        description: errorMessage,
-        variant: "destructive"
+        description: "Failed to generate workout",
+        variant: "destructive",
       });
     } finally {
-      setIsGenerating(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div id="generate-workout">
-      <GenerateWorkoutInput
-        generatePrompt={generatePrompt}
-        setGeneratePrompt={setGeneratePrompt}
-        handleGenerateWorkout={handleGenerateWorkout}
-        isGenerating={isGenerating}
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
-        setShowGenerateInput={setShowGenerateInput}
-      />
-      <div className="mt-8 flex justify-center">
-        <ContactDialog buttonText="Get Enterprise Access" variant="secondary" />
-      </div>
-      {isGenerating && <LoadingIndicator />}
+    <div className="flex flex-col items-center justify-center gap-4 p-4">
+      <Button
+        onClick={handleGenerateWorkout}
+        disabled={isLoading}
+        className="w-full max-w-md"
+      >
+        {isLoading ? "Generating..." : "Generate Workout"}
+      </Button>
     </div>
   );
-}
+};

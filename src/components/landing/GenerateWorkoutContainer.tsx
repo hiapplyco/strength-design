@@ -88,38 +88,43 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     }
   };
 
-  const handleGenerateWorkout = async () => {
+  const handleGenerateWorkout = () => {
+    // Set loading state immediately when button is clicked
     setIsLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
-        body: {
-          numberOfDays: 7,
+    
+    // Wrap the async operation in an immediately invoked async function
+    (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+          body: {
+            numberOfDays: 7,
+            selectedExercises: [],
+            prescribedExercises: prescribedExercises,
+          }
+        });
+
+        if (error) throw error;
+
+        console.log('Generated workout data:', data);
+        setWorkouts(data);
+
+        await saveGenerationInputs({
           selectedExercises: [],
+          numberOfDays: 7,
           prescribedExercises: prescribedExercises,
-        }
-      });
+        });
 
-      if (error) throw error;
-
-      console.log('Generated workout data:', data);
-      setWorkouts(data);
-
-      await saveGenerationInputs({
-        selectedExercises: [],
-        numberOfDays: 7,
-        prescribedExercises: prescribedExercises,
-      });
-
-    } catch (error) {
-      console.error('Error generating workout:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate workout. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+      } catch (error) {
+        console.error('Error generating workout:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate workout. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   };
 
   return (
@@ -155,7 +160,7 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
             disabled={isLoading}
             className="w-full"
           >
-            {isLoading ? "Generating..." : "Generate Workout"}
+            {isLoading ? "Generating..." : "Generate"}
           </Button>
         </CardContent>
       </Card>

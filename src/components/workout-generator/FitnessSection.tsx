@@ -3,7 +3,7 @@ import { Dumbbell } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { PdfUploadSection } from "./PdfUploadSection";
 import { supabase } from "@/integrations/supabase/client";
-import { processImageWithTesseract } from "@/utils/tesseract";
+import { processImageWithTesseract, initTesseract } from "@/utils/tesseract";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -45,13 +45,22 @@ export function FitnessSection({
         console.log("Processing image with Tesseract OCR");
         toast({
           title: "Processing Image",
-          description: "Extracting text from image using OCR...",
-          duration: 5000,
+          description: "Initializing OCR engine...",
+          duration: 3000,
         });
 
+        // Initialize Tesseract first
         try {
+          await initTesseract();
+          
+          toast({
+            title: "Processing Image",
+            description: "Extracting text from image...",
+            duration: 5000,
+          });
+
           extractedText = await processImageWithTesseract(file);
-          console.log("Tesseract OCR result:", extractedText);
+          console.log("Extracted text:", extractedText);
         } catch (ocrError) {
           console.error("Tesseract OCR error:", ocrError);
           throw new Error(`OCR processing failed: ${ocrError.message}`);
@@ -136,7 +145,7 @@ export function FitnessSection({
             <p className="text-sm text-destructive">{error}</p>
           )}
           {isProcessing && (
-            <p className="text-sm text-muted-foreground">Processing file...</p>
+            <p className="text-sm text-muted-foreground animate-pulse">Processing file... This may take a few moments.</p>
           )}
         </div>
 

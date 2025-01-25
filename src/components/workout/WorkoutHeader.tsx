@@ -44,6 +44,17 @@ export function WorkoutHeader({
     return `day${dayNumber}`;
   };
 
+  const formatWorkoutText = () => {
+    const sections = [
+      strength && `Strength:\n${strength}`,
+      warmup && `Warmup:\n${warmup}`,
+      workout && `Workout:\n${workout}`,
+      notes && `Notes:\n${notes}`
+    ].filter(Boolean);
+
+    return sections.join('\n\n');
+  };
+
   const handleModify = async (prompt: string) => {
     setIsModifying(true);
     try {
@@ -105,6 +116,7 @@ export function WorkoutHeader({
       <HeaderActions
         isExporting={isExporting}
         onExport={onExport}
+        workoutText={formatWorkoutText()}
         onShare={() => {
           navigator.share?.({
             title: `Workout for ${formatDayTitle(title)}`,

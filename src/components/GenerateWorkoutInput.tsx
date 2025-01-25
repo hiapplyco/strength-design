@@ -7,12 +7,9 @@ import { FitnessSection } from "./workout-generator/FitnessSection";
 import { GenerateSection } from "./workout-generator/GenerateSection";
 import { DaysSelection } from "./workout-generator/DaysSelection";
 import { TooltipWrapper } from "./workout-generator/TooltipWrapper";
-import { PdfUploadSection } from "./workout-generator/PdfUploadSection";
+import { FileUploadSection } from "./workout-generator/FileUploadSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -243,83 +240,21 @@ export function GenerateWorkoutInput({
           )}
         />
 
-        <Card className="border-none bg-muted/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Upload Exercise Program</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isAnalyzingPrescribed ? (
-              <div className="bg-white/20 backdrop-blur-sm p-8 rounded-lg shadow-xl">
-                <LoadingIndicator className="py-4">
-                  <h3 className="text-2xl font-oswald text-amber-700 text-center">Analyzing Your Exercise Program</h3>
-                  <div className="space-y-2">
-                    {["Processing file", "Extracting exercises", "Analyzing content"].map((step, i) => (
-                      <div key={step} className="flex items-center space-x-3">
-                        <div className={`h-2 w-2 rounded-full ${
-                          i === 0 ? "bg-amber-600 animate-pulse" :
-                          i === 1 ? "bg-amber-400" :
-                          "bg-amber-200"
-                        }`}/>
-                        <span className="text-amber-700">{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                </LoadingIndicator>
-              </div>
-            ) : (
-              <>
-                <PdfUploadSection onFileSelect={handlePrescribedFileSelect} />
-                
-                {prescribedExercises && (
-                  <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                      {prescribedExercises}
-                    </p>
-                  </ScrollArea>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <FileUploadSection
+          title="Upload Exercise Program"
+          isAnalyzing={isAnalyzingPrescribed}
+          content={prescribedExercises}
+          onFileSelect={handlePrescribedFileSelect}
+          analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
+        />
 
-        <Card className="border-none bg-muted/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Upload Medical Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isAnalyzingInjuries ? (
-              <div className="bg-white/20 backdrop-blur-sm p-8 rounded-lg shadow-xl">
-                <LoadingIndicator className="py-4">
-                  <h3 className="text-2xl font-oswald text-amber-700 text-center">Analyzing Medical Document</h3>
-                  <div className="space-y-2">
-                    {["Processing file", "Extracting conditions", "Analyzing restrictions"].map((step, i) => (
-                      <div key={step} className="flex items-center space-x-3">
-                        <div className={`h-2 w-2 rounded-full ${
-                          i === 0 ? "bg-amber-600 animate-pulse" :
-                          i === 1 ? "bg-amber-400" :
-                          "bg-amber-200"
-                        }`}/>
-                        <span className="text-amber-700">{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                </LoadingIndicator>
-              </div>
-            ) : (
-              <>
-                <PdfUploadSection onFileSelect={handleInjuriesFileSelect} />
-                
-                {injuries && (
-                  <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                      {injuries}
-                    </p>
-                  </ScrollArea>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <FileUploadSection
+          title="Upload Medical Information"
+          isAnalyzing={isAnalyzingInjuries}
+          content={injuries}
+          onFileSelect={handleInjuriesFileSelect}
+          analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
+        />
 
         <DaysSelection
           numberOfDays={numberOfDays}

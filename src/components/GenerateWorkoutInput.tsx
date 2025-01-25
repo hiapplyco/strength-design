@@ -235,6 +235,9 @@ export function GenerateWorkoutInput({
             <ExerciseSection
               selectedExercises={selectedExercises}
               onExerciseSelect={handleExerciseSelect}
+              renderTooltip={() => (
+                <TooltipWrapper content="Add specific equipment or exercises you have access to. This helps create workouts that match your available resources." />
+              )}
             />
           </div>
         </div>
@@ -252,9 +255,10 @@ export function GenerateWorkoutInput({
                 key={level}
                 onClick={() => setFitnessLevel(level)}
                 variant={fitnessLevel === level ? "default" : "outline"}
-                className={`flex items-center gap-2 h-auto py-4 ${
+                className={cn(
+                  "w-24 transition-colors duration-200",
                   fitnessLevel === level ? "bg-primary text-white" : "hover:bg-primary/10"
-                }`}
+                )}
               >
                 <span className="capitalize">{level}</span>
               </Button>

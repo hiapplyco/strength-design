@@ -8,6 +8,8 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+const MAX_INLINE_SIZE = 4 * 1024 * 1024; // 4MB limit for inline data
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders, status: 204 });
@@ -21,9 +23,20 @@ serve(async (req) => {
       throw new Error('No file uploaded');
     }
 
-    // Check file size (20MB limit)
-    if (file.size > 20 * 1024 * 1024) {
-      throw new Error('File size exceeds 20MB limit');
+    // Check file size - recommend different approach for larger files
+    if (file.size > MAX_INLINE_SIZE) {
+      return new Response(
+        JSON.stringify({
+          error: 'File too large for inline processing',
+          message: 'Files larger than 4MB should be processed using the Gemini File API. Please reduce the file size or contact support for handling larger files.',
+          size: file.size,
+          maxSize: MAX_INLINE_SIZE
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 413 // Request Entity Too Large
+        }
+      );
     }
 
     const arrayBuffer = await file.arrayBuffer();
@@ -70,17 +83,16 @@ serve(async (req) => {
     let status = 500;
     let message = error.message || 'Failed to process file';
     
-    if (error.message === 'File size exceeds 20MB limit') {
-      status = 413; // Request Entity Too Large
-    } else if (error.message.includes('Base64')) {
-      status = 400; // Bad Request
+    if (error.message.includes('Base64')) {
+      status = 400;
       message = 'Failed to encode file data';
     }
 
     return new Response(
       JSON.stringify({ 
         error: message,
-        details: error.stack
+        details: error.stack,
+        suggestion: 'If you are trying to process a large file, consider reducing its size or contacting support for alternative solutions.'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

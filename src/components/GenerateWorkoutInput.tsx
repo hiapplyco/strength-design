@@ -45,9 +45,14 @@ export function GenerateWorkoutInput({
   };
 
   const handleExerciseSelect = (exercise: Exercise) => {
-    if (!selectedExercises.some(e => e.name === exercise.name)) {
-      setSelectedExercises(prev => [...prev, exercise]);
-    }
+    setSelectedExercises(prev => {
+      // If the exercise is already selected, remove it
+      if (prev.some(e => e.name === exercise.name)) {
+        return prev.filter(e => e.name !== exercise.name);
+      }
+      // Otherwise, add it to the selection
+      return [...prev, exercise];
+    });
   };
 
   const isValid = fitnessLevel !== "" && numberOfDays > 0;

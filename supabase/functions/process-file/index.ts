@@ -23,7 +23,7 @@ serve(async (req) => {
 
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
-
+    
     console.log('Processing file with Gemini...', file.type);
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
@@ -31,14 +31,17 @@ serve(async (req) => {
 
     const prompt = "Extract and summarize the exercise-related information from this document. Focus on any specific exercises, restrictions, or recommendations:";
 
+    // Convert the file data to base64
+    const base64Data = Array.from(uint8Array)
+      .map(byte => String.fromCharCode(byte))
+      .join('');
+
     const result = await model.generateContent([
       prompt,
       {
         inlineData: {
           mimeType: file.type,
-          data: Array.from(uint8Array)
-            .map(byte => String.fromCharCode(byte))
-            .join('')
+          data: base64Data
         }
       }
     ]);

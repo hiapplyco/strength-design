@@ -7,6 +7,7 @@ import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { triggerConfetti } from "@/utils/confetti";
 
 interface WorkoutDay {
   description: string;
@@ -60,6 +61,7 @@ const Index = () => {
 
       setWorkouts(data);
       setShowGenerateInput(false);
+      triggerConfetti(); // Trigger confetti on successful generation
     } catch (error) {
       console.error('Error generating workout:', error);
       toast({

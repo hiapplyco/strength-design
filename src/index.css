@@ -5,30 +5,30 @@
 @layer base {
   :root {
     --background: 0 0% 100%; /* White background */
-    --foreground: 215 25% 27%; /* Changed to darker color for better readability */
+    --foreground: 215 25% 27%; /* Dark text for readability */
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 27%; /* Matching text color */
+    --card-foreground: 215 25% 27%;
  
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 27%; /* Matching text color */
+    --popover-foreground: 215 25% 27%;
  
     --primary: 36 36% 42%; /* Bronze */
-    --primary-foreground: 215 25% 27%; /* Matching text color */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
  
     --secondary: 0 0% 75%; /* Silver */
-    --secondary-foreground: 215 25% 27%; /* Matching text color */
+    --secondary-foreground: 215 25% 27%;
  
-    --muted: 215 25% 27%; /* Slate */
+    --muted: 215 25% 27%;
     --muted-foreground: 215 25% 45%;
  
     --accent: 41 65% 55%; /* Gold */
-    --accent-foreground: 215 25% 27%; /* Matching text color */
+    --accent-foreground: 215 25% 27%;
  
-    --destructive: 0 84% 60%; /* Red */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 85%;
+    --border: 36 36% 42%; /* Bronze border */
     --input: 0 0% 100%; /* White input background */
     --ring: 36 36% 42%; /* Bronze ring */
  
@@ -36,13 +36,13 @@
   }
  
   .dark {
-    --background: 0 0% 0%; /* Black background */
-    --foreground: 0 0% 100%;
+    --background: 215 25% 27%; /* Dark background */
+    --foreground: 0 0% 100%; /* White text */
  
-    --card: 0 0% 0%;
+    --card: 215 25% 27%;
     --card-foreground: 0 0% 100%;
  
-    --popover: 0 0% 0%;
+    --popover: 215 25% 27%;
     --popover-foreground: 0 0% 100%;
  
     --primary: 36 36% 42%; /* Bronze */
@@ -51,17 +51,17 @@
     --secondary: 0 0% 75%; /* Silver */
     --secondary-foreground: 0 0% 100%;
  
-    --muted: 215 25% 27%; /* Slate */
+    --muted: 215 25% 27%;
     --muted-foreground: 215 20% 65%;
  
     --accent: 41 65% 55%; /* Gold */
     --accent-foreground: 0 0% 100%;
  
-    --destructive: 0 84% 60%; /* Red */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
  
-    --border: 215 25% 27%;
-    --input: 0 0% 100%; /* White input background */
+    --border: 36 36% 42%; /* Bronze border */
+    --input: 215 28% 17%; /* Darker input background */
     --ring: 36 36% 42%; /* Bronze ring */
   }
 }
@@ -73,5 +73,13 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  input::placeholder {
+    @apply text-muted-foreground;
+  }
+
+  textarea::placeholder {
+    @apply text-muted-foreground;
   }
 }

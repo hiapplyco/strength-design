@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { marked } from 'marked';
 
 interface HeaderActionsProps {
   onShare?: () => void;
@@ -41,8 +42,49 @@ export function HeaderActions({
     }
   };
 
+  const formatWorkoutToMarkdown = (content: string) => {
+    const lines = content.split('\n');
+    let markdown = '';
+    let currentSection = '';
+
+    lines.forEach(line => {
+      if (line.includes('Day:')) {
+        markdown += `\n# ${line.trim()}\n\n`;
+      } else if (line.includes('Strength:')) {
+        currentSection = 'strength';
+        markdown += `## 💪 Strength\n\n`;
+      } else if (line.includes('Warmup:')) {
+        currentSection = 'warmup';
+        markdown += `## 🔥 Warm-up\n\n`;
+      } else if (line.includes('Workout:')) {
+        currentSection = 'workout';
+        markdown += `## 🏋️‍♂️ Workout\n\n`;
+      } else if (line.includes('Notes:')) {
+        currentSection = 'notes';
+        markdown += `## 📝 Notes\n\n`;
+      } else if (line.trim() === '---') {
+        markdown += `\n---\n\n`;
+      } else if (line.trim()) {
+        // Format the content based on the section
+        if (currentSection === 'workout') {
+          // Split workout items and format as a list
+          const items = line.split(',').map(item => item.trim());
+          items.forEach(item => {
+            if (item) markdown += `- ${item}\n`;
+          });
+        } else {
+          markdown += `${line.trim()}\n`;
+        }
+      }
+    });
+
+    return markdown;
+  };
+
   const exportToGoogleDocs = (content: string) => {
-    const docContent = encodeURIComponent(content);
+    const markdown = formatWorkoutToMarkdown(content);
+    const htmlContent = marked(markdown);
+    const docContent = encodeURIComponent(htmlContent);
     const googleDocsUrl = `https://docs.google.com/document/create?body=${docContent}`;
     window.open(googleDocsUrl, '_blank');
   };

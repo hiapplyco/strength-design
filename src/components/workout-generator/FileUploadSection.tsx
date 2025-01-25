@@ -9,6 +9,7 @@ interface FileUploadSectionProps {
   content: string;
   onFileSelect: (file: File) => Promise<void>;
   analysisSteps: string[];
+  className?: string;
 }
 
 export function FileUploadSection({
@@ -17,9 +18,10 @@ export function FileUploadSection({
   content,
   onFileSelect,
   analysisSteps,
+  className = "",
 }: FileUploadSectionProps) {
   return (
-    <Card className="border-none bg-muted/50">
+    <Card className={`border-none bg-muted/50 ${className}`}>
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-medium">{title}</CardTitle>
       </CardHeader>

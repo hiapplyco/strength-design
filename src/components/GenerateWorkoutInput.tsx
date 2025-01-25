@@ -228,33 +228,41 @@ export function GenerateWorkoutInput({
           )}
         />
 
-        <FitnessSection
-          fitnessLevel={fitnessLevel}
-          onFitnessLevelChange={setFitnessLevel}
-          prescribedExercises={prescribedExercises}
-          onPrescribedExercisesChange={setPrescribedExercises}
-          injuries={injuries}
-          onInjuriesChange={setInjuries}
-          renderTooltip={() => (
-            <TooltipWrapper content="Share your fitness level and any prescribed exercises to receive personalized workouts that match your capabilities and requirements." />
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <FitnessSection
+              fitnessLevel={fitnessLevel}
+              onFitnessLevelChange={setFitnessLevel}
+              prescribedExercises={prescribedExercises}
+              onPrescribedExercisesChange={setPrescribedExercises}
+              injuries={injuries}
+              onInjuriesChange={setInjuries}
+              renderTooltip={() => (
+                <TooltipWrapper content="Share your fitness level and any prescribed exercises to receive personalized workouts that match your capabilities and requirements." />
+              )}
+            />
+          </div>
 
-        <FileUploadSection
-          title="Upload Exercise Program"
-          isAnalyzing={isAnalyzingPrescribed}
-          content={prescribedExercises}
-          onFileSelect={handlePrescribedFileSelect}
-          analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
-        />
+          <div className="space-y-4">
+            <FileUploadSection
+              title="Upload Exercise Program"
+              isAnalyzing={isAnalyzingPrescribed}
+              content={prescribedExercises}
+              onFileSelect={handlePrescribedFileSelect}
+              analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
+              className="h-full"
+            />
 
-        <FileUploadSection
-          title="Upload Medical Information"
-          isAnalyzing={isAnalyzingInjuries}
-          content={injuries}
-          onFileSelect={handleInjuriesFileSelect}
-          analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
-        />
+            <FileUploadSection
+              title="Upload Medical Information"
+              isAnalyzing={isAnalyzingInjuries}
+              content={injuries}
+              onFileSelect={handleInjuriesFileSelect}
+              analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
+              className="h-full"
+            />
+          </div>
+        </div>
 
         <DaysSelection
           numberOfDays={numberOfDays}

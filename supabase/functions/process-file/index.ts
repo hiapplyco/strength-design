@@ -21,6 +21,11 @@ serve(async (req) => {
       throw new Error('No file uploaded');
     }
 
+    // Check file size (20MB limit)
+    if (file.size > 20 * 1024 * 1024) {
+      throw new Error('File size exceeds 20MB limit');
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
@@ -31,8 +36,8 @@ serve(async (req) => {
 
     const prompt = "Extract and summarize the exercise-related information from this document. Focus on any specific exercises, restrictions, or recommendations:";
 
-    // Convert the file data to base64 properly
-    const base64Data = btoa(String.fromCharCode.apply(null, uint8Array));
+    // Convert the file data to base64 using spread operator
+    const base64Data = btoa(String.fromCharCode(...uint8Array));
 
     const result = await model.generateContent([
       prompt,
@@ -60,14 +65,26 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error processing file:', error);
+    
+    // Handle specific error cases
+    let status = 500;
+    let message = error.message || 'Failed to process file';
+    
+    if (error.message === 'File size exceeds 20MB limit') {
+      status = 413; // Request Entity Too Large
+    } else if (error.message.includes('Base64')) {
+      status = 400; // Bad Request
+      message = 'Failed to encode file data';
+    }
+
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Failed to process file',
+        error: message,
         details: error.stack
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+        status 
       }
     );
   }

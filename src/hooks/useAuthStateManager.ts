@@ -27,6 +27,12 @@ export const useAuthStateManager = () => {
         if (initialSession) {
           console.log("Initial session retrieved:", initialSession.user?.id);
           setSession(initialSession);
+        } else {
+          // Show welcome message for new visitors
+          toast({
+            title: "Welcome to strength.design!",
+            description: "Try out our free program generator in the middle of the page!",
+          });
         }
       } catch (error) {
         console.error("Unexpected error during session initialization:", error);
@@ -52,7 +58,7 @@ export const useAuthStateManager = () => {
       switch (event) {
         case 'SIGNED_IN':
           toast({
-            title: "Welcome!",
+            title: "Welcome back!",
             description: "Successfully signed in.",
           });
           navigate('/');

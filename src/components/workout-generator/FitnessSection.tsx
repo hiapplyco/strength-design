@@ -33,6 +33,7 @@ export function FitnessSection({
   const { toast } = useToast();
 
   const handleFileSelect = async (file: File) => {
+    console.log("Starting file processing:", file.type, file.size);
     setIsProcessing(true);
     setError("");
 
@@ -41,12 +42,21 @@ export function FitnessSection({
       let extractedText = '';
 
       if (isImage) {
+        console.log("Processing image with Tesseract OCR");
         toast({
           title: "Processing Image",
           description: "Extracting text from image using OCR...",
         });
-        extractedText = await processImageWithTesseract(file);
+
+        try {
+          extractedText = await processImageWithTesseract(file);
+          console.log("Tesseract OCR result:", extractedText);
+        } catch (ocrError) {
+          console.error("Tesseract OCR error:", ocrError);
+          throw new Error(`OCR processing failed: ${ocrError.message}`);
+        }
       } else {
+        console.log("Processing PDF with Gemini");
         const formData = new FormData();
         formData.append('file', file);
 
@@ -60,6 +70,7 @@ export function FitnessSection({
 
         if (data?.text) {
           extractedText = data.text;
+          console.log("PDF processing result:", extractedText);
         }
       }
 
@@ -69,6 +80,8 @@ export function FitnessSection({
           title: "Success",
           description: "Successfully extracted text from file",
         });
+      } else {
+        throw new Error("No text could be extracted from the file");
       }
     } catch (err) {
       console.error('[FitnessSection] Error processing file:', err);

@@ -62,7 +62,7 @@ export function HeaderActions({
           <div>
             <ActionButton 
               icon={CalendarDays} 
-              onClick={() => {}} 
+              onClick={() => {}}
               disabled={isExporting} 
             />
           </div>

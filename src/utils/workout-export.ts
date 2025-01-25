@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import { toast } from "@/hooks/use-toast";
+import { formatWorkoutToMarkdown } from './workout-formatting';
 
 export const exportToExcel = async (content: string) => {
   try {

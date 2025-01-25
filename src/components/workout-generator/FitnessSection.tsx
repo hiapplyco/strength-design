@@ -3,7 +3,6 @@ import { Dumbbell } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { PdfUploadSection } from "./PdfUploadSection";
 import { supabase } from "@/integrations/supabase/client";
-import { processImageWithTesseract, initTesseract } from "@/utils/tesseract";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
@@ -37,31 +36,19 @@ export function FitnessSection({
     setError("");
 
     try {
-      const isImage = file.type.startsWith('image/');
-      let extractedText = '';
+      const formData = new FormData();
+      formData.append('file', file);
 
-      if (isImage) {
-        await initTesseract();
-        extractedText = await processImageWithTesseract(file);
-      } else {
-        const formData = new FormData();
-        formData.append('file', file);
+      const { data, error: functionError } = await supabase.functions.invoke('process-file', {
+        body: formData,
+      });
 
-        const { data, error: functionError } = await supabase.functions.invoke('process-file', {
-          body: formData,
-        });
-
-        if (functionError) {
-          throw new Error(functionError.message);
-        }
-
-        if (data?.text) {
-          extractedText = data.text;
-        }
+      if (functionError) {
+        throw new Error(functionError.message);
       }
 
-      if (extractedText) {
-        onPrescribedExercisesChange(extractedText);
+      if (data?.text) {
+        onPrescribedExercisesChange(data.text);
         toast({
           title: "Success",
           description: "Successfully extracted text from file",

@@ -26,11 +26,7 @@ export const SearchResults = ({
 }: SearchResultsProps) => {
   if (results.length === 0) return null;
 
-  const handleDeselect = (
-    e: React.MouseEvent<SVGSVGElement>,
-    exercise: Exercise
-  ) => {
-    e.stopPropagation();
+  const handleSelection = (exercise: Exercise, isSelected: boolean) => {
     onExerciseSelect(exercise);
   };
 
@@ -68,31 +64,29 @@ export const SearchResults = ({
                   {exercise.instructions[0]}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="default"
-                    onClick={() => !isSelected && onExerciseSelect(exercise)}
-                    className={cn(
-                      "w-full transition-colors duration-200",
-                      isSelected 
-                        ? "bg-green-500 hover:bg-green-600" 
-                        : "bg-[#C4A052] hover:bg-[#B38E3B]"
-                    )}
-                  >
-                    {isSelected ? (
+                  {isSelected ? (
+                    <Button
+                      variant="default"
+                      className="w-full bg-green-500 hover:bg-green-600 transition-colors duration-200"
+                    >
                       <div className="flex items-center justify-between w-full">
                         <Check className="h-4 w-4 text-white" />
                         <X 
                           className="h-4 w-4 text-red-500 hover:text-red-600 cursor-pointer" 
-                          onClick={(e) => handleDeselect(e, exercise)}
+                          onClick={() => handleSelection(exercise, false)}
                         />
                       </div>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </>
-                    )}
-                  </Button>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="default"
+                      onClick={() => handleSelection(exercise, true)}
+                      className="w-full bg-[#C4A052] hover:bg-[#B38E3B] transition-colors duration-200"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             );

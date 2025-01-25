@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ExportButton } from "./ExportButton";
 import { DownloadButton } from "./DownloadButton";
 import { formatAllWorkouts } from "@/utils/workout-formatting";
-import { downloadWorkout, exportToExcel } from "@/utils/workout-export";
+import { downloadWorkout } from "@/utils/workout-export";
 
 interface HeaderActionsProps {
   onShare?: () => void;
@@ -39,13 +39,9 @@ export function HeaderActions({
     }
   };
 
-  const handleDownload = async (format: 'txt' | 'docx' | 'pdf' | 'csv') => {
+  const handleDownload = async (format: 'txt' | 'pdf' | 'csv') => {
     const content = allWorkouts ? formatAllWorkouts(allWorkouts) : workoutText;
-    if (format === 'csv') {
-      exportToExcel(content);
-    } else {
-      await downloadWorkout(format, content);
-    }
+    await downloadWorkout(format, content);
   };
 
   return (

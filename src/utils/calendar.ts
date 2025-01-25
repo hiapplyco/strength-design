@@ -10,7 +10,7 @@ export const exportToCalendar = async (
     notes: string;
     dayOffset: number;
   }>,
-  toast: ReturnType<typeof useToast>["toast"]
+  toast?: ReturnType<typeof useToast>["toast"]
 ) => {
   try {
     const calendarEvents = events.map(({ title, warmup, workout, notes, dayOffset }) => {
@@ -41,7 +41,7 @@ export const exportToCalendar = async (
       createEvents(calendarEvents, (error: Error | undefined, value: string) => {
         if (error) {
           console.error(error);
-          toast({
+          toast?.({
             title: "Error",
             description: "Failed to create calendar events",
             variant: "destructive",
@@ -58,7 +58,7 @@ export const exportToCalendar = async (
         link.click();
         document.body.removeChild(link);
 
-        toast({
+        toast?.({
           title: "Success",
           description: "Calendar events have been downloaded",
         });
@@ -67,7 +67,7 @@ export const exportToCalendar = async (
     });
   } catch (error) {
     console.error('Error exporting calendar:', error);
-    toast({
+    toast?.({
       title: "Error",
       description: "Failed to export calendar events",
       variant: "destructive",

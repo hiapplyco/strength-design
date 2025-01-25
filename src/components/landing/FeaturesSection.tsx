@@ -7,7 +7,7 @@ export const FeaturesSection = () => {
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-collegiate text-destructive mb-4 transform -skew-x-12 uppercase tracking-wider break-words">
           strength.design
         </h2>
-        <p className="text-base md:text-lg text-gray-800 dark:text-white px-2">
+        <p className="text-base md:text-lg text-white px-2">
           Combine cutting-edge exercise science with intuitive software to build programs your members will love
         </p>
       </div>
@@ -16,22 +16,22 @@ export const FeaturesSection = () => {
         <div className="text-center space-y-4 px-4">
           <BarChart className="w-12 h-12 md:w-16 md:h-16 text-primary mx-auto" />
           <h3 className="text-xl md:text-2xl font-oswald text-primary">Data-Driven Programming</h3>
-          <p className="text-sm md:text-base text-gray-800 dark:text-white">Leverage advanced algorithms and real-time metrics to optimize strength gains.</p>
+          <p className="text-sm md:text-base text-white">Leverage advanced algorithms and real-time metrics to optimize strength gains.</p>
         </div>
         <div className="text-center space-y-4 px-4">
           <Brain className="w-12 h-12 md:w-16 md:h-16 text-primary mx-auto" />
           <h3 className="text-xl md:text-2xl font-oswald text-primary">Science-Backed Methods</h3>
-          <p className="text-sm md:text-base text-gray-800 dark:text-white">Every routine is rooted in the latest research on exercise physiology and biomechanics.</p>
+          <p className="text-sm md:text-base text-white">Every routine is rooted in the latest research on exercise physiology and biomechanics.</p>
         </div>
         <div className="text-center space-y-4 px-4">
           <Users className="w-12 h-12 md:w-16 md:h-16 text-primary mx-auto" />
           <h3 className="text-xl md:text-2xl font-oswald text-primary">Customizable Workouts</h3>
-          <p className="text-sm md:text-base text-gray-800 dark:text-white">Craft individualized programs for different fitness levels from beginners to elite athletes.</p>
+          <p className="text-sm md:text-base text-white">Craft individualized programs for different fitness levels from beginners to elite athletes.</p>
         </div>
         <div className="text-center space-y-4 px-4">
           <Scale className="w-12 h-12 md:w-16 md:h-16 text-primary mx-auto" />
           <h3 className="text-xl md:text-2xl font-oswald text-primary">Scalable Solutions</h3>
-          <p className="text-sm md:text-base text-gray-800 dark:text-white">Easily expand your programs to serve entire gyms, teams, or online communities.</p>
+          <p className="text-sm md:text-base text-white">Easily expand your programs to serve entire gyms, teams, or online communities.</p>
         </div>
       </div>
     </section>

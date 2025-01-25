@@ -23,7 +23,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
         <h1 className="text-4xl md:text-6xl font-oswald text-primary dark:text-white">
           Evidence-Based Strength Programming
         </h1>
-        <p className="text-lg md:text-xl max-w-3xl mx-auto text-gray-800 dark:text-gray-200">
+        <p className="text-lg md:text-xl max-w-3xl mx-auto text-white">
           Transform athlete performance with data-driven strength programs built on exercise science.
           Scale from individual training to managing thousands of athletes while maintaining scientific rigor and personalization.
         </p>
@@ -36,7 +36,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
             <h3 className="text-2xl md:text-3xl font-oswald text-white mb-4">
               Try Our Evidence-Based Programming Free
             </h3>
-            <p className="text-gray-300 mb-6">
+            <p className="text-white mb-6">
               Experience enterprise-grade programming technology. Generate custom workouts powered by exercise science - no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -69,7 +69,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
         ].map((item, i) => (
           <div key={i} className="p-6 bg-white/5 rounded-lg backdrop-blur-sm border border-white/10">
             <h3 className="text-xl font-oswald text-primary dark:text-white mb-2">{item.title}</h3>
-            <p className="text-gray-800 dark:text-gray-200">{item.desc}</p>
+            <p className="text-white">{item.desc}</p>
           </div>
         ))}
       </div>
@@ -101,7 +101,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
             </div>
             <div>
               <h3 className={`text-xl font-oswald text-${item.color} dark:text-white mb-2`}>{item.title}</h3>
-              <p className="text-gray-800 dark:text-gray-300">{item.desc}</p>
+              <p className="text-white">{item.desc}</p>
             </div>
           </div>
         ))}

@@ -15,7 +15,6 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
       toast({
         title: "Invalid file type",
@@ -26,7 +25,6 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
       return;
     }
 
-    // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "File too large",
@@ -42,7 +40,6 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
     } catch (error) {
       console.error('Error uploading file:', error);
       
-      // Handle specific error responses from the edge function
       if (error.response) {
         const errorData = await error.response.json();
         toast({
@@ -62,16 +59,16 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <Input
         id="pdf"
         type="file"
         accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
         onChange={handleFileChange}
-        className="cursor-pointer"
+        className="cursor-pointer text-xs h-8 file:text-xs file:font-medium py-0"
       />
-      <p className="text-sm text-muted-foreground">
-        Supported formats: PDF, JPG, PNG, WEBP, HEIC, HEIF (max 4MB)
+      <p className="text-[10px] text-muted-foreground/70">
+        PDF, JPG, PNG, WEBP, HEIC, HEIF (max 4MB)
       </p>
     </div>
   );

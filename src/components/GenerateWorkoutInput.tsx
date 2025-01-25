@@ -228,8 +228,8 @@ export function GenerateWorkoutInput({
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <FitnessSection
               fitnessLevel={fitnessLevel}
               onFitnessLevelChange={setFitnessLevel}
@@ -243,24 +243,24 @@ export function GenerateWorkoutInput({
             />
           </div>
 
-          <div className="space-y-4">
-            <FileUploadSection
-              title="Upload Exercise Program"
-              isAnalyzing={isAnalyzingPrescribed}
-              content={prescribedExercises}
-              onFileSelect={handlePrescribedFileSelect}
-              analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
-              className="h-full"
-            />
+          <div className="space-y-6 flex flex-col justify-between">
+            <div className="space-y-4">
+              <FileUploadSection
+                title="Upload Exercise Program"
+                isAnalyzing={isAnalyzingPrescribed}
+                content={prescribedExercises}
+                onFileSelect={handlePrescribedFileSelect}
+                analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
+              />
 
-            <FileUploadSection
-              title="Upload Medical Information"
-              isAnalyzing={isAnalyzingInjuries}
-              content={injuries}
-              onFileSelect={handleInjuriesFileSelect}
-              analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
-              className="h-full"
-            />
+              <FileUploadSection
+                title="Upload Medical Information"
+                isAnalyzing={isAnalyzingInjuries}
+                content={injuries}
+                onFileSelect={handleInjuriesFileSelect}
+                analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
+              />
+            </div>
           </div>
         </div>
 

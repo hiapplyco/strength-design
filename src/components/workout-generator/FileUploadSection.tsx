@@ -21,11 +21,11 @@ export function FileUploadSection({
   className = "",
 }: FileUploadSectionProps) {
   return (
-    <Card className={`border-none bg-muted/50 ${className}`}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium">{title}</CardTitle>
+    <Card className={`border-none bg-transparent ${className}`}>
+      <CardHeader className="p-0 pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-0 space-y-2">
         {isAnalyzing ? (
           <FileAnalysisState 
             title={`Analyzing ${title}`}
@@ -36,8 +36,8 @@ export function FileUploadSection({
             <PdfUploadSection onFileSelect={onFileSelect} />
             
             {content && (
-              <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-                <p className="text-sm text-muted-foreground whitespace-pre-line">
+              <ScrollArea className="h-[60px] w-full rounded-md border border-input/50 bg-muted/30 p-2">
+                <p className="text-xs text-muted-foreground">
                   {content}
                 </p>
               </ScrollArea>

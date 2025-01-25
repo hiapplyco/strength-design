@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowUpLeft, ArrowDownRight, ArrowDown } from "lucide-react";
+import { User, Dumbbell, Activity, BicepsFlexed } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FitnessSectionProps {
@@ -15,10 +15,10 @@ interface FitnessSectionProps {
 }
 
 const fitnessLevels = [
-  { value: "elite", label: "Elite", icon: ArrowUp },
-  { value: "advanced", label: "Advanced", icon: ArrowUpLeft },
-  { value: "intermediate", label: "Intermediate", icon: ArrowDownRight },
-  { value: "beginner", label: "Beginner", icon: ArrowDown },
+  { value: "beginner", label: "Beginner", icon: User },
+  { value: "intermediate", label: "Intermediate", icon: Dumbbell },
+  { value: "advanced", label: "Advanced", icon: Activity },
+  { value: "elite", label: "Elite", icon: BicepsFlexed },
 ];
 
 export function FitnessSection({

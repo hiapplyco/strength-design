@@ -7,6 +7,16 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ children }: HeroSectionProps) => {
+  const scrollToGenerate = () => {
+    const element = document.getElementById('generate-workout');
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'center'
+      });
+    }
+  };
+
   return (
     <section className="flex flex-col items-center space-y-8 pt-12 pb-20" aria-label="Scientific Strength Programming Platform">
       <div className="text-center space-y-4">
@@ -31,7 +41,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
-                onClick={() => document.getElementById('generate-workout')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={scrollToGenerate}
                 className="w-full sm:w-auto bg-destructive hover:bg-destructive/90 text-white font-oswald text-lg px-8 py-6"
               >
                 Generate Free Workout
@@ -97,7 +107,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
         ))}
       </div>
 
-      <div className="w-full max-w-3xl">
+      <div id="generate-workout" className="w-full max-w-3xl">
         {children}
       </div>
     </section>

@@ -29,6 +29,7 @@ const Index = () => {
 
   const resetWorkouts = () => {
     setWorkouts(null);
+    setShowGenerateInput(true);
   };
 
   const handleGenerateWorkout = async (params: {

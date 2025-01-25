@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Exercise } from "@/components/exercise-search/types";
 import { Json } from "@/integrations/supabase/types";
+import { PdfUploadSection } from "@/components/workout-generator/PdfUploadSection";
 
 interface GenerateWorkoutContainerProps {
   setWorkouts: (workouts: any) => void;
@@ -12,6 +13,38 @@ interface GenerateWorkoutContainerProps {
 export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContainerProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [prescribedExercises, setPrescribedExercises] = useState<string>("");
+
+  const handleFileSelect = async (file: File) => {
+    try {
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await supabase.functions.invoke('process-file', {
+        body: formData,
+      });
+
+      if (response.error) throw response.error;
+
+      const { text } = response.data;
+      setPrescribedExercises(text);
+      
+      toast({
+        title: "Success",
+        description: "File processed successfully",
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process file. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const saveGenerationInputs = async (params: {
     weatherData?: any;
@@ -22,13 +55,11 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     numberOfDays: number;
   }) => {
     try {
-      // Transform the Exercise[] array into a format that matches Json type
       const simplifiedExercises = params.selectedExercises.map(exercise => ({
         name: exercise.name,
         instructions: exercise.instructions
       })) as Json;
 
-      // Ensure weatherData is properly serialized as Json
       const serializedWeatherData = params.weatherData ? 
         JSON.parse(JSON.stringify(params.weatherData)) as Json : 
         null;
@@ -40,7 +71,7 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
           weather_prompt: params.weatherPrompt || null,
           selected_exercises: simplifiedExercises,
           fitness_level: params.fitnessLevel || null,
-          prescribed_exercises: params.prescribedExercises || null,
+          prescribed_exercises: prescribedExercises || null,
           number_of_days: params.numberOfDays
         });
 
@@ -60,8 +91,9 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     try {
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
-          numberOfDays: 7, // Default to 7 days
-          selectedExercises: [], // Add actual exercises here when implemented
+          numberOfDays: 7,
+          selectedExercises: [],
+          prescribedExercises: prescribedExercises,
         }
       });
 
@@ -70,10 +102,10 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
       console.log('Generated workout data:', data);
       setWorkouts(data);
 
-      // Save the generation inputs
       await saveGenerationInputs({
-        selectedExercises: [], // Add actual exercises here when implemented
-        numberOfDays: 7, // Default to 7 days
+        selectedExercises: [],
+        numberOfDays: 7,
+        prescribedExercises: prescribedExercises,
       });
 
     } catch (error) {
@@ -90,13 +122,16 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 p-4">
-      <Button
-        onClick={handleGenerateWorkout}
-        disabled={isLoading}
-        className="w-full max-w-md"
-      >
-        {isLoading ? "Generating..." : "Generate Workout"}
-      </Button>
+      <div className="w-full max-w-md space-y-4">
+        <PdfUploadSection onFileSelect={handleFileSelect} />
+        <Button
+          onClick={handleGenerateWorkout}
+          disabled={isLoading}
+          className="w-full"
+        >
+          {isLoading ? "Generating..." : "Generate Workout"}
+        </Button>
+      </div>
     </div>
   );
 };

@@ -23,18 +23,40 @@ serve(async (req) => {
       throw new Error('No file uploaded');
     }
 
-    // Check file size - recommend different approach for larger files
+    // Handle different file types
+    const isImage = file.type.startsWith('image/');
+    const isPDF = file.type === 'application/pdf';
+
+    if (!isImage && !isPDF) {
+      throw new Error('Unsupported file type. Only images and PDFs are supported.');
+    }
+
+    if (isImage) {
+      // For images, we'll use client-side Tesseract OCR
+      return new Response(
+        JSON.stringify({
+          useClientOCR: true,
+          message: 'Process this image using Tesseract OCR on the client side'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      );
+    }
+
+    // For PDFs, continue with Gemini processing
     if (file.size > MAX_INLINE_SIZE) {
       return new Response(
         JSON.stringify({
           error: 'File too large for inline processing',
-          message: 'Files larger than 4MB should be processed using the Gemini File API. Please reduce the file size or contact support for handling larger files.',
+          message: 'PDF files larger than 4MB cannot be processed. Please reduce the file size.',
           size: file.size,
           maxSize: MAX_INLINE_SIZE
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 413 // Request Entity Too Large
+          status: 413
         }
       );
     }
@@ -42,14 +64,13 @@ serve(async (req) => {
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
     
-    console.log('Processing file with Gemini...', file.type);
+    console.log('Processing PDF with Gemini...');
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     const prompt = "Extract and summarize the exercise-related information from this document. Focus on any specific exercises, restrictions, or recommendations:";
 
-    // Convert the file data to base64 using spread operator
     const base64Data = btoa(String.fromCharCode(...uint8Array));
 
     const result = await model.generateContent([
@@ -57,9 +78,9 @@ serve(async (req) => {
       {
         inlineData: {
           mimeType: file.type,
-          data: base64Data
-        }
-      }
+          data: base64Data,
+        },
+      },
     ]);
 
     console.log('Received response from Gemini');
@@ -67,19 +88,17 @@ serve(async (req) => {
     const response = await result.response;
     const text = response.text();
 
-    console.log('Successfully extracted text from file');
+    console.log('Successfully extracted text from PDF');
 
     return new Response(
       JSON.stringify({ text }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
+        status: 200
       }
     );
   } catch (error) {
     console.error('Error processing file:', error);
-    
-    // Handle specific error cases
     let status = 500;
     let message = error.message || 'Failed to process file';
     
@@ -92,11 +111,11 @@ serve(async (req) => {
       JSON.stringify({ 
         error: message,
         details: error.stack,
-        suggestion: 'If you are trying to process a large file, consider reducing its size or contacting support for alternative solutions.'
+        suggestion: 'If you are trying to process a large PDF, consider reducing its size.'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status 
+        status
       }
     );
   }

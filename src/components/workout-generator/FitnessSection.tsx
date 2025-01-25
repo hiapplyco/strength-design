@@ -3,6 +3,8 @@ import { Dumbbell } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { PdfUploadSection } from "./PdfUploadSection";
 import { supabase } from "@/integrations/supabase/client";
+import { processImageWithTesseract } from "@/utils/tesseract";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -28,29 +30,56 @@ export function FitnessSection({
 }: FitnessSectionProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const handleFileSelect = async (file: File) => {
     setIsProcessing(true);
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const isImage = file.type.startsWith('image/');
+      let extractedText = '';
 
-      const { data, error: functionError } = await supabase.functions.invoke('process-file', {
-        body: formData,
-      });
+      if (isImage) {
+        // Process images with Tesseract
+        toast({
+          title: "Processing Image",
+          description: "Extracting text from image using OCR...",
+        });
+        extractedText = await processImageWithTesseract(file);
+      } else {
+        // Process PDFs with Gemini
+        const formData = new FormData();
+        formData.append('file', file);
 
-      if (functionError) {
-        throw new Error(functionError.message);
+        const { data, error: functionError } = await supabase.functions.invoke('process-file', {
+          body: formData,
+        });
+
+        if (functionError) {
+          throw new Error(functionError.message);
+        }
+
+        if (data?.text) {
+          extractedText = data.text;
+        }
       }
 
-      if (data?.text) {
-        onPrescribedExercisesChange(data.text);
+      if (extractedText) {
+        onPrescribedExercisesChange(extractedText);
+        toast({
+          title: "Success",
+          description: "Successfully extracted text from file",
+        });
       }
     } catch (err) {
       console.error('[FitnessSection] Error processing file:', err);
       setError(err.message || 'Failed to process file');
+      toast({
+        title: "Error",
+        description: err.message || "Failed to process file",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CalendarDays, FileSpreadsheet, Copy, FileText } from "lucide-react";
+import { CalendarDays, FileText, Download } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,6 @@ import { downloadWorkout } from "@/utils/workout-export";
 
 interface ExportActionsProps {
   onExportCalendar: () => Promise<void>;
-  onExportDocs: () => void;
-  onExportExcel: () => void;
   onCopy: () => Promise<void>;
   isExporting: boolean;
   workoutText: string;
@@ -19,12 +17,11 @@ interface ExportActionsProps {
 
 export const ExportActions = ({
   onExportCalendar,
-  onExportExcel,
   onCopy,
   isExporting,
   workoutText
 }: ExportActionsProps) => {
-  const handleExport = async (format: 'txt' | 'docx' | 'pdf') => {
+  const handleExport = async (format: 'txt' | 'docx' | 'pdf' | 'csv') => {
     await downloadWorkout(format, workoutText);
   };
 
@@ -43,7 +40,7 @@ export const ExportActions = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
+            <Download className="w-4 h-4" />
             Export
           </Button>
         </DropdownMenuTrigger>
@@ -51,6 +48,10 @@ export const ExportActions = ({
           <DropdownMenuItem onClick={() => handleExport('txt')}>
             <FileText className="w-4 h-4 mr-2" />
             Export as TXT
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExport('csv')}>
+            <FileText className="w-4 h-4 mr-2" />
+            Export as CSV
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleExport('docx')}>
             <FileText className="w-4 h-4 mr-2" />
@@ -66,17 +67,9 @@ export const ExportActions = ({
       <Button
         variant="outline"
         className="flex items-center gap-2"
-        onClick={onExportExcel}
-      >
-        <FileSpreadsheet className="w-4 h-4" />
-        Excel
-      </Button>
-      <Button
-        variant="outline"
-        className="flex items-center gap-2"
         onClick={onCopy}
       >
-        <Copy className="w-4 h-4" />
+        <FileText className="w-4 h-4" />
         Copy
       </Button>
     </div>

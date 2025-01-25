@@ -82,21 +82,6 @@ export const WorkoutDisplay = ({
     }
   };
 
-  const exportToGoogleDocs = (content: string) => {
-    const docContent = encodeURIComponent(content);
-    const googleDocsUrl = `https://docs.google.com/document/create?body=${docContent}`;
-    window.open(googleDocsUrl, '_blank');
-  };
-
-  const exportToExcel = (content: string) => {
-    const csvContent = content.split('\n').join(',');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'workout.csv';
-    link.click();
-  };
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(formatAllWorkouts());
@@ -118,8 +103,6 @@ export const WorkoutDisplay = ({
       <WorkoutDisplayHeader
         resetWorkouts={resetWorkouts}
         onExportCalendar={handleExportAllWorkouts}
-        onExportDocs={() => exportToGoogleDocs(formatAllWorkouts())}
-        onExportExcel={() => exportToExcel(formatAllWorkouts())}
         onCopy={handleCopy}
         isExporting={isExporting}
         workoutText={formatAllWorkouts()}

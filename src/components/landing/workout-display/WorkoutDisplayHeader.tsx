@@ -5,8 +5,6 @@ import { ExportActions } from "./ExportActions";
 interface WorkoutDisplayHeaderProps {
   resetWorkouts: () => void;
   onExportCalendar: () => Promise<void>;
-  onExportDocs: () => void;
-  onExportExcel: () => void;
   onCopy: () => Promise<void>;
   isExporting: boolean;
   workoutText: string;
@@ -15,8 +13,6 @@ interface WorkoutDisplayHeaderProps {
 export const WorkoutDisplayHeader = ({
   resetWorkouts,
   onExportCalendar,
-  onExportDocs,
-  onExportExcel,
   onCopy,
   isExporting,
   workoutText
@@ -34,8 +30,6 @@ export const WorkoutDisplayHeader = ({
         
         <ExportActions
           onExportCalendar={onExportCalendar}
-          onExportDocs={onExportDocs}
-          onExportExcel={onExportExcel}
           onCopy={onCopy}
           isExporting={isExporting}
           workoutText={workoutText}

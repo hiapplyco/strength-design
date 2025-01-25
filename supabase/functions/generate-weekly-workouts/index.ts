@@ -73,18 +73,43 @@ serve(async (req) => {
 
     console.log('Raw response length:', responseText.length);
     
-    // Enhanced JSON cleaning
-    const cleanedText = responseText
-      .replace(/```(json)?/g, '') // Remove code blocks
-      .replace(/[\r\n]+/g, ' ')   // Replace newlines with spaces
-      .replace(/\s+/g, ' ')       // Normalize whitespace
-      .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3') // Ensure property names are quoted
-      .replace(/'/g, '"')         // Replace single quotes with double quotes
-      .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
-      .trim();
+    // Enhanced JSON cleaning with better error handling
+    const cleanJson = (text: string): string => {
+      // Remove markdown code blocks and comments
+      let cleaned = text
+        .replace(/```(json)?|```/g, '')
+        .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+        .trim();
 
-    console.log('Cleaned text length:', cleanedText.length);
-    console.log('Attempting to parse JSON...');
+      // Find the first { and last } to extract the JSON object
+      const start = cleaned.indexOf('{');
+      const end = cleaned.lastIndexOf('}');
+      
+      if (start === -1 || end === -1) {
+        console.error('Invalid JSON structure - missing braces');
+        throw new Error('Invalid JSON structure');
+      }
+
+      cleaned = cleaned.slice(start, end + 1);
+
+      // Ensure property names are properly quoted
+      cleaned = cleaned.replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3');
+
+      // Replace single quotes with double quotes
+      cleaned = cleaned.replace(/'/g, '"');
+
+      // Remove trailing commas
+      cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+
+      // Normalize whitespace
+      cleaned = cleaned.replace(/\s+/g, ' ');
+
+      return cleaned;
+    };
+
+    console.log('Cleaning and parsing JSON...');
+    const cleanedText = cleanJson(responseText);
+    console.log('Cleaned text:', cleanedText);
 
     try {
       const workouts = JSON.parse(cleanedText);

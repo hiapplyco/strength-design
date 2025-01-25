@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Plus, Check } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -33,7 +32,7 @@ export const SearchResults = ({
           <TableRow>
             <TableHead>Exercise</TableHead>
             <TableHead>Instructions</TableHead>
-            <TableHead className="w-[100px]">Action</TableHead>
+            <TableHead className="w-[100px]">Select</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -60,30 +59,13 @@ export const SearchResults = ({
                   {exercise.instructions[0]}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="default"
-                    onClick={() => onExerciseSelect(exercise)}
-                    className={cn(
-                      "w-full min-w-[100px] transition-colors duration-200",
-                      isSelected 
-                        ? "bg-green-500 hover:bg-green-600" 
-                        : "bg-[#C4A052] hover:bg-[#B38E3B]"
-                    )}
-                  >
-                    <div className="flex items-center justify-center w-full gap-2">
-                      {isSelected ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          <span>Selected</span>
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="h-4 w-4" />
-                          <span>Add</span>
-                        </>
-                      )}
-                    </div>
-                  </Button>
+                  <div className="flex items-center justify-center">
+                    <Switch
+                      checked={isSelected}
+                      onCheckedChange={() => onExerciseSelect(exercise)}
+                      className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-[#C4A052]"
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             );

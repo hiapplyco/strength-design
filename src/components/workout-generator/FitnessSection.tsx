@@ -46,6 +46,7 @@ export function FitnessSection({
         toast({
           title: "Processing Image",
           description: "Extracting text from image using OCR...",
+          duration: 5000,
         });
 
         try {

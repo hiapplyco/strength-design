@@ -60,7 +60,11 @@ export function HeaderActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div>
-            <ActionButton icon={CalendarDays} disabled={isExporting} />
+            <ActionButton 
+              icon={CalendarDays} 
+              onClick={() => {}} 
+              disabled={isExporting} 
+            />
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">

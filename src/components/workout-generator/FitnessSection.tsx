@@ -27,8 +27,8 @@ export function FitnessSection({
         <Label>Fitness Profile {renderTooltip()}</Label>
       </div>
       <Select value={fitnessLevel} onValueChange={onFitnessLevelChange}>
-        <SelectTrigger className="bg-white text-black placeholder:text-muted-foreground">
-          <SelectValue placeholder="Select your fitness level" />
+        <SelectTrigger className="bg-white text-black">
+          <SelectValue placeholder="Select your fitness level" className="text-muted-foreground" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="beginner">Beginner</SelectItem>

@@ -1,4 +1,4 @@
-import { CalendarDays, Share2, FileSpreadsheet, FileText, Copy } from "lucide-react";
+import { CalendarDays, Share2, FileSpreadsheet, FileText, Copy, Download } from "lucide-react";
 import { ActionButton } from "./ActionButton";
 import {
   DropdownMenu,
@@ -65,9 +65,7 @@ export function HeaderActions({
       } else if (line.trim() === '---') {
         markdown += `\n---\n\n`;
       } else if (line.trim()) {
-        // Format the content based on the section
         if (currentSection === 'workout') {
-          // Split workout items and format as a list
           const items = line.split(',').map(item => item.trim());
           items.forEach(item => {
             if (item) markdown += `- ${item}\n`;
@@ -81,21 +79,75 @@ export function HeaderActions({
     return markdown;
   };
 
-  const exportToGoogleDocs = async (content: string) => {
-    const markdown = formatWorkoutToMarkdown(content);
-    const htmlContent = await marked(markdown);
-    const docContent = encodeURIComponent(htmlContent);
-    const googleDocsUrl = `https://docs.google.com/document/create?body=${docContent}`;
-    window.open(googleDocsUrl, '_blank');
-  };
+  const downloadWorkout = async (format: 'txt' | 'docx' | 'pdf') => {
+    const content = allWorkouts ? formatAllWorkouts() : workoutText;
+    const formattedContent = formatWorkoutToMarkdown(content);
+    
+    let blob: Blob;
+    let filename: string;
+    
+    switch (format) {
+      case 'txt':
+        blob = new Blob([formattedContent], { type: 'text/plain;charset=utf-8' });
+        filename = 'workout.txt';
+        break;
+      case 'docx':
+        // Convert markdown to HTML for better Word compatibility
+        const htmlContent = await marked(formattedContent);
+        // Add basic Word document structure
+        const wordDoc = `
+          <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
+          <head>
+            <meta charset="utf-8">
+            <title>Workout Plan</title>
+          </head>
+          <body>
+            ${htmlContent}
+          </body>
+          </html>
+        `;
+        blob = new Blob([wordDoc], { type: 'application/vnd.ms-word;charset=utf-8' });
+        filename = 'workout.docx';
+        break;
+      case 'pdf':
+        // Convert markdown to HTML for PDF
+        const pdfContent = await marked(formattedContent);
+        // Create a styled HTML document for better PDF rendering
+        const styledHtml = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; }
+              h1 { color: #333; }
+              h2 { color: #666; }
+              ul { padding-left: 20px; }
+            </style>
+          </head>
+          <body>
+            ${pdfContent}
+          </body>
+          </html>
+        `;
+        blob = new Blob([styledHtml], { type: 'application/pdf' });
+        filename = 'workout.pdf';
+        break;
+    }
 
-  const exportToExcel = (content: string) => {
-    const csvContent = content.split('\n').join(',');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Create download link and trigger download
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'workout.csv';
+    link.download = filename;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+
+    toast({
+      title: "Success",
+      description: `Workout downloaded as ${format.toUpperCase()}`,
+    });
   };
 
   const formatAllWorkouts = () => {
@@ -122,10 +174,30 @@ export function HeaderActions({
         onClick={onExport}
         disabled={isExporting} 
       />
-      <ActionButton 
-        icon={FileText} 
-        onClick={() => exportToGoogleDocs(workoutText)}
-      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <div>
+            <ActionButton 
+              icon={Download}
+              onClick={() => {}}
+            />
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuItem onClick={() => downloadWorkout('txt')}>
+            <FileText className="mr-2 h-4 w-4" />
+            Download as TXT
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => downloadWorkout('docx')}>
+            <FileText className="mr-2 h-4 w-4" />
+            Download as DOCX
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => downloadWorkout('pdf')}>
+            <FileText className="mr-2 h-4 w-4" />
+            Download as PDF
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <ActionButton 
         icon={FileSpreadsheet} 
         onClick={() => exportToExcel(workoutText)}
@@ -134,34 +206,6 @@ export function HeaderActions({
         icon={Copy} 
         onClick={() => handleCopy(workoutText)}
       />
-
-      {allWorkouts && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div>
-              <ActionButton 
-                icon={CalendarDays} 
-                onClick={() => {}}
-                disabled={isExporting} 
-              />
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => exportToGoogleDocs(formatAllWorkouts())}>
-              <FileText className="mr-2 h-4 w-4" />
-              Export Week to Google Docs
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => exportToExcel(formatAllWorkouts())}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Export Week to Excel
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleCopy(formatAllWorkouts())}>
-              <Copy className="mr-2 h-4 w-4" />
-              Copy Week to Clipboard
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
     </div>
   );
 }

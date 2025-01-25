@@ -27,7 +27,7 @@ export function FitnessSection({
         <Label>Fitness Profile {renderTooltip()}</Label>
       </div>
       <Select value={fitnessLevel} onValueChange={onFitnessLevelChange}>
-        <SelectTrigger>
+        <SelectTrigger className="bg-white text-black">
           <SelectValue placeholder="Select your fitness level" />
         </SelectTrigger>
         <SelectContent>
@@ -44,7 +44,7 @@ export function FitnessSection({
           placeholder="List any injuries, medical conditions, or movement limitations that may affect your workout (e.g., knee pain, lower back issues, pregnancy)"
           value={injuries}
           onChange={(e) => onInjuriesChange(e.target.value)}
-          className="min-h-[80px]"
+          className="min-h-[80px] bg-white text-black"
         />
       </div>
 
@@ -54,7 +54,7 @@ export function FitnessSection({
           placeholder="Any specific exercises you need to include"
           value={prescribedExercises}
           onChange={(e) => onPrescribedExercisesChange(e.target.value)}
-          className="min-h-[80px]"
+          className="min-h-[80px] bg-white text-black"
         />
       </div>
     </div>

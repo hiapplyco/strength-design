@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ExportButton } from "./ExportButton";
 import { DownloadButton } from "./DownloadButton";
 import { formatAllWorkouts } from "@/utils/workout-formatting";
-import { exportToExcel, downloadWorkout } from "@/utils/workout-export";
+import { downloadWorkout, exportToExcel } from "@/utils/workout-export";
 
 interface HeaderActionsProps {
   onShare?: () => void;
@@ -39,9 +39,13 @@ export function HeaderActions({
     }
   };
 
-  const handleDownload = async (format: 'txt' | 'docx' | 'pdf') => {
+  const handleDownload = async (format: 'txt' | 'docx' | 'pdf' | 'csv') => {
     const content = allWorkouts ? formatAllWorkouts(allWorkouts) : workoutText;
-    await downloadWorkout(format, content);
+    if (format === 'csv') {
+      exportToExcel(content);
+    } else {
+      await downloadWorkout(format, content);
+    }
   };
 
   return (
@@ -49,10 +53,6 @@ export function HeaderActions({
       {onShare && <ActionButton icon={Share2} onClick={onShare} />}
       <ExportButton onExport={onExport} isExporting={isExporting} />
       <DownloadButton onDownload={handleDownload} />
-      <ActionButton 
-        icon={FileSpreadsheet} 
-        onClick={() => exportToExcel(workoutText)}
-      />
       <ActionButton 
         icon={Copy} 
         onClick={() => handleCopy(workoutText)}

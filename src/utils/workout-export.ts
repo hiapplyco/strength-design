@@ -2,12 +2,41 @@ import { marked } from 'marked';
 import { toast } from "@/hooks/use-toast";
 import { formatWorkoutToMarkdown } from './workout-formatting';
 
+export const exportToExcel = (content: string) => {
+  try {
+    const csvContent = content.split('\n')
+      .map(line => line.trim())
+      .filter(line => line && line !== '---')
+      .join(',');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'workout.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+
+    toast({
+      title: "Success",
+      description: "Workout exported as CSV",
+    });
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    toast({
+      title: "Error",
+      description: "Failed to export workout as CSV",
+      variant: "destructive",
+    });
+  }
+};
+
 export const downloadWorkout = async (format: 'txt' | 'docx' | 'pdf' | 'csv', content: string) => {
   try {
     const formattedContent = formatWorkoutToMarkdown(content);
     let blob: Blob;
     let filename: string;
-    let mimeType: string;
     
     switch (format) {
       case 'txt':
@@ -25,18 +54,16 @@ export const downloadWorkout = async (format: 'txt' | 'docx' | 'pdf' | 'csv', co
       case 'docx':
         const htmlContent = marked(formattedContent);
         const docContent = `
-          <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns:dt='uuid:C2F41010-65B3-11d1-A29F-00AA00C14882'>
+          <!DOCTYPE html>
+          <html xmlns:w="urn:schemas-microsoft-com:office:word">
           <head>
-            <meta charset='utf-8'>
+            <meta charset="utf-8">
             <title>Workout Plan</title>
-            <!-- Ensure Word knows this is a Word document -->
-            <xml>
-              <w:WordDocument>
-                <w:View>Print</w:View>
-                <w:Zoom>100</w:Zoom>
-                <w:DoNotOptimizeForBrowser/>
-              </w:WordDocument>
-            </xml>
+            <style>
+              body { font-family: Arial, sans-serif; }
+              h1 { color: #333; }
+              h2 { color: #666; }
+            </style>
           </head>
           <body>
             ${htmlContent}

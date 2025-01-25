@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CalendarDays } from "lucide-react";
+import { ArrowLeft, CalendarDays, FileSpreadsheet, FileText, Copy } from "lucide-react";
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
 import { exportToCalendar } from "@/utils/calendar";
 import { useState, useEffect, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface WorkoutDay {
   description: string;
@@ -29,6 +30,7 @@ export const WorkoutDisplay = ({
 }: WorkoutDisplayProps) => {
   const [localWorkouts, setLocalWorkouts] = useState<WeeklyWorkouts>(workouts);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (containerRef.current) {
@@ -47,6 +49,21 @@ export const WorkoutDisplay = ({
     }));
   };
 
+  const formatAllWorkouts = () => {
+    return Object.entries(localWorkouts)
+      .map(([day, workout]) => {
+        const sections = [
+          `Day: ${day}`,
+          workout.strength && `Strength:\n${workout.strength}`,
+          workout.warmup && `Warmup:\n${workout.warmup}`,
+          workout.workout && `Workout:\n${workout.workout}`,
+          workout.notes && `Notes:\n${workout.notes}`
+        ].filter(Boolean);
+        return sections.join('\n\n');
+      })
+      .join('\n\n---\n\n');
+  };
+
   const handleExportAllWorkouts = async () => {
     try {
       setIsExporting(true);
@@ -58,11 +75,42 @@ export const WorkoutDisplay = ({
         dayOffset: index
       }));
 
-      await exportToCalendar(events);
+      await exportToCalendar(events, toast);
     } catch (error) {
       console.error('Error exporting workouts:', error);
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const exportToGoogleDocs = (content: string) => {
+    const docContent = encodeURIComponent(content);
+    const googleDocsUrl = `https://docs.google.com/document/create?body=${docContent}`;
+    window.open(googleDocsUrl, '_blank');
+  };
+
+  const exportToExcel = (content: string) => {
+    const csvContent = content.split('\n').join(',');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'workout.csv';
+    link.click();
+  };
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Success",
+        description: "Workout copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy workout",
+        variant: "destructive",
+      });
     }
   };
 
@@ -78,15 +126,41 @@ export const WorkoutDisplay = ({
             <ArrowLeft className="w-4 h-4" /> Back to Home
           </Button>
           
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={handleExportAllWorkouts}
-            disabled={isExporting}
-          >
-            <CalendarDays className="w-4 h-4" />
-            Export All to Calendar
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={handleExportAllWorkouts}
+              disabled={isExporting}
+            >
+              <CalendarDays className="w-4 h-4" />
+              Calendar
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => exportToGoogleDocs(formatAllWorkouts())}
+            >
+              <FileText className="w-4 h-4" />
+              Docs
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => exportToExcel(formatAllWorkouts())}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Excel
+            </Button>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2"
+              onClick={() => handleCopy(formatAllWorkouts())}
+            >
+              <Copy className="w-4 h-4" />
+              Copy
+            </Button>
+          </div>
         </div>
       </div>
       
@@ -111,7 +185,7 @@ export const WorkoutDisplay = ({
                       workout: workout.workout,
                       notes: workout.notes || '',
                       dayOffset: 0
-                    }]);
+                    }], toast);
                   } finally {
                     setIsExporting(false);
                   }

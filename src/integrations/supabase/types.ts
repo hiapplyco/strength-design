@@ -289,7 +289,7 @@ export type Database = {
           notes: string | null
           strength: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
           warmup: string
           workout: string
         }
@@ -301,7 +301,7 @@ export type Database = {
           notes?: string | null
           strength?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           warmup: string
           workout: string
         }
@@ -313,19 +313,11 @@ export type Database = {
           notes?: string | null
           strength?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           warmup?: string
           workout?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "workouts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       workouts_backup: {
         Row: {

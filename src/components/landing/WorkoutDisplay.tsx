@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
 import { exportToCalendar } from "@/utils/calendar";
-import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 
 interface WorkoutDay {
@@ -28,7 +27,6 @@ export const WorkoutDisplay = ({
   isExporting,
   setIsExporting,
 }: WorkoutDisplayProps) => {
-  const { toast } = useToast();
   const [localWorkouts, setLocalWorkouts] = useState<WeeklyWorkouts>(workouts);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,11 +47,6 @@ export const WorkoutDisplay = ({
     }));
   };
 
-  const formatDayTitle = (day: string) => {
-    const dayNumber = day.match(/\d+/)?.[0] || "1";
-    return `day${dayNumber}`;
-  };
-
   const handleExportAllWorkouts = async () => {
     try {
       setIsExporting(true);
@@ -65,14 +58,9 @@ export const WorkoutDisplay = ({
         dayOffset: index
       }));
 
-      await exportToCalendar(events, toast);
+      await exportToCalendar(events);
     } catch (error) {
       console.error('Error exporting workouts:', error);
-      toast({
-        title: "Error",
-        description: "Failed to export workouts. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsExporting(false);
     }
@@ -123,7 +111,7 @@ export const WorkoutDisplay = ({
                       workout: workout.workout,
                       notes: workout.notes || '',
                       dayOffset: 0
-                    }], toast);
+                    }]);
                   } finally {
                     setIsExporting(false);
                   }

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
 import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
@@ -17,7 +16,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   const [isGenerating, setIsGenerating] = useState(false);
   const [numberOfDays, setNumberOfDays] = useState(7);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
-  const { toast } = useToast();
 
   const handleGenerateWorkout = async (params: {
     prompt: string;
@@ -39,15 +37,7 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       setWorkouts(workouts);
       
       // Save workouts without authentication
-      const saved = await saveWorkoutNoAuth(workouts);
-      
-      toast({
-        title: "Success",
-        description: saved 
-          ? "Your workout plan has been generated and saved!"
-          : "Your workout plan has been generated! (Note: Unable to save to database)",
-      });
-      
+      await saveWorkoutNoAuth(workouts);
       triggerConfetti();
 
     } catch (error: any) {
@@ -57,12 +47,6 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       console.error('Detailed error:', {
         message: errorMessage,
         originalError: error
-      });
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
       });
     } finally {
       setIsGenerating(false);

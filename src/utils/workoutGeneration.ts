@@ -1,6 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { triggerConfetti } from "@/utils/confetti";
 import type { Exercise } from "@/components/exercise-search/types";
 
 interface WorkoutDay {
@@ -45,7 +43,7 @@ export const generateWorkout = async (params: GenerateWorkoutParams): Promise<We
 };
 
 export const saveWorkoutNoAuth = async (workouts: WeeklyWorkouts) => {
-  console.log("Saving workouts without auth:", workouts);
+  console.log("Saving workouts:", workouts);
   
   const workoutPromises = Object.entries(workouts).map(([day, workout]) => {
     return supabase.from('workouts').insert({
@@ -54,8 +52,7 @@ export const saveWorkoutNoAuth = async (workouts: WeeklyWorkouts) => {
       workout: workout.workout,
       notes: workout.notes,
       strength: workout.strength,
-      description: workout.description,
-      user_id: '00000000-0000-0000-0000-000000000000' // Default user ID for non-authenticated workouts
+      description: workout.description
     });
   });
 

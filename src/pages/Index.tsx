@@ -5,6 +5,8 @@ import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface WorkoutDay {
   description: string;
@@ -23,6 +25,7 @@ const Index = () => {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [numberOfDays, setNumberOfDays] = useState(7);
+  const { toast } = useToast();
 
   const resetWorkouts = () => {
     setWorkouts(null);
@@ -37,23 +40,32 @@ const Index = () => {
   }) => {
     setIsGenerating(true);
     try {
-      const response = await fetch('/api/generate-workout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+        body: {
+          ...params,
+          numberOfDays
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate workout');
+      if (error) {
+        console.error('Error generating workout:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate workout. Please try again.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      const data = await response.json();
       setWorkouts(data);
       setShowGenerateInput(false);
     } catch (error) {
       console.error('Error generating workout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate workout. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsGenerating(false);
     }

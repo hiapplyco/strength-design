@@ -5,14 +5,14 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const MAX_INLINE_SIZE = 4 * 1024 * 1024; // 4MB limit for inline data
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB limit
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders, status: 204 });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
@@ -23,17 +23,34 @@ serve(async (req) => {
       throw new Error('No file uploaded');
     }
 
-    if (file.size > MAX_INLINE_SIZE) {
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
       return new Response(
         JSON.stringify({
-          error: 'File too large for inline processing',
-          message: 'Files larger than 4MB cannot be processed. Please reduce the file size.',
+          error: 'File too large',
+          message: 'Files must be less than 4MB',
           size: file.size,
-          maxSize: MAX_INLINE_SIZE
+          maxSize: MAX_FILE_SIZE
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 413
+          status: 413 // Payload Too Large
+        }
+      );
+    }
+
+    // Validate file type
+    if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
+      return new Response(
+        JSON.stringify({
+          error: 'Invalid file type',
+          message: 'Only JPEG, PNG, WEBP, HEIC, and HEIF files are supported',
+          type: file.type,
+          allowedTypes: ALLOWED_TYPES
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 415 // Unsupported Media Type
         }
       );
     }
@@ -75,23 +92,46 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Error processing file:', error);
-    let status = 500;
-    let message = error.message || 'Failed to process file';
     
-    if (error.message.includes('Base64')) {
-      status = 400;
-      message = 'Failed to encode file data';
+    // Handle different types of errors
+    if (error.message?.includes('Base64')) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'File encoding error',
+          message: 'Failed to process file data',
+          details: error.message
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400
+        }
+      );
+    }
+
+    // Handle Gemini API specific errors
+    if (error.message?.includes('Gemini')) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'AI processing error',
+          message: 'Failed to process image with AI',
+          details: error.message
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
+        }
+      );
     }
 
     return new Response(
       JSON.stringify({ 
-        error: message,
-        details: error.stack,
-        suggestion: 'If you are trying to process a large file, consider reducing its size.'
+        error: 'Internal server error',
+        message: 'An unexpected error occurred',
+        details: error.message
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status
+        status: 500
       }
     );
   }

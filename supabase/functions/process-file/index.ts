@@ -8,7 +8,15 @@ const corsHeaders = {
 };
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB limit
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+const ALLOWED_TYPES = [
+  'image/jpeg', 
+  'image/jpg', 
+  'image/png', 
+  'image/webp', 
+  'image/heic', 
+  'image/heif',
+  'application/pdf'
+];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -44,7 +52,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: 'Invalid file type',
-          message: 'Only JPEG, PNG, WEBP, HEIC, and HEIF files are supported',
+          message: 'Only JPEG, PNG, WEBP, HEIC, HEIF and PDF files are supported',
           type: file.type,
           allowedTypes: ALLOWED_TYPES
         }),

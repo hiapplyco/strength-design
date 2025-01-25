@@ -70,6 +70,8 @@ export const ExerciseSearch = ({
   const handleExerciseSelect = (exercise: Exercise) => {
     if (selectedExercises.includes(exercise.name)) {
       setSelectedExercises(prev => prev.filter(name => name !== exercise.name));
+      // Call onExerciseSelect with the exercise to notify parent of deselection
+      onExerciseSelect?.(exercise);
     } else {
       setSelectedExercises(prev => [...prev, exercise.name]);
       onExerciseSelect?.(exercise);

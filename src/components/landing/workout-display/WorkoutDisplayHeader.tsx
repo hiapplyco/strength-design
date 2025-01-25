@@ -9,6 +9,7 @@ interface WorkoutDisplayHeaderProps {
   onExportExcel: () => void;
   onCopy: () => Promise<void>;
   isExporting: boolean;
+  workoutText: string;
 }
 
 export const WorkoutDisplayHeader = ({
@@ -17,7 +18,8 @@ export const WorkoutDisplayHeader = ({
   onExportDocs,
   onExportExcel,
   onCopy,
-  isExporting
+  isExporting,
+  workoutText
 }: WorkoutDisplayHeaderProps) => {
   return (
     <div className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border p-4">
@@ -36,6 +38,7 @@ export const WorkoutDisplayHeader = ({
           onExportExcel={onExportExcel}
           onCopy={onCopy}
           isExporting={isExporting}
+          workoutText={workoutText}
         />
       </div>
     </div>

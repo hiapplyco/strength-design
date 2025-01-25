@@ -122,6 +122,7 @@ export const WorkoutDisplay = ({
         onExportExcel={() => exportToExcel(formatAllWorkouts())}
         onCopy={handleCopy}
         isExporting={isExporting}
+        workoutText={formatAllWorkouts()}
       />
       
       <div className="pt-32">

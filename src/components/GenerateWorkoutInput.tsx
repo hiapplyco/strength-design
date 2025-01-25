@@ -7,8 +7,11 @@ import { FitnessSection } from "./workout-generator/FitnessSection";
 import { GenerateSection } from "./workout-generator/GenerateSection";
 import { DaysSelection } from "./workout-generator/DaysSelection";
 import { TooltipWrapper } from "./workout-generator/TooltipWrapper";
+import { PdfUploadSection } from "./workout-generator/PdfUploadSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -57,6 +60,37 @@ export function GenerateWorkoutInput({
       }
       return [...prev, exercise];
     });
+  };
+
+  const handleFileSelect = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await supabase.functions.invoke('process-file', {
+        body: formData,
+      });
+
+      if (response.error) {
+        console.error('Edge Function error:', response.error);
+        throw response.error;
+      }
+
+      const { text } = response.data;
+      setPrescribedExercises(text);
+      
+      toast({
+        title: "Success",
+        description: "File processed successfully",
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process file. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const isValid = fitnessLevel !== "" && numberOfDays > 0;
@@ -133,7 +167,6 @@ export function GenerateWorkoutInput({
 
   const startGenerating = () => {
     setIsGenerating(true);
-    // Force a small delay so React can paint before we do the heavy lifting
     requestAnimationFrame(() => {
       handleGenerateWithWeather();
     });
@@ -169,6 +202,23 @@ export function GenerateWorkoutInput({
             <TooltipWrapper content="Share your fitness level and any prescribed exercises to receive personalized workouts that match your capabilities and requirements." />
           )}
         />
+
+        <Card className="border-none bg-muted/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-medium">Upload Exercise Program</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <PdfUploadSection onFileSelect={handleFileSelect} />
+            
+            {prescribedExercises && (
+              <ScrollArea className="h-[100px] w-full rounded-md border p-4">
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {prescribedExercises}
+                </p>
+              </ScrollArea>
+            )}
+          </CardContent>
+        </Card>
 
         <DaysSelection
           numberOfDays={numberOfDays}

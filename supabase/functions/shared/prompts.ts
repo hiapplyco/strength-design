@@ -25,39 +25,37 @@ export const createWorkoutGenerationPrompt = ({
     ? `REQUIRED MODIFICATIONS: Incorporate ${prescribedExercises}`
     : '';
 
-  return `As an elite fitness coach, design a scientifically-grounded ${numberOfDays}-day training program.
-  
-PROGRAM PARAMETERS:
-- Target fitness level: ${fitnessLevel}
-${weatherConsideration ? `- ${weatherConsideration}\n` : ''}${exerciseList ? `- ${exerciseList}\n` : ''}${prescription ? `- ${prescription}\n` : ''}
-
-DAILY STRUCTURE REQUIREMENTS:
-1. Focus description: Scientific training stimulus and physiological adaptation
-2. Warmup: Progressive activation sequence
-3. Workout: Periodized prescription with sets/reps/tempo
-4. Strength component: Compound movement pattern focus
-5. Notes: Regeneration strategies or scaling options
-
-FORMAT SPECIFICATION:
-Generate valid JSON following this exact structure:
-{
-  "day1": {
-    "description": "string",
-    "warmup": "string",
-    "workout": "string",
-    "strength": "string",
-    "notes": "string"
-  }
-  // ... Repeat for each day
-}
-
-CRITICAL INSTRUCTIONS:
-- Use double quotes for all strings
-- Maintain consistent JSON syntax
-- Avoid markdown formatting
-- Ensure proper escape characters
-- Include all 5 required sections per day
-- Prioritize exercise science principles`;
+  return `As an elite fitness coach, design a scientifically-grounded ${numberOfDays}-day training program.\n\n` +
+    `PROGRAM PARAMETERS:\n` +
+    `- Target fitness level: ${fitnessLevel}\n` +
+    `${weatherConsideration ? `- ${weatherConsideration}\n` : ''}` +
+    `${exerciseList ? `- ${exerciseList}\n` : ''}` +
+    `${prescription ? `- ${prescription}\n` : ''}\n` +
+    `DAILY STRUCTURE REQUIREMENTS:\n` +
+    `1. Focus description: Scientific training stimulus and physiological adaptation\n` +
+    `2. Warmup: Progressive activation sequence\n` +
+    `3. Workout: Periodized prescription with sets/reps/tempo\n` +
+    `4. Strength component: Compound movement pattern focus\n` +
+    `5. Notes: Regeneration strategies or scaling options\n\n` +
+    `FORMAT SPECIFICATION:\n` +
+    `Generate valid JSON following this exact structure:\n` +
+    `{\n` +
+    `  "day1": {\n` +
+    `    "description": "string",\n` +
+    `    "warmup": "string",\n` +
+    `    "workout": "string",\n` +
+    `    "strength": "string",\n` +
+    `    "notes": "string"\n` +
+    `  }\n` +
+    `  // ... Repeat for each day\n` +
+    `}\n\n` +
+    `CRITICAL INSTRUCTIONS:\n` +
+    `- Use double quotes for all strings\n` +
+    `- Maintain consistent JSON syntax\n` +
+    `- Avoid markdown formatting\n` +
+    `- Ensure proper escape characters\n` +
+    `- Include all 5 required sections per day\n` +
+    `- Prioritize exercise science principles`;
 };
 
 export const getGeminiConfig = () => ({

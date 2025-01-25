@@ -26,10 +26,6 @@ export const SearchResults = ({
 }: SearchResultsProps) => {
   if (results.length === 0) return null;
 
-  const handleSelection = (exercise: Exercise, isSelected: boolean) => {
-    onExerciseSelect(exercise);
-  };
-
   return (
     <div className="rounded-lg border bg-card max-h-[60vh] overflow-y-auto">
       <Table>
@@ -64,29 +60,31 @@ export const SearchResults = ({
                   {exercise.instructions[0]}
                 </TableCell>
                 <TableCell>
-                  {isSelected ? (
-                    <Button
-                      variant="default"
-                      className="w-full bg-green-500 hover:bg-green-600 transition-colors duration-200"
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <Check className="h-4 w-4 text-white" />
-                        <X 
-                          className="h-4 w-4 text-red-500 hover:text-red-600 cursor-pointer" 
-                          onClick={() => handleSelection(exercise, false)}
-                        />
-                      </div>
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="default"
-                      onClick={() => handleSelection(exercise, true)}
-                      className="w-full bg-[#C4A052] hover:bg-[#B38E3B] transition-colors duration-200"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add
-                    </Button>
-                  )}
+                  <Button
+                    variant="default"
+                    onClick={() => onExerciseSelect(exercise)}
+                    className={cn(
+                      "w-full transition-colors duration-200 group",
+                      isSelected 
+                        ? "bg-green-500 hover:bg-red-500" 
+                        : "bg-[#C4A052] hover:bg-[#B38E3B]"
+                    )}
+                  >
+                    <div className="flex items-center justify-center w-full gap-2">
+                      {isSelected ? (
+                        <>
+                          <Check className="h-4 w-4 group-hover:hidden" />
+                          <X className="h-4 w-4 hidden group-hover:block" />
+                          <span className="hidden group-hover:block">Remove</span>
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4" />
+                          <span>Add</span>
+                        </>
+                      )}
+                    </div>
+                  </Button>
                 </TableCell>
               </TableRow>
             );

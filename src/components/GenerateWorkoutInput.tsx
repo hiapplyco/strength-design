@@ -235,9 +235,6 @@ export function GenerateWorkoutInput({
             <ExerciseSection
               selectedExercises={selectedExercises}
               onExerciseSelect={handleExerciseSelect}
-              renderTooltip={() => (
-                <TooltipWrapper content="Add specific equipment or exercises you have access to." />
-              )}
             />
           </div>
         </div>

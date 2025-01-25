@@ -26,6 +26,14 @@ export const SearchResults = ({
 }: SearchResultsProps) => {
   if (results.length === 0) return null;
 
+  const handleDeselect = (
+    e: React.MouseEvent<SVGSVGElement>,
+    exercise: Exercise
+  ) => {
+    e.stopPropagation();
+    onExerciseSelect(exercise);
+  };
+
   return (
     <div className="rounded-lg border bg-card max-h-[60vh] overflow-y-auto">
       <Table>
@@ -61,10 +69,10 @@ export const SearchResults = ({
                 </TableCell>
                 <TableCell>
                   <Button
-                    variant={isSelected ? "default" : "default"}
-                    onClick={() => onExerciseSelect(exercise)}
+                    variant="default"
+                    onClick={() => !isSelected && onExerciseSelect(exercise)}
                     className={cn(
-                      "w-full transition-all duration-200",
+                      "w-full transition-colors duration-200",
                       isSelected 
                         ? "bg-green-500 hover:bg-green-600" 
                         : "bg-[#C4A052] hover:bg-[#B38E3B]"
@@ -74,11 +82,8 @@ export const SearchResults = ({
                       <div className="flex items-center justify-between w-full">
                         <Check className="h-4 w-4 text-white" />
                         <X 
-                          className="h-4 w-4 text-red-500 hover:text-red-300 transition-colors duration-200" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onExerciseSelect(exercise);
-                          }}
+                          className="h-4 w-4 text-red-500 hover:text-red-600 cursor-pointer" 
+                          onClick={(e) => handleDeselect(e, exercise)}
                         />
                       </div>
                     ) : (

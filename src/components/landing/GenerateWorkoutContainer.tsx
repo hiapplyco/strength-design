@@ -27,7 +27,10 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
         body: formData,
       });
 
-      if (response.error) throw response.error;
+      if (response.error) {
+        console.error('Edge Function error:', response.error);
+        throw response.error;
+      }
 
       const { text } = response.data;
       setPrescribedExercises(text);

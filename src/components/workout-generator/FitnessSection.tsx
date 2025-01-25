@@ -41,14 +41,12 @@ export function FitnessSection({
       let extractedText = '';
 
       if (isImage) {
-        // Process images with Tesseract
         toast({
           title: "Processing Image",
           description: "Extracting text from image using OCR...",
         });
         extractedText = await processImageWithTesseract(file);
       } else {
-        // Process PDFs with Gemini
         const formData = new FormData();
         formData.append('file', file);
 

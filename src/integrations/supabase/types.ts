@@ -269,15 +269,7 @@ export type Database = {
           weather_data?: Json | null
           weather_prompt?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "workout_generation_inputs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       workout_history: {
         Row: {

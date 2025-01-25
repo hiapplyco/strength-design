@@ -6,6 +6,8 @@ import { generateWorkout, saveWorkoutNoAuth } from "@/utils/workoutGeneration";
 import { ContactDialog } from "./ContactDialog";
 import type { WeeklyWorkouts } from "@/utils/workoutGeneration";
 import type { Exercise } from "../exercise-search/types";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface GenerateWorkoutContainerProps {
   setWorkouts: (workouts: WeeklyWorkouts | null) => void;
@@ -16,6 +18,35 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
   const [isGenerating, setIsGenerating] = useState(false);
   const [numberOfDays, setNumberOfDays] = useState(7);
   const [showGenerateInput, setShowGenerateInput] = useState(true);
+  const { toast } = useToast();
+
+  const saveGenerationInputs = async (params: {
+    weatherPrompt: string;
+    weatherData: any;
+    selectedExercises: Exercise[];
+    fitnessLevel: string;
+    prescribedExercises: string;
+    numberOfDays: number;
+  }) => {
+    try {
+      const { error } = await supabase
+        .from('workout_generation_inputs')
+        .insert({
+          weather_data: params.weatherData || null,
+          weather_prompt: params.weatherPrompt || null,
+          selected_exercises: params.selectedExercises || null,
+          fitness_level: params.fitnessLevel || null,
+          prescribed_exercises: params.prescribedExercises || null,
+          number_of_days: params.numberOfDays
+        });
+
+      if (error) {
+        console.error('Error saving generation inputs:', error);
+      }
+    } catch (error) {
+      console.error('Error in saveGenerationInputs:', error);
+    }
+  };
 
   const handleGenerateWorkout = async (params: {
     prompt: string;
@@ -27,6 +58,13 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
     try {
       setIsGenerating(true);
       console.log("Starting workout generation with params:", params);
+      
+      // Save the generation inputs
+      await saveGenerationInputs({
+        ...params,
+        numberOfDays,
+        weatherData: null // We'll need to pass this from the WeatherSection if needed
+      });
       
       const workouts = await generateWorkout({
         ...params,
@@ -47,6 +85,12 @@ export function GenerateWorkoutContainer({ setWorkouts }: GenerateWorkoutContain
       console.error('Detailed error:', {
         message: errorMessage,
         originalError: error
+      });
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);

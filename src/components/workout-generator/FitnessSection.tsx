@@ -51,7 +51,9 @@ export function FitnessSection({
 
         // Initialize Tesseract first
         try {
+          console.log("Starting Tesseract initialization");
           await initTesseract();
+          console.log("Tesseract initialization completed");
           
           toast({
             title: "Processing Image",
@@ -59,8 +61,9 @@ export function FitnessSection({
             duration: 5000,
           });
 
+          console.log("Starting image processing");
           extractedText = await processImageWithTesseract(file);
-          console.log("Extracted text:", extractedText);
+          console.log("Image processing completed, text length:", extractedText?.length);
         } catch (ocrError) {
           console.error("Tesseract OCR error:", ocrError);
           throw new Error(`OCR processing failed: ${ocrError.message}`);
@@ -85,6 +88,7 @@ export function FitnessSection({
       }
 
       if (extractedText) {
+        console.log("Setting extracted text to state");
         onPrescribedExercisesChange(extractedText);
         toast({
           title: "Success",
@@ -102,6 +106,7 @@ export function FitnessSection({
         variant: "destructive",
       });
     } finally {
+      console.log("File processing completed");
       setIsProcessing(false);
     }
   };

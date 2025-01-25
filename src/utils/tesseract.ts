@@ -3,73 +3,82 @@ import { OCRClient } from 'tesseract-wasm';
 let ocrClient: OCRClient | null = null;
 
 export async function initTesseract() {
-  console.log("Initializing Tesseract OCR client");
+  console.log("[Tesseract] Starting initialization");
   if (!ocrClient) {
     try {
-      console.log("Creating new OCR client");
+      console.log("[Tesseract] Creating new OCR client");
       ocrClient = new OCRClient();
-      console.log("Loading Tesseract model");
+      console.log("[Tesseract] Loading model");
       const modelUrl = '/tesseract/eng.traineddata';
       
       try {
-        console.log("Fetching model from:", modelUrl);
+        console.log("[Tesseract] Fetching model from:", modelUrl);
         const response = await fetch(modelUrl);
         if (!response.ok) {
-          console.error("Failed to fetch model:", response.status, response.statusText);
+          console.error("[Tesseract] Failed to fetch model:", response.status, response.statusText);
           throw new Error(`Failed to fetch model file: ${response.statusText}`);
         }
         const modelData = await response.arrayBuffer();
-        console.log("Model data fetched, size:", modelData.byteLength);
+        console.log("[Tesseract] Model data fetched, size:", modelData.byteLength);
+        
+        console.log("[Tesseract] Loading model into client");
         await ocrClient.loadModel(new Uint8Array(modelData));
-        console.log("Tesseract model loaded successfully");
+        console.log("[Tesseract] Model loaded successfully");
       } catch (modelError) {
-        console.error("Error loading Tesseract model:", modelError);
+        console.error("[Tesseract] Error loading model:", modelError);
+        ocrClient = null;
         throw new Error(`Failed to load Tesseract model: ${modelError.message}`);
       }
     } catch (error) {
-      console.error("Error initializing Tesseract:", error);
-      ocrClient = null; // Reset the client on error
+      console.error("[Tesseract] Error initializing:", error);
+      ocrClient = null;
       throw new Error(`Failed to initialize Tesseract: ${error.message}`);
     }
+  } else {
+    console.log("[Tesseract] Client already initialized");
   }
   return ocrClient;
 }
 
 export async function processImageWithTesseract(imageFile: File): Promise<string> {
   try {
-    console.log("Starting Tesseract OCR process");
+    console.log("[Tesseract] Starting OCR process");
     const client = await initTesseract();
     if (!client) {
+      console.error("[Tesseract] Client not initialized");
       throw new Error("OCR client not initialized");
     }
     
-    console.log("Converting file to ImageBitmap");
+    console.log("[Tesseract] Converting file to ImageBitmap");
     const imageBlob = new Blob([await imageFile.arrayBuffer()], { type: imageFile.type });
     const image = await createImageBitmap(imageBlob);
+    console.log("[Tesseract] Image converted, dimensions:", image.width, "x", image.height);
     
-    console.log("Loading image into Tesseract, dimensions:", image.width, "x", image.height);
+    console.log("[Tesseract] Loading image into client");
     await client.loadImage(image);
+    console.log("[Tesseract] Image loaded successfully");
     
-    console.log("Extracting text from image");
+    console.log("[Tesseract] Starting text extraction");
     const text = await client.getText();
+    console.log("[Tesseract] Text extraction completed");
     
     if (!text) {
-      console.error("No text extracted from image");
+      console.error("[Tesseract] No text extracted from image");
       throw new Error("No text was extracted from the image");
     }
     
-    console.log("Text extraction complete. Length:", text.length);
-    console.log("First 100 chars:", text.substring(0, 100));
+    console.log("[Tesseract] Text extraction successful. Length:", text.length);
+    console.log("[Tesseract] First 100 chars:", text.substring(0, 100));
     return text;
   } catch (error) {
-    console.error('Tesseract OCR error:', error);
+    console.error('[Tesseract] OCR error:', error);
     throw new Error(`Failed to process image with Tesseract OCR: ${error.message}`);
   }
 }
 
 export function cleanupTesseract() {
   if (ocrClient) {
-    console.log("Cleaning up Tesseract OCR client");
+    console.log("[Tesseract] Cleaning up OCR client");
     ocrClient.destroy();
     ocrClient = null;
   }

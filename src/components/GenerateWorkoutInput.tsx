@@ -3,17 +3,15 @@ import type { Exercise } from "./exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 import { WeatherSection } from "./workout-generator/WeatherSection";
 import { ExerciseSection } from "./workout-generator/ExerciseSection";
-import { FitnessSection } from "./workout-generator/FitnessSection";
+import { FitnessLevelSection } from "./workout-generator/FitnessLevelSection";
+import { PrescribedExercisesSection } from "./workout-generator/PrescribedExercisesSection";
+import { InjuriesSection } from "./workout-generator/InjuriesSection";
 import { GenerateSection } from "./workout-generator/GenerateSection";
 import { DaysSelection } from "./workout-generator/DaysSelection";
 import { TooltipWrapper } from "./workout-generator/TooltipWrapper";
-import { FileUploadSection } from "./workout-generator/FileUploadSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Activity, Dumbbell } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Dumbbell } from "lucide-react";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -232,88 +230,36 @@ export function GenerateWorkoutInput({
             <h3 className="font-oswald text-lg">Search Exercises & Equipment</h3>
             <TooltipWrapper content="Add specific equipment or exercises you have access to. This helps create workouts that match your available resources." />
           </div>
-          <div className="grid grid-cols-1 gap-4">
-            <ExerciseSection
-              selectedExercises={selectedExercises}
-              onExerciseSelect={handleExerciseSelect}
-              renderTooltip={() => (
-                <TooltipWrapper content="Add specific equipment or exercises you have access to. This helps create workouts that match your available resources." />
-              )}
-            />
-          </div>
+          <ExerciseSection
+            selectedExercises={selectedExercises}
+            onExerciseSelect={handleExerciseSelect}
+            renderTooltip={() => (
+              <TooltipWrapper content="Add specific equipment or exercises you have access to. This helps create workouts that match your available resources." />
+            )}
+          />
         </div>
 
         {/* Fitness Level Section */}
-        <div className="w-full">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity className="h-5 w-5 text-primary" />
-            <h3 className="font-oswald text-lg">Fitness Level</h3>
-            <TooltipWrapper content="Select your fitness level to receive appropriately challenging workouts." />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {["beginner", "intermediate", "advanced", "elite"].map((level) => (
-              <Button
-                key={level}
-                onClick={() => setFitnessLevel(level)}
-                variant={fitnessLevel === level ? "default" : "outline"}
-                className={cn(
-                  "w-24 transition-colors duration-200",
-                  fitnessLevel === level ? "bg-primary text-white" : "hover:bg-primary/10"
-                )}
-              >
-                <span className="capitalize">{level}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
+        <FitnessLevelSection
+          fitnessLevel={fitnessLevel}
+          setFitnessLevel={setFitnessLevel}
+        />
 
-        {/* Prescribed Exercises Row */}
-        <div className="w-full space-y-4">
-          <div className="flex items-center gap-2">
-            <Dumbbell className="h-5 w-5 text-primary" />
-            <h3 className="font-oswald text-lg">Prescribed Exercises</h3>
-            <TooltipWrapper content="Add any specific exercises you need to include in your workout program." />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Textarea
-              placeholder="List any specific exercises you need to include"
-              value={prescribedExercises}
-              onChange={(e) => setPrescribedExercises(e.target.value)}
-              className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
-            />
-            <FileUploadSection
-              title="Upload Exercise Program"
-              isAnalyzing={isAnalyzingPrescribed}
-              content={prescribedExercises}
-              onFileSelect={handlePrescribedFileSelect}
-              analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
-            />
-          </div>
-        </div>
+        {/* Prescribed Exercises Section */}
+        <PrescribedExercisesSection
+          prescribedExercises={prescribedExercises}
+          setPrescribedExercises={setPrescribedExercises}
+          isAnalyzingPrescribed={isAnalyzingPrescribed}
+          handlePrescribedFileSelect={handlePrescribedFileSelect}
+        />
 
-        {/* Injuries Row */}
-        <div className="w-full space-y-4">
-          <div className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary" />
-            <h3 className="font-oswald text-lg">Injuries & Health Considerations</h3>
-            <TooltipWrapper content="Share any injuries or health conditions that may affect your workout." />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Textarea
-              placeholder="List any injuries, medical conditions, or movement limitations"
-              value={injuries}
-              onChange={(e) => setInjuries(e.target.value)}
-              className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
-            />
-            <FileUploadSection
-              title="Upload Medical Information"
-              isAnalyzing={isAnalyzingInjuries}
-              content={injuries}
-              onFileSelect={handleInjuriesFileSelect}
-              analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
-            />
-          </div>
-        </div>
+        {/* Injuries Section */}
+        <InjuriesSection
+          injuries={injuries}
+          setInjuries={setInjuries}
+          isAnalyzingInjuries={isAnalyzingInjuries}
+          handleInjuriesFileSelect={handleInjuriesFileSelect}
+        />
 
         {/* Days Selection */}
         <DaysSelection

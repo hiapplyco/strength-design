@@ -5,6 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
@@ -13,6 +14,7 @@ interface HeaderActionsProps {
   onExport: () => void;
   isExporting: boolean;
   workoutText: string;
+  allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>;
 }
 
 export function HeaderActions({
@@ -20,12 +22,13 @@ export function HeaderActions({
   onExport,
   isExporting,
   workoutText,
+  allWorkouts,
 }: HeaderActionsProps) {
   const { toast } = useToast();
 
-  const handleCopy = async () => {
+  const handleCopy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(workoutText);
+      await navigator.clipboard.writeText(text);
       toast({
         title: "Success",
         description: "Workout copied to clipboard",
@@ -39,19 +42,35 @@ export function HeaderActions({
     }
   };
 
-  const exportToGoogleDocs = () => {
-    const docContent = encodeURIComponent(workoutText);
+  const exportToGoogleDocs = (content: string) => {
+    const docContent = encodeURIComponent(content);
     const googleDocsUrl = `https://docs.google.com/document/create?body=${docContent}`;
     window.open(googleDocsUrl, '_blank');
   };
 
-  const exportToExcel = () => {
-    const csvContent = workoutText.split('\n').join(',');
+  const exportToExcel = (content: string) => {
+    const csvContent = content.split('\n').join(',');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'workout.csv';
     link.click();
+  };
+
+  const formatAllWorkouts = () => {
+    if (!allWorkouts) return '';
+    return Object.entries(allWorkouts)
+      .map(([day, workout]) => {
+        const sections = [
+          `Day: ${day}`,
+          workout.strength && `Strength:\n${workout.strength}`,
+          workout.warmup && `Warmup:\n${workout.warmup}`,
+          workout.workout && `Workout:\n${workout.workout}`,
+          workout.notes && `Notes:\n${workout.notes}`
+        ].filter(Boolean);
+        return sections.join('\n\n');
+      })
+      .join('\n\n---\n\n');
   };
 
   return (
@@ -67,23 +86,43 @@ export function HeaderActions({
             />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-56">
+          {/* Single Day Export Options */}
           <DropdownMenuItem onClick={onExport} disabled={isExporting}>
             <CalendarDays className="mr-2 h-4 w-4" />
-            Add to Calendar
+            Add Day to Calendar
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={exportToGoogleDocs}>
+          <DropdownMenuItem onClick={() => exportToGoogleDocs(workoutText)}>
             <FileText className="mr-2 h-4 w-4" />
-            Export to Google Docs
+            Export Day to Google Docs
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={exportToExcel}>
+          <DropdownMenuItem onClick={() => exportToExcel(workoutText)}>
             <FileSpreadsheet className="mr-2 h-4 w-4" />
-            Export to Excel
+            Export Day to Excel
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCopy}>
+          <DropdownMenuItem onClick={() => handleCopy(workoutText)}>
             <Copy className="mr-2 h-4 w-4" />
-            Copy to Clipboard
+            Copy Day to Clipboard
           </DropdownMenuItem>
+
+          {allWorkouts && (
+            <>
+              <DropdownMenuSeparator />
+              {/* Weekly Export Options */}
+              <DropdownMenuItem onClick={() => exportToGoogleDocs(formatAllWorkouts())}>
+                <FileText className="mr-2 h-4 w-4" />
+                Export Week to Google Docs
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToExcel(formatAllWorkouts())}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Export Week to Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleCopy(formatAllWorkouts())}>
+                <Copy className="mr-2 h-4 w-4" />
+                Copy Week to Clipboard
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

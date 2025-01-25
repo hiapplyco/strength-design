@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Activity, Dumbbell } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;

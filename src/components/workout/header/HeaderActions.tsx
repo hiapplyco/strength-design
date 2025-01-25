@@ -79,6 +79,47 @@ export function HeaderActions({
     return markdown;
   };
 
+  const exportToExcel = async (content: string) => {
+    try {
+      const lines = content.split('\n');
+      let csvContent = '';
+      let currentSection = '';
+
+      lines.forEach(line => {
+        if (line.includes('Day:') || 
+            line.includes('Strength:') || 
+            line.includes('Warmup:') || 
+            line.includes('Workout:') || 
+            line.includes('Notes:')) {
+          currentSection = line.trim();
+          csvContent += `${currentSection}\n`;
+        } else if (line.trim() && line.trim() !== '---') {
+          csvContent += `${line.trim()}\n`;
+        }
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'workout.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      toast({
+        title: "Success",
+        description: "Workout exported to Excel format",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to export workout to Excel",
+        variant: "destructive",
+      });
+    }
+  };
+
   const downloadWorkout = async (format: 'txt' | 'docx' | 'pdf') => {
     const content = allWorkouts ? formatAllWorkouts() : workoutText;
     const formattedContent = formatWorkoutToMarkdown(content);

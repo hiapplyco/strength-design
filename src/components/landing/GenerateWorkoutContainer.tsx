@@ -58,26 +58,21 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
   const handleGenerateWorkout = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/generate-workout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          // Add any necessary parameters here
-        }),
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+        body: {
+          numberOfDays: 7, // Default to 7 days
+          selectedExercises: [], // Add actual exercises here when implemented
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate workout');
-      }
+      if (error) throw error;
 
-      const data = await response.json();
+      console.log('Generated workout data:', data);
       setWorkouts(data);
 
       // Save the generation inputs
       await saveGenerationInputs({
-        selectedExercises: [], // Add actual exercises here
+        selectedExercises: [], // Add actual exercises here when implemented
         numberOfDays: 7, // Default to 7 days
       });
 
@@ -85,7 +80,7 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
       console.error('Error generating workout:', error);
       toast({
         title: "Error",
-        description: "Failed to generate workout",
+        description: "Failed to generate workout. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -1,6 +1,8 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { ArrowUp, ArrowUpLeft, ArrowDownRight, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FitnessSectionProps {
   fitnessLevel: string;
@@ -11,6 +13,13 @@ interface FitnessSectionProps {
   onInjuriesChange: (value: string) => void;
   renderTooltip: () => React.ReactNode;
 }
+
+const fitnessLevels = [
+  { value: "elite", label: "Elite", icon: ArrowUp },
+  { value: "advanced", label: "Advanced", icon: ArrowUpLeft },
+  { value: "intermediate", label: "Intermediate", icon: ArrowDownRight },
+  { value: "beginner", label: "Beginner", icon: ArrowDown },
+];
 
 export function FitnessSection({
   fitnessLevel,
@@ -26,17 +35,26 @@ export function FitnessSection({
       <div className="flex items-center justify-between">
         <Label>Fitness Profile {renderTooltip()}</Label>
       </div>
-      <Select value={fitnessLevel} onValueChange={onFitnessLevelChange}>
-        <SelectTrigger className="bg-white text-black">
-          <SelectValue placeholder="Select your fitness level" className="text-gray-400" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="beginner">Beginner</SelectItem>
-          <SelectItem value="intermediate">Intermediate</SelectItem>
-          <SelectItem value="advanced">Advanced</SelectItem>
-          <SelectItem value="elite">Elite</SelectItem>
-        </SelectContent>
-      </Select>
+      
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {fitnessLevels.map((level) => {
+          const Icon = level.icon;
+          return (
+            <Button
+              key={level.value}
+              onClick={() => onFitnessLevelChange(level.value)}
+              variant={fitnessLevel === level.value ? "default" : "outline"}
+              className={cn(
+                "flex items-center gap-2 h-auto py-4",
+                fitnessLevel === level.value ? "bg-primary text-white" : "hover:bg-primary/10"
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{level.label}</span>
+            </Button>
+          );
+        })}
+      </div>
 
       <div className="space-y-2">
         <Label>Injuries or Health Considerations</Label>

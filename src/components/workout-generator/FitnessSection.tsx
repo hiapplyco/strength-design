@@ -33,7 +33,6 @@ export function FitnessSection({
   const { toast } = useToast();
 
   const handleFileSelect = async (file: File) => {
-    console.log("Starting file processing:", file.type, file.size);
     setIsProcessing(true);
     setError("");
 
@@ -42,34 +41,9 @@ export function FitnessSection({
       let extractedText = '';
 
       if (isImage) {
-        console.log("Processing image with Tesseract OCR");
-        toast({
-          title: "Processing Image",
-          description: "Initializing OCR engine...",
-          duration: 3000,
-        });
-
-        // Initialize Tesseract first
-        try {
-          console.log("Starting Tesseract initialization");
-          await initTesseract();
-          console.log("Tesseract initialization completed");
-          
-          toast({
-            title: "Processing Image",
-            description: "Extracting text from image...",
-            duration: 5000,
-          });
-
-          console.log("Starting image processing");
-          extractedText = await processImageWithTesseract(file);
-          console.log("Image processing completed, text length:", extractedText?.length);
-        } catch (ocrError) {
-          console.error("Tesseract OCR error:", ocrError);
-          throw new Error(`OCR processing failed: ${ocrError.message}`);
-        }
+        await initTesseract();
+        extractedText = await processImageWithTesseract(file);
       } else {
-        console.log("Processing PDF with Gemini");
         const formData = new FormData();
         formData.append('file', file);
 
@@ -83,12 +57,10 @@ export function FitnessSection({
 
         if (data?.text) {
           extractedText = data.text;
-          console.log("PDF processing result:", extractedText);
         }
       }
 
       if (extractedText) {
-        console.log("Setting extracted text to state");
         onPrescribedExercisesChange(extractedText);
         toast({
           title: "Success",
@@ -98,7 +70,6 @@ export function FitnessSection({
         throw new Error("No text could be extracted from the file");
       }
     } catch (err) {
-      console.error('[FitnessSection] Error processing file:', err);
       setError(err.message || 'Failed to process file');
       toast({
         title: "Error",
@@ -106,7 +77,6 @@ export function FitnessSection({
         variant: "destructive",
       });
     } finally {
-      console.log("File processing completed");
       setIsProcessing(false);
     }
   };
@@ -150,7 +120,7 @@ export function FitnessSection({
             <p className="text-sm text-destructive">{error}</p>
           )}
           {isProcessing && (
-            <p className="text-sm text-muted-foreground animate-pulse">Processing file... This may take a few moments.</p>
+            <p className="text-sm text-muted-foreground">Processing file...</p>
           )}
         </div>
 

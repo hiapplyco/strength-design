@@ -28,7 +28,7 @@ export function FitnessSection({
       </div>
       <Select value={fitnessLevel} onValueChange={onFitnessLevelChange}>
         <SelectTrigger className="bg-white text-black">
-          <SelectValue placeholder="Select your fitness level" className="text-muted-foreground" />
+          <SelectValue placeholder="Select your fitness level" className="text-muted" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="beginner">Beginner</SelectItem>

@@ -68,8 +68,12 @@ export const ExerciseSearch = ({
   }, [searchQuery, exercises]);
 
   const handleExerciseSelect = (exercise: Exercise) => {
-    setSelectedExercises(prev => [...prev, exercise.name]);
-    onExerciseSelect?.(exercise);
+    if (selectedExercises.includes(exercise.name)) {
+      setSelectedExercises(prev => prev.filter(name => name !== exercise.name));
+    } else {
+      setSelectedExercises(prev => [...prev, exercise.name]);
+      onExerciseSelect?.(exercise);
+    }
   };
 
   const handleClearSearch = () => {

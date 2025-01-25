@@ -34,23 +34,29 @@ serve(async (req) => {
 
     const { dayToModify, modificationPrompt, allWorkouts } = requestData;
     
-    // Structural validation
-    if (typeof dayToModify !== 'string' || !dayToModify.startsWith('day')) {
-      throw new Error(`Invalid day format: '${dayToModify}'. Use 'dayX' format`);
+    // Structural validation with more detailed error messages
+    if (!dayToModify) {
+      throw new Error('Day to modify is required');
     }
     
-    if (typeof modificationPrompt !== 'string' || modificationPrompt.length < 10) {
-      throw new Error('Modification prompt must be at least 10 characters');
+    if (!modificationPrompt) {
+      throw new Error('Please provide modification instructions');
     }
 
     if (!allWorkouts || typeof allWorkouts !== 'object' || Array.isArray(allWorkouts)) {
-      throw new Error('allWorkouts must be an object mapping days to workouts');
+      throw new Error('Current workout data is required');
     }
 
     const currentWorkout = allWorkouts[dayToModify];
     if (!isValidWorkout(currentWorkout)) {
       throw new Error(`Invalid workout structure for ${dayToModify}`);
     }
+
+    console.log('Processing modification request:', {
+      day: dayToModify,
+      promptLength: modificationPrompt.length,
+      workoutKeys: Object.keys(currentWorkout)
+    });
 
     const prompt = `PROFESSIONAL WORKOUT MODIFICATION REQUEST
 Current Day: ${dayToModify}
@@ -70,31 +76,30 @@ REQUIRED ACTIONS:
 
 STRICT OUTPUT FORMAT (JSON ONLY):
 {
-  "warmup": ["array", "of", "modified", "warmup", "steps"],
-  "workout": ["array", "of", "updated", "exercises"],
-  "notes": ["array", "of", "professional", "notes"],
-  "description": "string explaining changes"
+  "warmup": "Modified warmup routine",
+  "workout": "Updated workout routine",
+  "notes": "Professional notes and explanations",
+  "description": "Brief explanation of changes"
 }
 
 CRITICAL RULES:
-- Use double quotes ONLY
+- Use double quotes for strings
 - No markdown formatting
 - No text outside JSON
-- Escape special characters
-- Maintain array formatting`;
+- Escape special characters`;
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
-        temperature: 0.5,  // Lowered for more consistent modifications
+        temperature: 0.5,
         topK: 20,
         topP: 0.9,
         maxOutputTokens: 1024,
-        response_mime_type: "application/json",
       },
     });
 
+    console.log('Sending request to Gemini API...');
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
     });
@@ -103,27 +108,36 @@ CRITICAL RULES:
       throw new Error('Empty response from Gemini API');
     }
 
-    // Robust JSON extraction with multiple fallbacks
+    // Clean and parse response
     const rawText = result.response.text();
+    console.log('Received raw response:', rawText.substring(0, 100) + '...');
+    
     const jsonText = rawText
-      .replace(/```(json)?/g, '')  // Remove code blocks
-      .replace(/[\r\n]+/g, ' ')    // Collapse newlines
-      .replace(/\s+/g, ' ')        // Collapse whitespace
+      .replace(/```(json)?/g, '')
+      .replace(/[\r\n]+/g, ' ')
+      .replace(/\s+/g, ' ')
       .trim();
 
-    const modifiedWorkout = JSON.parse(jsonText);
-    
-    // Validate response structure
-    if (!modifiedWorkout.warmup || !modifiedWorkout.workout) {
-      throw new Error('Invalid modified workout structure from AI');
+    try {
+      const modifiedWorkout = JSON.parse(jsonText);
+      
+      // Validate response structure
+      if (!modifiedWorkout.warmup || !modifiedWorkout.workout) {
+        throw new Error('Invalid modified workout structure from AI');
+      }
+
+      console.log('Successfully generated modified workout');
+      return new Response(JSON.stringify(modifiedWorkout), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+
+    } catch (error) {
+      console.error('Error parsing Gemini response:', error);
+      throw new Error(`Failed to parse AI response: ${error.message}`);
     }
 
-    return new Response(JSON.stringify(modifiedWorkout), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(`Error in workout-modifier:`, error);
     return new Response(JSON.stringify({
       error: error.message,
       type: error.name,

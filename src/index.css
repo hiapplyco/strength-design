@@ -75,11 +75,9 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  input::placeholder {
-    @apply text-muted-foreground;
-  }
-
-  textarea::placeholder {
-    @apply text-muted-foreground;
+  input::placeholder,
+  textarea::placeholder,
+  select::placeholder {
+    @apply text-gray-400;
   }
 }

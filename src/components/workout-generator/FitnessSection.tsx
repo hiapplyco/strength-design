@@ -28,7 +28,7 @@ export function FitnessSection({
       </div>
       <Select value={fitnessLevel} onValueChange={onFitnessLevelChange}>
         <SelectTrigger className="bg-white text-black">
-          <SelectValue placeholder="Select your fitness level" className="text-muted" />
+          <SelectValue placeholder="Select your fitness level" className="text-gray-400" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="beginner">Beginner</SelectItem>
@@ -44,7 +44,7 @@ export function FitnessSection({
           placeholder="List any injuries, medical conditions, or movement limitations that may affect your workout (e.g., knee pain, lower back issues, pregnancy)"
           value={injuries}
           onChange={(e) => onInjuriesChange(e.target.value)}
-          className="min-h-[80px] bg-white text-black"
+          className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
         />
       </div>
 
@@ -54,7 +54,7 @@ export function FitnessSection({
           placeholder="Any specific exercises you need to include"
           value={prescribedExercises}
           onChange={(e) => onPrescribedExercisesChange(e.target.value)}
-          className="min-h-[80px] bg-white text-black"
+          className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
         />
       </div>
     </div>

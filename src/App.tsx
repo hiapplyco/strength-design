@@ -1,35 +1,25 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppContent } from "@/components/layout/AppContent";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { TooltipProvider } from "@radix-ui/react-tooltip";
+import { Toaster } from "@/components/ui/toaster";
+import AppContent from "./components/layout/AppContent";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      meta: {
-        onError: (error: Error) => {
-          console.error('Query error:', error);
-        },
-      },
-    },
-  },
-});
+const queryClient = new QueryClient();
 
-const App = () => {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark">
-        <TooltipProvider>
-          <BrowserRouter>
+    <ThemeProvider defaultTheme="system" enableSystem>
+      <TooltipProvider>
+        <QueryClientProvider client={queryClient}>
+          <Router>
             <AppContent />
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+            <Toaster />
+          </Router>
+        </QueryClientProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   );
-};
+}
 
 export default App;

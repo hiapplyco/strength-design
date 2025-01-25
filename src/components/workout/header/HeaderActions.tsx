@@ -81,9 +81,9 @@ export function HeaderActions({
     return markdown;
   };
 
-  const exportToGoogleDocs = (content: string) => {
+  const exportToGoogleDocs = async (content: string) => {
     const markdown = formatWorkoutToMarkdown(content);
-    const htmlContent = marked(markdown);
+    const htmlContent = await marked(markdown);
     const docContent = encodeURIComponent(htmlContent);
     const googleDocsUrl = `https://docs.google.com/document/create?body=${docContent}`;
     window.open(googleDocsUrl, '_blank');

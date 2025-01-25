@@ -7,6 +7,8 @@ import { FitnessSection } from "./workout-generator/FitnessSection";
 import { GenerateSection } from "./workout-generator/GenerateSection";
 import { DaysSelection } from "./workout-generator/DaysSelection";
 import { TooltipWrapper } from "./workout-generator/TooltipWrapper";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -38,6 +40,7 @@ export function GenerateWorkoutInput({
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [fitnessLevel, setFitnessLevel] = useState<string>("");
   const [prescribedExercises, setPrescribedExercises] = useState<string>("");
+  const { toast } = useToast();
 
   const handleWeatherUpdate = (weatherData: WeatherData | null, weatherPrompt: string) => {
     setWeatherData(weatherData);
@@ -46,11 +49,9 @@ export function GenerateWorkoutInput({
 
   const handleExerciseSelect = (exercise: Exercise) => {
     setSelectedExercises(prev => {
-      // If the exercise is already selected, remove it
       if (prev.some(e => e.name === exercise.name)) {
         return prev.filter(e => e.name !== exercise.name);
       }
-      // Otherwise, add it to the selection
       return [...prev, exercise];
     });
   };
@@ -60,7 +61,6 @@ export function GenerateWorkoutInput({
   const handleGenerateWithWeather = async () => {
     if (!isValid) return;
 
-    // Track the conversion event
     if (typeof window !== 'undefined' && window.gtagSendEvent) {
       window.gtagSendEvent();
     }
@@ -76,6 +76,27 @@ export function GenerateWorkoutInput({
     const fullPrompt = `${weatherPrompt}${prompts.exercises}${prompts.fitness}${prompts.prescribed}`;
     
     try {
+      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+        body: {
+          prompt: fullPrompt,
+          weatherPrompt,
+          selectedExercises,
+          fitnessLevel,
+          prescribedExercises,
+          numberOfDays
+        }
+      });
+
+      if (error) {
+        console.error('Edge Function error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate workout. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       await handleGenerateWorkout({
         prompt: fullPrompt,
         weatherPrompt,
@@ -83,9 +104,15 @@ export function GenerateWorkoutInput({
         fitnessLevel,
         prescribedExercises
       });
+      
       handleClear();
     } catch (error) {
       console.error("Error generating workout:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate workout. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

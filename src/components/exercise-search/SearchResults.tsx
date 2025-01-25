@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, Check, X } from "lucide-react";
+import { Plus, Check } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -64,18 +64,17 @@ export const SearchResults = ({
                     variant="default"
                     onClick={() => onExerciseSelect(exercise)}
                     className={cn(
-                      "w-full transition-colors duration-200 group min-w-[100px]",
+                      "w-full min-w-[100px] transition-colors duration-200",
                       isSelected 
-                        ? "bg-green-500 hover:bg-red-500" 
+                        ? "bg-green-500 hover:bg-green-600" 
                         : "bg-[#C4A052] hover:bg-[#B38E3B]"
                     )}
                   >
                     <div className="flex items-center justify-center w-full gap-2">
                       {isSelected ? (
                         <>
-                          <Check className="h-4 w-4 group-hover:hidden" />
-                          <X className="h-4 w-4 hidden group-hover:block" />
-                          <span className="group-hover:block">Remove</span>
+                          <Check className="h-4 w-4" />
+                          <span>Selected</span>
                         </>
                       ) : (
                         <>

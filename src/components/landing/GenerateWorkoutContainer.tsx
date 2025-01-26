@@ -60,6 +60,13 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     numberOfDays: number;
   }) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log('No user found, skipping save to database');
+        return;
+      }
+
       const simplifiedExercises = params.selectedExercises.map(exercise => ({
         name: exercise.name,
         instructions: exercise.instructions
@@ -72,6 +79,7 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
       const { error } = await supabase
         .from('workout_generation_inputs')
         .insert({
+          user_id: user.id,
           weather_data: serializedWeatherData,
           weather_prompt: params.weatherPrompt || null,
           selected_exercises: simplifiedExercises,
@@ -80,7 +88,12 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
           number_of_days: params.numberOfDays
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error saving generation inputs:', error);
+        throw error;
+      }
+
+      console.log('Successfully saved workout generation inputs');
     } catch (error) {
       console.error('Error saving generation inputs:', error);
       toast({
@@ -96,11 +109,14 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     
     try {
       console.log('Starting workout generation...');
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           numberOfDays: 7,
           selectedExercises: [],
           prescribedExercises: prescribedExercises,
+          user_id: user?.id
         }
       });
 

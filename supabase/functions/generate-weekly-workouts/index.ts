@@ -28,17 +28,20 @@ serve(async (req) => {
     }
 
     console.log('Parsing request body...');
-    const { prompt, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, numberOfDays, injuries } = await req.json();
+    const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, injuries } = await req.json();
     
     console.log('Request parameters:', {
-      hasPrompt: !!prompt,
+      numberOfDays,
       hasWeather: !!weatherPrompt,
       exerciseCount: selectedExercises?.length,
       fitnessLevel,
-      numberOfDays,
       hasPrescribed: !!prescribedExercises,
       hasInjuries: !!injuries
     });
+
+    if (!numberOfDays || typeof numberOfDays !== 'number') {
+      throw new Error('Invalid or missing numberOfDays parameter');
+    }
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const config = getGeminiConfig();
@@ -75,10 +78,7 @@ serve(async (req) => {
     
     const cleanJson = (text: string): string => {
       try {
-        // First, remove any markdown formatting
         let cleaned = text.replace(/```(json)?|```/g, '').trim();
-        
-        // Find the first { and last }
         const start = cleaned.indexOf('{');
         const end = cleaned.lastIndexOf('}');
         
@@ -87,35 +87,21 @@ serve(async (req) => {
           throw new Error('Invalid JSON structure');
         }
 
-        // Extract just the JSON portion
         cleaned = cleaned.slice(start, end + 1);
-
-        // Clean up common JSON formatting issues
         cleaned = cleaned
-          // Ensure property names are quoted
           .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
-          // Replace single quotes with double quotes
           .replace(/'/g, '"')
-          // Remove trailing commas
           .replace(/,(\s*[}\]])/g, '$1')
-          // Fix double quotes issues
           .replace(/\\"/g, '"')
           .replace(/"([^"]*)""/g, '"$1"')
-          // Remove control characters
           .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-          // Fix spacing around colons
           .replace(/":"/g, '": "')
-          // Normalize whitespace
           .replace(/\s+/g, ' ')
-          // Remove any comments
           .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-          // Fix escaped newlines
           .replace(/\\n/g, '\\n')
           .replace(/\n/g, '\\n');
 
-        // Validate the JSON by parsing it
-        JSON.parse(cleaned);
-        
+        JSON.parse(cleaned); // Validate JSON
         console.log('Successfully cleaned and validated JSON');
         return cleaned;
       } catch (error) {
@@ -127,56 +113,39 @@ serve(async (req) => {
 
     console.log('Cleaning and parsing JSON...');
     const cleanedText = cleanJson(responseText);
-    console.log('Cleaned text:', cleanedText);
+    const workouts = JSON.parse(cleanedText);
+    console.log('Successfully parsed JSON with keys:', Object.keys(workouts));
 
-    try {
-      const workouts = JSON.parse(cleanedText);
-      console.log('Successfully parsed JSON with keys:', Object.keys(workouts));
-
-      // Validate workout structure for the requested number of days
-      for (let i = 1; i <= numberOfDays; i++) {
-        const dayKey = `day${i}`;
-        const workout = workouts[dayKey];
-        
-        if (!workout) {
-          throw new Error(`Missing workout for ${dayKey}`);
-        }
-
-        const requiredFields = ['description', 'warmup', 'workout', 'strength'];
-        for (const field of requiredFields) {
-          if (!workout[field] || typeof workout[field] !== 'string') {
-            throw new Error(`Invalid or missing ${field} for ${dayKey}`);
-          }
-        }
+    // Validate workout structure
+    for (let i = 1; i <= numberOfDays; i++) {
+      const dayKey = `day${i}`;
+      const workout = workouts[dayKey];
+      
+      if (!workout) {
+        throw new Error(`Missing workout for ${dayKey}`);
       }
 
-      return new Response(JSON.stringify(workouts), {
-        headers: corsHeaders,
-        status: 200,
-      });
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      console.error('Problematic JSON text:', cleanedText);
-      
-      return new Response(JSON.stringify({ 
-        error: 'Failed to parse workout data',
-        details: parseError.message,
-        type: 'ParseError'
-      }), {
-        headers: corsHeaders,
-        status: 400,
-      });
+      const requiredFields = ['description', 'warmup', 'workout', 'strength'];
+      for (const field of requiredFields) {
+        if (!workout[field] || typeof workout[field] !== 'string') {
+          throw new Error(`Invalid or missing ${field} for ${dayKey}`);
+        }
+      }
     }
+
+    return new Response(JSON.stringify(workouts), {
+      headers: corsHeaders,
+      status: 200,
+    });
   } catch (error) {
     console.error('Error in generate-weekly-workouts:', error);
     
     return new Response(JSON.stringify({ 
       error: error.message || 'Failed to generate workouts',
       details: error.stack,
-      timestamp: new Date().toISOString(),
-      type: error.name || 'UnknownError'
+      timestamp: new Date().toISOString()
     }), {
-      status: error.status || 500,
+      status: 400, // Changed from 500 to 400 for client errors
       headers: corsHeaders,
     });
   }

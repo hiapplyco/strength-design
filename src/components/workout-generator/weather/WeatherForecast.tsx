@@ -11,19 +11,16 @@ export function WeatherForecast({ forecast, formatTemp, formatValue }: WeatherFo
   return (
     <div className="bg-white text-black p-4 rounded-lg shadow-sm">
       <h4 className="font-medium text-lg mb-3">Forecast</h4>
-      <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
         {forecast.dates.map((date, index) => (
-          <div key={date} className="p-3 bg-gray-50 rounded-md">
+          <div key={date} className="p-2 bg-gray-50 rounded-md text-sm">
             <p className="font-medium">{new Date(date).toLocaleDateString(undefined, {
-              weekday: 'long',
-              month: 'short',
+              weekday: 'short',
               day: 'numeric'
             })}</p>
-            <div className="mt-1 space-y-1 text-sm">
-              <p>High: {formatTemp(forecast.maxTemps[index])}</p>
-              <p>Low: {formatTemp(forecast.minTemps[index])}</p>
-              <p>Precipitation: {formatValue(forecast.precipitationProb[index], '%')}</p>
-              <p>Conditions: {getWeatherDescription(forecast.weatherCodes[index])}</p>
+            <div className="space-y-0.5">
+              <p>{formatTemp(forecast.maxTemps[index]).split(' ')[0]}</p>
+              <p className="text-gray-500 text-xs">{getWeatherDescription(forecast.weatherCodes[index])}</p>
             </div>
           </div>
         ))}

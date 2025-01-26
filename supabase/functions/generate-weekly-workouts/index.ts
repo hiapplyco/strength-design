@@ -75,7 +75,10 @@ serve(async (req) => {
     
     const cleanJson = (text: string): string => {
       try {
+        // First, remove any markdown formatting
         let cleaned = text.replace(/```(json)?|```/g, '').trim();
+        
+        // Find the first { and last }
         const start = cleaned.indexOf('{');
         const end = cleaned.lastIndexOf('}');
         
@@ -84,21 +87,40 @@ serve(async (req) => {
           throw new Error('Invalid JSON structure');
         }
 
+        // Extract just the JSON portion
         cleaned = cleaned.slice(start, end + 1);
+
+        // Clean up common JSON formatting issues
         cleaned = cleaned
+          // Ensure property names are quoted
           .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+          // Replace single quotes with double quotes
           .replace(/'/g, '"')
+          // Remove trailing commas
           .replace(/,(\s*[}\]])/g, '$1')
+          // Fix double quotes issues
           .replace(/\\"/g, '"')
           .replace(/"([^"]*)""/g, '"$1"')
+          // Remove control characters
           .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+          // Fix spacing around colons
           .replace(/":"/g, '": "')
-          .replace(/\s+/g, ' ');
+          // Normalize whitespace
+          .replace(/\s+/g, ' ')
+          // Remove any comments
+          .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+          // Fix escaped newlines
+          .replace(/\\n/g, '\\n')
+          .replace(/\n/g, '\\n');
 
+        // Validate the JSON by parsing it
         JSON.parse(cleaned);
+        
+        console.log('Successfully cleaned and validated JSON');
         return cleaned;
       } catch (error) {
         console.error('Error cleaning JSON:', error);
+        console.error('Problematic text:', text);
         throw new Error(`Failed to clean JSON: ${error.message}`);
       }
     };

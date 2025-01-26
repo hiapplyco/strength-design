@@ -152,6 +152,15 @@ export function GenerateWorkoutInput({
     
     const fullPrompt = `${weatherPrompt}${prompts.exercises}${prompts.fitness}${prompts.prescribed}${prompts.injuries}`;
     
+    console.log('Generating workout with params:', {
+      numberOfDays,
+      weatherPrompt,
+      selectedExercises: selectedExercises.length,
+      fitnessLevel,
+      hasPrescribed: !!prescribedExercises,
+      hasInjuries: !!injuries
+    });
+
     try {
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
@@ -165,11 +174,37 @@ export function GenerateWorkoutInput({
         }
       });
 
+      console.log('Edge function response:', { data, error });
+
       if (error) {
         console.error('Edge Function error:', error);
         toast({
           title: "Error",
-          description: "Failed to generate workout. Please try again.",
+          description: `Failed to generate workout: ${error.message || 'Unknown error'}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!data) {
+        console.error('No data received from edge function');
+        toast({
+          title: "Error",
+          description: "No workout data received. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate we have the correct number of days
+      const workoutDays = Object.keys(data).length;
+      console.log(`Received ${workoutDays} days of workouts, expected ${numberOfDays}`);
+      
+      if (workoutDays !== numberOfDays) {
+        console.error(`Mismatch in number of days: got ${workoutDays}, expected ${numberOfDays}`);
+        toast({
+          title: "Error",
+          description: "Incomplete workout generated. Please try again.",
           variant: "destructive",
         });
         return;
@@ -188,7 +223,7 @@ export function GenerateWorkoutInput({
       console.error("Error generating workout:", error);
       toast({
         title: "Error",
-        description: "Failed to generate workout. Please try again.",
+        description: error.message || "Failed to generate workout. Please try again.",
         variant: "destructive",
       });
     }

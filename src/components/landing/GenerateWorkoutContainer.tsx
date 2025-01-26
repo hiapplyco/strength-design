@@ -28,7 +28,6 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
       });
 
       if (response.error) {
-        console.error('Edge Function error:', response.error);
         throw response.error;
       }
 
@@ -56,8 +55,6 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     const startTime = performance.now();
     
     try {
-      console.log('Starting workout generation...');
-      
       const { data: workoutData, error: workoutError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           numberOfDays: 7,
@@ -66,37 +63,19 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
         }
       });
 
-      if (workoutError) {
-        console.error('Supabase function error:', workoutError);
-        throw workoutError;
-      }
+      if (workoutError) throw workoutError;
+      if (!workoutData) throw new Error('No data received from workout generation');
 
-      if (!workoutData) {
-        throw new Error('No data received from workout generation');
-      }
-
-      console.log('Generated workout data:', workoutData);
       setWorkouts(workoutData);
 
-      // Calculate session duration
-      const endTime = performance.now();
-      const sessionDuration = Math.round(endTime - startTime);
-
-      // Save session data to session_io table
-      const { error: sessionError } = await supabase
-        .from('session_io')
-        .insert({
-          prescribed_exercises: prescribedExercises,
-          number_of_days: 7,
-          generated_workouts: workoutData,
-          session_duration_ms: sessionDuration,
-          success: true
-        });
-
-      if (sessionError) {
-        console.error('Error saving session data:', sessionError);
-        // Don't throw here as the workout generation was successful
-      }
+      // Save session data
+      await supabase.from('session_io').insert({
+        prescribed_exercises: prescribedExercises,
+        number_of_days: 7,
+        generated_workouts: workoutData,
+        session_duration_ms: Math.round(performance.now() - startTime),
+        success: true
+      });
 
       toast({
         title: "Success",
@@ -107,15 +86,13 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
       console.error('Error generating workout:', error);
       
       // Save failed session
-      await supabase
-        .from('session_io')
-        .insert({
-          prescribed_exercises: prescribedExercises,
-          number_of_days: 7,
-          session_duration_ms: Math.round(performance.now() - startTime),
-          success: false,
-          error_message: error.message || "Unknown error occurred"
-        });
+      await supabase.from('session_io').insert({
+        prescribed_exercises: prescribedExercises,
+        number_of_days: 7,
+        session_duration_ms: Math.round(performance.now() - startTime),
+        success: false,
+        error_message: error.message || "Unknown error occurred"
+      });
 
       toast({
         title: "Error",

@@ -10,10 +10,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('Function invoked with method:', req.method);
-  
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
     return new Response(null, { 
       status: 204, 
       headers: corsHeaders 
@@ -23,11 +20,9 @@ serve(async (req) => {
   try {
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
-      console.error('Missing Gemini API key');
       throw new Error('Missing Gemini API key');
     }
 
-    console.log('Parsing request body...');
     const { numberOfDays, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, injuries } = await req.json();
     
     console.log('Request parameters:', {
@@ -39,15 +34,10 @@ serve(async (req) => {
       hasInjuries: !!injuries
     });
 
-    if (!numberOfDays || typeof numberOfDays !== 'number') {
-      throw new Error('Invalid or missing numberOfDays parameter');
-    }
-
     const genAI = new GoogleGenerativeAI(apiKey);
-    const config = getGeminiConfig();
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      generationConfig: config.generationConfig,
+      generationConfig: getGeminiConfig().generationConfig,
     });
 
     const systemPrompt = createWorkoutGenerationPrompt({
@@ -59,98 +49,41 @@ serve(async (req) => {
       injuries
     });
 
-    console.log('Sending request to Gemini with numberOfDays:', numberOfDays);
+    console.log('Sending request to Gemini');
     const result = await model.generateContent(systemPrompt);
-    console.log('Received response from Gemini');
-
+    
     if (!result?.response) {
-      console.error('Invalid response from Gemini:', result);
       throw new Error('Invalid response from Gemini');
     }
 
     const responseText = result.response.text();
     if (!responseText) {
-      console.error('No text content in Gemini response');
       throw new Error('No text content in Gemini response');
     }
 
-    console.log('Raw response length:', responseText.length);
-    
-    const cleanJson = (text: string): string => {
-      try {
-        // Remove markdown code blocks
-        let cleaned = text.replace(/```(json)?|```/g, '').trim();
-        
-        // Find the first { and last }
-        const start = cleaned.indexOf('{');
-        const end = cleaned.lastIndexOf('}');
-        
-        if (start === -1 || end === -1) {
-          console.error('Invalid JSON structure - missing braces');
-          throw new Error('Invalid JSON structure');
-        }
+    // Clean and parse JSON
+    const cleanedText = responseText
+      .replace(/```(json)?|```/g, '')
+      .trim()
+      .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+      .replace(/'/g, '"')
+      .replace(/,(\s*[}\]])/g, '$1')
+      .replace(/\\"/g, '"')
+      .replace(/"([^"]*)""/g, '"$1"')
+      .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+      .replace(/":"/g, '": "')
+      .replace(/\s+/g, ' ')
+      .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+      .replace(/\\n/g, '\\n')
+      .replace(/\n/g, '\\n');
 
-        // Extract just the JSON part
-        cleaned = cleaned.slice(start, end + 1);
-
-        // Clean up the JSON string
-        cleaned = cleaned
-          // Quote unquoted keys
-          .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
-          // Fix single quotes
-          .replace(/'/g, '"')
-          // Remove trailing commas
-          .replace(/,(\s*[}\]])/g, '$1')
-          // Fix escaped quotes
-          .replace(/\\"/g, '"')
-          // Fix double quotes
-          .replace(/"([^"]*)""/g, '"$1"')
-          // Remove control characters
-          .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-          // Fix spacing around colons
-          .replace(/":"/g, '": "')
-          // Normalize whitespace
-          .replace(/\s+/g, ' ')
-          // Remove comments
-          .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-          // Normalize newlines
-          .replace(/\\n/g, '\\n')
-          .replace(/\n/g, '\\n');
-
-        // Validate JSON by parsing it
-        const parsed = JSON.parse(cleaned);
-        
-        // Convert back to string with proper formatting
-        cleaned = JSON.stringify(parsed);
-        
-        console.log('Successfully cleaned and validated JSON');
-        return cleaned;
-      } catch (error) {
-        console.error('Error cleaning JSON:', error);
-        console.error('Problematic text:', text);
-        throw new Error(`Failed to clean JSON: ${error.message}`);
-      }
-    };
-
-    console.log('Cleaning and parsing JSON...');
-    const cleanedText = cleanJson(responseText);
     const workouts = JSON.parse(cleanedText);
-    console.log('Successfully parsed JSON with keys:', Object.keys(workouts));
 
     // Validate workout structure
     for (let i = 1; i <= numberOfDays; i++) {
       const dayKey = `day${i}`;
-      const workout = workouts[dayKey];
-      
-      if (!workout) {
+      if (!workouts[dayKey]) {
         throw new Error(`Missing workout for ${dayKey}`);
-      }
-
-      const requiredFields = ['description', 'warmup', 'workout', 'strength'];
-      for (const field of requiredFields) {
-        if (!workout[field] || typeof workout[field] !== 'string') {
-          throw new Error(`Invalid or missing ${field} for ${dayKey}`);
-        }
       }
     }
 

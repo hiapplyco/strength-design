@@ -10,6 +10,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       status: 204, 
@@ -61,22 +62,15 @@ serve(async (req) => {
       throw new Error('No text content in Gemini response');
     }
 
-    // Clean and parse JSON
+    // Clean and parse JSON - simplified version
     const cleanedText = responseText
-      .replace(/```(json)?|```/g, '')
+      .replace(/```json\s*|\s*```/g, '')  // Remove markdown
       .trim()
-      .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
-      .replace(/'/g, '"')
-      .replace(/,(\s*[}\]])/g, '$1')
-      .replace(/\\"/g, '"')
-      .replace(/"([^"]*)""/g, '"$1"')
-      .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
-      .replace(/":"/g, '": "')
-      .replace(/\s+/g, ' ')
-      .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-      .replace(/\\n/g, '\\n')
-      .replace(/\n/g, '\\n');
+      .replace(/\n/g, ' ')               // Remove newlines
+      .replace(/\s+/g, ' ');             // Normalize spaces
 
+    console.log('Cleaned text:', cleanedText);
+    
     const workouts = JSON.parse(cleanedText);
 
     // Validate workout structure
@@ -86,6 +80,8 @@ serve(async (req) => {
         throw new Error(`Missing workout for ${dayKey}`);
       }
     }
+
+    console.log(`Generated ${Object.keys(workouts).length} days of workouts`);
 
     return new Response(JSON.stringify(workouts), {
       headers: corsHeaders,

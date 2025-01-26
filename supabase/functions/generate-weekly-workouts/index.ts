@@ -78,7 +78,10 @@ serve(async (req) => {
     
     const cleanJson = (text: string): string => {
       try {
+        // Remove markdown code blocks
         let cleaned = text.replace(/```(json)?|```/g, '').trim();
+        
+        // Find the first { and last }
         const start = cleaned.indexOf('{');
         const end = cleaned.lastIndexOf('}');
         
@@ -87,21 +90,39 @@ serve(async (req) => {
           throw new Error('Invalid JSON structure');
         }
 
+        // Extract just the JSON part
         cleaned = cleaned.slice(start, end + 1);
+
+        // Clean up the JSON string
         cleaned = cleaned
+          // Quote unquoted keys
           .replace(/([{,]\s*)(\w+)(\s*:)/g, '$1"$2"$3')
+          // Fix single quotes
           .replace(/'/g, '"')
+          // Remove trailing commas
           .replace(/,(\s*[}\]])/g, '$1')
+          // Fix escaped quotes
           .replace(/\\"/g, '"')
+          // Fix double quotes
           .replace(/"([^"]*)""/g, '"$1"')
+          // Remove control characters
           .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+          // Fix spacing around colons
           .replace(/":"/g, '": "')
+          // Normalize whitespace
           .replace(/\s+/g, ' ')
+          // Remove comments
           .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+          // Normalize newlines
           .replace(/\\n/g, '\\n')
           .replace(/\n/g, '\\n');
 
-        JSON.parse(cleaned); // Validate JSON
+        // Validate JSON by parsing it
+        const parsed = JSON.parse(cleaned);
+        
+        // Convert back to string with proper formatting
+        cleaned = JSON.stringify(parsed);
+        
         console.log('Successfully cleaned and validated JSON');
         return cleaned;
       } catch (error) {
@@ -145,7 +166,7 @@ serve(async (req) => {
       details: error.stack,
       timestamp: new Date().toISOString()
     }), {
-      status: 400, // Changed from 500 to 400 for client errors
+      status: 400,
       headers: corsHeaders,
     });
   }

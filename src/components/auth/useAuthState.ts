@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { AuthError } from "@supabase/supabase-js";
 
 export const useAuthState = (
@@ -10,7 +9,6 @@ export const useAuthState = (
 ) => {
   const [error, setError] = useState<string>("");
   const [view, setView] = useState<"sign_up" | "sign_in">("sign_in");
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -19,7 +17,7 @@ export const useAuthState = (
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         console.log("User already signed in, closing dialog");
-        await supabase.auth.signOut(); // Sign out if there's an existing session
+        await supabase.auth.signOut();
         onOpenChange(false);
       }
     };
@@ -29,18 +27,10 @@ export const useAuthState = (
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
-      
-      if (event === 'SIGNED_OUT') {
-        toast({
-          title: "Signed out",
-          description: "Come back soon!",
-        });
-        setError("");
-      }
     });
 
     return () => subscription.unsubscribe();
-  }, [toast]);
+  }, []);
 
   const getErrorMessage = (error: AuthError) => {
     switch (error.message) {

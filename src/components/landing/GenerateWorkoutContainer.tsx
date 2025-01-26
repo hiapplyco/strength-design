@@ -51,58 +51,14 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     }
   };
 
-  const saveGenerationInputs = async (params: {
-    weatherData?: any;
-    weatherPrompt?: string;
-    selectedExercises: Exercise[];
-    fitnessLevel?: string;
-    prescribedExercises?: string;
-    numberOfDays: number;
-  }) => {
-    try {
-      const simplifiedExercises = params.selectedExercises.map(exercise => ({
-        name: exercise.name,
-        instructions: exercise.instructions
-      })) as Json;
-
-      const serializedWeatherData = params.weatherData ? 
-        JSON.parse(JSON.stringify(params.weatherData)) as Json : 
-        null;
-
-      const { error } = await supabase
-        .from('workout_generation_inputs')
-        .insert({
-          weather_data: serializedWeatherData,
-          weather_prompt: params.weatherPrompt || null,
-          selected_exercises: simplifiedExercises,
-          fitness_level: params.fitnessLevel || null,
-          prescribed_exercises: prescribedExercises || null,
-          number_of_days: params.numberOfDays
-        });
-
-      if (error) {
-        console.error('Error saving generation inputs:', error);
-        throw error;
-      }
-
-      console.log('Successfully saved workout generation inputs');
-    } catch (error) {
-      console.error('Error saving generation inputs:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save workout generation inputs",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleGenerateWorkout = async () => {
     setIsLoading(true);
+    const startTime = performance.now();
     
     try {
       console.log('Starting workout generation...');
       
-      const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
+      const { data: workoutData, error: workoutError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           numberOfDays: 7,
           selectedExercises: [],
@@ -110,23 +66,37 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
         }
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+      if (workoutError) {
+        console.error('Supabase function error:', workoutError);
+        throw workoutError;
       }
 
-      if (!data) {
+      if (!workoutData) {
         throw new Error('No data received from workout generation');
       }
 
-      console.log('Generated workout data:', data);
-      setWorkouts(data);
+      console.log('Generated workout data:', workoutData);
+      setWorkouts(workoutData);
 
-      await saveGenerationInputs({
-        selectedExercises: [],
-        numberOfDays: 7,
-        prescribedExercises: prescribedExercises,
-      });
+      // Calculate session duration
+      const endTime = performance.now();
+      const sessionDuration = Math.round(endTime - startTime);
+
+      // Save session data to session_io table
+      const { error: sessionError } = await supabase
+        .from('session_io')
+        .insert({
+          prescribed_exercises: prescribedExercises,
+          number_of_days: 7,
+          generated_workouts: workoutData,
+          session_duration_ms: sessionDuration,
+          success: true
+        });
+
+      if (sessionError) {
+        console.error('Error saving session data:', sessionError);
+        // Don't throw here as the workout generation was successful
+      }
 
       toast({
         title: "Success",
@@ -135,6 +105,18 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
 
     } catch (error) {
       console.error('Error generating workout:', error);
+      
+      // Save failed session
+      await supabase
+        .from('session_io')
+        .insert({
+          prescribed_exercises: prescribedExercises,
+          number_of_days: 7,
+          session_duration_ms: Math.round(performance.now() - startTime),
+          success: false,
+          error_message: error.message || "Unknown error occurred"
+        });
+
       toast({
         title: "Error",
         description: error.message || "Failed to generate workout. Please try again.",

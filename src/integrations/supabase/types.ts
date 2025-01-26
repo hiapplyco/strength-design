@@ -146,6 +146,54 @@ export type Database = {
         }
         Relationships: []
       }
+      session_io: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          fitness_level: string | null
+          generated_workouts: Json | null
+          id: string
+          injuries: string | null
+          number_of_days: number | null
+          prescribed_exercises: string | null
+          selected_exercises: Json | null
+          session_duration_ms: number | null
+          success: boolean | null
+          weather_data: Json | null
+          weather_prompt: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          fitness_level?: string | null
+          generated_workouts?: Json | null
+          id?: string
+          injuries?: string | null
+          number_of_days?: number | null
+          prescribed_exercises?: string | null
+          selected_exercises?: Json | null
+          session_duration_ms?: number | null
+          success?: boolean | null
+          weather_data?: Json | null
+          weather_prompt?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          fitness_level?: string | null
+          generated_workouts?: Json | null
+          id?: string
+          injuries?: string | null
+          number_of_days?: number | null
+          prescribed_exercises?: string | null
+          selected_exercises?: Json | null
+          session_duration_ms?: number | null
+          success?: boolean | null
+          weather_data?: Json | null
+          weather_prompt?: string | null
+        }
+        Relationships: []
+      }
       voice_recordings: {
         Row: {
           audio_url: string

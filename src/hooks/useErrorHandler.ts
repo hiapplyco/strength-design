@@ -14,12 +14,6 @@ export const useErrorHandler = () => {
       return;
     }
 
-    // Check for accessibility warnings
-    if (event.message.includes('DialogContent')) {
-      console.warn('Accessibility warning:', event.message);
-      return;
-    }
-
     // Check for file validation errors
     if (event.message.includes('Invalid file type')) {
       toast({
@@ -31,11 +25,7 @@ export const useErrorHandler = () => {
     }
 
     // General error handling
-    toast({
-      title: "Error",
-      description: "An unexpected error occurred. Please try again.",
-      variant: "destructive",
-    });
+    console.error("Application error:", event.message);
   };
 
   return handleError;

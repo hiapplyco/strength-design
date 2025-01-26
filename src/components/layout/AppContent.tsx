@@ -7,11 +7,9 @@ import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { useAuthStateManager } from "@/hooks/useAuthStateManager";
 
 export const AppContent = () => {
   const handleConsoleError = useErrorHandler();
-  const session = useAuthStateManager();
 
   useEffect(() => {
     window.addEventListener('error', handleConsoleError);

@@ -9,11 +9,11 @@ interface WeatherForecastProps {
 
 export function WeatherForecast({ forecast, formatTemp, formatValue }: WeatherForecastProps) {
   return (
-    <div className="bg-background/60 backdrop-blur-sm p-4 rounded-lg shadow-sm">
+    <div className="bg-white text-black p-4 rounded-lg shadow-sm">
       <h4 className="font-medium text-lg mb-3">Forecast</h4>
-      <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-300">
+      <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
         {forecast.dates.map((date, index) => (
-          <div key={date} className="p-3 bg-background/80 rounded-md">
+          <div key={date} className="p-3 bg-gray-50 rounded-md">
             <p className="font-medium">{new Date(date).toLocaleDateString(undefined, {
               weekday: 'long',
               month: 'short',

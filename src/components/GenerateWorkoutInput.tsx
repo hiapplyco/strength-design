@@ -1,4 +1,5 @@
 import { InputContainer } from "./workout-generator/InputContainer";
+import type { Exercise } from "./exercise-search/types";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;

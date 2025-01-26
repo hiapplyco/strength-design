@@ -5,19 +5,29 @@ import type { Exercise } from "./types";
 
 interface SearchDialogProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onClearSearch: () => void;
+  searchResults: Exercise[];
   selectedExercises: Exercise[];
   onExerciseSelect: (exercise: Exercise) => void;
+  sanitizeText: (text: string) => string;
 }
 
 export function SearchDialog({
   isOpen,
-  onOpenChange,
+  onClose,
+  searchQuery,
+  onSearchChange,
+  onClearSearch,
+  searchResults,
   selectedExercises,
   onExerciseSelect,
+  sanitizeText,
 }: SearchDialogProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Search Exercises</DialogTitle>
@@ -26,10 +36,16 @@ export function SearchDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <SearchInput />
+          <SearchInput 
+            value={searchQuery}
+            onChange={onSearchChange}
+            onClear={onClearSearch}
+          />
           <SearchResults
+            results={searchResults}
             selectedExercises={selectedExercises}
             onExerciseSelect={onExerciseSelect}
+            sanitizeText={sanitizeText}
           />
         </div>
       </DialogContent>

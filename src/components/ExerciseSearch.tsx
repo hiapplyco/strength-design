@@ -19,9 +19,7 @@ export const ExerciseSearch = ({
   selectedExercises: externalSelectedExercises = [] 
 }: ExerciseSearchProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedExerciseNames, setSelectedExerciseNames] = useState<string[]>(
-    externalSelectedExercises.map(ex => ex.name)
-  );
+  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>(externalSelectedExercises);
   
   const {
     searchQuery,
@@ -32,14 +30,14 @@ export const ExerciseSearch = ({
 
   // Update internal selection state when external selection changes
   useEffect(() => {
-    setSelectedExerciseNames(externalSelectedExercises.map(ex => ex.name));
+    setSelectedExercises(externalSelectedExercises);
   }, [externalSelectedExercises]);
 
   const handleExerciseSelect = (exercise: Exercise) => {
-    if (selectedExerciseNames.includes(exercise.name)) {
-      setSelectedExerciseNames(prev => prev.filter(name => name !== exercise.name));
+    if (selectedExercises.find(ex => ex.name === exercise.name)) {
+      setSelectedExercises(prev => prev.filter(ex => ex.name !== exercise.name));
     } else {
-      setSelectedExerciseNames(prev => [...prev, exercise.name]);
+      setSelectedExercises(prev => [...prev, exercise]);
     }
     onExerciseSelect?.(exercise);
   };
@@ -78,7 +76,7 @@ export const ExerciseSearch = ({
         onSearchChange={setSearchQuery}
         onClearSearch={handleClearSearch}
         searchResults={searchResults}
-        selectedExercises={selectedExerciseNames}
+        selectedExercises={selectedExercises}
         onExerciseSelect={handleExerciseSelect}
         sanitizeText={sanitizeText}
       />

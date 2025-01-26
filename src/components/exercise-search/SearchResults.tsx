@@ -12,7 +12,7 @@ import type { Exercise } from "./types";
 
 interface SearchResultsProps {
   results: Exercise[];
-  selectedExercises: string[];
+  selectedExercises: Exercise[];
   onExerciseSelect: (exercise: Exercise) => void;
   sanitizeText: (text: string) => string;
 }
@@ -37,7 +37,7 @@ export const SearchResults = ({
         </TableHeader>
         <TableBody>
           {results.map((exercise, index) => {
-            const isSelected = selectedExercises.includes(exercise.name);
+            const isSelected = selectedExercises.some(ex => ex.name === exercise.name);
             return (
               <TableRow key={index}>
                 <TableCell className="font-medium">

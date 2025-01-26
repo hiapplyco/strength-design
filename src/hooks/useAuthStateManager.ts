@@ -16,31 +16,15 @@ export const useAuthStateManager = () => {
         
         if (sessionError) {
           console.error("Error getting initial session:", sessionError);
-          toast({
-            title: "Session Error",
-            description: "Failed to retrieve session. Please try logging in again.",
-            variant: "destructive",
-          });
           return;
         }
 
         if (initialSession) {
           console.log("Initial session retrieved:", initialSession.user?.id);
           setSession(initialSession);
-        } else {
-          // Show welcome message for new visitors
-          toast({
-            title: "Welcome to strength.design!",
-            description: "Try out our free program generator in the middle of the page!",
-          });
         }
       } catch (error) {
         console.error("Unexpected error during session initialization:", error);
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred. Please try again.",
-          variant: "destructive",
-        });
       }
     };
 
@@ -57,18 +41,10 @@ export const useAuthStateManager = () => {
 
       switch (event) {
         case 'SIGNED_IN':
-          toast({
-            title: "Welcome back!",
-            description: "Successfully signed in.",
-          });
           navigate('/');
           break;
         case 'SIGNED_OUT':
           setSession(null);
-          toast({
-            title: "Signed out",
-            description: "Successfully signed out.",
-          });
           navigate('/');
           break;
         case 'TOKEN_REFRESHED':
@@ -85,11 +61,6 @@ export const useAuthStateManager = () => {
         default:
           if (!currentSession) {
             console.error('Auth state change error');
-            toast({
-              title: "Authentication Error",
-              description: "Please try signing in again.",
-              variant: "destructive",
-            });
           }
       }
     });
@@ -97,7 +68,7 @@ export const useAuthStateManager = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast, navigate, session]);
+  }, [navigate, session]);
 
   return session;
 };

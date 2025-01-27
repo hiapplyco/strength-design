@@ -45,7 +45,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "workouts"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       contact_submissions: {
@@ -69,6 +69,24 @@ export type Database = {
           id?: string
           name?: string
           subscription_type?: string
+        }
+        Relationships: []
+      }
+      pricing_page_events: {
+        Row: {
+          id: string
+          event_type: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_type: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_type?: string
+          created_at?: string
         }
         Relationships: []
       }
@@ -119,119 +137,26 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
-      profiles: {
+      pricing_page_events: {
         Row: {
           created_at: string
+          event_type: string
           id: string
-          tier: string | null
-          trial_end_date: string | null
-          updated_at: string
         }
         Insert: {
           created_at?: string
-          id: string
-          tier?: string | null
-          trial_end_date?: string | null
-          updated_at?: string
+          event_type: string
+          id?: string
         }
         Update: {
           created_at?: string
+          event_type?: string
           id?: string
-          tier?: string | null
-          trial_end_date?: string | null
-          updated_at?: string
         }
         Relationships: []
-      }
-      session_io: {
-        Row: {
-          created_at: string
-          error_message: string | null
-          fitness_level: string | null
-          generated_workouts: Json | null
-          id: string
-          injuries: string | null
-          number_of_days: number | null
-          prescribed_exercises: string | null
-          selected_exercises: Json | null
-          session_duration_ms: number | null
-          success: boolean | null
-          weather_data: Json | null
-          weather_prompt: string | null
-        }
-        Insert: {
-          created_at?: string
-          error_message?: string | null
-          fitness_level?: string | null
-          generated_workouts?: Json | null
-          id?: string
-          injuries?: string | null
-          number_of_days?: number | null
-          prescribed_exercises?: string | null
-          selected_exercises?: Json | null
-          session_duration_ms?: number | null
-          success?: boolean | null
-          weather_data?: Json | null
-          weather_prompt?: string | null
-        }
-        Update: {
-          created_at?: string
-          error_message?: string | null
-          fitness_level?: string | null
-          generated_workouts?: Json | null
-          id?: string
-          injuries?: string | null
-          number_of_days?: number | null
-          prescribed_exercises?: string | null
-          selected_exercises?: Json | null
-          session_duration_ms?: number | null
-          success?: boolean | null
-          weather_data?: Json | null
-          weather_prompt?: string | null
-        }
-        Relationships: []
-      }
-      voice_recordings: {
-        Row: {
-          audio_url: string
-          created_at: string
-          id: string
-          user_id: string
-          workout_id: string
-        }
-        Insert: {
-          audio_url: string
-          created_at?: string
-          id?: string
-          user_id: string
-          workout_id: string
-        }
-        Update: {
-          audio_url?: string
-          created_at?: string
-          id?: string
-          user_id?: string
-          workout_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "voice_recordings_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "voice_recordings_workout_id_fkey"
-            columns: ["workout_id"]
-            isOneToOne: false
-            referencedRelation: "workouts"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       workout_dashboard: {
         Row: {
@@ -280,7 +205,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       workout_generation_inputs: {
@@ -364,7 +289,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "workouts"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       workouts: {
@@ -464,7 +389,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {

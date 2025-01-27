@@ -12,9 +12,11 @@ const Pricing = () => {
 
   const trackEvent = async (eventType: string) => {
     try {
-      await supabase.from('pricing_page_events').insert({
-        event_type: eventType
-      });
+      const { error } = await supabase
+        .from("pricing_page_events")
+        .insert({ event_type: eventType });
+      
+      if (error) throw error;
     } catch (error) {
       console.error('Error tracking event:', error);
     }

@@ -33,10 +33,6 @@ interface WorkoutGeneratorFormProps {
   isValid: boolean;
 }
 
-const RequiredLabel = () => (
-  <span className="text-red-500 ml-1">*</span>
-);
-
 export function WorkoutGeneratorForm({
   weatherData,
   onWeatherUpdate,
@@ -80,13 +76,13 @@ export function WorkoutGeneratorForm({
       <div className="w-full space-y-4">
         <div className="flex items-center gap-2">
           <Dumbbell className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Search Exercises & Equipment<RequiredLabel /></h3>
+          <h3 className="font-oswald text-lg">Search Exercises & Equipment</h3>
         </div>
         <ExerciseSection
           selectedExercises={selectedExercises}
           onExerciseSelect={onExerciseSelect}
           renderTooltip={() => (
-            <div className="tooltip">Select exercises and equipment you have access to</div>
+            <div className="tooltip">Select specific exercises and equipment you have access to for personalized workouts</div>
           )}
         />
       </div>
@@ -94,7 +90,6 @@ export function WorkoutGeneratorForm({
       <FitnessLevelSection
         fitnessLevel={fitnessLevel}
         setFitnessLevel={setFitnessLevel}
-        isRequired={true}
       />
 
       <PrescribedExercisesSection
@@ -114,9 +109,8 @@ export function WorkoutGeneratorForm({
       <DaysSelection
         numberOfDays={numberOfDays}
         setNumberOfDays={setNumberOfDays}
-        isRequired={true}
         renderTooltip={() => (
-          <div className="tooltip">Choose how many days you want to train</div>
+          <div className="tooltip">Choose how many days you want to train in your program</div>
         )}
       />
 
@@ -126,7 +120,7 @@ export function WorkoutGeneratorForm({
         isGenerating={isGenerating}
         isValid={isValid}
         renderTooltip={() => (
-          <div className="tooltip">Review your selections and generate your program</div>
+          <div className="tooltip">Review your selections and generate your personalized program</div>
         )}
       />
     </div>

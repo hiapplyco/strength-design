@@ -5,16 +5,14 @@ interface DaysSelectionProps {
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
   renderTooltip: (content: string) => React.ReactNode;
-  isRequired?: boolean;
 }
 
-export function DaysSelection({ numberOfDays, setNumberOfDays, renderTooltip, isRequired = false }: DaysSelectionProps) {
+export function DaysSelection({ numberOfDays, setNumberOfDays, renderTooltip }: DaysSelectionProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <h3 className="text-sm font-medium text-white">
           How many days would you like to train?
-          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </h3>
         {renderTooltip("Select how many days of workouts to generate (1-12 days)")}
       </div>

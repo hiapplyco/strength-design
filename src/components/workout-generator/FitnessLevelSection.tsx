@@ -6,7 +6,6 @@ import { TooltipWrapper } from "./TooltipWrapper";
 interface FitnessLevelSectionProps {
   fitnessLevel: string;
   setFitnessLevel: (value: string) => void;
-  isRequired?: boolean;
 }
 
 const fitnessLevels = [
@@ -19,13 +18,12 @@ const fitnessLevels = [
 export function FitnessLevelSection({
   fitnessLevel,
   setFitnessLevel,
-  isRequired = false
 }: FitnessLevelSectionProps) {
   return (
     <div className="w-full">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="h-5 w-5 text-primary" />
-        <h3 className="font-oswald text-lg">Fitness Level{isRequired && <span className="text-red-500 ml-1">*</span>}</h3>
+        <h3 className="font-oswald text-lg">Fitness Level</h3>
         <TooltipWrapper content="Select your fitness level to receive appropriately challenging workouts" />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

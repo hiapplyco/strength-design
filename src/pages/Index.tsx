@@ -46,10 +46,15 @@ const Index = () => {
     const startTime = performance.now();
 
     try {
+      // Ensure selectedExercises is an array
+      const selectedExercisesArray = Array.isArray(params.selectedExercises) 
+        ? params.selectedExercises 
+        : [];
+
       // Store input data in session_io table
       const { error: sessionError } = await supabase.from('session_io').insert({
         weather_prompt: params.weatherPrompt,
-        selected_exercises: params.selectedExercises,
+        selected_exercises: selectedExercisesArray,
         fitness_level: params.fitnessLevel,
         prescribed_exercises: params.prescribedExercises,
         number_of_days: numberOfDays,
@@ -64,6 +69,7 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           ...params,
+          selectedExercises: selectedExercisesArray,
           numberOfDays
         }
       });

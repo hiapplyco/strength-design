@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Dumbbell } from "lucide-react";
 import { ExerciseSearch } from "../ExerciseSearch";
 import type { Exercise } from "../exercise-search/types";
+import { TooltipWrapper } from "./TooltipWrapper";
 
 interface ExerciseSectionProps {
   selectedExercises: Exercise[];
@@ -9,7 +10,7 @@ interface ExerciseSectionProps {
   renderTooltip: () => React.ReactNode;
 }
 
-export function ExerciseSection({ selectedExercises, onExerciseSelect, renderTooltip }: ExerciseSectionProps) {
+export function ExerciseSection({ selectedExercises, onExerciseSelect }: ExerciseSectionProps) {
   const [showSearch, setShowSearch] = useState(false);
 
   const handleRemoveExercise = (exerciseToRemove: Exercise) => {
@@ -18,6 +19,12 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
 
   return (
     <div className="space-y-4">      
+      <div className="flex items-center gap-2">
+        <Dumbbell className="h-5 w-5 text-primary" />
+        <h3 className="font-oswald text-lg">Search Exercises & Equipment</h3>
+        <TooltipWrapper content="Select specific exercises and equipment you have access to for personalized workouts" />
+      </div>
+
       <ExerciseSearch 
         onExerciseSelect={onExerciseSelect} 
         selectedExercises={selectedExercises}

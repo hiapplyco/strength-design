@@ -1,3 +1,5 @@
+import { motion, AnimatePresence } from "framer-motion";
+import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
 import { ExerciseSection } from "./ExerciseSection";
 import { FitnessLevelSection } from "./FitnessLevelSection";
@@ -5,7 +7,6 @@ import { PrescribedExercisesSection } from "./PrescribedExercisesSection";
 import { InjuriesSection } from "./InjuriesSection";
 import { GenerateSection } from "./GenerateSection";
 import { DaysSelection } from "./DaysSelection";
-import { WorkoutPresets } from "./WorkoutPresets";
 import { Dumbbell } from "lucide-react";
 import type { Exercise } from "../exercise-search/types";
 import type { WeatherData } from "@/types/weather";
@@ -68,24 +69,12 @@ export function WorkoutGeneratorForm({
       <WeatherSection 
         weatherData={weatherData}
         onWeatherUpdate={onWeatherUpdate}
-        renderTooltip={() => (
-          <div className="tooltip">Add your location to get weather-optimized workouts</div>
-        )}
       />
       
-      <div className="w-full space-y-4">
-        <div className="flex items-center gap-2">
-          <Dumbbell className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Search Exercises & Equipment</h3>
-        </div>
-        <ExerciseSection
-          selectedExercises={selectedExercises}
-          onExerciseSelect={onExerciseSelect}
-          renderTooltip={() => (
-            <div className="tooltip">Select specific exercises and equipment you have access to for personalized workouts</div>
-          )}
-        />
-      </div>
+      <ExerciseSection
+        selectedExercises={selectedExercises}
+        onExerciseSelect={onExerciseSelect}
+      />
 
       <FitnessLevelSection
         fitnessLevel={fitnessLevel}

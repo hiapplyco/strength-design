@@ -16,6 +16,8 @@ export function Editor({ content = '', onSave }: EditorProps) {
   const { toast } = useToast();
   const [shareableLink, setShareableLink] = useState<string>('');
   const [isPublishing, setIsPublishing] = useState(false);
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const [visible, setVisible] = useState(true);
   
   const editor = useEditor({
     extensions: [StarterKit],
@@ -32,6 +34,17 @@ export function Editor({ content = '', onSave }: EditorProps) {
       editor.commands.setContent(content);
     }
   }, [editor, content]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+      setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [prevScrollPos]);
 
   const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
     if (!shareableLink) return;
@@ -53,7 +66,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
         return true;
       }
       
-      // Fallback for older browsers or non-HTTPS
+      // Fallback for Safari and older browsers
       const textArea = document.createElement('textarea');
       textArea.value = text;
       textArea.style.position = 'fixed';
@@ -68,10 +81,12 @@ export function Editor({ content = '', onSave }: EditorProps) {
         textArea.remove();
         return true;
       } catch (err) {
+        console.error('Failed to copy using execCommand:', err);
         textArea.remove();
         return false;
       }
     } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
       return false;
     }
   };
@@ -100,7 +115,10 @@ export function Editor({ content = '', onSave }: EditorProps) {
         .select('id')
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
       if (!data) {
         throw new Error('Failed to create document');
@@ -142,90 +160,103 @@ export function Editor({ content = '', onSave }: EditorProps) {
   if (!editor) return null;
 
   return (
-    <Card className="w-full p-4 bg-background border-primary">
-      <div className="flex gap-2 mb-4 border-b border-primary pb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive('bold') ? 'bg-accent text-accent-foreground' : ''}
-        >
-          Bold
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive('italic') ? 'bg-accent text-accent-foreground' : ''}
-        >
-          Italic
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={editor.isActive('heading') ? 'bg-accent text-accent-foreground' : ''}
-        >
-          H2
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive('bulletList') ? 'bg-accent text-accent-foreground' : ''}
-        >
-          List
-        </Button>
-      </div>
-      <EditorContent 
-        editor={editor} 
-        className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
-      />
-      <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-primary">
-        <div className="flex justify-end">
-          <Button 
-            onClick={handlePublish}
-            disabled={isPublishing}
-          >
-            {isPublishing ? 'Publishing...' : 'Publish Document'}
-          </Button>
-        </div>
-        
-        {shareableLink && (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 p-2 bg-muted rounded">
-              <Link2 className="h-4 w-4" />
-              <span className="text-sm flex-1 break-all">{shareableLink}</span>
-            </div>
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('facebook')}
-                title="Share on Facebook"
-              >
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('twitter')}
-                title="Share on Twitter"
-              >
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleShare('linkedin')}
-                title="Share on LinkedIn"
-              >
-                <Linkedin className="h-4 w-4" />
-              </Button>
-            </div>
+    <div className="relative">
+      <div 
+        className={`fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-transform duration-300 ${
+          visible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="container mx-auto p-4">
+          <div className="flex gap-2 max-w-4xl mx-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={editor.isActive('bold') ? 'bg-accent text-accent-foreground' : ''}
+            >
+              Bold
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={editor.isActive('italic') ? 'bg-accent text-accent-foreground' : ''}
+            >
+              Italic
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+              className={editor.isActive('heading') ? 'bg-accent text-accent-foreground' : ''}
+            >
+              H2
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+              className={editor.isActive('bulletList') ? 'bg-accent text-accent-foreground' : ''}
+            >
+              List
+            </Button>
           </div>
-        )}
+        </div>
       </div>
-    </Card>
+
+      <div className="pt-24">
+        <Card className="w-full p-4 bg-background border-primary">
+          <EditorContent 
+            editor={editor} 
+            className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
+          />
+          <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-primary">
+            <div className="flex justify-end">
+              <Button 
+                onClick={handlePublish}
+                disabled={isPublishing}
+              >
+                {isPublishing ? 'Publishing...' : 'Publish Document'}
+              </Button>
+            </div>
+            
+            {shareableLink && (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                  <Link2 className="h-4 w-4" />
+                  <span className="text-sm flex-1 break-all">{shareableLink}</span>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare('facebook')}
+                    title="Share on Facebook"
+                  >
+                    <Facebook className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare('twitter')}
+                    title="Share on Twitter"
+                  >
+                    <Twitter className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleShare('linkedin')}
+                    title="Share on LinkedIn"
+                  >
+                    <Linkedin className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
+    </div>
   );
 }

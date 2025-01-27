@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { EditorToolbar } from './EditorToolbar';
 import { ShareSection } from './ShareSection';
-import { copyToClipboard, createShareableUrl } from './editorUtils';
+import { copyToClipboard, createShareableUrl, generateShareUrl } from './editorUtils';
 
 interface EditorProps {
   content?: string;
@@ -47,6 +47,12 @@ export function Editor({ content = '', onSave }: EditorProps) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [prevScrollPos]);
+
+  const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
+    if (!shareableLink) return;
+    const url = generateShareUrl(platform, shareableLink);
+    window.open(url, '_blank', 'width=600,height=400');
+  };
 
   const handlePublish = async () => {
     if (!editor) return;

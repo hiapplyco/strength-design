@@ -14,17 +14,13 @@ export const Navbar = () => {
   const [showEmailInput, setShowEmailInput] = useState(false);
   const navigate = useNavigate();
   
-  // Add new state for scroll handling
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
-      
-      // Make navbar visible when scrolling up or at the top
       setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
-      
       setPrevScrollPos(currentScrollPos);
     };
 
@@ -69,10 +65,6 @@ export const Navbar = () => {
     }
   };
 
-  const handleHomeClick = () => {
-    navigate('/');
-  };
-
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-border shadow-sm transition-transform duration-300 ${
@@ -83,10 +75,14 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
-            <Home 
-              className="h-6 w-6 text-primary cursor-pointer hover:text-primary/80 transition-colors" 
-              onClick={handleHomeClick}
-            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/')}
+              className="p-0"
+            >
+              <Home className="h-6 w-6 text-primary hover:text-primary/80 transition-colors" />
+            </Button>
             <span className="text-2xl font-collegiate text-primary tracking-wider">STRENGTH.DESIGN</span>
           </div>
 

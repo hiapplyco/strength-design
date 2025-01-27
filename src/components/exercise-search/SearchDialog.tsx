@@ -1,4 +1,5 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { SearchInput } from "./SearchInput";
 import { SearchResults } from "./SearchResults";
 import type { Exercise } from "./types";
@@ -47,6 +48,14 @@ export function SearchDialog({
             onExerciseSelect={onExerciseSelect}
             sanitizeText={sanitizeText}
           />
+          <div className="flex justify-end pt-4">
+            <Button 
+              onClick={onClose}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Done
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

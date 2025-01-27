@@ -118,7 +118,7 @@ export default function BestAppOfDay() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-24">
       <GenerateWorkoutInput
         generatePrompt={generatePrompt}
         setGeneratePrompt={setGeneratePrompt}

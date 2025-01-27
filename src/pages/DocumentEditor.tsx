@@ -19,7 +19,7 @@ export default function DocumentEditor() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-24 px-4">
       <h1 className="text-4xl font-bold mb-8 text-center font-heading">Document Editor</h1>
       <div className="max-w-4xl mx-auto">
         <Editor content={content} onSave={handleSave} />

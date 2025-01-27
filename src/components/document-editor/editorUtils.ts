@@ -40,6 +40,14 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 };
 
 export const createShareableUrl = (documentId: string): string => {
-  const origin = window.location.origin;
-  return `${origin}/document/${documentId}`;
+  // Get the current hostname, which will be different in dev and prod
+  const currentHostname = window.location.hostname;
+  
+  // Check if we're in development
+  if (currentHostname === 'localhost' || currentHostname.includes('.lovable.dev')) {
+    return `${window.location.origin}/document/${documentId}`;
+  }
+  
+  // For production with custom domain
+  return `https://www.strength.design/document/${documentId}`;
 };

@@ -15,6 +15,7 @@ interface EditorProps {
 export function Editor({ content = '', onSave }: EditorProps) {
   const { toast } = useToast();
   const [shareableLink, setShareableLink] = useState<string>('');
+  const [isPublishing, setIsPublishing] = useState(false);
   
   const editor = useEditor({
     extensions: [StarterKit],
@@ -48,6 +49,17 @@ export function Editor({ content = '', onSave }: EditorProps) {
     if (!editor) return;
     
     try {
+      setIsPublishing(true);
+      
+      if (!editor.getHTML().trim()) {
+        toast({
+          title: "Error",
+          description: "Document content cannot be empty",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('documents')
         .insert({
@@ -55,9 +67,13 @@ export function Editor({ content = '', onSave }: EditorProps) {
           title: 'Workout Document'
         })
         .select('id')
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      
+      if (!data) {
+        throw new Error('Failed to create document');
+      }
 
       if (onSave) {
         onSave(editor.getHTML());
@@ -85,6 +101,8 @@ export function Editor({ content = '', onSave }: EditorProps) {
         description: "Failed to publish document. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -132,7 +150,12 @@ export function Editor({ content = '', onSave }: EditorProps) {
       />
       <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-primary">
         <div className="flex justify-end">
-          <Button onClick={handlePublish}>Publish Document</Button>
+          <Button 
+            onClick={handlePublish}
+            disabled={isPublishing}
+          >
+            {isPublishing ? 'Publishing...' : 'Publish Document'}
+          </Button>
         </div>
         
         {shareableLink && (

@@ -8,6 +8,8 @@ import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
+import { Volume2, VolumeX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface WorkoutDay {
   description: string;
@@ -26,6 +28,7 @@ const Index = () => {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [numberOfDays, setNumberOfDays] = useState(7);
+  const [isMuted, setIsMuted] = useState(true);
   const { toast } = useToast();
 
   const resetWorkouts = () => {
@@ -61,7 +64,7 @@ const Index = () => {
 
       setWorkouts(data);
       setShowGenerateInput(false);
-      triggerConfetti(); // Trigger confetti on successful generation
+      triggerConfetti();
     } catch (error) {
       console.error('Error generating workout:', error);
       toast({
@@ -71,6 +74,14 @@ const Index = () => {
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const toggleMute = () => {
+    const video = document.querySelector('video');
+    if (video) {
+      video.muted = !video.muted;
+      setIsMuted(!isMuted);
     }
   };
 
@@ -86,18 +97,29 @@ const Index = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-black">
-      <div className="flex flex-col">
+    <div className="relative min-h-screen bg-black overflow-hidden">
+      <video
+        autoPlay
+        loop
+        muted={isMuted}
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+        style={{ filter: 'brightness(0.4)' }}
+      >
+        <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
+      </video>
+
+      <Button
+        onClick={toggleMute}
+        className="fixed top-4 right-4 z-50 bg-black/50 hover:bg-black/70"
+        size="icon"
+        variant="ghost"
+      >
+        {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
+      </Button>
+
+      <div className="flex flex-col relative z-10">
         <section className="min-h-screen relative">
-          <div 
-            className="fixed inset-0 bg-cover bg-center opacity-20 bg-fixed"
-            style={{
-              backgroundImage: "url('/lovable-uploads/0bcf4046-3564-4bd0-8091-c3deccd2f89d.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundAttachment: "fixed",
-            }}
-          />
           <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
             <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-20 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
               strength.design

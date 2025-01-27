@@ -45,6 +45,37 @@ export function Editor({ content = '', onSave }: EditorProps) {
     window.open(urls[platform], '_blank', 'width=600,height=400');
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      // Try the modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      
+      // Fallback for older browsers or non-HTTPS
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        textArea.remove();
+        return true;
+      } catch (err) {
+        textArea.remove();
+        return false;
+      }
+    } catch (err) {
+      return false;
+    }
+  };
+
   const handlePublish = async () => {
     if (!editor) return;
     
@@ -87,13 +118,15 @@ export function Editor({ content = '', onSave }: EditorProps) {
         description: "Your document has been published.",
       });
 
-      // Copy link to clipboard
-      await navigator.clipboard.writeText(link);
+      // Try to copy the link to clipboard
+      const copied = await copyToClipboard(link);
       
-      toast({
-        title: "Link Copied",
-        description: "Share link has been copied to your clipboard",
-      });
+      if (copied) {
+        toast({
+          title: "Link Copied",
+          description: "Share link has been copied to your clipboard",
+        });
+      }
     } catch (error) {
       console.error('Error publishing document:', error);
       toast({

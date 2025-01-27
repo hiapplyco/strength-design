@@ -8,14 +8,14 @@ interface VideoSectionProps {
 
 export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
   return (
-    <section className="relative w-full h-screen flex items-center justify-center p-8">
-      <div className="relative w-full max-w-5xl aspect-video">
+    <section className="relative w-full h-screen flex items-center justify-center p-8 bg-black/30">
+      <div className="relative w-full max-w-5xl aspect-video bg-transparent">
         <video
           autoPlay
           loop
           muted={isMuted}
           playsInline
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover rounded-lg"
         >
           <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
         </video>

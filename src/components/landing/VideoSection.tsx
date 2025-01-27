@@ -8,8 +8,8 @@ interface VideoSectionProps {
 
 export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
   return (
-    <section className="relative w-full h-screen flex items-center justify-center p-8 bg-black/30">
-      <div className="relative w-full max-w-5xl aspect-video bg-transparent">
+    <section className="relative w-full h-screen flex items-center justify-center p-8">
+      <div className="relative w-full max-w-5xl aspect-video">
         <video
           autoPlay
           loop

@@ -83,9 +83,11 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
       <div className="text-center space-y-2">
         <h3 className="text-lg font-semibold text-white">Try a Sample Program</h3>
         <p className="text-sm text-gray-300">
-          We've pre-loaded some popular workout templates to help you get started. Choose from CrossFit-inspired workouts, 
-          military training programs, or mindful movement flows. These templates are fully customizable - use them as-is or 
-          modify them to match your goals. Our AI will help you adapt any program to your specific needs and preferences.
+          Drawing from our database of thousands of user-submitted and expert-curated workouts, we've handpicked some 
+          popular training templates to help you get started. Explore proven programs from CrossFit champions, 
+          military fitness experts, and professional coaches. Each template can be fully customized to match your 
+          experience level, available equipment, and specific fitness goals. Start with these battle-tested routines 
+          and make them your own.
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

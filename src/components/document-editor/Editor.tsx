@@ -126,12 +126,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      // Get the base URL from the current environment
-      const baseUrl = import.meta.env.PROD 
-        ? 'https://ulnsvkrrdcmfiguibkpx.lovableproject.com'
-        : window.location.origin;
-      
-      const link = `${baseUrl}/document/${data.id}`;
+      // Generate shareable link that works with both custom domain and Supabase URL
+      const documentPath = `/document/${data.id}`;
+      const link = window.location.origin + documentPath;
       setShareableLink(link);
       
       toast({

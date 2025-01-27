@@ -21,14 +21,34 @@ export const WorkoutDisplayHeader = ({
   const navigate = useNavigate();
 
   const handlePublish = () => {
-    // Format the workout text with HTML tags for the editor
+    // Format each section with proper HTML structure
     const formattedContent = workoutText
       .split('\n\n---\n\n')
       .map(day => {
-        const sections = day.split('\n\n').map(section => `<p>${section}</p>`).join('');
-        return `<div>${sections}</div>`;
+        // Split each day into sections and wrap them in paragraphs
+        const sections = day.split('\n\n').map(section => {
+          // Add heading class for day titles
+          if (section.startsWith('Day:')) {
+            return `<h2 class="text-2xl font-bold mb-4">${section}</h2>`;
+          }
+          // Add specific classes for different sections
+          if (section.startsWith('Strength:')) {
+            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Strength</h3><p>${section.replace('Strength:', '')}</p></div>`;
+          }
+          if (section.startsWith('Warmup:')) {
+            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Warmup</h3><p>${section.replace('Warmup:', '')}</p></div>`;
+          }
+          if (section.startsWith('Workout:')) {
+            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Workout</h3><p>${section.replace('Workout:', '')}</p></div>`;
+          }
+          if (section.startsWith('Notes:')) {
+            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Notes</h3><p>${section.replace('Notes:', '')}</p></div>`;
+          }
+          return `<p class="mb-4">${section}</p>`;
+        }).join('');
+        return `<div class="workout-day mb-8">${sections}</div>`;
       })
-      .join('<hr />');
+      .join('<hr class="my-8" />');
 
     navigate('/document-editor', { 
       state: { 

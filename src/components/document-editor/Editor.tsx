@@ -72,7 +72,10 @@ export function Editor({ content = '', onSave }: EditorProps) {
           List
         </Button>
       </div>
-      <EditorContent editor={editor} className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary" />
+      <EditorContent 
+        editor={editor} 
+        className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
+      />
       <div className="flex justify-end mt-4 pt-4 border-t border-primary">
         <Button onClick={handleSave}>Save Document</Button>
       </div>

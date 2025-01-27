@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
 import { motion } from "framer-motion";
-import { ChevronDown, CircleIcon1, CircleIcon2, CircleIcon3, CircleIcon4, CircleIcon5, CircleIcon6 } from "lucide-react";
+import { ChevronDown, Circle } from "lucide-react";
 
 interface WorkoutDay {
   description: string;
@@ -132,6 +132,15 @@ const Index = () => {
     );
   }
 
+  const NumberedCircle = ({ number }: { number: number }) => (
+    <div className="relative w-6 h-6 text-accent">
+      <Circle className="w-6 h-6" />
+      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+        {number}
+      </span>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-black">
       <div className="w-full bg-black pt-24 pb-8">
@@ -180,28 +189,28 @@ const Index = () => {
                 <h3 className="text-xl font-oswald text-accent mb-4 text-center">Input Order:</h3>
                 <ul className="list-none space-y-3">
                   <li className="flex items-center text-white">
-                    <CircleIcon1 className="w-6 h-6 text-accent mr-3" />
-                    Location - Weather affects your performance
+                    <NumberedCircle number={1} />
+                    <span className="ml-3">Location - Weather affects your performance</span>
                   </li>
                   <li className="flex items-center text-white">
-                    <CircleIcon2 className="w-6 h-6 text-accent mr-3" />
-                    Search Exercises & Equipment - Define your available resources
+                    <NumberedCircle number={2} />
+                    <span className="ml-3">Search Exercises & Equipment - Define your available resources</span>
                   </li>
                   <li className="flex items-center text-white">
-                    <CircleIcon3 className="w-6 h-6 text-accent mr-3" />
-                    Fitness Level - Tailored to your capabilities
+                    <NumberedCircle number={3} />
+                    <span className="ml-3">Fitness Level - Tailored to your capabilities</span>
                   </li>
                   <li className="flex items-center text-white">
-                    <CircleIcon4 className="w-6 h-6 text-accent mr-3" />
-                    Prescribed Exercises - Upload images/PDFs of required movements
+                    <NumberedCircle number={4} />
+                    <span className="ml-3">Prescribed Exercises - Upload images/PDFs of required movements</span>
                   </li>
                   <li className="flex items-center text-white">
-                    <CircleIcon5 className="w-6 h-6 text-accent mr-3" />
-                    Injuries & Limitations - Ensures safe, appropriate programming
+                    <NumberedCircle number={5} />
+                    <span className="ml-3">Injuries & Limitations - Ensures safe, appropriate programming</span>
                   </li>
                   <li className="flex items-center text-white">
-                    <CircleIcon6 className="w-6 h-6 text-accent mr-3" />
-                    Training Days - Design your perfect training cycle
+                    <NumberedCircle number={6} />
+                    <span className="ml-3">Training Days - Design your perfect training cycle</span>
                   </li>
                 </ul>
               </div>

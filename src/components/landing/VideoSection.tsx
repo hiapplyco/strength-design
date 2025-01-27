@@ -8,8 +8,8 @@ interface VideoSectionProps {
 
 export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
   return (
-    <section className="relative h-screen w-full overflow-hidden mt-16">
-      <div className="absolute inset-0 px-4 md:px-6 lg:px-8">
+    <section className="relative h-screen w-full overflow-hidden mt-16 px-8 md:px-16 lg:px-24">
+      <div className="absolute inset-8 md:inset-16 lg:inset-24">
         <div className="relative h-full w-full">
           <video
             autoPlay
@@ -25,7 +25,7 @@ export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
 
       <Button
         onClick={onToggleMute}
-        className="absolute top-4 right-8 z-50 bg-black/50 hover:bg-black/70"
+        className="absolute top-12 right-12 z-50 bg-black/50 hover:bg-black/70 md:top-20 md:right-20 lg:top-28 lg:right-28"
         size="icon"
         variant="ghost"
       >

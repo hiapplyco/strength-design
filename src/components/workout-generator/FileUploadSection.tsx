@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { PdfUploadSection } from "./PdfUploadSection";
 import { FileAnalysisState } from "./FileAnalysisState";
+import { PdfUploadSection } from "./PdfUploadSection";
 
 interface FileUploadSectionProps {
   title: string;
@@ -32,17 +31,7 @@ export function FileUploadSection({
             steps={analysisSteps}
           />
         ) : (
-          <div className="space-y-2">
-            <PdfUploadSection onFileSelect={onFileSelect} />
-            
-            {content && (
-              <ScrollArea className="h-[60px] w-full rounded-md border border-input/50 bg-background/5 p-2">
-                <p className="text-xs text-muted-foreground">
-                  {content}
-                </p>
-              </ScrollArea>
-            )}
-          </div>
+          <PdfUploadSection onFileSelect={onFileSelect} />
         )}
       </CardContent>
     </Card>

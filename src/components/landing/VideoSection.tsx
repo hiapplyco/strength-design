@@ -8,7 +8,7 @@ interface VideoSectionProps {
 
 export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
   return (
-    <section className="relative h-screen mb-12 w-full overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden mt-16">
       <div className="absolute inset-0 px-4 md:px-6 lg:px-8">
         <div className="relative h-full w-full">
           <video

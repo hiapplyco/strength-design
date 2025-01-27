@@ -60,13 +60,11 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   const copyToClipboard = async (text: string) => {
     try {
-      // Try the modern clipboard API first
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
         return true;
       }
       
-      // Fallback for Safari and older browsers
       const textArea = document.createElement('textarea');
       textArea.value = text;
       textArea.style.position = 'fixed';
@@ -128,9 +126,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      // Generate the full URL using window.location.origin
-      const baseUrl = window.location.origin;
-      const link = `${baseUrl}/document/${data.id}`;
+      // Generate the Supabase project URL
+      const projectId = 'ulnsvkrrdcmfiguibkpx';
+      const link = `https://${projectId}.lovableproject.com/document/${data.id}`;
       setShareableLink(link);
       
       toast({
@@ -138,7 +136,6 @@ export function Editor({ content = '', onSave }: EditorProps) {
         description: "Your document has been published.",
       });
 
-      // Try to copy the link to clipboard
       const copied = await copyToClipboard(link);
       
       if (copied) {

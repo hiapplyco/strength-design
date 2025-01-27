@@ -67,8 +67,8 @@ export const SearchResults = ({
                       className={cn(
                         "w-24 transition-colors duration-200",
                         isSelected
-                          ? "bg-green-500 hover:bg-green-600 text-white border-green-500"
-                          : "bg-[#C4A052] hover:bg-[#B3913A] text-white border-[#C4A052]"
+                          ? "bg-accent hover:bg-accent/90 text-white border-accent"
+                          : "bg-accent/80 hover:bg-accent text-white border-accent/80"
                       )}
                     >
                       {isSelected ? "Selected" : "Select"}

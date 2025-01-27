@@ -4,11 +4,13 @@ import { ArrowLeft } from "lucide-react";
 import { ContactForm } from "@/components/landing/ContactForm";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Pricing = () => {
   const navigate = useNavigate();
   const [showContactForm, setShowContactForm] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const { toast } = useToast();
 
   const trackEvent = async (eventType: string) => {
     try {
@@ -16,7 +18,14 @@ const Pricing = () => {
         .from("pricing_page_events")
         .insert({ event_type: eventType });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error tracking event:', error);
+        toast({
+          title: "Error",
+          description: "Failed to track event",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error tracking event:', error);
     }

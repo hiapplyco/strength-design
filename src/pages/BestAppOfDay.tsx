@@ -125,6 +125,7 @@ export default function BestAppOfDay() {
         handleGenerateWorkout={handleGenerateWorkout}
         isGenerating={isGenerating}
         setIsGenerating={setIsGenerating}
+        showGenerateInput={showGenerateInput}
         setShowGenerateInput={setShowGenerateInput}
         numberOfDays={7}
         setNumberOfDays={() => {}}

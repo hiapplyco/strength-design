@@ -34,12 +34,14 @@ export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <Button
-              onClick={() => setShowGenerateInput(true)}
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-45 w-64 h-64 bg-destructive hover:bg-destructive/90 border-4 border-black text-black hover:text-black font-bold text-2xl z-10"
-            >
-              Click Here!
-            </Button>
+            {!props.isGenerating && (
+              <Button
+                onClick={() => setShowGenerateInput(true)}
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 bg-black hover:bg-black/90 min-w-[300px]"
+              >
+                strength.design
+              </Button>
+            )}
             <div className={`transition-all duration-300 ${props.isGenerating ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
               <InputContainer {...props} />
             </div>

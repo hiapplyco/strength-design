@@ -56,6 +56,10 @@ export function WorkoutGeneratorForm({
   isGenerating,
   isValid
 }: WorkoutGeneratorFormProps) {
+  const renderTooltip = (content: string) => (
+    <div className="tooltip">{content}</div>
+  );
+
   return (
     <div className={`relative bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 p-8 space-y-8 ${isGenerating ? 'before:absolute before:inset-0 before:rounded-lg before:border-4 before:border-primary before:animate-[gradient_3s_ease_infinite] before:bg-gradient-to-r before:from-transparent before:via-primary/20 before:to-transparent' : ''}`}>
       <WorkoutPresets 
@@ -69,11 +73,13 @@ export function WorkoutGeneratorForm({
       <WeatherSection 
         weatherData={weatherData}
         onWeatherUpdate={onWeatherUpdate}
+        renderTooltip={() => renderTooltip("Add your location to get weather-optimized workouts")}
       />
       
       <ExerciseSection
         selectedExercises={selectedExercises}
         onExerciseSelect={onExerciseSelect}
+        renderTooltip={() => renderTooltip("Select specific exercises and equipment you have access to for personalized workouts")}
       />
 
       <FitnessLevelSection
@@ -98,9 +104,7 @@ export function WorkoutGeneratorForm({
       <DaysSelection
         numberOfDays={numberOfDays}
         setNumberOfDays={setNumberOfDays}
-        renderTooltip={() => (
-          <div className="tooltip">Choose how many days you want to train in your program</div>
-        )}
+        renderTooltip={() => renderTooltip("Choose how many days you want to train in your program")}
       />
 
       <GenerateSection
@@ -108,9 +112,7 @@ export function WorkoutGeneratorForm({
         onClear={onClear}
         isGenerating={isGenerating}
         isValid={isValid}
-        renderTooltip={() => (
-          <div className="tooltip">Review your selections and generate your personalized program</div>
-        )}
+        renderTooltip={() => renderTooltip("Review your selections and generate your personalized program")}
       />
     </div>
   );

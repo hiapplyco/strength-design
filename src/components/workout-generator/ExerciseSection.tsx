@@ -10,7 +10,7 @@ interface ExerciseSectionProps {
   renderTooltip: () => React.ReactNode;
 }
 
-export function ExerciseSection({ selectedExercises, onExerciseSelect }: ExerciseSectionProps) {
+export function ExerciseSection({ selectedExercises, onExerciseSelect, renderTooltip }: ExerciseSectionProps) {
   const [showSearch, setShowSearch] = useState(false);
 
   const handleRemoveExercise = (exerciseToRemove: Exercise) => {
@@ -22,7 +22,7 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect }: Exercis
       <div className="flex items-center gap-2">
         <Dumbbell className="h-5 w-5 text-primary" />
         <h3 className="font-oswald text-lg">Search Exercises & Equipment</h3>
-        <TooltipWrapper content="Select specific exercises and equipment you have access to for personalized workouts" />
+        {renderTooltip()}
       </div>
 
       <ExerciseSearch 

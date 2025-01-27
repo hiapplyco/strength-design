@@ -106,16 +106,18 @@ const Index = () => {
       </div>
 
       {/* Video Section */}
-      <section className="relative h-screen mb-12">
-        <video
-          autoPlay
-          loop
-          muted={isMuted}
-          playsInline
-          className="w-full h-full object-cover"
-        >
-          <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
-        </video>
+      <section className="relative h-screen mb-12 w-full overflow-hidden">
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            loop
+            muted={isMuted}
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
+          </video>
+        </div>
 
         <Button
           onClick={toggleMute}

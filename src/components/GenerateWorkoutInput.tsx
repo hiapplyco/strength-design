@@ -15,6 +15,7 @@ interface GenerateWorkoutInputProps {
   }) => Promise<void>;
   isGenerating: boolean;
   setIsGenerating: (value: boolean) => void;
+  showGenerateInput: boolean;  // Added this prop
   setShowGenerateInput: (value: boolean) => void;
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;

@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
+import DocumentEditor from "@/pages/DocumentEditor";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 export const AppContent = () => {
@@ -27,6 +28,7 @@ export const AppContent = () => {
         <Route path="/" element={<Index />} />
         <Route path="/best-app-of-day" element={<BestAppOfDay />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/document-editor" element={<DocumentEditor />} />
       </Routes>
     </>
   );

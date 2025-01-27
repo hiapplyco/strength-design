@@ -40,6 +40,6 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 };
 
 export const createShareableUrl = (documentId: string): string => {
-  // Use the Supabase project URL directly
-  return `https://ulnsvkrrdcmfiguibkpx.supabase.co/rest/v1/documents?id=eq.${documentId}`;
+  // Include the anon key as a query parameter
+  return `https://ulnsvkrrdcmfiguibkpx.supabase.co/rest/v1/documents?id=eq.${documentId}&apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsbnN2a3JyZGNtZmlndWlia3B4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxMTk4NzcsImV4cCI6MjA1MjY5NTg3N30.L_ysW1DZXZPXwJT5pn_IepuZwP9zILravQTqv38MccI`;
 };

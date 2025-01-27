@@ -9,7 +9,7 @@ interface VideoSectionProps {
 export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
   return (
     <section className="relative h-screen w-full overflow-hidden mt-16 px-12 md:px-24 lg:px-32">
-      <div className="absolute inset-12 md:inset-24 lg:inset-32">
+      <div className="absolute inset-12 md:inset-24 lg:inset-32 bg-black/30 backdrop-blur-sm rounded-xl">
         <div className="relative h-full w-full max-w-[1400px] mx-auto">
           <video
             autoPlay

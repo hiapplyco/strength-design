@@ -8,7 +8,7 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ children }: HeroSectionProps) => {
   const scrollToInput = () => {
-    const element = document.getElementById('input-directions');
+    const element = document.getElementById('generate-workout');
     if (element) {
       element.scrollIntoView({ 
         behavior: 'smooth',

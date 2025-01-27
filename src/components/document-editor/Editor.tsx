@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { EditorToolbar } from './EditorToolbar';
 import { ShareSection } from './ShareSection';
-import { copyToClipboard, generateShareUrl } from './editorUtils';
+import { copyToClipboard, createShareableUrl } from './editorUtils';
 
 interface EditorProps {
   content?: string;
@@ -48,12 +48,6 @@ export function Editor({ content = '', onSave }: EditorProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [prevScrollPos]);
 
-  const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
-    if (!shareableLink) return;
-    const url = generateShareUrl(platform, shareableLink);
-    window.open(url, '_blank', 'width=600,height=400');
-  };
-
   const handlePublish = async () => {
     if (!editor) return;
     
@@ -76,23 +70,18 @@ export function Editor({ content = '', onSave }: EditorProps) {
           title: 'Workout Document'
         })
         .select('id')
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Supabase error:', error);
         throw error;
-      }
-      
-      if (!data) {
-        throw new Error('Failed to create document');
       }
 
       if (onSave) {
         onSave(editor.getHTML());
       }
 
-      const baseUrl = window.location.origin;
-      const link = `${baseUrl}/document/${data.id}`;
+      const link = createShareableUrl(data.id);
       setShareableLink(link);
       
       toast({
@@ -157,4 +146,4 @@ export function Editor({ content = '', onSave }: EditorProps) {
       </div>
     </div>
   );
-}
+};

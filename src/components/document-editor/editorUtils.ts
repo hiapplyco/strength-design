@@ -38,3 +38,8 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 
   return urls[platform];
 };
+
+export const createShareableUrl = (documentId: string): string => {
+  const origin = window.location.origin;
+  return `${origin}/document/${documentId}`;
+};

@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Dumbbell } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SharedDocument() {
   const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { id } = useParams();
   const { toast } = useToast();
 
@@ -15,11 +17,7 @@ export default function SharedDocument() {
     async function fetchDocument() {
       try {
         if (!id) {
-          toast({
-            title: "Error",
-            description: "Invalid document ID",
-            variant: "destructive",
-          });
+          setError('Invalid document ID');
           return;
         }
 
@@ -37,6 +35,7 @@ export default function SharedDocument() {
         if (data) {
           setContent(data.content);
         } else {
+          setError('Document not found');
           toast({
             title: "Document not found",
             description: "The requested document could not be found.",
@@ -45,6 +44,7 @@ export default function SharedDocument() {
         }
       } catch (error) {
         console.error('Error fetching document:', error);
+        setError('Failed to load document');
         toast({
           title: "Error",
           description: "Failed to load document. Please try again.",
@@ -61,8 +61,27 @@ export default function SharedDocument() {
   if (loading) {
     return (
       <div className="container mx-auto py-24 px-4">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-center">Loading document...</p>
+        <div className="max-w-4xl mx-auto space-y-4">
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-24 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-2xl font-bold text-destructive mb-4">{error}</h1>
+          <p className="text-muted-foreground mb-8">The document you're looking for might have been removed or is temporarily unavailable.</p>
+          <Button 
+            variant="default"
+            onClick={() => window.location.href = '/document-editor'}
+          >
+            Create New Document
+          </Button>
         </div>
       </div>
     );

@@ -5,11 +5,10 @@ import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
+import { VideoSection } from "@/components/landing/VideoSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
-import { Volume2, VolumeX } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface WorkoutDay {
   description: string;
@@ -98,36 +97,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header Section - Added pt-24 for more padding from the top */}
+      {/* Header Section */}
       <div className="w-full bg-black pt-24 pb-8">
         <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] max-w-3xl mx-auto">
           strength.design
         </h1>
       </div>
 
-      {/* Video Section - Added px-4 for horizontal padding and rounded-lg for subtle border radius */}
-      <section className="relative h-screen mb-12 w-full overflow-hidden px-4">
-        <div className="absolute inset-0">
-          <video
-            autoPlay
-            loop
-            muted={isMuted}
-            playsInline
-            className="w-full h-full object-cover rounded-lg"
-          >
-            <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
-          </video>
-        </div>
-
-        <Button
-          onClick={toggleMute}
-          className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70"
-          size="icon"
-          variant="ghost"
-        >
-          {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
-        </Button>
-      </section>
+      <VideoSection isMuted={isMuted} onToggleMute={toggleMute} />
 
       {/* Content Sections */}
       <div className="relative">

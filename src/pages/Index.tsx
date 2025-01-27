@@ -45,7 +45,24 @@ const Index = () => {
     prescribedExercises: string;
   }) => {
     setIsGenerating(true);
+    const startTime = performance.now();
+
     try {
+      // Store input data in session_io table
+      const { error: sessionError } = await supabase.from('session_io').insert({
+        weather_prompt: params.weatherPrompt,
+        selected_exercises: params.selectedExercises,
+        fitness_level: params.fitnessLevel,
+        prescribed_exercises: params.prescribedExercises,
+        number_of_days: numberOfDays,
+        session_duration_ms: 0, // Will be updated after workout generation
+        success: false // Will be updated after successful generation
+      });
+
+      if (sessionError) {
+        console.error('Error storing session:', sessionError);
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           ...params,
@@ -61,6 +78,22 @@ const Index = () => {
           variant: "destructive",
         });
         return;
+      }
+
+      // Update session with generated workouts and success status
+      const sessionDuration = Math.round(performance.now() - startTime);
+      const { error: updateError } = await supabase
+        .from('session_io')
+        .update({
+          generated_workouts: data,
+          session_duration_ms: sessionDuration,
+          success: true
+        })
+        .eq('session_duration_ms', 0) // Update the session we just created
+        .eq('success', false);
+
+      if (updateError) {
+        console.error('Error updating session:', updateError);
       }
 
       setWorkouts(data);

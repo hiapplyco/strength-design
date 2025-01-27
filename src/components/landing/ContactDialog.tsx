@@ -13,13 +13,14 @@ import { Label } from "@/components/ui/label";
 interface ContactDialogProps {
   buttonText: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  className?: string;
 }
 
-export const ContactDialog = ({ buttonText, variant = "default" }: ContactDialogProps) => {
+export const ContactDialog = ({ buttonText, variant = "default", className }: ContactDialogProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={variant}>{buttonText}</Button>
+        <Button variant={variant} className={className}>{buttonText}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <form

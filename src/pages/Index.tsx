@@ -168,10 +168,10 @@ const Index = () => {
           <div className="container mx-auto px-4 max-w-[1200px]">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
-                Try Our Free Workout Generator
+                Try Our Free Program Generator
               </h2>
               <p className="text-lg text-white">
-                Experience the power of AI-driven workout planning with our free generator
+                Experience our lite version - Generate up to 12 days of customized training programs instantly. Perfect for elite athletes, CrossFit competitors, and strength specialists seeking personalized programming. Upgrade to access our full platform generating 8-week periodized programs tailored to any training methodology or competition framework.
               </p>
             </div>
             <div id="generate-workout">

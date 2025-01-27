@@ -105,15 +105,15 @@ const Index = () => {
         </h1>
       </div>
 
-      {/* Video Section */}
-      <section className="relative h-screen mb-12 w-full overflow-hidden">
+      {/* Video Section - Added px-4 for horizontal padding and rounded-lg for subtle border radius */}
+      <section className="relative h-screen mb-12 w-full overflow-hidden px-4">
         <div className="absolute inset-0">
           <video
             autoPlay
             loop
             muted={isMuted}
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-lg"
           >
             <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
           </video>

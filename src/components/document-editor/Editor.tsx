@@ -17,7 +17,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
     content,
     editorProps: {
       attributes: {
-        class: 'prose prose-invert min-h-[200px] focus:outline-none',
+        class: 'prose prose-invert min-h-[200px] focus:outline-none max-w-none',
       },
     },
   });
@@ -72,7 +72,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
           List
         </Button>
       </div>
-      <EditorContent editor={editor} className="min-h-[200px]" />
+      <EditorContent editor={editor} className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary" />
       <div className="flex justify-end mt-4 pt-4 border-t border-primary">
         <Button onClick={handleSave}>Save Document</Button>
       </div>

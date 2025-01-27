@@ -21,7 +21,20 @@ export const WorkoutDisplayHeader = ({
   const navigate = useNavigate();
 
   const handlePublish = () => {
-    navigate('/document-editor', { state: { content: workoutText } });
+    // Format the workout text with HTML tags for the editor
+    const formattedContent = workoutText
+      .split('\n\n---\n\n')
+      .map(day => {
+        const sections = day.split('\n\n').map(section => `<p>${section}</p>`).join('');
+        return `<div>${sections}</div>`;
+      })
+      .join('<hr />');
+
+    navigate('/document-editor', { 
+      state: { 
+        content: `<div class="workout-content">${formattedContent}</div>`
+      } 
+    });
   };
 
   return (

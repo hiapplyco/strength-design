@@ -185,7 +185,7 @@ const Index = () => {
                 Experience our lite version - Generate up to 12 days of customized training programs instantly. Perfect for elite athletes, CrossFit competitors, and strength specialists seeking personalized programming. Upgrade to access our full platform generating 8-week periodized programs tailored to any training methodology or competition framework.
               </p>
               
-              <div className="mt-8 max-w-2xl mx-auto text-left space-y-2 bg-white/5 p-6 rounded-lg">
+              <div id="input-directions" className="mt-8 max-w-2xl mx-auto text-left space-y-2 bg-white/5 p-6 rounded-lg">
                 <h3 className="text-xl font-oswald text-accent mb-4 text-center">Input Order:</h3>
                 <ul className="list-none space-y-3">
                   <li className="flex items-center text-white">

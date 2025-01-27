@@ -5,7 +5,9 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { Facebook, Twitter, Linkedin, Link2 } from "lucide-react";
+import { EditorToolbar } from './EditorToolbar';
+import { ShareSection } from './ShareSection';
+import { copyToClipboard, generateShareUrl } from './editorUtils';
 
 interface EditorProps {
   content?: string;
@@ -48,45 +50,8 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
     if (!shareableLink) return;
-
-    const urls = {
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareableLink)}`,
-      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareableLink)}&text=${encodeURIComponent('Check out my document!')}`,
-      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareableLink)}`,
-    };
-
-    window.open(urls[platform], '_blank', 'width=600,height=400');
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      }
-      
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      
-      try {
-        document.execCommand('copy');
-        textArea.remove();
-        return true;
-      } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
-        textArea.remove();
-        return false;
-      }
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-      return false;
-    }
+    const url = generateShareUrl(platform, shareableLink);
+    window.open(url, '_blank', 'width=600,height=400');
   };
 
   const handlePublish = async () => {
@@ -126,7 +91,6 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      // Generate shareable link using the current domain
       const baseUrl = window.location.origin;
       const link = `${baseUrl}/document/${data.id}`;
       setShareableLink(link);
@@ -165,42 +129,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
           visible ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
-        <div className="container mx-auto p-4">
-          <div className="flex gap-2 max-w-4xl mx-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={editor.isActive('bold') ? 'bg-accent text-accent-foreground' : ''}
-            >
-              Bold
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={editor.isActive('italic') ? 'bg-accent text-accent-foreground' : ''}
-            >
-              Italic
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              className={editor.isActive('heading') ? 'bg-accent text-accent-foreground' : ''}
-            >
-              H2
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={editor.isActive('bulletList') ? 'bg-accent text-accent-foreground' : ''}
-            >
-              List
-            </Button>
-          </div>
-        </div>
+        <EditorToolbar editor={editor} />
       </div>
 
       <div className="pt-24">
@@ -219,40 +148,10 @@ export function Editor({ content = '', onSave }: EditorProps) {
               </Button>
             </div>
             
-            {shareableLink && (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 p-2 bg-muted rounded">
-                  <Link2 className="h-4 w-4" />
-                  <span className="text-sm flex-1 break-all">{shareableLink}</span>
-                </div>
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleShare('facebook')}
-                    title="Share on Facebook"
-                  >
-                    <Facebook className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleShare('twitter')}
-                    title="Share on Twitter"
-                  >
-                    <Twitter className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleShare('linkedin')}
-                    title="Share on LinkedIn"
-                  >
-                    <Linkedin className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            <ShareSection 
+              shareableLink={shareableLink} 
+              handleShare={handleShare}
+            />
           </div>
         </Card>
       </div>

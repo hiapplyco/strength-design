@@ -23,20 +23,24 @@ export function InjuriesSection({
         <h3 className="font-oswald text-lg">Injuries & Health Considerations</h3>
         <TooltipWrapper content="Share any injuries or health conditions that may affect your workout." />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Textarea
-          placeholder="List any injuries, medical conditions, or movement limitations"
-          value={injuries}
-          onChange={(e) => setInjuries(e.target.value)}
-          className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
-        />
-        <FileUploadSection
-          title="Upload Medical Information"
-          isAnalyzing={isAnalyzingInjuries}
-          content={injuries}
-          onFileSelect={handleInjuriesFileSelect}
-          analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
-        />
+      <div className="grid grid-cols-4 gap-4">
+        <div className="col-span-3">
+          <Textarea
+            placeholder="List any injuries, medical conditions, or movement limitations"
+            value={injuries}
+            onChange={(e) => setInjuries(e.target.value)}
+            className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
+          />
+        </div>
+        <div className="col-span-1">
+          <FileUploadSection
+            title="Upload Medical Information"
+            isAnalyzing={isAnalyzingInjuries}
+            content={injuries}
+            onFileSelect={handleInjuriesFileSelect}
+            analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
+          />
+        </div>
       </div>
     </div>
   );

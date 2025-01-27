@@ -23,20 +23,24 @@ export function PrescribedExercisesSection({
         <h3 className="font-oswald text-lg">Prescribed Exercises</h3>
         <TooltipWrapper content="Add any specific exercises you need to include in your workout program." />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Textarea
-          placeholder="List any specific exercises you need to include"
-          value={prescribedExercises}
-          onChange={(e) => setPrescribedExercises(e.target.value)}
-          className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
-        />
-        <FileUploadSection
-          title="Upload Exercise Program"
-          isAnalyzing={isAnalyzingPrescribed}
-          content={prescribedExercises}
-          onFileSelect={handlePrescribedFileSelect}
-          analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
-        />
+      <div className="grid grid-cols-4 gap-4">
+        <div className="col-span-3">
+          <Textarea
+            placeholder="List any specific exercises you need to include"
+            value={prescribedExercises}
+            onChange={(e) => setPrescribedExercises(e.target.value)}
+            className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
+          />
+        </div>
+        <div className="col-span-1">
+          <FileUploadSection
+            title="Upload Exercise Program"
+            isAnalyzing={isAnalyzingPrescribed}
+            content={prescribedExercises}
+            onFileSelect={handlePrescribedFileSelect}
+            analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
+          />
+        </div>
       </div>
     </div>
   );

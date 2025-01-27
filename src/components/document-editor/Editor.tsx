@@ -3,8 +3,9 @@ import StarterKit from '@tiptap/starter-kit';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { Facebook, Twitter, Linkedin, Link2 } from "lucide-react";
 
 interface EditorProps {
   content?: string;
@@ -13,6 +14,7 @@ interface EditorProps {
 
 export function Editor({ content = '', onSave }: EditorProps) {
   const { toast } = useToast();
+  const [shareableLink, setShareableLink] = useState<string>('');
   
   const editor = useEditor({
     extensions: [StarterKit],
@@ -29,6 +31,18 @@ export function Editor({ content = '', onSave }: EditorProps) {
       editor.commands.setContent(content);
     }
   }, [editor, content]);
+
+  const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
+    if (!shareableLink) return;
+
+    const urls = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareableLink)}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareableLink)}&text=${encodeURIComponent('Check out my document!')}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareableLink)}`,
+    };
+
+    window.open(urls[platform], '_blank', 'width=600,height=400');
+  };
 
   const handlePublish = async () => {
     if (!editor) return;
@@ -49,15 +63,16 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      const shareableLink = `${window.location.origin}/document/${data.id}`;
+      const link = `${window.location.origin}/document/${data.id}`;
+      setShareableLink(link);
       
       toast({
         title: "Success",
-        description: "Your document has been published. Share using this link: " + shareableLink,
+        description: "Your document has been published.",
       });
 
       // Copy link to clipboard
-      await navigator.clipboard.writeText(shareableLink);
+      await navigator.clipboard.writeText(link);
       
       toast({
         title: "Link Copied",
@@ -115,8 +130,45 @@ export function Editor({ content = '', onSave }: EditorProps) {
         editor={editor} 
         className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
       />
-      <div className="flex justify-end mt-4 pt-4 border-t border-primary">
-        <Button onClick={handlePublish}>Publish Document</Button>
+      <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-primary">
+        <div className="flex justify-end">
+          <Button onClick={handlePublish}>Publish Document</Button>
+        </div>
+        
+        {shareableLink && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 p-2 bg-muted rounded">
+              <Link2 className="h-4 w-4" />
+              <span className="text-sm flex-1 break-all">{shareableLink}</span>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('facebook')}
+                title="Share on Facebook"
+              >
+                <Facebook className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('twitter')}
+                title="Share on Twitter"
+              >
+                <Twitter className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleShare('linkedin')}
+                title="Share on LinkedIn"
+              >
+                <Linkedin className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   );

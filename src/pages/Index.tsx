@@ -11,6 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
+import { motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 
 interface WorkoutDay {
   description: string;
@@ -173,7 +175,56 @@ const Index = () => {
               <p className="text-lg text-white">
                 Experience our lite version - Generate up to 12 days of customized training programs instantly. Perfect for elite athletes, CrossFit competitors, and strength specialists seeking personalized programming. Upgrade to access our full platform generating 8-week periodized programs tailored to any training methodology or competition framework.
               </p>
+              
+              <div className="mt-8 max-w-2xl mx-auto text-left space-y-2 bg-white/5 p-6 rounded-lg">
+                <h3 className="text-xl font-oswald text-primary mb-4 text-center">Input Order:</h3>
+                <ul className="list-none space-y-3">
+                  <li className="flex items-center text-white">
+                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    Location - Weather affects your performance
+                  </li>
+                  <li className="flex items-center text-white">
+                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    Search Exercises & Equipment - Define your available resources
+                  </li>
+                  <li className="flex items-center text-white">
+                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    Fitness Level - Tailored to your capabilities
+                  </li>
+                  <li className="flex items-center text-white">
+                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    Prescribed Exercises - Upload images/PDFs of required movements
+                  </li>
+                  <li className="flex items-center text-white">
+                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    Injuries & Limitations - Ensures safe, appropriate programming
+                  </li>
+                  <li className="flex items-center text-white">
+                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    Training Days - Design your perfect training cycle
+                  </li>
+                </ul>
+              </div>
             </div>
+
+            <motion.div 
+              className="flex justify-center items-center my-12"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative">
+                <Separator className="my-8 bg-primary/20" />
+                <motion.div 
+                  className="absolute left-1/2 -translate-x-1/2 -bottom-8 bg-primary rounded-full p-2"
+                  animate={{ y: [0, 10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <ChevronDown className="w-6 h-6 text-white" />
+                </motion.div>
+              </div>
+            </motion.div>
+
             <div id="generate-workout">
               <GenerateWorkoutInput
                 generatePrompt={generatePrompt}

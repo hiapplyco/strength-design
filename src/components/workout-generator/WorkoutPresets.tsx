@@ -13,7 +13,6 @@ const PRESETS: WorkoutPreset[] = [
     title: "CrossFit Program",
     prescribedExercises: `CrossFit-Inspired Program: "The Functional Firestorm"
 
-Week 1 & Week 2 (Repeat with added intensity):
 Day 1:
 - Strength: Back Squat 5x5 @ 75% of 1-rep max
 - Conditioning: AMRAP (10 minutes):
@@ -39,15 +38,15 @@ Day 5:
     title: "Military Precision",
     prescribedExercises: `Military Precision Fitness Program by Erik Bartell
 
-Week Breakdown:
-Day 1 & Day 8: Assessment Day
+Training Schedule:
+Day 1: Assessment Day
 - Push-ups, Pull-ups, Squats, and timed mile run
 
-Day 2 & Day 9: Cardio Capacity Work
+Day 2: Cardio Capacity Work
 - Ruck or run for distance (30-45 minutes)
-- Aim to improve pace in Week 2
+- Focus on maintaining steady pace
 
-Day 4 & Day 11: Strength Circuit
+Day 4: Strength Circuit
 AMRAP in 15 minutes:
 - Push-ups x15
 - Air Squats x20
@@ -58,16 +57,15 @@ AMRAP in 15 minutes:
   },
   {
     title: "Yoga Flow",
-    prescribedExercises: `Two-Week Yoga Flow Program
+    prescribedExercises: `Daily Yoga Flow Program (30-45 minutes):
 
-Daily Routine (30-45 minutes):
-Days 1-6 & Days 8-13: Vinyasa Flow Sequence
+Regular Practice Days:
 - Sun Salutations A & B (5 rounds)
 - Warrior Series (I, II, III) with transitions
 - Core Flow: Plank to Side Plank
 - Cooldown stretches
 
-Days 7 & 14: Restorative Yoga
+Rest Days:
 - Deep stretches (Pigeon Pose, Child's Pose)
 - Hold poses for up to two minutes`,
     fitnessLevel: "intermediate",

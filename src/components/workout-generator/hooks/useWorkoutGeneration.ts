@@ -230,6 +230,8 @@ export const useWorkoutGeneration = ({
     handleInjuriesFileSelect,
     handleGenerateWithWeather,
     handleClear,
-    setFitnessLevel
+    setFitnessLevel,
+    setPrescribedExercises,  // Added this
+    setInjuries  // Added this
   };
 };

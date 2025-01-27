@@ -106,10 +106,6 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
           </div>
         ))}
       </div>
-
-      <div id="generate-workout" className="w-full max-w-3xl">
-        {children}
-      </div>
     </section>
   );
 };

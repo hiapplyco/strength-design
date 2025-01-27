@@ -6,6 +6,8 @@ import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { VideoSection } from "@/components/landing/VideoSection";
+import { Footer } from "@/components/layout/Footer";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
@@ -107,21 +109,7 @@ const Index = () => {
 
       <div className="relative">
         <div className="container mx-auto px-4 max-w-[1200px]">
-          <HeroSection>
-            {showGenerateInput && (
-              <GenerateWorkoutInput
-                generatePrompt={generatePrompt}
-                setGeneratePrompt={setGeneratePrompt}
-                handleGenerateWorkout={handleGenerateWorkout}
-                isGenerating={isGenerating}
-                setIsGenerating={setIsGenerating}
-                showGenerateInput={showGenerateInput}
-                setShowGenerateInput={setShowGenerateInput}
-                numberOfDays={numberOfDays}
-                setNumberOfDays={setNumberOfDays}
-              />
-            )}
-          </HeroSection>
+          <HeroSection />
         </div>
 
         <div className="relative">
@@ -141,7 +129,36 @@ const Index = () => {
             <TestimonialsSection />
           </div>
         </div>
+
+        <div className="relative py-20">
+          <Separator className="mb-20 bg-primary/20" />
+          <div className="container mx-auto px-4 max-w-[1200px]">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
+                Try Our Free Workout Generator
+              </h2>
+              <p className="text-lg text-white">
+                Experience the power of AI-driven workout planning with our free generator
+              </p>
+            </div>
+            <div id="generate-workout">
+              <GenerateWorkoutInput
+                generatePrompt={generatePrompt}
+                setGeneratePrompt={setGeneratePrompt}
+                handleGenerateWorkout={handleGenerateWorkout}
+                isGenerating={isGenerating}
+                setIsGenerating={setIsGenerating}
+                showGenerateInput={showGenerateInput}
+                setShowGenerateInput={setShowGenerateInput}
+                numberOfDays={numberOfDays}
+                setNumberOfDays={setNumberOfDays}
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

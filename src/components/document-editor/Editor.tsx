@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from 'react';
+import { supabase } from "@/integrations/supabase/client";
 
 interface EditorProps {
   content?: string;
@@ -29,14 +30,45 @@ export function Editor({ content = '', onSave }: EditorProps) {
     }
   }, [editor, content]);
 
-  const handleSave = () => {
+  const handlePublish = async () => {
     if (!editor) return;
     
-    if (onSave) {
-      onSave(editor.getHTML());
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .insert({
+          content: editor.getHTML(),
+          title: 'Workout Document'
+        })
+        .select('id')
+        .single();
+
+      if (error) throw error;
+
+      if (onSave) {
+        onSave(editor.getHTML());
+      }
+
+      const shareableLink = `${window.location.origin}/document/${data.id}`;
+      
       toast({
         title: "Success",
-        description: "Your document has been saved",
+        description: "Your document has been published. Share using this link: " + shareableLink,
+      });
+
+      // Copy link to clipboard
+      await navigator.clipboard.writeText(shareableLink);
+      
+      toast({
+        title: "Link Copied",
+        description: "Share link has been copied to your clipboard",
+      });
+    } catch (error) {
+      console.error('Error publishing document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to publish document. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -84,7 +116,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
         className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
       />
       <div className="flex justify-end mt-4 pt-4 border-t border-primary">
-        <Button onClick={handleSave}>Save Document</Button>
+        <Button onClick={handlePublish}>Publish Document</Button>
       </div>
     </Card>
   );

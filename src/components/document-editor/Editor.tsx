@@ -126,9 +126,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      // Generate shareable link using the Supabase project URL
-      const projectId = 'ulnsvkrrdcmfiguibkpx';
-      const link = `https://${projectId}.lovableproject.com/document/${data.id}`;
+      // Generate shareable link using the current domain
+      const baseUrl = window.location.origin;
+      const link = `${baseUrl}/document/${data.id}`;
       setShareableLink(link);
       
       toast({

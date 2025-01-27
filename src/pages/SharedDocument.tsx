@@ -14,13 +14,25 @@ export default function SharedDocument() {
   useEffect(() => {
     async function fetchDocument() {
       try {
+        if (!id) {
+          toast({
+            title: "Error",
+            description: "Invalid document ID",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const { data, error } = await supabase
           .from('documents')
           .select('content')
           .eq('id', id)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error:', error);
+          throw error;
+        }
 
         if (data) {
           setContent(data.content);
@@ -43,9 +55,7 @@ export default function SharedDocument() {
       }
     }
 
-    if (id) {
-      fetchDocument();
-    }
+    fetchDocument();
   }, [id, toast]);
 
   if (loading) {
@@ -61,7 +71,7 @@ export default function SharedDocument() {
   return (
     <div className="container mx-auto py-24 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="prose prose-invert">
+        <div className="prose prose-invert max-w-none">
           <div dangerouslySetInnerHTML={{ __html: content }} />
         </div>
         

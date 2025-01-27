@@ -81,12 +81,12 @@ export function Editor({ content = '', onSave }: EditorProps) {
         textArea.remove();
         return true;
       } catch (err) {
-        console.error('Failed to copy using execCommand:', err);
+        console.error('Fallback: Oops, unable to copy', err);
         textArea.remove();
         return false;
       }
     } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+      console.error('Failed to copy text: ', err);
       return false;
     }
   };
@@ -128,7 +128,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      const link = `${window.location.origin}/document/${data.id}`;
+      // Generate the full URL using window.location.origin
+      const baseUrl = window.location.origin;
+      const link = `${baseUrl}/document/${data.id}`;
       setShareableLink(link);
       
       toast({

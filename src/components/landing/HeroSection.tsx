@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
 import { ContactDialog } from "./ContactDialog";
+import { VideoSection } from "./VideoSection";
 
 interface HeroSectionProps {
   children?: React.ReactNode;
@@ -27,6 +27,8 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
           Transform athlete performance with data-driven strength programs built on exercise science.
           Scale from individual training to managing thousands of athletes while maintaining scientific rigor and personalization.
         </p>
+
+        <VideoSection />
 
         <div className="mt-12 max-w-2xl mx-auto px-4">
           <div className="bg-black/90 border-2 border-destructive rounded-xl p-8 backdrop-blur-sm transform hover:scale-[1.02] transition-all">

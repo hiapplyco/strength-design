@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
 import { ExerciseSection } from "./ExerciseSection";
@@ -7,7 +7,7 @@ import { PrescribedExercisesSection } from "./PrescribedExercisesSection";
 import { InjuriesSection } from "./InjuriesSection";
 import { GenerateSection } from "./GenerateSection";
 import { DaysSelection } from "./DaysSelection";
-import { Dumbbell } from "lucide-react";
+import { TooltipWrapper } from "./TooltipWrapper";
 import type { Exercise } from "../exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 
@@ -57,7 +57,7 @@ export function WorkoutGeneratorForm({
   isValid
 }: WorkoutGeneratorFormProps) {
   const renderTooltip = (content: string) => (
-    <div className="tooltip">{content}</div>
+    <TooltipWrapper content={content} />
   );
 
   return (
@@ -69,7 +69,7 @@ export function WorkoutGeneratorForm({
           setNumberOfDays(preset.numberOfDays);
         }} 
       />
-
+      
       <WeatherSection 
         weatherData={weatherData}
         onWeatherUpdate={onWeatherUpdate}

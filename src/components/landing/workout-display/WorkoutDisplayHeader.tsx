@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ExportActions } from "./ExportActions";
 import { useNavigate } from "react-router-dom";
+import { formatWorkoutToMarkdown } from "@/utils/workout-formatting";
 
 interface WorkoutDisplayHeaderProps {
   resetWorkouts: () => void;
@@ -21,38 +22,11 @@ export const WorkoutDisplayHeader = ({
   const navigate = useNavigate();
 
   const handlePublish = () => {
-    // Format each section with proper HTML structure
-    const formattedContent = workoutText
-      .split('\n\n---\n\n')
-      .map(day => {
-        // Split each day into sections and wrap them in paragraphs
-        const sections = day.split('\n\n').map(section => {
-          // Add heading class for day titles
-          if (section.startsWith('Day:')) {
-            return `<h2 class="text-2xl font-bold mb-4">${section}</h2>`;
-          }
-          // Add specific classes for different sections
-          if (section.startsWith('Strength:')) {
-            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Strength</h3><p>${section.replace('Strength:', '')}</p></div>`;
-          }
-          if (section.startsWith('Warmup:')) {
-            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Warmup</h3><p>${section.replace('Warmup:', '')}</p></div>`;
-          }
-          if (section.startsWith('Workout:')) {
-            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Workout</h3><p>${section.replace('Workout:', '')}</p></div>`;
-          }
-          if (section.startsWith('Notes:')) {
-            return `<div class="mb-4"><h3 class="text-xl font-semibold mb-2">Notes</h3><p>${section.replace('Notes:', '')}</p></div>`;
-          }
-          return `<p class="mb-4">${section}</p>`;
-        }).join('');
-        return `<div class="workout-day mb-8">${sections}</div>`;
-      })
-      .join('<hr class="my-8" />');
-
+    const formattedContent = formatWorkoutToMarkdown(workoutText);
+    
     navigate('/document-editor', { 
       state: { 
-        content: `<div class="workout-content">${formattedContent}</div>`
+        content: formattedContent
       } 
     });
   };

@@ -3,6 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from 'react';
 
 interface EditorProps {
   content?: string;
@@ -14,13 +15,19 @@ export function Editor({ content = '', onSave }: EditorProps) {
   
   const editor = useEditor({
     extensions: [StarterKit],
-    content,
+    content: '',
     editorProps: {
       attributes: {
         class: 'prose prose-invert min-h-[200px] focus:outline-none max-w-none',
       },
     },
   });
+
+  useEffect(() => {
+    if (editor && content) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
 
   const handleSave = () => {
     if (!editor) return;

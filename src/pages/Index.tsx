@@ -97,67 +97,72 @@ const Index = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-black overflow-hidden">
-      <video
-        autoPlay
-        loop
-        muted={isMuted}
-        playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover z-0"
-        style={{ filter: 'brightness(0.4)' }}
-      >
-        <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
-      </video>
+    <div className="min-h-screen bg-black">
+      {/* Video Section */}
+      <section className="relative h-screen mb-12">
+        <video
+          autoPlay
+          loop
+          muted={isMuted}
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
+        </video>
 
-      <Button
-        onClick={toggleMute}
-        className="fixed top-4 right-4 z-50 bg-black/50 hover:bg-black/70"
-        size="icon"
-        variant="ghost"
-      >
-        {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
-      </Button>
+        <Button
+          onClick={toggleMute}
+          className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70"
+          size="icon"
+          variant="ghost"
+        >
+          {isMuted ? <VolumeX className="h-6 w-6" /> : <Volume2 className="h-6 w-6" />}
+        </Button>
 
-      <div className="flex flex-col relative z-10">
-        <section className="min-h-screen relative">
-          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
-            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white mb-6 transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 mt-20 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
-              strength.design
-            </h1>
-            <HeroSection>
-              {showGenerateInput && (
-                <GenerateWorkoutInput
-                  generatePrompt={generatePrompt}
-                  setGeneratePrompt={setGeneratePrompt}
-                  handleGenerateWorkout={handleGenerateWorkout}
-                  isGenerating={isGenerating}
-                  setIsGenerating={setIsGenerating}
-                  setShowGenerateInput={setShowGenerateInput}
-                  numberOfDays={numberOfDays}
-                  setNumberOfDays={setNumberOfDays}
-                />
-              )}
-            </HeroSection>
-          </div>
-        </section>
+        {/* Overlay text */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052]">
+            strength.design
+          </h1>
+        </div>
+      </section>
 
-        <section className="relative">
-          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
+      {/* Content Sections */}
+      <div className="relative">
+        <div className="container mx-auto px-4 max-w-[1200px]">
+          <HeroSection>
+            {showGenerateInput && (
+              <GenerateWorkoutInput
+                generatePrompt={generatePrompt}
+                setGeneratePrompt={setGeneratePrompt}
+                handleGenerateWorkout={handleGenerateWorkout}
+                isGenerating={isGenerating}
+                setIsGenerating={setIsGenerating}
+                setShowGenerateInput={setShowGenerateInput}
+                numberOfDays={numberOfDays}
+                setNumberOfDays={setNumberOfDays}
+              />
+            )}
+          </HeroSection>
+        </div>
+
+        <div className="relative">
+          <div className="container mx-auto px-4 max-w-[1200px]">
             <FeaturesSection />
           </div>
-        </section>
+        </div>
 
-        <section className="relative">
-          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
+        <div className="relative">
+          <div className="container mx-auto px-4 max-w-[1200px]">
             <SolutionsSection />
           </div>
-        </section>
+        </div>
 
-        <section className="relative">
-          <div className="relative z-10 container mx-auto px-4 max-w-[1200px]">
+        <div className="relative">
+          <div className="container mx-auto px-4 max-w-[1200px]">
             <TestimonialsSection />
           </div>
-        </section>
+        </div>
       </div>
     </div>
   );

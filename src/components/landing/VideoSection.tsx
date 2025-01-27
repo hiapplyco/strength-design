@@ -8,9 +8,9 @@ interface VideoSectionProps {
 
 export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
   return (
-    <section className="relative h-screen w-full overflow-hidden mt-16 px-8 md:px-16 lg:px-24">
-      <div className="absolute inset-8 md:inset-16 lg:inset-24">
-        <div className="relative h-full w-full">
+    <section className="relative h-screen w-full overflow-hidden mt-16 px-12 md:px-24 lg:px-32">
+      <div className="absolute inset-12 md:inset-24 lg:inset-32">
+        <div className="relative h-full w-full max-w-[1400px] mx-auto">
           <video
             autoPlay
             loop
@@ -25,7 +25,7 @@ export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
 
       <Button
         onClick={onToggleMute}
-        className="absolute top-12 right-12 z-50 bg-black/50 hover:bg-black/70 md:top-20 md:right-20 lg:top-28 lg:right-28"
+        className="absolute top-16 right-16 z-50 bg-black/50 hover:bg-black/70 md:top-28 md:right-28 lg:top-36 lg:right-36"
         size="icon"
         variant="ghost"
       >

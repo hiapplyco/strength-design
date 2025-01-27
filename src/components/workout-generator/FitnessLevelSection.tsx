@@ -33,8 +33,10 @@ export function FitnessLevelSection({
             onClick={() => setFitnessLevel(level)}
             variant={fitnessLevel === level ? "default" : "outline"}
             className={cn(
-              "w-full transition-colors duration-200 flex items-center gap-2 justify-center",
-              fitnessLevel === level ? "bg-primary text-white" : "hover:bg-primary/10"
+              "w-full transition-all duration-200 flex items-center gap-2 justify-center transform hover:scale-105",
+              fitnessLevel === level 
+                ? "bg-[#FFD700] text-black hover:bg-[#FFD700]/90" 
+                : "bg-black/50 text-white hover:bg-black/70 hover:border-[#FFD700]/50 border-2"
             )}
           >
             <Icon className="h-4 w-4" />

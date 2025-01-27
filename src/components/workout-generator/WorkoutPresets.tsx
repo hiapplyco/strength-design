@@ -85,12 +85,12 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
         {PRESETS.map((preset) => (
           <Card 
             key={preset.title}
-            className="p-4 bg-black/50 border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer"
+            className="p-4 bg-black/50 border-2 border-primary/20 hover:border-primary/40 transition-colors cursor-pointer transform hover:scale-105 duration-200"
             onClick={() => onSelectPreset(preset)}
           >
             <Button 
               variant="ghost" 
-              className="w-full h-full text-lg font-semibold text-white hover:text-primary"
+              className="w-full h-full text-lg font-semibold text-white hover:text-[#FFD700] hover:bg-black/40 active:bg-[#FFD700]/20 focus:bg-[#FFD700]/20 focus:text-[#FFD700]"
             >
               {preset.title}
             </Button>

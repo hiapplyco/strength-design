@@ -5,7 +5,6 @@ import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
-import { VideoSection } from "@/components/landing/VideoSection";
 import { Footer } from "@/components/layout/Footer";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +30,6 @@ const Index = () => {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [numberOfDays, setNumberOfDays] = useState(7);
-  const [isMuted, setIsMuted] = useState(true);
   const { toast } = useToast();
 
   const resetWorkouts = () => {
@@ -113,14 +111,6 @@ const Index = () => {
     }
   };
 
-  const toggleMute = () => {
-    const video = document.querySelector('video');
-    if (video) {
-      video.muted = !video.muted;
-      setIsMuted(!isMuted);
-    }
-  };
-
   if (workouts) {
     return (
       <WorkoutDisplay
@@ -149,15 +139,13 @@ const Index = () => {
         </h1>
       </div>
 
-      <VideoSection isMuted={isMuted} onToggleMute={toggleMute} />
-
       <div 
         className="relative bg-cover bg-center bg-fixed"
         style={{
           backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
         }}
       >
-        <div className="absolute inset-0 bg-black/80" /> {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/80" />
         <div className="relative">
           <div className="container mx-auto px-4 max-w-[1200px]">
             <HeroSection />

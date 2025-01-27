@@ -27,7 +27,8 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 };
 
 export const createShareableUrl = (documentId: string): string => {
-  // Generate a link to our document viewer page instead of the Supabase API
+  // Use window.location.origin to get the base URL of the current environment
   const baseUrl = window.location.origin;
+  // Construct the full URL to the document viewer page
   return `${baseUrl}/document/${documentId}`;
 };

@@ -23,7 +23,16 @@ interface InputContainerProps {
   setNumberOfDays: (value: number) => void;
 }
 
-export function InputContainer(props: InputContainerProps) {
+export function InputContainer({
+  generatePrompt,
+  setGeneratePrompt,
+  handleGenerateWorkout,
+  isGenerating,
+  setIsGenerating,
+  setShowGenerateInput,
+  numberOfDays,
+  setNumberOfDays
+}: InputContainerProps) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
@@ -256,7 +265,7 @@ export function InputContainer(props: InputContainerProps) {
           setNumberOfDays={setNumberOfDays}
           onGenerate={startGenerating}
           onClear={handleClear}
-          isGenerating={props.isGenerating}
+          isGenerating={isGenerating}
           isValid={fitnessLevel !== "" && numberOfDays > 0}
         />
       </motion.div>

@@ -1,12 +1,35 @@
 import { toast } from "@/components/ui/use-toast";
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
+  // Create a temporary textarea element
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  
+  // Make it invisible but keep it in the viewport for iOS
+  textArea.style.position = 'fixed';
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.opacity = '0';
+  
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
   try {
+    // Try the new API first
     await navigator.clipboard.writeText(text);
     return true;
   } catch (error) {
-    console.error('Failed to copy text:', error);
-    return false;
+    // Fallback for Safari
+    try {
+      document.execCommand('copy');
+      return true;
+    } catch (fallbackError) {
+      console.error('Failed to copy text:', fallbackError);
+      return false;
+    }
+  } finally {
+    document.body.removeChild(textArea);
   }
 };
 
@@ -27,8 +50,7 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 };
 
 export const createShareableUrl = (documentId: string): string => {
-  // Use window.location.origin to get the base URL of the current environment
+  // Use window.location.origin to get the current domain
   const baseUrl = window.location.origin;
-  // Construct the full URL to the document viewer page
   return `${baseUrl}/document/${documentId}`;
 };

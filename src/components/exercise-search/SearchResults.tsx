@@ -50,7 +50,9 @@ export const SearchResults = ({
                         src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
                         alt={exercise.name}
                         className="rounded-md w-48 h-auto object-cover"
-                        loading="lazy"
+                        loading="eager"
+                        decoding="async"
+                        crossOrigin="anonymous"
                       />
                     )}
                   </div>

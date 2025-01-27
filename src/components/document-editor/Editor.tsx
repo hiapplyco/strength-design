@@ -44,8 +44,15 @@ export function Editor({ content = '', onSave }: EditorProps) {
       setPrevScrollPos(currentScrollPos);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Safari smooth scrolling fix
+    const scrollContainer = document.documentElement;
+    scrollContainer.style.scrollBehavior = 'auto';
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      scrollContainer.style.scrollBehavior = '';
+    };
   }, [prevScrollPos]);
 
   const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
@@ -89,26 +96,16 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
       const link = createShareableUrl(data.id);
       setShareableLink(link);
+
+      const copied = await copyToClipboard(link);
       
       toast({
         title: "Success",
-        description: "Your document has been published. The share link has been copied to your clipboard.",
+        description: copied 
+          ? "Your document has been published and the share link has been copied to your clipboard."
+          : "Your document has been published. Please manually copy the share link below.",
       });
 
-      // Attempt to copy the link to clipboard
-      try {
-        await navigator.clipboard.writeText(link);
-        toast({
-          title: "Link Copied",
-          description: "Share link has been copied to your clipboard",
-        });
-      } catch (copyError) {
-        console.error('Failed to copy to clipboard:', copyError);
-        toast({
-          title: "Note",
-          description: "Please manually copy the share link below",
-        });
-      }
     } catch (error) {
       console.error('Error publishing document:', error);
       toast({
@@ -129,6 +126,10 @@ export function Editor({ content = '', onSave }: EditorProps) {
         className={`fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-transform duration-300 ${
           visible ? 'translate-y-0' : '-translate-y-full'
         }`}
+        style={{
+          WebkitTransform: visible ? 'translate3d(0,0,0)' : 'translate3d(0,-100%,0)',
+          transform: visible ? 'translateY(0)' : 'translateY(-100%)'
+        }}
       >
         <EditorToolbar editor={editor} />
       </div>
@@ -166,4 +167,4 @@ export function Editor({ content = '', onSave }: EditorProps) {
       </div>
     </div>
   );
-};
+}

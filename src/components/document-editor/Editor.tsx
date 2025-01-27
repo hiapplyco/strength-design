@@ -126,9 +126,12 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      // Generate the Supabase project URL
-      const projectId = 'ulnsvkrrdcmfiguibkpx';
-      const link = `https://${projectId}.lovableproject.com/document/${data.id}`;
+      // Get the base URL from the current environment
+      const baseUrl = import.meta.env.PROD 
+        ? 'https://ulnsvkrrdcmfiguibkpx.lovableproject.com'
+        : window.location.origin;
+      
+      const link = `${baseUrl}/document/${data.id}`;
       setShareableLink(link);
       
       toast({

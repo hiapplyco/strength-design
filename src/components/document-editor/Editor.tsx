@@ -92,15 +92,21 @@ export function Editor({ content = '', onSave }: EditorProps) {
       
       toast({
         title: "Success",
-        description: "Your document has been published.",
+        description: "Your document has been published. The share link has been copied to your clipboard.",
       });
 
-      const copied = await copyToClipboard(link);
-      
-      if (copied) {
+      // Attempt to copy the link to clipboard
+      try {
+        await navigator.clipboard.writeText(link);
         toast({
           title: "Link Copied",
           description: "Share link has been copied to your clipboard",
+        });
+      } catch (copyError) {
+        console.error('Failed to copy to clipboard:', copyError);
+        toast({
+          title: "Note",
+          description: "Please manually copy the share link below",
         });
       }
     } catch (error) {
@@ -138,15 +144,23 @@ export function Editor({ content = '', onSave }: EditorProps) {
               <Button 
                 onClick={handlePublish}
                 disabled={isPublishing}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isPublishing ? 'Publishing...' : 'Publish Document'}
               </Button>
             </div>
             
-            <ShareSection 
-              shareableLink={shareableLink} 
-              handleShare={handleShare}
-            />
+            {shareableLink && (
+              <>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Your document has been published! Share it with others using the link below.
+                </p>
+                <ShareSection 
+                  shareableLink={shareableLink} 
+                  handleShare={handleShare}
+                />
+              </>
+            )}
           </div>
         </Card>
       </div>

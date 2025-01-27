@@ -62,13 +62,11 @@ export const SearchResults = ({
                   <div className="flex items-center justify-center">
                     <Button
                       onClick={() => onExerciseSelect(exercise)}
-                      variant="outline"
+                      variant={isSelected ? "default" : "outline"}
                       size="sm"
                       className={cn(
                         "w-24 transition-colors duration-200",
-                        isSelected
-                          ? "bg-accent hover:bg-accent/90 text-white border-accent"
-                          : "bg-accent/80 hover:bg-accent text-white border-accent/80"
+                        isSelected ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "hover:bg-primary/10"
                       )}
                     >
                       {isSelected ? "Selected" : "Select"}

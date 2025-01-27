@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
 import { motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, CircleIcon1, CircleIcon2, CircleIcon3, CircleIcon4, CircleIcon5, CircleIcon6 } from "lucide-react";
 
 interface WorkoutDay {
   description: string;
@@ -169,7 +169,7 @@ const Index = () => {
           <Separator className="mb-20 bg-primary/20" />
           <div className="container mx-auto px-4 max-w-[1200px]">
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-oswald text-primary mb-4">
+              <h2 className="text-4xl md:text-5xl font-oswald text-accent mb-4">
                 Try Our Free Program Generator
               </h2>
               <p className="text-lg text-white">
@@ -177,30 +177,30 @@ const Index = () => {
               </p>
               
               <div className="mt-8 max-w-2xl mx-auto text-left space-y-2 bg-white/5 p-6 rounded-lg">
-                <h3 className="text-xl font-oswald text-primary mb-4 text-center">Input Order:</h3>
+                <h3 className="text-xl font-oswald text-accent mb-4 text-center">Input Order:</h3>
                 <ul className="list-none space-y-3">
                   <li className="flex items-center text-white">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    <CircleIcon1 className="w-6 h-6 text-accent mr-3" />
                     Location - Weather affects your performance
                   </li>
                   <li className="flex items-center text-white">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    <CircleIcon2 className="w-6 h-6 text-accent mr-3" />
                     Search Exercises & Equipment - Define your available resources
                   </li>
                   <li className="flex items-center text-white">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    <CircleIcon3 className="w-6 h-6 text-accent mr-3" />
                     Fitness Level - Tailored to your capabilities
                   </li>
                   <li className="flex items-center text-white">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    <CircleIcon4 className="w-6 h-6 text-accent mr-3" />
                     Prescribed Exercises - Upload images/PDFs of required movements
                   </li>
                   <li className="flex items-center text-white">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    <CircleIcon5 className="w-6 h-6 text-accent mr-3" />
                     Injuries & Limitations - Ensures safe, appropriate programming
                   </li>
                   <li className="flex items-center text-white">
-                    <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                    <CircleIcon6 className="w-6 h-6 text-accent mr-3" />
                     Training Days - Design your perfect training cycle
                   </li>
                 </ul>
@@ -216,7 +216,7 @@ const Index = () => {
               <div className="relative">
                 <Separator className="my-8 bg-primary/20" />
                 <motion.div 
-                  className="absolute left-1/2 -translate-x-1/2 -bottom-8 bg-primary rounded-full p-2"
+                  className="absolute left-1/2 -translate-x-1/2 -bottom-8 bg-accent rounded-full p-2"
                   animate={{ y: [0, 10, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >

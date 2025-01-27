@@ -151,9 +151,17 @@ const Index = () => {
 
       <VideoSection isMuted={isMuted} onToggleMute={toggleMute} />
 
-      <div className="relative">
-        <div className="container mx-auto px-4 max-w-[1200px]">
-          <HeroSection />
+      <div 
+        className="relative bg-cover bg-center bg-fixed"
+        style={{
+          backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/80" /> {/* Dark overlay */}
+        <div className="relative">
+          <div className="container mx-auto px-4 max-w-[1200px]">
+            <HeroSection />
+          </div>
         </div>
 
         <div className="relative">

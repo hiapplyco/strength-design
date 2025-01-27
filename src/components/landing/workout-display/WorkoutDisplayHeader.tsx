@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ExportActions } from "./ExportActions";
@@ -20,6 +21,19 @@ export const WorkoutDisplayHeader = ({
   workoutText
 }: WorkoutDisplayHeaderProps) => {
   const navigate = useNavigate();
+  const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollPos = window.scrollY;
+      setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      setPrevScrollPos(currentScrollPos);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [prevScrollPos]);
 
   const handlePublish = () => {
     const formattedContent = formatWorkoutToMarkdown(workoutText);
@@ -32,7 +46,11 @@ export const WorkoutDisplayHeader = ({
   };
 
   return (
-    <div className="fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border p-4">
+    <div 
+      className={`fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border p-4 transition-transform duration-300 ${
+        visible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       <div className="container mx-auto flex justify-between items-center">
         <Button 
           variant="ghost" 

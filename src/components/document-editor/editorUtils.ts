@@ -40,5 +40,6 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 };
 
 export const createShareableUrl = (documentId: string): string => {
-  return `${window.location.origin}/document/${documentId}`;
+  // Use the Supabase project URL directly
+  return `https://ulnsvkrrdcmfiguibkpx.supabase.co/rest/v1/documents?id=eq.${documentId}`;
 };

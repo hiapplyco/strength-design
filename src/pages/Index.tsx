@@ -141,7 +141,19 @@ const Index = () => {
         <div className="absolute inset-0 bg-black/80" />
         <div className="relative">
           <div className="container mx-auto px-4 max-w-[1200px]">
-            <HeroSection />
+            <HeroSection>
+              <GeneratorSection
+                generatePrompt={generatePrompt}
+                setGeneratePrompt={setGeneratePrompt}
+                handleGenerateWorkout={handleGenerateWorkout}
+                isGenerating={isGenerating}
+                setIsGenerating={setIsGenerating}
+                showGenerateInput={showGenerateInput}
+                setShowGenerateInput={setShowGenerateInput}
+                numberOfDays={numberOfDays}
+                setNumberOfDays={setNumberOfDays}
+              />
+            </HeroSection>
           </div>
         </div>
 
@@ -162,18 +174,6 @@ const Index = () => {
             <TestimonialsSection />
           </div>
         </div>
-
-        <GeneratorSection
-          generatePrompt={generatePrompt}
-          setGeneratePrompt={setGeneratePrompt}
-          handleGenerateWorkout={handleGenerateWorkout}
-          isGenerating={isGenerating}
-          setIsGenerating={setIsGenerating}
-          showGenerateInput={showGenerateInput}
-          setShowGenerateInput={setShowGenerateInput}
-          numberOfDays={numberOfDays}
-          setNumberOfDays={setNumberOfDays}
-        />
       </div>
 
       <Footer />

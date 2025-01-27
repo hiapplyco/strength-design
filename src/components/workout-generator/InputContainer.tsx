@@ -4,6 +4,7 @@ import type { WeatherData } from "@/types/weather";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { WorkoutGeneratorForm } from "./WorkoutGeneratorForm";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -22,16 +23,7 @@ interface InputContainerProps {
   setNumberOfDays: (value: number) => void;
 }
 
-export function InputContainer({
-  generatePrompt,
-  setGeneratePrompt,
-  handleGenerateWorkout,
-  isGenerating,
-  setIsGenerating,
-  setShowGenerateInput,
-  numberOfDays,
-  setNumberOfDays
-}: InputContainerProps) {
+export function InputContainer(props: InputContainerProps) {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState<string>("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
@@ -237,29 +229,37 @@ export function InputContainer({
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4">
-      <WorkoutGeneratorForm
-        weatherData={weatherData}
-        onWeatherUpdate={handleWeatherUpdate}
-        selectedExercises={selectedExercises}
-        onExerciseSelect={handleExerciseSelect}
-        fitnessLevel={fitnessLevel}
-        setFitnessLevel={setFitnessLevel}
-        prescribedExercises={prescribedExercises}
-        setPrescribedExercises={setPrescribedExercises}
-        isAnalyzingPrescribed={isAnalyzingPrescribed}
-        handlePrescribedFileSelect={handlePrescribedFileSelect}
-        injuries={injuries}
-        setInjuries={setInjuries}
-        isAnalyzingInjuries={isAnalyzingInjuries}
-        handleInjuriesFileSelect={handleInjuriesFileSelect}
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
-        onGenerate={startGenerating}
-        onClear={handleClear}
-        isGenerating={isGenerating}
-        isValid={fitnessLevel !== "" && numberOfDays > 0}
-      />
-    </div>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-6xl mx-auto px-4"
+      >
+        <WorkoutGeneratorForm
+          weatherData={weatherData}
+          onWeatherUpdate={handleWeatherUpdate}
+          selectedExercises={selectedExercises}
+          onExerciseSelect={handleExerciseSelect}
+          fitnessLevel={fitnessLevel}
+          setFitnessLevel={setFitnessLevel}
+          prescribedExercises={prescribedExercises}
+          setPrescribedExercises={setPrescribedExercises}
+          isAnalyzingPrescribed={isAnalyzingPrescribed}
+          handlePrescribedFileSelect={handlePrescribedFileSelect}
+          injuries={injuries}
+          setInjuries={setInjuries}
+          isAnalyzingInjuries={isAnalyzingInjuries}
+          handleInjuriesFileSelect={handleInjuriesFileSelect}
+          numberOfDays={numberOfDays}
+          setNumberOfDays={setNumberOfDays}
+          onGenerate={startGenerating}
+          onClear={handleClear}
+          isGenerating={props.isGenerating}
+          isValid={fitnessLevel !== "" && numberOfDays > 0}
+        />
+      </motion.div>
+    </AnimatePresence>
   );
 }

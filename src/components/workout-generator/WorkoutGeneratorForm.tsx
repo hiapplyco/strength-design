@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Separator } from "@/components/ui/separator";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
 import { ExerciseSection } from "./ExerciseSection";
@@ -70,6 +71,32 @@ export function WorkoutGeneratorForm({
         }} 
       />
       
+      {/* Required Fields */}
+      <DaysSelection
+        numberOfDays={numberOfDays}
+        setNumberOfDays={setNumberOfDays}
+        renderTooltip={() => renderTooltip("Choose how many days you want to train in your program")}
+      />
+
+      <PrescribedExercisesSection
+        prescribedExercises={prescribedExercises}
+        setPrescribedExercises={setPrescribedExercises}
+        isAnalyzingPrescribed={isAnalyzingPrescribed}
+        handlePrescribedFileSelect={handlePrescribedFileSelect}
+      />
+
+      {/* Optional Fields Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <Separator className="w-full" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-card px-4 text-sm text-muted-foreground">
+            Optional Fields
+          </span>
+        </div>
+      </div>
+
       <WeatherSection 
         weatherData={weatherData}
         onWeatherUpdate={onWeatherUpdate}
@@ -87,13 +114,6 @@ export function WorkoutGeneratorForm({
         setFitnessLevel={setFitnessLevel}
       />
 
-      <PrescribedExercisesSection
-        prescribedExercises={prescribedExercises}
-        setPrescribedExercises={setPrescribedExercises}
-        isAnalyzingPrescribed={isAnalyzingPrescribed}
-        handlePrescribedFileSelect={handlePrescribedFileSelect}
-      />
-
       <InjuriesSection
         injuries={injuries}
         setInjuries={setInjuries}
@@ -101,17 +121,11 @@ export function WorkoutGeneratorForm({
         handleInjuriesFileSelect={handleInjuriesFileSelect}
       />
 
-      <DaysSelection
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
-        renderTooltip={() => renderTooltip("Choose how many days you want to train in your program")}
-      />
-
       <GenerateSection
         onGenerate={onGenerate}
         onClear={onClear}
         isGenerating={isGenerating}
-        isValid={isValid}
+        isValid={!!prescribedExercises && numberOfDays > 0}
         renderTooltip={() => renderTooltip("Review your selections and generate your personalized program")}
       />
     </div>

@@ -16,7 +16,7 @@ export const VideoSection = ({ isMuted, onToggleMute }: VideoSectionProps) => {
             loop
             muted={isMuted}
             playsInline
-            className="w-full h-full object-contain rounded-lg"
+            className="w-full h-full object-contain"
           >
             <source src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos/S.D.mov?t=2025-01-27T00%3A24%3A48.059Z" type="video/mp4" />
           </video>

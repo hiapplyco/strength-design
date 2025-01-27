@@ -7,6 +7,7 @@ import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
 import DocumentEditor from "@/pages/DocumentEditor";
+import SharedDocument from "@/pages/SharedDocument";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 export const AppContent = () => {
@@ -29,6 +30,7 @@ export const AppContent = () => {
         <Route path="/best-app-of-day" element={<BestAppOfDay />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/document-editor" element={<DocumentEditor />} />
+        <Route path="/document/:id" element={<SharedDocument />} />
       </Routes>
     </>
   );

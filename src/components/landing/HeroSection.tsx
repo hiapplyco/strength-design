@@ -18,12 +18,12 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
   };
 
   return (
-    <section className="flex flex-col items-center space-y-8 pt-12 pb-20" aria-label="Scientific Strength Programming Platform">
-      <div className="text-center space-y-4">
+    <section className="flex flex-col items-center space-y-8 pt-12 pb-20 w-full" aria-label="Scientific Strength Programming Platform">
+      <div className="text-center space-y-4 w-full px-4">
         <h1 className="text-4xl md:text-6xl font-oswald text-primary dark:text-white">
           Evidence-Based Strength Programming
         </h1>
-        <p className="text-lg md:text-xl max-w-3xl mx-auto text-white">
+        <p className="text-lg md:text-xl mx-auto text-white max-w-4xl">
           Transform athlete performance with data-driven strength programs built on exercise science.
           Scale from individual training to managing thousands of athletes while maintaining scientific rigor and personalization.
         </p>
@@ -52,7 +52,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl px-4">
         {[
           {
             title: "Research-Backed Methodology",

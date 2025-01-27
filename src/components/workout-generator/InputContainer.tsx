@@ -45,7 +45,9 @@ export function InputContainer({
     handleInjuriesFileSelect,
     handleGenerateWithWeather,
     handleClear,
-    setFitnessLevel
+    setFitnessLevel,
+    setPrescribedExercises,
+    setInjuries
   } = useWorkoutGeneration({
     handleGenerateWorkout,
     setIsGenerating,

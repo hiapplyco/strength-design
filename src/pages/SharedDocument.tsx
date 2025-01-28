@@ -1,151 +1,108 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Footer } from "@/components/layout/Footer";
-import { Dumbbell } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function SharedDocument() {
-  const { id } = useParams();
-  const [content, setContent] = useState("");
+  const [document, setDocument] = useState<{ content: string; title?: string } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams();
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchDocument = async () => {
       try {
-        if (!id) {
-          setError("No document ID provided");
-          setLoading(false);
-          return;
-        }
-
-        const { data, error: fetchError } = await supabase
-          .from("documents")
-          .select("content")
-          .eq("id", id)
+        const { data, error } = await supabase
+          .from('documents')
+          .select('content, title')
+          .eq('id', id)
           .single();
 
-        if (fetchError) {
-          console.error("Error fetching document:", fetchError);
-          setError("Failed to load document");
-          toast({
-            title: "Error",
-            description: "Failed to load document",
-            variant: "destructive",
-          });
-        } else if (!data) {
-          setError("Document not found");
-        } else {
-          setContent(data.content);
-          setError(null);
+        if (error) {
+          throw error;
         }
-      } catch (err) {
-        console.error("Error:", err);
-        setError("An unexpected error occurred");
+
+        if (data) {
+          setDocument(data);
+        }
+      } catch (error) {
+        console.error('Error fetching document:', error);
         toast({
-          title: "Error",
-          description: "An unexpected error occurred",
           variant: "destructive",
+          title: "Error",
+          description: "Failed to load the document. Please try again later.",
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDocument();
+    if (id) {
+      fetchDocument();
+    }
   }, [id, toast]);
 
-  const LoadingState = () => (
-    <div className="min-h-screen bg-background pt-16">
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-3xl mx-auto space-y-4">
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
-      <Footer />
-    </div>
-  );
+    );
+  }
 
-  const ErrorState = () => (
-    <div className="min-h-screen bg-background pt-16">
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-2xl font-bold text-destructive mb-4">{error}</h1>
-          <p className="text-muted-foreground mb-8">
-            The document you're looking for might have been removed or is temporarily unavailable.
+  if (!document) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card className="p-6 text-center">
+          <h1 className="text-2xl font-bold mb-4">Document Not Found</h1>
+          <p className="text-muted-foreground mb-6">
+            The document you're looking for doesn't exist or has been removed.
           </p>
-          <Button 
-            variant="default"
-            onClick={() => window.location.href = 'https://strength.design'}
-          >
-            Visit Strength.Design
+          <Button asChild>
+            <a href="https://strength.design" className="inline-block">
+              Create Your Own Workout Plan
+            </a>
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Top CTA */}
+      <div className="w-full bg-primary/10 py-4">
+        <div className="container mx-auto px-4">
+          <Button asChild className="w-full sm:w-auto" variant="default">
+            <a href="https://strength.design">
+              Create Your Own AI-Powered Workout Plan
+            </a>
           </Button>
         </div>
       </div>
-      <Footer />
-    </div>
-  );
 
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState />;
-
-  return (
-    <div className="min-h-screen bg-background pt-16">
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-3xl mx-auto">
-          {/* Top CTA */}
-          <div className="mb-16 p-6 bg-black/30 backdrop-blur-sm rounded-lg border border-primary/20">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <Dumbbell className="w-12 h-12 text-primary" />
-              <h3 className="text-2xl font-oswald text-primary">
-                Discover Your Perfect Training Program
-              </h3>
-              <p className="text-white/90 max-w-2xl">
-                Join strength.design and access personalized, science-backed workout plans designed to help you reach your fitness goals.
-              </p>
-              <Button 
-                size="lg"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => window.location.href = 'https://strength.design'}
-              >
-                Start Your Journey
-              </Button>
-            </div>
-          </div>
-
-          <article className="prose prose-invert max-w-none mb-16">
-            <div dangerouslySetInnerHTML={{ __html: content }} />
-          </article>
-
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-4xl mx-auto p-6 bg-background">
+          {document.title && (
+            <h1 className="text-3xl font-bold mb-6">{document.title}</h1>
+          )}
+          <div 
+            className="prose prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: document.content }}
+          />
+          
           {/* Bottom CTA */}
-          <div className="mt-16 p-6 bg-black/30 backdrop-blur-sm rounded-lg border border-primary/20">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <Dumbbell className="w-12 h-12 text-primary" />
-              <h3 className="text-2xl font-oswald text-primary">
-                Ready to Build Your Own Evidence-Based Training Program?
-              </h3>
-              <p className="text-white/90 max-w-2xl">
-                Experience the intersection of exercise science and intelligent programming. Create personalized, science-backed 
-                workout plans tailored to your specific goals and training requirements.
-              </p>
-              <Button 
-                size="lg"
-                className="bg-primary hover:bg-primary/90"
-                onClick={() => window.location.href = 'https://strength.design'}
-              >
-                Start Creating Now
-              </Button>
-            </div>
+          <div className="mt-8 text-center">
+            <Button asChild size="lg">
+              <a href="https://strength.design">
+                Start Building Your Custom Workout Program
+              </a>
+            </Button>
           </div>
-        </div>
+        </Card>
       </div>
-      <Footer />
     </div>
   );
 }

@@ -61,15 +61,22 @@ export function WorkoutGeneratorForm({
     <TooltipWrapper content={content} />
   );
 
+  const handlePresetSelect = (preset: {
+    title: string;
+    prescribedExercises: string;
+    fitnessLevel: string;
+    numberOfDays: number;
+  }) => {
+    console.log('Preset selected in form:', preset);
+    setPrescribedExercises(preset.prescribedExercises);
+    setFitnessLevel(preset.fitnessLevel);
+    setNumberOfDays(preset.numberOfDays);
+  };
+
   return (
     <div className={`relative bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 p-8 space-y-8 ${isGenerating ? 'before:absolute before:inset-0 before:rounded-lg before:border-4 before:border-primary before:animate-[gradient_3s_ease_infinite] before:bg-gradient-to-r before:from-transparent before:via-primary/20 before:to-transparent' : ''}`}>
       <WorkoutPresets 
-        onSelectPreset={(preset) => {
-          console.log('Preset selected in form:', preset);
-          setPrescribedExercises(preset.prescribedExercises);
-          setFitnessLevel(preset.fitnessLevel);
-          setNumberOfDays(preset.numberOfDays);
-        }} 
+        onSelectPreset={handlePresetSelect}
       />
       
       <DaysSelection

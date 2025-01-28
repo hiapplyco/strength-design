@@ -14,13 +14,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface WorkoutPreset {
-  title: string;
-  prescribedExercises: string;
-  fitnessLevel: string;
-  numberOfDays: number;
-}
-
 const WORKOUT_PROGRAMS = {
   CrossFit_Workout_Programs: {
     Fran: "A high-intensity benchmark WOD combining thrusters and pull-ups for time.",
@@ -69,12 +62,25 @@ const PRESET_CONFIGS = {
     prescribedExercises: "Chest & Back:\n- Bench Press: 5 sets of 8-12 reps\n- Wide-Grip Pull-Ups: 5 sets to failure\n- Incline Bench Press: 4 sets of 8-12 reps\n- Barbell Rows: 4 sets of 8-12 reps",
     fitnessLevel: "intermediate",
     numberOfDays: 6
+  },
+  Diane: {
+    title: "CrossFit - Diane",
+    prescribedExercises: "21-15-9 reps for time:\nDeadlifts (225/155 lb)\nHandstand Push-ups",
+    fitnessLevel: "advanced",
+    numberOfDays: 1
   }
 } as const;
 
 type WorkoutProgramsType = typeof WORKOUT_PROGRAMS;
 type CategoryType = keyof WorkoutProgramsType;
 type WorkoutType<T extends CategoryType> = keyof WorkoutProgramsType[T];
+
+interface WorkoutPreset {
+  title: string;
+  prescribedExercises: string;
+  fitnessLevel: string;
+  numberOfDays: number;
+}
 
 interface WorkoutPresetsProps {
   onSelectPreset: (preset: WorkoutPreset) => void;
@@ -104,10 +110,14 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
       const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
       
       if (preset) {
-        const formattedPreset = {
-          ...preset,
-          prescribedExercises: `${preset.title}\n\nDescription:\n${workoutDescription}\n\nWorkout Details:\n${preset.prescribedExercises}`
+        const formattedPreset: WorkoutPreset = {
+          title: preset.title,
+          prescribedExercises: `${preset.title}\n\nDescription:\n${workoutDescription}\n\nWorkout Details:\n${preset.prescribedExercises}`,
+          fitnessLevel: preset.fitnessLevel,
+          numberOfDays: preset.numberOfDays
         };
+        
+        console.log('Selected preset:', formattedPreset); // Debug log
         onSelectPreset(formattedPreset);
       }
     }

@@ -49,7 +49,17 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 
 export const createShareableUrl = async (documentId: string): Promise<string> => {
   try {
-    const baseUrl = window.location.origin;
+    const { data: settings, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'share_base_url')
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    const baseUrl = settings?.value || window.location.origin;
     return `${baseUrl}/document/${documentId}`;
   } catch (error) {
     console.error('Failed to create shareable URL:', error);

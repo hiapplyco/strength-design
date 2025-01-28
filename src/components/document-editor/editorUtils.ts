@@ -49,10 +49,14 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 
 export const createShareableUrl = async (documentId: string): Promise<string> => {
   try {
-    // Get the Supabase project URL from the client
-    const supabaseUrl = supabase.supabaseUrl;
-    // Create a public URL using the Supabase project URL
-    const publicUrl = `${supabaseUrl}/storage/v1/object/public/documents/${documentId}`;
+    // Get the config from the Supabase client
+    const { data: { publicUrl }, error } = await supabase
+      .storage
+      .from('documents')
+      .getPublicUrl(documentId);
+
+    if (error) throw error;
+    
     return publicUrl.replace(/([^:]\/)\/+/g, "$1");
   } catch (error) {
     console.error('Failed to create shareable URL:', error);

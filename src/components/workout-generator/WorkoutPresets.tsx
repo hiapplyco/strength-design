@@ -85,18 +85,20 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
     setSelectedWorkout(workoutName);
     const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
     if (preset) {
-      onSelectPreset(preset);
+      onSelectPreset({
+        ...preset,
+        prescribedExercises: `${preset.title}\n\n${WORKOUT_PROGRAMS[selectedCategory as keyof typeof WORKOUT_PROGRAMS][workoutName]}\n\n${preset.prescribedExercises}`
+      });
     }
   };
 
   return (
     <div className="space-y-4">
       <div className="text-center space-y-2">
-        <h3 className="text-lg font-semibold text-white">Try a Sample Program</h3>
+        <h3 className="text-lg font-semibold text-white">What exercise would you like to do?</h3>
         <p className="text-sm text-gray-300">
           Drawing from our database of thousands of user-submitted and expert-curated workouts, we've handpicked some 
-          popular training templates to help you get started. Explore proven programs from CrossFit champions, 
-          military fitness experts, and professional coaches.
+          popular training templates to help you get started.
         </p>
       </div>
 

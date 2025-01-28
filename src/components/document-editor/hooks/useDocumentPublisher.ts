@@ -21,8 +21,8 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
-      // Get the base URL for the application
-      const baseUrl = window.location.origin;
+      // Use the production domain instead of the current domain
+      const baseUrl = 'https://hiapply.co';
       
       const { data, error } = await supabase
         .from('documents')
@@ -50,7 +50,7 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
-      // Generate shareable link using the document ID and base URL
+      // Generate shareable link using the document ID and production base URL
       const shareLink = `${baseUrl}/shared-document/${data.id}`;
       
       // Update the document with the complete URL

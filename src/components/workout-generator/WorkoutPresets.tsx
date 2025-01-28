@@ -91,7 +91,7 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
       setSelectedWorkout(workoutName);
       
       // Get the workout description from the programs object
-      const workoutDescription = WORKOUT_PROGRAMS[categoryKey as keyof typeof WORKOUT_PROGRAMS][workoutName];
+      const workoutDescription = WORKOUT_PROGRAMS[categoryKey as keyof typeof WORKOUT_PROGRAMS][workoutName as keyof (typeof WORKOUT_PROGRAMS)[typeof categoryKey]];
       
       // Get the preset configuration if it exists
       const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
@@ -99,7 +99,7 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
       if (preset) {
         onSelectPreset({
           ...preset,
-          prescribedExercises: `${preset.title}\n\n${workoutDescription}\n\n${preset.prescribedExercises}`
+          prescribedExercises: `${preset.title}\n\nDescription:\n${workoutDescription}\n\nWorkout Details:\n${preset.prescribedExercises}`
         });
       }
     }

@@ -19,6 +19,7 @@ export function useDocumentPublisher() {
 
     try {
       setIsPublishing(true);
+      console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
       const { data, error } = await supabase
         .from('documents')
@@ -34,6 +35,13 @@ export function useDocumentPublisher() {
         throw error;
       }
 
+      if (!data || !data.id) {
+        console.error('No data returned from insert');
+        throw new Error('Failed to get document ID after insert');
+      }
+
+      console.log('Document created with ID:', data.id);
+
       if (onSave) {
         onSave(content);
       }
@@ -41,6 +49,7 @@ export function useDocumentPublisher() {
       // Generate shareable link using the document ID
       const shareLink = `/shared-document/${data.id}`;
       setShareableLink(shareLink);
+      console.log('Generated share link:', shareLink);
 
       toast({
         title: "Success",
@@ -51,7 +60,7 @@ export function useDocumentPublisher() {
       console.error('Error publishing document:', error);
       toast({
         title: "Error",
-        description: "Failed to publish document. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to publish document. Please try again.",
         variant: "destructive"
       });
     } finally {

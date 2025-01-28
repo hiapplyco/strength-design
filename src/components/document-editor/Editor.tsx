@@ -20,6 +20,8 @@ export function Editor({ content = '', onSave }: EditorProps) {
       StarterKit,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right'],
+        defaultAlignment: 'left',
       }),
     ],
     content: '',

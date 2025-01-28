@@ -72,13 +72,13 @@ const PRESET_CONFIGS = {
   }
 } as const;
 
-interface WorkoutPresetsProps {
-  onSelectPreset: (preset: WorkoutPreset) => void;
-}
-
 type WorkoutProgramsType = typeof WORKOUT_PROGRAMS;
 type CategoryType = keyof WorkoutProgramsType;
 type WorkoutType<T extends CategoryType> = keyof WorkoutProgramsType[T];
+
+interface WorkoutPresetsProps {
+  onSelectPreset: (preset: WorkoutPreset) => void;
+}
 
 export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -104,10 +104,11 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
       const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
       
       if (preset) {
-        onSelectPreset({
+        const formattedPreset = {
           ...preset,
           prescribedExercises: `${preset.title}\n\nDescription:\n${workoutDescription}\n\nWorkout Details:\n${preset.prescribedExercises}`
-        });
+        };
+        onSelectPreset(formattedPreset);
       }
     }
   };

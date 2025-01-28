@@ -34,7 +34,7 @@ export default function DocumentEditor() {
       />
       
       {/* Content */}
-      <div className="relative z-10 container mx-auto py-24 px-4">
+      <div className="relative z-10 container mx-auto pt-32 pb-24 px-4">
         <h1 className="text-4xl font-bold mb-8 text-center font-heading">Document Editor</h1>
         <div className="max-w-4xl mx-auto">
           <Editor content={content} onSave={handleSave} />

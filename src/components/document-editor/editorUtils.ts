@@ -31,12 +31,9 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 };
 
 export const getBaseUrl = () => {
-  if (typeof window !== 'undefined') { 
-    // Browser should use the current domain
-    return window.location.origin;
-  }
-  // Server should use the Supabase URL
-  return process.env.VITE_SUPABASE_URL || '';
+  // Always use the current domain for sharing
+  // This ensures the link works with any custom domain
+  return typeof window !== 'undefined' ? window.location.origin : '';
 };
 
 export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', url: string): string => {

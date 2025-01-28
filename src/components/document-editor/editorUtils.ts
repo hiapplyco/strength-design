@@ -60,7 +60,7 @@ export const createShareableUrl = async (documentId: string): Promise<string> =>
     }
 
     const baseUrl = settings?.value || window.location.origin;
-    return `${baseUrl}/document/${documentId}`;
+    return `${baseUrl}/document/${documentId}`.replace(/([^:]\/)\/+/g, "$1");
   } catch (error) {
     console.error('Failed to create shareable URL:', error);
     toast({

@@ -1,41 +1,34 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
-import { Footer } from "@/components/layout/Footer";
 import { HeaderSection } from "@/components/landing/HeaderSection";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
+import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
+import type { WeeklyWorkouts } from "@/types/fitness";
 
-interface WorkoutDay {
-  description: string;
-  warmup: string;
-  workout: string;
-  strength: string;
-  notes?: string;
-}
-
-type WeeklyWorkouts = Record<string, WorkoutDay>;
+const DEFAULT_DAYS = 7;
 
 const Index = () => {
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [showGenerateInput, setShowGenerateInput] = useState(true);
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [numberOfDays, setNumberOfDays] = useState(7);
+  const [showGenerateInput, setShowGenerateInput] = useState(true);
+  const [numberOfDays, setNumberOfDays] = useState(DEFAULT_DAYS);
   const { toast } = useToast();
 
-  const resetWorkouts = () => {
+  const resetWorkouts = useCallback(() => {
     setWorkouts(null);
     setShowGenerateInput(true);
-  };
+  }, []);
 
-  const handleGenerateWorkout = async (params: {
+  const handleGenerateWorkout = useCallback(async (params: {
     prompt: string;
     weatherPrompt: string;
     selectedExercises: any[];
@@ -46,13 +39,9 @@ const Index = () => {
     const startTime = performance.now();
 
     try {
-      const selectedExercisesArray = Array.isArray(params.selectedExercises) 
-        ? params.selectedExercises 
-        : [];
-
       const { error: sessionError } = await supabase.from('session_io').insert({
         weather_prompt: params.weatherPrompt,
-        selected_exercises: selectedExercisesArray,
+        selected_exercises: params.selectedExercises,
         fitness_level: params.fitnessLevel,
         prescribed_exercises: params.prescribedExercises,
         number_of_days: numberOfDays,
@@ -67,7 +56,6 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           ...params,
-          selectedExercises: selectedExercisesArray,
           numberOfDays
         }
       });
@@ -110,7 +98,7 @@ const Index = () => {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [numberOfDays, toast]);
 
   if (workouts) {
     return (
@@ -124,7 +112,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className="min-h-screen">
       <HeaderSection />
 
       <div 
@@ -133,7 +121,8 @@ const Index = () => {
           backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
         }}
       >
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+        
         <div className="relative">
           <div className="container mx-auto px-4 max-w-[1200px]">
             <HeroSection>

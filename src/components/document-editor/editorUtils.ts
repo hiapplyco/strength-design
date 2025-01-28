@@ -1,4 +1,5 @@
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
@@ -46,8 +47,28 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
   }
 };
 
-export const createShareableUrl = (documentId: string): string => {
-  // Get the current window location origin to ensure correct base URL
-  const baseUrl = window.location.origin;
-  return `${baseUrl}/document/${documentId}`;
+export const createShareableUrl = async (documentId: string): Promise<string> => {
+  try {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'share_base_url')
+      .single();
+
+    if (error) {
+      console.error('Error fetching base URL:', error);
+      throw error;
+    }
+
+    const baseUrl = data.value;
+    return `${baseUrl}/document/${documentId}`;
+  } catch (error) {
+    console.error('Failed to create shareable URL:', error);
+    toast({
+      title: "Error",
+      description: "Failed to generate shareable link. Please try again.",
+      variant: "destructive"
+    });
+    return '';
+  }
 };

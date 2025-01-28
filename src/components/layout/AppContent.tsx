@@ -30,7 +30,7 @@ export const AppContent = () => {
         <Route path="/best-app-of-day" element={<BestAppOfDay />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/document-editor" element={<DocumentEditor />} />
-        <Route path="/document/:id" element={<SharedDocument />} />
+        <Route path="/shared-document/:id" element={<SharedDocument />} />
       </Routes>
     </>
   );

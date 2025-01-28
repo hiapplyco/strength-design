@@ -127,7 +127,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-transparent">
       <div className="pt-24">
         <HeaderSection />
       </div>
@@ -138,7 +138,7 @@ const Index = () => {
           backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
         }}
       >
-        <div className="absolute inset-0 bg-black/80" />
+        <div className="absolute inset-0 bg-black/50" />
         <div className="relative">
           <div className="container mx-auto px-4 max-w-[1200px]">
             <HeroSection>

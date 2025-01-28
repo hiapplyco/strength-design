@@ -24,6 +24,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
         class: 'prose prose-invert min-h-[200px] focus:outline-none max-w-none',
       },
     },
+    onFocus: () => {
+      setVisible(true);
+    },
   });
 
   useEffect(() => {
@@ -35,24 +38,32 @@ export function Editor({ content = '', onSave }: EditorProps) {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
-      setVisible(prevScrollPos > currentScrollPos || currentScrollPos < 10);
+      const isScrollingUp = prevScrollPos > currentScrollPos;
+      const isNearTop = currentScrollPos < 10;
+      const isEditorFocused = editor?.isFocused;
+      
+      setVisible(isScrollingUp || isNearTop || isEditorFocused);
       setPrevScrollPos(currentScrollPos);
     };
 
     const scrollContainer = document.documentElement;
-    scrollContainer.style.scrollBehavior = 'auto';
+    scrollContainer.style.scrollBehavior = 'smooth';
     
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
       scrollContainer.style.scrollBehavior = '';
     };
-  }, [prevScrollPos]);
+  }, [prevScrollPos, editor]);
 
-  const handleShare = (platform: 'facebook' | 'twitter' | 'linkedin') => {
+  const handleShare = async (platform: 'facebook' | 'twitter' | 'linkedin') => {
     if (!shareableLink) return;
     const url = generateShareUrl(platform, shareableLink);
-    window.open(url, '_blank', 'width=600,height=400');
+    try {
+      await window.open(url, '_blank', 'width=600,height=400');
+    } catch (error) {
+      console.error('Error opening share window:', error);
+    }
   };
 
   const handlePublish = async () => {
@@ -63,9 +74,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
   if (!editor) return null;
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
       <div 
-        className={`fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border transition-transform duration-300 ${
+        className={`fixed top-16 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border transition-transform duration-300 ${
           visible ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
@@ -73,7 +84,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
           transform: visible ? 'translateY(0)' : 'translateY(-100%)'
         }}
       >
-        <EditorToolbar editor={editor} />
+        <div className="container mx-auto">
+          <EditorToolbar editor={editor} />
+        </div>
       </div>
 
       <div className="pt-24">

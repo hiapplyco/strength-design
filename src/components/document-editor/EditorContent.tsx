@@ -19,32 +19,32 @@ export function DocumentEditorContent({
   handleShare
 }: DocumentEditorContentProps) {
   return (
-    <Card className="w-full p-4 bg-background border-primary">
+    <Card className="w-full p-6 bg-background border-primary">
       <TipTapEditorContent 
         editor={editor} 
-        className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
+        className="min-h-[300px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
       />
-      <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-primary">
+      <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-primary">
         <div className="flex justify-end">
           <Button 
             onClick={onPublish}
             disabled={isPublishing}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[160px]"
           >
             {isPublishing ? 'Publishing...' : 'Publish Document'}
           </Button>
         </div>
         
         {shareableLink && (
-          <>
-            <p className="text-sm text-muted-foreground mt-2">
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
               Your document has been published! Share it with others using the link below.
             </p>
             <ShareSection 
               shareableLink={shareableLink} 
               handleShare={handleShare}
             />
-          </>
+          </div>
         )}
       </div>
     </Card>

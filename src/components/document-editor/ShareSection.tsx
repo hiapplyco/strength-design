@@ -16,16 +16,17 @@ export function ShareSection({ shareableLink, handleShare }: ShareSectionProps) 
     toast({
       title: success ? "Copied!" : "Failed to copy",
       description: success ? "Link copied to clipboard" : "Please copy the link manually",
+      duration: 2000,
     });
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 p-2 bg-muted rounded">
-        <Link2 className="h-4 w-4" />
-        <span className="text-sm flex-1 break-all">{shareableLink}</span>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+        <Link2 className="h-4 w-4 flex-shrink-0" />
+        <span className="text-sm flex-1 break-all font-mono">{shareableLink}</span>
       </div>
-      <div className="flex gap-2 justify-end items-center">
+      <div className="flex flex-wrap gap-2 justify-end items-center">
         <Button
           variant="outline"
           size="icon"
@@ -33,32 +34,34 @@ export function ShareSection({ shareableLink, handleShare }: ShareSectionProps) 
           onClick={handleCopy}
           title="Copy link"
         >
-          <Copy className="h-6 w-6" />
+          <Copy className="h-5 w-5" />
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handleShare('facebook')}
-          title="Share on Facebook"
-        >
-          <Facebook className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handleShare('twitter')}
-          title="Share on Twitter"
-        >
-          <Twitter className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handleShare('linkedin')}
-          title="Share on LinkedIn"
-        >
-          <Linkedin className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleShare('facebook')}
+            title="Share on Facebook"
+          >
+            <Facebook className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleShare('twitter')}
+            title="Share on Twitter"
+          >
+            <Twitter className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleShare('linkedin')}
+            title="Share on LinkedIn"
+          >
+            <Linkedin className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

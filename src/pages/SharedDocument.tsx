@@ -59,43 +59,45 @@ export default function SharedDocument() {
     fetchDocument();
   }, [id, toast]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-24 px-4">
-          <div className="max-w-3xl mx-auto space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-32 w-full" />
-          </div>
+  const LoadingState = () => (
+    <div className="min-h-screen bg-background pt-16">
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
         </div>
       </div>
-    );
-  }
+      <Footer />
+    </div>
+  );
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-24 px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-2xl font-bold text-destructive mb-4">{error}</h1>
-            <p className="text-muted-foreground mb-8">The document you're looking for might have been removed or is temporarily unavailable.</p>
-            <Button 
-              variant="default"
-              onClick={() => window.location.href = '/document-editor'}
-            >
-              Create New Document
-            </Button>
-          </div>
+  const ErrorState = () => (
+    <div className="min-h-screen bg-background pt-16">
+      <div className="container mx-auto py-8 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-2xl font-bold text-destructive mb-4">{error}</h1>
+          <p className="text-muted-foreground mb-8">
+            The document you're looking for might have been removed or is temporarily unavailable.
+          </p>
+          <Button 
+            variant="default"
+            onClick={() => window.location.href = '/document-editor'}
+          >
+            Create New Document
+          </Button>
         </div>
-        <Footer />
       </div>
-    );
-  }
+      <Footer />
+    </div>
+  );
+
+  if (loading) return <LoadingState />;
+  if (error) return <ErrorState />;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-24 px-4">
+    <div className="min-h-screen bg-background pt-16">
+      <div className="container mx-auto py-8 px-4">
         <div className="max-w-3xl mx-auto">
           <article className="prose prose-invert max-w-none mb-16">
             <div dangerouslySetInnerHTML={{ __html: content }} />
@@ -104,7 +106,9 @@ export default function SharedDocument() {
           <div className="mt-16 p-6 bg-black/30 backdrop-blur-sm rounded-lg border border-primary/20">
             <div className="flex flex-col items-center text-center space-y-4">
               <Dumbbell className="w-12 h-12 text-primary" />
-              <h3 className="text-2xl font-oswald text-primary">Ready to Build Your Own Evidence-Based Training Program?</h3>
+              <h3 className="text-2xl font-oswald text-primary">
+                Ready to Build Your Own Evidence-Based Training Program?
+              </h3>
               <p className="text-white/90 max-w-2xl">
                 Experience the intersection of exercise science and intelligent programming. Create personalized, science-backed 
                 workout plans tailored to your specific goals and training requirements.

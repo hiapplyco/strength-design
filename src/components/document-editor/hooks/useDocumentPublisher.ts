@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { copyToClipboard } from '../editorUtils';
 
 export function useDocumentPublisher() {
   const { toast } = useToast();
@@ -66,9 +67,14 @@ export function useDocumentPublisher() {
       setShareableLink(shareLink);
       console.log('Generated share link:', shareLink);
 
+      // Copy to clipboard and show toast
+      const copySuccess = await copyToClipboard(shareLink);
+      
       toast({
-        title: "Success",
-        description: "Your document has been published and can now be shared.",
+        title: copySuccess ? "Link Copied!" : "Success",
+        description: copySuccess 
+          ? "The shareable link has been copied to your clipboard."
+          : "Your document has been published and can now be shared.",
       });
 
     } catch (error) {

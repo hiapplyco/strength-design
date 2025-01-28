@@ -50,7 +50,7 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
 };
 
 export const createShareableUrl = (documentId: string): string => {
-  // Use window.location.origin to get the current domain
+  // Get the current window location origin to ensure correct base URL
   const baseUrl = window.location.origin;
   return `${baseUrl}/document/${documentId}`;
 };

@@ -20,10 +20,12 @@ export function DocumentEditorContent({
 }: DocumentEditorContentProps) {
   return (
     <Card className="w-full p-6 bg-background border-primary">
-      <TipTapEditorContent 
-        editor={editor} 
-        className="min-h-[300px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
-      />
+      <div className="bg-white rounded-lg p-6">
+        <TipTapEditorContent 
+          editor={editor} 
+          className="min-h-[300px] prose prose-slate max-w-none prose-h2:text-black prose-h2:text-xl prose-h2:font-bold prose-p:text-black prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-black prose-h3:text-lg prose-h3:font-semibold" 
+        />
+      </div>
       <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-primary">
         <div className="flex justify-end">
           <Button 

@@ -21,7 +21,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-invert min-h-[200px] focus:outline-none max-w-none',
+        class: 'prose prose-slate focus:outline-none max-w-none min-h-[200px]',
       },
     },
     onFocus: () => {

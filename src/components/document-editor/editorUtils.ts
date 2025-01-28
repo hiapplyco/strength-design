@@ -31,7 +31,9 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 };
 
 export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', url: string): string => {
-  const encodedUrl = encodeURIComponent(url);
+  // Ensure we have an absolute URL for social sharing
+  const absoluteUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+  const encodedUrl = encodeURIComponent(absoluteUrl);
   const text = encodeURIComponent('Check out this workout document!');
 
   switch (platform) {

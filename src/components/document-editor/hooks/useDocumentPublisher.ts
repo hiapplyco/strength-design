@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getBaseUrl } from '../editorUtils';
 
 export function useDocumentPublisher() {
   const { toast } = useToast();
@@ -20,7 +21,6 @@ export function useDocumentPublisher() {
     try {
       setIsPublishing(true);
       
-      // Insert the document content into the documents table
       const { data, error } = await supabase
         .from('documents')
         .insert({
@@ -39,8 +39,8 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
-      // Generate the shareable link using the document ID
-      const shareLink = `${window.location.origin}/shared-document/${data.id}`;
+      // Use relative URL for client-side sharing
+      const shareLink = `/shared-document/${data.id}`;
       setShareableLink(shareLink);
 
       toast({

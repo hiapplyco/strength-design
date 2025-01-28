@@ -1,13 +1,10 @@
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
 import { EditorToolbar } from './EditorToolbar';
-import { ShareSection } from './ShareSection';
-import { copyToClipboard, createShareableUrl, generateShareUrl } from './editorUtils';
+import { generateShareUrl } from './editorUtils';
+import { useDocumentPublisher } from './hooks/useDocumentPublisher';
+import { EditorContent } from './EditorContent';
 
 interface EditorProps {
   content?: string;
@@ -15,11 +12,9 @@ interface EditorProps {
 }
 
 export function Editor({ content = '', onSave }: EditorProps) {
-  const { toast } = useToast();
-  const [shareableLink, setShareableLink] = useState<string>('');
-  const [isPublishing, setIsPublishing] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
+  const { shareableLink, isPublishing, publishDocument } = useDocumentPublisher();
   
   const editor = useEditor({
     extensions: [StarterKit],
@@ -62,61 +57,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   const handlePublish = async () => {
     if (!editor) return;
-    
-    try {
-      setIsPublishing(true);
-      
-      if (!editor.getHTML().trim()) {
-        toast({
-          title: "Error",
-          description: "Document content cannot be empty",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('documents')
-        .insert({
-          content: editor.getHTML(),
-          title: 'Workout Document'
-        })
-        .select('id')
-        .single();
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      if (onSave) {
-        onSave(editor.getHTML());
-      }
-
-      const link = await createShareableUrl(data.id);
-      setShareableLink(link);
-
-      if (link) {
-        const copied = await copyToClipboard(link);
-        
-        toast({
-          title: "Success",
-          description: copied 
-            ? "Your document has been published and the share link has been copied to your clipboard."
-            : "Your document has been published. Please manually copy the share link below.",
-        });
-      }
-
-    } catch (error) {
-      console.error('Error publishing document:', error);
-      toast({
-        title: "Error",
-        description: "Failed to publish document. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsPublishing(false);
-    }
+    await publishDocument(editor.getHTML(), onSave);
   };
 
   if (!editor) return null;
@@ -136,35 +77,13 @@ export function Editor({ content = '', onSave }: EditorProps) {
       </div>
 
       <div className="pt-24">
-        <Card className="w-full p-4 bg-background border-primary">
-          <EditorContent 
-            editor={editor} 
-            className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
-          />
-          <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-primary">
-            <div className="flex justify-end">
-              <Button 
-                onClick={handlePublish}
-                disabled={isPublishing}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-              >
-                {isPublishing ? 'Publishing...' : 'Publish Document'}
-              </Button>
-            </div>
-            
-            {shareableLink && (
-              <>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Your document has been published! Share it with others using the link below.
-                </p>
-                <ShareSection 
-                  shareableLink={shareableLink} 
-                  handleShare={handleShare}
-                />
-              </>
-            )}
-          </div>
-        </Card>
+        <EditorContent 
+          editor={editor}
+          isPublishing={isPublishing}
+          shareableLink={shareableLink}
+          onPublish={handlePublish}
+          handleShare={handleShare}
+        />
       </div>
     </div>
   );

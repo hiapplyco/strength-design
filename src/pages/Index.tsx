@@ -128,7 +128,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-transparent">
-      <div className="pt-24">
+      <div className="relative bg-transparent">
         <HeaderSection />
       </div>
 

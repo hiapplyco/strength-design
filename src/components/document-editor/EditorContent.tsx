@@ -1,10 +1,9 @@
-import { Editor } from '@tiptap/react';
+import { Editor, EditorContent as TipTapEditorContent } from '@tiptap/react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EditorContent } from '@tiptap/react';
 import { ShareSection } from './ShareSection';
 
-interface EditorContentProps {
+interface DocumentEditorContentProps {
   editor: Editor;
   isPublishing: boolean;
   shareableLink: string;
@@ -12,16 +11,16 @@ interface EditorContentProps {
   handleShare: (platform: 'facebook' | 'twitter' | 'linkedin') => void;
 }
 
-export function EditorContent({
+export function DocumentEditorContent({
   editor,
   isPublishing,
   shareableLink,
   onPublish,
   handleShare
-}: EditorContentProps) {
+}: DocumentEditorContentProps) {
   return (
     <Card className="w-full p-4 bg-background border-primary">
-      <EditorContent 
+      <TipTapEditorContent 
         editor={editor} 
         className="min-h-[200px] prose-h2:text-xl prose-h2:font-bold prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-lg prose-h3:font-semibold" 
       />

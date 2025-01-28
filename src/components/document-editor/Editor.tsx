@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { EditorToolbar } from './EditorToolbar';
 import { generateShareUrl } from './editorUtils';
 import { useDocumentPublisher } from './hooks/useDocumentPublisher';
-import { EditorContent } from './EditorContent';
+import { DocumentEditorContent } from './EditorContent';
 
 interface EditorProps {
   content?: string;
@@ -77,7 +77,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
       </div>
 
       <div className="pt-24">
-        <EditorContent 
+        <DocumentEditorContent 
           editor={editor}
           isPublishing={isPublishing}
           shareableLink={shareableLink}

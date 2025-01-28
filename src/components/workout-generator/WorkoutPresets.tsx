@@ -39,6 +39,7 @@ const WORKOUT_PROGRAMS = {
 } as const;
 
 const PRESET_CONFIGS = {
+  // CrossFit Programs
   Fran: {
     title: "CrossFit - Fran",
     prescribedExercises: "21-15-9 reps for time:\nThrusters (95/65 lb)\nPull-ups",
@@ -51,23 +52,85 @@ const PRESET_CONFIGS = {
     fitnessLevel: "advanced",
     numberOfDays: 1
   },
-  SealFit: {
-    title: "Military - SealFit",
-    prescribedExercises: "Warm-up:\n400m run\n25 push-ups\n25 air squats\n\nMain workout:\n5 rounds for time:\n400m run\n25 pull-ups\n50 push-ups\n75 squats",
-    fitnessLevel: "advanced",
-    numberOfDays: 5
-  },
-  Arnold_Blueprint_to_Mass: {
-    title: "Bodybuilding - Arnold Blueprint",
-    prescribedExercises: "Chest & Back:\n- Bench Press: 5 sets of 8-12 reps\n- Wide-Grip Pull-Ups: 5 sets to failure\n- Incline Bench Press: 4 sets of 8-12 reps\n- Barbell Rows: 4 sets of 8-12 reps",
+  Cindy: {
+    title: "CrossFit - Cindy",
+    prescribedExercises: "20 minute AMRAP:\n5 Pull-ups\n10 Push-ups\n15 Air Squats",
     fitnessLevel: "intermediate",
-    numberOfDays: 6
+    numberOfDays: 1
   },
   Diane: {
     title: "CrossFit - Diane",
     prescribedExercises: "21-15-9 reps for time:\nDeadlifts (225/155 lb)\nHandstand Push-ups",
     fitnessLevel: "advanced",
     numberOfDays: 1
+  },
+  Grace: {
+    title: "CrossFit - Grace",
+    prescribedExercises: "For time:\n30 Clean and Jerks (135/95 lb)",
+    fitnessLevel: "advanced",
+    numberOfDays: 1
+  },
+  // Military Programs
+  SealFit: {
+    title: "Military - SealFit",
+    prescribedExercises: "Warm-up:\n400m run\n25 push-ups\n25 air squats\n\nMain workout:\n5 rounds for time:\n400m run\n25 pull-ups\n50 push-ups\n75 squats",
+    fitnessLevel: "advanced",
+    numberOfDays: 5
+  },
+  Ranger_School_PT_Program: {
+    title: "Military - Ranger School PT",
+    prescribedExercises: "5 mile run\n100 push-ups\n100 sit-ups\n20 pull-ups\n12 mile ruck march with 35lb pack",
+    fitnessLevel: "advanced",
+    numberOfDays: 6
+  },
+  Army_Combat_Fitness_Test_ACFT: {
+    title: "Military - ACFT",
+    prescribedExercises: "3 Rep Max Deadlift\nStanding Power Throw\nHand Release Push-ups\nSprint-Drag-Carry\nLeg Tuck\n2 Mile Run",
+    fitnessLevel: "intermediate",
+    numberOfDays: 3
+  },
+  Recon_Ron_Pull_Up_Program: {
+    title: "Military - Recon Ron",
+    prescribedExercises: "Progressive Pull-up Program:\nSet 1: Max Reps\nSet 2: 75% of Max\nSet 3-5: 50% of Max\nRest 90 seconds between sets",
+    fitnessLevel: "intermediate",
+    numberOfDays: 3
+  },
+  Operator_Ugly: {
+    title: "Military - Operator Ugly",
+    prescribedExercises: "For time:\n1 mile run\n100 burpees\n100 pull-ups\n100 push-ups\n100 sit-ups\n1 mile run",
+    fitnessLevel: "advanced",
+    numberOfDays: 1
+  },
+  // Bodybuilding Programs
+  Arnold_Blueprint_to_Mass: {
+    title: "Bodybuilding - Arnold Blueprint",
+    prescribedExercises: "Chest & Back:\nBench Press: 5x8-12\nWide-Grip Pull-Ups: 5x failure\nIncline Bench: 4x8-12\nBarbell Rows: 4x8-12",
+    fitnessLevel: "intermediate",
+    numberOfDays: 6
+  },
+  Dorian_Yates_Blood_and_Guts: {
+    title: "Bodybuilding - Blood and Guts",
+    prescribedExercises: "Back:\nDeadlifts: 1x6-8\nBarbell Rows: 1x6-8\nPull-downs: 1x6-8\nSeated Rows: 1x6-8",
+    fitnessLevel: "advanced",
+    numberOfDays: 4
+  },
+  German_Volume_Training_GVT: {
+    title: "Bodybuilding - GVT",
+    prescribedExercises: "Day 1 - Chest & Back:\nBench Press: 10x10\nBent Over Rows: 10x10\nIncline DB Press: 3x10\nPull-downs: 3x10",
+    fitnessLevel: "intermediate",
+    numberOfDays: 5
+  },
+  Push_Pull_Legs_PPL: {
+    title: "Bodybuilding - PPL",
+    prescribedExercises: "Push Day:\nBench Press: 4x8-12\nOHP: 4x8-12\nIncline DB Press: 3x10-15\nLateral Raises: 3x12-15",
+    fitnessLevel: "intermediate",
+    numberOfDays: 6
+  },
+  Jim_Wendlers_5_3_1: {
+    title: "Bodybuilding - 5/3/1",
+    prescribedExercises: "Week 1:\nSet 1: 65% x 5\nSet 2: 75% x 5\nSet 3: 85% x 5+\nBBB: 5x10 at 50%",
+    fitnessLevel: "intermediate",
+    numberOfDays: 4
   }
 } as const;
 

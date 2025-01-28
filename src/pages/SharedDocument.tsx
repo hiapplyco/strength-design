@@ -82,9 +82,9 @@ export default function SharedDocument() {
           </p>
           <Button 
             variant="default"
-            onClick={() => window.location.href = '/document-editor'}
+            onClick={() => window.location.href = 'https://strength.design'}
           >
-            Create New Document
+            Visit Strength.Design
           </Button>
         </div>
       </div>
@@ -99,10 +99,31 @@ export default function SharedDocument() {
     <div className="min-h-screen bg-background pt-16">
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-3xl mx-auto">
+          {/* Top CTA */}
+          <div className="mb-16 p-6 bg-black/30 backdrop-blur-sm rounded-lg border border-primary/20">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <Dumbbell className="w-12 h-12 text-primary" />
+              <h3 className="text-2xl font-oswald text-primary">
+                Discover Your Perfect Training Program
+              </h3>
+              <p className="text-white/90 max-w-2xl">
+                Join strength.design and access personalized, science-backed workout plans designed to help you reach your fitness goals.
+              </p>
+              <Button 
+                size="lg"
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => window.location.href = 'https://strength.design'}
+              >
+                Start Your Journey
+              </Button>
+            </div>
+          </div>
+
           <article className="prose prose-invert max-w-none mb-16">
             <div dangerouslySetInnerHTML={{ __html: content }} />
           </article>
 
+          {/* Bottom CTA */}
           <div className="mt-16 p-6 bg-black/30 backdrop-blur-sm rounded-lg border border-primary/20">
             <div className="flex flex-col items-center text-center space-y-4">
               <Dumbbell className="w-12 h-12 text-primary" />
@@ -116,7 +137,7 @@ export default function SharedDocument() {
               <Button 
                 size="lg"
                 className="bg-primary hover:bg-primary/90"
-                onClick={() => window.location.href = '/document-editor'}
+                onClick={() => window.location.href = 'https://strength.design'}
               >
                 Start Creating Now
               </Button>

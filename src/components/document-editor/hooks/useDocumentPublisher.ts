@@ -21,7 +21,7 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
-      const baseUrl = 'https://www.hiapply.co';
+      const baseUrl = 'https://0b2787bf-d61b-4518-b06e-297d11fced1f.lovableproject.com';
       
       const { data, error } = await supabase
         .from('documents')

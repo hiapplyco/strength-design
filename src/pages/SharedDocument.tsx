@@ -21,11 +21,12 @@ export default function SharedDocument() {
           return;
         }
 
+        // Use Supabase client to fetch the document
         const { data, error } = await supabase
           .from('documents')
           .select('content, title')
           .eq('id', id)
-          .maybeSingle();
+          .single();
 
         if (error) {
           console.error('Supabase error:', error);

@@ -46,20 +46,18 @@ const Index = () => {
     const startTime = performance.now();
 
     try {
-      // Ensure selectedExercises is an array
       const selectedExercisesArray = Array.isArray(params.selectedExercises) 
         ? params.selectedExercises 
         : [];
 
-      // Store input data in session_io table
       const { error: sessionError } = await supabase.from('session_io').insert({
         weather_prompt: params.weatherPrompt,
         selected_exercises: selectedExercisesArray,
         fitness_level: params.fitnessLevel,
         prescribed_exercises: params.prescribedExercises,
         number_of_days: numberOfDays,
-        session_duration_ms: 0, // Will be updated after workout generation
-        success: false // Will be updated after successful generation
+        session_duration_ms: 0,
+        success: false
       });
 
       if (sessionError) {
@@ -84,7 +82,6 @@ const Index = () => {
         return;
       }
 
-      // Update session with generated workouts and success status
       const sessionDuration = Math.round(performance.now() - startTime);
       const { error: updateError } = await supabase
         .from('session_io')
@@ -93,7 +90,7 @@ const Index = () => {
           session_duration_ms: sessionDuration,
           success: true
         })
-        .eq('session_duration_ms', 0) // Update the session we just created
+        .eq('session_duration_ms', 0)
         .eq('success', false);
 
       if (updateError) {

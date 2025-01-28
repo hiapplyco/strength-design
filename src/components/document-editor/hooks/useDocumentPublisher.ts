@@ -21,11 +21,7 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
-      // Determine if we're in a Lovable preview environment
-      const isLovablePreview = window.location.hostname.includes('lovableproject.com');
-      const baseUrl = isLovablePreview 
-        ? `https://${window.location.hostname}`
-        : 'https://www.hiapply.co';
+      const baseUrl = 'https://www.hiapply.co';
       
       const { data, error } = await supabase
         .from('documents')

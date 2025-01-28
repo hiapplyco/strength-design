@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { copyToClipboard, createShareableUrl } from '../editorUtils';
 
 export function useDocumentPublisher() {
   const { toast } = useToast();
@@ -21,6 +20,7 @@ export function useDocumentPublisher() {
     try {
       setIsPublishing(true);
       
+      // Insert the document content into the documents table
       const { data, error } = await supabase
         .from('documents')
         .insert({
@@ -39,19 +39,14 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
-      const link = await createShareableUrl(data.id);
-      setShareableLink(link);
+      // Generate the shareable link using the document ID
+      const shareLink = `${window.location.origin}/shared-document/${data.id}`;
+      setShareableLink(shareLink);
 
-      if (link) {
-        const copied = await copyToClipboard(link);
-        
-        toast({
-          title: "Success",
-          description: copied 
-            ? "Your document has been published and the share link has been copied to your clipboard."
-            : "Your document has been published. Please manually copy the share link below.",
-        });
-      }
+      toast({
+        title: "Success",
+        description: "Your document has been published and can now be shared.",
+      });
 
     } catch (error) {
       console.error('Error publishing document:', error);

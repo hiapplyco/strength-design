@@ -44,7 +44,6 @@ export function Editor({ content = '', onSave }: EditorProps) {
       setPrevScrollPos(currentScrollPos);
     };
 
-    // Safari smooth scrolling fix
     const scrollContainer = document.documentElement;
     scrollContainer.style.scrollBehavior = 'auto';
     

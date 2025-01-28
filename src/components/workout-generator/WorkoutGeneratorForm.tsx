@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-import { Separator } from "@/components/ui/separator";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
 import { ExerciseSection } from "./ExerciseSection";
@@ -92,17 +90,6 @@ export function WorkoutGeneratorForm({
         handlePrescribedFileSelect={handlePrescribedFileSelect}
       />
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator className="w-full" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-card px-4 text-sm text-muted-foreground">
-            Optional Fields
-          </span>
-        </div>
-      </div>
-
       <WeatherSection 
         weatherData={weatherData}
         onWeatherUpdate={onWeatherUpdate}
@@ -131,7 +118,7 @@ export function WorkoutGeneratorForm({
         onGenerate={onGenerate}
         onClear={onClear}
         isGenerating={isGenerating}
-        isValid={!!prescribedExercises && numberOfDays > 0}
+        isValid={isValid}
         renderTooltip={() => renderTooltip("Review your selections and generate your personalized program")}
       />
     </div>

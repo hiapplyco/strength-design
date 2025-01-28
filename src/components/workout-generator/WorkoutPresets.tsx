@@ -86,12 +86,14 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
   const [selectedWorkouts, setSelectedWorkouts] = useState<Record<string, string>>({});
 
   const handleWorkoutSelect = (category: string, workoutName: string) => {
-    // Clear previous selections in all categories
-    setSelectedWorkouts({});
-
     const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
     
     if (preset) {
+      // Clear previous selections in all categories
+      setSelectedWorkouts({
+        [category]: workoutName
+      });
+      
       // Find the workout description
       const categoryKey = Object.keys(WORKOUT_PROGRAMS).find(cat => 
         Object.keys(WORKOUT_PROGRAMS[cat as keyof typeof WORKOUT_PROGRAMS]).includes(workoutName)
@@ -108,7 +110,6 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
         };
         
         console.log('Sending preset to parent:', formattedPreset);
-        setSelectedWorkouts({ [category]: workoutName });
         onSelectPreset(formattedPreset);
       }
     }

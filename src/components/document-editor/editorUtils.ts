@@ -37,7 +37,7 @@ export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', 
     : `${window.location.origin}${url.startsWith('/') ? '' : '/'}${url}`;
     
   const encodedUrl = encodeURIComponent(absoluteUrl);
-  const text = encodeURIComponent('Check out this workout document!');
+  const text = encodeURIComponent('Check out this document!');
 
   switch (platform) {
     case 'facebook':

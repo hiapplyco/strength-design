@@ -22,7 +22,8 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
-      const baseUrl = 'https://0b2787bf-d61b-4518-b06e-297d11fced1f.lovableproject.com';
+      // Get the current origin for dynamic base URL
+      const baseUrl = window.location.origin;
       
       const { data, error } = await supabase
         .from('documents')

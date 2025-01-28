@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -44,7 +43,7 @@ const WORKOUT_PROGRAMS = {
     Push_Pull_Legs_PPL: "A widely used split routine that targets pushing muscles, pulling muscles, and legs separately.",
     Jim_Wendlers_5_3_1: "A strength-focused program emphasizing progressive overload with squats, deadlifts, bench press, and overhead press."
   }
-};
+} as const;
 
 const PRESET_CONFIGS = {
   Fran: {
@@ -82,6 +81,7 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
   const [selectedWorkout, setSelectedWorkout] = useState<string>("");
 
   const handleWorkoutSelect = (workoutName: string) => {
+    // Find the category that contains this workout
     const categoryKey = Object.keys(WORKOUT_PROGRAMS).find(category => 
       Object.keys(WORKOUT_PROGRAMS[category as keyof typeof WORKOUT_PROGRAMS]).includes(workoutName)
     );
@@ -89,11 +89,17 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
     if (categoryKey) {
       setSelectedCategory(categoryKey);
       setSelectedWorkout(workoutName);
+      
+      // Get the workout description from the programs object
+      const workoutDescription = WORKOUT_PROGRAMS[categoryKey as keyof typeof WORKOUT_PROGRAMS][workoutName];
+      
+      // Get the preset configuration if it exists
       const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
+      
       if (preset) {
         onSelectPreset({
           ...preset,
-          prescribedExercises: `${preset.title}\n\n${WORKOUT_PROGRAMS[categoryKey as keyof typeof WORKOUT_PROGRAMS][workoutName]}\n\n${preset.prescribedExercises}`
+          prescribedExercises: `${preset.title}\n\n${workoutDescription}\n\n${preset.prescribedExercises}`
         });
       }
     }

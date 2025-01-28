@@ -11,7 +11,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       status: 204, 
@@ -50,7 +49,13 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      generationConfig: getGeminiConfig().generationConfig,
+      generationConfig: {
+        ...getGeminiConfig().generationConfig,
+        maxOutputTokens: 8192,
+        temperature: 0.9,
+        topK: 40,
+        topP: 0.8,
+      },
     });
 
     const systemPrompt = createWorkoutGenerationPrompt({
@@ -63,34 +68,67 @@ serve(async (req) => {
     });
 
     console.log('Sending request to Gemini');
-    const result = await model.generateContent(systemPrompt);
     
-    if (!result?.response) {
-      throw new Error('Invalid response from Gemini');
-    }
+    // Make up to 3 attempts to get a valid response
+    let workouts = null;
+    let attempts = 0;
+    const maxAttempts = 3;
 
-    const responseText = result.response.text();
-    if (!responseText) {
-      throw new Error('No text content in Gemini response');
-    }
+    while (attempts < maxAttempts && !workouts) {
+      attempts++;
+      console.log(`Attempt ${attempts} of ${maxAttempts}`);
 
-    // Clean and parse JSON - simplified version
-    const cleanedText = responseText
-      .replace(/```json\s*|\s*```/g, '')  // Remove markdown
-      .trim()
-      .replace(/\n/g, ' ')               // Remove newlines
-      .replace(/\s+/g, ' ');             // Normalize spaces
-
-    console.log('Cleaned text:', cleanedText);
-    
-    const workouts = JSON.parse(cleanedText);
-
-    // Validate workout structure
-    for (let i = 1; i <= numberOfDays; i++) {
-      const dayKey = `day${i}`;
-      if (!workouts[dayKey]) {
-        throw new Error(`Missing workout for ${dayKey}`);
+      const result = await model.generateContent(systemPrompt);
+      
+      if (!result?.response) {
+        console.log('No response from Gemini, retrying...');
+        continue;
       }
+
+      const responseText = result.response.text();
+      if (!responseText) {
+        console.log('Empty response from Gemini, retrying...');
+        continue;
+      }
+
+      try {
+        // Clean and parse JSON
+        const cleanedText = responseText
+          .replace(/```json\s*|\s*```/g, '')
+          .trim()
+          .replace(/\n/g, ' ')
+          .replace(/\s+/g, ' ');
+
+        console.log('Cleaned text:', cleanedText);
+        
+        const parsedWorkouts = JSON.parse(cleanedText);
+
+        // Validate workout structure
+        let isValid = true;
+        for (let i = 1; i <= numberOfDays; i++) {
+          const dayKey = `day${i}`;
+          if (!parsedWorkouts[dayKey] || 
+              !parsedWorkouts[dayKey].description ||
+              !parsedWorkouts[dayKey].warmup ||
+              !parsedWorkouts[dayKey].workout ||
+              !parsedWorkouts[dayKey].strength) {
+            console.log(`Missing or invalid data for ${dayKey}`);
+            isValid = false;
+            break;
+          }
+        }
+
+        if (isValid) {
+          workouts = parsedWorkouts;
+          break;
+        }
+      } catch (error) {
+        console.error('Error parsing response:', error);
+      }
+    }
+
+    if (!workouts) {
+      throw new Error(`Failed to generate valid workout plan after ${maxAttempts} attempts`);
     }
 
     console.log(`Generated ${Object.keys(workouts).length} days of workouts`);

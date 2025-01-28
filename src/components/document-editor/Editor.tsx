@@ -93,17 +93,19 @@ export function Editor({ content = '', onSave }: EditorProps) {
         onSave(editor.getHTML());
       }
 
-      const link = createShareableUrl(data.id);
+      const link = await createShareableUrl(data.id);
       setShareableLink(link);
 
-      const copied = await copyToClipboard(link);
-      
-      toast({
-        title: "Success",
-        description: copied 
-          ? "Your document has been published and the share link has been copied to your clipboard."
-          : "Your document has been published. Please manually copy the share link below.",
-      });
+      if (link) {
+        const copied = await copyToClipboard(link);
+        
+        toast({
+          title: "Success",
+          description: copied 
+            ? "Your document has been published and the share link has been copied to your clipboard."
+            : "Your document has been published. Please manually copy the share link below.",
+        });
+      }
 
     } catch (error) {
       console.error('Error publishing document:', error);

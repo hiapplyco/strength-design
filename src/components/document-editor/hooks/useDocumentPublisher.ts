@@ -21,11 +21,15 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
+      // Get the base URL for the application
+      const baseUrl = window.location.origin;
+      
       const { data, error } = await supabase
         .from('documents')
         .insert({
           content: content,
-          title: 'Workout Document'
+          title: 'Workout Document',
+          url: `${baseUrl}/shared-document/` // We'll append the ID after we get it
         })
         .select('id')
         .single();
@@ -46,8 +50,20 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
-      // Generate shareable link using the document ID
-      const shareLink = `/shared-document/${data.id}`;
+      // Generate shareable link using the document ID and base URL
+      const shareLink = `${baseUrl}/shared-document/${data.id}`;
+      
+      // Update the document with the complete URL
+      const { error: updateError } = await supabase
+        .from('documents')
+        .update({ url: shareLink })
+        .eq('id', data.id);
+
+      if (updateError) {
+        console.error('Error updating document URL:', updateError);
+        // Don't throw here, as the document is still created
+      }
+
       setShareableLink(shareLink);
       console.log('Generated share link:', shareLink);
 

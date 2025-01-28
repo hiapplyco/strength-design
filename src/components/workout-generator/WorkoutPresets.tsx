@@ -76,6 +76,10 @@ interface WorkoutPresetsProps {
   onSelectPreset: (preset: WorkoutPreset) => void;
 }
 
+type WorkoutProgramsType = typeof WORKOUT_PROGRAMS;
+type CategoryType = keyof WorkoutProgramsType;
+type WorkoutType<T extends CategoryType> = keyof WorkoutProgramsType[T];
+
 export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedWorkout, setSelectedWorkout] = useState<string>("");
@@ -83,15 +87,18 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
   const handleWorkoutSelect = (workoutName: string) => {
     // Find the category that contains this workout
     const categoryKey = Object.keys(WORKOUT_PROGRAMS).find(category => 
-      Object.keys(WORKOUT_PROGRAMS[category as keyof typeof WORKOUT_PROGRAMS]).includes(workoutName)
+      Object.keys(WORKOUT_PROGRAMS[category as CategoryType]).includes(workoutName)
     );
 
     if (categoryKey) {
       setSelectedCategory(categoryKey);
       setSelectedWorkout(workoutName);
       
+      const category = categoryKey as CategoryType;
+      const workout = workoutName as WorkoutType<typeof category>;
+      
       // Get the workout description from the programs object
-      const workoutDescription = WORKOUT_PROGRAMS[categoryKey as keyof typeof WORKOUT_PROGRAMS][workoutName as keyof (typeof WORKOUT_PROGRAMS)[typeof categoryKey]];
+      const workoutDescription = WORKOUT_PROGRAMS[category][workout];
       
       // Get the preset configuration if it exists
       const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];

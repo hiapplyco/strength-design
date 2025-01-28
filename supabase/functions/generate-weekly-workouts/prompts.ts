@@ -4,6 +4,8 @@ export interface WorkoutGenerationParams {
   selectedExercises?: Array<{ name: string; instructions: string[] }>;
   fitnessLevel: string;
   prescribedExercises?: string;
+  injuries?: string;
+  weatherData?: any;
 }
 
 export const createWorkoutGenerationPrompt = ({
@@ -11,37 +13,59 @@ export const createWorkoutGenerationPrompt = ({
   weatherPrompt,
   selectedExercises,
   fitnessLevel,
-  prescribedExercises
+  prescribedExercises,
+  injuries,
+  weatherData
 }: WorkoutGenerationParams): string => {
-  const exercisesPrompt = selectedExercises?.length 
-    ? `Include these exercises: ${selectedExercises.map(e => e.name).join(", ")}` 
+  const exerciseList = selectedExercises?.length 
+    ? `INCLUDED EXERCISES: ${selectedExercises.map(e => e.name).join(", ")}`
     : '';
-  
-  return `As an expert fitness coach, create a ${numberOfDays}-day workout program. 
-    ${weatherPrompt ? `Consider these weather conditions: ${weatherPrompt}` : ''}
-    ${exercisesPrompt}
-    ${fitnessLevel ? `This program is for a ${fitnessLevel} level individual` : ''}
-    ${prescribedExercises ? `Include these prescribed exercises/modifications: ${prescribedExercises}` : ''}
 
-    For each day, provide:
-    1. A brief description of the focus and stimulus
-    2. A warmup routine
-    3. The main workout
-    4. A strength component
-    5. Optional notes or modifications
+  const weatherConsideration = weatherPrompt
+    ? `WEATHER ADAPTATIONS: Account for ${weatherPrompt.toLowerCase()} conditions`
+    : '';
 
-    Format each day as follows:
-    {
-      "day1": {
-        "description": "...",
-        "warmup": "...",
-        "workout": "...",
-        "strength": "...",
-        "notes": "..."
-      }
-    }
+  const prescription = prescribedExercises
+    ? `REQUIRED MODIFICATIONS: Incorporate ${prescribedExercises}`
+    : '';
 
-    Ensure the response is a valid JSON object.`;
+  const injuryConsideration = injuries
+    ? `INJURY CONSIDERATIONS: Adapt for ${injuries}`
+    : '';
+
+  return `As an elite fitness coach, design a scientifically-grounded ${numberOfDays}-day training program.\n\n` +
+    `PROGRAM PARAMETERS:\n` +
+    `- Target fitness level: ${fitnessLevel}\n` +
+    `${weatherConsideration ? `- ${weatherConsideration}\n` : ''}` +
+    `${exerciseList ? `- ${exerciseList}\n` : ''}` +
+    `${prescription ? `- ${prescription}\n` : ''}` +
+    `${injuryConsideration ? `- ${injuryConsideration}\n` : ''}\n` +
+    `DAILY STRUCTURE REQUIREMENTS:\n` +
+    `1. Focus description: Scientific training stimulus and physiological adaptation\n` +
+    `2. Warmup: Progressive activation sequence\n` +
+    `3. Workout: Periodized prescription with sets/reps/tempo\n` +
+    `4. Strength component: Compound movement pattern focus\n` +
+    `5. Notes: Regeneration strategies or scaling options\n\n` +
+    `FORMAT SPECIFICATION:\n` +
+    `Generate valid JSON following this exact structure for ${numberOfDays} days:\n` +
+    `{\n` +
+    `  "day1": {\n` +
+    `    "description": "string",\n` +
+    `    "warmup": "string",\n` +
+    `    "workout": "string",\n` +
+    `    "strength": "string",\n` +
+    `    "notes": "string"\n` +
+    `  },\n` +
+    `  // ... Repeat for each day up to day${numberOfDays}\n` +
+    `}\n\n` +
+    `CRITICAL INSTRUCTIONS:\n` +
+    `- Generate exactly ${numberOfDays} days of workouts\n` +
+    `- Use double quotes for all strings\n` +
+    `- Maintain consistent JSON syntax\n` +
+    `- Avoid markdown formatting\n` +
+    `- Ensure proper escape characters\n` +
+    `- Include all 5 required sections per day\n` +
+    `- Prioritize exercise science principles`;
 };
 
 export const getGeminiConfig = () => ({

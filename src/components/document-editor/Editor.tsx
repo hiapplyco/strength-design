@@ -1,6 +1,7 @@
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useEffect, useState } from 'react';
+import TextAlign from '@tiptap/extension-text-align';
+import { useEffect } from 'react';
 import { EditorToolbar } from './EditorToolbar';
 import { generateShareUrl } from './editorUtils';
 import { useDocumentPublisher } from './hooks/useDocumentPublisher';
@@ -15,7 +16,12 @@ export function Editor({ content = '', onSave }: EditorProps) {
   const { shareableLink, isPublishing, publishDocument } = useDocumentPublisher();
   
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+    ],
     content: '',
     editorProps: {
       attributes: {

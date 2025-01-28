@@ -22,7 +22,7 @@ export function DocumentEditorContent({
   return (
     <Card className="w-full p-6 bg-background border-primary">
       <div className="bg-white rounded-lg">
-        <div className="border-b border-border p-4">
+        <div className="sticky top-20 z-50 bg-white border-b border-border p-4 shadow-sm">
           <EditorToolbar editor={editor} />
         </div>
         <div className="p-6">

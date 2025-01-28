@@ -21,8 +21,8 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
-      // Use the production domain instead of the current domain
-      const baseUrl = 'https://hiapply.co';
+      // Use the production domain with www prefix
+      const baseUrl = 'https://www.hiapply.co';
       
       const { data, error } = await supabase
         .from('documents')

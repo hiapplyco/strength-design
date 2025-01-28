@@ -82,13 +82,20 @@ export function WorkoutPresets({ onSelectPreset }: WorkoutPresetsProps) {
   const [selectedWorkout, setSelectedWorkout] = useState<string>("");
 
   const handleWorkoutSelect = (workoutName: string) => {
-    setSelectedWorkout(workoutName);
-    const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
-    if (preset) {
-      onSelectPreset({
-        ...preset,
-        prescribedExercises: `${preset.title}\n\n${WORKOUT_PROGRAMS[selectedCategory as keyof typeof WORKOUT_PROGRAMS][workoutName]}\n\n${preset.prescribedExercises}`
-      });
+    const categoryKey = Object.keys(WORKOUT_PROGRAMS).find(category => 
+      Object.keys(WORKOUT_PROGRAMS[category as keyof typeof WORKOUT_PROGRAMS]).includes(workoutName)
+    );
+
+    if (categoryKey) {
+      setSelectedCategory(categoryKey);
+      setSelectedWorkout(workoutName);
+      const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
+      if (preset) {
+        onSelectPreset({
+          ...preset,
+          prescribedExercises: `${preset.title}\n\n${WORKOUT_PROGRAMS[categoryKey as keyof typeof WORKOUT_PROGRAMS][workoutName]}\n\n${preset.prescribedExercises}`
+        });
+      }
     }
   };
 

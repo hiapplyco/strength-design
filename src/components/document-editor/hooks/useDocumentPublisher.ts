@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { getBaseUrl } from '../editorUtils';
 
 export function useDocumentPublisher() {
   const { toast } = useToast();
@@ -39,8 +38,8 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
-      // Generate full URL including domain
-      const shareLink = `${getBaseUrl()}/shared-document/${data.id}`;
+      // Generate shareable link using the document ID
+      const shareLink = `/shared-document/${data.id}`;
       setShareableLink(shareLink);
 
       toast({

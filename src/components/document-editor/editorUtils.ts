@@ -30,15 +30,9 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
   }
 };
 
-export const getBaseUrl = () => {
-  // Always use the current domain for sharing
-  // This ensures the link works with any custom domain
-  return typeof window !== 'undefined' ? window.location.origin : '';
-};
-
 export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', url: string): string => {
   // Ensure we have an absolute URL for social sharing
-  const absoluteUrl = url.startsWith('http') ? url : `${getBaseUrl()}${url}`;
+  const absoluteUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
   const encodedUrl = encodeURIComponent(absoluteUrl);
   const text = encodeURIComponent('Check out this workout document!');
 

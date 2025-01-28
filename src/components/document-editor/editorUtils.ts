@@ -32,8 +32,8 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 
 export const getBaseUrl = () => {
   if (typeof window !== 'undefined') { 
-    // Browser should use relative path
-    return '';
+    // Browser should use the current domain
+    return window.location.origin;
   }
   // Server should use the Supabase URL
   return process.env.VITE_SUPABASE_URL || '';
@@ -41,7 +41,7 @@ export const getBaseUrl = () => {
 
 export const generateShareUrl = (platform: 'facebook' | 'twitter' | 'linkedin', url: string): string => {
   // Ensure we have an absolute URL for social sharing
-  const absoluteUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+  const absoluteUrl = url.startsWith('http') ? url : `${getBaseUrl()}${url}`;
   const encodedUrl = encodeURIComponent(absoluteUrl);
   const text = encodeURIComponent('Check out this workout document!');
 

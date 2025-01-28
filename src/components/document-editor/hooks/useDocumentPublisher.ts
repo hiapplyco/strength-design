@@ -39,8 +39,8 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
-      // Use relative URL for client-side sharing
-      const shareLink = `/shared-document/${data.id}`;
+      // Generate full URL including domain
+      const shareLink = `${getBaseUrl()}/shared-document/${data.id}`;
       setShareableLink(shareLink);
 
       toast({

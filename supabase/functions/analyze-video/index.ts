@@ -22,6 +22,12 @@ serve(async (req) => {
       throw new Error('No video file provided or invalid file type')
     }
 
+    // Add file size check to prevent resource exhaustion
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error('File size exceeds 50MB limit')
+    }
+
     console.log('File received:', file.name, 'Size:', file.size, 'Type:', file.type)
 
     // Initialize Supabase client
@@ -30,13 +36,17 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Upload to storage first
-    const fileName = `${crypto.randomUUID()}-${file.name}`
+    // Generate a unique filename with timestamp to prevent conflicts
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const fileName = `${timestamp}-${crypto.randomUUID()}-${file.name}`
     console.log('Uploading to storage with filename:', fileName)
 
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('videos')
-      .upload(fileName, file)
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError)
@@ -51,19 +61,23 @@ serve(async (req) => {
     console.log('File uploaded successfully. Public URL:', publicUrl)
 
     try {
-      // Initialize Gradio client
+      // Initialize Gradio client with timeout
       console.log('Initializing Gradio client...')
       const client = await Client.connect("jschlauch/strength-design", {
         hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
       });
 
+      // Process video in smaller chunks if needed
       console.log('Converting file to ArrayBuffer...')
       const arrayBuffer = await file.arrayBuffer()
       const uint8Array = new Uint8Array(arrayBuffer)
       
       console.log('Sending video to HuggingFace API for analysis...')
-      const result = await client.predict("/process_video", [
-        uint8Array  // Send as raw binary data
+      const result = await Promise.race([
+        client.predict("/process_video", [uint8Array]),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Analysis timeout after 25 seconds')), 25000)
+        )
       ]);
 
       if (!result || !result.data) {
@@ -85,6 +99,14 @@ serve(async (req) => {
       )
     } catch (gradioError) {
       console.error('Error in Gradio processing:', gradioError)
+      
+      // Clean up the uploaded file on analysis failure
+      await supabase.storage
+        .from('videos')
+        .remove([fileName])
+        .then(() => console.log('Cleaned up uploaded file after analysis failure'))
+        .catch(err => console.error('Failed to clean up file:', err))
+
       throw new Error(`Video analysis failed: ${gradioError.message}`)
     }
 

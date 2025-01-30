@@ -14,13 +14,15 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting video analysis...')
     const formData = await req.formData()
     const file = formData.get('video')
-    const spaceName = formData.get('space') || 'hysts/ViTPose-transformers'
 
-    if (!file) {
-      throw new Error('No video file provided')
+    if (!file || !(file instanceof File)) {
+      throw new Error('No video file provided or invalid file type')
     }
+
+    console.log('File received:', file.name, 'Size:', file.size, 'Type:', file.type)
 
     // Initialize Supabase client
     const supabase = createClient(
@@ -30,11 +32,14 @@ serve(async (req) => {
 
     // Upload to storage first
     const fileName = `${crypto.randomUUID()}.${file.name.split('.').pop()}`
+    console.log('Uploading to storage with filename:', fileName)
+
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('videos')
       .upload(fileName, file)
 
     if (uploadError) {
+      console.error('Storage upload error:', uploadError)
       throw new Error(`Storage upload failed: ${uploadError.message}`)
     }
 
@@ -43,23 +48,25 @@ serve(async (req) => {
       .from('videos')
       .getPublicUrl(fileName)
 
+    console.log('File uploaded successfully. Public URL:', publicUrl)
+
     // Initialize Gradio client and analyze video
-    const client = await Client.connect(spaceName, {
+    const client = await Client.connect("hysts/ViTPose-transformers", {
       hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
     });
 
-    console.log('Analyzing video:', publicUrl);
+    console.log('Sending video to HuggingFace API for analysis...')
     
-    const result = await client.predict("/process_video", { 
-      video_path: publicUrl,  // Send the public URL to the video
-    });
+    const result = await client.predict("/process_video", [
+      publicUrl  // Send the public URL to the video
+    ]);
 
-    console.log('Analysis complete:', result);
+    console.log('Analysis complete:', result)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        result: result.data,
+        result: result,
         videoUrl: publicUrl 
       }),
       { 
@@ -73,7 +80,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message 
+        error: error.message || 'An unknown error occurred'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

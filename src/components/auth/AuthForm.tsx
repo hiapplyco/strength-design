@@ -1,5 +1,6 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 
 interface AuthFormProps {
@@ -7,49 +8,60 @@ interface AuthFormProps {
 }
 
 export const AuthForm = ({ view }: AuthFormProps) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (view === 'sign_up') {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Auth
-      supabaseClient={supabase}
-      view={view}
-      appearance={{
-        theme: ThemeSupa,
-        variables: {
-          default: {
-            colors: {
-              brand: '#D4B96D',
-              brandAccent: '#b39b5c',
-              inputText: 'black',
-              defaultButtonBackground: 'white',
-              defaultButtonBackgroundHover: '#f8f8f8',
-              defaultButtonBorder: '#e2e8f0',
-              defaultButtonText: 'black',
-            }
-          }
-        },
-        className: {
-          container: 'bg-white text-black',
-          label: 'text-black',
-          button: 'bg-primary hover:bg-primary/90',
-          input: 'bg-white border-gray-300 text-black',
-        }
-      }}
-      providers={[]}
-      localization={{
-        variables: {
-          sign_up: {
-            email_label: "Email",
-            password_label: "Create Password",
-            button_label: "Sign Up",
-            link_text: "Already have an account? Sign in",
-          },
-          sign_in: {
-            email_label: "Email",
-            password_label: "Password",
-            button_label: "Sign In",
-            link_text: "Don't have an account? Sign up",
-          },
-        },
-      }}
-    />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full"
+        />
+      </div>
+      <div>
+        <Input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full"
+        />
+      </div>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Loading...' : view === 'sign_up' ? 'Sign Up' : 'Sign In'}
+      </Button>
+    </form>
   );
 };

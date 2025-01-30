@@ -14,13 +14,13 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-oswald text-black">
-            {view === "sign_up" ? "Create Account" : "Welcome Back"}
+          <DialogTitle>
+            {view === "sign_up" ? "Create Account" : "Sign In"}
           </DialogTitle>
         </DialogHeader>
-        <AuthErrorAlert error={error} />
+        {error && <AuthErrorAlert error={error} />}
         <AuthForm view={view} />
       </DialogContent>
     </Dialog>

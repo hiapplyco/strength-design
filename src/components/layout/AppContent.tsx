@@ -8,6 +8,8 @@ import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
 import DocumentEditor from "@/pages/DocumentEditor";
 import SharedDocument from "@/pages/SharedDocument";
+import WorkoutGenerator from "@/pages/WorkoutGenerator";
+import VideoAnalysis from "@/pages/VideoAnalysis";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 export const AppContent = () => {
@@ -31,6 +33,8 @@ export const AppContent = () => {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/document-editor" element={<DocumentEditor />} />
         <Route path="/shared-document/:id" element={<SharedDocument />} />
+        <Route path="/workout-generator" element={<WorkoutGenerator />} />
+        <Route path="/video-analysis" element={<VideoAnalysis />} />
       </Routes>
     </>
   );

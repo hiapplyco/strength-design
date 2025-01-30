@@ -51,23 +51,24 @@ serve(async (req) => {
     console.log('File uploaded successfully. Public URL:', publicUrl)
 
     try {
-      // Initialize Gradio client and analyze video
+      // Initialize Gradio client
       console.log('Initializing Gradio client...')
       const client = await Client.connect("jschlauch/strength-design", {
         hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
       });
 
+      console.log('Converting file to ArrayBuffer...')
+      const arrayBuffer = await file.arrayBuffer()
+      const uint8Array = new Uint8Array(arrayBuffer)
+      
       console.log('Sending video to HuggingFace API for analysis...')
-      
-      // Convert URL to blob for API
-      const videoResponse = await fetch(publicUrl)
-      const videoBlob = await videoResponse.blob()
-      
-      console.log('Video blob created, size:', videoBlob.size)
-      
-      const result = await client.predict("/process_video", { 
-        video_path: videoBlob
-      });
+      const result = await client.predict("/process_video", [
+        uint8Array  // Send as raw binary data
+      ]);
+
+      if (!result || !result.data) {
+        throw new Error('No result returned from Gradio API')
+      }
 
       console.log('Analysis complete, result:', result)
 

@@ -31,7 +31,7 @@ serve(async (req) => {
     )
 
     // Upload to storage first
-    const fileName = `${crypto.randomUUID()}.${file.name.split('.').pop()}`
+    const fileName = `${crypto.randomUUID()}-${file.name}`
     console.log('Uploading to storage with filename:', fileName)
 
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -50,34 +50,42 @@ serve(async (req) => {
 
     console.log('File uploaded successfully. Public URL:', publicUrl)
 
-    // Initialize Gradio client and analyze video
-    const client = await Client.connect("jschlauch/strength-design", {
-      hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
-    });
+    try {
+      // Initialize Gradio client and analyze video
+      console.log('Initializing Gradio client...')
+      const client = await Client.connect("jschlauch/strength-design", {
+        hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
+      });
 
-    console.log('Sending video to HuggingFace API for analysis...')
-    
-    // Convert URL to blob for API
-    const videoResponse = await fetch(publicUrl)
-    const videoBlob = await videoResponse.blob()
-    
-    const result = await client.predict("/process_video", { 
-      video_path: videoBlob
-    });
+      console.log('Sending video to HuggingFace API for analysis...')
+      
+      // Convert URL to blob for API
+      const videoResponse = await fetch(publicUrl)
+      const videoBlob = await videoResponse.blob()
+      
+      console.log('Video blob created, size:', videoBlob.size)
+      
+      const result = await client.predict("/process_video", { 
+        video_path: videoBlob
+      });
 
-    console.log('Analysis complete:', result)
+      console.log('Analysis complete, result:', result)
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        result: result.data,
-        videoUrl: publicUrl 
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
-    )
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          result: result.data,
+          videoUrl: publicUrl 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      )
+    } catch (gradioError) {
+      console.error('Error in Gradio processing:', gradioError)
+      throw new Error(`Video analysis failed: ${gradioError.message}`)
+    }
 
   } catch (error) {
     console.error('Error in analyze-video function:', error)

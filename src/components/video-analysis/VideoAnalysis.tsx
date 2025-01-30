@@ -7,7 +7,11 @@ import { Loader2 } from "lucide-react";
 
 export function VideoAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<{
+    processedVideo?: string;
+    analytics?: any;
+    videoUrl?: string;
+  } | null>(null);
   const { toast } = useToast();
 
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,12 +28,12 @@ export function VideoAnalysis() {
       return;
     }
 
-    // Validate file size (100MB limit)
-    const MAX_SIZE = 100 * 1024 * 1024; // 100MB in bytes
+    // Validate file size (50MB limit)
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB in bytes
     if (file.size > MAX_SIZE) {
       toast({
         title: "File too large",
-        description: "Please upload a video smaller than 100MB",
+        description: "Please upload a video smaller than 50MB",
         variant: "destructive",
       });
       return;
@@ -89,11 +93,28 @@ export function VideoAnalysis() {
         </div>
 
         {analysisResult && (
-          <div className="mt-6 p-4 bg-white/10 rounded-lg">
-            <h4 className="text-lg font-semibold text-white mb-2">Analysis Results:</h4>
-            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-              {JSON.stringify(analysisResult, null, 2)}
-            </pre>
+          <div className="mt-6 space-y-4">
+            {analysisResult.processedVideo && (
+              <div className="rounded-lg overflow-hidden">
+                <video 
+                  src={analysisResult.processedVideo} 
+                  controls 
+                  className="w-full"
+                  poster={analysisResult.videoUrl}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            )}
+            
+            {analysisResult.analytics && (
+              <div className="p-4 bg-white/10 rounded-lg">
+                <h4 className="text-lg font-semibold text-white mb-2">Analysis Results:</h4>
+                <pre className="text-sm text-gray-300 whitespace-pre-wrap">
+                  {JSON.stringify(analysisResult.analytics, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
         )}
       </div>

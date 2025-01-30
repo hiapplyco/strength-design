@@ -61,27 +61,29 @@ serve(async (req) => {
     console.log('File uploaded successfully. Public URL:', publicUrl)
 
     try {
-      // Initialize Gradio client with timeout
+      // Initialize Gradio client with timeout and correct space
       console.log('Initializing Gradio client...')
-      const client = await Client.connect("jschlauch/strength-design", {
+      const client = await Client.connect("hysts/ViTPose-transformers", {
         hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
       });
 
-      // Process video in smaller chunks if needed
+      // Convert file to blob for processing
       console.log('Converting file to ArrayBuffer...')
       const arrayBuffer = await file.arrayBuffer()
-      const uint8Array = new Uint8Array(arrayBuffer)
+      const videoBlob = new Blob([arrayBuffer], { type: file.type })
       
       console.log('Sending video to HuggingFace API for analysis...')
       const result = await Promise.race([
-        client.predict("/process_video", [uint8Array]),
+        client.predict("/process_video", {
+          video_path: videoBlob
+        }),
         new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Analysis timeout after 25 seconds')), 25000)
         )
       ]);
 
-      if (!result || !result.data) {
-        throw new Error('No result returned from Gradio API')
+      if (!result?.data?.video) {
+        throw new Error('Invalid response format from ViTPose API')
       }
 
       console.log('Analysis complete, result:', result)
@@ -89,7 +91,10 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          result: result.data,
+          result: {
+            processedVideo: result.data.video,
+            analytics: result.data[1]
+          },
           videoUrl: publicUrl 
         }),
         { 

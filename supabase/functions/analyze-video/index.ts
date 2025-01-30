@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import { Client } from 'https://esm.sh/@gradio/client'
+import { Client } from "https://esm.sh/@gradio/client"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -51,22 +51,26 @@ serve(async (req) => {
     console.log('File uploaded successfully. Public URL:', publicUrl)
 
     // Initialize Gradio client and analyze video
-    const client = await Client.connect("hysts/ViTPose-transformers", {
+    const client = await Client.connect("jschlauch/strength-design", {
       hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
     });
 
     console.log('Sending video to HuggingFace API for analysis...')
     
-    const result = await client.predict("/process_video", [
-      publicUrl  // Send the public URL to the video
-    ]);
+    // Convert URL to blob for API
+    const videoResponse = await fetch(publicUrl)
+    const videoBlob = await videoResponse.blob()
+    
+    const result = await client.predict("/process_video", { 
+      video_path: videoBlob
+    });
 
     console.log('Analysis complete:', result)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        result: result,
+        result: result.data,
         videoUrl: publicUrl 
       }),
       { 

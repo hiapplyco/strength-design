@@ -44,27 +44,18 @@ serve(async (req) => {
     })
 
     try {
-      // Read file in chunks to prevent memory issues
-      const chunks = [];
-      const chunkSize = 1024 * 1024; // 1MB chunks
-      const fileData = await file.arrayBuffer();
-      const totalChunks = Math.ceil(fileData.byteLength / chunkSize);
+      // Process video data more efficiently
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
       
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * chunkSize;
-        const end = Math.min(start + chunkSize, fileData.byteLength);
-        chunks.push(new Uint8Array(fileData.slice(start, end)));
+      // Convert to base64 in chunks to prevent stack overflow
+      const chunkSize = 32768; // Process 32KB at a time
+      let base64Data = '';
+      
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.slice(i, i + chunkSize);
+        base64Data += btoa(String.fromCharCode.apply(null, chunk));
       }
-      
-      // Combine chunks and convert to base64
-      const fullData = new Uint8Array(fileData.byteLength);
-      let offset = 0;
-      for (const chunk of chunks) {
-        fullData.set(chunk, offset);
-        offset += chunk.byteLength;
-      }
-      
-      const base64Data = btoa(String.fromCharCode(...fullData));
       
       console.log('Successfully processed video data');
       
@@ -107,16 +98,15 @@ serve(async (req) => {
 
       console.log('Received analysis from Gemini');
 
-      // Create a blob URL for the video
-      const blob = new Blob([fileData], { type: file.type });
-      const videoUrl = URL.createObjectURL(blob);
+      // Create a data URL for the video instead of a blob URL
+      const dataUrl = `data:${file.type};base64,${base64Data}`;
 
       return new Response(
         JSON.stringify({ 
           success: true, 
           result: {
             analysis,
-            videoUrl
+            videoUrl: dataUrl
           }
         }),
         { 

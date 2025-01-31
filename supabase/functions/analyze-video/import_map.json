@@ -1,5 +1,5 @@
 {
   "imports": {
-    "npm:@google-cloud/vertexai": "https://esm.sh/@google-cloud/vertexai@0.5.0"
+    "@google-cloud/vertexai": "npm:@google-cloud/vertexai@0.5.0"
   }
 }

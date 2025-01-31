@@ -11,35 +11,32 @@
 };
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { VertexAI } from "npm:@google-cloud/vertexai@0.5.0"
-
-console.log("Hello from analyze-video function!");
+import { VertexAI } from "npm:@google-cloud/vertexai"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     // Validate content type
-    const contentType = req.headers.get("content-type") || ""
+    const contentType = req.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
-      throw new Error("Invalid content type")
+      throw new Error(`Invalid content type: ${contentType}`);
     }
 
     const { videoUrl, movement } = await req.json();
-
-    console.log('Received request with videoUrl and movement:', { videoUrl, movement });
+    console.log('Received request:', { videoUrl, movement });
 
     if (!videoUrl || !movement) {
-      console.error('Missing required fields');
       throw new Error('Missing required fields: videoUrl and movement are required');
     }
 
@@ -47,22 +44,16 @@ serve(async (req) => {
     try {
       new URL(videoUrl);
     } catch (e) {
-      console.error('Invalid video URL:', e);
       throw new Error('Invalid video URL format');
     }
 
     // Debug logging for credentials
     console.log("Project ID:", Deno.env.get("GOOGLE_CLOUD_PROJECT"));
-    console.log("Google Credentials (first 20 chars):", 
-      Deno.env.get("GOOGLE_CREDENTIALS")?.slice(0, 20) + "...");
+    console.log("Credentials available:", !!Deno.env.get("GOOGLE_CREDENTIALS"));
 
     const vertexAI = new VertexAI({
       project: Deno.env.get('GOOGLE_CLOUD_PROJECT') || '',
       location: 'us-central1',
-      authOptions: {
-        credentials: JSON.parse(Deno.env.get('GOOGLE_CREDENTIALS') || '{}'),
-        scopes: ['https://www.googleapis.com/auth/cloud-platform']
-      }
     });
 
     console.log('Initialized Vertex AI client');
@@ -116,7 +107,6 @@ serve(async (req) => {
       });
       clearTimeout(timeoutId);
       
-      // Validate response structure
       if (!result?.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
         throw new Error("Invalid response from AI model");
       }
@@ -132,7 +122,6 @@ serve(async (req) => {
         { 
           headers: { 
             ...corsHeaders,
-            'Content-Type': 'application/json'
           },
           status: 200 
         }
@@ -146,19 +135,15 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in analyze-video function:', error);
+    
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message.includes("AbortError") 
-          ? "Analysis timed out (25s limit)" 
-          : error.message
+        error: error.message || 'An unexpected error occurred'
       }),
       {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        },
-        status: error.message.includes("AbortError") ? 504 : 400
+        headers: corsHeaders,
+        status: error.message.includes("timeout") ? 504 : 400
       }
     );
   }

@@ -2,7 +2,6 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { useEffect } from 'react';
-import { EditorToolbar } from './EditorToolbar';
 import { generateShareUrl } from './editorUtils';
 import { useDocumentPublisher } from './hooks/useDocumentPublisher';
 import { DocumentEditorContent } from './EditorContent';
@@ -35,15 +34,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   useEffect(() => {
     if (editor && content) {
-      try {
-        // Try to parse the content as JSON first
-        const parsedContent = JSON.parse(content);
-        editor.commands.setContent(parsedContent);
-      } catch (error) {
-        // If parsing fails, set the content as is (for backward compatibility)
-        console.log('Content is not JSON, setting as plain content');
-        editor.commands.setContent(content);
-      }
+      editor.commands.setContent(content);
     }
   }, [editor, content]);
 
@@ -60,7 +51,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
       }
 
       console.log('Received formatted content:', data);
-      return data;
+      return data.content; // Now returns markdown content directly
     } catch (error) {
       console.error('Error in formatWorkoutContent:', error);
       throw error;
@@ -86,11 +77,11 @@ export function Editor({ content = '', onSave }: EditorProps) {
       console.log('Publishing workout data:', workoutData);
       
       // Format the workout content using Gemini
-      const formattedContent = await formatWorkoutContent(workoutData);
-      console.log('Setting formatted content:', formattedContent);
+      const markdownContent = await formatWorkoutContent(workoutData);
+      console.log('Setting markdown content:', markdownContent);
       
-      // Update the editor with the formatted content
-      editor.commands.setContent(formattedContent);
+      // Update the editor with the markdown content
+      editor.commands.setContent(markdownContent);
       
       // Publish the formatted document
       await publishDocument(editor.getHTML(), onSave);

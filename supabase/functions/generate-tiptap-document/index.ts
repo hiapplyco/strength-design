@@ -16,57 +16,31 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `You are a professional fitness document formatter. Format the following workout data into a structured TipTap document. Follow these guidelines strictly:
+    const prompt = `You are a professional fitness document formatter. Format the following workout data into a structured markdown document. Follow these guidelines strictly:
 
-    1. Create a document with proper sections using Tiptap nodes
-    2. Use appropriate emojis for different sections
-    3. Format exercises with bold text
+    1. Use proper markdown syntax with # for main headings and ## for subheadings
+    2. Use emojis for different sections
+    3. Format exercises in **bold**
     4. Include form tips with the 💡 emoji
-    5. Use bullet lists for sets and reps
+    5. Use bullet points for sets and reps
     6. Add intensity indicators where appropriate
     7. Structure the document with proper heading hierarchy
-
-    The output should be a valid JSON object following this structure:
-    {
-      "type": "doc",
-      "content": [
-        {
-          "type": "heading",
-          "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Workout Overview" }]
-        },
-        // Additional content following Tiptap schema
-      ]
-    }
 
     Here's the workout data to format:
     ${JSON.stringify(workouts, null, 2)}
 
     Important:
-    - Use only valid Tiptap nodes (doc, heading, paragraph, bulletList, listItem, text)
-    - Include marks for bold and italic text where appropriate
-    - Ensure proper nesting of nodes
-    - Return only the JSON structure, no additional text
+    - Use proper markdown syntax
+    - Return only the formatted markdown text, no additional text or JSON structure
+    - Include clear section breaks between different parts of the workout
     `;
 
     const result = await model.generateContent(prompt);
-    const response = result.response;
-    let formattedContent;
+    const markdownContent = result.response.text();
     
-    try {
-      // Extract JSON from the response
-      const jsonMatch = response.text().match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        formattedContent = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("No valid JSON found in response");
-      }
-    } catch (error) {
-      console.error("Error parsing Gemini response:", error);
-      throw new Error("Failed to parse workout format");
-    }
+    console.log('Generated markdown content:', markdownContent);
 
-    return new Response(JSON.stringify(formattedContent), {
+    return new Response(JSON.stringify({ content: markdownContent }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

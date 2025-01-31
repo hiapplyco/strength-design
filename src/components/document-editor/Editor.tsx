@@ -34,7 +34,24 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   useEffect(() => {
     if (editor && content) {
-      editor.commands.setContent(content);
+      try {
+        // Try to parse the content as JSON
+        const parsedContent = JSON.parse(content);
+        
+        // If it's our specific format with a content field containing markdown
+        if (parsedContent.content) {
+          console.log('Setting markdown content:', parsedContent.content);
+          editor.commands.setContent(parsedContent.content);
+        } else {
+          // If it's just regular content
+          console.log('Setting regular content:', content);
+          editor.commands.setContent(content);
+        }
+      } catch (error) {
+        // If parsing fails, set the content directly
+        console.log('Setting direct content:', content);
+        editor.commands.setContent(content);
+      }
     }
   }, [editor, content]);
 
@@ -51,7 +68,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
       }
 
       console.log('Received formatted content:', data);
-      return data.content; // Now returns markdown content directly
+      return data.content;
     } catch (error) {
       console.error('Error in formatWorkoutContent:', error);
       throw error;

@@ -101,8 +101,6 @@ serve(async (req) => {
          - Equipment/form adjustments
          - Progressive overload recommendations
 
-      Video URL: ${publicUrl}
-
       Please provide your analysis in this format:
       [Sport/Discipline]: ${movement}
 

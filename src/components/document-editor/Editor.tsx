@@ -6,6 +6,7 @@ import { EditorToolbar } from './EditorToolbar';
 import { generateShareUrl } from './editorUtils';
 import { useDocumentPublisher } from './hooks/useDocumentPublisher';
 import { DocumentEditorContent } from './EditorContent';
+import { FloatingMenu } from '@tiptap/react';
 
 interface EditorProps {
   content?: string;
@@ -27,7 +28,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-slate focus:outline-none max-w-none min-h-[200px]',
+        class: 'prose prose-slate focus:outline-none max-w-none min-h-[200px] prose-headings:font-bold prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl',
       },
     },
   });
@@ -65,6 +66,19 @@ export function Editor({ content = '', onSave }: EditorProps) {
           onPublish={handlePublish}
           handleShare={handleShare}
         />
+        
+        {editor && (
+          <FloatingMenu 
+            editor={editor} 
+            className="bg-white border rounded-lg shadow-lg p-2 flex gap-2"
+            shouldShow={({ editor }) => {
+              // Only show when text is selected
+              return editor.view.state.selection.content().size > 0;
+            }}
+          >
+            <EditorToolbar editor={editor} />
+          </FloatingMenu>
+        )}
       </div>
     </div>
   );

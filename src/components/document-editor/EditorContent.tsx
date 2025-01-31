@@ -28,7 +28,13 @@ export function DocumentEditorContent({
         <div className="p-6">
           <TipTapEditorContent 
             editor={editor} 
-            className="min-h-[300px] prose prose-slate max-w-none prose-h2:text-black prose-h2:text-xl prose-h2:font-bold prose-p:text-black prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-black prose-h3:text-lg prose-h3:font-semibold" 
+            className="min-h-[300px] prose prose-slate max-w-none 
+              prose-headings:font-bold 
+              prose-h1:text-3xl prose-h1:mb-6 
+              prose-h2:text-2xl prose-h2:mb-4 
+              prose-h3:text-xl prose-h3:mb-3
+              prose-p:text-black prose-p:mb-4 
+              prose-hr:my-8 prose-hr:border-primary" 
           />
         </div>
       </div>

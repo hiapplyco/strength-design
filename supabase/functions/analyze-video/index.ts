@@ -24,6 +24,14 @@ serve(async (req) => {
       throw new Error('Missing required fields: videoUrl and movement are required');
     }
 
+    // Validate URL format
+    try {
+      new URL(videoUrl);
+    } catch (e) {
+      console.error('Invalid video URL:', e);
+      throw new Error('Invalid video URL format');
+    }
+
     const vertexAI = new VertexAI({
       project: Deno.env.get('GOOGLE_CLOUD_PROJECT') || '',
       location: 'us-central1',
@@ -104,25 +112,40 @@ serve(async (req) => {
       ],
     };
 
-    const result = await generativeModel.generateContent(request);
-    const response = result.response;
-    const analysis = response.candidates[0].content.parts[0].text;
+    // Add timeout for Vertex AI request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
-    console.log('Successfully received analysis from Vertex AI');
+    try {
+      const result = await generativeModel.generateContent(request, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      const response = result.response;
+      const analysis = response.candidates[0].content.parts[0].text;
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        result: analysis 
-      }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        },
-        status: 200 
+      console.log('Successfully received analysis from Vertex AI');
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          result: analysis 
+        }),
+        { 
+          headers: { 
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          },
+          status: 200 
+        }
+      );
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Analysis request timed out after 30 seconds');
       }
-    );
+      throw error;
+    }
 
   } catch (error) {
     console.error('Error in analyze-video function:', error);

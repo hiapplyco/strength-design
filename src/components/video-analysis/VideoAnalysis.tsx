@@ -66,11 +66,14 @@ export const VideoAnalysis = () => {
           videoUrl: publicUrl,
           movement: movement,
         }
+      }).catch(error => {
+        console.error('Network error:', error);
+        throw new Error('Failed to connect to analysis service');
       });
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw error;
+        throw new Error(error.message || 'Analysis service error');
       }
 
       console.log('Analysis completed successfully');

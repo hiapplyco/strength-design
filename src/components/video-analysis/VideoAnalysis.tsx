@@ -40,7 +40,6 @@ export const VideoAnalysis = () => {
       setIsAnalyzing(true);
       console.log('Starting video analysis...');
       
-      // Upload video to Supabase Storage
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${new Date().toISOString()}-${crypto.randomUUID()}-${selectedFile.name}`;
       
@@ -54,7 +53,6 @@ export const VideoAnalysis = () => {
 
       console.log('Video uploaded successfully');
 
-      // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from('videos')
         .getPublicUrl(fileName);

@@ -1,23 +1,18 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { VertexAI } from 'npm:@google-cloud/vertexai'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { corsHeaders } from "../_shared/cors.ts";
+import { VertexAI } from "npm:@google-cloud/vertexai";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-
-console.log('Video Analysis Function Started');
+console.log("Hello from analyze-video function!");
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
     const { videoUrl, movement } = await req.json();
-    console.log('Received request with videoUrl:', videoUrl, 'and movement:', movement);
+
+    console.log('Received request with videoUrl and movement:', { videoUrl, movement });
 
     if (!videoUrl || !movement) {
       console.error('Missing required fields');
@@ -42,73 +37,46 @@ serve(async (req) => {
       }
     });
 
+    console.log('Initialized Vertex AI client');
+
     const generativeModel = vertexAI.preview.getGenerativeModel({
-      model: 'gemini-1.5-flash-002',
-      generationConfig: {
-        maxOutputTokens: 8192,
-        temperature: 1,
-        topP: 0.95,
-        seed: 0,
+      model: "gemini-1.0-pro-vision",
+      generation_config: {
+        max_output_tokens: 2048,
+        temperature: 0.4,
+        top_p: 1,
+        top_k: 32,
       },
-      safetySettings: [
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH',
-          threshold: 'OFF',
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'OFF',
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'OFF',
-        },
-        {
-          category: 'HARM_CATEGORY_HARASSMENT',
-          threshold: 'OFF',
-        }
-      ],
     });
 
-    const text1 = {
-      text: `You are strength.analysis - the world's most advanced physical movement analyst. 
-      Analyze this ${movement} video and provide expert feedback.
-      
-      **Analysis Protocol:**`
-    };
+    console.log('Created generative model instance');
 
-    const video1 = {
-      fileData: {
-        mimeType: 'video/mp4',
-        fileUri: videoUrl
-      }
-    };
-
-    const text2 = {
-      text: `1. **Movement Architecture**  
-        - Phase segmentation with timestamps (MM:SS)  
-        - Joint/segment alignment in critical positions  
-        - Force distribution patterns (bilateral symmetry, ground contact)  
-        - Temporal sequencing (acceleration/deceleration ratios)  
-        - Kinetic chain efficiency audit  
-
-      2. **Expert Evaluation**  
-        - 3 Biomechanical Advantages ("Optimal patterns observed...")  
-        - 3 Priority Corrections ("Essential adjustments for...")  
-        - Injury Probability Matrix (Low/Moderate/High + risk factors)  
-        - Activity-Specific Efficiency Enhancers  
-
-      3. **Adaptive Prescriptions**  
-        - 2-3 Neuro-Muscular Drills (scalable difficulty)  
-        - Equipment/Task Constraint Modifications  
-        - Load Management Strategy (volume, intensity, frequency)`
-    };
-
-    console.log('Sending request to Vertex AI');
+    const prompt = `You are a professional fitness trainer and movement analyst. 
+    Analyze this video of a ${movement} exercise and provide detailed feedback on:
+    1. Form and technique
+    2. Common mistakes to watch out for
+    3. Specific recommendations for improvement
+    4. Safety considerations
     
+    Format your response in clear sections with bullet points where appropriate.
+    Be specific and actionable in your feedback.`;
+
     const request = {
       contents: [
-        {role: 'user', parts: [text1, video1, text2]}
+        {
+          role: "user",
+          parts: [
+            {
+              text: prompt,
+            },
+            {
+              inlineData: {
+                mimeType: "video/mp4",
+                data: videoUrl,
+              },
+            },
+          ],
+        },
       ],
     };
 
@@ -150,16 +118,16 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in analyze-video function:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message || 'An unexpected error occurred'
+      JSON.stringify({
+        success: false,
+        error: error.message
       }),
-      { 
-        headers: { 
+      {
+        headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
         },
-        status: 500 
+        status: 400
       }
     );
   }

@@ -22,12 +22,11 @@ serve(async (req) => {
 
     console.log('Processing new video analysis request');
     
-    // Validate content type
-    const contentType = req.headers.get('content-type');
-    if (!contentType || !contentType.includes('multipart/form-data')) {
-      throw new Error('Invalid content type. Expected multipart/form-data');
-    }
+    // Get the content type
+    const contentType = req.headers.get('content-type') || '';
+    console.log('Content-Type:', contentType);
 
+    // Parse the multipart form data
     const formData = await req.formData();
     const file = formData.get('video');
     const movement = formData.get('movement');

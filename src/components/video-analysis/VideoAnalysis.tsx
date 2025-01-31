@@ -66,12 +66,17 @@ export function VideoAnalysis() {
 
     try {
       setIsAnalyzing(true);
+      
+      // Create FormData and append file with proper name
       const formData = new FormData();
-      formData.append('video', selectedFile);
+      formData.append('video', selectedFile, selectedFile.name);
       formData.append('movement', movement);
 
       const { data, error } = await supabase.functions.invoke('analyze-video', {
         body: formData,
+        headers: {
+          'Accept': 'application/json',
+        },
       });
 
       if (error) throw error;

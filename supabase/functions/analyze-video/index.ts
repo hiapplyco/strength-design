@@ -41,7 +41,7 @@ serve(async (req) => {
       const base64Data = video.split('base64,')[1] || video;
       console.log('Successfully processed video data');
 
-      // Initialize Vertex AI
+      // Initialize Vertex AI with project ID from environment
       const vertexAI = new VertexAI({
         project: Deno.env.get('GOOGLE_CLOUD_PROJECT'),
         location: 'us-central1',

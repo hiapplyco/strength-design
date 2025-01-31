@@ -50,7 +50,7 @@ serve(async (req) => {
       const generativeModel = vertexAI.getGenerativeModel({
         model: 'gemini-1.5-pro',
         generationConfig: {
-          maxOutputTokens: 2048, // Reduced from 8192 to prevent payload issues
+          maxOutputTokens: 2048,
           temperature: 0.7,
           topP: 0.8,
           seed: 0,

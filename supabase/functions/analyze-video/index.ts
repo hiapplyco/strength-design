@@ -19,16 +19,22 @@ serve(async (req) => {
     const file = formData.get('video')
 
     if (!file || !(file instanceof File)) {
+      console.error('Invalid file input:', file)
       throw new Error('No video file provided or invalid file type')
     }
 
     // Add file size check to prevent resource exhaustion
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
     if (file.size > MAX_FILE_SIZE) {
+      console.error('File size too large:', file.size)
       throw new Error('File size exceeds 50MB limit')
     }
 
-    console.log('File received:', file.name, 'Size:', file.size, 'Type:', file.type)
+    console.log('File received:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    })
 
     // Initialize Supabase client
     const supabase = createClient(
@@ -36,7 +42,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Generate a unique filename with timestamp to prevent conflicts
+    // Generate a unique filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const fileName = `${timestamp}-${crypto.randomUUID()}-${file.name}`
     console.log('Uploading to storage with filename:', fileName)
@@ -61,10 +67,15 @@ serve(async (req) => {
     console.log('File uploaded successfully. Public URL:', publicUrl)
 
     try {
-      // Initialize Gradio client with timeout and correct space
+      // Initialize Gradio client
       console.log('Initializing Gradio client...')
+      const hfToken = Deno.env.get('HUGGINGFACE_API_KEY')
+      if (!hfToken) {
+        throw new Error('HUGGINGFACE_API_KEY is not set')
+      }
+
       const client = await Client.connect("hysts/ViTPose-transformers", {
-        hf_token: Deno.env.get('HUGGINGFACE_API_KEY')
+        hf_token: hfToken
       });
 
       // Convert file to blob for processing
@@ -82,11 +93,21 @@ serve(async (req) => {
         )
       ]);
 
-      if (!result?.data?.video) {
-        throw new Error('Invalid response format from ViTPose API')
+      console.log('Raw API response:', result)
+
+      if (!result?.data) {
+        throw new Error('No data received from ViTPose API')
       }
 
-      console.log('Analysis complete, result:', result)
+      if (!result.data.video) {
+        throw new Error('No video data in API response')
+      }
+
+      console.log('Analysis complete, result structure:', {
+        hasVideo: !!result.data.video,
+        hasAnalytics: !!result.data[1],
+        responseKeys: Object.keys(result.data)
+      })
 
       return new Response(
         JSON.stringify({ 

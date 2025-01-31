@@ -44,9 +44,29 @@ serve(async (req) => {
     })
 
     try {
-      // Convert video file to base64
-      const arrayBuffer = await file.arrayBuffer();
-      const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      // Read file in chunks to prevent memory issues
+      const chunks = [];
+      const chunkSize = 1024 * 1024; // 1MB chunks
+      const fileData = await file.arrayBuffer();
+      const totalChunks = Math.ceil(fileData.byteLength / chunkSize);
+      
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, fileData.byteLength);
+        chunks.push(new Uint8Array(fileData.slice(start, end)));
+      }
+      
+      // Combine chunks and convert to base64
+      const fullData = new Uint8Array(fileData.byteLength);
+      let offset = 0;
+      for (const chunk of chunks) {
+        fullData.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      
+      const base64Data = btoa(String.fromCharCode(...fullData));
+      
+      console.log('Successfully processed video data');
       
       const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -87,12 +107,16 @@ serve(async (req) => {
 
       console.log('Received analysis from Gemini');
 
+      // Create a blob URL for the video
+      const blob = new Blob([fileData], { type: file.type });
+      const videoUrl = URL.createObjectURL(blob);
+
       return new Response(
         JSON.stringify({ 
           success: true, 
           result: {
             analysis,
-            videoUrl: URL.createObjectURL(file) 
+            videoUrl
           }
         }),
         { 

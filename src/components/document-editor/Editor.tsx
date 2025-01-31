@@ -41,6 +41,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   const formatWorkoutContent = async (workouts: any) => {
     try {
+      console.log('Formatting workout content:', workouts);
       const { data, error } = await supabase.functions.invoke('generate-tiptap-document', {
         body: { workouts }
       });
@@ -50,6 +51,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
         throw error;
       }
 
+      console.log('Received formatted content:', data);
       return data;
     } catch (error) {
       console.error('Error in formatWorkoutContent:', error);
@@ -71,16 +73,25 @@ export function Editor({ content = '', onSave }: EditorProps) {
     if (!editor) return;
     
     try {
-      // If the content is a workout (you might want to add a check here)
+      // Parse the content as JSON to check if it's workout data
       const workoutData = JSON.parse(content);
+      console.log('Publishing workout data:', workoutData);
+      
+      // Format the workout content using Gemini
       const formattedContent = await formatWorkoutContent(workoutData);
+      console.log('Setting formatted content:', formattedContent);
+      
+      // Update the editor with the formatted content
       editor.commands.setContent(formattedContent);
+      
+      // Publish the formatted document
+      await publishDocument(editor.getHTML(), onSave);
     } catch (error) {
+      console.error('Error in handlePublish:', error);
       // If parsing fails, assume it's regular content
       console.log('Content is not workout data, publishing as is');
+      await publishDocument(editor.getHTML(), onSave);
     }
-
-    await publishDocument(editor.getHTML(), onSave);
   };
 
   if (!editor) return null;

@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders } from "../_shared/cors.ts"
-import { VertexAI } from "npm:@google-cloud/vertexai"
+import { VertexAI } from "npm:@google-cloud/vertexai@0.5.0"
 
 // Bypass Node.js-specific logging initialization
 (globalThis as any).process = {
@@ -10,14 +9,27 @@ import { VertexAI } from "npm:@google-cloud/vertexai"
   }
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+}
+
 console.log("Hello from analyze-video function!");
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Validate content type
+    const contentType = req.headers.get("content-type") || ""
+    if (!contentType.includes("application/json")) {
+      throw new Error("Invalid content type")
+    }
+
     const { videoUrl, movement } = await req.json();
 
     console.log('Received request with videoUrl and movement:', { videoUrl, movement });
@@ -35,25 +47,29 @@ serve(async (req) => {
       throw new Error('Invalid video URL format');
     }
 
+    // Debug logging for credentials
+    console.log("Project ID:", Deno.env.get("GOOGLE_CLOUD_PROJECT"));
+    console.log("Google Credentials (first 20 chars):", 
+      Deno.env.get("GOOGLE_CREDENTIALS")?.slice(0, 20) + "...");
+
     const vertexAI = new VertexAI({
       project: Deno.env.get('GOOGLE_CLOUD_PROJECT') || '',
       location: 'us-central1',
-      auth: {
-        clientOptions: {
-          credentials: JSON.parse(Deno.env.get('GOOGLE_APPLICATION_CREDENTIALS') || '{}')
-        }
+      authOptions: {
+        credentials: JSON.parse(Deno.env.get('GOOGLE_CREDENTIALS') || '{}'),
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
       }
     });
 
     console.log('Initialized Vertex AI client');
 
-    const generativeModel = vertexAI.preview.getGenerativeModel({
-      model: "gemini-1.0-pro-vision",
-      generation_config: {
-        max_output_tokens: 2048,
+    const model = vertexAI.preview.getGenerativeModel({
+      model: "gemini-1.5-flash-002",
+      generationConfig: {
+        maxOutputTokens: 2048,
         temperature: 0.4,
-        top_p: 1,
-        top_k: 32,
+        topP: 1,
+        topK: 32,
       },
     });
 
@@ -76,10 +92,10 @@ serve(async (req) => {
           parts: [
             { text: prompt },
             {
-              inlineData: {
+              fileData: {
                 mimeType: "video/mp4",
-                data: videoUrl,
-              },
+                fileUri: videoUrl
+              }
             },
           ],
         },
@@ -88,23 +104,26 @@ serve(async (req) => {
 
     // Add timeout for Vertex AI request
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
     try {
-      const result = await generativeModel.generateContent(request, {
+      const result = await model.generateContent(request, {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
       
-      const response = result.response;
-      const analysis = response.candidates[0].content.parts[0].text;
+      // Validate response structure
+      if (!result?.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error("Invalid response from AI model");
+      }
 
+      const analysis = result.response.candidates[0].content.parts[0].text;
       console.log('Successfully received analysis from Vertex AI');
 
       return new Response(
         JSON.stringify({ 
           success: true, 
-          result: analysis 
+          analysis 
         }),
         { 
           headers: { 
@@ -116,7 +135,7 @@ serve(async (req) => {
       );
     } catch (error) {
       if (error.name === 'AbortError') {
-        throw new Error('Analysis request timed out after 30 seconds');
+        throw new Error('Analysis request timed out after 25 seconds');
       }
       throw error;
     }
@@ -126,14 +145,16 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message
+        error: error.message.includes("AbortError") 
+          ? "Analysis timed out (25s limit)" 
+          : error.message
       }),
       {
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
         },
-        status: 400
+        status: error.message.includes("AbortError") ? 504 : 400
       }
     );
   }

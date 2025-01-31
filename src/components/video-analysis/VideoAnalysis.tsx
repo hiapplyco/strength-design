@@ -100,13 +100,13 @@ export function VideoAnalysis() {
           />
         </div>
 
-        <div className="relative p-4 rounded-lg bg-white/5"> {/* Updated container styling */}
+        <div className="relative p-6 rounded-lg bg-white/5 min-h-[80px]"> {/* Updated padding and min-height */}
           <Input
             type="file"
             accept="video/*"
             onChange={handleVideoUpload}
             disabled={isAnalyzing}
-            className="cursor-pointer text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-destructive file:text-white hover:file:bg-destructive/90 border-0 bg-transparent"
+            className="cursor-pointer text-sm file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-destructive file:text-white hover:file:bg-destructive/90 border-0 bg-transparent h-auto py-2" /* Increased padding and height */
           />
           {isAnalyzing && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">

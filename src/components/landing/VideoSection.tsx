@@ -19,7 +19,7 @@ export const VideoSection = () => {
         <div className="aspect-video relative">
           <video
             className="w-full h-full object-cover absolute inset-0"
-            src="/videos/S.D.mov"
+            src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos//S.D.mov"
             autoPlay
             loop
             muted

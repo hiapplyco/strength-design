@@ -1,13 +1,19 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { VertexAI } from "npm:@google-cloud/vertexai@0.5.0"
-
-// Bypass Node.js-specific logging initialization
+// Initialize process before any imports
 (globalThis as any).process = {
   env: {
     GOOGLE_SDK_NODE_LOGGING: 'disable',
-    NODE_DEBUG: ''
-  }
-}
+    NODE_DEBUG: '',
+    // Add other required env vars
+    GOOGLE_CLOUD_PROJECT: Deno.env.get('GOOGLE_CLOUD_PROJECT'),
+    GOOGLE_APPLICATION_CREDENTIALS: Deno.env.get('GOOGLE_CREDENTIALS')
+  },
+  // Add minimal process methods that might be called
+  nextTick: (callback: () => void) => setTimeout(callback, 0),
+  version: 'v16.0.0'
+};
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { VertexAI } from "npm:@google-cloud/vertexai@0.5.0"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

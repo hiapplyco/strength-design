@@ -60,16 +60,17 @@ serve(async (req) => {
       console.log('Successfully processed video data');
       
       const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
       const prompt = `You are FormCoachAI - the world's most advanced sports movement analyst. Analyze this ${movement} video and provide expert feedback.
 
       Analysis Protocol:
       1. Movement Breakdown
-         - Phase segmentation (setup -> execution -> follow-through)
+         - Phase segmentation with timestamps (MM:SS format)
          - Joint angle analysis in critical positions
          - Weight distribution patterns
          - Timing/rhythm evaluation
+         - Audio analysis for breathing patterns or technique cues (if applicable)
 
       2. Expert Feedback
          - 3 Key Strengths ("What's working well...")

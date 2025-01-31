@@ -4,6 +4,7 @@ import { WorkoutDayCard } from "./workout-display/WorkoutDayCard";
 import { ExportActions } from "./workout-display/ExportActions";
 import { ArrowLeft } from "lucide-react";
 import type { WeeklyWorkouts } from "@/types/fitness";
+import { formatWorkoutToMarkdown } from "@/utils/workout-formatting";
 
 interface WorkoutDisplayProps {
   workouts: WeeklyWorkouts;
@@ -18,32 +19,56 @@ export function WorkoutDisplay({
   isExporting,
   setIsExporting 
 }: WorkoutDisplayProps) {
+  const workoutText = formatWorkoutToMarkdown(workouts);
+
+  const handleExportCalendar = async () => {
+    // Implement export calendar functionality
+  };
+
+  const handleCopy = async () => {
+    // Implement copy functionality
+  };
+
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Button
-            onClick={resetWorkouts}
-            variant="outline"
-            className="mb-4 text-white hover:text-primary"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Go Back to Generator
-          </Button>
-          
-          <WorkoutDisplayHeader />
-        </div>
+        <Button
+          onClick={resetWorkouts}
+          variant="outline"
+          className="mb-8 text-white hover:text-primary flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Go Back to Generator
+        </Button>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {Object.entries(workouts).map(([day, workout]) => (
-            <WorkoutDayCard key={day} day={day} workout={workout} />
+        <WorkoutDisplayHeader
+          resetWorkouts={resetWorkouts}
+          onExportCalendar={handleExportCalendar}
+          onCopy={handleCopy}
+          isExporting={isExporting}
+          workoutText={workoutText}
+        />
+
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mt-24">
+          {Object.entries(workouts).map(([day, workout], index) => (
+            <WorkoutDayCard 
+              key={day} 
+              day={day} 
+              workout={workout}
+              index={index}
+              isExporting={isExporting}
+              setIsExporting={setIsExporting}
+              allWorkouts={workouts}
+              onUpdate={() => {}}
+            />
           ))}
         </div>
 
         <ExportActions
-          workouts={workouts}
+          onExportCalendar={handleExportCalendar}
+          onCopy={handleCopy}
           isExporting={isExporting}
-          setIsExporting={setIsExporting}
+          workoutText={workoutText}
         />
       </div>
     </div>

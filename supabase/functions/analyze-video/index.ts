@@ -4,28 +4,47 @@ import { VertexAI } from 'npm:@google-cloud/vertexai'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 console.log('Video Analysis Function Started');
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
+    if (req.method !== 'POST') {
+      throw new Error('Method not allowed');
+    }
+
     console.log('Processing new video analysis request');
-    const formData = await req.formData()
-    const file = formData.get('video')
-    const movement = formData.get('movement')
+    
+    // Validate content type
+    const contentType = req.headers.get('content-type');
+    if (!contentType || !contentType.includes('multipart/form-data')) {
+      throw new Error('Invalid content type. Expected multipart/form-data');
+    }
+
+    const formData = await req.formData();
+    const file = formData.get('video');
+    const movement = formData.get('movement');
+
+    console.log('Received form data:', {
+      hasFile: !!file,
+      fileType: file instanceof File ? file.type : 'not a file',
+      movement: movement
+    });
 
     if (!file || !(file instanceof File)) {
-      console.error('Invalid file input:', file)
-      throw new Error('No video file provided or invalid file type')
+      console.error('Invalid file input:', file);
+      throw new Error('No video file provided or invalid file type');
     }
 
     if (!movement) {
-      throw new Error('No movement type specified')
+      throw new Error('No movement type specified');
     }
 
     console.log('Analyzing movement:', movement);
@@ -33,15 +52,15 @@ serve(async (req) => {
     // Add file size check
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
     if (file.size > MAX_FILE_SIZE) {
-      console.error('File size too large:', file.size)
-      throw new Error('File size exceeds 50MB limit')
+      console.error('File size too large:', file.size);
+      throw new Error('File size exceeds 50MB limit');
     }
 
     console.log('File validation passed:', {
       name: file.name,
       size: file.size,
       type: file.type
-    })
+    });
 
     try {
       // Convert video to base64 more efficiently
@@ -90,7 +109,7 @@ serve(async (req) => {
          - Equipment/form adjustments
          - Progressive overload recommendations`;
 
-      console.log('Sending prompt to Vertex AI:', prompt);
+      console.log('Sending prompt to Vertex AI');
       
       const request = {
         contents: [{
@@ -127,27 +146,33 @@ serve(async (req) => {
           }
         }),
         { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json'
+          },
           status: 200 
         }
-      )
+      );
 
     } catch (vertexError) {
-      console.error('Error in Vertex AI processing:', vertexError)
-      throw new Error(`Video analysis failed: ${vertexError.message}`)
+      console.error('Error in Vertex AI processing:', vertexError);
+      throw new Error(`Video analysis failed: ${vertexError.message}`);
     }
 
   } catch (error) {
-    console.error('Error in analyze-video function:', error)
+    console.error('Error in analyze-video function:', error);
     return new Response(
       JSON.stringify({ 
         success: false, 
         error: error.message || 'An unknown error occurred'
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 500 
       }
-    )
+    );
   }
-})
+});

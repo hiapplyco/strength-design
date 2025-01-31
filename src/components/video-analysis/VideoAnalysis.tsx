@@ -67,25 +67,35 @@ export function VideoAnalysis() {
     try {
       setIsAnalyzing(true);
       
-      // Create FormData and append file with proper name
-      const formData = new FormData();
-      formData.append('video', selectedFile, selectedFile.name);
-      formData.append('movement', movement);
+      // Convert file to base64
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(selectedFile);
+      
+      fileReader.onload = async () => {
+        const base64Data = fileReader.result as string;
+        
+        const { data, error } = await supabase.functions.invoke('analyze-video', {
+          body: {
+            video: base64Data,
+            movement: movement,
+            fileName: selectedFile.name,
+            fileType: selectedFile.type
+          }
+        });
 
-      const { data, error } = await supabase.functions.invoke('analyze-video', {
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
+        if (error) throw error;
 
-      if (error) throw error;
+        setAnalysisResult(data.result);
+        toast({
+          title: "Analysis Complete",
+          description: "Your video has been successfully analyzed",
+        });
+      };
 
-      setAnalysisResult(data.result);
-      toast({
-        title: "Analysis Complete",
-        description: "Your video has been successfully analyzed",
-      });
+      fileReader.onerror = (error) => {
+        throw new Error('Error reading file');
+      };
+
     } catch (error) {
       console.error('Error analyzing video:', error);
       toast({

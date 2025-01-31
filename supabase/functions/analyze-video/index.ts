@@ -22,58 +22,23 @@ serve(async (req) => {
 
     console.log('Processing new video analysis request');
     
-    // Get the content type
-    const contentType = req.headers.get('content-type') || '';
-    console.log('Content-Type:', contentType);
+    const body = await req.json();
+    const { video, movement, fileName, fileType } = body;
 
-    // Parse the multipart form data
-    const formData = await req.formData();
-    const file = formData.get('video');
-    const movement = formData.get('movement');
-
-    console.log('Received form data:', {
-      hasFile: !!file,
-      fileType: file instanceof File ? file.type : 'not a file',
-      movement: movement
-    });
-
-    if (!file || !(file instanceof File)) {
-      console.error('Invalid file input:', file);
-      throw new Error('No video file provided or invalid file type');
+    if (!video || !movement) {
+      throw new Error('Missing required fields');
     }
 
-    if (!movement) {
-      throw new Error('No movement type specified');
-    }
-
-    console.log('Analyzing movement:', movement);
-
-    // Add file size check
-    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
-    if (file.size > MAX_FILE_SIZE) {
-      console.error('File size too large:', file.size);
-      throw new Error('File size exceeds 50MB limit');
-    }
-
-    console.log('File validation passed:', {
-      name: file.name,
-      size: file.size,
-      type: file.type
+    console.log('Received data:', {
+      hasVideo: !!video,
+      movement,
+      fileName,
+      fileType
     });
 
     try {
-      // Convert video to base64 more efficiently
-      const arrayBuffer = await file.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      
-      // Convert to base64 in smaller chunks to prevent stack overflow
-      const chunkSize = 1024; // Process 1KB at a time
-      let base64Data = '';
-      
-      for (let i = 0; i < uint8Array.length; i += chunkSize) {
-        const chunk = uint8Array.slice(i, i + chunkSize);
-        base64Data += btoa(String.fromCharCode(...chunk));
-      }
+      // Remove the data:video/* prefix from base64 string
+      const base64Data = video.split(',')[1];
       
       console.log('Successfully processed video data');
 
@@ -116,7 +81,7 @@ serve(async (req) => {
           parts: [
             {
               fileData: {
-                mimeType: file.type,
+                mimeType: fileType,
                 data: base64Data
               }
             },
@@ -133,15 +98,12 @@ serve(async (req) => {
 
       console.log('Received analysis from Vertex AI');
 
-      // Create a data URL for the video
-      const dataUrl = `data:${file.type};base64,${base64Data}`;
-
       return new Response(
         JSON.stringify({ 
           success: true, 
           result: {
             analysis,
-            videoUrl: dataUrl
+            videoUrl: video // Return the original video data URL
           }
         }),
         { 

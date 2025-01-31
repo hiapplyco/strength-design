@@ -35,7 +35,15 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   useEffect(() => {
     if (editor && content) {
-      editor.commands.setContent(content);
+      try {
+        // Try to parse the content as JSON first
+        const parsedContent = JSON.parse(content);
+        editor.commands.setContent(parsedContent);
+      } catch (error) {
+        // If parsing fails, set the content as is (for backward compatibility)
+        console.log('Content is not JSON, setting as plain content');
+        editor.commands.setContent(content);
+      }
     }
   }, [editor, content]);
 

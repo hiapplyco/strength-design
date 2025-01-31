@@ -27,6 +27,11 @@ serve(async (req) => {
     const vertexAI = new VertexAI({
       project: Deno.env.get('GOOGLE_CLOUD_PROJECT') || '',
       location: 'us-central1',
+      auth: {
+        clientOptions: {
+          credentials: JSON.parse(Deno.env.get('GOOGLE_APPLICATION_CREDENTIALS') || '{}')
+        }
+      }
     });
 
     const generativeModel = vertexAI.preview.getGenerativeModel({

@@ -100,7 +100,7 @@ export function VideoAnalysis() {
           />
         </div>
 
-        <div className="relative">
+        <div className="relative p-4"> {/* Added padding here */}
           <Input
             type="file"
             accept="video/*"

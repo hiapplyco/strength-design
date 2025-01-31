@@ -3,11 +3,14 @@ import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { Footer } from "@/components/layout/Footer";
+import { VideoSection } from "@/components/landing/VideoSection";
+import { HeroSection } from "@/components/landing/HeroSection";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
       <HeaderSection />
+      <VideoSection />
 
       <div 
         className="relative bg-cover bg-center bg-fixed"

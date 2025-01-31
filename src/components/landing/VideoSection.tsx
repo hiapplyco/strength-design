@@ -14,7 +14,7 @@ export const VideoSection = () => {
   };
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto my-8">
+    <div className="relative w-full max-w-7xl mx-auto -mt-12 mb-24 px-4">
       <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-black/30 to-black/10 backdrop-blur-sm border border-white/10">
         <div className="aspect-video relative">
           <video

@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3"
+import { VertexAI } from 'npm:@google-cloud/vertexai'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -54,13 +54,20 @@ serve(async (req) => {
       
       for (let i = 0; i < uint8Array.length; i += chunkSize) {
         const chunk = uint8Array.slice(i, i + chunkSize);
-        base64Data += btoa(String.fromCharCode.apply(null, [...chunk]));
+        base64Data += btoa(String.fromCharCode(...chunk));
       }
       
       console.log('Successfully processed video data');
-      
-      const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+      // Initialize Vertex AI
+      const vertexAI = new VertexAI({
+        project: Deno.env.get('GOOGLE_CLOUD_PROJECT'),
+        location: 'us-central1',
+      });
+
+      const generativeModel = vertexAI.getGenerativeModel({
+        model: 'gemini-1.5-pro',
+      });
 
       const prompt = `You are FormCoachAI - the world's most advanced sports movement analyst. Analyze this ${movement} video and provide expert feedback.
 
@@ -83,21 +90,30 @@ serve(async (req) => {
          - Equipment/form adjustments
          - Progressive overload recommendations`;
 
-      console.log('Sending prompt to Gemini:', prompt);
+      console.log('Sending prompt to Vertex AI:', prompt);
       
-      const result = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            mimeType: file.type,
-            data: base64Data
-          }
-        }
-      ]);
-      const response = await result.response;
-      const analysis = response.text();
+      const request = {
+        contents: [{
+          role: 'user',
+          parts: [
+            {
+              fileData: {
+                mimeType: file.type,
+                data: base64Data
+              }
+            },
+            {
+              text: prompt
+            }
+          ]
+        }]
+      };
 
-      console.log('Received analysis from Gemini');
+      const result = await generativeModel.generateContent(request);
+      const response = await result.response;
+      const analysis = response.candidates[0].content.parts[0].text;
+
+      console.log('Received analysis from Vertex AI');
 
       // Create a data URL for the video
       const dataUrl = `data:${file.type};base64,${base64Data}`;
@@ -116,9 +132,9 @@ serve(async (req) => {
         }
       )
 
-    } catch (geminiError) {
-      console.error('Error in Gemini processing:', geminiError)
-      throw new Error(`Video analysis failed: ${geminiError.message}`)
+    } catch (vertexError) {
+      console.error('Error in Vertex AI processing:', vertexError)
+      throw new Error(`Video analysis failed: ${vertexError.message}`)
     }
 
   } catch (error) {

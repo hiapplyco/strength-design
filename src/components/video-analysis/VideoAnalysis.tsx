@@ -4,12 +4,14 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export function VideoAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [movement, setMovement] = useState("");
   const [analysisResult, setAnalysisResult] = useState<{
-    processedVideo?: string;
-    analytics?: any;
+    analysis?: string;
     videoUrl?: string;
   } | null>(null);
   const { toast } = useToast();
@@ -17,6 +19,15 @@ export function VideoAnalysis() {
   const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    if (!movement.trim()) {
+      toast({
+        title: "Movement type required",
+        description: "Please specify the movement you want to analyze",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Validate file type
     if (!file.type.startsWith('video/')) {
@@ -43,6 +54,7 @@ export function VideoAnalysis() {
       setIsAnalyzing(true);
       const formData = new FormData();
       formData.append('video', file);
+      formData.append('movement', movement);
 
       const { data, error } = await supabase.functions.invoke('analyze-video', {
         body: formData,
@@ -77,6 +89,17 @@ export function VideoAnalysis() {
       </div>
 
       <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="movement" className="text-white">Movement to Analyze</Label>
+          <Input
+            id="movement"
+            placeholder="e.g., barbell back squat, tennis serve, jiu-jitsu armbar"
+            value={movement}
+            onChange={(e) => setMovement(e.target.value)}
+            className="bg-white/10 text-white placeholder:text-gray-400"
+          />
+        </div>
+
         <div className="relative">
           <Input
             type="file"
@@ -94,25 +117,26 @@ export function VideoAnalysis() {
 
         {analysisResult && (
           <div className="mt-6 space-y-4">
-            {analysisResult.processedVideo && (
+            {analysisResult.videoUrl && (
               <div className="rounded-lg overflow-hidden">
                 <video 
-                  src={analysisResult.processedVideo} 
+                  src={analysisResult.videoUrl} 
                   controls 
                   className="w-full"
-                  poster={analysisResult.videoUrl}
                 >
                   Your browser does not support the video tag.
                 </video>
               </div>
             )}
             
-            {analysisResult.analytics && (
+            {analysisResult.analysis && (
               <div className="p-4 bg-white/10 rounded-lg">
                 <h4 className="text-lg font-semibold text-white mb-2">Analysis Results:</h4>
-                <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-                  {JSON.stringify(analysisResult.analytics, null, 2)}
-                </pre>
+                <Textarea
+                  value={analysisResult.analysis}
+                  readOnly
+                  className="min-h-[400px] bg-transparent text-gray-300 border-none resize-none focus-visible:ring-0"
+                />
               </div>
             )}
           </div>

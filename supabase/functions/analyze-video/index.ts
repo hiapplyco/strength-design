@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import { Client } from "https://esm.sh/@gradio/client"
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +10,6 @@ const corsHeaders = {
 console.log('Video Analysis Function Started');
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -19,11 +18,18 @@ serve(async (req) => {
     console.log('Processing new video analysis request');
     const formData = await req.formData()
     const file = formData.get('video')
+    const movement = formData.get('movement')
 
     if (!file || !(file instanceof File)) {
       console.error('Invalid file input:', file)
       throw new Error('No video file provided or invalid file type')
     }
+
+    if (!movement) {
+      throw new Error('No movement type specified')
+    }
+
+    console.log('Analyzing movement:', movement);
 
     // Add file size check to prevent resource exhaustion
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
@@ -72,54 +78,67 @@ serve(async (req) => {
     console.log('Generated public URL:', publicUrl)
 
     try {
-      // Initialize Gradio client
-      console.log('Initializing Gradio client')
-      const hfToken = Deno.env.get('HUGGINGFACE_API_KEY')
-      if (!hfToken) {
-        throw new Error('HUGGINGFACE_API_KEY is not set')
-      }
+      const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      const client = await Client.connect("hysts/ViTPose-transformers", {
-        hf_token: hfToken
-      });
+      const prompt = `You are FormCoachAI - the world's most advanced sports movement analyst. Analyze this ${movement} video and provide expert feedback.
 
-      // Convert file to blob for processing
-      console.log('Converting file to ArrayBuffer for processing')
-      const arrayBuffer = await file.arrayBuffer()
-      const videoBlob = new Blob([arrayBuffer], { type: file.type })
+      Analysis Protocol:
+      1. Movement Breakdown
+         - Phase segmentation (setup -> execution -> follow-through)
+         - Joint angle analysis in critical positions
+         - Weight distribution patterns
+         - Timing/rhythm evaluation
+
+      2. Expert Feedback
+         - 3 Key Strengths ("What's working well...")
+         - 3 Critical Improvements ("Focus on adjusting...")
+         - Injury Risk Assessment
+         - Sport-Specific Cues
+
+      3. Prescriptive Guidance
+         - 2-3 Drills to reinforce proper mechanics
+         - Equipment/form adjustments
+         - Progressive overload recommendations
+
+      Video URL: ${publicUrl}
+
+      Please provide your analysis in this format:
+      [Sport/Discipline]: ${movement}
+
+      **Key Observations**
+      - Phase 1 (Setup):
+      - Phase 2 (Execution):
+      - Phase 3 (Completion):
+
+      **Strength Highlights**
+      1.
+      2.
+      3.
+
+      **Form Optimization**
+      ⚠️ Safety Note:
+      1. Primary Correction:
+      2. Secondary Adjustment:
+      3. Efficiency Boost:
+
+      **Recommended Drills**
+      1.
+      2.`;
+
+      console.log('Sending prompt to Gemini:', prompt);
       
-      console.log('Sending video to HuggingFace API for analysis')
-      const result = await Promise.race([
-        client.predict("/process_video", {
-          video_path: videoBlob
-        }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Analysis timeout after 25 seconds')), 25000)
-        )
-      ]);
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const analysis = response.text();
 
-      console.log('Raw API response received:', JSON.stringify(result))
-
-      if (!result?.data) {
-        throw new Error('No data received from ViTPose API')
-      }
-
-      if (!result.data.video) {
-        throw new Error('No video data in API response')
-      }
-
-      console.log('Analysis complete, result structure:', {
-        hasVideo: !!result.data.video,
-        hasAnalytics: !!result.data[1],
-        responseKeys: Object.keys(result.data)
-      })
+      console.log('Received analysis from Gemini:', analysis);
 
       return new Response(
         JSON.stringify({ 
           success: true, 
           result: {
-            processedVideo: result.data.video,
-            analytics: result.data[1],
+            analysis,
             videoUrl: publicUrl 
           }
         }),
@@ -128,8 +147,9 @@ serve(async (req) => {
           status: 200 
         }
       )
-    } catch (gradioError) {
-      console.error('Error in Gradio processing:', gradioError)
+
+    } catch (geminiError) {
+      console.error('Error in Gemini processing:', geminiError)
       
       // Clean up the uploaded file on analysis failure
       console.log('Cleaning up uploaded file after analysis failure')
@@ -139,7 +159,7 @@ serve(async (req) => {
         .then(() => console.log('Cleaned up uploaded file'))
         .catch(err => console.error('Failed to clean up file:', err))
 
-      throw new Error(`Video analysis failed: ${gradioError.message}`)
+      throw new Error(`Video analysis failed: ${geminiError.message}`)
     }
 
   } catch (error) {

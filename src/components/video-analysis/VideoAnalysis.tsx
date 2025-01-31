@@ -31,18 +31,30 @@ export function VideoAnalysis() {
       return;
     }
 
-    // Validate file size (50MB limit)
-    const MAX_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+    // Validate file size (10MB limit)
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
     if (file.size > MAX_SIZE) {
       toast({
         title: "File too large",
-        description: "Please upload a video smaller than 50MB",
+        description: "Please upload a video smaller than 10MB",
         variant: "destructive",
       });
       return;
     }
 
     setSelectedFile(file);
+  };
+
+  const compressVideo = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleAnalyzeVideo = async () => {
@@ -66,33 +78,29 @@ export function VideoAnalysis() {
 
     try {
       setIsAnalyzing(true);
+      console.log('Starting video analysis...');
       
-      // Convert file to base64
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(selectedFile);
+      const compressedVideo = await compressVideo(selectedFile);
+      console.log('Video compressed and converted to base64');
       
-      fileReader.onload = async () => {
-        const base64Data = fileReader.result as string;
-        
-        const { data, error } = await supabase.functions.invoke('analyze-video', {
-          body: {
-            video: base64Data,
-            movement: movement,
-          }
-        });
+      const { data, error } = await supabase.functions.invoke('analyze-video', {
+        body: {
+          video: compressedVideo,
+          movement: movement,
+        }
+      });
 
-        if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
-        setAnalysisResult(data.result);
-        toast({
-          title: "Analysis Complete",
-          description: "Your video has been successfully analyzed",
-        });
-      };
-
-      fileReader.onerror = (error) => {
-        throw new Error('Error reading file');
-      };
+      console.log('Analysis completed successfully');
+      setAnalysisResult(data.result);
+      toast({
+        title: "Analysis Complete",
+        description: "Your video has been successfully analyzed",
+      });
 
     } catch (error) {
       console.error('Error analyzing video:', error);

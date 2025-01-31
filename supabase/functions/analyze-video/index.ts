@@ -26,18 +26,19 @@ serve(async (req) => {
     const { video, movement } = body;
 
     if (!video || !movement) {
+      console.error('Missing required fields');
       throw new Error('Missing required fields');
     }
 
     console.log('Received data:', {
       hasVideo: !!video,
       movement,
+      videoSize: video.length,
     });
 
     try {
-      // Remove the data:video/* prefix from base64 string if it exists
-      const base64Data = video.includes('base64,') ? video.split('base64,')[1] : video;
-      
+      // Extract base64 data
+      const base64Data = video.split('base64,')[1] || video;
       console.log('Successfully processed video data');
 
       // Initialize Vertex AI
@@ -123,7 +124,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'An unknown error occurred'
+        error: error.message || 'An unexpected error occurred'
       }),
       { 
         headers: { 

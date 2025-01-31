@@ -16,11 +16,16 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `You are a professional fitness document formatter. Format the following workout data into a structured markdown document. Follow these guidelines strictly:
+    const prompt = `You are a professional fitness document formatter. Format the following workout data into a structured document suitable for a rich text editor. Follow these guidelines strictly:
 
-    1. Use proper markdown syntax with # for main headings and ## for subheadings
-    2. Use emojis for different sections
-    3. Format exercises in **bold**
+    1. Use HTML-like formatting:
+       - Use <h1> for main headings
+       - Use <h2> for subheadings
+       - Use <p> for paragraphs
+       - Use <ul> and <li> for lists
+       - Use <strong> for emphasis
+    2. Include emojis for visual appeal
+    3. Format exercises in <strong> tags
     4. Include form tips with the 💡 emoji
     5. Use bullet points for sets and reps
     6. Add intensity indicators where appropriate
@@ -30,17 +35,18 @@ serve(async (req) => {
     ${JSON.stringify(workouts, null, 2)}
 
     Important:
-    - Use proper markdown syntax
-    - Return only the formatted markdown text, no additional text or JSON structure
+    - Use proper HTML tags for structure
+    - Return only the formatted HTML text
     - Include clear section breaks between different parts of the workout
+    - Make sure all HTML tags are properly closed
     `;
 
     const result = await model.generateContent(prompt);
-    const markdownContent = result.response.text();
+    const formattedContent = result.response.text();
     
-    console.log('Generated markdown content:', markdownContent);
+    console.log('Generated HTML content:', formattedContent);
 
-    return new Response(JSON.stringify({ content: markdownContent }), {
+    return new Response(JSON.stringify({ content: formattedContent }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

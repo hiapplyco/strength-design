@@ -25,11 +25,11 @@ export const useVideoProcessing = () => {
       return;
     }
 
-    const MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB in bytes
     if (file.size > MAX_SIZE) {
       toast({
         title: "File too large",
-        description: "Please upload a video smaller than 10MB",
+        description: "Please upload a video smaller than 50MB",
         variant: "destructive",
       });
       return;
@@ -38,23 +38,10 @@ export const useVideoProcessing = () => {
     setSelectedFile(file);
   };
 
-  const compressVideo = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        resolve(base64);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   return {
     selectedFile,
     isAnalyzing,
     setIsAnalyzing,
     handleFileSelect,
-    compressVideo,
   };
 };

@@ -15,7 +15,6 @@ export const VideoAnalysis = () => {
     isAnalyzing,
     setIsAnalyzing,
     handleFileSelect,
-    compressVideo,
   } = useVideoProcessing();
 
   const handleAnalyzeVideo = async () => {
@@ -41,12 +40,30 @@ export const VideoAnalysis = () => {
       setIsAnalyzing(true);
       console.log('Starting video analysis...');
       
-      const compressedVideo = await compressVideo(selectedFile);
-      console.log('Video compressed and converted to base64');
+      // Upload video to Supabase Storage
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${new Date().toISOString()}-${crypto.randomUUID()}-${selectedFile.name}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(fileName, selectedFile);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      console.log('Video uploaded successfully');
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(fileName);
+
+      console.log('Got public URL:', publicUrl);
       
       const { data, error } = await supabase.functions.invoke('analyze-video', {
         body: {
-          video: compressedVideo,
+          videoUrl: publicUrl,
           movement: movement,
         }
       });

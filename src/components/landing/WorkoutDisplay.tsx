@@ -4,7 +4,7 @@ import { WorkoutDayCard } from "./workout-display/WorkoutDayCard";
 import { ExportActions } from "./workout-display/ExportActions";
 import { ArrowLeft } from "lucide-react";
 import type { WeeklyWorkouts } from "@/types/fitness";
-import { formatWorkoutToMarkdown } from "@/utils/workout-formatting";
+import { formatWorkoutToMarkdown, formatAllWorkouts } from "@/utils/workout-formatting";
 
 interface WorkoutDisplayProps {
   workouts: WeeklyWorkouts;
@@ -19,7 +19,9 @@ export function WorkoutDisplay({
   isExporting,
   setIsExporting 
 }: WorkoutDisplayProps) {
-  const workoutText = formatWorkoutToMarkdown(workouts);
+  // First format workouts to string, then to markdown
+  const formattedWorkouts = formatAllWorkouts(workouts);
+  const workoutText = formatWorkoutToMarkdown(formattedWorkouts);
 
   const handleExportCalendar = async () => {
     // Implement export calendar functionality

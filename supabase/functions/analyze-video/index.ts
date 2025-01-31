@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+console.log('Video Analysis Function Started');
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -14,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting video analysis...')
+    console.log('Processing new video analysis request');
     const formData = await req.formData()
     const file = formData.get('video')
 
@@ -30,7 +32,7 @@ serve(async (req) => {
       throw new Error('File size exceeds 50MB limit')
     }
 
-    console.log('File received:', {
+    console.log('File validation passed:', {
       name: file.name,
       size: file.size,
       type: file.type
@@ -45,8 +47,9 @@ serve(async (req) => {
     // Generate a unique filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const fileName = `${timestamp}-${crypto.randomUUID()}-${file.name}`
-    console.log('Uploading to storage with filename:', fileName)
+    console.log('Generated unique filename:', fileName)
 
+    console.log('Attempting to upload file to storage')
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('videos')
       .upload(fileName, file, {
@@ -59,16 +62,18 @@ serve(async (req) => {
       throw new Error(`Storage upload failed: ${uploadError.message}`)
     }
 
-    // Get public URL
+    console.log('File uploaded successfully:', uploadData)
+
+    // Get public URL for the uploaded file
     const { data: { publicUrl } } = supabase.storage
       .from('videos')
       .getPublicUrl(fileName)
 
-    console.log('File uploaded successfully. Public URL:', publicUrl)
+    console.log('Generated public URL:', publicUrl)
 
     try {
       // Initialize Gradio client
-      console.log('Initializing Gradio client...')
+      console.log('Initializing Gradio client')
       const hfToken = Deno.env.get('HUGGINGFACE_API_KEY')
       if (!hfToken) {
         throw new Error('HUGGINGFACE_API_KEY is not set')
@@ -79,11 +84,11 @@ serve(async (req) => {
       });
 
       // Convert file to blob for processing
-      console.log('Converting file to ArrayBuffer...')
+      console.log('Converting file to ArrayBuffer for processing')
       const arrayBuffer = await file.arrayBuffer()
       const videoBlob = new Blob([arrayBuffer], { type: file.type })
       
-      console.log('Sending video to HuggingFace API for analysis...')
+      console.log('Sending video to HuggingFace API for analysis')
       const result = await Promise.race([
         client.predict("/process_video", {
           video_path: videoBlob
@@ -93,7 +98,7 @@ serve(async (req) => {
         )
       ]);
 
-      console.log('Raw API response:', result)
+      console.log('Raw API response received:', JSON.stringify(result))
 
       if (!result?.data) {
         throw new Error('No data received from ViTPose API')
@@ -114,9 +119,9 @@ serve(async (req) => {
           success: true, 
           result: {
             processedVideo: result.data.video,
-            analytics: result.data[1]
-          },
-          videoUrl: publicUrl 
+            analytics: result.data[1],
+            videoUrl: publicUrl 
+          }
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -127,10 +132,11 @@ serve(async (req) => {
       console.error('Error in Gradio processing:', gradioError)
       
       // Clean up the uploaded file on analysis failure
+      console.log('Cleaning up uploaded file after analysis failure')
       await supabase.storage
         .from('videos')
         .remove([fileName])
-        .then(() => console.log('Cleaned up uploaded file after analysis failure'))
+        .then(() => console.log('Cleaned up uploaded file'))
         .catch(err => console.error('Failed to clean up file:', err))
 
       throw new Error(`Video analysis failed: ${gradioError.message}`)

@@ -1,6 +1,14 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "../_shared/cors.ts";
-import { VertexAI } from "npm:@google-cloud/vertexai";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { corsHeaders } from "../_shared/cors.ts"
+import { VertexAI } from "npm:@google-cloud/vertexai"
+
+// Bypass Node.js-specific logging initialization
+(globalThis as any).process = {
+  env: {
+    GOOGLE_SDK_NODE_LOGGING: 'disable',
+    NODE_DEBUG: ''
+  }
+}
 
 console.log("Hello from analyze-video function!");
 
@@ -66,9 +74,7 @@ serve(async (req) => {
         {
           role: "user",
           parts: [
-            {
-              text: prompt,
-            },
+            { text: prompt },
             {
               inlineData: {
                 mimeType: "video/mp4",

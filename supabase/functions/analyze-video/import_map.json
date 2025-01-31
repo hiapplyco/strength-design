@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@google-cloud/vertexai": "https://esm.sh/@google-cloud/vertexai@0.5.0"
+  }
+}

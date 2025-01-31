@@ -3,11 +3,9 @@
   env: {
     GOOGLE_SDK_NODE_LOGGING: 'disable',
     NODE_DEBUG: '',
-    // Add other required env vars
     GOOGLE_CLOUD_PROJECT: Deno.env.get('GOOGLE_CLOUD_PROJECT'),
     GOOGLE_APPLICATION_CREDENTIALS: Deno.env.get('GOOGLE_CREDENTIALS')
   },
-  // Add minimal process methods that might be called
   nextTick: (callback: () => void) => setTimeout(callback, 0),
   version: 'v16.0.0'
 };
@@ -129,7 +127,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          analysis 
+          result: analysis 
         }),
         { 
           headers: { 

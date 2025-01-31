@@ -157,11 +157,39 @@ export function VideoAnalysis() {
             {analysisResult.analysis && (
               <div className="p-4 bg-white/10 rounded-lg">
                 <h4 className="text-lg font-semibold text-white mb-2">Analysis Results:</h4>
-                <Textarea
-                  value={analysisResult.analysis}
-                  readOnly
-                  className="min-h-[400px] bg-transparent text-gray-300 border-none resize-none focus-visible:ring-0"
-                />
+                <div className="space-y-4 text-gray-300">
+                  {analysisResult.analysis.split('\n\n').map((section, index) => {
+                    const [title, ...content] = section.split('\n');
+                    if (!title.trim()) return null;
+                    
+                    return (
+                      <div key={index} className="space-y-2">
+                        {title.includes('**') ? (
+                          <h5 className="text-md font-semibold text-white">
+                            {title.replace(/\*\*/g, '')}
+                          </h5>
+                        ) : (
+                          <h5 className="text-md font-semibold text-white">{title}</h5>
+                        )}
+                        <div className="pl-4 space-y-1">
+                          {content.map((line, lineIndex) => (
+                            <p 
+                              key={lineIndex}
+                              className={`${
+                                line.startsWith('⚠️') ? 'text-yellow-400' :
+                                line.startsWith('-') ? 'text-gray-300' :
+                                line.startsWith('1.') || line.startsWith('2.') || line.startsWith('3.') ? 'text-gray-300' :
+                                'text-gray-400'
+                              }`}
+                            >
+                              {line.trim()}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

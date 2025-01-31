@@ -49,28 +49,52 @@ serve(async (req) => {
 
       const generativeModel = vertexAI.getGenerativeModel({
         model: 'gemini-1.5-pro',
+        generationConfig: {
+          maxOutputTokens: 8192,
+          temperature: 1,
+          topP: 0.95,
+          seed: 0,
+        },
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'OFF',
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'OFF',
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'OFF',
+          },
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'OFF',
+          }
+        ],
       });
 
       const prompt = `You are FormCoachAI - the world's most advanced sports movement analyst. Analyze this ${movement} video and provide expert feedback.
 
       Analysis Protocol:
-      1. Movement Breakdown
-         - Phase segmentation with timestamps (MM:SS format)
-         - Joint angle analysis in critical positions
-         - Weight distribution patterns
-         - Timing/rhythm evaluation
-         - Audio analysis for breathing patterns or technique cues (if applicable)
+      1. Movement Architecture  
+         - Phase segmentation with timestamps (MM:SS)  
+         - Joint/segment alignment in critical positions  
+         - Force distribution patterns (bilateral symmetry, ground contact)  
+         - Temporal sequencing (acceleration/deceleration ratios)  
+         - Kinetic chain efficiency audit  
 
-      2. Expert Feedback
-         - 3 Key Strengths ("What's working well...")
-         - 3 Critical Improvements ("Focus on adjusting...")
-         - Injury Risk Assessment
-         - Sport-Specific Cues
+      2. Expert Evaluation  
+         - 3 Biomechanical Advantages ("Optimal patterns observed...")  
+         - 3 Priority Corrections ("Essential adjustments for...")  
+         - Injury Probability Matrix (Low/Moderate/High + risk factors)  
+         - Activity-Specific Efficiency Enhancers  
 
-      3. Prescriptive Guidance
-         - 2-3 Drills to reinforce proper mechanics
-         - Equipment/form adjustments
-         - Progressive overload recommendations`;
+      3. Adaptive Prescriptions  
+         - 2-3 Neuro-Muscular Drills (scalable difficulty)  
+         - Equipment/Task Constraint Modifications  
+         - Load Management Strategy (volume, intensity, frequency)`;
 
       console.log('Sending prompt to Vertex AI');
       
@@ -100,10 +124,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          result: {
-            analysis,
-            videoUrl: video
-          }
+          result: analysis
         }),
         { 
           headers: { 

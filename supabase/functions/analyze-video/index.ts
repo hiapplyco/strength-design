@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3"
 
 const corsHeaders = {
@@ -31,7 +30,7 @@ serve(async (req) => {
 
     console.log('Analyzing movement:', movement);
 
-    // Add file size check to prevent resource exhaustion
+    // Add file size check
     const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
     if (file.size > MAX_FILE_SIZE) {
       console.error('File size too large:', file.size)
@@ -44,40 +43,11 @@ serve(async (req) => {
       type: file.type
     })
 
-    // Initialize Supabase client
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
-    // Generate a unique filename with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const fileName = `${timestamp}-${crypto.randomUUID()}-${file.name}`
-    console.log('Generated unique filename:', fileName)
-
-    console.log('Attempting to upload file to storage')
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('videos')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
-
-    if (uploadError) {
-      console.error('Storage upload error:', uploadError)
-      throw new Error(`Storage upload failed: ${uploadError.message}`)
-    }
-
-    console.log('File uploaded successfully:', uploadData)
-
-    // Get public URL for the uploaded file
-    const { data: { publicUrl } } = supabase.storage
-      .from('videos')
-      .getPublicUrl(fileName)
-
-    console.log('Generated public URL:', publicUrl)
-
     try {
+      // Convert video file to base64
+      const arrayBuffer = await file.arrayBuffer();
+      const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      
       const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -99,47 +69,30 @@ serve(async (req) => {
       3. Prescriptive Guidance
          - 2-3 Drills to reinforce proper mechanics
          - Equipment/form adjustments
-         - Progressive overload recommendations
-
-      Video URL: ${publicUrl}
-
-      Please provide your analysis in this format:
-      [Sport/Discipline]: ${movement}
-
-      **Key Observations**
-      - Phase 1 (Setup):
-      - Phase 2 (Execution):
-      - Phase 3 (Completion):
-
-      **Strength Highlights**
-      1.
-      2.
-      3.
-
-      **Form Optimization**
-      ⚠️ Safety Note:
-      1. Primary Correction:
-      2. Secondary Adjustment:
-      3. Efficiency Boost:
-
-      **Recommended Drills**
-      1.
-      2.`;
+         - Progressive overload recommendations`;
 
       console.log('Sending prompt to Gemini:', prompt);
       
-      const result = await model.generateContent(prompt);
+      const result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            mimeType: file.type,
+            data: base64Data
+          }
+        }
+      ]);
       const response = await result.response;
       const analysis = response.text();
 
-      console.log('Received analysis from Gemini:', analysis);
+      console.log('Received analysis from Gemini');
 
       return new Response(
         JSON.stringify({ 
           success: true, 
           result: {
             analysis,
-            videoUrl: publicUrl 
+            videoUrl: URL.createObjectURL(file) 
           }
         }),
         { 
@@ -150,15 +103,6 @@ serve(async (req) => {
 
     } catch (geminiError) {
       console.error('Error in Gemini processing:', geminiError)
-      
-      // Clean up the uploaded file on analysis failure
-      console.log('Cleaning up uploaded file after analysis failure')
-      await supabase.storage
-        .from('videos')
-        .remove([fileName])
-        .then(() => console.log('Cleaned up uploaded file'))
-        .catch(err => console.error('Failed to clean up file:', err))
-
       throw new Error(`Video analysis failed: ${geminiError.message}`)
     }
 

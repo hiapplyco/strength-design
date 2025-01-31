@@ -10,66 +10,69 @@ const corsHeaders = {
 console.log('Video Analysis Function Started');
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const body = await req.json();
-    const { videoUrl, movement } = body;
+    const { videoUrl, movement } = await req.json();
+    console.log('Received request with videoUrl:', videoUrl, 'and movement:', movement);
 
     if (!videoUrl || !movement) {
       console.error('Missing required fields');
       throw new Error('Missing required fields: videoUrl and movement are required');
     }
 
-    try {
-      const vertexAI = new VertexAI({
-        project: Deno.env.get('GOOGLE_CLOUD_PROJECT'),
-        location: 'us-central1',
-      });
+    const vertexAI = new VertexAI({
+      project: Deno.env.get('GOOGLE_CLOUD_PROJECT') || '',
+      location: 'us-central1',
+    });
 
-      const generativeModel = vertexAI.preview.getGenerativeModel({
-        model: 'gemini-1.5-flash-002',
-        generationConfig: {
-          maxOutputTokens: 8192,
-          temperature: 1,
-          topP: 0.95,
-          seed: 0,
+    const generativeModel = vertexAI.preview.getGenerativeModel({
+      model: 'gemini-1.5-flash-002',
+      generationConfig: {
+        maxOutputTokens: 8192,
+        temperature: 1,
+        topP: 0.95,
+        seed: 0,
+      },
+      safetySettings: [
+        {
+          category: 'HARM_CATEGORY_HATE_SPEECH',
+          threshold: 'OFF',
         },
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'OFF',
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'OFF',
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'OFF',
-          },
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'OFF',
-          }
-        ],
-      });
+        {
+          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+          threshold: 'OFF',
+        },
+        {
+          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+          threshold: 'OFF',
+        },
+        {
+          category: 'HARM_CATEGORY_HARASSMENT',
+          threshold: 'OFF',
+        }
+      ],
+    });
 
-      const text1 = {text: `You are strength.analysis - the world's most advanced physical movement analyst. 
+    const text1 = {
+      text: `You are strength.analysis - the world's most advanced physical movement analyst. 
       Analyze this ${movement} video and provide expert feedback.
       
-      **Analysis Protocol:**`};
+      **Analysis Protocol:**`
+    };
 
-      const video1 = {
-        fileData: {
-          mimeType: 'video/mp4',
-          fileUri: videoUrl
-        }
-      };
+    const video1 = {
+      fileData: {
+        mimeType: 'video/mp4',
+        fileUri: videoUrl
+      }
+    };
 
-      const text2 = {text: `1. **Movement Architecture**  
+    const text2 = {
+      text: `1. **Movement Architecture**  
         - Phase segmentation with timestamps (MM:SS)  
         - Joint/segment alignment in critical positions  
         - Force distribution patterns (bilateral symmetry, ground contact)  
@@ -85,40 +88,36 @@ serve(async (req) => {
       3. **Adaptive Prescriptions**  
         - 2-3 Neuro-Muscular Drills (scalable difficulty)  
         - Equipment/Task Constraint Modifications  
-        - Load Management Strategy (volume, intensity, frequency)`};
+        - Load Management Strategy (volume, intensity, frequency)`
+    };
 
-      console.log('Sending request to Vertex AI');
-      
-      const request = {
-        contents: [
-          {role: 'user', parts: [text1, video1, text2]}
-        ],
-      };
+    console.log('Sending request to Vertex AI');
+    
+    const request = {
+      contents: [
+        {role: 'user', parts: [text1, video1, text2]}
+      ],
+    };
 
-      const result = await generativeModel.generateContent(request);
-      const response = await result.response;
-      const analysis = response.candidates[0].content.parts[0].text;
+    const result = await generativeModel.generateContent(request);
+    const response = result.response;
+    const analysis = response.candidates[0].content.parts[0].text;
 
-      console.log('Successfully received analysis from Vertex AI');
+    console.log('Successfully received analysis from Vertex AI');
 
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          result: analysis 
-        }),
-        { 
-          headers: { 
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          },
-          status: 200 
-        }
-      );
-
-    } catch (vertexError) {
-      console.error('Error in Vertex AI processing:', vertexError);
-      throw new Error(`Video analysis failed: ${vertexError.message}`);
-    }
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        result: analysis 
+      }),
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        },
+        status: 200 
+      }
+    );
 
   } catch (error) {
     console.error('Error in analyze-video function:', error);

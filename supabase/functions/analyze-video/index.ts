@@ -23,7 +23,7 @@ serve(async (req) => {
     console.log('Processing new video analysis request');
     
     const body = await req.json();
-    const { video, movement, fileName, fileType } = body;
+    const { video, movement } = body;
 
     if (!video || !movement) {
       throw new Error('Missing required fields');
@@ -32,13 +32,11 @@ serve(async (req) => {
     console.log('Received data:', {
       hasVideo: !!video,
       movement,
-      fileName,
-      fileType
     });
 
     try {
-      // Remove the data:video/* prefix from base64 string
-      const base64Data = video.split(',')[1];
+      // Remove the data:video/* prefix from base64 string if it exists
+      const base64Data = video.includes('base64,') ? video.split('base64,')[1] : video;
       
       console.log('Successfully processed video data');
 
@@ -81,7 +79,7 @@ serve(async (req) => {
           parts: [
             {
               fileData: {
-                mimeType: fileType,
+                mimeType: 'video/mp4',
                 data: base64Data
               }
             },
@@ -103,7 +101,7 @@ serve(async (req) => {
           success: true, 
           result: {
             analysis,
-            videoUrl: video // Return the original video data URL
+            videoUrl: video
           }
         }),
         { 

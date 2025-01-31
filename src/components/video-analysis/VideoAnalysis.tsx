@@ -78,8 +78,6 @@ export function VideoAnalysis() {
           body: {
             video: base64Data,
             movement: movement,
-            fileName: selectedFile.name,
-            fileType: selectedFile.type
           }
         });
 

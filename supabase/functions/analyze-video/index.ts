@@ -44,17 +44,17 @@ serve(async (req) => {
     })
 
     try {
-      // Process video data more efficiently
+      // Convert video to base64 more efficiently
       const arrayBuffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       
-      // Convert to base64 in chunks to prevent stack overflow
-      const chunkSize = 32768; // Process 32KB at a time
+      // Convert to base64 in smaller chunks to prevent stack overflow
+      const chunkSize = 1024; // Process 1KB at a time
       let base64Data = '';
       
       for (let i = 0; i < uint8Array.length; i += chunkSize) {
         const chunk = uint8Array.slice(i, i + chunkSize);
-        base64Data += btoa(String.fromCharCode.apply(null, chunk));
+        base64Data += btoa(String.fromCharCode.apply(null, [...chunk]));
       }
       
       console.log('Successfully processed video data');
@@ -99,7 +99,7 @@ serve(async (req) => {
 
       console.log('Received analysis from Gemini');
 
-      // Create a data URL for the video instead of a blob URL
+      // Create a data URL for the video
       const dataUrl = `data:${file.type};base64,${base64Data}`;
 
       return new Response(

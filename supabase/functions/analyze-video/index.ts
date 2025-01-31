@@ -27,14 +27,8 @@ serve(async (req) => {
 
     if (!video || !movement) {
       console.error('Missing required fields');
-      throw new Error('Missing required fields');
+      throw new Error('Missing required fields: video and movement are required');
     }
-
-    console.log('Received data:', {
-      hasVideo: !!video,
-      movement,
-      videoSize: video.length,
-    });
 
     try {
       // Extract base64 data
@@ -48,68 +42,29 @@ serve(async (req) => {
       });
 
       const generativeModel = vertexAI.getGenerativeModel({
-        model: 'gemini-1.5-pro',
+        model: 'gemini-1.5-pro-vision',
         generationConfig: {
           maxOutputTokens: 2048,
-          temperature: 0.7,
+          temperature: 0.4,
           topP: 0.8,
-          seed: 0,
+          topK: 40,
         },
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'OFF',
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'OFF',
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'OFF',
-          },
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'OFF',
-          }
-        ],
       });
 
-      const prompt = `You are FormCoachAI - the world's most advanced sports movement analyst. Analyze this ${movement} video and provide expert feedback.
-
-      Analysis Protocol:
-      1. Movement Architecture  
-         - Phase segmentation with timestamps (MM:SS)  
-         - Joint/segment alignment in critical positions  
-         - Force distribution patterns (bilateral symmetry, ground contact)  
-         - Temporal sequencing (acceleration/deceleration ratios)  
-         - Kinetic chain efficiency audit  
-
-      2. Expert Evaluation  
-         - 3 Biomechanical Advantages ("Optimal patterns observed...")  
-         - 3 Priority Corrections ("Essential adjustments for...")  
-         - Injury Probability Matrix (Low/Moderate/High + risk factors)  
-         - Activity-Specific Efficiency Enhancers  
-
-      3. Adaptive Prescriptions  
-         - 2-3 Neuro-Muscular Drills (scalable difficulty)  
-         - Equipment/Task Constraint Modifications  
-         - Load Management Strategy (volume, intensity, frequency)`;
-
-      console.log('Sending prompt to Vertex AI');
+      console.log('Sending request to Vertex AI');
       
       const request = {
         contents: [{
           role: 'user',
           parts: [
             {
+              text: prompt
+            },
+            {
               fileData: {
                 mimeType: 'video/mp4',
                 data: base64Data
               }
-            },
-            {
-              text: prompt
             }
           ]
         }]
@@ -119,16 +74,16 @@ serve(async (req) => {
       const response = await result.response;
       const analysis = response.candidates[0].content.parts[0].text;
 
-      console.log('Received analysis from Vertex AI');
+      console.log('Successfully received analysis from Vertex AI');
 
       return new Response(
         JSON.stringify({ 
           success: true, 
-          result: analysis
+          result: analysis 
         }),
         { 
           headers: { 
-            ...corsHeaders, 
+            ...corsHeaders,
             'Content-Type': 'application/json'
           },
           status: 200 
@@ -149,7 +104,7 @@ serve(async (req) => {
       }),
       { 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json'
         },
         status: 500 

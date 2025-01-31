@@ -1,8 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Exercise } from "@/components/exercise-search/types";
 import type { WeatherData } from "@/types/weather";
+
+const STORAGE_KEY = "workout_generator_inputs";
+
+interface SavedInputs {
+  weatherData: WeatherData | null;
+  weatherPrompt: string;
+  selectedExercises: Exercise[];
+  fitnessLevel: string;
+  prescribedExercises: string;
+  injuries: string;
+  numberOfDays: number;
+}
 
 interface UseWorkoutGenerationProps {
   handleGenerateWorkout: (params: {
@@ -30,6 +42,34 @@ export const useWorkoutGeneration = ({
   const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
   const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
   const { toast } = useToast();
+
+  // Load saved inputs on mount
+  useEffect(() => {
+    const savedInputs = localStorage.getItem(STORAGE_KEY);
+    if (savedInputs) {
+      const parsed = JSON.parse(savedInputs) as SavedInputs;
+      setWeatherData(parsed.weatherData);
+      setWeatherPrompt(parsed.weatherPrompt);
+      setSelectedExercises(parsed.selectedExercises);
+      setFitnessLevel(parsed.fitnessLevel);
+      setPrescribedExercises(parsed.prescribedExercises);
+      setInjuries(parsed.injuries);
+    }
+  }, []);
+
+  // Save inputs whenever they change
+  useEffect(() => {
+    const inputs: SavedInputs = {
+      weatherData,
+      weatherPrompt,
+      selectedExercises,
+      fitnessLevel,
+      prescribedExercises,
+      injuries,
+      numberOfDays: 7 // Default value
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(inputs));
+  }, [weatherData, weatherPrompt, selectedExercises, fitnessLevel, prescribedExercises, injuries]);
 
   const handleWeatherUpdate = (weatherData: WeatherData | null, weatherPrompt: string) => {
     setWeatherData(weatherData);
@@ -193,8 +233,6 @@ export const useWorkoutGeneration = ({
         fitnessLevel,
         prescribedExercises
       });
-      
-      handleClear();
     } catch (error) {
       console.error("Error generating workout:", error);
       toast({
@@ -213,6 +251,7 @@ export const useWorkoutGeneration = ({
     setFitnessLevel("");
     setPrescribedExercises("");
     setInjuries("");
+    localStorage.removeItem(STORAGE_KEY);
   };
 
   return {
@@ -231,7 +270,7 @@ export const useWorkoutGeneration = ({
     handleGenerateWithWeather,
     handleClear,
     setFitnessLevel,
-    setPrescribedExercises,  // Added this
-    setInjuries  // Added this
+    setPrescribedExercises,
+    setInjuries
   };
 };

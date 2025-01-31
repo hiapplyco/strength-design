@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ContactDialog } from "./ContactDialog";
 import { VideoSection } from "./VideoSection";
-import { VideoAnalysis } from "../video-analysis/VideoAnalysis";
 
 interface HeroSectionProps {
   children?: React.ReactNode;
@@ -36,10 +35,6 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
               <ContactDialog buttonText="Schedule a Demo" variant="outline" />
             </div>
           </div>
-        </div>
-
-        <div className="mt-12">
-          <VideoAnalysis />
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { EmailSignup } from "./EmailSignup";
-import { Activity, Video, Dumbbell } from "lucide-react";
+import { Activity, Dumbbell } from "lucide-react";
 
 export const Navigation = ({ isMobile = false, onMobileMenuClose }: { isMobile?: boolean; onMobileMenuClose?: () => void }) => {
   const navigate = useNavigate();
@@ -25,14 +25,6 @@ export const Navigation = ({ isMobile = false, onMobileMenuClose }: { isMobile?:
       </Button>
       <Button
         className={`${isMobile ? "w-full justify-start" : ""} gap-2`}
-        variant="ghost"
-        onClick={() => handleNavigation('/video-analysis')}
-      >
-        <Video className="h-4 w-4" />
-        Video Analysis
-      </Button>
-      <Button
-        className={isMobile ? "w-full justify-start" : ""}
         variant="ghost"
         onClick={() => handleNavigation('/pricing')}
       >

@@ -20,10 +20,11 @@ const Index = () => {
         className="relative bg-cover bg-center bg-fixed"
         style={{
           backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
+          zIndex: 0
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" />
-        <div className="pt-20">
+        <div className="relative z-10">
           <HeaderSection />
           <HeroSection />
         </div>

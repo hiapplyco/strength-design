@@ -44,32 +44,34 @@ export function Editor({ content = '', onSave }: EditorProps) {
           editor.commands.setContent(parsedContent);
         } else {
           // Format the workout data into a readable document
-          let formattedContent = '';
+          let formattedContent = '<h1>Weekly Workout Plan</h1>\n\n';
           
           Object.entries(parsedContent).forEach(([day, data]: [string, any]) => {
-            formattedContent += `<h1>${day}</h1>\n`;
+            // Format day header (e.g., "day1" to "Day 1")
+            const formattedDay = day.replace(/day(\d+)/, 'Day $1');
+            formattedContent += `<h2>${formattedDay}</h2>\n`;
             
             if (data.description) {
               formattedContent += `<p><strong>Focus:</strong> ${data.description}</p>\n`;
             }
             
-            if (data.warmup) {
-              formattedContent += `<h2>Warmup</h2>\n<p>${data.warmup}</p>\n`;
+            if (data.strength) {
+              formattedContent += `<h3>Strength</h3>\n<p>${data.strength}</p>\n`;
             }
             
-            if (data.strength) {
-              formattedContent += `<h2>Strength</h2>\n<p>${data.strength}</p>\n`;
+            if (data.warmup) {
+              formattedContent += `<h3>Warmup</h3>\n<p>${data.warmup}</p>\n`;
             }
             
             if (data.workout) {
-              formattedContent += `<h2>Workout</h2>\n<p>${data.workout}</p>\n`;
+              formattedContent += `<h3>Workout</h3>\n<p>${data.workout}</p>\n`;
             }
             
             if (data.notes) {
-              formattedContent += `<h2>Notes</h2>\n<p>${data.notes}</p>\n`;
+              formattedContent += `<h3>Notes</h3>\n<p>${data.notes}</p>\n`;
             }
             
-            formattedContent += '<hr/>\n';
+            formattedContent += '<hr/>\n\n';
           });
           
           console.log('Setting formatted content:', formattedContent);

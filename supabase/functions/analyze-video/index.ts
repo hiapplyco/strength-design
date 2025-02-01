@@ -51,6 +51,7 @@ serve(async (req) => {
     console.log("Project ID:", Deno.env.get("GOOGLE_CLOUD_PROJECT"));
     console.log("Credentials available:", !!Deno.env.get("GOOGLE_CREDENTIALS"));
 
+    // Initialize Vertex AI client
     const vertexAI = new VertexAI({
       project: Deno.env.get('GOOGLE_CLOUD_PROJECT') || '',
       location: 'us-central1',
@@ -58,12 +59,13 @@ serve(async (req) => {
 
     console.log('Initialized Vertex AI client');
 
+    // Create generative model instance with updated model and generation configuration
     const model = vertexAI.preview.getGenerativeModel({
-      model: "gemini-1.5-flash-002",
+      model: "gemini-2.0-flash-exp",
       generationConfig: {
-        maxOutputTokens: 2048,
-        temperature: 0.4,
-        topP: 1,
+        maxOutputTokens: 8192,
+        temperature: 1,
+        topP: 0.95,
         topK: 32,
       },
     });
@@ -71,14 +73,15 @@ serve(async (req) => {
     console.log('Created generative model instance');
 
     const prompt = `You are a professional fitness trainer and movement analyst. 
-    Analyze this video of a ${movement} exercise and provide detailed feedback on:
-    1. Form and technique
-    2. Common mistakes to watch out for
-    3. Specific recommendations for improvement
-    4. Safety considerations
-    
-    Format your response in clear sections with bullet points where appropriate.
-    Be specific and actionable in your feedback.`;
+Analyze this video of a ${movement} exercise and provide detailed feedback on:
+1. Form and technique
+2. Common mistakes to watch out for
+3. Specific recommendations for improvement
+4. Safety considerations
+
+Format your response in clear sections with bullet points where appropriate.
+Describe the video first then provide your feedback.
+Be specific and actionable in your feedback.`;
 
     const request = {
       contents: [
@@ -88,7 +91,7 @@ serve(async (req) => {
             { text: prompt },
             {
               fileData: {
-                mimeType: "video/mp4",
+                mimeType: "video/webm",  // updated MIME type to match the recorded format
                 fileUri: videoUrl
               }
             },
@@ -97,14 +100,12 @@ serve(async (req) => {
       ],
     };
 
-    // Add timeout for Vertex AI request
+    // Set up a timeout for the Vertex AI request
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s timeout
 
     try {
-      const result = await model.generateContent(request, {
-        signal: controller.signal
-      });
+      const result = await model.generateContent(request, { signal: controller.signal });
       clearTimeout(timeoutId);
       
       if (!result?.response?.candidates?.[0]?.content?.parts?.[0]?.text) {
@@ -119,12 +120,7 @@ serve(async (req) => {
           success: true, 
           result: analysis 
         }),
-        { 
-          headers: { 
-            ...corsHeaders,
-          },
-          status: 200 
-        }
+        { headers: { ...corsHeaders }, status: 200 }
       );
     } catch (error) {
       if (error.name === 'AbortError') {
@@ -132,7 +128,6 @@ serve(async (req) => {
       }
       throw error;
     }
-
   } catch (error) {
     console.error('Error in analyze-video function:', error);
     

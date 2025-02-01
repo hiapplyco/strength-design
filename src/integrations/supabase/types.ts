@@ -120,6 +120,36 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_workouts: {
+        Row: {
+          generated_at: string | null
+          id: string
+          summary: string | null
+          tags: string[] | null
+          title: string | null
+          user_id: string | null
+          workout_data: Json
+        }
+        Insert: {
+          generated_at?: string | null
+          id?: string
+          summary?: string | null
+          tags?: string[] | null
+          title?: string | null
+          user_id?: string | null
+          workout_data: Json
+        }
+        Update: {
+          generated_at?: string | null
+          id?: string
+          summary?: string | null
+          tags?: string[] | null
+          title?: string | null
+          user_id?: string | null
+          workout_data?: Json
+        }
+        Relationships: []
+      }
       lead_gen: {
         Row: {
           created_at: string

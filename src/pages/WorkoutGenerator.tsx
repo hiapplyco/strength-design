@@ -51,6 +51,13 @@ const WorkoutGenerator = () => {
     const startTime = performance.now();
 
     try {
+      // Get current session to ensure user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("You must be logged in to generate workouts");
+      }
+
+      // First log the session input
       const { error: sessionError } = await supabase.from('session_io').insert({
         weather_prompt: params.weatherPrompt,
         selected_exercises: params.selectedExercises,
@@ -65,6 +72,7 @@ const WorkoutGenerator = () => {
         console.error('Error storing session:', sessionError);
       }
 
+      // Generate the workout
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           ...params,
@@ -74,12 +82,23 @@ const WorkoutGenerator = () => {
 
       if (error) {
         console.error('Error generating workout:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate workout. Please try again.",
-          variant: "destructive",
+        throw error;
+      }
+
+      // Save to generated_workouts table
+      const { error: saveError } = await supabase
+        .from('generated_workouts')
+        .insert({
+          user_id: session.user.id,
+          workout_data: data,
+          title: `${numberOfDays}-Day Workout Plan`,
+          tags: [params.fitnessLevel],
+          summary: `${numberOfDays}-day workout plan generated with ${params.selectedExercises.length} selected exercises`
         });
-        return;
+
+      if (saveError) {
+        console.error('Error saving workout:', saveError);
+        // Don't throw here - we still want to show the workout even if saving fails
       }
 
       const sessionDuration = Math.round(performance.now() - startTime);
@@ -104,7 +123,7 @@ const WorkoutGenerator = () => {
       console.error('Error generating workout:', error);
       toast({
         title: "Error",
-        description: "Failed to generate workout. Please try again.",
+        description: error.message || "Failed to generate workout. Please try again.",
         variant: "destructive",
       });
     } finally {

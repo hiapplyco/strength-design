@@ -20,7 +20,7 @@ export const Navbar = () => {
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-[60] bg-black/80 backdrop-blur-sm border-b border-border shadow-sm transition-transform duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-border shadow-sm transition-transform duration-300 ${
         visible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >

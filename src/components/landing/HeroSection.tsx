@@ -46,7 +46,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
               className="bg-destructive text-white hover:bg-destructive/90 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"
             >
               <Rocket className="w-6 h-6" />
-              Try Free Generator
+              Sign Up / Log In
             </Button>
           </motion.div>
           <ContactDialog buttonText="Schedule a Demo" variant="outline" />
@@ -75,7 +75,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
                   className="bg-white text-black hover:bg-gray-100 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"
                 >
                   <Gift className="w-6 h-6" />
-                  Generate Free Workout
+                  Sign Up Now
                 </Button>
               </motion.div>
             </div>

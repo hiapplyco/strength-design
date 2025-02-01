@@ -36,19 +36,39 @@ export function Editor({ content = '', onSave }: EditorProps) {
     if (editor && content) {
       try {
         const parsedContent = JSON.parse(content);
-        if (parsedContent.content) {
-          // Remove markdown code block indicators if present
-          const cleanContent = parsedContent.content
-            .replace(/```html[\s\S]*?```/g, '') // Remove entire code blocks
-            .replace(/^```html\n?/, '')         // Remove opening tag
-            .replace(/\n?```$/, '')             // Remove closing tag
-            .trim();                            // Clean up whitespace
-          console.log('Setting markdown content:', cleanContent);
-          editor.commands.setContent(cleanContent);
-        } else {
-          console.log('Setting regular content:', content);
-          editor.commands.setContent(content);
-        }
+        console.log('Parsed content:', parsedContent);
+        
+        let formattedContent = '';
+        
+        // Format the workout data into a readable document
+        Object.entries(parsedContent).forEach(([day, data]: [string, any]) => {
+          formattedContent += `<h1>${day}</h1>\n`;
+          
+          if (data.description) {
+            formattedContent += `<p><strong>Focus:</strong> ${data.description}</p>\n`;
+          }
+          
+          if (data.warmup) {
+            formattedContent += `<h2>Warmup</h2>\n<p>${data.warmup}</p>\n`;
+          }
+          
+          if (data.strength) {
+            formattedContent += `<h2>Strength</h2>\n<p>${data.strength}</p>\n`;
+          }
+          
+          if (data.workout) {
+            formattedContent += `<h2>Workout</h2>\n<p>${data.workout}</p>\n`;
+          }
+          
+          if (data.notes) {
+            formattedContent += `<h2>Notes</h2>\n<p>${data.notes}</p>\n`;
+          }
+          
+          formattedContent += '<hr/>\n';
+        });
+        
+        console.log('Setting formatted content:', formattedContent);
+        editor.commands.setContent(formattedContent);
       } catch (error) {
         console.log('Setting direct content:', content);
         editor.commands.setContent(content);
@@ -71,16 +91,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
         console.error('Error formatting workout:', error);
         throw error;
       }
-
-      // Clean the response content more thoroughly
-      const cleanContent = data.content
-        .replace(/```html[\s\S]*?```/g, '') // Remove entire code blocks
-        .replace(/^```html\n?/, '')         // Remove opening tag
-        .replace(/\n?```$/, '')             // Remove closing tag
-        .trim();                            // Clean up whitespace
       
-      console.log('Received formatted content:', cleanContent);
-      return cleanContent;
+      console.log('Received formatted content:', data.content);
+      return data.content;
     } catch (error) {
       console.error('Error in formatWorkoutContent:', error);
       throw error;

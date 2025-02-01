@@ -1,24 +1,27 @@
-import { BrowserRouter as Router } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Toaster } from "@/components/ui/toaster";
-import { AppContent } from "./components/layout/AppContent";
-
-const queryClient = new QueryClient();
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import Index from "./pages/Index";
+import WorkoutGenerator from "./pages/WorkoutGenerator";
+import DocumentEditor from "./pages/DocumentEditor";
+import GeneratedWorkouts from "./pages/GeneratedWorkouts";
+import VideoAnalysis from "./pages/VideoAnalysis";
+import SharedDocument from "./pages/SharedDocument";
+import Pricing from "./pages/Pricing";
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" enableSystem>
-      <TooltipProvider>
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <AppContent />
-            <Toaster />
-          </Router>
-        </QueryClientProvider>
-      </TooltipProvider>
-    </ThemeProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/workout-generator" element={<WorkoutGenerator />} />
+        <Route path="/document-editor" element={<DocumentEditor />} />
+        <Route path="/generated-workouts" element={<GeneratedWorkouts />} />
+        <Route path="/video-analysis" element={<VideoAnalysis />} />
+        <Route path="/shared-document/:id" element={<SharedDocument />} />
+        <Route path="/pricing" element={<Pricing />} />
+      </Routes>
+      <Toaster />
+    </Router>
   );
 }
 

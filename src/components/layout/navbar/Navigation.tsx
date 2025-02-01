@@ -1,37 +1,27 @@
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { EmailSignup } from "./EmailSignup";
-import { Activity, Dumbbell } from "lucide-react";
+import { Dumbbell, FileText } from "lucide-react";
 
-export const Navigation = ({ isMobile = false, onMobileMenuClose }: { isMobile?: boolean; onMobileMenuClose?: () => void }) => {
-  const navigate = useNavigate();
+interface NavigationProps {
+  className?: string;
+}
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    if (isMobile && onMobileMenuClose) {
-      onMobileMenuClose();
-    }
-  };
-
+export function Navigation({ className }: NavigationProps) {
   return (
-    <div className={`${isMobile ? 'space-y-2' : 'flex items-center space-x-4'}`}>
-      <Button
-        className={`${isMobile ? "w-full justify-start" : ""} gap-2`}
-        variant="ghost"
-        onClick={() => handleNavigation('/workout-generator')}
-      >
-        <Dumbbell className="h-4 w-4" />
-        Workout Generator
+    <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
+      <Button asChild variant="ghost" className="text-sm font-medium transition-colors hover:text-primary">
+        <Link to="/workout-generator" className="flex items-center gap-2">
+          <Dumbbell className="h-4 w-4" />
+          Generate Workout
+        </Link>
       </Button>
-      <Button
-        className={`${isMobile ? "w-full justify-start" : ""} gap-2`}
-        variant="ghost"
-        onClick={() => handleNavigation('/pricing')}
-      >
-        <Activity className="h-4 w-4" />
-        Pricing
+      <Button asChild variant="ghost" className="text-sm font-medium transition-colors hover:text-primary">
+        <Link to="/generated-workouts" className="flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          My Workouts
+        </Link>
       </Button>
-      <EmailSignup />
-    </div>
+    </nav>
   );
-};
+}

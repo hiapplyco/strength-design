@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { VideoPreview } from './VideoPreview';
+import { VideoControls } from './VideoControls';
+import { UploadStatus } from './UploadStatus';
 
 interface VideoRecorderProps {
   onAnalyzeVideo?: (videoUrl: string) => void;
@@ -160,76 +162,21 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({ onAnalyzeVideo }) => {
   return (
     <div className="w-full max-w-xl mx-auto bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
       <h2 className="text-2xl font-bold mb-4 text-white">Record and Upload Video</h2>
-      <video
-        ref={videoRef}
-        className="w-full aspect-video rounded-md bg-black/80 mb-4"
-        autoPlay
-        muted
+      <VideoPreview videoRef={videoRef} />
+      <VideoControls
+        isWebcamOn={isWebcamOn}
+        recording={recording}
+        recordedChunks={recordedChunks}
+        uploading={uploading}
+        publicUrl={publicUrl}
+        onStartWebcam={startWebcam}
+        onStopWebcam={stopWebcam}
+        onStartRecording={startRecording}
+        onStopRecording={stopRecording}
+        onUploadVideo={uploadVideo}
+        onAnalyzeVideo={handleAnalyze}
       />
-      <div className="flex gap-2 flex-wrap">
-        {!isWebcamOn ? (
-          <Button 
-            onClick={startWebcam}
-            className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
-          >
-            Start Webcam
-          </Button>
-        ) : (
-          <>
-            {!recording ? (
-              <Button 
-                onClick={startRecording}
-                className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
-              >
-                Start Recording
-              </Button>
-            ) : (
-              <Button 
-                onClick={stopRecording}
-                variant="destructive"
-              >
-                Stop Recording
-              </Button>
-            )}
-            <Button 
-              onClick={stopWebcam}
-              variant="destructiveSecondary"
-            >
-              Stop Webcam
-            </Button>
-          </>
-        )}
-        {!recording && recordedChunks.length > 0 && (
-          <Button 
-            onClick={uploadVideo} 
-            disabled={uploading}
-            className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
-          >
-            {uploading ? "Uploading..." : "Upload Video"}
-          </Button>
-        )}
-        {publicUrl && onAnalyzeVideo && (
-          <Button
-            onClick={handleAnalyze}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            Analyze Video
-          </Button>
-        )}
-      </div>
-      {publicUrl && (
-        <div className="mt-4 p-4 bg-green-950/50 rounded-md">
-          <p className="text-green-400 mb-2">Video uploaded successfully!</p>
-          <a
-            href={publicUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-300 underline"
-          >
-            View Video
-          </a>
-        </div>
-      )}
+      <UploadStatus publicUrl={publicUrl} />
     </div>
   );
 };

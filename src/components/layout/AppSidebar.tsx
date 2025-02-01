@@ -38,7 +38,10 @@ export function AppSidebar() {
   const session = useAuthStateManager();
   const { toast } = useToast();
 
-  const handleNavigation = (path: string, requiresAuth: boolean) => {
+  const handleNavigation = (path: string, requiresAuth: boolean, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (requiresAuth && !session) {
       toast({
         title: "Authentication Required",
@@ -47,6 +50,7 @@ export function AppSidebar() {
       });
       return;
     }
+    
     navigate(path);
   };
 
@@ -74,7 +78,7 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton 
-                    onClick={() => handleNavigation(item.path, item.requiresAuth)}
+                    onClick={(e: React.MouseEvent) => handleNavigation(item.path, item.requiresAuth, e)}
                     className="flex items-center gap-2 w-full"
                   >
                     {item.icon}

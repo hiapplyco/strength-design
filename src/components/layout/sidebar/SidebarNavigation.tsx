@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { FileText, Dumbbell, Video, DollarSign, Database } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useAuthStateManager } from "@/hooks/useAuthStateManager";
@@ -15,7 +15,6 @@ const menuItems = [
 export const SidebarNavigation = () => {
   const session = useAuthStateManager();
   const { toast } = useToast();
-  const location = useLocation();
 
   const handleAuthCheck = (requiresAuth: boolean, e: React.MouseEvent) => {
     if (requiresAuth && !session) {
@@ -37,9 +36,10 @@ export const SidebarNavigation = () => {
           <NavLink 
             to={item.path}
             onClick={(e) => handleAuthCheck(item.requiresAuth, e)}
+            end
             className={({ isActive }) =>
               `flex items-center gap-2 w-full p-2 rounded-md transition-colors ${
-                isActive || location.pathname.startsWith(item.path)
+                isActive
                   ? "bg-accent text-accent-foreground"
                   : "text-white hover:bg-accent/80 hover:text-accent-foreground"
               }`

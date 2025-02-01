@@ -10,7 +10,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <HeaderSection />
-      <VideoSection />
+      <HeroSection />
 
       <div 
         className="relative bg-cover bg-center bg-fixed"

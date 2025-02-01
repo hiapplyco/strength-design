@@ -13,13 +13,12 @@ const Index = () => {
 
   useEffect(() => {
     if (session) {
-      navigate('/workout-generator');
+      navigate('/workout-generator', { replace: true });
     }
   }, [session, navigate]);
 
-  // If user is authenticated, don't render the landing page content
   if (session) {
-    return null; // Return null while redirecting
+    return null;
   }
 
   return (

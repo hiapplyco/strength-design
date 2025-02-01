@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
   Home, 
   FileText, 
@@ -36,24 +36,26 @@ const menuItems = [
 export function AppSidebar() {
   const session = useAuthStateManager();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleAuthCheck = (requiresAuth: boolean) => {
+  const handleNavigation = (path: string, requiresAuth: boolean) => {
     if (requiresAuth && !session) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to access this feature",
         variant: "destructive",
       });
-      return false;
+      return;
     }
-    return true;
+    navigate(path);
   };
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-2xl font-collegiate text-accent tracking-wider">
+          <Link to={session ? "/workout-generator" : "/"} className="text-2xl font-collegiate text-accent tracking-wider">
             STRENGTH.DESIGN
           </Link>
           <SidebarTrigger>
@@ -72,18 +74,15 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <Link 
-                    to={item.path}
-                    onClick={(e) => {
-                      if (!handleAuthCheck(item.requiresAuth)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className="flex items-center gap-2 w-full p-2 rounded-md hover:bg-accent"
+                  <button
+                    onClick={() => handleNavigation(item.path, item.requiresAuth)}
+                    className={`flex items-center gap-2 w-full p-2 rounded-md hover:bg-accent ${
+                      location.pathname === item.path ? 'bg-accent text-accent-foreground' : ''
+                    }`}
                   >
                     {item.icon}
                     <span>{item.text}</span>
-                  </Link>
+                  </button>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

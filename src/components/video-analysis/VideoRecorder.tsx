@@ -3,7 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
-const VideoRecorder: React.FC = () => {
+interface VideoRecorderProps {
+  onAnalyzeVideo?: (videoUrl: string) => void;
+}
+
+const VideoRecorder: React.FC<VideoRecorderProps> = ({ onAnalyzeVideo }) => {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -147,6 +151,12 @@ const VideoRecorder: React.FC = () => {
     setRecordedChunks([]);
   };
 
+  const handleAnalyze = () => {
+    if (publicUrl && onAnalyzeVideo) {
+      onAnalyzeVideo(publicUrl);
+    }
+  };
+
   return (
     <div className="w-full max-w-xl mx-auto bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
       <h2 className="text-2xl font-bold mb-4 text-white">Record and Upload Video</h2>
@@ -196,6 +206,14 @@ const VideoRecorder: React.FC = () => {
             className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
           >
             {uploading ? "Uploading..." : "Upload Video"}
+          </Button>
+        )}
+        {publicUrl && onAnalyzeVideo && (
+          <Button
+            onClick={handleAnalyze}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            Analyze Video
           </Button>
         )}
       </div>

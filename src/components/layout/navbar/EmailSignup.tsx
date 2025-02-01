@@ -1,72 +1,30 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useNavigate } from "react-router-dom";
 
 export const EmailSignup = () => {
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showEmailInput, setShowEmailInput] = useState(false);
-  const { toast } = useToast();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    if (!email.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter your email",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const { error } = await supabase
-        .from("lead_gen")
-        .insert([{ email }]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success!",
-        description: "Thank you for signing up. We'll keep you updated!",
-      });
-      
-      setEmail("");
-      setShowEmailInput(false);
-    } catch (error: any) {
-      console.error("Lead submission error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleAuthSuccess = () => {
+    navigate('/workout-generator');
   };
 
-  return showEmailInput ? (
-    <div className="flex items-center gap-2">
-      <Input
-        type="email"
-        placeholder="Enter your email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-64"
-        disabled={isSubmitting}
-      />
+  return (
+    <>
       <Button 
-        onClick={handleSubmit}
-        disabled={isSubmitting}
+        onClick={() => setShowAuthDialog(true)}
+        variant="default"
       >
-        {isSubmitting ? "Submitting..." : "Submit"}
+        Sign Up / Log In
       </Button>
-    </div>
-  ) : (
-    <Button onClick={() => setShowEmailInput(true)}>
-      Sign Up
-    </Button>
+
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onOpenChange={setShowAuthDialog}
+        onSuccess={handleAuthSuccess}
+      />
+    </>
   );
 };

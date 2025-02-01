@@ -123,21 +123,13 @@ export function Editor({ content = '', onSave }: EditorProps) {
     if (!editor) return;
     
     try {
-      const workoutData = JSON.parse(content);
-      console.log('Publishing workout data:', workoutData);
-      
-      const markdownContent = await formatWorkoutContent(workoutData);
-      console.log('Setting markdown content:', markdownContent);
-      
-      editor.commands.setContent(markdownContent);
-      
-      await publishDocument(editor.getHTML(), onSave);
+      // Get the current editor content instead of making a new API call
+      const currentContent = editor.getHTML();
+      await publishDocument(currentContent, onSave);
     } catch (error) {
       console.error('Error in handlePublish:', error);
-      console.log('Content is not workout data, publishing as is');
-      await publishDocument(editor.getHTML(), onSave);
     }
-  }, [editor, content, formatWorkoutContent, publishDocument, onSave]);
+  }, [editor, publishDocument, onSave]);
 
   if (!editor) return null;
 

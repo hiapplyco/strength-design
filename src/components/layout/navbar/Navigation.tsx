@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Dumbbell, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface NavigationProps {
   isMobile?: boolean;
@@ -14,10 +16,32 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
   };
 
   return (
-    <nav className={`${isMobile ? 'flex flex-col space-y-2' : 'flex items-center space-x-4'}`}>
-      <Link to="/workout-generator" onClick={handleClick}>
-        <Button variant="ghost">Workout Generator</Button>
-      </Link>
+    <nav className={cn(
+      "flex items-center",
+      isMobile ? "flex-col space-y-2" : "space-x-4 lg:space-x-6"
+    )}>
+      <Button 
+        asChild 
+        variant="ghost" 
+        className="text-sm font-medium transition-colors hover:text-primary"
+        onClick={handleClick}
+      >
+        <Link to="/workout-generator" className="flex items-center gap-2">
+          <Dumbbell className="h-4 w-4" />
+          Generate Workout
+        </Link>
+      </Button>
+      <Button 
+        asChild 
+        variant="ghost" 
+        className="text-sm font-medium transition-colors hover:text-primary"
+        onClick={handleClick}
+      >
+        <Link to="/generated-workouts" className="flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          My Workouts
+        </Link>
+      </Button>
       <Link to="/document-editor" onClick={handleClick}>
         <Button variant="ghost">Document Editor</Button>
       </Link>

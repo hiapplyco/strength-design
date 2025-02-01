@@ -14,8 +14,8 @@ const Index = () => {
           zIndex: 0
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none z-[1]" />
-        <div className="relative z-[2]">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" style={{ zIndex: 1 }} />
+        <div className="relative" style={{ zIndex: 2 }}>
           <HeaderSection />
           <HeroSection />
         </div>

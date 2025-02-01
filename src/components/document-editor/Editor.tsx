@@ -39,8 +39,10 @@ export function Editor({ content = '', onSave }: EditorProps) {
         if (parsedContent.content) {
           // Remove markdown code block indicators if present
           const cleanContent = parsedContent.content
-            .replace(/^```html\n?/, '')
-            .replace(/\n?```$/, '');
+            .replace(/```html[\s\S]*?```/g, '') // Remove entire code blocks
+            .replace(/^```html\n?/, '')         // Remove opening tag
+            .replace(/\n?```$/, '')             // Remove closing tag
+            .trim();                            // Clean up whitespace
           console.log('Setting markdown content:', cleanContent);
           editor.commands.setContent(cleanContent);
         } else {
@@ -70,10 +72,12 @@ export function Editor({ content = '', onSave }: EditorProps) {
         throw error;
       }
 
-      // Clean the response content
+      // Clean the response content more thoroughly
       const cleanContent = data.content
-        .replace(/^```html\n?/, '')
-        .replace(/\n?```$/, '');
+        .replace(/```html[\s\S]*?```/g, '') // Remove entire code blocks
+        .replace(/^```html\n?/, '')         // Remove opening tag
+        .replace(/\n?```$/, '')             // Remove closing tag
+        .trim();                            // Clean up whitespace
       
       console.log('Received formatted content:', cleanContent);
       return cleanContent;

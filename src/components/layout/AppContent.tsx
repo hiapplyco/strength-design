@@ -28,7 +28,7 @@ export const AppContent = () => {
     <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
       <HeaderSection />
-      <div className="flex-grow">
+      <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/best-app-of-day" element={<BestAppOfDay />} />
@@ -38,7 +38,7 @@ export const AppContent = () => {
           <Route path="/workout-generator" element={<WorkoutGenerator />} />
           <Route path="/video-analysis" element={<VideoAnalysis />} />
         </Routes>
-      </div>
+      </main>
       <Footer />
       <Toaster />
       <Sonner />

@@ -16,7 +16,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
       className="relative flex flex-col items-center space-y-8 pt-12 pb-20 w-full"
       aria-label="Scientific Strength Programming Platform"
     >
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="relative z-10 text-center space-y-4 w-full px-4">
         <h1 className="text-4xl md:text-6xl font-oswald text-primary dark:text-white">
           Evidence-Based Strength Programming

@@ -6,9 +6,10 @@ import {
   ScrollText, 
   Video, 
   DollarSign,
-  Menu
+  UserPlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EmailSignup } from "./EmailSignup";
 
 export interface NavigationProps {
   isMobile?: boolean;
@@ -82,6 +83,9 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
           Pricing
         </Link>
       </Button>
+      <div className="flex items-center gap-2">
+        <EmailSignup />
+      </div>
     </nav>
   );
 };

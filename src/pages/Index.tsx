@@ -15,7 +15,7 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => (
 const Index = () => {
   return (
     <>
-      <main className="min-h-screen pt-32">
+      <main className="min-h-screen">
         <div 
           className="relative bg-cover bg-center bg-fixed"
           style={{

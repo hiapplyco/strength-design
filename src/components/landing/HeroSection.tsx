@@ -1,10 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ContactDialog } from "./ContactDialog";
 import { VideoSection } from "./VideoSection";
-import { GenerateWorkoutButton } from "@/components/GenerateWorkoutButton";
 import { Rocket, Gift } from "lucide-react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +21,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
 
   return (
     <section 
-      className="relative flex flex-col items-center space-y-8 pt-12 pb-20 w-full"
+      className="relative flex flex-col items-center space-y-8 py-12 w-full bg-black/40 backdrop-blur-sm"
       aria-label="Scientific Strength Programming Platform"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-transparent backdrop-blur-[2px]" />

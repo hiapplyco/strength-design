@@ -24,20 +24,22 @@ export const AppContent = () => {
   }, [handleConsoleError]);
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
       <HeaderSection />
+      <div className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/best-app-of-day" element={<BestAppOfDay />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/document-editor" element={<DocumentEditor />} />
+          <Route path="/shared-document/:id" element={<SharedDocument />} />
+          <Route path="/workout-generator" element={<WorkoutGenerator />} />
+          <Route path="/video-analysis" element={<VideoAnalysis />} />
+        </Routes>
+      </div>
       <Toaster />
       <Sonner />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/best-app-of-day" element={<BestAppOfDay />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/document-editor" element={<DocumentEditor />} />
-        <Route path="/shared-document/:id" element={<SharedDocument />} />
-        <Route path="/workout-generator" element={<WorkoutGenerator />} />
-        <Route path="/video-analysis" element={<VideoAnalysis />} />
-      </Routes>
-    </>
+    </div>
   );
 };

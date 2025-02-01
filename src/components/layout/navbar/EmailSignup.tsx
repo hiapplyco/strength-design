@@ -5,13 +5,13 @@ import { useNavigate } from "react-router-dom";
 import { UserPlus, Weight, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthStateManager } from "@/hooks/useAuthStateManager";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const EmailSignup = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const session = useAuthStateManager();
+  const { session } = useAuth();
 
   const handleAuthSuccess = () => {
     navigate('/workout-generator');

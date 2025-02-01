@@ -13,11 +13,19 @@ import WorkoutGenerator from "@/pages/WorkoutGenerator";
 import VideoAnalysis from "@/pages/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { useAuthStateManager } from "@/hooks/useAuthStateManager";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const session = useAuthStateManager();
+  const { session, isLoading } = useAuth();
   const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!session) {
     return <Navigate to="/" state={{ from: location }} replace />;
@@ -28,7 +36,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 export const AppContent = () => {
   const handleConsoleError = useErrorHandler();
-  const session = useAuthStateManager();
+  const { session, isLoading } = useAuth();
 
   useEffect(() => {
     window.addEventListener('error', handleConsoleError);
@@ -36,6 +44,14 @@ export const AppContent = () => {
       window.removeEventListener('error', handleConsoleError);
     };
   }, [handleConsoleError]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <>

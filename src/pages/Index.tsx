@@ -18,16 +18,15 @@ const Index = () => {
     <>
       <HeaderSection />
       <main className="min-h-screen">
-        <HeroSection />
-
         <div 
           className="relative bg-cover bg-center bg-fixed"
           style={{
             backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
           }}
         >
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-          
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-transparent" />
+          <HeroSection />
+
           <SectionWrapper>
             <FeaturesSection />
           </SectionWrapper>

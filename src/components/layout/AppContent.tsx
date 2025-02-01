@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import { HeaderSection } from "@/components/landing/HeaderSection";
+import { Footer } from "@/components/layout/Footer";
 import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
@@ -38,6 +39,7 @@ export const AppContent = () => {
           <Route path="/video-analysis" element={<VideoAnalysis />} />
         </Routes>
       </div>
+      <Footer />
       <Toaster />
       <Sonner />
     </div>

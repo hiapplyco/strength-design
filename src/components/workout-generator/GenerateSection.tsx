@@ -28,9 +28,7 @@ export function GenerateSection({
         <Button 
           onClick={() => {
             if (isValid && !isGenerating) {
-              requestAnimationFrame(() => {
-                onGenerate();
-              });
+              onGenerate();
             }
           }}
           disabled={isGenerating || !isValid}

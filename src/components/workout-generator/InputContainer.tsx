@@ -55,12 +55,8 @@ export function InputContainer({
   });
 
   const startGenerating = () => {
-    // Set isGenerating immediately for the animation
     setIsGenerating(true);
-    // Use requestAnimationFrame to ensure the state update is processed
-    requestAnimationFrame(() => {
-      handleGenerateWithWeather(numberOfDays);
-    });
+    handleGenerateWithWeather(numberOfDays);
   };
 
   return (

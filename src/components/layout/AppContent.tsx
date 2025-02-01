@@ -51,7 +51,6 @@ export const AppContent = () => {
               } />
               <Route path="/best-app-of-day" element={<BestAppOfDay />} />
               <Route path="/pricing" element={<Pricing />} />
-              
               <Route path="/document-editor" element={
                 <ProtectedRoute>
                   <DocumentEditor />
@@ -77,7 +76,6 @@ export const AppContent = () => {
                   <GeneratedWorkouts />
                 </ProtectedRoute>
               } />
-
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

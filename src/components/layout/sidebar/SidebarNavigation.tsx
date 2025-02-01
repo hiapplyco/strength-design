@@ -36,7 +36,6 @@ export const SidebarNavigation = () => {
           <NavLink 
             to={item.path}
             onClick={(e) => handleAuthCheck(item.requiresAuth, e)}
-            end
             className={({ isActive }) =>
               `flex items-center gap-2 w-full p-2 rounded-md transition-colors ${
                 isActive

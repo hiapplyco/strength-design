@@ -1,10 +1,27 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { HeaderSection } from "@/components/landing/HeaderSection";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
+import { useAuthStateManager } from "@/hooks/useAuthStateManager";
 
 const Index = () => {
+  const session = useAuthStateManager();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (session) {
+      navigate('/workout-generator');
+    }
+  }, [session, navigate]);
+
+  // If user is authenticated, don't render the landing page content
+  if (session) {
+    return null; // Return null while redirecting
+  }
+
   return (
     <div className="min-h-screen">
       <div 

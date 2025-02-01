@@ -1,7 +1,7 @@
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { generateShareUrl } from './editorUtils';
 import { useDocumentPublisher } from './hooks/useDocumentPublisher';
 import { DocumentEditorContent } from './EditorContent';
@@ -32,7 +32,8 @@ export function Editor({ content = '', onSave }: EditorProps) {
     },
   });
 
-  useEffect(() => {
+  // Memoized function to update the editor content
+  const setEditorContent = useCallback(() => {
     if (editor && content) {
       try {
         // Try to parse the content as JSON
@@ -55,7 +56,11 @@ export function Editor({ content = '', onSave }: EditorProps) {
     }
   }, [editor, content]);
 
-  const formatWorkoutContent = async (workouts: any) => {
+  useEffect(() => {
+    setEditorContent();
+  }, [setEditorContent]);
+
+  const formatWorkoutContent = useCallback(async (workouts: any) => {
     try {
       console.log('Formatting workout content:', workouts);
       const { data, error } = await supabase.functions.invoke('generate-tiptap-document', {
@@ -73,9 +78,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
       console.error('Error in formatWorkoutContent:', error);
       throw error;
     }
-  };
+  }, []);
 
-  const handleShare = async (platform: 'facebook' | 'twitter' | 'linkedin') => {
+  const handleShare = useCallback(async (platform: 'facebook' | 'twitter' | 'linkedin') => {
     if (!shareableLink) return;
     const url = generateShareUrl(platform, shareableLink);
     try {
@@ -83,9 +88,9 @@ export function Editor({ content = '', onSave }: EditorProps) {
     } catch (error) {
       console.error('Error opening share window:', error);
     }
-  };
+  }, [shareableLink]);
 
-  const handlePublish = async () => {
+  const handlePublish = useCallback(async () => {
     if (!editor) return;
     
     try {
@@ -108,7 +113,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
       console.log('Content is not workout data, publishing as is');
       await publishDocument(editor.getHTML(), onSave);
     }
-  };
+  }, [editor, content, formatWorkoutContent, publishDocument, onSave]);
 
   if (!editor) return null;
 

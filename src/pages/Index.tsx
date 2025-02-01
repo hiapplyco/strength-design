@@ -21,7 +21,7 @@ const Index = () => {
           backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" />
         <HeroSection />
 
         <SectionWrapper>

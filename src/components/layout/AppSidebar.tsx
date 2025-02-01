@@ -44,7 +44,9 @@ export function AppSidebar() {
         description: "Please sign in to access this feature",
         variant: "destructive",
       });
+      return false;
     }
+    return true;
   };
 
   return (
@@ -77,10 +79,11 @@ export function AppSidebar() {
                     to={item.path}
                     onClick={(e) => handleAuthCheck(item.requiresAuth, e)}
                     className={({ isActive }) =>
-                      `flex items-center gap-2 w-full p-2 rounded-md hover:bg-accent transition-colors ${
-                        isActive ? "bg-accent text-accent-foreground" : ""
+                      `flex items-center gap-2 w-full p-2 rounded-md hover:bg-accent/80 transition-colors ${
+                        isActive ? "bg-accent text-accent-foreground" : "text-white hover:text-accent-foreground"
                       }`
                     }
+                    end={item.path === '/'}
                   >
                     {item.icon}
                     <span>{item.text}</span>

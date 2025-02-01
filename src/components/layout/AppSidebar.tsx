@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { 
   Home, 
   FileText, 
@@ -35,6 +35,7 @@ const menuItems = [
 export function AppSidebar() {
   const session = useAuthStateManager();
   const { toast } = useToast();
+  const location = useLocation();
 
   const handleAuthCheck = (requiresAuth: boolean, e: React.MouseEvent) => {
     if (requiresAuth && !session) {
@@ -78,10 +79,10 @@ export function AppSidebar() {
                   <NavLink 
                     to={item.path}
                     onClick={(e) => handleAuthCheck(item.requiresAuth, e)}
-                    end={true}
+                    end={item.path === '/'} // Only use end for home route
                     className={({ isActive }) =>
                       `flex items-center gap-2 w-full p-2 rounded-md transition-colors ${
-                        isActive
+                        isActive || (item.path !== '/' && location.pathname.startsWith(item.path))
                           ? "bg-accent text-accent-foreground"
                           : "text-white hover:bg-accent/80 hover:text-accent-foreground"
                       }`

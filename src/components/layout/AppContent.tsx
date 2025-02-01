@@ -21,6 +21,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   if (!session) {
+    // Store the attempted URL to redirect back after login
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
@@ -80,6 +81,9 @@ export const AppContent = () => {
                   <GeneratedWorkouts />
                 </ProtectedRoute>
               } />
+
+              {/* Catch all route - redirect to home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
         </div>

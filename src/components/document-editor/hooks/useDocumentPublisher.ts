@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { copyToClipboard } from '../editorUtils';
+import { useNavigate } from 'react-router-dom';
 
 export function useDocumentPublisher() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [shareableLink, setShareableLink] = useState<string>('');
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -62,7 +64,6 @@ export function useDocumentPublisher() {
 
       if (updateError) {
         console.error('Error updating document URL:', updateError);
-        // Don't throw here, as the document is still created
       }
 
       setShareableLink(shareLink);
@@ -76,6 +77,14 @@ export function useDocumentPublisher() {
         description: copySuccess 
           ? "The shareable link has been copied to your clipboard."
           : "Your document has been published and can now be shared.",
+      });
+
+      // Navigate to video analysis with the content
+      navigate('/video-analysis', { 
+        state: { 
+          workoutScript: content,
+          documentId: data.id
+        }
       });
 
     } catch (error) {

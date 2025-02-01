@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,12 +6,15 @@ import { VideoUpload } from "./VideoUpload";
 import { AnalysisForm } from "./AnalysisForm";
 import { useVideoProcessing } from "@/hooks/useVideoProcessing";
 import { Teleprompter } from "./Teleprompter";
+import { useLocation } from "react-router-dom";
 
 export const VideoAnalysis = () => {
+  const location = useLocation();
   const [movement, setMovement] = useState("");
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [teleprompterPosition, setTeleprompterPosition] = useState(0);
-  const [workoutScript] = useState(`
+  const [workoutScript, setWorkoutScript] = useState(
+    location.state?.workoutScript || `
 Warm-up (5-10 minutes):
 - Light jogging in place
 - Arm circles (10 each direction)
@@ -125,6 +128,11 @@ Cool-down (5 minutes):
     <Card className="p-6 space-y-6">
       <h2 className="text-2xl font-bold text-center">Video Analysis</h2>
       
+      <Teleprompter 
+        script={workoutScript}
+        onPositionChange={setTeleprompterPosition}
+      />
+
       <VideoUpload
         onFileSelect={handleFileSelect}
         selectedFile={selectedFile}
@@ -136,11 +144,6 @@ Cool-down (5 minutes):
         onAnalyze={handleAnalyzeVideo}
         isAnalyzing={isAnalyzing}
         disabled={!selectedFile}
-      />
-
-      <Teleprompter 
-        script={workoutScript}
-        onPositionChange={setTeleprompterPosition}
       />
 
       {analysisResult && (

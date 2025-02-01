@@ -126,6 +126,9 @@ Cool-down (5 minutes):
 
   useEffect(() => {
     console.log('Workout script received:', location.state?.workoutScript);
+    if (location.state?.workoutScript) {
+      setWorkoutScript(location.state.workoutScript);
+    }
   }, [location.state]);
 
   return (

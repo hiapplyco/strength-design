@@ -24,7 +24,6 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
-      // Get the current origin for dynamic base URL
       const baseUrl = window.location.origin;
       
       const { data, error } = await supabase
@@ -32,7 +31,7 @@ export function useDocumentPublisher() {
         .insert({
           content: content,
           title: 'Workout Document',
-          url: `${baseUrl}/shared-document/` // We'll append the ID after we get it
+          url: `${baseUrl}/shared-document/`
         })
         .select('id')
         .single();
@@ -53,10 +52,8 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
-      // Generate shareable link using the document ID and base URL
       const shareLink = `${baseUrl}/shared-document/${data.id}`;
       
-      // Update the document with the complete URL
       const { error: updateError } = await supabase
         .from('documents')
         .update({ url: shareLink })
@@ -69,7 +66,6 @@ export function useDocumentPublisher() {
       setShareableLink(shareLink);
       console.log('Generated share link:', shareLink);
 
-      // Copy to clipboard and show toast
       const copySuccess = await copyToClipboard(shareLink);
       
       toast({

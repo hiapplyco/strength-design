@@ -1,27 +1,32 @@
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Dumbbell, FileText } from "lucide-react";
 
-interface NavigationProps {
-  className?: string;
+export interface NavigationProps {
+  isMobile?: boolean;
+  onMobileMenuClose?: () => void;
 }
 
-export function Navigation({ className }: NavigationProps) {
+export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => {
+  const handleClick = () => {
+    if (isMobile && onMobileMenuClose) {
+      onMobileMenuClose();
+    }
+  };
+
   return (
-    <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
-      <Button asChild variant="ghost" className="text-sm font-medium transition-colors hover:text-primary">
-        <Link to="/workout-generator" className="flex items-center gap-2">
-          <Dumbbell className="h-4 w-4" />
-          Generate Workout
-        </Link>
-      </Button>
-      <Button asChild variant="ghost" className="text-sm font-medium transition-colors hover:text-primary">
-        <Link to="/generated-workouts" className="flex items-center gap-2">
-          <FileText className="h-4 w-4" />
-          My Workouts
-        </Link>
-      </Button>
+    <nav className={`${isMobile ? 'flex flex-col space-y-2' : 'flex items-center space-x-4'}`}>
+      <Link to="/workout-generator" onClick={handleClick}>
+        <Button variant="ghost">Workout Generator</Button>
+      </Link>
+      <Link to="/document-editor" onClick={handleClick}>
+        <Button variant="ghost">Document Editor</Button>
+      </Link>
+      <Link to="/video-analysis" onClick={handleClick}>
+        <Button variant="ghost">Video Analysis</Button>
+      </Link>
+      <Link to="/pricing" onClick={handleClick}>
+        <Button variant="ghost">Pricing</Button>
+      </Link>
     </nav>
   );
-}
+};

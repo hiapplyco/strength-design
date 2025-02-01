@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
 import Index from "./pages/Index";
 import WorkoutGenerator from "./pages/WorkoutGenerator";
 import DocumentEditor from "./pages/DocumentEditor";
@@ -20,7 +19,6 @@ function App() {
         <Route path="/shared-document/:id" element={<SharedDocument />} />
         <Route path="/pricing" element={<Pricing />} />
       </Routes>
-      <Toaster />
     </Router>
   );
 }

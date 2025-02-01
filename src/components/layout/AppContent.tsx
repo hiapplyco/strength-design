@@ -27,18 +27,20 @@ export const AppContent = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
-      <HeaderSection />
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/best-app-of-day" element={<BestAppOfDay />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/document-editor" element={<DocumentEditor />} />
-          <Route path="/shared-document/:id" element={<SharedDocument />} />
-          <Route path="/workout-generator" element={<WorkoutGenerator />} />
-          <Route path="/video-analysis" element={<VideoAnalysis />} />
-        </Routes>
-      </main>
+      <div className="pt-16"> {/* Add padding to account for fixed navbar */}
+        <HeaderSection />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/best-app-of-day" element={<BestAppOfDay />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/document-editor" element={<DocumentEditor />} />
+            <Route path="/shared-document/:id" element={<SharedDocument />} />
+            <Route path="/workout-generator" element={<WorkoutGenerator />} />
+            <Route path="/video-analysis" element={<VideoAnalysis />} />
+          </Routes>
+        </main>
+      </div>
       <Footer />
       <Toaster />
       <Sonner />

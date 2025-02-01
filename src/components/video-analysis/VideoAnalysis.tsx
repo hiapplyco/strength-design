@@ -5,10 +5,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { VideoUpload } from "./VideoUpload";
 import { AnalysisForm } from "./AnalysisForm";
 import { useVideoProcessing } from "@/hooks/useVideoProcessing";
+import { Teleprompter } from "./Teleprompter";
 
 export const VideoAnalysis = () => {
   const [movement, setMovement] = useState("");
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [teleprompterPosition, setTeleprompterPosition] = useState(0);
+  const [workoutScript] = useState(`
+Warm-up (5-10 minutes):
+- Light jogging in place
+- Arm circles (10 each direction)
+- Hip rotations (10 each direction)
+- Leg swings (10 each leg)
+
+Main Workout:
+1. Squats
+   - 3 sets of 12 reps
+   - Focus on form and depth
+
+2. Push-ups
+   - 3 sets of 10 reps
+   - Keep core tight
+
+3. Lunges
+   - 3 sets of 10 per leg
+   - Maintain balance
+
+Cool-down (5 minutes):
+- Light stretching
+- Deep breathing
+- Relaxation
+  `);
+
   const { toast } = useToast();
   const {
     selectedFile,
@@ -110,10 +138,18 @@ export const VideoAnalysis = () => {
         disabled={!selectedFile}
       />
 
+      <Teleprompter 
+        script={workoutScript}
+        onPositionChange={setTeleprompterPosition}
+      />
+
       {analysisResult && (
         <div className="mt-4 p-4 bg-muted rounded-lg">
           <h3 className="font-semibold mb-2">Analysis Results:</h3>
           <p className="whitespace-pre-wrap">{analysisResult}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Teleprompter position: {teleprompterPosition}
+          </p>
         </div>
       )}
     </Card>

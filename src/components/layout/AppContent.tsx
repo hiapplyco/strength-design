@@ -15,13 +15,11 @@ import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useAuthStateManager } from "@/hooks/useAuthStateManager";
 
-// Protected route wrapper component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const session = useAuthStateManager();
   const location = useLocation();
 
   if (!session) {
-    // Store the attempted URL to redirect back after login
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
@@ -48,14 +46,12 @@ export const AppContent = () => {
           <AppSidebar />
           <main className="flex-1 overflow-auto">
             <Routes>
-              {/* Public routes */}
               <Route path="/" element={
                 session ? <Navigate to="/workout-generator" replace /> : <Index />
               } />
               <Route path="/best-app-of-day" element={<BestAppOfDay />} />
               <Route path="/pricing" element={<Pricing />} />
               
-              {/* Protected routes */}
               <Route path="/document-editor" element={
                 <ProtectedRoute>
                   <DocumentEditor />
@@ -82,7 +78,6 @@ export const AppContent = () => {
                 </ProtectedRoute>
               } />
 
-              {/* Catch all route - redirect to home */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

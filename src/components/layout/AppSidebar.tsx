@@ -1,6 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { 
-  Home, 
   FileText, 
   Dumbbell, 
   Video, 
@@ -24,10 +23,9 @@ import { useAuthStateManager } from "@/hooks/useAuthStateManager";
 import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
-  { path: '/', icon: <Home className="h-5 w-5" />, text: 'Home', requiresAuth: false },
-  { path: '/document-editor', icon: <FileText className="h-5 w-5" />, text: 'Documents', requiresAuth: true },
   { path: '/workout-generator', icon: <Dumbbell className="h-5 w-5" />, text: 'Generate Workout', requiresAuth: true },
   { path: '/generated-workouts', icon: <Database className="h-5 w-5" />, text: 'My Workouts', requiresAuth: true },
+  { path: '/document-editor', icon: <FileText className="h-5 w-5" />, text: 'Document Workout', requiresAuth: true },
   { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Videos', requiresAuth: true },
   { path: '/pricing', icon: <DollarSign className="h-5 w-5" />, text: 'Pricing', requiresAuth: false },
 ];
@@ -55,7 +53,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
           <NavLink
-            to={session ? "/workout-generator" : "/"}
+            to="/workout-generator"
             className="text-2xl font-collegiate text-accent tracking-wider hover:text-accent/80 transition-colors"
           >
             STRENGTH.DESIGN
@@ -79,10 +77,9 @@ export function AppSidebar() {
                   <NavLink 
                     to={item.path}
                     onClick={(e) => handleAuthCheck(item.requiresAuth, e)}
-                    end={item.path === '/'} // Only use end for home route
                     className={({ isActive }) =>
                       `flex items-center gap-2 w-full p-2 rounded-md transition-colors ${
-                        isActive || (item.path !== '/' && location.pathname.startsWith(item.path))
+                        isActive || location.pathname.startsWith(item.path)
                           ? "bg-accent text-accent-foreground"
                           : "text-white hover:bg-accent/80 hover:text-accent-foreground"
                       }`

@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  return children;
 };
 
 export const AppContent = () => {

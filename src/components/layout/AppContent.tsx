@@ -27,20 +27,17 @@ export const AppContent = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
-      <div className="flex-grow flex flex-col pt-20">
-        <main className="flex-grow relative z-0">
-          <HeaderSection />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/best-app-of-day" element={<BestAppOfDay />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/document-editor" element={<DocumentEditor />} />
-            <Route path="/shared-document/:id" element={<SharedDocument />} />
-            <Route path="/workout-generator" element={<WorkoutGenerator />} />
-            <Route path="/video-analysis" element={<VideoAnalysis />} />
-          </Routes>
-        </main>
-      </div>
+      <main className="flex-grow pt-16">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/best-app-of-day" element={<BestAppOfDay />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/document-editor" element={<DocumentEditor />} />
+          <Route path="/shared-document/:id" element={<SharedDocument />} />
+          <Route path="/workout-generator" element={<WorkoutGenerator />} />
+          <Route path="/video-analysis" element={<VideoAnalysis />} />
+        </Routes>
+      </main>
       <Footer />
       <Toaster />
       <Sonner />

@@ -3,6 +3,7 @@ import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { HeaderSection } from "@/components/landing/HeaderSection";
 
 const SectionWrapper = ({ children }: { children: React.ReactNode }) => (
   <section className="relative">
@@ -15,7 +16,8 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => (
 const Index = () => {
   return (
     <>
-      <main className="min-h-screen pt-16">
+      <div className="min-h-screen">
+        <HeaderSection />
         <div 
           className="relative bg-cover bg-center bg-fixed"
           style={{
@@ -37,7 +39,7 @@ const Index = () => {
             <TestimonialsSection />
           </SectionWrapper>
         </div>
-      </main>
+      </div>
       <Footer />
     </>
   );

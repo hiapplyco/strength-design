@@ -14,24 +14,29 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
   const animationRef = useRef<number>();
   const lastScrollPosition = useRef(0);
 
+  // Reset scroll position if the script changes
+  useEffect(() => {
+    lastScrollPosition.current = 0;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo(0, 0);
+    }
+  }, [script]);
+
   useEffect(() => {
     if (playing && scrollRef.current) {
       const scroll = () => {
         if (!scrollRef.current) return;
-        
         lastScrollPosition.current += speed;
         scrollRef.current.scrollTo(0, lastScrollPosition.current);
         
         if (onPositionChange) {
           onPositionChange(lastScrollPosition.current);
         }
-        
         animationRef.current = requestAnimationFrame(scroll);
       };
 
       animationRef.current = requestAnimationFrame(scroll);
     }
-
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -39,32 +44,35 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
     };
   }, [playing, speed, onPositionChange]);
 
-  const togglePlay = () => setPlaying(!playing);
+  const togglePlay = () => setPlaying((prev) => !prev);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <label className="text-white">Speed: {speed.toFixed(1)}x</label>
-        <input
-          type="range"
-          min="0.5"
-          max="5"
-          step="0.5"
-          value={speed}
-          onChange={(e) => setSpeed(parseFloat(e.target.value))}
-          className="w-1/2"
-        />
-        
-        <label className="text-white">Font size: {fontSize}px</label>
-        <input
-          type="range"
-          min="14"
-          max="32"
-          step="1"
-          value={fontSize}
-          onChange={(e) => setFontSize(parseFloat(e.target.value))}
-          className="w-1/2"
-        />
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-white">Speed: {speed.toFixed(1)}x</label>
+          <input
+            type="range"
+            min="0.5"
+            max="5"
+            step="0.5"
+            value={speed}
+            onChange={(e) => setSpeed(parseFloat(e.target.value))}
+            className="w-40"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-white">Font size: {fontSize}px</label>
+          <input
+            type="range"
+            min="14"
+            max="32"
+            step="1"
+            value={fontSize}
+            onChange={(e) => setFontSize(parseFloat(e.target.value))}
+            className="w-40"
+          />
+        </div>
       </div>
 
       <button 

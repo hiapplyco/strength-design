@@ -7,6 +7,7 @@ import { AnalysisForm } from "./AnalysisForm";
 import { useVideoProcessing } from "@/hooks/useVideoProcessing";
 import { Teleprompter } from "./Teleprompter";
 import { useLocation } from "react-router-dom";
+import VideoRecorder from "./VideoRecorder";
 
 export const VideoAnalysis = () => {
   const location = useLocation();
@@ -107,42 +108,45 @@ export const VideoAnalysis = () => {
   };
 
   return (
-    <Card className="p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-center">Video Analysis</h2>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <VideoUpload
-            onFileSelect={handleFileSelect}
-            selectedFile={selectedFile}
-          />
-          
-          <AnalysisForm
-            movement={movement}
-            setMovement={setMovement}
-            onAnalyze={handleAnalyzeVideo}
-            isAnalyzing={isAnalyzing}
-            disabled={!selectedFile}
-          />
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed pt-24"
+         style={{
+           backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
+         }}>
+      <div className="min-h-screen bg-black/75 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <h1 className="text-4xl font-bold text-white mb-8 text-center">Video Analysis</h1>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+            <div className="space-y-6">
+              <VideoRecorder />
+              
+              <AnalysisForm
+                movement={movement}
+                setMovement={setMovement}
+                onAnalyze={handleAnalyzeVideo}
+                isAnalyzing={isAnalyzing}
+                disabled={!selectedFile}
+              />
 
-          {analysisResult && (
-            <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-semibold mb-2">Analysis Results:</h3>
-              <p className="whitespace-pre-wrap">{analysisResult}</p>
+              {analysisResult && (
+                <div className="p-4 bg-muted rounded-lg">
+                  <h3 className="font-semibold mb-2">Analysis Results:</h3>
+                  <p className="whitespace-pre-wrap">{analysisResult}</p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {workoutScript && (
-          <div className="bg-black/25 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
-            <h3 className="text-xl font-semibold mb-4">Workout Script</h3>
-            <Teleprompter 
-              script={workoutScript}
-              onPositionChange={setTeleprompterPosition}
-            />
+            {workoutScript && (
+              <div className="bg-black/25 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
+                <h3 className="text-xl font-semibold mb-4 text-white">Workout Script</h3>
+                <Teleprompter 
+                  script={workoutScript}
+                  onPositionChange={setTeleprompterPosition}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </Card>
+    </div>
   );
 };

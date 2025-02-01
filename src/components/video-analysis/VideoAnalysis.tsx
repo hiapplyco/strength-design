@@ -23,6 +23,17 @@ export const VideoAnalysis = () => {
     handleFileSelect,
   } = useVideoProcessing();
 
+  useEffect(() => {
+    if (location.state?.workoutScript) {
+      // Convert HTML to plain text for the teleprompter
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = location.state.workoutScript;
+      const plainText = tempDiv.textContent || tempDiv.innerText || "";
+      console.log('Setting workout script:', plainText);
+      setWorkoutScript(plainText);
+    }
+  }, [location.state]);
+
   const handleAnalyzeVideo = async () => {
     if (!selectedFile) {
       toast({
@@ -70,14 +81,10 @@ export const VideoAnalysis = () => {
           videoUrl: publicUrl,
           movement: movement,
         }
-      }).catch(error => {
-        console.error('Network error:', error);
-        throw new Error('Failed to connect to analysis service');
       });
 
       if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Analysis service error');
+        throw error;
       }
 
       console.log('Analysis completed successfully');
@@ -98,17 +105,6 @@ export const VideoAnalysis = () => {
       setIsAnalyzing(false);
     }
   };
-
-  useEffect(() => {
-    if (location.state?.workoutScript) {
-      // Convert HTML to plain text for the teleprompter
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = location.state.workoutScript;
-      const plainText = tempDiv.textContent || tempDiv.innerText || "";
-      console.log('Setting workout script:', plainText);
-      setWorkoutScript(plainText);
-    }
-  }, [location.state]);
 
   return (
     <Card className="p-6 space-y-6">

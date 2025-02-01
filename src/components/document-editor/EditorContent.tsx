@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShareSection } from './ShareSection';
 import { EditorToolbar } from './EditorToolbar';
+import { useNavigate } from 'react-router-dom';
 
 interface DocumentEditorContentProps {
   editor: Editor;
@@ -19,6 +20,21 @@ export function DocumentEditorContent({
   onPublish,
   handleShare
 }: DocumentEditorContentProps) {
+  const navigate = useNavigate();
+
+  const handlePublish = async () => {
+    await onPublish();
+    // Get the HTML content from the editor
+    const content = editor.getHTML();
+    
+    // Navigate to video analysis with the content
+    navigate('/video-analysis', { 
+      state: { 
+        workoutScript: content
+      }
+    });
+  };
+
   return (
     <Card className="w-full p-6 bg-background border-primary mb-12">
       <div className="grid grid-cols-1 gap-6">
@@ -37,11 +53,11 @@ export function DocumentEditorContent({
         <div className="flex flex-col gap-4 pt-6 border-t border-primary">
           <div className="flex justify-end">
             <Button 
-              onClick={onPublish}
+              onClick={handlePublish}
               disabled={isPublishing}
               className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[160px]"
             >
-              {isPublishing ? 'Publishing...' : 'Publish Document'}
+              {isPublishing ? 'Publishing...' : 'Publish & Record'}
             </Button>
           </div>
           

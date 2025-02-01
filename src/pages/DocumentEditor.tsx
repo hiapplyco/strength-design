@@ -21,6 +21,10 @@ export default function DocumentEditor() {
     // For example, saving to Supabase or local storage
   };
 
+  const handleBack = () => {
+    navigate('/workout-generator');
+  };
+
   return (
     <div className="relative min-h-screen">
       {/* Background Image */}
@@ -40,7 +44,7 @@ export default function DocumentEditor() {
       <div className="relative z-10 container mx-auto pt-32 pb-24 px-4">
         <div className="flex items-center justify-between mb-8">
           <Button 
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             variant="ghost" 
             className="flex items-center gap-2 text-white hover:text-primary"
           >

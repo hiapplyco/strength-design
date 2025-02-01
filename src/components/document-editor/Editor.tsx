@@ -32,6 +32,16 @@ export function Editor({ content = '', onSave }: EditorProps) {
     },
   });
 
+  const handleShare = useCallback(async (platform: 'facebook' | 'twitter' | 'linkedin') => {
+    if (!shareableLink) return;
+    const url = generateShareUrl(platform, shareableLink);
+    try {
+      await window.open(url, '_blank', 'width=600,height=400');
+    } catch (error) {
+      console.error('Error opening share window:', error);
+    }
+  }, [shareableLink]);
+
   const setEditorContent = useCallback(() => {
     if (editor && content) {
       try {
@@ -95,16 +105,6 @@ export function Editor({ content = '', onSave }: EditorProps) {
   useEffect(() => {
     setEditorContent();
   }, [setEditorContent]);
-
-  const handleShare = useCallback(async (platform: 'facebook' | 'twitter' | 'linkedin') => {
-    if (!shareableLink) return;
-    const url = generateShareUrl(platform, shareableLink);
-    try {
-      await window.open(url, '_blank', 'width=600,height=400');
-    } catch (error) {
-      console.error('Error opening share window:', error);
-    }
-  }, [shareableLink]);
 
   const handlePublish = useCallback(async () => {
     if (!editor) return;

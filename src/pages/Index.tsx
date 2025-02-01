@@ -23,8 +23,10 @@ const Index = () => {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" />
-        <HeaderSection />
-        <HeroSection />
+        <div className="pt-20">
+          <HeaderSection />
+          <HeroSection />
+        </div>
 
         <SectionWrapper>
           <FeaturesSection />

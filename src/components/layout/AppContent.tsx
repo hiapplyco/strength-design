@@ -25,11 +25,9 @@ export const AppContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="bg-black/95 border-b border-primary/20">
-          <div className="container mx-auto">
-            <Navbar />
-          </div>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 border-b border-primary/20">
+        <div className="container mx-auto">
+          <Navbar />
         </div>
       </header>
       <main className="flex-grow pt-16">

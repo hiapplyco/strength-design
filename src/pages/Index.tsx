@@ -1,8 +1,8 @@
+import { HeaderSection } from "@/components/landing/HeaderSection";
+import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { HeaderSection } from "@/components/landing/HeaderSection";
 
 const Index = () => {
   return (
@@ -14,34 +14,14 @@ const Index = () => {
           zIndex: 0
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" style={{ zIndex: 1 }} />
-        <div className="relative" style={{ zIndex: 2 }}>
-          <HeaderSection />
-          <HeroSection />
-        </div>
-
-        <SectionWrapper>
-          <FeaturesSection />
-        </SectionWrapper>
-
-        <SectionWrapper>
-          <SolutionsSection />
-        </SectionWrapper>
-
-        <SectionWrapper>
-          <TestimonialsSection />
-        </SectionWrapper>
+        <HeaderSection />
+        <HeroSection />
+        <FeaturesSection />
+        <SolutionsSection />
+        <TestimonialsSection />
       </div>
     </div>
   );
 };
-
-const SectionWrapper = ({ children }: { children: React.ReactNode }) => (
-  <section className="relative">
-    <div className="container mx-auto px-4 max-w-[1200px]">
-      {children}
-    </div>
-  </section>
-);
 
 export default Index;

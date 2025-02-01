@@ -25,24 +25,26 @@ export const AppContent = () => {
   }, [handleConsoleError]);
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-black">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/best-app-of-day" element={<BestAppOfDay />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/document-editor" element={<DocumentEditor />} />
-            <Route path="/shared-document/:id" element={<SharedDocument />} />
-            <Route path="/workout-generator" element={<WorkoutGenerator />} />
-            <Route path="/video-analysis" element={<VideoAnalysis />} />
-            <Route path="/generated-workouts" element={<GeneratedWorkouts />} />
-          </Routes>
-        </main>
-        <Toaster />
-        <Sonner />
-      </div>
-    </SidebarProvider>
+    <>
+      <Toaster />
+      <Sonner />
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-black">
+          <AppSidebar />
+          <main className="flex-1 overflow-auto">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/best-app-of-day" element={<BestAppOfDay />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/document-editor" element={<DocumentEditor />} />
+              <Route path="/shared-document/:id" element={<SharedDocument />} />
+              <Route path="/workout-generator" element={<WorkoutGenerator />} />
+              <Route path="/video-analysis" element={<VideoAnalysis />} />
+              <Route path="/generated-workouts" element={<GeneratedWorkouts />} />
+            </Routes>
+          </main>
+        </div>
+      </SidebarProvider>
+    </>
   );
 };

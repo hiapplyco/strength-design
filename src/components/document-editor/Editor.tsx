@@ -35,41 +35,48 @@ export function Editor({ content = '', onSave }: EditorProps) {
   const setEditorContent = useCallback(() => {
     if (editor && content) {
       try {
+        // First try to parse as JSON
         const parsedContent = JSON.parse(content);
         console.log('Parsed content:', parsedContent);
         
-        let formattedContent = '';
-        
-        // Format the workout data into a readable document
-        Object.entries(parsedContent).forEach(([day, data]: [string, any]) => {
-          formattedContent += `<h1>${day}</h1>\n`;
+        if (typeof parsedContent === 'string') {
+          // If the parsed content is a string, set it directly
+          editor.commands.setContent(parsedContent);
+        } else {
+          // Format the workout data into a readable document
+          let formattedContent = '';
           
-          if (data.description) {
-            formattedContent += `<p><strong>Focus:</strong> ${data.description}</p>\n`;
-          }
+          Object.entries(parsedContent).forEach(([day, data]: [string, any]) => {
+            formattedContent += `<h1>${day}</h1>\n`;
+            
+            if (data.description) {
+              formattedContent += `<p><strong>Focus:</strong> ${data.description}</p>\n`;
+            }
+            
+            if (data.warmup) {
+              formattedContent += `<h2>Warmup</h2>\n<p>${data.warmup}</p>\n`;
+            }
+            
+            if (data.strength) {
+              formattedContent += `<h2>Strength</h2>\n<p>${data.strength}</p>\n`;
+            }
+            
+            if (data.workout) {
+              formattedContent += `<h2>Workout</h2>\n<p>${data.workout}</p>\n`;
+            }
+            
+            if (data.notes) {
+              formattedContent += `<h2>Notes</h2>\n<p>${data.notes}</p>\n`;
+            }
+            
+            formattedContent += '<hr/>\n';
+          });
           
-          if (data.warmup) {
-            formattedContent += `<h2>Warmup</h2>\n<p>${data.warmup}</p>\n`;
-          }
-          
-          if (data.strength) {
-            formattedContent += `<h2>Strength</h2>\n<p>${data.strength}</p>\n`;
-          }
-          
-          if (data.workout) {
-            formattedContent += `<h2>Workout</h2>\n<p>${data.workout}</p>\n`;
-          }
-          
-          if (data.notes) {
-            formattedContent += `<h2>Notes</h2>\n<p>${data.notes}</p>\n`;
-          }
-          
-          formattedContent += '<hr/>\n';
-        });
-        
-        console.log('Setting formatted content:', formattedContent);
-        editor.commands.setContent(formattedContent);
+          console.log('Setting formatted content:', formattedContent);
+          editor.commands.setContent(formattedContent);
+        }
       } catch (error) {
+        // If parsing fails, set the content directly
         console.log('Setting direct content:', content);
         editor.commands.setContent(content);
       }

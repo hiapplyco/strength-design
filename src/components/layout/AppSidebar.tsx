@@ -34,8 +34,7 @@ const menuItems = [
 export function AppSidebar() {
   const navigate = useNavigate();
 
-  const handleNavigation = (path: string, event: React.MouseEvent) => {
-    event.preventDefault();
+  const handleNavigation = (path: string) => {
     navigate(path);
   };
 
@@ -63,8 +62,8 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton 
-                    onClick={(e) => handleNavigation(item.path, e)}
-                    className="flex items-center gap-2"
+                    onClick={() => handleNavigation(item.path)}
+                    className="flex items-center gap-2 w-full"
                   >
                     {item.icon}
                     <span>{item.text}</span>

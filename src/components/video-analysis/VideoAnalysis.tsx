@@ -114,37 +114,39 @@ export const VideoAnalysis = () => {
     <Card className="p-6 space-y-6">
       <h2 className="text-2xl font-bold text-center">Video Analysis</h2>
       
-      <div className="bg-black/25 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
-        {workoutScript && (
-          <Teleprompter 
-            script={workoutScript}
-            onPositionChange={setTeleprompterPosition}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <VideoUpload
+            onFileSelect={handleFileSelect}
+            selectedFile={selectedFile}
           />
+          
+          <AnalysisForm
+            movement={movement}
+            setMovement={setMovement}
+            onAnalyze={handleAnalyzeVideo}
+            isAnalyzing={isAnalyzing}
+            disabled={!selectedFile}
+          />
+
+          {analysisResult && (
+            <div className="p-4 bg-muted rounded-lg">
+              <h3 className="font-semibold mb-2">Analysis Results:</h3>
+              <p className="whitespace-pre-wrap">{analysisResult}</p>
+            </div>
+          )}
+        </div>
+
+        {workoutScript && (
+          <div className="bg-black/25 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
+            <h3 className="text-xl font-semibold mb-4">Workout Script</h3>
+            <Teleprompter 
+              script={workoutScript}
+              onPositionChange={setTeleprompterPosition}
+            />
+          </div>
         )}
       </div>
-
-      <VideoUpload
-        onFileSelect={handleFileSelect}
-        selectedFile={selectedFile}
-      />
-      
-      <AnalysisForm
-        movement={movement}
-        setMovement={setMovement}
-        onAnalyze={handleAnalyzeVideo}
-        isAnalyzing={isAnalyzing}
-        disabled={!selectedFile}
-      />
-
-      {analysisResult && (
-        <div className="mt-4 p-4 bg-muted rounded-lg">
-          <h3 className="font-semibold mb-2">Analysis Results:</h3>
-          <p className="whitespace-pre-wrap">{analysisResult}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Teleprompter position: {teleprompterPosition}
-          </p>
-        </div>
-      )}
     </Card>
   );
 };

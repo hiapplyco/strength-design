@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Navbar } from "@/components/layout/Navbar";
-import { HeaderSection } from "@/components/landing/HeaderSection";
 import { Footer } from "@/components/layout/Footer";
 import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
@@ -26,7 +25,13 @@ export const AppContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
-      <Navbar />
+      <header className="fixed top-0 left-0 right-0 z-50">
+        <div className="bg-black/95 border-b border-primary/20">
+          <div className="container mx-auto">
+            <Navbar />
+          </div>
+        </div>
+      </header>
       <main className="flex-grow pt-16">
         <Routes>
           <Route path="/" element={<Index />} />

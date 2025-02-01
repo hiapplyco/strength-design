@@ -25,7 +25,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
 
   return (
     <nav className={cn(
-      "flex items-center gap-2 relative z-[10000]",
+      "flex items-center gap-2",
       isMobile ? "flex-col space-y-2" : "space-x-4 lg:space-x-6"
     )}>
       <div className="flex items-center gap-2">

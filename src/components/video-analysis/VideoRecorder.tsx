@@ -7,12 +7,14 @@ const VideoRecorder: React.FC = () => {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [isWebcamOn, setIsWebcamOn] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [uploading, setUploading] = useState(false);
   const [publicUrl, setPublicUrl] = useState<string>('');
 
-  const startRecording = async () => {
+  const startWebcam = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
@@ -22,29 +24,11 @@ const VideoRecorder: React.FC = () => {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
       }
-      const options = { mimeType: 'video/webm;codecs=vp9,opus' };
-      const mediaRecorder = new MediaRecorder(stream, options);
-      mediaRecorderRef.current = mediaRecorder;
-      setRecordedChunks([]);
-
-      mediaRecorder.ondataavailable = (event: BlobEvent) => {
-        if (event.data && event.data.size > 0) {
-          setRecordedChunks((prev) => [...prev, event.data]);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const stream = videoRef.current?.srcObject as MediaStream;
-        if (stream) {
-          stream.getTracks().forEach((track) => track.stop());
-        }
-      };
-
-      mediaRecorder.start();
-      setRecording(true);
+      streamRef.current = stream;
+      setIsWebcamOn(true);
       toast({
-        title: "Recording Started",
-        description: "Your video is now being recorded.",
+        title: "Camera Ready",
+        description: "Your webcam is now active and ready to record.",
       });
     } catch (err: any) {
       console.error("Error accessing media devices:", err);
@@ -56,13 +40,52 @@ const VideoRecorder: React.FC = () => {
     }
   };
 
+  const stopWebcam = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsWebcamOn(false);
+  };
+
+  const startRecording = () => {
+    if (!streamRef.current) return;
+    
+    try {
+      const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+      const mediaRecorder = new MediaRecorder(streamRef.current, options);
+      mediaRecorderRef.current = mediaRecorder;
+      setRecordedChunks([]);
+
+      mediaRecorder.ondataavailable = (event: BlobEvent) => {
+        if (event.data && event.data.size > 0) {
+          setRecordedChunks((prev) => [...prev, event.data]);
+        }
+      };
+
+      mediaRecorder.start();
+      setRecording(true);
+      toast({
+        title: "Recording Started",
+        description: "Your video is now being recorded.",
+      });
+    } catch (err: any) {
+      console.error("Error starting recording:", err);
+      toast({
+        title: "Error",
+        description: "Failed to start recording. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const stopRecording = () => {
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
       setRecording(false);
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
       toast({
         title: "Recording Stopped",
         description: "Your video has been recorded successfully.",
@@ -134,20 +157,37 @@ const VideoRecorder: React.FC = () => {
         muted
       />
       <div className="flex gap-2 flex-wrap">
-        {!recording ? (
+        {!isWebcamOn ? (
           <Button 
-            onClick={startRecording}
+            onClick={startWebcam}
             className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
           >
-            Start Recording
+            Start Webcam
           </Button>
         ) : (
-          <Button 
-            onClick={stopRecording}
-            variant="destructive"
-          >
-            Stop Recording
-          </Button>
+          <>
+            {!recording ? (
+              <Button 
+                onClick={startRecording}
+                className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+              >
+                Start Recording
+              </Button>
+            ) : (
+              <Button 
+                onClick={stopRecording}
+                variant="destructive"
+              >
+                Stop Recording
+              </Button>
+            )}
+            <Button 
+              onClick={stopWebcam}
+              variant="destructiveSecondary"
+            >
+              Stop Webcam
+            </Button>
+          </>
         )}
         {!recording && recordedChunks.length > 0 && (
           <Button 

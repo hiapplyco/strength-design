@@ -75,42 +75,51 @@ export default function GeneratedWorkouts() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8 text-white">My Generated Workouts</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {workouts.length > 0 ? (
-          workouts.map((workout) => (
-            <Card key={workout.id} className="hover:shadow-lg transition-shadow bg-black/50 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">{workout.title || 'Workout Plan'}</CardTitle>
-                <p className="text-sm text-gray-400">
-                  Generated {formatDistanceToNow(new Date(workout.generated_at), { addSuffix: true })}
-                </p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-400 mb-4">
-                  {workout.summary || 'Custom workout plan'}
-                </p>
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{
+        backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
+      }}
+    >
+      <div className="min-h-screen bg-black/75 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-4xl font-bold mb-8 text-white">My Generated Workouts</h1>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {workouts.length > 0 ? (
+              workouts.map((workout) => (
+                <Card key={workout.id} className="hover:shadow-lg transition-shadow bg-black/50 border-gray-800 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-white">{workout.title || 'Workout Plan'}</CardTitle>
+                    <p className="text-sm text-gray-400">
+                      Generated {formatDistanceToNow(new Date(workout.generated_at), { addSuffix: true })}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-400 mb-4">
+                      {workout.summary || 'Custom workout plan'}
+                    </p>
+                    <Button 
+                      onClick={() => handleViewWorkout(workout)}
+                      className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+                    >
+                      View Workout
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-lg text-gray-400">No workouts generated yet.</p>
                 <Button 
-                  onClick={() => handleViewWorkout(workout)}
-                  className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+                  className="mt-4 bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+                  onClick={() => navigate('/workout-generator')}
                 >
-                  View Workout
+                  Generate Your First Workout
                 </Button>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-12">
-            <p className="text-lg text-gray-400">No workouts generated yet.</p>
-            <Button 
-              className="mt-4 bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
-              onClick={() => navigate('/workout-generator')}
-            >
-              Generate Your First Workout
-            </Button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

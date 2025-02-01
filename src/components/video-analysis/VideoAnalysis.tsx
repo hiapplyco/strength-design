@@ -124,14 +124,20 @@ Cool-down (5 minutes):
     }
   };
 
+  useEffect(() => {
+    console.log('Workout script received:', location.state?.workoutScript);
+  }, [location.state]);
+
   return (
     <Card className="p-6 space-y-6">
       <h2 className="text-2xl font-bold text-center">Video Analysis</h2>
       
-      <Teleprompter 
-        script={workoutScript}
-        onPositionChange={setTeleprompterPosition}
-      />
+      <div className="bg-black/25 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
+        <Teleprompter 
+          script={workoutScript}
+          onPositionChange={setTeleprompterPosition}
+        />
+      </div>
 
       <VideoUpload
         onFileSelect={handleFileSelect}

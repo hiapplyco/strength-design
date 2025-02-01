@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AuthErrorAlert } from "./AuthErrorAlert";
 import { AuthForm } from "./AuthForm";
 import { useAuthState } from "./useAuthState";
+import { Button } from "@/components/ui/button";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -10,7 +11,7 @@ interface AuthDialogProps {
 }
 
 export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps) => {
-  const { error, view } = useAuthState(isOpen, onOpenChange, onSuccess);
+  const { error, view, setView } = useAuthState(isOpen, onOpenChange, onSuccess);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -22,6 +23,17 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
         </DialogHeader>
         {error && <AuthErrorAlert error={error} />}
         <AuthForm view={view} onSuccess={onSuccess} />
+        <div className="mt-4 text-center">
+          <Button
+            variant="link"
+            onClick={() => setView(view === "sign_up" ? "sign_in" : "sign_up")}
+            className="text-sm"
+          >
+            {view === "sign_up" 
+              ? "Already have an account? Sign in" 
+              : "Don't have an account? Sign up"}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

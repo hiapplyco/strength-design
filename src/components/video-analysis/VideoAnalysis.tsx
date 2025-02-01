@@ -13,32 +13,7 @@ export const VideoAnalysis = () => {
   const [movement, setMovement] = useState("");
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [teleprompterPosition, setTeleprompterPosition] = useState(0);
-  const [workoutScript, setWorkoutScript] = useState(
-    location.state?.workoutScript || `
-Warm-up (5-10 minutes):
-- Light jogging in place
-- Arm circles (10 each direction)
-- Hip rotations (10 each direction)
-- Leg swings (10 each leg)
-
-Main Workout:
-1. Squats
-   - 3 sets of 12 reps
-   - Focus on form and depth
-
-2. Push-ups
-   - 3 sets of 10 reps
-   - Keep core tight
-
-3. Lunges
-   - 3 sets of 10 per leg
-   - Maintain balance
-
-Cool-down (5 minutes):
-- Light stretching
-- Deep breathing
-- Relaxation
-  `);
+  const [workoutScript, setWorkoutScript] = useState("");
 
   const { toast } = useToast();
   const {
@@ -125,9 +100,13 @@ Cool-down (5 minutes):
   };
 
   useEffect(() => {
-    console.log('Workout script received:', location.state?.workoutScript);
     if (location.state?.workoutScript) {
-      setWorkoutScript(location.state.workoutScript);
+      // Convert HTML to plain text for the teleprompter
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = location.state.workoutScript;
+      const plainText = tempDiv.textContent || tempDiv.innerText || "";
+      console.log('Setting workout script:', plainText);
+      setWorkoutScript(plainText);
     }
   }, [location.state]);
 
@@ -136,10 +115,12 @@ Cool-down (5 minutes):
       <h2 className="text-2xl font-bold text-center">Video Analysis</h2>
       
       <div className="bg-black/25 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
-        <Teleprompter 
-          script={workoutScript}
-          onPositionChange={setTeleprompterPosition}
-        />
+        {workoutScript && (
+          <Teleprompter 
+            script={workoutScript}
+            onPositionChange={setTeleprompterPosition}
+          />
+        )}
       </div>
 
       <VideoUpload

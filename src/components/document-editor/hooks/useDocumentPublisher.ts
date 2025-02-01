@@ -75,7 +75,7 @@ export function useDocumentPublisher() {
           : "Your document has been published and can now be shared.",
       });
 
-      // Navigate to video analysis with the content
+      // Navigate to video analysis with the raw HTML content
       navigate('/video-analysis', { 
         state: { 
           workoutScript: content,

@@ -32,24 +32,22 @@ export function Editor({ content = '', onSave }: EditorProps) {
     },
   });
 
-  // Memoized function to update the editor content
   const setEditorContent = useCallback(() => {
     if (editor && content) {
       try {
-        // Try to parse the content as JSON
         const parsedContent = JSON.parse(content);
-        
-        // If it's our specific format with a content field containing markdown
         if (parsedContent.content) {
-          console.log('Setting markdown content:', parsedContent.content);
-          editor.commands.setContent(parsedContent.content);
+          // Remove markdown code block indicators if present
+          const cleanContent = parsedContent.content
+            .replace(/^```html\n?/, '')
+            .replace(/\n?```$/, '');
+          console.log('Setting markdown content:', cleanContent);
+          editor.commands.setContent(cleanContent);
         } else {
-          // If it's just regular content
           console.log('Setting regular content:', content);
           editor.commands.setContent(content);
         }
       } catch (error) {
-        // If parsing fails, set the content directly
         console.log('Setting direct content:', content);
         editor.commands.setContent(content);
       }
@@ -72,8 +70,13 @@ export function Editor({ content = '', onSave }: EditorProps) {
         throw error;
       }
 
-      console.log('Received formatted content:', data);
-      return data.content;
+      // Clean the response content
+      const cleanContent = data.content
+        .replace(/^```html\n?/, '')
+        .replace(/\n?```$/, '');
+      
+      console.log('Received formatted content:', cleanContent);
+      return cleanContent;
     } catch (error) {
       console.error('Error in formatWorkoutContent:', error);
       throw error;
@@ -94,22 +97,17 @@ export function Editor({ content = '', onSave }: EditorProps) {
     if (!editor) return;
     
     try {
-      // Parse the content as JSON to check if it's workout data
       const workoutData = JSON.parse(content);
       console.log('Publishing workout data:', workoutData);
       
-      // Format the workout content using Gemini
       const markdownContent = await formatWorkoutContent(workoutData);
       console.log('Setting markdown content:', markdownContent);
       
-      // Update the editor with the markdown content
       editor.commands.setContent(markdownContent);
       
-      // Publish the formatted document
       await publishDocument(editor.getHTML(), onSave);
     } catch (error) {
       console.error('Error in handlePublish:', error);
-      // If parsing fails, assume it's regular content
       console.log('Content is not workout data, publishing as is');
       await publishDocument(editor.getHTML(), onSave);
     }
@@ -119,7 +117,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
 
   return (
     <div className="relative min-h-screen">
-      <div className="pt-24">
+      <div className="pt-24 pb-12">
         <DocumentEditorContent 
           editor={editor}
           isPublishing={isPublishing}

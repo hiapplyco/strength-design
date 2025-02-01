@@ -20,7 +20,7 @@ export function DocumentEditorContent({
   handleShare
 }: DocumentEditorContentProps) {
   return (
-    <Card className="w-full p-6 bg-background border-primary">
+    <Card className="w-full p-6 bg-background border-primary mb-12">
       <div className="grid grid-cols-1 gap-6">
         <div className="bg-white rounded-lg">
           <div className="sticky top-20 z-50 bg-white border-b border-border p-4 shadow-sm">

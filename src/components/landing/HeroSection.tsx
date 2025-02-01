@@ -21,7 +21,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
 
   return (
     <section 
-      className="relative flex flex-col items-center space-y-8 py-12 w-full bg-black/40 backdrop-blur-sm mt-8"
+      className="relative flex flex-col items-center space-y-8 py-32 w-full bg-black/40 backdrop-blur-sm"
       aria-label="Scientific Strength Programming Platform"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-transparent backdrop-blur-[2px]" />

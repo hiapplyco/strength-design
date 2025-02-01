@@ -16,12 +16,12 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <div 
-        className="relative bg-cover bg-center bg-fixed pt-24"
+        className="relative bg-cover bg-center bg-fixed"
         style={{
           backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-transparent" />
         <HeroSection />
 
         <SectionWrapper>

@@ -25,12 +25,12 @@ export const AppContent = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-black">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/95 border-b border-primary/20">
+      <header className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-b from-black via-black/95 to-black/80 border-b border-primary/20 backdrop-blur-sm">
         <div className="container mx-auto">
           <Navbar />
         </div>
       </header>
-      <main className="flex-grow pt-16">
+      <main className="flex-grow pt-20">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/best-app-of-day" element={<BestAppOfDay />} />

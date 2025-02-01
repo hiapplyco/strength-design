@@ -21,7 +21,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
           </DialogTitle>
         </DialogHeader>
         {error && <AuthErrorAlert error={error} />}
-        <AuthForm view={view} />
+        <AuthForm view={view} onSuccess={onSuccess} />
       </DialogContent>
     </Dialog>
   );

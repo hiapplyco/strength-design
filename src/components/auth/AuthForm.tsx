@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface AuthFormProps {
   view: "sign_up" | "sign_in";
+  onSuccess?: () => void;
 }
 
-export const AuthForm = ({ view }: AuthFormProps) => {
+export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,12 +24,14 @@ export const AuthForm = ({ view }: AuthFormProps) => {
           password,
         });
         if (error) throw error;
+        onSuccess?.();
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (error) throw error;
+        onSuccess?.();
       }
     } catch (error) {
       console.error('Authentication error:', error);

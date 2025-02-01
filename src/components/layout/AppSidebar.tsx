@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { 
   Home, 
   FileText, 
@@ -15,7 +15,6 @@ import {
   SidebarTrigger,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -36,28 +35,28 @@ const menuItems = [
 export function AppSidebar() {
   const session = useAuthStateManager();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  const handleNavigation = (path: string, requiresAuth: boolean) => {
+  const handleAuthCheck = (requiresAuth: boolean, e: React.MouseEvent) => {
     if (requiresAuth && !session) {
+      e.preventDefault();
       toast({
         title: "Authentication Required",
         description: "Please sign in to access this feature",
         variant: "destructive",
       });
-      return;
     }
-    navigate(path);
   };
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-between">
-          <Link to={session ? "/workout-generator" : "/"} className="text-2xl font-collegiate text-accent tracking-wider">
+          <NavLink
+            to={session ? "/workout-generator" : "/"}
+            className="text-2xl font-collegiate text-accent tracking-wider hover:text-accent/80 transition-colors"
+          >
             STRENGTH.DESIGN
-          </Link>
+          </NavLink>
           <SidebarTrigger>
             <Menu className="h-6 w-6" />
           </SidebarTrigger>
@@ -74,15 +73,18 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <button
-                    onClick={() => handleNavigation(item.path, item.requiresAuth)}
-                    className={`flex items-center gap-2 w-full p-2 rounded-md hover:bg-accent ${
-                      location.pathname === item.path ? 'bg-accent text-accent-foreground' : ''
-                    }`}
+                  <NavLink 
+                    to={item.path}
+                    onClick={(e) => handleAuthCheck(item.requiresAuth, e)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 w-full p-2 rounded-md hover:bg-accent transition-colors ${
+                        isActive ? "bg-accent text-accent-foreground" : ""
+                      }`
+                    }
                   >
                     {item.icon}
                     <span>{item.text}</span>
-                  </button>
+                  </NavLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

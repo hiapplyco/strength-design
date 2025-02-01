@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
@@ -11,6 +11,7 @@ import DocumentEditor from "@/pages/DocumentEditor";
 import SharedDocument from "@/pages/SharedDocument";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
 import VideoAnalysis from "@/pages/VideoAnalysis";
+import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 export const AppContent = () => {
@@ -24,24 +25,24 @@ export const AppContent = () => {
   }, [handleConsoleError]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-black">
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <Navbar />
-      </header>
-      <main className="flex-grow pt-20">
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/best-app-of-day" element={<BestAppOfDay />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/document-editor" element={<DocumentEditor />} />
-          <Route path="/shared-document/:id" element={<SharedDocument />} />
-          <Route path="/workout-generator" element={<WorkoutGenerator />} />
-          <Route path="/video-analysis" element={<VideoAnalysis />} />
-        </Routes>
-      </main>
-      <Footer />
-      <Toaster />
-      <Sonner />
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-black">
+        <AppSidebar />
+        <main className="flex-1 overflow-auto">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/best-app-of-day" element={<BestAppOfDay />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/document-editor" element={<DocumentEditor />} />
+            <Route path="/shared-document/:id" element={<SharedDocument />} />
+            <Route path="/workout-generator" element={<WorkoutGenerator />} />
+            <Route path="/video-analysis" element={<VideoAnalysis />} />
+            <Route path="/generated-workouts" element={<GeneratedWorkouts />} />
+          </Routes>
+        </main>
+        <Toaster />
+        <Sonner />
+      </div>
+    </SidebarProvider>
   );
 };

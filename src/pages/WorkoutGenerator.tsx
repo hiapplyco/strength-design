@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
-import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
@@ -65,6 +64,15 @@ const WorkoutGenerator = () => {
         
         <div className="relative">
           <div className="container mx-auto px-4 max-w-[1200px] pt-24">
+            <div className="text-center mb-16">
+              <h1 className="text-5xl md:text-6xl font-oswald text-accent mb-6">
+                Workout Generator
+              </h1>
+              <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                Create personalized workout programs tailored to your needs. Our AI-powered generator considers your fitness level, available equipment, and specific requirements.
+              </p>
+            </div>
+            
             <GeneratorSection
               generatePrompt={generatePrompt}
               setGeneratePrompt={setGeneratePrompt}

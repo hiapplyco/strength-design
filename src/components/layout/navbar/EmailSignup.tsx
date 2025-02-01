@@ -17,7 +17,7 @@ export const EmailSignup = () => {
       <Button 
         onClick={() => setShowAuthDialog(true)}
         variant="default"
-        className="bg-accent hover:bg-accent/90 text-black font-bold flex items-center gap-2"
+        className="bg-accent hover:bg-accent/90 text-black font-bold flex items-center gap-2 relative z-[10000]"
       >
         <UserPlus className="h-4 w-4" />
         Sign Up / Log In

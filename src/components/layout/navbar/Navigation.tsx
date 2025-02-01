@@ -25,21 +25,23 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
 
   return (
     <nav className={cn(
-      "flex items-center gap-2",
+      "flex items-center gap-2 relative z-[10000]",
       isMobile ? "flex-col space-y-2" : "space-x-4 lg:space-x-6"
     )}>
-      <EmailSignup />
-      <Button 
-        asChild 
-        variant="ghost" 
-        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
-        onClick={handleClick}
-      >
-        <Link to="/pricing">
-          <DollarSign className="h-4 w-4" />
-          Pricing
-        </Link>
-      </Button>
+      <div className="flex items-center gap-2">
+        <EmailSignup />
+        <Button 
+          asChild 
+          variant="ghost" 
+          className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
+          onClick={handleClick}
+        >
+          <Link to="/pricing">
+            <DollarSign className="h-4 w-4" />
+            Pricing
+          </Link>
+        </Button>
+      </div>
       <Button 
         asChild 
         variant="ghost" 

@@ -1,4 +1,3 @@
-import { HeaderSection } from "@/components/landing/HeaderSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
@@ -16,7 +15,6 @@ const SectionWrapper = ({ children }: { children: React.ReactNode }) => (
 const Index = () => {
   return (
     <>
-      <HeaderSection />
       <main className="min-h-screen">
         <div 
           className="relative bg-cover bg-center bg-fixed"

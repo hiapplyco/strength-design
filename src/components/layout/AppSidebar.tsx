@@ -21,20 +21,32 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { EmailSignup } from "./navbar/EmailSignup";
+import { useAuthStateManager } from "@/hooks/useAuthStateManager";
+import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
-  { path: '/', icon: <Home className="h-5 w-5" />, text: 'Home' },
-  { path: '/document-editor', icon: <FileText className="h-5 w-5" />, text: 'Documents' },
-  { path: '/workout-generator', icon: <Dumbbell className="h-5 w-5" />, text: 'Generate Workout' },
-  { path: '/generated-workouts', icon: <Database className="h-5 w-5" />, text: 'My Workouts' },
-  { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Videos' },
-  { path: '/pricing', icon: <DollarSign className="h-5 w-5" />, text: 'Pricing' },
+  { path: '/', icon: <Home className="h-5 w-5" />, text: 'Home', requiresAuth: false },
+  { path: '/document-editor', icon: <FileText className="h-5 w-5" />, text: 'Documents', requiresAuth: true },
+  { path: '/workout-generator', icon: <Dumbbell className="h-5 w-5" />, text: 'Generate Workout', requiresAuth: true },
+  { path: '/generated-workouts', icon: <Database className="h-5 w-5" />, text: 'My Workouts', requiresAuth: true },
+  { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Videos', requiresAuth: true },
+  { path: '/pricing', icon: <DollarSign className="h-5 w-5" />, text: 'Pricing', requiresAuth: false },
 ];
 
 export function AppSidebar() {
   const navigate = useNavigate();
+  const session = useAuthStateManager();
+  const { toast } = useToast();
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path: string, requiresAuth: boolean) => {
+    if (requiresAuth && !session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access this feature",
+        variant: "destructive",
+      });
+      return;
+    }
     navigate(path);
   };
 
@@ -62,7 +74,7 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton 
-                    onClick={() => handleNavigation(item.path)}
+                    onClick={() => handleNavigation(item.path, item.requiresAuth)}
                     className="flex items-center gap-2 w-full"
                   >
                     {item.icon}

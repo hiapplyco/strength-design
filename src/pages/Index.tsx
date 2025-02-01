@@ -3,6 +3,7 @@ import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { HeaderSection } from "@/components/landing/HeaderSection";
 
 const SectionWrapper = ({ children }: { children: React.ReactNode }) => (
   <section className="relative">
@@ -22,6 +23,7 @@ const Index = () => {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" />
+        <HeaderSection />
         <HeroSection />
 
         <SectionWrapper>

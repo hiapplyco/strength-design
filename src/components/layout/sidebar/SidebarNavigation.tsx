@@ -39,8 +39,8 @@ export const SidebarNavigation = () => {
             className={({ isActive }) =>
               `flex items-center gap-2 w-full p-2 rounded-md transition-colors ${
                 isActive
-                  ? "bg-accent text-accent-foreground"
-                  : "text-white hover:bg-accent/80 hover:text-accent-foreground"
+                  ? "bg-[#B08D57] text-white"
+                  : "text-white hover:bg-[#B08D57]/80"
               }`
             }
           >

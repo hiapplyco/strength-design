@@ -45,7 +45,7 @@ export function HeaderActions({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 relative z-10 mr-2">
       {onShare && <ActionButton icon={Share2} onClick={onShare} />}
       <ExportButton onExport={onExport} isExporting={isExporting} />
       <DownloadButton onDownload={handleDownload} />

@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { 
   Home, 
   FileText, 
@@ -78,12 +78,14 @@ export function AppSidebar() {
                   <NavLink 
                     to={item.path}
                     onClick={(e) => handleAuthCheck(item.requiresAuth, e)}
+                    end={true}
                     className={({ isActive }) =>
-                      `flex items-center gap-2 w-full p-2 rounded-md hover:bg-accent/80 transition-colors ${
-                        isActive ? "bg-accent text-accent-foreground" : "text-white hover:text-accent-foreground"
+                      `flex items-center gap-2 w-full p-2 rounded-md transition-colors ${
+                        isActive
+                          ? "bg-accent text-accent-foreground"
+                          : "text-white hover:bg-accent/80 hover:text-accent-foreground"
                       }`
                     }
-                    end={item.path === '/'}
                   >
                     {item.icon}
                     <span>{item.text}</span>

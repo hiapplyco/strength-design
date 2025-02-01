@@ -5,10 +5,10 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
-import { useAuthStateManager } from "@/hooks/useAuthStateManager";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
-  const session = useAuthStateManager();
+  const { session } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

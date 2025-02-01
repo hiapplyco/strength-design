@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { FileText, Dumbbell, Video, DollarSign, Database } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
-import { useAuthStateManager } from "@/hooks/useAuthStateManager";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
@@ -13,7 +13,7 @@ const menuItems = [
 ];
 
 export const SidebarNavigation = () => {
-  const session = useAuthStateManager();
+  const { session } = useAuth();
   const { toast } = useToast();
 
   const handleAuthCheck = (requiresAuth: boolean, e: React.MouseEvent) => {

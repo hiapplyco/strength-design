@@ -14,16 +14,13 @@ export const EmailSignup = () => {
   const { session } = useAuth();
 
   const handleAuthSuccess = () => {
+    setShowAuthDialog(false);
     navigate('/workout-generator');
   };
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "Logged out successfully",
-        description: "Come back soon!",
-      });
       navigate('/');
     } catch (error) {
       toast({

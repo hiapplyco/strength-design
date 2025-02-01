@@ -24,28 +24,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
+      if (mounted) {
+        setSession(session);
+        setIsLoading(false);
+      }
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setIsLoading(false);
-      
-      if (session) {
-        toast({
-          title: "Authenticated",
-          description: "You are now signed in",
-        });
+      if (mounted) {
+        setSession(session);
+        setIsLoading(false);
+        
+        if (session) {
+          toast({
+            title: "Welcome back!",
+            description: "You are now signed in",
+          });
+        } else {
+          toast({
+            title: "Signed out",
+            description: "Come back soon!",
+          });
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [toast]);
 
   return (

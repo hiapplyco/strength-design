@@ -30,7 +30,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
       <Button 
         asChild 
         variant="ghost" 
-        className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
+        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
         onClick={handleClick}
       >
         <Link to="/workout-generator">
@@ -41,7 +41,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
       <Button 
         asChild 
         variant="ghost" 
-        className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
+        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
         onClick={handleClick}
       >
         <Link to="/generated-workouts">
@@ -52,7 +52,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
       <Button 
         asChild 
         variant="ghost" 
-        className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
+        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
         onClick={handleClick}
       >
         <Link to="/document-editor">
@@ -63,7 +63,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
       <Button 
         asChild 
         variant="ghost" 
-        className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
+        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
         onClick={handleClick}
       >
         <Link to="/video-analysis">
@@ -74,7 +74,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
       <Button 
         asChild 
         variant="ghost" 
-        className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
+        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
         onClick={handleClick}
       >
         <Link to="/pricing">

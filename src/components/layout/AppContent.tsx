@@ -27,7 +27,7 @@ export const AppContent = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
-      <div className="flex-grow flex flex-col">
+      <div className="flex-grow flex flex-col pt-16">
         <HeaderSection />
         <main className="flex-grow">
           <Routes>

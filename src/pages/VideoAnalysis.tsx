@@ -1,4 +1,4 @@
-import { VideoAnalysisComponent } from "@/components/video-analysis/VideoAnalysis";
+import { VideoAnalysis as VideoAnalysisComponent } from "@/components/video-analysis/VideoAnalysis";
 import VideoRecorder from "@/components/video-analysis/VideoRecorder";
 
 const VideoAnalysis = () => {

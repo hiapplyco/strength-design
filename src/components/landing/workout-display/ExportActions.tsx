@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CalendarDays, FileText, Download } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,14 +9,12 @@ import {
 import { downloadWorkout } from "@/utils/workout-export";
 
 interface ExportActionsProps {
-  onExportCalendar: () => Promise<void>;
   onCopy: () => Promise<void>;
   isExporting: boolean;
   workoutText: string;
 }
 
 export const ExportActions = ({
-  onExportCalendar,
   onCopy,
   isExporting,
   workoutText
@@ -27,16 +25,6 @@ export const ExportActions = ({
 
   return (
     <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        className="flex items-center gap-2"
-        onClick={onExportCalendar}
-        disabled={isExporting}
-      >
-        <CalendarDays className="w-4 h-4" />
-        Calendar
-      </Button>
-      
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">

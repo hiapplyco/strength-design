@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface WorkoutDisplayHeaderProps {
   resetWorkouts: () => void;
-  onExportCalendar: () => Promise<void>;
   onCopy: () => Promise<void>;
   isExporting: boolean;
   workoutText: string;
@@ -18,7 +17,6 @@ interface WorkoutDisplayHeaderProps {
 
 export const WorkoutDisplayHeader = ({
   resetWorkouts,
-  onExportCalendar,
   onCopy,
   isExporting,
   workoutText,
@@ -45,7 +43,6 @@ export const WorkoutDisplayHeader = ({
     try {
       setIsPublishing(true);
       
-      // Call the Gemini function to format the workout
       const { data, error } = await supabase.functions.invoke('generate-tiptap-document', {
         body: { workouts: allWorkouts }
       });
@@ -60,7 +57,6 @@ export const WorkoutDisplayHeader = ({
         return;
       }
 
-      // Navigate to document editor with the formatted content
       navigate('/document-editor', { 
         state: { 
           content: JSON.stringify(data)
@@ -103,7 +99,6 @@ export const WorkoutDisplayHeader = ({
           </Button>
           
           <ExportActions
-            onExportCalendar={onExportCalendar}
             onCopy={onCopy}
             isExporting={isExporting}
             workoutText={workoutText}

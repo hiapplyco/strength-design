@@ -5,7 +5,6 @@ import { ExportActions } from "./workout-display/ExportActions";
 import { ArrowLeft } from "lucide-react";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { formatWorkoutToMarkdown, formatAllWorkouts } from "@/utils/workout-formatting";
-import { exportToCalendar } from "@/utils/calendar";
 import { useToast } from "@/hooks/use-toast";
 
 interface WorkoutDisplayProps {
@@ -24,30 +23,6 @@ export function WorkoutDisplay({
   const { toast } = useToast();
   const formattedWorkouts = formatAllWorkouts(workouts);
   const workoutText = formatWorkoutToMarkdown(formattedWorkouts);
-
-  const handleExportCalendar = async () => {
-    try {
-      setIsExporting(true);
-      const workoutEvents = Object.entries(workouts).map(([day, workout], index) => ({
-        title: `Day ${index + 1}`,
-        warmup: workout.warmup,
-        workout: workout.workout,
-        notes: workout.notes || '',
-        dayOffset: index
-      }));
-
-      await exportToCalendar(workoutEvents, toast);
-    } catch (error) {
-      console.error('Error exporting to calendar:', error);
-      toast({
-        title: "Error",
-        description: "Failed to export workouts to calendar",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   const handleCopy = async () => {
     try {
@@ -80,7 +55,6 @@ export function WorkoutDisplay({
 
         <WorkoutDisplayHeader
           resetWorkouts={resetWorkouts}
-          onExportCalendar={handleExportCalendar}
           onCopy={handleCopy}
           isExporting={isExporting}
           workoutText={workoutText}
@@ -103,7 +77,6 @@ export function WorkoutDisplay({
         </div>
 
         <ExportActions
-          onExportCalendar={handleExportCalendar}
           onCopy={handleCopy}
           isExporting={isExporting}
           workoutText={workoutText}

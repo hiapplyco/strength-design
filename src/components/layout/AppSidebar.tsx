@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   Home, 
   FileText, 
@@ -32,6 +32,13 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const navigate = useNavigate();
+
+  const handleNavigation = (path: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    navigate(path);
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
@@ -55,11 +62,12 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.path} className="flex items-center gap-2">
-                      {item.icon}
-                      <span>{item.text}</span>
-                    </Link>
+                  <SidebarMenuButton 
+                    onClick={(e) => handleNavigation(item.path, e)}
+                    className="flex items-center gap-2"
+                  >
+                    {item.icon}
+                    <span>{item.text}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

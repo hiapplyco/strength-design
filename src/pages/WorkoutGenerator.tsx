@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { triggerConfetti } from "@/utils/confetti";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
+import { useNavigate } from "react-router-dom";
 
 const DEFAULT_DAYS = 7;
 
@@ -16,6 +17,23 @@ const WorkoutGenerator = () => {
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const [numberOfDays, setNumberOfDays] = useState(DEFAULT_DAYS);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to generate workouts",
+          variant: "destructive",
+        });
+        navigate('/');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate, toast]);
 
   const resetWorkouts = useCallback(() => {
     setWorkouts(null);

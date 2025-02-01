@@ -5,12 +5,22 @@ import { GenerateWorkoutButton } from "@/components/GenerateWorkoutButton";
 import { Rocket, Gift } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {
   children?: React.ReactNode;
 }
 
 export const HeroSection = ({ children }: HeroSectionProps) => {
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAuthSuccess = () => {
+    navigate('/workout-generator');
+  };
+
   return (
     <section 
       className="relative flex flex-col items-center space-y-8 pt-12 pb-20 w-full"
@@ -31,14 +41,13 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Link to="/workout-generator">
-              <Button 
-                className="bg-destructive text-white hover:bg-destructive/90 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"
-              >
-                <Rocket className="w-6 h-6" />
-                Try Free Generator
-              </Button>
-            </Link>
+            <Button 
+              onClick={() => setShowAuthDialog(true)}
+              className="bg-destructive text-white hover:bg-destructive/90 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"
+            >
+              <Rocket className="w-6 h-6" />
+              Try Free Generator
+            </Button>
           </motion.div>
           <ContactDialog buttonText="Schedule a Demo" variant="outline" />
         </div>
@@ -61,14 +70,13 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Link to="/workout-generator">
-                  <Button 
-                    className="bg-white text-black hover:bg-gray-100 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"
-                  >
-                    <Gift className="w-6 h-6" />
-                    Generate Free Workout
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => setShowAuthDialog(true)}
+                  className="bg-white text-black hover:bg-gray-100 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"
+                >
+                  <Gift className="w-6 h-6" />
+                  Generate Free Workout
+                </Button>
               </motion.div>
             </div>
           </div>
@@ -76,6 +84,12 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
       </div>
 
       {children}
+
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onOpenChange={setShowAuthDialog}
+        onSuccess={handleAuthSuccess}
+      />
     </section>
   );
 };

@@ -1,10 +1,6 @@
 import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
 
 export const HeaderSection = () => {
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
-
   return (
     <div className="w-full py-12 relative bg-black border-b border-primary/20">
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent via-black/20 to-black/60 backdrop-blur-[8px] pointer-events-none" />

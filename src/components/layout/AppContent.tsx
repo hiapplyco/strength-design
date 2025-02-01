@@ -26,7 +26,7 @@ export const AppContent = () => {
   return (
     <div className="min-h-screen flex flex-col bg-black">
       <Navbar />
-      <main className="flex-grow relative z-0">
+      <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/best-app-of-day" element={<BestAppOfDay />} />

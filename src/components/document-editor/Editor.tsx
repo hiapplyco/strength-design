@@ -42,6 +42,13 @@ export function Editor({ content = '', onSave }: EditorProps) {
         if (typeof parsedContent === 'string') {
           // If the parsed content is a string, set it directly
           editor.commands.setContent(parsedContent);
+        } else if (parsedContent.content) {
+          // If it's the Gemini response format with a content property
+          const cleanContent = parsedContent.content
+            .replace(/```html|```/g, '') // Remove markdown code block markers
+            .trim();
+          console.log('Setting cleaned Gemini content:', cleanContent);
+          editor.commands.setContent(cleanContent);
         } else {
           // Format the workout data into a readable document
           let formattedContent = '<h1>Weekly Workout Plan</h1>\n\n';
@@ -89,41 +96,10 @@ export function Editor({ content = '', onSave }: EditorProps) {
     setEditorContent();
   }, [setEditorContent]);
 
-  const formatWorkoutContent = useCallback(async (workouts: any) => {
-    try {
-      console.log('Formatting workout content:', workouts);
-      const { data, error } = await supabase.functions.invoke('generate-tiptap-document', {
-        body: { workouts }
-      });
-
-      if (error) {
-        console.error('Error formatting workout:', error);
-        throw error;
-      }
-      
-      console.log('Received formatted content:', data.content);
-      return data.content;
-    } catch (error) {
-      console.error('Error in formatWorkoutContent:', error);
-      throw error;
-    }
-  }, []);
-
-  const handleShare = useCallback(async (platform: 'facebook' | 'twitter' | 'linkedin') => {
-    if (!shareableLink) return;
-    const url = generateShareUrl(platform, shareableLink);
-    try {
-      await window.open(url, '_blank', 'width=600,height=400');
-    } catch (error) {
-      console.error('Error opening share window:', error);
-    }
-  }, [shareableLink]);
-
   const handlePublish = useCallback(async () => {
     if (!editor) return;
     
     try {
-      // Get the current editor content instead of making a new API call
       const currentContent = editor.getHTML();
       await publishDocument(currentContent, onSave);
     } catch (error) {

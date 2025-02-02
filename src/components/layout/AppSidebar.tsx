@@ -1,16 +1,12 @@
-import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { SidebarLogo } from "./sidebar/SidebarLogo";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { EmailSignup } from "./navbar/EmailSignup";
 import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
-  const [isOpen, setIsOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  const { open, toggleSidebar } = useSidebar();
 
   return (
     <>
@@ -20,7 +16,7 @@ export function AppSidebar() {
         onClick={toggleSidebar}
         className="fixed top-4 left-4 z-50 text-accent hover:text-accent/80"
       >
-        {isOpen ? (
+        {open ? (
           <X className="h-6 w-6" />
         ) : (
           <Menu className="h-6 w-6" />
@@ -28,7 +24,7 @@ export function AppSidebar() {
       </Button>
 
       <div className={`fixed top-0 left-0 h-screen w-64 bg-background border-r transform transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
+        open ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="p-4">
           <SidebarLogo />

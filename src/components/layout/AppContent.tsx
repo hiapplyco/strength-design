@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
@@ -51,7 +52,7 @@ export const AppContent = () => {
   }
 
   return (
-    <>
+    <SidebarProvider>
       <Toaster />
       <Sonner />
       <div className="min-h-screen flex w-full bg-black">
@@ -92,6 +93,6 @@ export const AppContent = () => {
           </Routes>
         </main>
       </div>
-    </>
+    </SidebarProvider>
   );
 };

@@ -12,7 +12,6 @@ interface VideoControlsProps {
   onStartRecording: () => void;
   onStopRecording: () => void;
   onUploadVideo: () => void;
-  onAnalyzeVideo?: () => void;
   extraControls?: React.ReactNode;
 }
 
@@ -27,7 +26,6 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   onStartRecording,
   onStopRecording,
   onUploadVideo,
-  onAnalyzeVideo,
   extraControls,
 }) => {
   return (
@@ -75,14 +73,6 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
         >
           {uploading ? "Uploading..." : "Upload Video"}
-        </Button>
-      )}
-      {publicUrl && onAnalyzeVideo && (
-        <Button
-          onClick={onAnalyzeVideo}
-          className="bg-green-600 hover:bg-green-700 text-white"
-        >
-          Analyze Video
         </Button>
       )}
     </div>

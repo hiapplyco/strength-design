@@ -1,29 +1,16 @@
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useVideoProcessing } from "@/hooks/useVideoProcessing";
-import { Teleprompter } from "./Teleprompter";
 import { useLocation } from "react-router-dom";
-import VideoRecorder from "./VideoRecorder";
 import { Camera, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Teleprompter } from "./Teleprompter";
+import VideoRecorder from "./VideoRecorder";
 
 export const VideoAnalysis = () => {
   const location = useLocation();
-  const [movement, setMovement] = useState("");
-  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
-  const [teleprompterPosition, setTeleprompterPosition] = useState(0);
-  const [workoutScript, setWorkoutScript] = useState("");
   const [showRecorder, setShowRecorder] = useState(false);
   const [showTeleprompter, setShowTeleprompter] = useState(false);
-
-  const { toast } = useToast();
-  const {
-    selectedFile,
-    isAnalyzing,
-    setIsAnalyzing,
-    handleFileSelect,
-  } = useVideoProcessing();
+  const [teleprompterPosition, setTeleprompterPosition] = useState(0);
+  const [workoutScript, setWorkoutScript] = useState("");
 
   // Debug logging
   useEffect(() => {
@@ -44,35 +31,6 @@ export const VideoAnalysis = () => {
       setWorkoutScript(plainText);
     }
   }, [location.state]);
-
-  const handleAnalyzeVideo = async (videoUrl: string) => {
-    try {
-      setIsAnalyzing(true);
-      const { data, error } = await supabase.functions.invoke('analyze-video', {
-        body: {
-          videoUrl,
-          movement: movement || "exercise",
-        }
-      });
-
-      if (error) throw error;
-
-      setAnalysisResult(data.result);
-      toast({
-        title: "Analysis Complete",
-        description: "Your video has been successfully analyzed",
-      });
-    } catch (error) {
-      console.error('Error analyzing video:', error);
-      toast({
-        title: "Analysis Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
 
   // Render initial buttons if neither recorder nor teleprompter is active
   if (!showRecorder && !showTeleprompter) {
@@ -128,7 +86,7 @@ export const VideoAnalysis = () => {
                   <div className="flex flex-col space-y-4">
                     <h2 className="text-2xl font-bold text-white mb-4">Record Your Video</h2>
                     <div className="flex-grow">
-                      <VideoRecorder onAnalyzeVideo={handleAnalyzeVideo} />
+                      <VideoRecorder />
                     </div>
                   </div>
                 )}
@@ -146,15 +104,6 @@ export const VideoAnalysis = () => {
                 )}
               </div>
             </div>
-
-            {analysisResult && (
-              <div className="bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
-                <h2 className="text-2xl font-bold text-white mb-4">Analysis Results</h2>
-                <div className="text-white whitespace-pre-wrap">
-                  {analysisResult}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

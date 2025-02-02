@@ -1,5 +1,0 @@
-{
-  "imports": {
-    "@google-cloud/vertexai": "npm:@google-cloud/vertexai@0.5.0"
-  }
-}

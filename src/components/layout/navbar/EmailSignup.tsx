@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useNavigate } from "react-router-dom";
-import { UserPlus, Weight, LogOut } from "lucide-react";
+import { UserPlus, Weight, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export const EmailSignup = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -35,14 +36,19 @@ export const EmailSignup = () => {
     return (
       <div className="flex flex-col items-center gap-2">
         <Weight className="h-8 w-8 text-accent animate-bounce" />
-        <Button 
-          onClick={handleLogout}
-          variant="ghost"
-          className="text-muted-foreground hover:text-accent flex items-center gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={handleLogout}
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-accent"
+          >
+            <LogOut className="h-6 w-6" />
+          </Button>
+          <SidebarTrigger>
+            <Menu className="h-6 w-6" />
+          </SidebarTrigger>
+        </div>
       </div>
     );
   }

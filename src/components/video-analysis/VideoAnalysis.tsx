@@ -73,16 +73,18 @@ export const VideoAnalysis = () => {
           <div className="max-w-7xl mx-auto">
             <div className="bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800 mb-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
+                <div className="min-h-[400px] flex flex-col">
                   <VideoRecorder onAnalyzeVideo={handleAnalyzeVideo} />
                 </div>
 
-                <div>
+                <div className="min-h-[400px] flex flex-col">
                   <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
-                  <Teleprompter 
-                    script={workoutScript || "No workout script available. Please generate a workout first."}
-                    onPositionChange={setTeleprompterPosition}
-                  />
+                  <div className="flex-grow">
+                    <Teleprompter 
+                      script={workoutScript || "No workout script available. Please generate a workout first."}
+                      onPositionChange={setTeleprompterPosition}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

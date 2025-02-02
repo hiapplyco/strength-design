@@ -17,6 +17,7 @@ export const VideoAnalysis = () => {
   const [workoutScript, setWorkoutScript] = useState("");
   const [showEditor, setShowEditor] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const { toast } = useToast();
 
   const generateMonologue = async (content: string) => {
@@ -42,8 +43,15 @@ export const VideoAnalysis = () => {
       
       if (data?.monologue) {
         console.log('Generated monologue:', data.monologue);
-        setWorkoutScript(data.monologue);
+        // Format the monologue by replacing markdown headers and adding proper spacing
+        const formattedMonologue = data.monologue
+          .replace(/###\s+/g, '\n\n')  // Replace markdown headers with line breaks
+          .replace(/\n\s*\n/g, '\n\n')  // Normalize multiple line breaks
+          .trim();
+        
+        setWorkoutScript(formattedMonologue);
         setShowTeleprompter(true);
+        setIsReady(true);
         toast({
           title: "Success",
           description: "Your influencer script is ready!",
@@ -113,6 +121,24 @@ export const VideoAnalysis = () => {
     );
   }
 
+  if (isGenerating) {
+    return (
+      <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
+        style={{
+          backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
+        }}>
+        <div className="min-h-screen bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm flex items-center justify-center">
+          <div className="max-w-2xl mx-auto text-center">
+            <LoadingIndicator className="scale-150">
+              <h2 className="text-2xl font-bold text-white mb-4">Creating Your Influencer Script</h2>
+              <p className="text-gray-300">We're crafting an engaging script for your workout video...</p>
+            </LoadingIndicator>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
       style={{
@@ -125,7 +151,7 @@ export const VideoAnalysis = () => {
           <div className="max-w-7xl mx-auto">
             <div className="bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800 mb-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {showRecorder && (
+                {isReady && showRecorder && (
                   <div className="flex flex-col space-y-4">
                     <h2 className="text-2xl font-bold text-white mb-4">Record Your Video</h2>
                     <div className="flex-grow">
@@ -138,16 +164,12 @@ export const VideoAnalysis = () => {
                   <div className="flex flex-col space-y-4">
                     <h2 className="text-2xl font-bold text-white mb-4">Your Script</h2>
                     <div className="flex-grow">
-                      {isGenerating ? (
-                        <LoadingIndicator>
-                          Creating your influencer script...
-                        </LoadingIndicator>
-                      ) : workoutScript ? (
+                      {workoutScript && (
                         <Teleprompter 
                           script={workoutScript}
                           onPositionChange={setTeleprompterPosition}
                         />
-                      ) : null}
+                      )}
                     </div>
                   </div>
                 )}

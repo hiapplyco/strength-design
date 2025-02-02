@@ -27,14 +27,12 @@ serve(async (req) => {
     Convert this workout plan into an engaging, motivational script that feels natural and conversational.
     
     IMPORTANT FORMATTING REQUIREMENTS:
-    - Use <h1> tags for main sections (like "Warm-up", "Workout", "Cool Down")
-    - Use <h2> tags for subsections
-    - Use <br><br> for clear paragraph breaks between sections
-    - Use bullet points (•) for listing exercises
+    - Start each main section (like "Warm-up", "Workout", "Cool Down") with ### for clear visual breaks
+    - Use double line breaks between sections
+    - Use • for listing exercises
     - Keep sentences short and easy to read
     - Add emojis for visual engagement
     - Include clear verbal transitions between sections
-    - Add emphasis on key form cues with <strong> tags
     
     Here's the workout plan to convert:
     ${workoutPlan}

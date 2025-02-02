@@ -40,7 +40,7 @@ export function WorkoutDisplay({
           allWorkouts={workouts}
         />
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mt-24">
+        <div className="grid gap-8 mt-32 md:mt-24">
           {Object.entries(workouts).map(([day, workout], index) => (
             <WorkoutDayCard 
               key={day} 

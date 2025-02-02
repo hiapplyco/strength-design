@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 
 export const SidebarLogo = () => {
-  const { toggle } = useSidebar();
+  const { toggleSidebar } = useSidebar();
 
   return (
     <div className="flex items-center justify-between">
@@ -15,7 +15,7 @@ export const SidebarLogo = () => {
         STRENGTH.DESIGN
       </NavLink>
       <Button
-        onClick={toggle}
+        onClick={toggleSidebar}
         variant="ghost"
         size="icon"
         title="Toggle Menu"

@@ -1,13 +1,10 @@
-import { Share2, FileSpreadsheet, Copy } from "lucide-react";
-import { ActionButton } from "./ActionButton";
 import { useToast } from "@/hooks/use-toast";
-import { ExportButton } from "./ExportButton";
-import { DownloadButton } from "./DownloadButton";
+import { Button } from "@/components/ui/button";
+import { CalendarDays } from "lucide-react";
 import { formatAllWorkouts } from "@/utils/workout-formatting";
-import { downloadWorkout } from "@/utils/workout-export";
+import { exportToCalendar } from "@/utils/calendar";
 
 interface HeaderActionsProps {
-  onShare?: () => void;
   onExport: () => void;
   isExporting: boolean;
   workoutText: string;
@@ -15,44 +12,43 @@ interface HeaderActionsProps {
 }
 
 export function HeaderActions({
-  onShare,
   onExport,
   isExporting,
-  workoutText,
   allWorkouts,
 }: HeaderActionsProps) {
   const { toast } = useToast();
 
-  const handleCopy = async (text: string) => {
+  const handleExportToCalendar = async () => {
+    if (!allWorkouts) return;
+
+    const events = Object.entries(allWorkouts).map(([day, workout], index) => ({
+      title: `Day ${index + 1}`,
+      warmup: workout.warmup,
+      workout: workout.workout,
+      notes: workout.notes || '',
+      dayOffset: index,
+    }));
+
     try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: "Success",
-        description: "Workout copied to clipboard",
-      });
+      await exportToCalendar(events, toast);
     } catch (error) {
+      console.error('Error exporting to calendar:', error);
       toast({
         title: "Error",
-        description: "Failed to copy workout",
+        description: "Failed to export to calendar",
         variant: "destructive",
       });
     }
   };
 
-  const handleDownload = async (format: 'txt' | 'pdf' | 'csv') => {
-    const content = allWorkouts ? formatAllWorkouts(allWorkouts) : workoutText;
-    await downloadWorkout(format, content);
-  };
-
   return (
-    <div className="flex items-center gap-2 relative z-10 mr-2">
-      {onShare && <ActionButton icon={Share2} onClick={onShare} />}
-      <ExportButton onExport={onExport} isExporting={isExporting} />
-      <DownloadButton onDownload={handleDownload} />
-      <ActionButton 
-        icon={Copy} 
-        onClick={() => handleCopy(workoutText)}
-      />
-    </div>
+    <Button
+      onClick={handleExportToCalendar}
+      disabled={isExporting}
+      className="w-full sm:w-auto text-lg font-oswald font-bold text-black dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[3px] border-black rounded-lg px-4 py-2 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_#C4A052,8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),2px_2px_0px_0px_#C4A052,4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 bg-gradient-to-r from-[#C4A052] to-[#E5C88E]"
+    >
+      <CalendarDays className="w-5 h-5 mr-2" />
+      Export to Calendar
+    </Button>
   );
 }

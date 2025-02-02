@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Database } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { HeaderActions } from "@/components/workout/header/HeaderActions";
 
 interface WorkoutDisplayHeaderProps {
   resetWorkouts: () => void;
@@ -78,6 +79,13 @@ export const WorkoutDisplayHeader = ({
         >
           {isPublishing ? "Publishing..." : "Publish"}
         </Button>
+
+        <HeaderActions
+          onExport={() => {}}
+          isExporting={isExporting}
+          workoutText={workoutText}
+          allWorkouts={allWorkouts}
+        />
       </div>
     </div>
   );

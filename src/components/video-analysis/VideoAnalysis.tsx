@@ -25,6 +25,17 @@ export const VideoAnalysis = () => {
     handleFileSelect,
   } = useVideoProcessing();
 
+  // Add debug logging
+  useEffect(() => {
+    console.log('VideoAnalysis mounted');
+    console.log('Initial showRecorder:', showRecorder);
+    console.log('Initial showTeleprompter:', showTeleprompter);
+  }, []);
+
+  useEffect(() => {
+    console.log('State changed - showRecorder:', showRecorder, 'showTeleprompter:', showTeleprompter);
+  }, [showRecorder, showTeleprompter]);
+
   useEffect(() => {
     if (location.state?.workoutScript) {
       const tempDiv = document.createElement('div');
@@ -64,6 +75,7 @@ export const VideoAnalysis = () => {
   };
 
   if (!showRecorder && !showTeleprompter) {
+    console.log('Rendering initial buttons view');
     return (
       <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
         style={{

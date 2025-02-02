@@ -13,7 +13,7 @@ const VideoAnalysis = () => {
       const { data, error } = await supabase.functions.invoke('analyze-video', {
         body: {
           videoUrl,
-          movement: "exercise", // You might want to make this configurable
+          movement: "exercise",
         }
       });
 
@@ -38,13 +38,13 @@ const VideoAnalysis = () => {
 
   return (
     <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed pt-24"
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
       style={{
         backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
       }}
     >
-      <div className="min-h-screen bg-black/75 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
+        <div className="container mx-auto px-4 pt-16">
           <h1 className="text-4xl font-bold text-white mb-8 text-center">Video Analysis</h1>
           <div className="max-w-4xl mx-auto space-y-8">
             <VideoRecorder onAnalyzeVideo={handleAnalyzeVideo} />

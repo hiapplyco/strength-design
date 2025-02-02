@@ -10,7 +10,7 @@ import Pricing from "@/pages/Pricing";
 import DocumentEditor from "@/pages/DocumentEditor";
 import SharedDocument from "@/pages/SharedDocument";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
-import VideoAnalysis from "@/pages/VideoAnalysis";
+import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useAuth } from "@/contexts/AuthContext";

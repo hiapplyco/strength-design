@@ -25,12 +25,26 @@ serve(async (req) => {
     const prompt = `
     You are a charismatic fitness influencer creating a video script for a workout plan. 
     Convert this workout plan into an engaging, motivational script that feels natural and conversational.
-    Include emojis and enthusiasm, but keep it professional.
-    Make sure to cover all exercises and important form cues.
-    Break down the content into clear sections.
     
-    Workout Plan:
+    IMPORTANT FORMATTING REQUIREMENTS:
+    - Use <h1> tags for main sections (like "Warm-up", "Workout", "Cool Down")
+    - Use <h2> tags for subsections
+    - Use <br><br> for clear paragraph breaks between sections
+    - Use bullet points (•) for listing exercises
+    - Keep sentences short and easy to read
+    - Add emojis for visual engagement
+    - Include clear verbal transitions between sections
+    - Add emphasis on key form cues with <strong> tags
+    
+    Here's the workout plan to convert:
     ${workoutPlan}
+    
+    Remember to:
+    1. Start with an energetic introduction
+    2. Break down the content into clear sections
+    3. End with a motivational closing
+    4. Keep the tone friendly and encouraging
+    5. Include form cues and safety reminders
     `;
 
     const result = await model.generateContent(prompt);

@@ -23,17 +23,39 @@ serve(async (req) => {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     const prompt = `
-    You are a charismatic fitness influencer creating a video script for a workout plan. 
-    Convert this workout plan into an engaging, motivational script that feels natural and conversational.
+    You are a fitness influencer creating a video script for a workout plan. 
+    Convert this workout plan into a directorial script that includes both what to say and how to present it.
     
     IMPORTANT FORMATTING REQUIREMENTS:
-    - Start each main section (like "Warm-up", "Workout", "Cool Down") with ### for clear visual breaks
-    - Use double line breaks between sections
-    - Use • for listing exercises
+    - Use LOTS of line breaks between sections for easy reading
+    - Start each section with [CAMERA SETUP] to describe how to position for recording
+    - Follow with [SCRIPT] for what to say
+    - Use 4 line breaks between major sections
     - Keep sentences short and easy to read
     - Add emojis for visual engagement
     - Include clear verbal transitions between sections
     
+    FORMAT EXAMPLE:
+
+    [CAMERA SETUP]
+    Position camera at medium shot, showing full upper body
+    Stand slightly to the left to demonstrate exercises
+
+
+    [SCRIPT]
+    Hey fitness family! Today we're crushing an amazing full-body workout!
+
+
+
+
+    [CAMERA SETUP]
+    Switch to wide shot to show full body movement
+    Face slightly right to demonstrate proper form
+
+
+    [SCRIPT]
+    Let's start with our warm-up...
+
     Here's the workout plan to convert:
     ${workoutPlan}
     
@@ -41,8 +63,8 @@ serve(async (req) => {
     1. Start with an energetic introduction
     2. Break down the content into clear sections
     3. End with a motivational closing
-    4. Keep the tone friendly and encouraging
-    5. Include form cues and safety reminders
+    4. Include camera positioning for each section
+    5. Add form cues and safety reminders
     `;
 
     const result = await model.generateContent(prompt);

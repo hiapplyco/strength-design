@@ -15,9 +15,9 @@ interface WordSpan {
 
 export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) => {
   const { toast } = useToast();
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(0.25); // Start with slower default speed
   const [playing, setPlaying] = useState(false);
-  const [fontSize, setFontSize] = useState(20);
+  const [fontSize, setFontSize] = useState(32);
   const [mirrorV, setMirrorV] = useState(false);
   const [mirrorH, setMirrorH] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
@@ -99,13 +99,13 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <label className="text-white whitespace-nowrap">Speed: {speed.toFixed(1)}x</label>
+          <label className="text-white whitespace-nowrap">Speed: {speed.toFixed(2)}x</label>
           <Slider
             value={[speed]}
             onValueChange={([value]) => setSpeed(value)}
-            min={0.5}
+            min={0.1}
             max={5}
-            step={0.5}
+            step={0.1}
             className="w-40"
           />
         </div>
@@ -115,7 +115,7 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
             value={[fontSize]}
             onValueChange={([value]) => setFontSize(value)}
             min={14}
-            max={32}
+            max={72}
             step={1}
             className="w-40"
           />
@@ -168,7 +168,7 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
           className="whitespace-pre-wrap text-center"
           style={{ 
             fontSize: `${fontSize}px`, 
-            lineHeight: 1.4,
+            lineHeight: 1.6,
             transform: `scale(${mirrorH ? -1 : 1}, ${mirrorV ? -1 : 1})` 
           }}
         >

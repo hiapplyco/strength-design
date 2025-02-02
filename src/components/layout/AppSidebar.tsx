@@ -5,13 +5,15 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AppSidebar() {
-  const { open } = useSidebar();
+  const { open, openMobile } = useSidebar();
   const isMobile = useIsMobile();
+
+  const isVisible = isMobile ? openMobile : open;
 
   return (
     <div 
-      className={`fixed top-0 left-0 h-screen w-64 bg-background border-r transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
-        open || !isMobile ? 'translate-x-0' : '-translate-x-full'
+      className={`fixed top-0 left-0 h-screen w-64 bg-background border-r transform transition-transform duration-300 ease-in-out ${
+        isVisible ? 'translate-x-0' : '-translate-x-full'
       } z-50`}
     >
       <div className="p-4">

@@ -2,14 +2,16 @@ import { SidebarLogo } from "./sidebar/SidebarLogo";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { EmailSignup } from "./navbar/EmailSignup";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const isMobile = useIsMobile();
 
   return (
-    <div className={`fixed top-0 left-0 h-screen w-64 bg-background border-r transform transition-transform duration-300 ease-in-out ${
-      open ? 'translate-x-0' : '-translate-x-full'
-    }`}>
+    <div className={`fixed top-0 left-0 h-screen w-64 bg-background border-r transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+      open || !isMobile ? 'translate-x-0' : '-translate-x-full'
+    } z-50`}>
       <div className="p-4">
         <SidebarLogo />
         <div className="mt-4">

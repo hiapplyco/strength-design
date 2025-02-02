@@ -18,14 +18,30 @@ const VideoRecorder: React.FC = () => {
 
   const startWebcam = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
+      // iOS Safari requires specific constraints
+      const constraints = {
+        video: {
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        }
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        await videoRef.current.play().catch(err => {
+          console.error("Error playing video:", err);
+          throw new Error("Failed to play video stream");
+        });
       }
+      
       streamRef.current = stream;
       setIsWebcamOn(true);
       toast({
@@ -34,9 +50,21 @@ const VideoRecorder: React.FC = () => {
       });
     } catch (err: any) {
       console.error("Error accessing media devices:", err);
+      let errorMessage = "Error accessing webcam. ";
+      
+      if (err.name === 'NotAllowedError') {
+        errorMessage += "Please grant camera and microphone permissions.";
+      } else if (err.name === 'NotFoundError') {
+        errorMessage += "No camera or microphone found.";
+      } else if (err.name === 'NotReadableError') {
+        errorMessage += "Camera or microphone is already in use.";
+      } else {
+        errorMessage += "Please check your device settings.";
+      }
+      
       toast({
         title: "Error",
-        description: "Error accessing webcam. Please check your device settings.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -57,7 +85,31 @@ const VideoRecorder: React.FC = () => {
     if (!streamRef.current) return;
     
     try {
-      const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+      // Try different MIME types for better iOS compatibility
+      const mimeTypes = [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm',
+        'video/mp4'
+      ];
+      
+      let selectedMimeType = '';
+      for (const mimeType of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType;
+          break;
+        }
+      }
+      
+      if (!selectedMimeType) {
+        throw new Error('No supported MIME type found for recording');
+      }
+
+      const options = { 
+        mimeType: selectedMimeType,
+        videoBitsPerSecond: 2500000 // 2.5 Mbps
+      };
+      
       const mediaRecorder = new MediaRecorder(streamRef.current, options);
       mediaRecorderRef.current = mediaRecorder;
       setRecordedChunks([]);
@@ -68,7 +120,8 @@ const VideoRecorder: React.FC = () => {
         }
       };
 
-      mediaRecorder.start();
+      // Set a data interval of 1 second for more frequent chunks
+      mediaRecorder.start(1000);
       setRecording(true);
       toast({
         title: "Recording Started",
@@ -77,8 +130,8 @@ const VideoRecorder: React.FC = () => {
     } catch (err: any) {
       console.error("Error starting recording:", err);
       toast({
-        title: "Error",
-        description: "Failed to start recording. Please try again.",
+        title: "Recording Error",
+        description: err.message || "Failed to start recording. Your browser might not support video recording.",
         variant: "destructive",
       });
     }
@@ -104,49 +157,53 @@ const VideoRecorder: React.FC = () => {
       });
       return;
     }
-    setUploading(true);
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const fileName = `videos/recording_${Date.now()}.webm`;
-
-    const { error: uploadError } = await supabase
-      .storage
-      .from('videos')
-      .upload(fileName, blob, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: 'video/webm',
-      });
-    setUploading(false);
     
-    if (uploadError) {
-      console.error("Upload error:", uploadError.message);
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload video. Please try again.",
-        variant: "destructive",
+    setUploading(true);
+    try {
+      // Create a Blob with the correct MIME type
+      const blob = new Blob(recordedChunks, { 
+        type: mediaRecorderRef.current?.mimeType || 'video/webm' 
       });
-      return;
-    }
+      const fileName = `videos/recording_${Date.now()}.webm`;
 
-    const { data } = supabase
-      .storage
-      .from('videos')
-      .getPublicUrl(fileName);
+      const { error: uploadError } = await supabase
+        .storage
+        .from('videos')
+        .upload(fileName, blob, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: mediaRecorderRef.current?.mimeType || 'video/webm',
+        });
 
-    if (!data.publicUrl) {
-      toast({
-        title: "Error",
-        description: "Failed to retrieve video URL.",
-        variant: "destructive",
-      });
-    } else {
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase
+        .storage
+        .from('videos')
+        .getPublicUrl(fileName);
+
+      if (!data.publicUrl) {
+        throw new Error("Failed to retrieve video URL");
+      }
+      
       setPublicUrl(data.publicUrl);
       toast({
         title: "Success",
         description: "Video uploaded successfully!",
       });
+      setRecordedChunks([]);
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload video. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
-    setRecordedChunks([]);
   };
 
   return (

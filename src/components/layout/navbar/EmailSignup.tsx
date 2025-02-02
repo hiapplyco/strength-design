@@ -6,21 +6,14 @@ import { UserPlus, Weight, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { 
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTrigger 
-} from "@/components/ui/drawer";
-import { SidebarLogo } from "../sidebar/SidebarLogo";
-import { SidebarNavigation } from "../sidebar/SidebarNavigation";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const EmailSignup = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { toggleSidebar } = useSidebar();
 
   const handleLogout = async () => {
     try {
@@ -52,24 +45,14 @@ export const EmailSignup = () => {
           >
             <LogOut className="h-6 w-6" />
           </Button>
-          <Drawer open={isOpen} onOpenChange={setIsOpen}>
-            <DrawerTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-accent">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent className="h-[95vh]">
-              <DrawerHeader className="p-4">
-                <SidebarLogo />
-                <div className="mt-4">
-                  <div className="text-sm font-medium text-muted-foreground">Navigation</div>
-                  <div className="mt-2">
-                    <SidebarNavigation />
-                  </div>
-                </div>
-              </DrawerHeader>
-            </DrawerContent>
-          </Drawer>
+          <Button 
+            onClick={toggleSidebar}
+            variant="ghost" 
+            size="icon"
+            className="text-muted-foreground hover:text-accent"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
         </div>
       </div>
     );

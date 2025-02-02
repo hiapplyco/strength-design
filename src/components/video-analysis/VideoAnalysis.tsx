@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Camera } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Editor } from "@/components/document-editor/Editor";
 import { LoadingState } from "./LoadingState";
-import { RecordingInterface } from "./RecordingInterface";
+import { LandingView } from "./LandingView";
+import { EditorView } from "./EditorView";
 import { useScriptGeneration } from "./hooks/useScriptGeneration";
 
 export const VideoAnalysis = () => {
@@ -45,42 +43,16 @@ export const VideoAnalysis = () => {
     }
   };
 
+  const handleEditorSave = (content: string) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    const plainText = tempDiv.textContent || tempDiv.innerText || "";
+    generateMonologue(plainText);
+    setShowEditor(false);
+  };
+
   if (isGenerating) {
     return <LoadingState />;
-  }
-
-  if (!showRecorder && !showEditor) {
-    return (
-      <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
-        style={{
-          backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
-        }}>
-        <div className="min-h-screen bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
-          <div className="container mx-auto px-4 pt-16">
-            <div className="bg-black/40 backdrop-blur-sm rounded-xl p-8 mb-16 max-w-3xl mx-auto">
-              <h1 className="text-4xl font-bold text-white mb-4 text-center">
-                Record and Share your workout with the World!
-              </h1>
-              <p className="text-xl text-gray-300 text-center">
-                Create your own workout video with our easy-to-use recording studio. Write a script, use our teleprompter, and record yourself demonstrating exercises to share with the fitness community.
-              </p>
-            </div>
-            
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Button
-                  onClick={handleStartRecording}
-                  className="h-64 bg-accent hover:bg-accent/90 flex flex-col items-center justify-center gap-4 p-8 rounded-xl transition-all duration-300 hover:scale-105"
-                >
-                  <Camera className="h-24 w-24" />
-                  <span className="text-2xl font-semibold">Start Recording</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -89,42 +61,18 @@ export const VideoAnalysis = () => {
         backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
       }}>
       <div className="min-h-screen bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
-        <div className="container mx-auto px-4 pt-16">
-          <div className="bg-black/40 backdrop-blur-sm rounded-xl p-8 mb-8 max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold text-white mb-4 text-center">
-              Record and Share your workout with the World!
-            </h1>
-            <p className="text-xl text-gray-300 text-center">
-              Create your own workout video with our easy-to-use recording studio. Write a script, use our teleprompter, and record yourself demonstrating exercises to share with the fitness community.
-            </p>
-          </div>
-          
-          <div className="max-w-7xl mx-auto">
-            {isReady && showRecorder && (
-              <RecordingInterface
-                workoutScript={workoutScript}
-                teleprompterPosition={teleprompterPosition}
-                setTeleprompterPosition={setTeleprompterPosition}
-              />
-            )}
-
-            {showEditor && !workoutScript && (
-              <div className="flex flex-col space-y-4">
-                <div className="flex-grow">
-                  <Editor 
-                    onSave={(content) => {
-                      const tempDiv = document.createElement('div');
-                      tempDiv.innerHTML = content;
-                      const plainText = tempDiv.textContent || tempDiv.innerText || "";
-                      generateMonologue(plainText);
-                      setShowEditor(false);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        {!showRecorder && !showEditor ? (
+          <LandingView onStartRecording={handleStartRecording} />
+        ) : (
+          <EditorView
+            showRecorder={showRecorder}
+            showEditor={showEditor}
+            workoutScript={workoutScript}
+            teleprompterPosition={teleprompterPosition}
+            setTeleprompterPosition={setTeleprompterPosition}
+            onEditorSave={handleEditorSave}
+          />
+        )}
       </div>
     </div>
   );

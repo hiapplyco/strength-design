@@ -31,9 +31,9 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   extraControls,
 }) => {
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 mt-4">
       {!isWebcamOn ? (
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex items-center gap-2">
           <Button 
             onClick={onStartWebcam}
             className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"

@@ -30,7 +30,7 @@ export const WorkoutDayCard = ({
   const { toast } = useToast();
 
   return (
-    <div className="w-full bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200">
+    <div className="w-full bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 mx-auto max-w-[95%] sm:max-w-full">
       <WorkoutHeader
         title={`Day${index + 1}`}
         isExporting={isExporting}
@@ -56,31 +56,31 @@ export const WorkoutDayCard = ({
         onUpdate={(updates) => onUpdate(day, updates)}
       />
       
-      <div className="p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-4">
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Description</h3>
-          <p className="text-muted-foreground">{workout.description}</p>
+          <p className="text-muted-foreground text-sm sm:text-base">{workout.description}</p>
         </div>
         
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Warm-up</h3>
-          <p className="text-muted-foreground whitespace-pre-line">{workout.warmup}</p>
+          <p className="text-muted-foreground whitespace-pre-line text-sm sm:text-base">{workout.warmup}</p>
         </div>
         
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Workout</h3>
-          <p className="text-muted-foreground whitespace-pre-line">{workout.workout}</p>
+          <p className="text-muted-foreground whitespace-pre-line text-sm sm:text-base">{workout.workout}</p>
         </div>
         
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Strength Focus</h3>
-          <p className="text-muted-foreground">{workout.strength}</p>
+          <p className="text-muted-foreground text-sm sm:text-base">{workout.strength}</p>
         </div>
         
         {workout.notes && (
           <div>
             <h3 className="text-lg font-semibold text-destructive mb-2">Coaching Notes</h3>
-            <p className="text-muted-foreground">{workout.notes}</p>
+            <p className="text-muted-foreground text-sm sm:text-base">{workout.notes}</p>
           </div>
         )}
       </div>

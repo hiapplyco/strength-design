@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Camera, Tv } from "lucide-react";
+import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Teleprompter } from "./Teleprompter";
 import VideoRecorder from "./VideoRecorder";
@@ -32,6 +32,11 @@ export const VideoAnalysis = () => {
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
       setWorkoutScript(plainText);
       setShowTeleprompter(true);
+      
+      // Auto-start if coming from document editor
+      if (location.state.autoStartRecording) {
+        setShowRecorder(true);
+      }
     } else {
       setShowEditor(true);
     }

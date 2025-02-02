@@ -27,10 +27,12 @@ export function DocumentEditorContent({
     // Get the HTML content from the editor
     const content = editor.getHTML();
     
-    // Navigate to video analysis with the content
+    // Navigate to video analysis with the content and auto-start flags
     navigate('/video-analysis', { 
       state: { 
-        workoutScript: content
+        workoutScript: content,
+        autoStartRecording: true,
+        autoStartTeleprompter: true
       }
     });
   };

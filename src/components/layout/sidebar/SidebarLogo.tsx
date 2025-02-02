@@ -1,29 +1,10 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import { LogOut, Star } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const SidebarLogo = () => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: "Error logging out",
-        description: "Please try again",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleUpgrade = () => {
-    navigate('/upgrade');
-  };
+  const { toggle } = useSidebar();
 
   return (
     <div className="flex items-center justify-between">
@@ -33,26 +14,15 @@ export const SidebarLogo = () => {
       >
         STRENGTH.DESIGN
       </NavLink>
-      <div className="flex items-center gap-2">
-        <Button
-          onClick={handleLogout}
-          variant="ghost"
-          size="icon"
-          title="Logout"
-          className="text-muted-foreground hover:text-accent transition-colors"
-        >
-          <LogOut className="h-6 w-6" />
-        </Button>
-        <Button
-          onClick={handleUpgrade}
-          variant="ghost"
-          size="icon"
-          title="Upgrade"
-          className="text-muted-foreground hover:text-accent transition-colors"
-        >
-          <Star className="h-6 w-6" />
-        </Button>
-      </div>
+      <Button
+        onClick={toggle}
+        variant="ghost"
+        size="icon"
+        title="Toggle Menu"
+        className="text-muted-foreground hover:text-accent transition-colors md:hidden"
+      >
+        <Menu className="h-6 w-6" />
+      </Button>
     </div>
   );
 };

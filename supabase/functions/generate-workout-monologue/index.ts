@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -19,28 +20,47 @@ serve(async (req) => {
       throw new Error('GEMINI_API_KEY is not configured');
     }
 
-    console.log('Starting Gemini generation');
+    console.log('Starting Gemini generation with input:', {
+      dayToSpeak,
+      workoutPlan: workoutPlan.substring(0, 100) + '...', // Log truncated for brevity
+      warmup: warmup?.substring(0, 100) + '...',
+      wod: wod?.substring(0, 100) + '...',
+      notes: notes?.substring(0, 100) + '...'
+    });
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-pro",
+      generationConfig: {
+        temperature: 0.9,
+        topK: 1,
+        topP: 1,
+        maxOutputTokens: 2048,
+      },
     });
 
-    const generationConfig = {
-      temperature: 1,
-      topP: 0.95,
-      topK: 40,
-      maxOutputTokens: 8192,
-    };
+    const prompt = `As a professional fitness coach, create a motivational monologue for ${dayToSpeak}'s workout. Include natural pauses and directorial notes in [brackets]. Format the response with clear sections and pauses for demonstration.
 
-    const prompt = `You are a professional fitness coach. Create a motivational monologue for ${dayToSpeak}'s workout. Include specific details about the workout components and provide encouragement. Here are the workout details:
+    Workout Components:
+    ${warmup ? `Warmup: ${warmup}` : ''}
+    ${wod ? `Workout: ${wod}` : ''}
+    ${notes ? `Notes: ${notes}` : ''}
+
+    Please structure the monologue with:
+    1. Clear introduction
+    2. Natural breaks for demonstrations
+    3. Motivational cues
+    4. Form reminders
+    5. Pacing guidance
     
-    Warmup: ${warmup}
-    Workout: ${wod}
-    Notes: ${notes}`;
+    Use [PAUSE] for demonstration breaks
+    Use [DEMO] for exercise demonstrations
+    Use [ENERGY SHIFT] for tone changes`;
 
+    console.log('Sending prompt to Gemini');
+    
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig,
     });
 
     const response = result.response;
@@ -53,9 +73,12 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in generate-workout-monologue function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Error generating workout monologue'
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

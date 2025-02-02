@@ -4,6 +4,7 @@ import { Camera, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Teleprompter } from "./Teleprompter";
 import VideoRecorder from "./VideoRecorder";
+import { Editor } from "@/components/document-editor/Editor";
 
 export const VideoAnalysis = () => {
   const location = useLocation();
@@ -11,6 +12,7 @@ export const VideoAnalysis = () => {
   const [showTeleprompter, setShowTeleprompter] = useState(false);
   const [teleprompterPosition, setTeleprompterPosition] = useState(0);
   const [workoutScript, setWorkoutScript] = useState("");
+  const [showEditor, setShowEditor] = useState(false);
 
   // Debug logging
   useEffect(() => {
@@ -29,11 +31,24 @@ export const VideoAnalysis = () => {
       tempDiv.innerHTML = location.state.workoutScript;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
       setWorkoutScript(plainText);
+      setShowTeleprompter(true);
+    } else {
+      setShowEditor(true);
     }
   }, [location.state]);
 
+  const handleStartRecording = () => {
+    setShowRecorder(true);
+    // If we have a workout script, show teleprompter, otherwise show editor
+    if (workoutScript) {
+      setShowTeleprompter(true);
+    } else {
+      setShowEditor(true);
+    }
+  };
+
   // Render initial buttons if neither recorder nor teleprompter is active
-  if (!showRecorder && !showTeleprompter) {
+  if (!showRecorder && !showTeleprompter && !showEditor) {
     console.log('Rendering initial buttons view');
     return (
       <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
@@ -47,19 +62,11 @@ export const VideoAnalysis = () => {
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Button
-                  onClick={() => setShowRecorder(true)}
+                  onClick={handleStartRecording}
                   className="h-64 bg-accent hover:bg-accent/90 flex flex-col items-center justify-center gap-4 p-8 rounded-xl transition-all duration-300 hover:scale-105"
                 >
                   <Camera className="h-24 w-24" />
                   <span className="text-2xl font-semibold">Start Recording</span>
-                </Button>
-
-                <Button
-                  onClick={() => setShowTeleprompter(true)}
-                  className="h-64 bg-accent hover:bg-accent/90 flex flex-col items-center justify-center gap-4 p-8 rounded-xl transition-all duration-300 hover:scale-105"
-                >
-                  <Tv className="h-24 w-24" />
-                  <span className="text-2xl font-semibold">Start Teleprompter</span>
                 </Button>
               </div>
             </div>
@@ -91,13 +98,31 @@ export const VideoAnalysis = () => {
                   </div>
                 )}
 
-                {showTeleprompter && (
+                {showTeleprompter && workoutScript && (
                   <div className="flex flex-col space-y-4">
                     <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
                     <div className="flex-grow">
                       <Teleprompter 
-                        script={workoutScript || "No workout script available. Please generate a workout first."}
+                        script={workoutScript}
                         onPositionChange={setTeleprompterPosition}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {showEditor && !workoutScript && (
+                  <div className="flex flex-col space-y-4">
+                    <h2 className="text-2xl font-bold text-white mb-4">Create Your Script</h2>
+                    <div className="flex-grow">
+                      <Editor 
+                        onSave={(content) => {
+                          const tempDiv = document.createElement('div');
+                          tempDiv.innerHTML = content;
+                          const plainText = tempDiv.textContent || tempDiv.innerText || "";
+                          setWorkoutScript(plainText);
+                          setShowEditor(false);
+                          setShowTeleprompter(true);
+                        }}
                       />
                     </div>
                   </div>

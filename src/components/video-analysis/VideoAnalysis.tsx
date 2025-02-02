@@ -43,10 +43,10 @@ export const VideoAnalysis = () => {
       
       if (data?.monologue) {
         console.log('Generated monologue:', data.monologue);
-        // Format the monologue by replacing markdown headers and adding proper spacing
+        // Format the monologue by preserving newlines and removing any HTML/markdown
         const formattedMonologue = data.monologue
-          .replace(/###\s+/g, '\n\n')  // Replace markdown headers with line breaks
-          .replace(/\n\s*\n/g, '\n\n')  // Normalize multiple line breaks
+          .replace(/<[^>]*>/g, '')  // Remove any HTML tags
+          .replace(/\\n/g, '\n')    // Replace literal \n with actual newlines
           .trim();
         
         setWorkoutScript(formattedMonologue);

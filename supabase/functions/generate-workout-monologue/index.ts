@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { GoogleGenerativeAI } from "npm:@google/generative-ai"
 
 const corsHeaders = {
@@ -27,10 +27,9 @@ serve(async (req) => {
     Convert this workout plan into a directorial script that includes both what to say and how to present it.
     
     IMPORTANT FORMATTING REQUIREMENTS:
-    - Use LOTS of line breaks between sections for easy reading
-    - Start each section with [CAMERA SETUP] to describe how to position for recording
-    - Follow with [SCRIPT] for what to say
-    - Use 4 line breaks between major sections
+    - Use multiple newline characters (\\n\\n\\n\\n) between major sections for clear visual breaks
+    - Start each section with [CAMERA SETUP] followed by camera positioning details
+    - Follow with [SCRIPT] for the actual lines to say
     - Keep sentences short and easy to read
     - Add emojis for visual engagement
     - Include clear verbal transitions between sections
@@ -42,6 +41,7 @@ serve(async (req) => {
     Stand slightly to the left to demonstrate exercises
 
 
+
     [SCRIPT]
     Hey fitness family! Today we're crushing an amazing full-body workout!
 
@@ -51,6 +51,7 @@ serve(async (req) => {
     [CAMERA SETUP]
     Switch to wide shot to show full body movement
     Face slightly right to demonstrate proper form
+
 
 
     [SCRIPT]

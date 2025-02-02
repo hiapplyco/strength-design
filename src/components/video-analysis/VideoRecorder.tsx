@@ -7,9 +7,10 @@ import { UploadStatus } from './UploadStatus';
 
 interface VideoRecorderProps {
   onAnalyzeVideo?: (videoUrl: string) => void;
+  extraControls?: React.ReactNode;
 }
 
-const VideoRecorder: React.FC<VideoRecorderProps> = ({ onAnalyzeVideo }) => {
+const VideoRecorder: React.FC<VideoRecorderProps> = ({ onAnalyzeVideo, extraControls }) => {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -161,7 +162,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({ onAnalyzeVideo }) => {
 
   return (
     <div className="w-full max-w-xl mx-auto bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
-      <h2 className="text-2xl font-bold mb-4 text-white">Record and Upload Video</h2>
+      <h2 className="text-2xl font-bold mb-4 text-white">Record Your Video</h2>
       <VideoPreview videoRef={videoRef} />
       <VideoControls
         isWebcamOn={isWebcamOn}
@@ -175,6 +176,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({ onAnalyzeVideo }) => {
         onStopRecording={stopRecording}
         onUploadVideo={uploadVideo}
         onAnalyzeVideo={handleAnalyze}
+        extraControls={extraControls}
       />
       <UploadStatus publicUrl={publicUrl} />
     </div>

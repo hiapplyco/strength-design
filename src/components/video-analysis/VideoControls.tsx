@@ -13,6 +13,7 @@ interface VideoControlsProps {
   onStopRecording: () => void;
   onUploadVideo: () => void;
   onAnalyzeVideo?: () => void;
+  extraControls?: React.ReactNode;
 }
 
 export const VideoControls: React.FC<VideoControlsProps> = ({
@@ -27,16 +28,20 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   onStopRecording,
   onUploadVideo,
   onAnalyzeVideo,
+  extraControls,
 }) => {
   return (
-    <div className="flex gap-2 flex-wrap">
+    <div className="flex flex-wrap items-center gap-2">
       {!isWebcamOn ? (
-        <Button 
-          onClick={onStartWebcam}
-          className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
-        >
-          Start Webcam
-        </Button>
+        <div className="flex items-center gap-2 w-full">
+          <Button 
+            onClick={onStartWebcam}
+            className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+          >
+            Start Webcam
+          </Button>
+          {extraControls}
+        </div>
       ) : (
         <>
           {!recording ? (
@@ -60,6 +65,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           >
             Stop Webcam
           </Button>
+          {extraControls}
         </>
       )}
       {!recording && recordedChunks.length > 0 && (

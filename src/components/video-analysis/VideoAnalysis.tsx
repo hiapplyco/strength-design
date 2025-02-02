@@ -77,18 +77,19 @@ export const VideoAnalysis = () => {
             <div className="bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800 mb-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-white">Record Your Video</h2>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowTeleprompter(!showTeleprompter)}
-                      className="flex items-center gap-2"
-                    >
-                      <Tv className="h-4 w-4" />
-                      Teleprompter
-                    </Button>
-                  </div>
-                  <VideoRecorder onAnalyzeVideo={handleAnalyzeVideo} />
+                  <VideoRecorder 
+                    onAnalyzeVideo={handleAnalyzeVideo} 
+                    extraControls={
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowTeleprompter(!showTeleprompter)}
+                        className="flex items-center gap-2"
+                      >
+                        <Tv className="h-4 w-4" />
+                        Teleprompter
+                      </Button>
+                    }
+                  />
                 </div>
 
                 {showTeleprompter && (

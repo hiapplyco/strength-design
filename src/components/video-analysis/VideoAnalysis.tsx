@@ -5,8 +5,6 @@ import { useVideoProcessing } from "@/hooks/useVideoProcessing";
 import { Teleprompter } from "./Teleprompter";
 import { useLocation } from "react-router-dom";
 import VideoRecorder from "./VideoRecorder";
-import { Tv } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export const VideoAnalysis = () => {
   const location = useLocation();
@@ -14,7 +12,6 @@ export const VideoAnalysis = () => {
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   const [teleprompterPosition, setTeleprompterPosition] = useState(0);
   const [workoutScript, setWorkoutScript] = useState("");
-  const [showTeleprompter, setShowTeleprompter] = useState(false);
 
   const { toast } = useToast();
   const {
@@ -77,30 +74,16 @@ export const VideoAnalysis = () => {
             <div className="bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800 mb-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <VideoRecorder 
-                    onAnalyzeVideo={handleAnalyzeVideo} 
-                    extraControls={
-                      <Button
-                        variant="secondary"
-                        onClick={() => setShowTeleprompter(!showTeleprompter)}
-                        className="flex items-center gap-2"
-                      >
-                        <Tv className="h-4 w-4" />
-                        Teleprompter
-                      </Button>
-                    }
-                  />
+                  <VideoRecorder onAnalyzeVideo={handleAnalyzeVideo} />
                 </div>
 
-                {showTeleprompter && (
-                  <div>
-                    <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
-                    <Teleprompter 
-                      script={workoutScript || "No workout script available. Please generate a workout first."}
-                      onPositionChange={setTeleprompterPosition}
-                    />
-                  </div>
-                )}
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
+                  <Teleprompter 
+                    script={workoutScript || "No workout script available. Please generate a workout first."}
+                    onPositionChange={setTeleprompterPosition}
+                  />
+                </div>
               </div>
             </div>
 

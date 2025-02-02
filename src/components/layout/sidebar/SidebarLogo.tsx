@@ -1,6 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { Menu, LogOut, Star } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { LogOut, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -53,9 +52,6 @@ export const SidebarLogo = () => {
         >
           <Star className="h-6 w-6" />
         </Button>
-        <SidebarTrigger title="Menu">
-          <Menu className="h-6 w-6" />
-        </SidebarTrigger>
       </div>
     </div>
   );

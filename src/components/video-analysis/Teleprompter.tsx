@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useToast } from "@/hooks/use-toast";
 
 interface TeleprompterProps {
   script: string;
@@ -8,6 +9,7 @@ interface TeleprompterProps {
 }
 
 export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) => {
+  const { toast } = useToast();
   const [speed, setSpeed] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [fontSize, setFontSize] = useState(20);
@@ -15,11 +17,13 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
   const [mirrorH, setMirrorH] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [speechEnabled, setSpeechEnabled] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
   const timerRef = useRef<number>();
   const lastScrollPosition = useRef(0);
+  const recognitionRef = useRef<any>(null);
 
   // Reset scroll position if the script changes
   useEffect(() => {
@@ -28,6 +32,99 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
       scrollRef.current.scrollTo(0, 0);
     }
   }, [script]);
+
+  const initializeSpeechRecognition = () => {
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
+
+        recognitionRef.current.onresult = (event: any) => {
+          const lastResult = event.results[event.results.length - 1];
+          const transcript = lastResult[0].transcript.toLowerCase();
+          
+          // Find the position of the spoken text in the script
+          const scriptLower = script.toLowerCase();
+          const words = transcript.split(' ');
+          
+          // Look for the last few words to find the current position
+          for (let i = words.length; i > 0; i--) {
+            const phrase = words.slice(i - 3, i).join(' ');
+            const position = scriptLower.indexOf(phrase);
+            
+            if (position !== -1 && scrollRef.current) {
+              // Calculate scroll position based on the found text position
+              const textHeight = scrollRef.current.scrollHeight;
+              const viewportHeight = scrollRef.current.clientHeight;
+              const scrollPosition = (position / script.length) * textHeight;
+              
+              // Smooth scroll to the position
+              scrollRef.current.scrollTo({
+                top: Math.max(0, scrollPosition - viewportHeight / 3),
+                behavior: 'smooth'
+              });
+              
+              if (onPositionChange) {
+                onPositionChange(scrollPosition);
+              }
+              break;
+            }
+          }
+        };
+
+        recognitionRef.current.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          if (event.error === 'not-allowed') {
+            toast({
+              title: "Microphone Access Denied",
+              description: "Please enable microphone access to use speech recognition.",
+              variant: "destructive",
+            });
+            setSpeechEnabled(false);
+          }
+        };
+
+        setSpeechEnabled(true);
+      } else {
+        toast({
+          title: "Speech Recognition Unavailable",
+          description: "Your browser doesn't support speech recognition.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error initializing speech recognition:', error);
+      toast({
+        title: "Speech Recognition Error",
+        description: "Failed to initialize speech recognition.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleSpeechRecognition = () => {
+    if (!recognitionRef.current) {
+      initializeSpeechRecognition();
+    }
+    
+    if (speechEnabled) {
+      if (recognitionRef.current?.state === 'active') {
+        recognitionRef.current.stop();
+        toast({
+          title: "Speech Recognition Stopped",
+          description: "Auto-scroll based on speech is now disabled.",
+        });
+      } else {
+        recognitionRef.current.start();
+        toast({
+          title: "Speech Recognition Started",
+          description: "Auto-scroll will follow your speech.",
+        });
+      }
+    }
+  };
 
   // Handle scrolling animation
   useEffect(() => {
@@ -66,6 +163,15 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
     };
   }, [showTimer, playing]);
 
+  // Cleanup speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, []);
+
   const togglePlay = () => setPlaying(prev => !prev);
   
   const handleReset = () => {
@@ -74,6 +180,9 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
     if (scrollRef.current) {
       lastScrollPosition.current = 0;
       scrollRef.current.scrollTo(0, 0);
+    }
+    if (recognitionRef.current?.state === 'active') {
+      recognitionRef.current.stop();
     }
   };
 
@@ -122,6 +231,12 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
           variant="secondary"
         >
           Reset
+        </Button>
+        <Button 
+          onClick={toggleSpeechRecognition}
+          variant={speechEnabled ? "default" : "secondary"}
+        >
+          Voice Control: {speechEnabled ? 'ON' : 'OFF'}
         </Button>
         <Button 
           onClick={() => setMirrorV(prev => !prev)}

@@ -20,27 +20,27 @@ export function SidebarNavigation() {
 
   const navItems = [
     {
-      to: "/document-editor",
-      icon: <FileText className="h-5 w-5" />,
-      text: "Documents",
+      to: "/workout-generator",
+      icon: <Dumbbell className="h-5 w-5" />,
+      text: "Generate Program",
       requiresAuth: true,
     },
     {
-      to: "/workout-generator",
-      icon: <Dumbbell className="h-5 w-5" />,
-      text: "Workouts",
+      to: "/generated-workouts",
+      icon: <FileText className="h-5 w-5" />,
+      text: "Previous Programs",
       requiresAuth: true,
     },
     {
       to: "/video-analysis",
       icon: <Video className="h-5 w-5" />,
-      text: "Videos",
+      text: "Publish Program",
       requiresAuth: true,
     },
     {
       to: "/pricing",
       icon: <DollarSign className="h-5 w-5" />,
-      text: "Pricing",
+      text: "Upgrade to Pro",
       requiresAuth: false,
     },
   ];

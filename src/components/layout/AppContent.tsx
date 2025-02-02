@@ -4,6 +4,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 import Index from "@/pages/Index";
 import BestAppOfDay from "@/pages/BestAppOfDay";
 import Pricing from "@/pages/Pricing";
@@ -14,6 +17,7 @@ import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -39,6 +43,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 export const AppContent = () => {
   const handleConsoleError = useErrorHandler();
   const { session, isLoading } = useAuth();
+  const { toggleSidebar } = useSidebar();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     window.addEventListener('error', handleConsoleError);
@@ -55,6 +61,16 @@ export const AppContent = () => {
     <SidebarProvider>
       <Toaster />
       <Sonner />
+      {session && isMobile && (
+        <Button
+          onClick={toggleSidebar}
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 text-muted-foreground hover:text-accent"
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+      )}
       <div className="min-h-screen flex w-full bg-black">
         <AppSidebar />
         <main className="flex-1 overflow-auto pl-0 md:pl-64">

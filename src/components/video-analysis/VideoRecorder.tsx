@@ -18,7 +18,6 @@ const VideoRecorder: React.FC = () => {
 
   const startWebcam = async () => {
     try {
-      // iOS Safari specific constraints
       const constraints = {
         video: {
           facingMode: 'user',
@@ -86,23 +85,30 @@ const VideoRecorder: React.FC = () => {
     if (!streamRef.current) return;
     
     try {
+      // Updated MIME types order for better iOS Safari compatibility
       const mimeTypes = [
+        'video/mp4',
         'video/mp4;codecs=h264,aac',
-        'video/webm;codecs=vp9,opus',
+        'video/webm',
+        'video/webm;codecs=h264',
         'video/webm;codecs=vp8,opus',
-        'video/webm'
+        'video/webm;codecs=vp9,opus'
       ];
       
       let selectedMimeType = '';
       for (const mimeType of mimeTypes) {
         if (MediaRecorder.isTypeSupported(mimeType)) {
+          console.log('Supported MIME type found:', mimeType);
           selectedMimeType = mimeType;
           break;
+        } else {
+          console.log('Unsupported MIME type:', mimeType);
         }
       }
       
       if (!selectedMimeType) {
-        throw new Error('No supported MIME type found for recording');
+        throw new Error('No supported MIME type found for recording. Available types: ' + 
+          mimeTypes.map(type => `${type} (${MediaRecorder.isTypeSupported(type)})`).join(', '));
       }
 
       const options = { 
@@ -130,7 +136,7 @@ const VideoRecorder: React.FC = () => {
       console.error("Error starting recording:", err);
       toast({
         title: "Recording Error",
-        description: err.message || "Failed to start recording. Your browser might not support video recording.",
+        description: `${err.message} Please try using a different browser or device.`,
         variant: "destructive",
       });
     }

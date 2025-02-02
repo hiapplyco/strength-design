@@ -6,6 +6,7 @@ import { Teleprompter } from "./Teleprompter";
 import VideoRecorder from "./VideoRecorder";
 import { Editor } from "@/components/document-editor/Editor";
 import { supabase } from "@/integrations/supabase/client";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 export const VideoAnalysis = () => {
   const location = useLocation();
@@ -14,6 +15,7 @@ export const VideoAnalysis = () => {
   const [teleprompterPosition, setTeleprompterPosition] = useState(0);
   const [workoutScript, setWorkoutScript] = useState("");
   const [showEditor, setShowEditor] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Debug logging
   useEffect(() => {
@@ -28,6 +30,7 @@ export const VideoAnalysis = () => {
 
   const generateMonologue = async (content: string) => {
     try {
+      setIsGenerating(true);
       const { data, error } = await supabase.functions.invoke('generate-workout-monologue', {
         body: {
           workoutPlan: content,
@@ -48,6 +51,8 @@ export const VideoAnalysis = () => {
       console.error('Error generating monologue:', error);
       // Fallback to original content if monologue generation fails
       setWorkoutScript(content);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -82,7 +87,6 @@ export const VideoAnalysis = () => {
 
   // Render initial buttons if neither recorder nor teleprompter is active
   if (!showRecorder && !showTeleprompter && !showEditor) {
-    console.log('Rendering initial buttons view');
     return (
       <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
         style={{
@@ -131,14 +135,20 @@ export const VideoAnalysis = () => {
                   </div>
                 )}
 
-                {showTeleprompter && workoutScript && (
+                {showTeleprompter && (
                   <div className="flex flex-col space-y-4">
                     <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
                     <div className="flex-grow">
-                      <Teleprompter 
-                        script={workoutScript}
-                        onPositionChange={setTeleprompterPosition}
-                      />
+                      {isGenerating ? (
+                        <LoadingIndicator>
+                          Generating your workout script...
+                        </LoadingIndicator>
+                      ) : workoutScript ? (
+                        <Teleprompter 
+                          script={workoutScript}
+                          onPositionChange={setTeleprompterPosition}
+                        />
+                      ) : null}
                     </div>
                   </div>
                 )}

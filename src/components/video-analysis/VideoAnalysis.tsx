@@ -57,7 +57,12 @@ export const VideoAnalysis = () => {
         }}>
         <div className="min-h-screen bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
           <div className="container mx-auto px-4 pt-16">
-            <h1 className="text-4xl font-bold text-white mb-16 text-center">Video Analysis</h1>
+            <h1 className="text-4xl font-bold text-white mb-4 text-center">
+              Record and Share your workout with the World!
+            </h1>
+            <p className="text-xl text-gray-300 mb-16 text-center max-w-2xl mx-auto">
+              Create your own workout video with our easy-to-use recording studio. Write a script, use our teleprompter, and record yourself demonstrating exercises to share with the fitness community.
+            </p>
             
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -83,7 +88,12 @@ export const VideoAnalysis = () => {
       }}>
       <div className="min-h-screen bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
         <div className="container mx-auto px-4 pt-16">
-          <h1 className="text-4xl font-bold text-white mb-8 text-center">Video Analysis</h1>
+          <h1 className="text-4xl font-bold text-white mb-4 text-center">
+            Record and Share your workout with the World!
+          </h1>
+          <p className="text-xl text-gray-300 mb-8 text-center max-w-2xl mx-auto">
+            Create your own workout video with our easy-to-use recording studio. Write a script, use our teleprompter, and record yourself demonstrating exercises to share with the fitness community.
+          </p>
           
           <div className="max-w-7xl mx-auto">
             {isReady && showRecorder && (

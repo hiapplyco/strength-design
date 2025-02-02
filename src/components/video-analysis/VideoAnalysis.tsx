@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Teleprompter } from "./Teleprompter";
 import VideoRecorder from "./VideoRecorder";
 import { Editor } from "@/components/document-editor/Editor";
+import { supabase } from "@/integrations/supabase/client";
 
 export const VideoAnalysis = () => {
   const location = useLocation();
@@ -25,12 +26,39 @@ export const VideoAnalysis = () => {
     console.log('State changed - showRecorder:', showRecorder, 'showTeleprompter:', showTeleprompter);
   }, [showRecorder, showTeleprompter]);
 
+  const generateMonologue = async (content: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-workout-monologue', {
+        body: {
+          workoutPlan: content,
+          dayToSpeak: "today",
+          warmup: "Standard warmup",
+          wod: content,
+          notes: "Focus on form and technique"
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.monologue) {
+        setWorkoutScript(data.monologue);
+        return;
+      }
+    } catch (error) {
+      console.error('Error generating monologue:', error);
+      // Fallback to original content if monologue generation fails
+      setWorkoutScript(content);
+    }
+  };
+
   useEffect(() => {
     if (location.state?.workoutScript) {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = location.state.workoutScript;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
-      setWorkoutScript(plainText);
+      
+      // Generate monologue from the content
+      generateMonologue(plainText);
       setShowTeleprompter(true);
       
       // Auto-start if coming from document editor

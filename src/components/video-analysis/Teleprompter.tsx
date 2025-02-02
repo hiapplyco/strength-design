@@ -151,8 +151,6 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
       <div 
         ref={scrollRef}
         className="mt-4 p-4 bg-black/50 rounded-lg overflow-y-auto h-[400px] relative"
-        onMouseEnter={() => setPlaying(false)}
-        onMouseLeave={() => setPlaying(true)}
       >
         <div 
           className="whitespace-pre-wrap text-center"

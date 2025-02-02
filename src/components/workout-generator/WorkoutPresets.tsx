@@ -15,21 +15,21 @@ import {
 } from "@/components/ui/tooltip";
 
 const WORKOUT_PROGRAMS = {
-  CrossFit_Workout_Programs: {
+  CrossFit_Programs: {
     Fran: "A high-intensity benchmark WOD combining thrusters and pull-ups for time.",
     Murph: "A grueling hero WOD featuring a 1-mile run, 100 pull-ups, 200 push-ups, 300 squats, and another 1-mile run, often done with a weighted vest.",
     Cindy: "A 20-minute AMRAP (as many rounds as possible) of 5 pull-ups, 10 push-ups, and 15 air squats.",
     Diane: "A fast-paced WOD of deadlifts and handstand push-ups, completed for time.",
     Grace: "A sprint-style WOD consisting of 30 clean and jerks at 135 lbs (95 lbs for women)."
   },
-  Military_Precision_Workout_Programs: {
+  Military_Programs: {
     SealFit: "A Navy SEAL-inspired program blending endurance, strength, and mental toughness training.",
     Ranger_School_PT_Program: "A rigorous physical training regimen designed to prepare soldiers for the intense demands of Ranger School.",
     Army_Combat_Fitness_Test_ACFT: "The current U.S. Army fitness test, including deadlifts, sprint-drag-carry drills, and a two-mile run.",
     Recon_Ron_Pull_Up_Program: "A structured pull-up progression plan used by military personnel to build upper-body strength.",
     Operator_Ugly: "A brutal fitness test designed for special forces, incorporating strength, endurance, and tactical readiness elements."
   },
-  Bodybuilding_Frameworks: {
+  Bodybuilding_Programs: {
     Arnold_Blueprint_to_Mass: "A high-volume program based on Arnold Schwarzenegger's legendary training routine.",
     Dorian_Yates_Blood_and_Guts: "An intense, low-volume, high-intensity training method focused on reaching muscle failure.",
     German_Volume_Training_GVT: "A hypertrophy program centered around 10 sets of 10 reps for maximal muscle growth.",

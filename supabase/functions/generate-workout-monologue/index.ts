@@ -22,7 +22,7 @@ serve(async (req) => {
 
     console.log('Starting Gemini generation with input:', {
       dayToSpeak,
-      workoutPlan: workoutPlan.substring(0, 100) + '...', // Log truncated for brevity
+      workoutPlan: workoutPlan?.substring(0, 100) + '...', // Log truncated for brevity
       warmup: warmup?.substring(0, 100) + '...',
       wod: wod?.substring(0, 100) + '...',
       notes: notes?.substring(0, 100) + '...'

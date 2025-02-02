@@ -24,6 +24,7 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
   const [elapsedTime, setElapsedTime] = useState(0);
   const [speechEnabled, setSpeechEnabled] = useState(false);
   const [words, setWords] = useState<WordSpan[]>([]);
+  const [isRecognitionActive, setIsRecognitionActive] = useState(false);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
@@ -56,20 +57,17 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
           const lastResult = event.results[event.results.length - 1];
           const transcript = lastResult[0].transcript.toLowerCase();
           
-          // Update highlighted words based on speech
-          const spokenWords = transcript.split(' ');
           setWords(prevWords => {
             const newWords = [...prevWords];
             let matchFound = false;
             
-            // Look for matches in groups of words
+            const spokenWords = transcript.split(' ');
             for (let i = 0; i < newWords.length - spokenWords.length + 1; i++) {
               const potentialMatch = newWords.slice(i, i + spokenWords.length)
                 .map(w => w.word.toLowerCase())
                 .join(' ');
               
               if (transcript.includes(potentialMatch)) {
-                // Mark these words as spoken
                 for (let j = 0; j < spokenWords.length; j++) {
                   if (i + j < newWords.length) {
                     newWords[i + j].isSpoken = true;
@@ -77,7 +75,6 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
                 }
                 matchFound = true;
                 
-                // Scroll to the last matched word
                 if (scrollRef.current) {
                   const wordElements = scrollRef.current.getElementsByClassName('word');
                   if (wordElements[i + spokenWords.length - 1]) {
@@ -109,6 +106,7 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
               variant: "destructive",
             });
             setSpeechEnabled(false);
+            setIsRecognitionActive(false);
           }
         };
 
@@ -133,26 +131,35 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
   const toggleSpeechRecognition = () => {
     if (!recognitionRef.current) {
       initializeSpeechRecognition();
+      return;
     }
     
-    if (speechEnabled) {
-      if (recognitionRef.current?.state === 'active') {
-        recognitionRef.current.stop();
-        toast({
-          title: "Speech Recognition Stopped",
-          description: "Auto-scroll based on speech is now disabled.",
-        });
-      } else {
+    if (isRecognitionActive) {
+      recognitionRef.current.stop();
+      setIsRecognitionActive(false);
+      toast({
+        title: "Speech Recognition Stopped",
+        description: "Auto-scroll based on speech is now disabled.",
+      });
+    } else {
+      try {
         recognitionRef.current.start();
+        setIsRecognitionActive(true);
         toast({
           title: "Speech Recognition Started",
           description: "Auto-scroll will follow your speech.",
+        });
+      } catch (error) {
+        console.error('Error starting speech recognition:', error);
+        toast({
+          title: "Speech Recognition Error",
+          description: "Failed to start speech recognition. Please try again.",
+          variant: "destructive",
         });
       }
     }
   };
 
-  // Handle scrolling animation
   useEffect(() => {
     if (playing && scrollRef.current) {
       const scroll = () => {
@@ -175,7 +182,6 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
     };
   }, [playing, speed, onPositionChange]);
 
-  // Handle timer
   useEffect(() => {
     if (showTimer && playing) {
       timerRef.current = window.setInterval(() => {
@@ -209,7 +215,10 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
     }
     if (recognitionRef.current?.state === 'active') {
       recognitionRef.current.stop();
+      setIsRecognitionActive(false);
     }
+    // Reset highlighted words
+    setWords(prevWords => prevWords.map(word => ({ ...word, isSpoken: false })));
   };
 
   const formatTime = (seconds: number) => {

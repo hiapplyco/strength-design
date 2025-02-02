@@ -5,10 +5,10 @@ import { MobileMenu } from "./navbar/MobileMenu";
 
 export const Navbar = () => {
   const navItems = [
-    { path: '/document-editor', icon: <FileText className="h-5 w-5" />, text: 'Documents' },
-    { path: '/workout-generator', icon: <Dumbbell className="h-5 w-5" />, text: 'Workouts' },
-    { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Videos' },
-    { path: '/pricing', icon: <DollarSign className="h-5 w-5" />, text: 'Pricing' },
+    { path: '/workout-generator', icon: <Dumbbell className="h-5 w-5" />, text: 'Generate Program' },
+    { path: '/generated-workouts', icon: <FileText className="h-5 w-5" />, text: 'Previous Programs' },
+    { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Publish Program' },
+    { path: '/pricing', icon: <DollarSign className="h-5 w-5" />, text: 'Upgrade to Pro' },
   ];
 
   return (

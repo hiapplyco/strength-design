@@ -3,13 +3,10 @@ import { Button } from "@/components/ui/button";
 import { 
   Dumbbell, 
   FileText, 
-  ScrollText, 
   Video, 
   DollarSign,
-  UserPlus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EmailSignup } from "./EmailSignup";
 
 export interface NavigationProps {
   isMobile?: boolean;
@@ -23,69 +20,32 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
     }
   };
 
+  const navItems = [
+    { path: '/workout-generator', icon: <Dumbbell className="h-4 w-4" />, text: 'Generate Program' },
+    { path: '/generated-workouts', icon: <FileText className="h-4 w-4" />, text: 'Previous Programs' },
+    { path: '/video-analysis', icon: <Video className="h-4 w-4" />, text: 'Publish Program' },
+    { path: '/pricing', icon: <DollarSign className="h-4 w-4" />, text: 'Upgrade to Pro' },
+  ];
+
   return (
     <nav className={cn(
       "flex items-center gap-2",
       isMobile ? "flex-col space-y-2" : "space-x-4 lg:space-x-6"
     )}>
-      <div className="flex items-center gap-2">
-        <EmailSignup />
+      {navItems.map((item) => (
         <Button 
+          key={item.path}
           asChild 
           variant="ghost" 
           className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
           onClick={handleClick}
         >
-          <Link to="/pricing">
-            <DollarSign className="h-4 w-4" />
-            Pricing
+          <Link to={item.path}>
+            {item.icon}
+            <span>{item.text}</span>
           </Link>
         </Button>
-      </div>
-      <Button 
-        asChild 
-        variant="ghost" 
-        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
-        onClick={handleClick}
-      >
-        <Link to="/workout-generator">
-          <Dumbbell className="h-4 w-4" />
-          Generate Workout
-        </Link>
-      </Button>
-      <Button 
-        asChild 
-        variant="ghost" 
-        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
-        onClick={handleClick}
-      >
-        <Link to="/generated-workouts">
-          <FileText className="h-4 w-4" />
-          My Workouts
-        </Link>
-      </Button>
-      <Button 
-        asChild 
-        variant="ghost" 
-        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
-        onClick={handleClick}
-      >
-        <Link to="/document-editor">
-          <ScrollText className="h-4 w-4" />
-          Document Editor
-        </Link>
-      </Button>
-      <Button 
-        asChild 
-        variant="ghost" 
-        className="text-white text-sm font-medium transition-colors hover:text-primary flex items-center gap-2"
-        onClick={handleClick}
-      >
-        <Link to="/video-analysis">
-          <Video className="h-4 w-4" />
-          Video Analysis
-        </Link>
-      </Button>
+      ))}
     </nav>
   );
 };

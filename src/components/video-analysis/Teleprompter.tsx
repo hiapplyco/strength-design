@@ -8,6 +8,11 @@ interface TeleprompterProps {
   onPositionChange?: (position: number) => void;
 }
 
+interface WordSpan {
+  word: string;
+  isSpoken: boolean;
+}
+
 export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) => {
   const { toast } = useToast();
   const [speed, setSpeed] = useState(1);
@@ -18,6 +23,7 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
   const [showTimer, setShowTimer] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [speechEnabled, setSpeechEnabled] = useState(false);
+  const [words, setWords] = useState<WordSpan[]>([]);
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
@@ -25,8 +31,13 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
   const lastScrollPosition = useRef(0);
   const recognitionRef = useRef<any>(null);
 
-  // Reset scroll position if the script changes
+  // Initialize words from script
   useEffect(() => {
+    const wordArray = script.split(/\s+/).map(word => ({
+      word,
+      isSpoken: false
+    }));
+    setWords(wordArray);
     lastScrollPosition.current = 0;
     if (scrollRef.current) {
       scrollRef.current.scrollTo(0, 0);
@@ -45,33 +56,48 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
           const lastResult = event.results[event.results.length - 1];
           const transcript = lastResult[0].transcript.toLowerCase();
           
-          // Find the position of the spoken text in the script
-          const scriptLower = script.toLowerCase();
-          const words = transcript.split(' ');
-          
-          // Look for the last few words to find the current position
-          for (let i = words.length; i > 0; i--) {
-            const phrase = words.slice(i - 3, i).join(' ');
-            const position = scriptLower.indexOf(phrase);
+          // Update highlighted words based on speech
+          const spokenWords = transcript.split(' ');
+          setWords(prevWords => {
+            const newWords = [...prevWords];
+            let matchFound = false;
             
-            if (position !== -1 && scrollRef.current) {
-              // Calculate scroll position based on the found text position
-              const textHeight = scrollRef.current.scrollHeight;
-              const viewportHeight = scrollRef.current.clientHeight;
-              const scrollPosition = (position / script.length) * textHeight;
+            // Look for matches in groups of words
+            for (let i = 0; i < newWords.length - spokenWords.length + 1; i++) {
+              const potentialMatch = newWords.slice(i, i + spokenWords.length)
+                .map(w => w.word.toLowerCase())
+                .join(' ');
               
-              // Smooth scroll to the position
-              scrollRef.current.scrollTo({
-                top: Math.max(0, scrollPosition - viewportHeight / 3),
-                behavior: 'smooth'
-              });
-              
-              if (onPositionChange) {
-                onPositionChange(scrollPosition);
+              if (transcript.includes(potentialMatch)) {
+                // Mark these words as spoken
+                for (let j = 0; j < spokenWords.length; j++) {
+                  if (i + j < newWords.length) {
+                    newWords[i + j].isSpoken = true;
+                  }
+                }
+                matchFound = true;
+                
+                // Scroll to the last matched word
+                if (scrollRef.current) {
+                  const wordElements = scrollRef.current.getElementsByClassName('word');
+                  if (wordElements[i + spokenWords.length - 1]) {
+                    const element = wordElements[i + spokenWords.length - 1] as HTMLElement;
+                    const position = element.offsetTop - scrollRef.current.clientHeight / 3;
+                    scrollRef.current.scrollTo({
+                      top: position,
+                      behavior: 'smooth'
+                    });
+                    if (onPositionChange) {
+                      onPositionChange(position);
+                    }
+                  }
+                }
+                break;
               }
-              break;
             }
-          }
+            
+            return matchFound ? newWords : prevWords;
+          });
         };
 
         recognitionRef.current.onerror = (event: any) => {
@@ -221,7 +247,7 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
 
       <div className="flex flex-wrap gap-2">
         <Button 
-          onClick={togglePlay}
+          onClick={() => setPlaying(prev => !prev)}
           variant="default"
         >
           {playing ? 'Pause' : 'Play'}
@@ -275,7 +301,14 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
             transform: `scale(${mirrorH ? -1 : 1}, ${mirrorV ? -1 : 1})` 
           }}
         >
-          {script}
+          {words.map((wordObj, index) => (
+            <span
+              key={index}
+              className={`word ${wordObj.isSpoken ? 'text-blue-500' : 'text-white'} transition-colors duration-200`}
+            >
+              {wordObj.word}{' '}
+            </span>
+          ))}
         </div>
       </div>
     </div>

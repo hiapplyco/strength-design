@@ -46,7 +46,8 @@ const MainContent = () => {
   const isMobile = useIsMobile();
 
   return (
-    <>
+    <div className="min-h-screen flex w-full bg-black">
+      <AppSidebar />
       {session && isMobile && (
         <Button
           onClick={toggleSidebar}
@@ -57,45 +58,42 @@ const MainContent = () => {
           <Menu className="h-6 w-6" />
         </Button>
       )}
-      <div className="min-h-screen flex w-full bg-black">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto pl-0 md:pl-64">
-          <Routes>
-            <Route path="/" element={
-              session ? <Navigate to="/workout-generator" replace /> : <Index />
-            } />
-            <Route path="/best-app-of-day" element={<BestAppOfDay />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/document-editor" element={
-              <ProtectedRoute>
-                <DocumentEditor />
-              </ProtectedRoute>
-            } />
-            <Route path="/shared-document/:id" element={
-              <ProtectedRoute>
-                <SharedDocument />
-              </ProtectedRoute>
-            } />
-            <Route path="/workout-generator" element={
-              <ProtectedRoute>
-                <WorkoutGenerator />
-              </ProtectedRoute>
-            } />
-            <Route path="/video-analysis" element={
-              <ProtectedRoute>
-                <VideoAnalysis />
-              </ProtectedRoute>
-            } />
-            <Route path="/generated-workouts" element={
-              <ProtectedRoute>
-                <GeneratedWorkouts />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </>
+      <main className="flex-1 overflow-auto pl-0 md:pl-64">
+        <Routes>
+          <Route path="/" element={
+            session ? <Navigate to="/workout-generator" replace /> : <Index />
+          } />
+          <Route path="/best-app-of-day" element={<BestAppOfDay />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/document-editor" element={
+            <ProtectedRoute>
+              <DocumentEditor />
+            </ProtectedRoute>
+          } />
+          <Route path="/shared-document/:id" element={
+            <ProtectedRoute>
+              <SharedDocument />
+            </ProtectedRoute>
+          } />
+          <Route path="/workout-generator" element={
+            <ProtectedRoute>
+              <WorkoutGenerator />
+            </ProtectedRoute>
+          } />
+          <Route path="/video-analysis" element={
+            <ProtectedRoute>
+              <VideoAnalysis />
+            </ProtectedRoute>
+          } />
+          <Route path="/generated-workouts" element={
+            <ProtectedRoute>
+              <GeneratedWorkouts />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
   );
 };
 

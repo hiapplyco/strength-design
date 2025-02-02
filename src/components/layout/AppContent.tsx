@@ -46,19 +46,19 @@ const MainContent = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen flex w-full bg-black">
+    <div className="min-h-screen flex w-full bg-black relative">
       <AppSidebar />
-      {session && isMobile && (
-        <Button
-          onClick={toggleSidebar}
-          variant="ghost"
-          size="icon"
-          className="fixed top-4 left-4 z-50 text-muted-foreground hover:text-accent"
-        >
-          <Menu className="h-6 w-6" />
-        </Button>
-      )}
       <main className="flex-1 overflow-auto pl-0 md:pl-64">
+        {session && (
+          <Button
+            onClick={toggleSidebar}
+            variant="ghost"
+            size="icon"
+            className="fixed top-4 left-[16.5rem] z-50 text-muted-foreground hover:text-accent md:left-[15.5rem]"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        )}
         <Routes>
           <Route path="/" element={
             session ? <Navigate to="/workout-generator" replace /> : <Index />

@@ -7,6 +7,7 @@ import VideoRecorder from "./VideoRecorder";
 import { Editor } from "@/components/document-editor/Editor";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { useToast } from "@/hooks/use-toast";
 
 export const VideoAnalysis = () => {
   const location = useLocation();
@@ -16,39 +17,41 @@ export const VideoAnalysis = () => {
   const [workoutScript, setWorkoutScript] = useState("");
   const [showEditor, setShowEditor] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('VideoAnalysis mounted');
-    console.log('Initial showRecorder:', showRecorder);
-    console.log('Initial showTeleprompter:', showTeleprompter);
-  }, []);
-
-  useEffect(() => {
-    console.log('State changed - showRecorder:', showRecorder, 'showTeleprompter:', showTeleprompter);
-  }, [showRecorder, showTeleprompter]);
+  const { toast } = useToast();
 
   const generateMonologue = async (content: string) => {
     try {
       setIsGenerating(true);
+      console.log('Generating monologue for content:', content);
+      
       const { data, error } = await supabase.functions.invoke('generate-workout-monologue', {
         body: {
-          workoutPlan: content,
-          dayToSpeak: "today",
-          warmup: "Standard warmup",
-          wod: content,
-          notes: "Focus on form and technique"
+          workoutPlan: content
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error generating monologue:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate the script. Please try again.",
+          variant: "destructive",
+        });
+        throw error;
+      }
       
       if (data?.monologue) {
+        console.log('Generated monologue:', data.monologue);
         setWorkoutScript(data.monologue);
+        setShowTeleprompter(true);
+        toast({
+          title: "Success",
+          description: "Your influencer script is ready!",
+        });
         return;
       }
     } catch (error) {
-      console.error('Error generating monologue:', error);
+      console.error('Error in generateMonologue:', error);
       // Fallback to original content if monologue generation fails
       setWorkoutScript(content);
     } finally {
@@ -64,7 +67,6 @@ export const VideoAnalysis = () => {
       
       // Generate monologue from the content
       generateMonologue(plainText);
-      setShowTeleprompter(true);
       
       // Auto-start if coming from document editor
       if (location.state.autoStartRecording) {
@@ -77,7 +79,6 @@ export const VideoAnalysis = () => {
 
   const handleStartRecording = () => {
     setShowRecorder(true);
-    // If we have a workout script, show teleprompter, otherwise show editor
     if (workoutScript) {
       setShowTeleprompter(true);
     } else {
@@ -85,7 +86,6 @@ export const VideoAnalysis = () => {
     }
   };
 
-  // Render initial buttons if neither recorder nor teleprompter is active
   if (!showRecorder && !showTeleprompter && !showEditor) {
     return (
       <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
@@ -113,7 +113,6 @@ export const VideoAnalysis = () => {
     );
   }
 
-  // Only render video recorder or teleprompter after button click
   return (
     <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
       style={{
@@ -137,11 +136,11 @@ export const VideoAnalysis = () => {
 
                 {showTeleprompter && (
                   <div className="flex flex-col space-y-4">
-                    <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
+                    <h2 className="text-2xl font-bold text-white mb-4">Your Script</h2>
                     <div className="flex-grow">
                       {isGenerating ? (
                         <LoadingIndicator>
-                          Generating your workout script...
+                          Creating your influencer script...
                         </LoadingIndicator>
                       ) : workoutScript ? (
                         <Teleprompter 

@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { GoogleGenerativeAI } from "npm:@google/generative-ai"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,28 +7,36 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { workoutPlan, dayToSpeak, warmup, wod, notes } = await req.json()
+    const { workoutPlan } = await req.json()
     
     if (!workoutPlan) {
       throw new Error('Workout plan is required')
     }
 
-    // Create the monologue
-    const monologue = `Hey everyone! Let's go through today's workout plan.
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(Deno.env.get("GEMINI_API_KEY") || "");
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+    const prompt = `
+    You are a charismatic fitness influencer creating a video script for a workout plan. 
+    Convert this workout plan into an engaging, motivational script that feels natural and conversational.
+    Include emojis and enthusiasm, but keep it professional.
+    Make sure to cover all exercises and important form cues.
+    Break down the content into clear sections.
     
-    For our warmup today, we'll be doing: ${warmup}
-    
-    Now for the main workout: ${wod}
-    
-    Some important notes to keep in mind: ${notes}
-    
-    Remember to focus on form and technique throughout the workout. Stay hydrated and let's crush it!`
+    Workout Plan:
+    ${workoutPlan}
+    `;
+
+    const result = await model.generateContent(prompt);
+    const monologue = result.response.text();
+
+    console.log('Generated monologue:', monologue);
 
     return new Response(
       JSON.stringify({ monologue }),

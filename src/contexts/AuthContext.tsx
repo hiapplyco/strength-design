@@ -1,14 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { Session } from "@supabase/supabase-js";
+import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   session: Session | null;
+  user: User | null;
   isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ session: null, isLoading: true });
+const AuthContext = createContext<AuthContextType>({ session: null, user: null, isLoading: true });
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -63,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
 
   return (
-    <AuthContext.Provider value={{ session, isLoading }}>
+    <AuthContext.Provider value={{ session, user: session?.user ?? null, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

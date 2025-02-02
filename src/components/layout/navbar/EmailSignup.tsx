@@ -86,8 +86,12 @@ export const EmailSignup = () => {
         Sign up
       </Button>
       <AuthDialog
-        showDialog={showAuthDialog}
+        isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          navigate("/workout-generator");
+        }}
       />
     </div>
   );

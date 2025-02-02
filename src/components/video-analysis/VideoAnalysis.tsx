@@ -162,7 +162,7 @@ export const VideoAnalysis = () => {
                           const tempDiv = document.createElement('div');
                           tempDiv.innerHTML = content;
                           const plainText = tempDiv.textContent || tempDiv.innerText || "";
-                          setWorkoutScript(plainText);
+                          generateMonologue(plainText);
                           setShowEditor(false);
                           setShowTeleprompter(true);
                         }}

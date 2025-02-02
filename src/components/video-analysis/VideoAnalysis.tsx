@@ -25,7 +25,7 @@ export const VideoAnalysis = () => {
     handleFileSelect,
   } = useVideoProcessing();
 
-  // Add debug logging
+  // Debug logging
   useEffect(() => {
     console.log('VideoAnalysis mounted');
     console.log('Initial showRecorder:', showRecorder);
@@ -74,6 +74,7 @@ export const VideoAnalysis = () => {
     }
   };
 
+  // Render initial buttons if neither recorder nor teleprompter is active
   if (!showRecorder && !showTeleprompter) {
     console.log('Rendering initial buttons view');
     return (
@@ -110,6 +111,7 @@ export const VideoAnalysis = () => {
     );
   }
 
+  // Only render video recorder or teleprompter after button click
   return (
     <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
       style={{

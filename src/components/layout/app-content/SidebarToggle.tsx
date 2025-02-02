@@ -7,16 +7,17 @@ interface SidebarToggleProps {
 }
 
 export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, open } = useSidebar();
 
   if (!isVisible) return null;
 
   return (
     <Button
-      onClick={toggleSidebar}
+      onClick={() => toggleSidebar()}
       variant="ghost"
       size="icon"
       className="fixed top-4 left-[16.5rem] z-50 text-muted-foreground hover:text-accent md:left-[15.5rem]"
+      aria-label={open ? "Close sidebar" : "Open sidebar"}
     >
       <Menu className="h-6 w-6" />
     </Button>

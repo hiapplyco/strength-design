@@ -1,213 +1,19 @@
-import React, { useRef, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import React from 'react';
 import { VideoPreview } from './VideoPreview';
 import { VideoControls } from './VideoControls';
 import { UploadStatus } from './UploadStatus';
+import { useWebcam } from './hooks/useWebcam';
+import { useRecording } from './hooks/useRecording';
+import { useVideoUpload } from './hooks/useVideoUpload';
 
 const VideoRecorder: React.FC = () => {
-  const { toast } = useToast();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const [isWebcamOn, setIsWebcamOn] = useState(false);
-  const [recording, setRecording] = useState(false);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [publicUrl, setPublicUrl] = useState<string>('');
+  const { videoRef, streamRef, isWebcamOn, startWebcam, stopWebcam } = useWebcam();
+  const { recording, recordedChunks, startRecording, stopRecording, mediaRecorderRef } = useRecording(streamRef);
+  const { uploading, publicUrl, uploadVideo } = useVideoUpload();
 
-  const startWebcam = async () => {
-    try {
-      const constraints = {
-        video: {
-          facingMode: 'user',
-          width: { ideal: 1280, max: 1280 },
-          height: { ideal: 720, max: 720 }
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
-        }
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute('playsinline', 'true');
-        await videoRef.current.play().catch(err => {
-          console.error("Error playing video:", err);
-          throw new Error("Failed to play video stream");
-        });
-      }
-      
-      streamRef.current = stream;
-      setIsWebcamOn(true);
-      toast({
-        title: "Camera Ready",
-        description: "Your webcam is now active and ready to record.",
-      });
-    } catch (err: any) {
-      console.error("Error accessing media devices:", err);
-      let errorMessage = "Error accessing webcam. ";
-      
-      if (err.name === 'NotAllowedError') {
-        errorMessage += "Please grant camera and microphone permissions.";
-      } else if (err.name === 'NotFoundError') {
-        errorMessage += "No camera or microphone found.";
-      } else if (err.name === 'NotReadableError') {
-        errorMessage += "Camera or microphone is already in use.";
-      } else {
-        errorMessage += "Please check your device settings.";
-      }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const stopWebcam = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    setIsWebcamOn(false);
-  };
-
-  const startRecording = () => {
-    if (!streamRef.current) return;
-    
-    try {
-      // Updated MIME types order for better iOS Safari compatibility
-      const mimeTypes = [
-        'video/mp4',
-        'video/mp4;codecs=h264,aac',
-        'video/webm',
-        'video/webm;codecs=h264',
-        'video/webm;codecs=vp8,opus',
-        'video/webm;codecs=vp9,opus'
-      ];
-      
-      let selectedMimeType = '';
-      for (const mimeType of mimeTypes) {
-        if (MediaRecorder.isTypeSupported(mimeType)) {
-          console.log('Supported MIME type found:', mimeType);
-          selectedMimeType = mimeType;
-          break;
-        } else {
-          console.log('Unsupported MIME type:', mimeType);
-        }
-      }
-      
-      if (!selectedMimeType) {
-        throw new Error('No supported MIME type found for recording. Available types: ' + 
-          mimeTypes.map(type => `${type} (${MediaRecorder.isTypeSupported(type)})`).join(', '));
-      }
-
-      const options = { 
-        mimeType: selectedMimeType,
-        videoBitsPerSecond: 2500000 // 2.5 Mbps
-      };
-      
-      const mediaRecorder = new MediaRecorder(streamRef.current, options);
-      mediaRecorderRef.current = mediaRecorder;
-      setRecordedChunks([]);
-
-      mediaRecorder.ondataavailable = (event: BlobEvent) => {
-        if (event.data && event.data.size > 0) {
-          setRecordedChunks((prev) => [...prev, event.data]);
-        }
-      };
-
-      mediaRecorder.start(1000);
-      setRecording(true);
-      toast({
-        title: "Recording Started",
-        description: "Your video is now being recorded.",
-      });
-    } catch (err: any) {
-      console.error("Error starting recording:", err);
-      toast({
-        title: "Recording Error",
-        description: `${err.message} Please try using a different browser or device.`,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stop();
-      setRecording(false);
-      toast({
-        title: "Recording Stopped",
-        description: "Your video has been recorded successfully.",
-      });
-    }
-  };
-
-  const uploadVideo = async () => {
-    if (recordedChunks.length === 0) {
-      toast({
-        title: "Error",
-        description: "No recording available to upload.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setUploading(true);
-    try {
-      // Create a Blob with the correct MIME type
-      const blob = new Blob(recordedChunks, { 
-        type: mediaRecorderRef.current?.mimeType || 'video/webm' 
-      });
-      const fileName = `videos/recording_${Date.now()}.webm`;
-
-      const { error: uploadError } = await supabase
-        .storage
-        .from('videos')
-        .upload(fileName, blob, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: mediaRecorderRef.current?.mimeType || 'video/webm',
-        });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data } = supabase
-        .storage
-        .from('videos')
-        .getPublicUrl(fileName);
-
-      if (!data.publicUrl) {
-        throw new Error("Failed to retrieve video URL");
-      }
-      
-      setPublicUrl(data.publicUrl);
-      toast({
-        title: "Success",
-        description: "Video uploaded successfully!",
-      });
-      setRecordedChunks([]);
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload video. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
+  const handleUploadVideo = async () => {
+    if (mediaRecorderRef.current) {
+      await uploadVideo(recordedChunks, mediaRecorderRef.current.mimeType);
     }
   };
 
@@ -224,7 +30,7 @@ const VideoRecorder: React.FC = () => {
         onStopWebcam={stopWebcam}
         onStartRecording={startRecording}
         onStopRecording={stopRecording}
-        onUploadVideo={uploadVideo}
+        onUploadVideo={handleUploadVideo}
       />
       <UploadStatus publicUrl={publicUrl} />
     </div>

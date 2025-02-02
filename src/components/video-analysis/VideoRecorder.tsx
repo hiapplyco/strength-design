@@ -18,12 +18,12 @@ const VideoRecorder: React.FC = () => {
 
   const startWebcam = async () => {
     try {
-      // iOS Safari requires specific constraints
+      // iOS Safari specific constraints
       const constraints = {
         video: {
           facingMode: 'user',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 1280, max: 1280 },
+          height: { ideal: 720, max: 720 }
         },
         audio: {
           echoCancellation: true,
@@ -36,6 +36,7 @@ const VideoRecorder: React.FC = () => {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.setAttribute('playsinline', 'true');
         await videoRef.current.play().catch(err => {
           console.error("Error playing video:", err);
           throw new Error("Failed to play video stream");
@@ -85,12 +86,11 @@ const VideoRecorder: React.FC = () => {
     if (!streamRef.current) return;
     
     try {
-      // Try different MIME types for better iOS compatibility
       const mimeTypes = [
+        'video/mp4;codecs=h264,aac',
         'video/webm;codecs=vp9,opus',
         'video/webm;codecs=vp8,opus',
-        'video/webm',
-        'video/mp4'
+        'video/webm'
       ];
       
       let selectedMimeType = '';
@@ -120,7 +120,6 @@ const VideoRecorder: React.FC = () => {
         }
       };
 
-      // Set a data interval of 1 second for more frequent chunks
       mediaRecorder.start(1000);
       setRecording(true);
       toast({

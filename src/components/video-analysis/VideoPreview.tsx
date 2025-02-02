@@ -6,11 +6,14 @@ interface VideoPreviewProps {
 
 export const VideoPreview: React.FC<VideoPreviewProps> = ({ videoRef }) => {
   return (
-    <video
-      ref={videoRef}
-      className="w-full aspect-video rounded-md bg-black/80 mb-4"
-      autoPlay
-      muted
-    />
+    <div className="relative w-full aspect-video bg-black/80 mb-4 rounded-md overflow-hidden">
+      <video
+        ref={videoRef}
+        className="absolute inset-0 w-full h-full object-cover"
+        autoPlay
+        muted
+        playsInline
+      />
+    </div>
   );
 };

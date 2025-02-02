@@ -40,27 +40,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return children;
 };
 
-export const AppContent = () => {
-  const handleConsoleError = useErrorHandler();
-  const { session, isLoading } = useAuth();
+const MainContent = () => {
+  const { session } = useAuth();
   const { toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    window.addEventListener('error', handleConsoleError);
-    return () => {
-      window.removeEventListener('error', handleConsoleError);
-    };
-  }, [handleConsoleError]);
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
   return (
-    <SidebarProvider>
-      <Toaster />
-      <Sonner />
+    <>
       {session && isMobile && (
         <Button
           onClick={toggleSidebar}
@@ -109,6 +95,30 @@ export const AppContent = () => {
           </Routes>
         </main>
       </div>
+    </>
+  );
+};
+
+export const AppContent = () => {
+  const handleConsoleError = useErrorHandler();
+  const { isLoading } = useAuth();
+
+  useEffect(() => {
+    window.addEventListener('error', handleConsoleError);
+    return () => {
+      window.removeEventListener('error', handleConsoleError);
+    };
+  }, [handleConsoleError]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  return (
+    <SidebarProvider>
+      <Toaster />
+      <Sonner />
+      <MainContent />
     </SidebarProvider>
   );
 };

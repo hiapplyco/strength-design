@@ -26,7 +26,6 @@ export const VideoAnalysis = () => {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = location.state.workoutScript;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
-      console.log('Setting workout script:', plainText);
       setWorkoutScript(plainText);
     }
   }, [location.state]);
@@ -79,15 +78,13 @@ export const VideoAnalysis = () => {
                   <VideoRecorder onAnalyzeVideo={handleAnalyzeVideo} />
                 </div>
 
-                {workoutScript && (
-                  <div>
-                    <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
-                    <Teleprompter 
-                      script={workoutScript}
-                      onPositionChange={setTeleprompterPosition}
-                    />
-                  </div>
-                )}
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-4">Workout Script</h2>
+                  <Teleprompter 
+                    script={workoutScript || "No workout script available. Please generate a workout first."}
+                    onPositionChange={setTeleprompterPosition}
+                  />
+                </div>
               </div>
             </div>
 

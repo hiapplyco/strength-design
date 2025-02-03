@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { HeaderActions } from "./header/HeaderActions";
 import { WorkoutModifier } from "./WorkoutModifier";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { triggerConfetti } from "@/utils/confetti";
+import { StyledHeaderButton } from "./header/StyledHeaderButton";
 
 interface WorkoutHeaderProps {
   title: string;
@@ -103,13 +103,12 @@ export function WorkoutHeader({
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 border-b">
       <div className="flex items-center gap-4">
         <h2 className="text-2xl font-oswald text-primary">{formatDayTitle(title)}</h2>
-        <Button
-          variant="outline"
-          className="bg-[#B8860B] hover:bg-[#B8860B]/90 text-black font-oswald uppercase tracking-tight transition-all hover:-translate-y-1 hover:shadow-lg border-2 border-[#B8860B] px-6 relative after:absolute after:inset-0 after:z-[-1] after:translate-y-[2px] after:translate-x-[2px] after:bg-black/20 after:rounded-md"
+        <StyledHeaderButton
           onClick={() => setShowModifier(true)}
+          variant="secondary"
         >
           Edit Workout
-        </Button>
+        </StyledHeaderButton>
       </div>
 
       <HeaderActions

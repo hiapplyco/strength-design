@@ -69,7 +69,7 @@ const WorkoutGenerator = () => {
                 generate.workout
               </h1>
               <p className="text-xl text-white/80 max-w-3xl mx-auto">
-                Create personalized workout programs tailored to your needs. Our AI-powered generator considers your fitness level, available equipment, and specific requirements.
+                Create personalized workout programs tailored to your needs. Our machine learned models considers your fitness level, available equipment, and specific requirements.
               </p>
             </div>
             

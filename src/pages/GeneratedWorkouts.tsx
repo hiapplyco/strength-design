@@ -17,9 +17,9 @@ const GeneratedWorkouts = () => {
     const fetchWorkouts = async () => {
       try {
         const { data, error } = await supabase
-          .from('workouts')
+          .from('generated_workouts')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('generated_at', { ascending: false });
 
         if (error) throw error;
 
@@ -40,16 +40,46 @@ const GeneratedWorkouts = () => {
   }, [toast]);
 
   const handleWorkoutClick = (workout) => {
+    const workoutData = workout.workout_data;
+    let content = '';
+
+    if (workout.title) {
+      content += `# ${workout.title}\n\n`;
+    }
+
+    if (workout.summary) {
+      content += `## Summary\n${workout.summary}\n\n`;
+    }
+
+    if (workoutData) {
+      Object.entries(workoutData).forEach(([day, dayWorkout]) => {
+        content += `## ${day}\n\n`;
+        
+        if (dayWorkout.description) {
+          content += `### Description\n${dayWorkout.description}\n\n`;
+        }
+        
+        if (dayWorkout.warmup) {
+          content += `### Warmup\n${dayWorkout.warmup}\n\n`;
+        }
+        
+        if (dayWorkout.strength) {
+          content += `### Strength\n${dayWorkout.strength}\n\n`;
+        }
+        
+        if (dayWorkout.workout) {
+          content += `### Workout\n${dayWorkout.workout}\n\n`;
+        }
+        
+        if (dayWorkout.notes) {
+          content += `### Notes\n${dayWorkout.notes}\n\n`;
+        }
+      });
+    }
+
     navigate('/document-editor', {
       state: {
-        content: `
-# ${workout.day}
-
-${workout.description ? `## Description\n${workout.description}\n` : ''}
-${workout.warmup ? `## Warmup\n${workout.warmup}\n` : ''}
-${workout.workout ? `## Workout\n${workout.workout}\n` : ''}
-${workout.notes ? `## Notes\n${workout.notes}` : ''}
-        `.trim()
+        content: content.trim()
       }
     });
   };
@@ -83,16 +113,21 @@ ${workout.notes ? `## Notes\n${workout.notes}` : ''}
                   onClick={() => handleWorkoutClick(workout)}
                 >
                   <CardHeader>
-                    <CardTitle className="text-white">{workout.day}</CardTitle>
+                    <CardTitle className="text-white">
+                      {workout.title || "Generated Workout"}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ScrollArea className="h-[100px] w-full rounded-md border border-white/20 p-4">
                       <div className="space-y-2">
                         <p className="text-sm text-white/80 whitespace-pre-line">
-                          {workout.description}
+                          {workout.summary || "A custom workout program"}
                         </p>
                         <p className="text-xs text-gray-400">
-                          {formatDistanceToNow(new Date(workout.created_at), { addSuffix: true })}
+                          {workout.generated_at ? 
+                            formatDistanceToNow(new Date(workout.generated_at), { addSuffix: true }) :
+                            "Recently generated"
+                          }
                         </p>
                       </div>
                     </ScrollArea>

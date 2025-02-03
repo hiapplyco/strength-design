@@ -78,7 +78,7 @@ export default function GeneratedWorkouts() {
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
       style={{
-        backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
+        backgroundImage: 'url("/lovable-uploads/47062b35-74bb-47f1-aaa1-a642db4673ce.png")',
       }}
     >
       <div className="min-h-screen bg-black/75 backdrop-blur-sm">

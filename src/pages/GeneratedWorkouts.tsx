@@ -39,6 +39,12 @@ const GeneratedWorkouts = () => {
     fetchWorkouts();
   }, [toast]);
 
+  const handleWorkoutClick = (workout) => {
+    // Navigate to workout details or perform action
+    console.log('Clicked workout:', workout);
+    // You can add navigation or other actions here
+  };
+
   return (
     <div 
       className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
@@ -58,25 +64,33 @@ const GeneratedWorkouts = () => {
           </div>
 
           {isLoading ? (
-            <p className="text-white">Loading...</p>
+            <p className="text-white text-center">Loading your workouts...</p>
           ) : (
-            workouts.map((workout) => (
-              <Card key={workout.id} className="mb-4">
-                <CardHeader>
-                  <CardTitle>{workout.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                      {workout.description}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {formatDistanceToNow(new Date(workout.created_at), { addSuffix: true })}
-                    </p>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            ))
+            <div className="grid gap-4">
+              {workouts.map((workout) => (
+                <Card 
+                  key={workout.id} 
+                  className="bg-white/10 hover:bg-white/20 transition-colors cursor-pointer border-2 border-primary/20"
+                  onClick={() => handleWorkoutClick(workout)}
+                >
+                  <CardHeader>
+                    <CardTitle className="text-white">{workout.day}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[100px] w-full rounded-md border border-white/20 p-4">
+                      <div className="space-y-2">
+                        <p className="text-sm text-white/80 whitespace-pre-line">
+                          {workout.description}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {formatDistanceToNow(new Date(workout.created_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </div>
       </div>

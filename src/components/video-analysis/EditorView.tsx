@@ -20,8 +20,8 @@ export const EditorView = ({
   onEditorSave,
 }: EditorViewProps) => {
   return (
-    <div className="container mx-auto px-4 pt-16">
-      <VideoHeader className="mb-8" />
+    <div className="container mx-auto px-4 pt-8 md:pt-16">
+      <VideoHeader className="mb-4 md:mb-8" />
       <div className="max-w-7xl mx-auto">
         {showRecorder && (
           <RecordingInterface

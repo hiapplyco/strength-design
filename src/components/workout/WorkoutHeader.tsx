@@ -117,12 +117,7 @@ export function WorkoutHeader({
         isExporting={isExporting}
         onExport={onExport}
         workoutText={formatWorkoutText()}
-        onShare={() => {
-          navigator.share?.({
-            title: `Workout for ${formatDayTitle(title)}`,
-            text: `Check out this workout for ${formatDayTitle(title)}!`,
-          }).catch(console.error);
-        }}
+        allWorkouts={allWorkouts}
       />
 
       <Dialog open={showModifier} onOpenChange={setShowModifier}>

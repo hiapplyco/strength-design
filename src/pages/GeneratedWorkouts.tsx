@@ -6,9 +6,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
+import { WorkoutDay } from "@/types/fitness";
+import { Database } from "@/integrations/supabase/types";
+
+type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
+type WorkoutData = Record<string, WorkoutDay>;
 
 const GeneratedWorkouts = () => {
-  const [workouts, setWorkouts] = useState([]);
+  const [workouts, setWorkouts] = useState<GeneratedWorkout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -23,7 +28,7 @@ const GeneratedWorkouts = () => {
 
         if (error) throw error;
 
-        setWorkouts(data);
+        setWorkouts(data || []);
       } catch (error) {
         console.error('Error fetching workouts:', error);
         toast({
@@ -39,8 +44,8 @@ const GeneratedWorkouts = () => {
     fetchWorkouts();
   }, [toast]);
 
-  const handleWorkoutClick = (workout) => {
-    const workoutData = workout.workout_data;
+  const handleWorkoutClick = (workout: GeneratedWorkout) => {
+    const workoutData = workout.workout_data as WorkoutData;
     let content = '';
 
     if (workout.title) {

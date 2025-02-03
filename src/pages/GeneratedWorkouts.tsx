@@ -40,9 +40,18 @@ const GeneratedWorkouts = () => {
   }, [toast]);
 
   const handleWorkoutClick = (workout) => {
-    // Navigate to workout details or perform action
-    console.log('Clicked workout:', workout);
-    // You can add navigation or other actions here
+    navigate('/document-editor', {
+      state: {
+        content: `
+# ${workout.day}
+
+${workout.description ? `## Description\n${workout.description}\n` : ''}
+${workout.warmup ? `## Warmup\n${workout.warmup}\n` : ''}
+${workout.workout ? `## Workout\n${workout.workout}\n` : ''}
+${workout.notes ? `## Notes\n${workout.notes}` : ''}
+        `.trim()
+      }
+    });
   };
 
   return (

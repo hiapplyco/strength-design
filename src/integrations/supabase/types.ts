@@ -290,6 +290,44 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_content: {
+        Row: {
+          created_at: string
+          document_id: string | null
+          id: string
+          shareable_link: string | null
+          updated_at: string
+          user_id: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          shareable_link?: string | null
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          shareable_link?: string | null
+          updated_at?: string
+          user_id?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_content_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       voice_recordings: {
         Row: {
           audio_url: string

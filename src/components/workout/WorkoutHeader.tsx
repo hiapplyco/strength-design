@@ -105,7 +105,7 @@ export function WorkoutHeader({
         <h2 className="text-2xl font-oswald text-primary">{formatDayTitle(title)}</h2>
         <Button
           variant="outline"
-          className="bg-accent hover:bg-accent/90 text-accent-foreground font-oswald uppercase tracking-tight transition-all hover:-translate-y-1 hover:shadow-lg"
+          className="bg-accent hover:bg-accent/90 text-black font-oswald uppercase tracking-tight transition-all hover:-translate-y-1 hover:shadow-lg border-2 border-accent px-6"
           onClick={() => setShowModifier(true)}
         >
           Edit Workout

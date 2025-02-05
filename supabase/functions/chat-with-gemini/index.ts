@@ -23,6 +23,7 @@ serve(async (req) => {
     let response;
     if (fileUrl) {
       // If there's a file URL, we need to fetch it first
+      console.log('Fetching file from URL:', fileUrl);
       const fileResponse = await fetch(fileUrl);
       const fileData = await fileResponse.arrayBuffer();
       const uint8Array = new Uint8Array(fileData);

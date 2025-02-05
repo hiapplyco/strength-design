@@ -6,11 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
-import { WorkoutDay } from "@/types/fitness";
+import { WorkoutDay, WorkoutData } from "@/types/fitness";
 import { Database } from "@/integrations/supabase/types";
 
 type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
-type WorkoutData = Record<string, WorkoutDay>;
 
 const GeneratedWorkouts = () => {
   const [workouts, setWorkouts] = useState<GeneratedWorkout[]>([]);
@@ -45,7 +44,8 @@ const GeneratedWorkouts = () => {
   }, [toast]);
 
   const handleWorkoutClick = (workout: GeneratedWorkout) => {
-    const workoutData = workout.workout_data as WorkoutData;
+    // Safely cast the workout_data to WorkoutData type
+    const workoutData = workout.workout_data as unknown as WorkoutData;
     let content = '';
 
     if (workout.title) {

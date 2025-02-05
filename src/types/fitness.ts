@@ -7,3 +7,8 @@ export interface WorkoutDay {
 }
 
 export type WeeklyWorkouts = Record<string, WorkoutDay>;
+
+// Add this new type for generated workouts
+export interface WorkoutData {
+  [key: string]: WorkoutDay;
+}

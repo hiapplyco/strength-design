@@ -28,19 +28,30 @@ serve(async (req) => {
       const fileData = await fileResponse.arrayBuffer();
       const uint8Array = new Uint8Array(fileData);
       const base64Data = btoa(String.fromCharCode(...uint8Array));
+      const mimeType = fileResponse.headers.get('content-type') || 'application/pdf';
 
-      console.log('Processing file input');
+      console.log('Processing file input with MIME type:', mimeType);
       
-      const result = await model.generateContent([
-        {
-          inlineData: {
-            mimeType: "application/octet-stream",
-            data: base64Data
-          }
-        },
-        message
-      ]);
-      response = await result.response;
+      // Only process supported MIME types
+      if (mimeType.startsWith('image/')) {
+        const result = await model.generateContent([
+          {
+            inlineData: {
+              mimeType: mimeType,
+              data: base64Data
+            }
+          },
+          message
+        ]);
+        response = await result.response;
+      } else {
+        // For non-image files, just process the message
+        console.log('Non-image file detected, processing message only');
+        const result = await model.generateContent([
+          `This is regarding a file of type ${mimeType}. ${message}`
+        ]);
+        response = await result.response;
+      }
     } else {
       console.log('Processing text-only input');
       const result = await model.generateContent(message);

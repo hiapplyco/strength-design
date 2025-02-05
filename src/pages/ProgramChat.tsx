@@ -47,16 +47,37 @@ export default function ProgramChat() {
         .from('documents')
         .getPublicUrl(filePath);
 
-      const { error: dbError } = await supabase
+      // First save the message
+      const { data: messageData, error: dbError } = await supabase
         .from('chat_messages')
         .insert({
           user_id: user?.id,
           message: `Uploaded file: ${file.name}`,
           file_path: urlData.publicUrl,
           file_type: file.type
-        });
+        })
+        .select()
+        .single();
 
       if (dbError) throw dbError;
+
+      // Then get AI response
+      const response = await supabase.functions.invoke('chat-with-gemini', {
+        body: { 
+          message: `Please analyze this file: ${file.name}`,
+          fileUrl: urlData.publicUrl
+        }
+      });
+
+      if (response.error) throw response.error;
+
+      // Update the message with AI response
+      const { error: updateError } = await supabase
+        .from('chat_messages')
+        .update({ response: response.data.response })
+        .eq('id', messageData.id);
+
+      if (updateError) throw updateError;
 
       toast({
         title: "Success",
@@ -102,16 +123,35 @@ export default function ProgramChat() {
 
     try {
       setIsLoading(true);
-      const { error } = await supabase
+      // First save the message
+      const { data: messageData, error } = await supabase
         .from('chat_messages')
         .insert({
           user_id: user?.id,
           message: message.trim()
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
       setMessage("");
+
+      // Then get AI response
+      const response = await supabase.functions.invoke('chat-with-gemini', {
+        body: { message: message.trim() }
+      });
+
+      if (response.error) throw response.error;
+
+      // Update the message with AI response
+      const { error: updateError } = await supabase
+        .from('chat_messages')
+        .update({ response: response.data.response })
+        .eq('id', messageData.id);
+
+      if (updateError) throw updateError;
+
       fetchMessages();
     } catch (error) {
       console.error('Error sending message:', error);
@@ -141,25 +181,29 @@ export default function ProgramChat() {
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
               {messages.map((msg) => (
-                <div key={msg.id} className="bg-accent/5 rounded-lg p-4">
-                  <p className="text-accent">
-                    {msg.file_path ? (
-                      <a 
-                        href={msg.file_path} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {msg.message}
-                      </a>
-                    ) : (
-                      msg.message
-                    )}
-                  </p>
-                  {msg.response && (
-                    <p className="mt-2 text-muted-foreground">
-                      {msg.response}
+                <div key={msg.id} className="space-y-2">
+                  <div className="bg-accent/5 rounded-lg p-4">
+                    <p className="text-accent">
+                      {msg.file_path ? (
+                        <a 
+                          href={msg.file_path} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {msg.message}
+                        </a>
+                      ) : (
+                        msg.message
+                      )}
                     </p>
+                  </div>
+                  {msg.response && (
+                    <div className="bg-primary/5 rounded-lg p-4 ml-4">
+                      <p className="text-primary">
+                        {msg.response}
+                      </p>
+                    </div>
                   )}
                 </div>
               ))}

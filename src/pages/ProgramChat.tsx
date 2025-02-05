@@ -8,13 +8,14 @@ import { MessageSquare, Send } from "lucide-react";
 import { FileUpload } from "@/components/chat/FileUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 interface ChatMessage {
   id: string;
   message: string;
-  response?: string;
-  file_path?: string;
-  file_type?: string;
+  response?: string | null;
+  file_path?: string | null;
+  file_type?: string | null;
   created_at: string;
 }
 
@@ -81,7 +82,7 @@ export default function ProgramChat() {
 
       toast({
         title: "Success",
-        description: "File uploaded successfully",
+        description: "File uploaded and processed successfully",
       });
 
       fetchMessages();
@@ -89,7 +90,7 @@ export default function ProgramChat() {
       console.error('Error uploading file:', error);
       toast({
         title: "Error",
-        description: "Failed to upload file",
+        description: "Failed to upload and process file",
         variant: "destructive",
       });
     } finally {
@@ -225,6 +226,11 @@ export default function ProgramChat() {
                 <Send className="h-4 w-4" />
               </Button>
             </div>
+            {isLoading && (
+              <div className="mt-2">
+                <LoadingIndicator>Processing your request...</LoadingIndicator>
+              </div>
+            )}
           </form>
         </div>
       </Card>

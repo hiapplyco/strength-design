@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@1.0.0";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@1.0.0?target=deno";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {

@@ -80,13 +80,12 @@ export default function ProgramChat() {
       if (updateError) throw updateError;
 
       console.log('Response saved to database');
+      await fetchMessages();
 
       toast({
         title: "Success",
         description: "File uploaded and processed successfully",
       });
-
-      await fetchMessages();
     } catch (error) {
       console.error('Error uploading file:', error);
       toast({
@@ -126,7 +125,8 @@ export default function ProgramChat() {
       setIsLoading(true);
       console.log('Sending message:', message);
 
-      const { data: messageData, error } = await supabase
+      // First save the message
+      const { data: messageData, error: messageError } = await supabase
         .from('chat_messages')
         .insert({
           user_id: user?.id,
@@ -135,20 +135,22 @@ export default function ProgramChat() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (messageError) throw messageError;
       console.log('Message saved to database:', messageData);
 
-      const response = await supabase.functions.invoke('chat-with-gemini', {
+      // Then get the response from Gemini
+      const { data: response, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { message }
       });
 
       console.log('Received Gemini response:', response);
 
-      if (response.error) throw response.error;
+      if (geminiError) throw geminiError;
 
+      // Update the message with the response
       const { error: updateError } = await supabase
         .from('chat_messages')
-        .update({ response: response.data.response })
+        .update({ response: response.response })
         .eq('id', messageData.id);
 
       if (updateError) throw updateError;

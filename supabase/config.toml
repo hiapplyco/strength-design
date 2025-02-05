@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.generate-tiptap-document]
 verify_jwt = false
+
+[functions.chat-with-gemini]
+verify_jwt = false

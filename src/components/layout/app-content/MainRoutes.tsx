@@ -9,6 +9,7 @@ import SharedDocument from "@/pages/SharedDocument";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
 import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
+import ProgramChat from "@/pages/ProgramChat";
 
 export const MainRoutes = () => {
   const { session } = useAuth();
@@ -58,6 +59,14 @@ export const MainRoutes = () => {
         element={
           <ProtectedRoute>
             <GeneratedWorkouts />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/program-chat"
+        element={
+          <ProtectedRoute>
+            <ProgramChat />
           </ProtectedRoute>
         }
       />

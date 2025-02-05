@@ -5,6 +5,7 @@ import {
   FileText, 
   Video, 
   DollarSign,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
     { path: '/workout-generator', icon: <Dumbbell className="h-4 w-4" />, text: 'Generate Program' },
     { path: '/generated-workouts', icon: <FileText className="h-4 w-4" />, text: 'Previous Programs' },
     { path: '/video-analysis', icon: <Video className="h-4 w-4" />, text: 'Publish Program' },
+    { path: '/program-chat', icon: <MessageSquare className="h-4 w-4" />, text: 'Program Chat' },
     { path: '/pricing', icon: <DollarSign className="h-4 w-4" />, text: 'Upgrade to Pro' },
   ];
 

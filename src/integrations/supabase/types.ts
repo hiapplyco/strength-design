@@ -72,6 +72,36 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          file_type: string | null
+          id: string
+          message: string
+          response: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          message: string
+          response?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          file_type?: string | null
+          id?: string
+          message?: string
+          response?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           created_at: string

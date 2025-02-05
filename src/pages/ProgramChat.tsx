@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,12 @@ export default function ProgramChat() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      fetchMessages();
+    }
+  }, [user]);
 
   const handleFileSelect = async (file: File) => {
     try {
@@ -57,7 +63,6 @@ export default function ProgramChat() {
         description: "File uploaded successfully",
       });
 
-      // Fetch latest messages
       fetchMessages();
     } catch (error) {
       console.error('Error uploading file:', error);

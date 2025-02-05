@@ -139,7 +139,7 @@ export default function ProgramChat() {
       console.log('Message saved to database:', messageData);
 
       const response = await supabase.functions.invoke('chat-with-gemini', {
-        body: { message: message }
+        body: { message }
       });
 
       console.log('Received Gemini response:', response);

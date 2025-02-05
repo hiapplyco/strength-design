@@ -1,11 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@1.0.0";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const SUPPORTED_MIME_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'video/mp4',
+  'audio/mpeg'
+];
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -18,7 +27,7 @@ serve(async (req) => {
     console.log('Processing chat request:', { message, fileUrl });
 
     const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-001" });
 
     let response;
     if (fileUrl) {
@@ -30,31 +39,48 @@ serve(async (req) => {
       const base64Data = btoa(String.fromCharCode(...uint8Array));
       const mimeType = fileResponse.headers.get('content-type') || 'application/pdf';
 
+      if (!SUPPORTED_MIME_TYPES.includes(mimeType)) {
+        throw new Error(`Unsupported file type: ${mimeType}`);
+      }
+
       console.log('Processing file input with MIME type:', mimeType);
       
-      // Only process supported MIME types
+      // For image files
       if (mimeType.startsWith('image/')) {
-        const result = await model.generateContent([
-          {
-            inlineData: {
-              mimeType: mimeType,
-              data: base64Data
-            }
-          },
-          message
-        ]);
+        const result = await model.generateContent({
+          contents: [{
+            role: "user",
+            parts: [
+              { 
+                inlineData: {
+                  mimeType: mimeType,
+                  data: base64Data
+                }
+              },
+              { text: message }
+            ]
+          }]
+        });
         response = await result.response;
       } else {
         // For non-image files, just process the message
         console.log('Non-image file detected, processing message only');
-        const result = await model.generateContent([
-          `This is regarding a file of type ${mimeType}. ${message}`
-        ]);
+        const result = await model.generateContent({
+          contents: [{
+            role: "user",
+            parts: [{ text: `This is regarding a file of type ${mimeType}. ${message}` }]
+          }]
+        });
         response = await result.response;
       }
     } else {
       console.log('Processing text-only input');
-      const result = await model.generateContent(message);
+      const result = await model.generateContent({
+        contents: [{
+          role: "user",
+          parts: [{ text: message }]
+        }]
+      });
       response = await result.response;
     }
 
@@ -69,7 +95,16 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in chat-with-gemini function:', error);
+    console.error('Full error details:', {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.status,
+      requestDetails: {
+        model: "gemini-2.0-flash-001",
+        inputType: error.fileUrl ? "multimodal" : "text"
+      }
+    });
+
     return new Response(
       JSON.stringify({ 
         error: 'Failed to process chat request',

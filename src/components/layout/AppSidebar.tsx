@@ -1,9 +1,11 @@
+
 import { useRef, useEffect } from "react";
 import { SidebarLogo } from "./sidebar/SidebarLogo";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { EmailSignup } from "./navbar/EmailSignup";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
   const { open, openMobile, setOpenMobile } = useSidebar();
@@ -29,11 +31,13 @@ export function AppSidebar() {
   }, [isMobile, isVisible, setOpenMobile]);
 
   return (
-    <div 
+    <aside 
       ref={sidebarRef}
-      className={`fixed top-0 left-0 h-screen w-64 bg-background border-r transform transition-transform duration-300 ease-in-out ${
-        isVisible ? 'translate-x-0' : '-translate-x-full'
-      } z-50`}
+      className={cn(
+        "fixed top-0 left-0 h-screen z-50 w-64 bg-background border-r",
+        "transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        !isVisible && "-translate-x-full"
+      )}
     >
       <div className="p-4">
         <SidebarLogo />
@@ -47,6 +51,6 @@ export function AppSidebar() {
           <SidebarNavigation />
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

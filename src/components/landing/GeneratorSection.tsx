@@ -1,3 +1,4 @@
+
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -42,11 +43,11 @@ export const GeneratorSection = ({
 
   return (
     <motion.div 
-      className={`flex flex-col items-start justify-center min-h-screen px-4 py-6 transition-all duration-300 ${
+      className={`flex flex-col items-start justify-center min-h-screen w-full px-4 py-6 transition-all duration-300 ${
         hasScrolled ? 'bg-black/90' : 'bg-transparent'
       }`}
     >
-      <div className="max-w-4xl space-y-6 ml-8 md:ml-16 lg:ml-24">
+      <div className="w-full max-w-4xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="text-left"
           initial={{ opacity: 0, y: 20 }}
@@ -65,7 +66,7 @@ export const GeneratorSection = ({
           </div>
         </motion.div>
         
-        <div className="container max-w-[1000px] pl-0">
+        <div className="w-full max-w-[1000px]">
           <InputDirections />
         </div>
 

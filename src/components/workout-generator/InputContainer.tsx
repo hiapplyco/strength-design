@@ -104,7 +104,10 @@ export function InputContainer({
         onWeatherUpdate={handleWeatherUpdate}
         renderTooltip={() => renderTooltip("Add your location for weather-optimized workouts")}
       />
-      <ExerciseSearch />
+      <ExerciseSearch 
+        onExerciseSelect={handleExerciseSelect}
+        selectedExercises={selectedExercises}
+      />
       <FitnessSection
         fitnessLevel={fitnessLevel}
         onFitnessLevelChange={setFitnessLevel}
@@ -130,6 +133,12 @@ export function InputContainer({
         isGenerating={isGenerating}
         renderTooltip={() => renderTooltip("Generate your custom workout program")}
         isValid={fitnessLevel !== "" && numberOfDays > 0}
+        selectedExercises={selectedExercises}
+        fitnessLevel={fitnessLevel}
+        prescribedExercises={prescribedExercises}
+        injuries={injuries}
+        numberOfDays={numberOfDays}
+        weatherData={weatherData}
       />
     </div>
   );

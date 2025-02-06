@@ -1,5 +1,8 @@
 import { Send, Loader2, Check, X } from "lucide-react";
 import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { ScrollArea } from "../ui/scroll-area";
+import type { Exercise } from "../exercise-search/types";
 
 interface GenerateSectionProps {
   onGenerate: () => void;
@@ -7,6 +10,12 @@ interface GenerateSectionProps {
   isGenerating: boolean;
   renderTooltip: () => React.ReactNode;
   isValid: boolean;
+  selectedExercises?: Exercise[];
+  fitnessLevel?: string;
+  prescribedExercises?: string;
+  injuries?: string;
+  numberOfDays?: number;
+  weatherData?: any;
 }
 
 export function GenerateSection({ 
@@ -14,8 +23,16 @@ export function GenerateSection({
   onClear,
   isGenerating,
   renderTooltip,
-  isValid
+  isValid,
+  selectedExercises = [],
+  fitnessLevel = "",
+  prescribedExercises = "",
+  injuries = "",
+  numberOfDays = 0,
+  weatherData
 }: GenerateSectionProps) {
+  const hasSelections = selectedExercises.length > 0 || fitnessLevel || prescribedExercises || injuries || numberOfDays > 0 || weatherData;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -24,6 +41,65 @@ export function GenerateSection({
         {renderTooltip()}
       </div>
       
+      {hasSelections && (
+        <Card className="bg-black/20 border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-lg text-primary">Your Workout Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ScrollArea className="h-[200px] rounded-md border p-4">
+              {numberOfDays > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-primary mb-1">Training Days</h4>
+                  <p className="text-sm text-muted-foreground">{numberOfDays} day{numberOfDays > 1 ? 's' : ''} of training</p>
+                </div>
+              )}
+              
+              {fitnessLevel && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-primary mb-1">Fitness Level</h4>
+                  <p className="text-sm text-muted-foreground capitalize">{fitnessLevel}</p>
+                </div>
+              )}
+
+              {selectedExercises.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-primary mb-1">Selected Exercises</h4>
+                  <ul className="list-disc list-inside text-sm text-muted-foreground">
+                    {selectedExercises.map((exercise, index) => (
+                      <li key={index}>{exercise.name}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {prescribedExercises && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-primary mb-1">Prescribed Exercises</h4>
+                  <p className="text-sm text-muted-foreground">{prescribedExercises}</p>
+                </div>
+              )}
+
+              {injuries && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-primary mb-1">Health Considerations</h4>
+                  <p className="text-sm text-muted-foreground">{injuries}</p>
+                </div>
+              )}
+
+              {weatherData && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-primary mb-1">Weather Conditions</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Weather data available for workout optimization
+                  </p>
+                </div>
+              )}
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Button 
           onClick={() => {

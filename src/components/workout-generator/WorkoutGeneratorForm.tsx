@@ -60,10 +60,10 @@ export function WorkoutGeneratorForm({
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 bg-white rounded-lg shadow-lg p-8">
+    <div className="max-w-4xl mx-auto space-y-6 bg-jupyter-cell/70 backdrop-blur-sm rounded-lg shadow-[0_0_15px_rgba(196,160,82,0.1)] p-8 border border-jupyter-border">
       <div className="prose prose-lg mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Workout Program Generator</h1>
-        <p className="text-gray-600">Build your custom workout program by filling out the sections below.</p>
+        <h1 className="text-3xl font-bold text-white mb-4">Workout Program Generator</h1>
+        <p className="text-gray-300">Build your custom workout program by filling out the sections below.</p>
       </div>
 
       <div className="space-y-6">

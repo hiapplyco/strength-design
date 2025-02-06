@@ -75,6 +75,11 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  input,
+  textarea {
+    @apply min-h-[80px] bg-white text-black placeholder:text-gray-400 border border-input rounded-md px-4 py-2 w-full;
+  }
+
   input::placeholder,
   textarea::placeholder,
   select::placeholder {

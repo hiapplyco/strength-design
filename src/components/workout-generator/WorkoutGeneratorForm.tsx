@@ -2,8 +2,7 @@ import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
 import { ExerciseSection } from "./ExerciseSection";
 import { FitnessLevelSection } from "./FitnessLevelSection";
-import { PrescribedExercisesSection } from "./PrescribedExercisesSection";
-import { InjuriesSection } from "./InjuriesSection";
+import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
 import { GenerateSection } from "./GenerateSection";
 import { DaysSelection } from "./DaysSelection";
 import { TooltipWrapper } from "./TooltipWrapper";
@@ -84,11 +83,15 @@ export function WorkoutGeneratorForm({
         </div>
 
         <div className="jupyter-cell">
-          <PrescribedExercisesSection
+          <GoalsAndInjuriesSection
             prescribedExercises={prescribedExercises}
             setPrescribedExercises={setPrescribedExercises}
             isAnalyzingPrescribed={isAnalyzingPrescribed}
             handlePrescribedFileSelect={handlePrescribedFileSelect}
+            injuries={injuries}
+            setInjuries={setInjuries}
+            isAnalyzingInjuries={isAnalyzingInjuries}
+            handleInjuriesFileSelect={handleInjuriesFileSelect}
           />
         </div>
 
@@ -112,15 +115,6 @@ export function WorkoutGeneratorForm({
           <FitnessLevelSection
             fitnessLevel={fitnessLevel}
             setFitnessLevel={setFitnessLevel}
-          />
-        </div>
-
-        <div className="jupyter-cell">
-          <InjuriesSection
-            injuries={injuries}
-            setInjuries={setInjuries}
-            isAnalyzingInjuries={isAnalyzingInjuries}
-            handleInjuriesFileSelect={handleInjuriesFileSelect}
           />
         </div>
 

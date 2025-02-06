@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react";
+import { HeartPulse, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploadSection } from "./FileUploadSection";
 import { TooltipWrapper } from "./TooltipWrapper";
@@ -21,26 +21,45 @@ export function InjuriesSection({
 }: InjuriesSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleClear = () => {
+    setInjuries("");
+  };
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2 border border-input rounded-lg p-4">
-      <div className="flex items-center gap-2">
-        <Activity className="h-5 w-5 text-primary" />
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" className="hover:bg-transparent hover:underline p-0">
-            <h3 className="font-oswald text-lg">Injuries & Health Considerations</h3>
+    <Collapsible 
+      open={isOpen} 
+      onOpenChange={setIsOpen} 
+      className="collapsible-section w-full space-y-2"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <HeartPulse className="h-5 w-5 text-primary" />
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="hover:bg-transparent hover:underline p-0">
+              <h3 className="font-oswald text-lg">Any Injuries or Health Considerations?</h3>
+            </Button>
+          </CollapsibleTrigger>
+          <TooltipWrapper content="Share any injuries, medical conditions, or movement limitations that may affect your workout" />
+        </div>
+        {injuries && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClear}
+            className="h-8 w-8 p-0 hover:bg-destructive/10"
+          >
+            <X className="h-4 w-4" />
           </Button>
-        </CollapsibleTrigger>
-        <TooltipWrapper content="Share any injuries or health conditions that may affect your workout." />
+        )}
       </div>
       
-      <CollapsibleContent className="space-y-4">
+      <CollapsibleContent className="space-y-4 p-4">
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-3">
             <Textarea
               placeholder="List any injuries, medical conditions, or movement limitations"
               value={injuries}
               onChange={(e) => setInjuries(e.target.value)}
-              className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
             />
           </div>
           <div className="col-span-1">
@@ -49,7 +68,7 @@ export function InjuriesSection({
               isAnalyzing={isAnalyzingInjuries}
               content={injuries}
               onFileSelect={handleInjuriesFileSelect}
-              analysisSteps={["Processing file", "Extracting conditions", "Analyzing restrictions"]}
+              analysisSteps={["Processing file", "Extracting information", "Analyzing content"]}
             />
           </div>
         </div>

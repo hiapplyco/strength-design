@@ -26,7 +26,11 @@ export function PrescribedExercisesSection({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2 border border-input rounded-lg p-4">
+    <Collapsible 
+      open={isOpen} 
+      onOpenChange={setIsOpen} 
+      className="collapsible-section w-full space-y-2"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Dumbbell className="h-5 w-5 text-primary" />
@@ -49,14 +53,13 @@ export function PrescribedExercisesSection({
         )}
       </div>
       
-      <CollapsibleContent className="space-y-4">
+      <CollapsibleContent className="space-y-4 p-4">
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-3">
             <Textarea
               placeholder="List any specific exercises you need to include"
               value={prescribedExercises}
               onChange={(e) => setPrescribedExercises(e.target.value)}
-              className="min-h-[80px] bg-white text-black placeholder:text-gray-400"
             />
           </div>
           <div className="col-span-1">

@@ -75,14 +75,27 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Consistent styling for all input elements */
   input,
-  textarea {
+  textarea,
+  .collapsible-section {
     @apply min-h-[80px] bg-white text-black placeholder:text-gray-400 border border-input rounded-md px-4 py-2 w-full;
   }
 
+  /* Style for collapsible sections to match inputs */
+  .collapsible-section {
+    @apply border border-input rounded-md overflow-hidden;
+  }
+
+  /* Consistent placeholder styling */
   input::placeholder,
   textarea::placeholder,
   select::placeholder {
     @apply text-gray-400;
+  }
+
+  /* Button styling within collapsible sections */
+  .collapsible-section button[type="button"] {
+    @apply w-full text-left bg-white text-black px-4 py-2;
   }
 }

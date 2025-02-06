@@ -22,7 +22,7 @@ export function InjuriesSection({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2 border border-input rounded-lg p-4">
       <div className="flex items-center gap-2">
         <Activity className="h-5 w-5 text-primary" />
         <CollapsibleTrigger asChild>

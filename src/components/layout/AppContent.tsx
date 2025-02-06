@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,7 +16,7 @@ const MainContent = () => {
   return (
     <div className="min-h-screen flex w-full bg-black relative">
       <AppSidebar />
-      <main className="flex-1 overflow-auto pl-0 md:pl-64">
+      <main className="flex-1 w-full transition-all duration-300 ease-in-out">
         <SidebarToggle isVisible={!!session} />
         <MainRoutes />
       </main>

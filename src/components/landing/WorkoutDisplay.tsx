@@ -36,7 +36,7 @@ export function WorkoutDisplay({
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-4 py-8 pl-4 md:pl-72">
+      <div className="max-w-7xl mx-auto px-4 py-8 transition-all duration-300 ease-in-out">
         <div className="space-y-8">
           <Button
             onClick={resetWorkouts}

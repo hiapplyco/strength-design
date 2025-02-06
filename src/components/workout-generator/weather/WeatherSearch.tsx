@@ -25,10 +25,8 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
     return parts.join(", ");
   };
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!location.trim()) {
+  const handleSearch = async (searchLocation: string) => {
+    if (!searchLocation.trim()) {
       toast({
         title: "Error",
         description: "Please enter a location",
@@ -41,7 +39,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
     
     try {
       const geocodingResponse = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=5&language=en&format=json`
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchLocation)}&count=5&language=en&format=json`
       );
       
       if (!geocodingResponse.ok) {
@@ -168,8 +166,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
           <SearchForm
             location={location}
             setLocation={setLocation}
-            onSubmit={handleSearch}
-            isLoading={isLoading}
+            onSearch={handleSearch}
           />
 
           <LocationResultsDialog

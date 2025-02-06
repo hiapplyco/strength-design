@@ -26,7 +26,7 @@ export function DaysSelection({ numberOfDays, setNumberOfDays, renderTooltip }: 
           <ToggleGroupItem 
             key={day} 
             value={day.toString()}
-            className="px-3 py-2 bg-white/10 text-white data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-white/20"
+            className="h-14 w-14 rounded-full bg-white/10 text-white data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-white/20"
           >
             {day}
           </ToggleGroupItem>

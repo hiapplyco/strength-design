@@ -4,35 +4,26 @@
  
 @layer base {
   :root {
-    --background: 0 0% 0%; /* Black background */
-    --foreground: 0 0% 100%; /* White text */
-
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
     --card: 0 0% 0%;
     --card-foreground: 0 0% 100%;
- 
     --popover: 0 0% 0%;
     --popover-foreground: 0 0% 100%;
- 
-    --primary: 43 59% 55%; /* Gold */
+    --primary: 43 59% 55%;
     --primary-foreground: 0 0% 0%;
- 
     --secondary: 43 57% 49%;
     --secondary-foreground: 0 0% 100%;
- 
     --muted: 43 30% 20%;
     --muted-foreground: 0 0% 80%;
- 
     --accent: 43 84% 36%;
     --accent-foreground: 0 0% 100%;
- 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 43 59% 55%;
     --input: 43 59% 55%;
     --ring: 43 59% 55%;
- 
-    --radius: 1.5rem; /* Increased border radius */
+    --radius: 1.5rem;
   }
 
   body {
@@ -55,12 +46,18 @@
     z-index: -1;
   }
 
-  /* Jupyter-style input styling */
+  /* Base input styling */
+  .base-input {
+    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white h-14;
+  }
+
+  /* Apply base input styling to all form elements */
   input,
   textarea,
   .collapsible-section button[type="button"],
-  .collapsible-section {
-    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] px-4 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white h-14;
+  .collapsible-section,
+  [role="combobox"] {
+    @apply base-input;
   }
 
   /* Jupyter-style collapsible sections */
@@ -91,5 +88,20 @@
   /* Custom dropdown styling */
   .dropdown-trigger {
     @apply h-14 text-xl font-normal flex items-center justify-between px-6;
+  }
+
+  /* Consistent button heights */
+  .btn-standard {
+    @apply h-14;
+  }
+
+  /* Consistent dropdown menu styling */
+  [role="listbox"] {
+    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] mt-2 py-2;
+  }
+
+  /* Dropdown option styling */
+  [role="option"] {
+    @apply px-6 py-2 hover:bg-primary/10 cursor-pointer;
   }
 }

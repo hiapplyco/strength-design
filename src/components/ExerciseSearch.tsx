@@ -1,85 +1,50 @@
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { Input } from "./ui/input";
-import { SearchDialog } from "./exercise-search/SearchDialog";
-import { useExerciseSearch } from "./exercise-search/useExerciseSearch";
-import type { Exercise } from "./exercise-search/types";
+import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dumbbell } from "lucide-react";
 
-interface ExerciseSearchProps {
-  onExerciseSelect?: (exercise: Exercise) => void;
-  className?: string;
-  embedded?: boolean;
-  selectedExercises?: Exercise[];
-}
+const exercises = [
+  "Push-ups",
+  "Pull-ups",
+  "Squats",
+  "Deadlifts",
+  "Bench Press",
+  "Lunges",
+  "Planks",
+  "Burpees",
+  "Mountain Climbers",
+  "Jumping Jacks",
+  // Add more exercises as needed
+];
 
-export const ExerciseSearch = ({ 
-  onExerciseSelect, 
-  className, 
-  embedded = false,
-  selectedExercises: externalSelectedExercises = [] 
-}: ExerciseSearchProps) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>(externalSelectedExercises);
-  
-  const {
-    searchQuery,
-    setSearchQuery,
-    searchResults,
-    setSearchResults
-  } = useExerciseSearch();
-
-  // Update internal selection state when external selection changes
-  useEffect(() => {
-    setSelectedExercises(externalSelectedExercises);
-  }, [externalSelectedExercises]);
-
-  const handleExerciseSelect = (exercise: Exercise) => {
-    if (selectedExercises.find(ex => ex.name === exercise.name)) {
-      setSelectedExercises(prev => prev.filter(ex => ex.name !== exercise.name));
-    } else {
-      setSelectedExercises(prev => [...prev, exercise]);
-    }
-    onExerciseSelect?.(exercise);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    setSearchResults([]);
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    handleClearSearch();
-  };
-
-  const sanitizeText = (text: string): string => {
-    return text
-      .replace(/WOD/g, 'Workout')
-      .replace(/[^\w\s.,!?;:()\-–—]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-
+export function ExerciseSearch() {
   return (
-    <div className={cn("space-y-4", className)}>
-      <Input
-        onClick={() => setDialogOpen(true)}
-        readOnly
-        placeholder="Enter exercises or equipment..."
-        className="cursor-pointer bg-white text-black rounded-full border-2 border-primary focus-visible:ring-primary"
-      />
-
-      <SearchDialog
-        isOpen={dialogOpen}
-        onClose={handleDialogClose}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onClearSearch={handleClearSearch}
-        searchResults={searchResults}
-        selectedExercises={selectedExercises}
-        onExerciseSelect={handleExerciseSelect}
-        sanitizeText={sanitizeText}
-      />
+    <div className="w-full">
+      <div className="flex items-center gap-2 mb-4">
+        <Dumbbell className="h-5 w-5 text-primary" />
+        <h3 className="font-oswald text-lg">Exercise Selection</h3>
+      </div>
+      <Select>
+        <SelectTrigger className="w-full bg-black/50 text-white border-2 border-primary/20">
+          <SelectValue placeholder="Select exercises..." />
+        </SelectTrigger>
+        <SelectContent className="bg-black/95 border-primary max-h-[300px]">
+          {exercises.map((exercise) => (
+            <SelectItem 
+              key={exercise} 
+              value={exercise}
+              className="text-white hover:bg-primary/20 cursor-pointer"
+            >
+              {exercise}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
-};
+}

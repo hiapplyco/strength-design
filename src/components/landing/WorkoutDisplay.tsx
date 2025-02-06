@@ -47,7 +47,7 @@ export function WorkoutDisplay({
             Back
           </Button>
 
-          <div className="rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] bg-background p-6">
+          <div className="bg-background p-6">
             <WorkoutDisplayHeader
               resetWorkouts={resetWorkouts}
               isExporting={isExporting}

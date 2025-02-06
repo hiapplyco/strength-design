@@ -1,8 +1,11 @@
+
 import { Dumbbell, HeartPulse, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploadSection } from "./FileUploadSection";
 import { TooltipWrapper } from "./TooltipWrapper";
 import { Button } from "@/components/ui/button";
+import { useGeminiExerciseExtraction } from "./hooks/useGeminiExerciseExtraction";
+import { useState } from "react";
 
 interface GoalsAndInjuriesSectionProps {
   prescribedExercises: string;
@@ -25,12 +28,29 @@ export function GoalsAndInjuriesSection({
   isAnalyzingInjuries,
   handleInjuriesFileSelect
 }: GoalsAndInjuriesSectionProps) {
+  const { parseDocument: parseExercises, isSuccess: isPrescribedSuccess } = useGeminiExerciseExtraction();
+  const { parseDocument: parseInjuries, isSuccess: isInjuriesSuccess } = useGeminiExerciseExtraction();
+  
   const handleClearPrescribed = () => {
     setPrescribedExercises("");
   };
 
   const handleClearInjuries = () => {
     setInjuries("");
+  };
+
+  const handlePrescribedUpload = async (file: File) => {
+    const result = await parseExercises(file);
+    if (result.success) {
+      setPrescribedExercises(prev => prev ? `${prev}\n${result.text}` : result.text);
+    }
+  };
+
+  const handleInjuriesUpload = async (file: File) => {
+    const result = await parseInjuries(file);
+    if (result.success) {
+      setInjuries(prev => prev ? `${prev}\n${result.text}` : result.text);
+    }
   };
 
   return (
@@ -55,8 +75,9 @@ export function GoalsAndInjuriesSection({
             <FileUploadSection
               title="Upload Exercise Program"
               isAnalyzing={isAnalyzingPrescribed}
+              isSuccess={isPrescribedSuccess}
               content={prescribedExercises}
-              onFileSelect={handlePrescribedFileSelect}
+              onFileSelect={handlePrescribedUpload}
               analysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
             />
           </div>
@@ -98,8 +119,9 @@ export function GoalsAndInjuriesSection({
             <FileUploadSection
               title="Upload Medical Information"
               isAnalyzing={isAnalyzingInjuries}
+              isSuccess={isInjuriesSuccess}
               content={injuries}
-              onFileSelect={handleInjuriesFileSelect}
+              onFileSelect={handleInjuriesUpload}
               analysisSteps={["Processing file", "Extracting information", "Analyzing content"]}
             />
           </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -32,6 +32,7 @@ interface WorkoutPresetsProps {
 export function WorkoutPresets({ onSelectPreset, onExercisesExtracted }: WorkoutPresetsProps) {
   const [selectedWorkouts, setSelectedWorkouts] = useState<Record<string, string>>({});
   const [showPresets, setShowPresets] = useState(false);
+  const [visible, setVisible] = useState(true);
   const { extractExercises, isExtracting } = useGeminiExerciseExtraction();
 
   const handleWorkoutSelect = async (category: string, workoutName: string) => {
@@ -56,7 +57,6 @@ export function WorkoutPresets({ onSelectPreset, onExercisesExtracted }: Workout
           numberOfDays: preset.numberOfDays
         };
 
-        // Extract exercises using Gemini
         if (onExercisesExtracted) {
           const exercises = await extractExercises(formattedPreset.prescribedExercises);
           onExercisesExtracted(exercises);
@@ -67,8 +67,18 @@ export function WorkoutPresets({ onSelectPreset, onExercisesExtracted }: Workout
     }
   };
 
+  if (!visible) return null;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative border border-red-500/30 rounded-lg p-4">
+      <button
+        onClick={() => setVisible(false)}
+        className="absolute top-2 right-2 text-red-500/70 hover:text-red-500 transition-colors"
+        aria-label="Close workout presets"
+      >
+        <X size={20} />
+      </button>
+
       <div className="text-center space-y-2">
         <h3 className="text-lg font-semibold text-white">Sample Workouts</h3>
       </div>

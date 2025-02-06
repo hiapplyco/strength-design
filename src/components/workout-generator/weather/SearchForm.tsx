@@ -23,7 +23,7 @@ export function SearchForm({
           placeholder="Enter city name..."
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="bg-white text-black placeholder:text-gray-400 rounded-full border-2 border-primary focus-visible:ring-primary pr-10"
+          className="bg-black text-white placeholder:text-gray-400 rounded-full border-2 border-primary focus-visible:ring-primary pr-10"
         />
         {location && (
           <button

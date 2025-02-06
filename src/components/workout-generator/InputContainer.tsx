@@ -4,7 +4,10 @@ import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
 import { WeatherSection } from "./WeatherSection";
 import { GenerateSection } from "./GenerateSection";
 import { WorkoutPresets } from "./WorkoutPresets";
+import { TooltipWrapper } from "./TooltipWrapper";
 import type { Exercise } from "@/components/exercise-search/types";
+import { useState } from "react";
+import type { WeatherData } from "@/types/weather";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -35,27 +38,98 @@ export function InputContainer({
   numberOfDays,
   setNumberOfDays,
 }: InputContainerProps) {
+  // State management for the form
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherPrompt, setWeatherPrompt] = useState("");
+  const [fitnessLevel, setFitnessLevel] = useState("");
+  const [prescribedExercises, setPrescribedExercises] = useState("");
+  const [injuries, setInjuries] = useState("");
+  const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
+  const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
+  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
+
   const handlePresetSelect = (preset: any) => {
     if (preset.prescribedExercises) {
       setGeneratePrompt(preset.prescribedExercises);
     }
   };
 
+  const handleWeatherUpdate = (data: WeatherData | null, prompt: string) => {
+    setWeatherData(data);
+    setWeatherPrompt(prompt);
+  };
+
+  const handlePrescribedFileSelect = async (file: File) => {
+    setIsAnalyzingPrescribed(true);
+    // Implementation for file analysis would go here
+    setIsAnalyzingPrescribed(false);
+  };
+
+  const handleInjuriesFileSelect = async (file: File) => {
+    setIsAnalyzingInjuries(true);
+    // Implementation for file analysis would go here
+    setIsAnalyzingInjuries(false);
+  };
+
+  const renderTooltip = (content: string) => (
+    <TooltipWrapper content={content} />
+  );
+
+  const handleGenerate = () => {
+    if (fitnessLevel && numberOfDays > 0) {
+      handleGenerateWorkout({
+        prompt: generatePrompt,
+        weatherPrompt,
+        selectedExercises,
+        fitnessLevel,
+        prescribedExercises
+      });
+    }
+  };
+
+  const handleClear = () => {
+    setPrescribedExercises("");
+    setInjuries("");
+    setFitnessLevel("");
+    setWeatherData(null);
+    setWeatherPrompt("");
+    setSelectedExercises([]);
+  };
+
   return (
     <div className="space-y-8">
       <WorkoutPresets onSelectPreset={handlePresetSelect} />
-      <WeatherSection />
+      <WeatherSection
+        weatherData={weatherData}
+        onWeatherUpdate={handleWeatherUpdate}
+        renderTooltip={() => renderTooltip("Add your location for weather-optimized workouts")}
+      />
       <ExerciseSearch />
-      <FitnessSection />
-      <GoalsAndInjuriesSection />
+      <FitnessSection
+        fitnessLevel={fitnessLevel}
+        onFitnessLevelChange={setFitnessLevel}
+        prescribedExercises={prescribedExercises}
+        onPrescribedExercisesChange={setPrescribedExercises}
+        injuries={injuries}
+        onInjuriesChange={setInjuries}
+        renderTooltip={() => renderTooltip("Select your fitness level and any specific requirements")}
+      />
+      <GoalsAndInjuriesSection
+        prescribedExercises={prescribedExercises}
+        setPrescribedExercises={setPrescribedExercises}
+        isAnalyzingPrescribed={isAnalyzingPrescribed}
+        handlePrescribedFileSelect={handlePrescribedFileSelect}
+        injuries={injuries}
+        setInjuries={setInjuries}
+        isAnalyzingInjuries={isAnalyzingInjuries}
+        handleInjuriesFileSelect={handleInjuriesFileSelect}
+      />
       <GenerateSection
-        generatePrompt={generatePrompt}
-        setGeneratePrompt={setGeneratePrompt}
-        handleGenerateWorkout={handleGenerateWorkout}
+        onGenerate={handleGenerate}
+        onClear={handleClear}
         isGenerating={isGenerating}
-        setIsGenerating={setIsGenerating}
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
+        renderTooltip={() => renderTooltip("Generate your custom workout program")}
+        isValid={fitnessLevel !== "" && numberOfDays > 0}
       />
     </div>
   );

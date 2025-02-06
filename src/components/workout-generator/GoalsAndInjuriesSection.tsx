@@ -42,14 +42,14 @@ export function GoalsAndInjuriesSection({
   const handlePrescribedUpload = async (file: File) => {
     const result = await parseExercises(file);
     if (result.success) {
-      setPrescribedExercises(prev => prev ? `${prev}\n${result.text}` : result.text);
+      setPrescribedExercises(prescribedExercises ? `${prescribedExercises}\n${result.text}` : result.text);
     }
   };
 
   const handleInjuriesUpload = async (file: File) => {
     const result = await parseInjuries(file);
     if (result.success) {
-      setInjuries(prev => prev ? `${prev}\n${result.text}` : result.text);
+      setInjuries(injuries ? `${injuries}\n${result.text}` : result.text);
     }
   };
 

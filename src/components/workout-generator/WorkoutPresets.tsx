@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
@@ -33,7 +34,7 @@ export function WorkoutPresets({ onSelectPreset, onExercisesExtracted }: Workout
   const [selectedWorkouts, setSelectedWorkouts] = useState<Record<string, string>>({});
   const [showPresets, setShowPresets] = useState(false);
   const [visible, setVisible] = useState(true);
-  const { extractExercises, isExtracting } = useGeminiExerciseExtraction();
+  const { parseDocument, isExtracting } = useGeminiExerciseExtraction();
 
   const handleWorkoutSelect = async (category: string, workoutName: string) => {
     const preset = PRESET_CONFIGS[workoutName as keyof typeof PRESET_CONFIGS];
@@ -57,11 +58,7 @@ export function WorkoutPresets({ onSelectPreset, onExercisesExtracted }: Workout
           numberOfDays: preset.numberOfDays
         };
 
-        if (onExercisesExtracted) {
-          const exercises = await extractExercises(formattedPreset.prescribedExercises);
-          onExercisesExtracted(exercises);
-        }
-        
+        // Since we don't have direct access to exercise extraction, we'll just pass the formatted preset
         onSelectPreset(formattedPreset);
       }
     }

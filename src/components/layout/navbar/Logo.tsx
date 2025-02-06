@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -12,9 +13,9 @@ export const Logo = () => {
   };
   
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex items-center space-x-4 overflow-hidden">
-        <span className="text-2xl font-collegiate text-primary tracking-wider transform -skew-x-12 whitespace-nowrap hover:text-primary/80 transition-colors cursor-pointer"
+    <div className="flex flex-col items-center max-w-full px-4">
+      <div className="flex items-center space-x-4 w-full overflow-hidden">
+        <span className="text-2xl font-collegiate text-primary tracking-wider transform -skew-x-12 truncate hover:text-primary/80 transition-colors cursor-pointer"
           onClick={() => navigate('/')}
         >
           STRENGTH.DESIGN
@@ -25,7 +26,7 @@ export const Logo = () => {
         <Button
           variant="ghost"
           onClick={() => setShowAuthDialog(true)}
-          className="text-primary hover:text-primary/80 transition-colors"
+          className="text-primary hover:text-primary/80 transition-colors text-sm"
         >
           Sign Up / Sign In
         </Button>

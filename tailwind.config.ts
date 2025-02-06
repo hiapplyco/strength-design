@@ -53,6 +53,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        jupyter: {
+          cell: "#f7f7f7",
+          border: "#e1e4e8",
+          hover: "#f1f1f1",
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -60,10 +65,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Oswald", ...fontFamily.sans],
-        heading: ["Oswald", ...fontFamily.sans],
-        collegiate: ["Oswald", ...fontFamily.sans],
-        oswald: ["Oswald", ...fontFamily.sans],
+        sans: ["Inter", ...fontFamily.sans],
+        mono: ["JetBrains Mono", ...fontFamily.mono],
       },
       keyframes: {
         "accordion-down": {
@@ -74,31 +77,10 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        progress: {
-          '0%': { transform: 'translateX(-100%)' },
-          '50%': { transform: 'translateX(-10%)' },
-          '100%': { transform: 'translateX(0)' }
-        },
-        gradient: {
-          '0%': { 
-            backgroundPosition: '0% 50%',
-            opacity: '0.5'
-          },
-          '50%': { 
-            backgroundPosition: '100% 50%',
-            opacity: '0.8'
-          },
-          '100%': { 
-            backgroundPosition: '0% 50%',
-            opacity: '0.5'
-          }
-        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "progress": "progress 2s ease-in-out infinite",
-        "gradient": "gradient 3s ease infinite"
       },
     },
   },

@@ -36,7 +36,7 @@ export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {
           >
             <Button
               onClick={() => setShowGenerateInput(true)}
-              className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-destructive dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 bg-black hover:bg-black/90 min-w-[300px]"
+              className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-black dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-primary rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_#C4A052,12px_12px_0px_0px_#B8860B] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_#C4A052,8px_8px_0px_0px_#B8860B] transition-all duration-200 bg-gradient-to-r from-[#C4A052] to-[#DAA520] min-w-[300px]"
             >
               Click here
             </Button>

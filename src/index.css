@@ -48,7 +48,7 @@
 
   /* Base input styling */
   .base-input {
-    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white h-14;
+    @apply bg-black border border-jupyter-border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white h-14;
   }
 
   /* Apply base input styling to all form elements */
@@ -62,7 +62,7 @@
 
   /* Jupyter-style collapsible sections */
   .collapsible-section {
-    @apply bg-jupyter-cell shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-black shadow-sm hover:shadow-md transition-shadow duration-200;
   }
 
   /* Jupyter-style section headers */
@@ -72,12 +72,12 @@
 
   /* Jupyter-style code cells */
   .code-cell {
-    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] p-4 font-mono text-sm;
+    @apply bg-black border border-jupyter-border rounded-[20px] p-4 font-mono text-sm;
   }
 
   /* Jupyter-style output cells */
   .output-cell {
-    @apply bg-jupyter-cell border-l-4 border-primary pl-4 py-2 mt-2;
+    @apply bg-black border-l-4 border-primary pl-4 py-2 mt-2;
   }
 
   /* Remove double borders from collapsible sections */
@@ -97,7 +97,7 @@
 
   /* Consistent dropdown menu styling */
   [role="listbox"] {
-    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] mt-2 py-2;
+    @apply bg-black border border-jupyter-border rounded-[20px] mt-2 py-2;
   }
 
   /* Dropdown option styling */

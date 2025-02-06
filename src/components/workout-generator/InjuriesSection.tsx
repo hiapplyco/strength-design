@@ -35,7 +35,10 @@ export function InjuriesSection({
         <div className="flex items-center gap-2">
           <HeartPulse className="h-5 w-5 text-primary" />
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="hover:bg-transparent hover:underline p-0">
+            <Button 
+              variant="ghost" 
+              className="hover:bg-transparent hover:underline p-0 h-14 text-xl font-normal"
+            >
               <h3 className="font-oswald text-lg">Any Injuries or Health Considerations?</h3>
             </Button>
           </CollapsibleTrigger>
@@ -60,6 +63,7 @@ export function InjuriesSection({
               placeholder="List any injuries, medical conditions, or movement limitations"
               value={injuries}
               onChange={(e) => setInjuries(e.target.value)}
+              className="min-h-[100px]"
             />
           </div>
           <div className="col-span-1">

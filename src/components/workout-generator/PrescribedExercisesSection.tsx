@@ -26,7 +26,7 @@ export function PrescribedExercisesSection({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full space-y-2 border border-input rounded-lg p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Dumbbell className="h-5 w-5 text-primary" />

@@ -28,13 +28,13 @@ export const GeneratorSection = ({
   setNumberOfDays,
 }: GeneratorSectionProps) => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-12">
-      <div className="max-w-4xl w-full space-y-8">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-6">
+      <div className="max-w-4xl w-full space-y-6">
         <div className="text-center">
-          <h2 className="text-5xl md:text-6xl font-oswald text-accent mb-6 tracking-tight">
+          <h2 className="text-5xl md:text-6xl font-oswald text-accent mb-4 tracking-tight">
             Generate Your Free Program
           </h2>
-          <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-8">
             Experience our lite version - Generate up to 12 days of customized training programs instantly. 
             Perfect for elite athletes, CrossFit competitors, and strength specialists seeking personalized programming.
           </p>
@@ -59,7 +59,7 @@ export const GeneratorSection = ({
         </div>
       </div>
       
-      <Separator className="mt-20 bg-primary/20" />
+      <Separator className="mt-12 bg-primary/20" />
     </div>
   );
 };

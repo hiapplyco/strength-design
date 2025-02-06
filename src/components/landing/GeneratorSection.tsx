@@ -28,7 +28,7 @@ export const GeneratorSection = ({
   setNumberOfDays,
 }: GeneratorSectionProps) => {
   return (
-    <div className="relative py-20">
+    <div className="relative py-8">
       <Separator className="mb-20 bg-primary/20" />
       <div className="text-center mb-16">
         <h2 className="text-4xl md:text-5xl font-oswald text-accent mb-4">

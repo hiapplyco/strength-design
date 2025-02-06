@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "./app-content/LoadingSpinner";
+import { SidebarToggle } from "./app-content/SidebarToggle";
 import { MainRoutes } from "./app-content/MainRoutes";
 
 const MainContent = () => {
@@ -16,6 +17,7 @@ const MainContent = () => {
     <div className="min-h-screen flex w-full bg-black relative">
       <AppSidebar />
       <main className="flex-1 w-full transition-all duration-300 ease-in-out">
+        <SidebarToggle isVisible={!!session} />
         <MainRoutes />
       </main>
     </div>

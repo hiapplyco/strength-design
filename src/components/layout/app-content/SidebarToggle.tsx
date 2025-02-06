@@ -9,7 +9,7 @@ interface SidebarToggleProps {
 }
 
 export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
-  const { toggleSidebar, openMobile } = useSidebar();
+  const { toggleSidebar, open } = useSidebar();
   const isMobile = useIsMobile();
 
   if (!isVisible) return null;
@@ -19,8 +19,10 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
       onClick={toggleSidebar}
       variant="ghost"
       size="icon"
-      className="fixed top-4 left-4 z-50 text-muted-foreground hover:text-accent md:hidden"
-      aria-label={openMobile ? "Close sidebar" : "Open sidebar"}
+      className={`fixed top-4 left-4 z-50 text-[#C4A052] hover:text-[#E5C88E] transition-all duration-200 ${
+        open ? 'opacity-0' : 'opacity-100'
+      }`}
+      aria-label={open ? "Close sidebar" : "Open sidebar"}
     >
       <Menu className="h-6 w-6" />
     </Button>

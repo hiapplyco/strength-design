@@ -6,8 +6,8 @@ import { GenerateSection } from "./GenerateSection";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { TooltipWrapper } from "./TooltipWrapper";
 import type { Exercise } from "@/components/exercise-search/types";
-import { useState } from "react";
 import type { WeatherData } from "@/types/weather";
+import { useState } from "react";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -38,7 +38,6 @@ export function InputContainer({
   numberOfDays,
   setNumberOfDays,
 }: InputContainerProps) {
-  // State management for the form
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState("");
   const [fitnessLevel, setFitnessLevel] = useState("");
@@ -95,6 +94,30 @@ export function InputContainer({
     setWeatherData(null);
     setWeatherPrompt("");
     setSelectedExercises([]);
+  };
+
+  const renderTooltip = (content: string) => (
+    <TooltipWrapper content={content} />
+  );
+
+  const handlePrescribedFileSelect = async (file: File) => {
+    setIsAnalyzingPrescribed(true);
+    try {
+      // Implementation for file analysis would go here
+      console.log("Analyzing prescribed exercises file:", file.name);
+    } finally {
+      setIsAnalyzingPrescribed(false);
+    }
+  };
+
+  const handleInjuriesFileSelect = async (file: File) => {
+    setIsAnalyzingInjuries(true);
+    try {
+      // Implementation for file analysis would go here
+      console.log("Analyzing injuries file:", file.name);
+    } finally {
+      setIsAnalyzingInjuries(false);
+    }
   };
 
   return (

@@ -138,11 +138,7 @@ export function InputContainer({
       <FitnessSection
         fitnessLevel={fitnessLevel}
         onFitnessLevelChange={setFitnessLevel}
-        prescribedExercises={prescribedExercises}
-        onPrescribedExercisesChange={setPrescribedExercises}
-        injuries={injuries}
-        onInjuriesChange={setInjuries}
-        renderTooltip={() => renderTooltip("Select your fitness level and any specific requirements")}
+        renderTooltip={() => renderTooltip("Select your fitness level")}
       />
       <GoalsAndInjuriesSection
         prescribedExercises={prescribedExercises}

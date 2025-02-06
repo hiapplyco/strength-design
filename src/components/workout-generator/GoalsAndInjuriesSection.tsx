@@ -28,8 +28,8 @@ export function GoalsAndInjuriesSection({
   isAnalyzingInjuries,
   handleInjuriesFileSelect
 }: GoalsAndInjuriesSectionProps) {
-  const { parseDocument: parseExercises, isSuccess: isPrescribedSuccess } = useGeminiExerciseExtraction();
-  const { parseDocument: parseInjuries, isSuccess: isInjuriesSuccess } = useGeminiExerciseExtraction();
+  const { parseDocument: parseExercises, isExtracting: isParsingExercises, isSuccess: isPrescribedSuccess } = useGeminiExerciseExtraction();
+  const { parseDocument: parseInjuries, isExtracting: isParsingInjuries, isSuccess: isInjuriesSuccess } = useGeminiExerciseExtraction();
   
   const handleClearPrescribed = () => {
     setPrescribedExercises("");
@@ -74,7 +74,7 @@ export function GoalsAndInjuriesSection({
           <div className="lg:col-span-1">
             <FileUploadSection
               title="Upload Exercise Program"
-              isAnalyzing={isAnalyzingPrescribed}
+              isAnalyzing={isParsingExercises}
               isSuccess={isPrescribedSuccess}
               content={prescribedExercises}
               onFileSelect={handlePrescribedUpload}
@@ -118,7 +118,7 @@ export function GoalsAndInjuriesSection({
           <div className="lg:col-span-1">
             <FileUploadSection
               title="Upload Medical Information"
-              isAnalyzing={isAnalyzingInjuries}
+              isAnalyzing={isParsingInjuries}
               isSuccess={isInjuriesSuccess}
               content={injuries}
               onFileSelect={handleInjuriesUpload}

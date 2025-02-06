@@ -33,6 +33,12 @@ export function useGeminiExerciseExtraction() {
       }
 
       setIsSuccess(true);
+      toast({
+        title: "Success",
+        description: "Document processed successfully",
+        className: "bg-green-500",
+      });
+
       return {
         text: response.data.text,
         success: true

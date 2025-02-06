@@ -51,12 +51,10 @@ export function InputContainer({
   const handlePresetSelect = (preset: any) => {
     if (preset.prescribedExercises) {
       setGeneratePrompt(preset.prescribedExercises);
+      setFitnessLevel(preset.fitnessLevel);
+      setNumberOfDays(preset.numberOfDays);
+      setPrescribedExercises(preset.prescribedExercises);
     }
-  };
-
-  const handleWeatherUpdate = (data: WeatherData | null, prompt: string) => {
-    setWeatherData(data);
-    setWeatherPrompt(prompt);
   };
 
   const handleExerciseSelect = (exercise: Exercise) => {
@@ -69,21 +67,14 @@ export function InputContainer({
     });
   };
 
-  const handlePrescribedFileSelect = async (file: File) => {
-    setIsAnalyzingPrescribed(true);
-    // Implementation for file analysis would go here
-    setIsAnalyzingPrescribed(false);
+  const handleExtractedExercises = (exercises: Exercise[]) => {
+    setSelectedExercises(exercises);
   };
 
-  const handleInjuriesFileSelect = async (file: File) => {
-    setIsAnalyzingInjuries(true);
-    // Implementation for file analysis would go here
-    setIsAnalyzingInjuries(false);
+  const handleWeatherUpdate = (data: WeatherData | null, prompt: string) => {
+    setWeatherData(data);
+    setWeatherPrompt(prompt);
   };
-
-  const renderTooltip = (content: string) => (
-    <TooltipWrapper content={content} />
-  );
 
   const handleGenerate = () => {
     if (fitnessLevel && numberOfDays > 0) {
@@ -108,7 +99,10 @@ export function InputContainer({
 
   return (
     <div className="space-y-8">
-      <WorkoutPresets onSelectPreset={handlePresetSelect} />
+      <WorkoutPresets 
+        onSelectPreset={handlePresetSelect}
+        onExercisesExtracted={handleExtractedExercises}
+      />
       <WeatherSection
         weatherData={weatherData}
         onWeatherUpdate={handleWeatherUpdate}

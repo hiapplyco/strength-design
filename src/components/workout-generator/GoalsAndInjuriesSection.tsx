@@ -42,8 +42,8 @@ export function GoalsAndInjuriesSection({
           <TooltipWrapper content="Share your fitness goals and specific exercises you'd like to include in your workout program." />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="lg:col-span-3">
             <Textarea
               placeholder="List any specific exercises you need to include"
               value={prescribedExercises}
@@ -51,7 +51,7 @@ export function GoalsAndInjuriesSection({
               className="min-h-[100px] bg-jupyter-cell border border-jupyter-border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white"
             />
           </div>
-          <div className="md:col-span-1 min-w-[200px]">
+          <div className="lg:col-span-1">
             <FileUploadSection
               title="Upload Exercise Program"
               isAnalyzing={isAnalyzingPrescribed}
@@ -85,8 +85,8 @@ export function GoalsAndInjuriesSection({
           <TooltipWrapper content="Share any injuries, medical conditions, or movement limitations that may affect your workout" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="lg:col-span-3">
             <Textarea
               placeholder="List any injuries, medical conditions, or movement limitations"
               value={injuries}
@@ -94,7 +94,7 @@ export function GoalsAndInjuriesSection({
               className="min-h-[100px] bg-jupyter-cell border border-jupyter-border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white"
             />
           </div>
-          <div className="md:col-span-1 min-w-[200px]">
+          <div className="lg:col-span-1">
             <FileUploadSection
               title="Upload Medical Information"
               isAnalyzing={isAnalyzingInjuries}

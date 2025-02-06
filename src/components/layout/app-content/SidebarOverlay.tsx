@@ -4,7 +4,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const SidebarOverlay = () => {
-  const { openMobile, setOpenMobile } = useSidebar();
+  const { openMobile, setOpenMobile, setOpen } = useSidebar();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -17,9 +17,14 @@ export const SidebarOverlay = () => {
 
   if (!openMobile || !isMobile) return null;
 
+  const handleClose = () => {
+    setOpenMobile(false);
+    setOpen(false);
+  };
+
   return (
     <div
-      onClick={() => setOpenMobile(false)}
+      onClick={handleClose}
       className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
     />
   );

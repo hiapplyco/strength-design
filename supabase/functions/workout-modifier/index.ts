@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
@@ -11,7 +12,9 @@ const corsHeaders = {
 function isValidWorkout(workout: unknown): workout is { 
   warmup: unknown; 
   workout: unknown; 
-  notes?: unknown 
+  notes?: unknown;
+  strength?: unknown;
+  description?: unknown;
 } {
   return !!workout && 
          typeof workout === 'object' && 
@@ -59,34 +62,40 @@ serve(async (req) => {
     });
 
     const prompt = `PROFESSIONAL WORKOUT MODIFICATION REQUEST
-Current Day: ${dayToModify}
-Original Workout Details:
+Specifically modifying: ${dayToModify}
+Current Workout Details:
+- Description: ${currentWorkout.description || 'No description provided'}
 - Warmup: ${currentWorkout.warmup}
+- Strength: ${currentWorkout.strength || 'No strength component'}
 - Main Workout: ${currentWorkout.workout}
 - Notes: ${currentWorkout.notes || 'No additional notes'}
 
 Modification Instructions: "${modificationPrompt}"
 
 REQUIRED ACTIONS:
-1. Analyze current workout structure
+1. Analyze current workout structure for ${dayToModify}
 2. Maintain original workout intent where possible
 3. Implement requested changes scientifically
 4. Preserve exercise progression logic
 5. Add modification rationale in notes
+6. Keep the same format as the original workout
 
 STRICT OUTPUT FORMAT (JSON ONLY):
 {
   "warmup": "Modified warmup routine",
   "workout": "Updated workout routine",
+  "strength": "Updated strength component",
   "notes": "Professional notes and explanations",
   "description": "Brief explanation of changes"
 }
 
 CRITICAL RULES:
+- Keep the same structure and format as the original workout
 - Use double quotes for strings
 - No markdown formatting
 - No text outside JSON
-- Escape special characters`;
+- Escape special characters
+- Focus only on modifying ${dayToModify}, ignore other days`;
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
@@ -122,11 +131,11 @@ CRITICAL RULES:
       const modifiedWorkout = JSON.parse(jsonText);
       
       // Validate response structure
-      if (!modifiedWorkout.warmup || !modifiedWorkout.workout) {
+      if (!modifiedWorkout.warmup || !modifiedWorkout.workout || !modifiedWorkout.strength) {
         throw new Error('Invalid modified workout structure from AI');
       }
 
-      console.log('Successfully generated modified workout');
+      console.log('Successfully generated modified workout for:', dayToModify);
       return new Response(JSON.stringify(modifiedWorkout), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

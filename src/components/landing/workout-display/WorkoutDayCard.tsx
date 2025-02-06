@@ -1,3 +1,4 @@
+
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCalendar } from "@/utils/calendar";

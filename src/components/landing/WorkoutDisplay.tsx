@@ -5,6 +5,7 @@ import { WorkoutDayCard } from "./workout-display/WorkoutDayCard";
 import { ArrowLeft } from "lucide-react";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { formatWorkoutToMarkdown, formatAllWorkouts } from "@/utils/workout-formatting";
+import { useState } from "react";
 
 interface WorkoutDisplayProps {
   workouts: WeeklyWorkouts;
@@ -14,13 +15,24 @@ interface WorkoutDisplayProps {
 }
 
 export function WorkoutDisplay({ 
-  workouts, 
+  workouts: initialWorkouts, 
   resetWorkouts,
   isExporting,
   setIsExporting 
 }: WorkoutDisplayProps) {
+  const [workouts, setWorkouts] = useState(initialWorkouts);
   const formattedWorkouts = formatAllWorkouts(workouts);
   const workoutText = formatWorkoutToMarkdown(formattedWorkouts);
+
+  const handleUpdate = (day: string, updates: any) => {
+    setWorkouts(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        ...updates
+      }
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -53,7 +65,7 @@ export function WorkoutDisplay({
                   isExporting={isExporting}
                   setIsExporting={setIsExporting}
                   allWorkouts={workouts}
-                  onUpdate={() => {}}
+                  onUpdate={handleUpdate}
                 />
               ))}
             </div>

@@ -59,6 +59,16 @@ export function InputContainer({
     setWeatherPrompt(prompt);
   };
 
+  const handleExerciseSelect = (exercise: Exercise) => {
+    setSelectedExercises(prev => {
+      const exists = prev.some(e => e.name === exercise.name);
+      if (exists) {
+        return prev.filter(e => e.name !== exercise.name);
+      }
+      return [...prev, exercise];
+    });
+  };
+
   const handlePrescribedFileSelect = async (file: File) => {
     setIsAnalyzingPrescribed(true);
     // Implementation for file analysis would go here

@@ -9,7 +9,7 @@ interface WeatherDisplayProps {
 
 export function WeatherDisplay({ weatherData, formatTemp, formatValue }: WeatherDisplayProps) {
   return (
-    <div className="bg-white text-black p-4 rounded-lg shadow-sm">
+    <div className="bg-black text-white p-4 rounded-lg shadow-sm border border-primary/30">
       <h4 className="font-medium text-lg mb-3">Current Weather in {weatherData.location}</h4>
       <div className="space-y-2">
         <p>Temperature: {formatTemp(weatherData.temperature)}</p>

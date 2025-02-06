@@ -42,13 +42,13 @@ export const GeneratorSection = ({
 
   return (
     <motion.div 
-      className={`flex flex-col items-center justify-center min-h-screen px-4 py-6 transition-all duration-300 ${
+      className={`flex flex-col items-start justify-center min-h-screen px-4 py-6 transition-all duration-300 ${
         hasScrolled ? 'bg-black/90' : 'bg-transparent'
       }`}
     >
-      <div className="max-w-4xl w-full space-y-6">
+      <div className="max-w-4xl space-y-6 ml-8 md:ml-16 lg:ml-24">
         <motion.div 
-          className="text-center"
+          className="text-left"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -58,7 +58,7 @@ export const GeneratorSection = ({
           }`}>
             Generate Your Free Program
           </h2>
-          <div className={`text-xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-8 space-y-2 transition-all duration-300 ${
+          <div className={`text-xl text-white/90 max-w-3xl leading-relaxed mb-8 space-y-2 transition-all duration-300 ${
             hasScrolled ? 'opacity-80' : 'opacity-100'
           }`}>
             <p>Experience our lite version:</p>
@@ -71,7 +71,7 @@ export const GeneratorSection = ({
           </div>
         </motion.div>
         
-        <div className="container mx-auto max-w-[1000px]">
+        <div className="container max-w-[1000px] pl-0">
           <InputDirections />
         </div>
 
@@ -90,7 +90,7 @@ export const GeneratorSection = ({
         </div>
       </div>
       
-      <Separator className="mt-12 bg-primary/20" />
+      <Separator className="mt-12 bg-primary/20 w-full" />
     </motion.div>
   );
 };

@@ -1,5 +1,5 @@
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { SidebarLogo } from "./sidebar/SidebarLogo";
 import { SidebarNavigation } from "./sidebar/SidebarNavigation";
 import { EmailSignup } from "./navbar/EmailSignup";
@@ -8,27 +8,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {
-  const { open, openMobile, setOpenMobile } = useSidebar();
+  const { open, openMobile } = useSidebar();
   const isMobile = useIsMobile();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const isVisible = isMobile ? openMobile : open;
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isMobile && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        setOpenMobile(false);
-      }
-    };
-
-    if (isVisible && isMobile) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMobile, isVisible, setOpenMobile]);
 
   return (
     <aside 

@@ -56,18 +56,12 @@ export const GeneratorSection = ({
           <h2 className={`text-5xl md:text-6xl font-oswald text-accent mb-4 tracking-tight transition-all duration-300 ${
             hasScrolled ? 'scale-90' : 'scale-100'
           }`}>
-            Generate Your Free Program
+            Generate Your Program
           </h2>
-          <div className={`text-xl text-white/90 max-w-3xl leading-relaxed mb-8 space-y-2 transition-all duration-300 ${
+          <div className={`text-xl text-white/90 max-w-3xl leading-relaxed mb-8 transition-all duration-300 ${
             hasScrolled ? 'opacity-80' : 'opacity-100'
           }`}>
-            <p>Experience our lite version:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>Generate up to 12 days of customized training programs instantly</li>
-              <li>Perfect for elite athletes</li>
-              <li>Ideal for CrossFit competitors</li>
-              <li>Designed for strength specialists seeking personalized programming</li>
-            </ul>
+            <p className="mb-2">Generate up to 12 days of customized training programs instantly, perfect for elite athletes, CrossFit competitors, and strength specialists.</p>
           </div>
         </motion.div>
         

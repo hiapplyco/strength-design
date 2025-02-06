@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { MapPin } from "lucide-react";
+import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getWeatherDescription } from "./weather-utils";
 import { SearchForm } from "./SearchForm";
 import { LocationResultsDialog } from "./LocationResultsDialog";
+import { Button } from "@/components/ui/button";
 import type { WeatherSearchProps, LocationResult } from "./types";
 
 export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchProps) {
@@ -12,6 +13,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
   const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const { toast } = useToast();
 
   const formatLocation = (result: LocationResult) => {
@@ -147,21 +149,38 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
         <h3 className="font-oswald text-lg">Add Your Location</h3>
         {renderTooltip()}
       </div>
-      
-      <SearchForm
-        location={location}
-        setLocation={setLocation}
-        onSubmit={handleSearch}
-        isLoading={isLoading}
-      />
 
-      <LocationResultsDialog
-        open={showLocationDialog}
-        onOpenChange={setShowLocationDialog}
-        locationResults={locationResults}
-        onLocationSelect={handleLocationSelect}
-        formatLocation={formatLocation}
-      />
+      <Button
+        variant="outline"
+        className="w-full flex items-center justify-between"
+        onClick={() => setShowSearch(!showSearch)}
+      >
+        <span>Would you like to add your location for weather-optimized workouts?</span>
+        {showSearch ? (
+          <ChevronUp className="h-4 w-4 ml-2" />
+        ) : (
+          <ChevronDown className="h-4 w-4 ml-2" />
+        )}
+      </Button>
+
+      {showSearch && (
+        <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+          <SearchForm
+            location={location}
+            setLocation={setLocation}
+            onSubmit={handleSearch}
+            isLoading={isLoading}
+          />
+
+          <LocationResultsDialog
+            open={showLocationDialog}
+            onOpenChange={setShowLocationDialog}
+            locationResults={locationResults}
+            onLocationSelect={handleLocationSelect}
+            formatLocation={formatLocation}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -20,7 +20,7 @@ export function PrescribedExercisesSection({
   handlePrescribedFileSelect
 }: PrescribedExercisesSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const handleClear = () => {
     setPrescribedExercises("");
   };
@@ -31,14 +31,15 @@ export function PrescribedExercisesSection({
       onOpenChange={setIsOpen} 
       className="collapsible-section"
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between py-3 px-4">
         <div className="flex items-center gap-2">
           <Dumbbell className="h-5 w-5 text-primary" />
           <h3 className="font-oswald text-lg">What are your Goals?</h3>
           <CollapsibleTrigger asChild>
             <Button
               variant="ghost"
-              className="hover:bg-transparent hover:underline p-2"
+              size="sm"
+              className="hover:bg-transparent hover:underline ml-2"
             >
               <span className="sr-only">Toggle Goals Section</span>
             </Button>
@@ -56,7 +57,7 @@ export function PrescribedExercisesSection({
           </Button>
         )}
       </div>
-      
+
       <CollapsibleContent className="space-y-4 p-4">
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-3">

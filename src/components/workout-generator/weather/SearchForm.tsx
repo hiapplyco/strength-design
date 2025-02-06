@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
@@ -23,7 +24,7 @@ export function SearchForm({ onSearch, location, setLocation }: SearchFormProps)
         placeholder="Enter city name..."
         value={location}
         onChange={(e) => setLocation(e.target.value)}
-        className="bg-black text-white placeholder:text-gray-400 rounded-lg border-[6px] border-primary font-oswald transform -skew-x-12 uppercase tracking-wider text-center shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_#C4A052,12px_12px_0px_0px_#B8860B] focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="bg-black text-white placeholder:text-gray-400 w-full"
       />
       {location && (
         <button

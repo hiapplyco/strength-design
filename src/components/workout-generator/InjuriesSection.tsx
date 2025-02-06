@@ -31,10 +31,10 @@ export function InjuriesSection({
       onOpenChange={setIsOpen} 
       className="collapsible-section"
     >
-      <div className="flex items-center justify-between py-3 px-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between py-3 px-4 gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-1">
           <HeartPulse className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Any Injuries or Health Considerations?</h3>
+          <h3 className="font-oswald text-lg whitespace-nowrap">Any Injuries or Health Considerations?</h3>
           <CollapsibleTrigger asChild>
             <Button
               variant="ghost"
@@ -59,16 +59,16 @@ export function InjuriesSection({
       </div>
 
       <CollapsibleContent className="space-y-4 p-4">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="col-span-3">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-3">
             <Textarea
               placeholder="List any injuries, medical conditions, or movement limitations"
               value={injuries}
               onChange={(e) => setInjuries(e.target.value)}
-              className="min-h-[100px] base-input"
+              className="min-h-[100px] my-input-element"
             />
           </div>
-          <div className="col-span-1">
+          <div className="md:col-span-1 min-w-[200px]">
             <FileUploadSection
               title="Upload Medical Information"
               isAnalyzing={isAnalyzingInjuries}

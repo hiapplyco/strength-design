@@ -35,8 +35,8 @@ export function WorkoutDisplay({
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="max-w-7xl mx-auto px-4 py-8 transition-all duration-300 ease-in-out">
+    <div className="min-h-screen bg-black w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300 ease-in-out">
         <div className="space-y-8">
           <Button
             onClick={resetWorkouts}
@@ -46,7 +46,7 @@ export function WorkoutDisplay({
             Back
           </Button>
 
-          <div className="bg-background p-6">
+          <div className="bg-background p-4 sm:p-6 rounded-lg overflow-hidden">
             <WorkoutDisplayHeader
               resetWorkouts={resetWorkouts}
               isExporting={isExporting}
@@ -74,3 +74,4 @@ export function WorkoutDisplay({
     </div>
   );
 }
+

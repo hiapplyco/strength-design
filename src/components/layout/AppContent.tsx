@@ -18,7 +18,7 @@ const MainContent = () => {
     <div className="min-h-screen flex w-full bg-black relative">
       <SidebarOverlay />
       <AppSidebar />
-      <main className="flex-1 w-full transition-all duration-300 ease-in-out pl-0 lg:pl-64">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden transition-all duration-300 ease-in-out pl-0 lg:pl-64">
         <SidebarToggle isVisible={!!session} />
         <MainRoutes />
       </main>
@@ -49,3 +49,4 @@ export const AppContent = () => {
     </SidebarProvider>
   );
 };
+

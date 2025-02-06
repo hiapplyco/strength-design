@@ -17,7 +17,7 @@ export function GenerateWorkoutButton({ setShowGenerateInput, isGenerating }: Ge
       <Button 
         onClick={() => setShowGenerateInput(true)}
         disabled={isGenerating}
-        className={`border-2 border-destructive bg-destructive text-black font-collegiate text-xl uppercase tracking-tight transition-all hover:bg-destructiveSecondary hover:border-destructiveSecondary transform hover:-translate-y-1 hover:shadow-lg px-8 py-6 ${isGenerating ? 'opacity-75' : ''}`}
+        className={`bg-[#DAA520] border-[#DAA520] text-black font-collegiate text-xl uppercase tracking-tight transition-all hover:bg-[#FFD700] hover:border-[#FFD700] transform hover:-translate-y-1 hover:shadow-lg px-8 py-6 rounded-[20px] ${isGenerating ? 'opacity-75' : ''}`}
       >
         {isGenerating ? (
           <Loader2 className="mr-2 h-6 w-6 animate-spin" />

@@ -32,7 +32,7 @@
     --input: 43 59% 55%;
     --ring: 43 59% 55%;
  
-    --radius: 0.5rem;
+    --radius: 1.5rem; /* Increased border radius */
   }
 
   body {
@@ -60,7 +60,7 @@
   textarea,
   .collapsible-section button[type="button"],
   .collapsible-section {
-    @apply bg-jupyter-cell border border-jupyter-border rounded-md px-4 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white;
+    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] px-4 py-2 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white;
   }
 
   /* Jupyter-style collapsible sections */
@@ -75,11 +75,16 @@
 
   /* Jupyter-style code cells */
   .code-cell {
-    @apply bg-jupyter-cell border border-jupyter-border rounded-md p-4 font-mono text-sm;
+    @apply bg-jupyter-cell border border-jupyter-border rounded-[20px] p-4 font-mono text-sm;
   }
 
   /* Jupyter-style output cells */
   .output-cell {
     @apply bg-jupyter-cell border-l-4 border-primary pl-4 py-2 mt-2;
+  }
+
+  /* Remove double borders from collapsible sections */
+  .collapsible-section button[type="button"] {
+    @apply border-none;
   }
 }

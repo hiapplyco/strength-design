@@ -14,12 +14,12 @@ export const SearchInput = ({ value, onChange, onClear }: SearchInputProps) => {
         placeholder="Search for exercises or equipment..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white text-black placeholder:text-gray-400 rounded-full border-2 border-primary focus-visible:ring-primary pr-10"
+        className="w-full bg-jupyter-cell text-white placeholder:text-gray-400 rounded-[20px] border border-jupyter-border focus-visible:ring-primary pr-10"
       />
       {value && (
         <button
           onClick={onClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-primary/20 rounded-full transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-jupyter-hover rounded-full transition-colors"
           aria-label="Clear search"
         >
           <X className="h-4 w-4 text-primary" />

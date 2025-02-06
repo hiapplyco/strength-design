@@ -26,11 +26,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#C4A052", // Gold color
+          DEFAULT: "#DAA520", // Updated gold color
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#DAA520", // Darker gold for contrast
+          DEFAULT: "#FFD700", // Brighter gold for selected states
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
@@ -42,7 +42,7 @@ export default {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#B8860B", // Another gold shade
+          DEFAULT: "#B8860B", // Darker gold
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
@@ -55,8 +55,8 @@ export default {
         },
         jupyter: {
           cell: "rgba(0, 0, 0, 0.7)",
-          border: "#C4A052",
-          hover: "rgba(196, 160, 82, 0.1)",
+          border: "#DAA520",
+          hover: "rgba(218, 165, 32, 0.1)",
         }
       },
       borderRadius: {

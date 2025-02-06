@@ -1,7 +1,10 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { WorkoutGeneratorForm } from "./WorkoutGeneratorForm";
-import { useWorkoutGeneration } from "./hooks/useWorkoutGeneration";
-import type { Exercise } from "../exercise-search/types";
+import { ExerciseSearch } from "@/components/ExerciseSearch";
+import { FitnessSection } from "./FitnessSection";
+import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
+import { WeatherSection } from "./WeatherSection";
+import { GenerateSection } from "./GenerateSection";
+import { WorkoutPresets } from "./WorkoutPresets";
+import type { Exercise } from "@/components/exercise-search/types";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -15,6 +18,7 @@ interface InputContainerProps {
   }) => Promise<void>;
   isGenerating: boolean;
   setIsGenerating: (value: boolean) => void;
+  showGenerateInput: boolean;
   setShowGenerateInput: (value: boolean) => void;
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
@@ -26,71 +30,33 @@ export function InputContainer({
   handleGenerateWorkout,
   isGenerating,
   setIsGenerating,
+  showGenerateInput,
   setShowGenerateInput,
   numberOfDays,
-  setNumberOfDays
+  setNumberOfDays,
 }: InputContainerProps) {
-  const {
-    weatherData,
-    weatherPrompt,
-    selectedExercises,
-    fitnessLevel,
-    prescribedExercises,
-    injuries,
-    isAnalyzingPrescribed,
-    isAnalyzingInjuries,
-    handleWeatherUpdate,
-    handleExerciseSelect,
-    handlePrescribedFileSelect,
-    handleInjuriesFileSelect,
-    handleGenerateWithWeather,
-    handleClear,
-    setFitnessLevel,
-    setPrescribedExercises,
-    setInjuries
-  } = useWorkoutGeneration({
-    handleGenerateWorkout,
-    setIsGenerating,
-    setGeneratePrompt
-  });
-
-  const startGenerating = () => {
-    setIsGenerating(true);
-    handleGenerateWithWeather(numberOfDays);
+  const handlePresetSelect = (preset: any) => {
+    if (preset.prescribedExercises) {
+      setGeneratePrompt(preset.prescribedExercises);
+    }
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
-        className="w-full max-w-6xl mx-auto px-4"
-      >
-        <WorkoutGeneratorForm
-          weatherData={weatherData}
-          onWeatherUpdate={handleWeatherUpdate}
-          selectedExercises={selectedExercises}
-          onExerciseSelect={handleExerciseSelect}
-          fitnessLevel={fitnessLevel}
-          setFitnessLevel={setFitnessLevel}
-          prescribedExercises={prescribedExercises}
-          setPrescribedExercises={setPrescribedExercises}
-          isAnalyzingPrescribed={isAnalyzingPrescribed}
-          handlePrescribedFileSelect={handlePrescribedFileSelect}
-          injuries={injuries}
-          setInjuries={setInjuries}
-          isAnalyzingInjuries={isAnalyzingInjuries}
-          handleInjuriesFileSelect={handleInjuriesFileSelect}
-          numberOfDays={numberOfDays}
-          setNumberOfDays={setNumberOfDays}
-          onGenerate={startGenerating}
-          onClear={handleClear}
-          isGenerating={isGenerating}
-          isValid={fitnessLevel !== "" && numberOfDays > 0}
-        />
-      </motion.div>
-    </AnimatePresence>
+    <div className="space-y-8">
+      <WorkoutPresets onSelectPreset={handlePresetSelect} />
+      <WeatherSection />
+      <ExerciseSearch />
+      <FitnessSection />
+      <GoalsAndInjuriesSection />
+      <GenerateSection
+        generatePrompt={generatePrompt}
+        setGeneratePrompt={setGeneratePrompt}
+        handleGenerateWorkout={handleGenerateWorkout}
+        isGenerating={isGenerating}
+        setIsGenerating={setIsGenerating}
+        numberOfDays={numberOfDays}
+        setNumberOfDays={setNumberOfDays}
+      />
+    </div>
   );
 }

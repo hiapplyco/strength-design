@@ -3,6 +3,7 @@ import { Send, Loader2, Check, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
+import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import type { Exercise } from "../exercise-search/types";
 
 interface GenerateSectionProps {
@@ -38,6 +39,31 @@ export function GenerateSection({
 
   return (
     <div className="space-y-4">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-medium text-primary">
+            How many days would you like to train?
+          </h3>
+          {renderTooltip()}
+        </div>
+        <ToggleGroup 
+          type="single" 
+          value={numberOfDays.toString()}
+          onValueChange={(value) => setNumberOfDays(parseInt(value || "7"))}
+          className="flex flex-wrap gap-2"
+        >
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((day) => (
+            <ToggleGroupItem 
+              key={day} 
+              value={day.toString()}
+              className="h-14 w-14 rounded-full bg-black/20 text-white data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-white/20"
+            >
+              {day}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </div>
+
       <div className="flex items-center gap-2">
         <Send className="h-5 w-5 text-primary" />
         <h3 className="font-oswald text-lg">Create Your Workout</h3>

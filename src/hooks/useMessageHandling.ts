@@ -74,9 +74,6 @@ export const useMessageHandling = () => {
       // Update local state immediately with the new message
       setMessages(prev => [...prev, messageData]);
 
-      // Add a small delay to ensure the message is committed
-      await new Promise(resolve => setTimeout(resolve, 500));
-
       // Then, get the AI response
       const { data, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { message }
@@ -89,30 +86,19 @@ export const useMessageHandling = () => {
         throw new Error('Invalid response from AI');
       }
 
-      // Update the message with the response
-      const { data: updatedMessage, error: updateError } = await supabase
+      // Update the message with the response directly using the messageData.id
+      const { error: updateError } = await supabase
         .from('chat_messages')
         .update({ response: data.response })
-        .eq('id', messageData.id)
-        .select()
-        .maybeSingle();
+        .eq('id', messageData.id);
 
       if (updateError) throw updateError;
       
-      if (updatedMessage) {
-        // Update local state with the response if the update was successful
-        setMessages(prev => prev.map(msg => 
-          msg.id === messageData.id ? { ...msg, response: data.response } : msg
-        ));
-        console.log('Response saved to database and state updated');
-      } else {
-        console.error('Failed to update message with response - message not found');
-        toast({
-          title: "Warning",
-          description: "Message was sent but couldn't be updated with the response",
-          variant: "destructive",
-        });
-      }
+      // Update local state with the response
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageData.id ? { ...msg, response: data.response } : msg
+      ));
+      console.log('Response saved to database and state updated');
 
     } catch (error) {
       console.error('Error sending message:', error);

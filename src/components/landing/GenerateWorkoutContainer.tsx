@@ -1,12 +1,13 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Exercise } from "@/components/exercise-search/types";
-import { Json } from "@/integrations/supabase/types";
-import { PdfUploadSection } from "@/components/workout-generator/PdfUploadSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface GenerateWorkoutContainerProps {
   setWorkouts: (workouts: any) => void;
@@ -16,6 +17,7 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [prescribedExercises, setPrescribedExercises] = useState<string>("");
+  const [numberOfDays, setNumberOfDays] = useState<number>(7);
 
   const handleFileSelect = async (file: File) => {
     try {
@@ -57,7 +59,7 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     try {
       const { data: workoutData, error: workoutError } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
-          numberOfDays: 7,
+          numberOfDays,
           selectedExercises: [],
           prescribedExercises: prescribedExercises
         }
@@ -68,10 +70,9 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
 
       setWorkouts(workoutData);
 
-      // Save session data
       await supabase.from('session_io').insert({
         prescribed_exercises: prescribedExercises,
-        number_of_days: 7,
+        number_of_days: numberOfDays,
         generated_workouts: workoutData,
         session_duration_ms: Math.round(performance.now() - startTime),
         success: true
@@ -85,10 +86,9 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
     } catch (error) {
       console.error('Error generating workout:', error);
       
-      // Save failed session
       await supabase.from('session_io').insert({
         prescribed_exercises: prescribedExercises,
-        number_of_days: 7,
+        number_of_days: numberOfDays,
         session_duration_ms: Math.round(performance.now() - startTime),
         success: false,
         error_message: error.message || "Unknown error occurred"
@@ -115,6 +115,30 @@ export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContain
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-medium">
+                How many days would you like to train?
+              </h3>
+            </div>
+            <ToggleGroup 
+              type="single" 
+              value={numberOfDays.toString()}
+              onValueChange={(value) => setNumberOfDays(parseInt(value || "7"))}
+              className="flex flex-wrap gap-2"
+            >
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((day) => (
+                <ToggleGroupItem 
+                  key={day} 
+                  value={day.toString()}
+                  className="h-14 w-14 rounded-full bg-black/20 text-white data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-white/20"
+                >
+                  {day}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
           <PdfUploadSection onFileSelect={handleFileSelect} />
           
           {prescribedExercises && (

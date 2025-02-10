@@ -92,15 +92,24 @@ export const useMessageHandling = () => {
         .update({ response: data.response })
         .eq('id', messageData.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (updateError) throw updateError;
-      console.log('Response saved to database');
-
-      // Update local state with the response
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageData.id ? { ...msg, response: data.response } : msg
-      ));
+      
+      if (updatedMessage) {
+        // Update local state with the response if the update was successful
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageData.id ? { ...msg, response: data.response } : msg
+        ));
+        console.log('Response saved to database and state updated');
+      } else {
+        console.error('Failed to update message with response - message not found');
+        toast({
+          title: "Warning",
+          description: "Message was sent but couldn't be updated with the response",
+          variant: "destructive",
+        });
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);

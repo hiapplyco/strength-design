@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,12 +24,71 @@ export default function ProgramChat() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchMessages();
-    }
+    if (!user) return;
+    
+    // Set up realtime subscription for messages
+    const channel = supabase
+      .channel('public:chat_messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchMessages();
+        }
+      )
+      .subscribe();
+
+    // Initial fetch
+    fetchMessages();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
+  const fetchMessages = async () => {
+    if (!user) return;
+
+    try {
+      console.log('Fetching messages for user:', user.id);
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
+      }
+
+      console.log('Fetched messages:', data);
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load messages. Please try refreshing the page.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleFileSelect = async (file: File) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Please sign in to upload files",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       const fileName = `${crypto.randomUUID()}-${file.name}`;
@@ -49,7 +109,7 @@ export default function ProgramChat() {
       const { data: messageData, error: dbError } = await supabase
         .from('chat_messages')
         .insert({
-          user_id: user?.id,
+          user_id: user.id,
           message: `Uploaded file: ${file.name}`,
           file_path: urlData.publicUrl,
           file_type: file.type
@@ -79,9 +139,6 @@ export default function ProgramChat() {
 
       if (updateError) throw updateError;
 
-      console.log('Response saved to database');
-      await fetchMessages();
-
       toast({
         title: "Success",
         description: "File uploaded and processed successfully",
@@ -98,38 +155,24 @@ export default function ProgramChat() {
     }
   };
 
-  const fetchMessages = async () => {
-    try {
-      console.log('Fetching messages for user:', user?.id);
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      console.log('Fetched messages:', data);
-      setMessages(data || []);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
+  const handleSendMessage = async (message: string) => {
+    if (!user) {
       toast({
         title: "Error",
-        description: "Failed to load messages",
+        description: "Please sign in to send messages",
         variant: "destructive",
       });
+      return;
     }
-  };
 
-  const handleSendMessage = async (message: string) => {
     try {
       setIsLoading(true);
       console.log('Sending message:', message);
 
-      // First save the message
       const { data: messageData, error: messageError } = await supabase
         .from('chat_messages')
         .insert({
-          user_id: user?.id,
+          user_id: user.id,
           message: message
         })
         .select()
@@ -138,25 +181,21 @@ export default function ProgramChat() {
       if (messageError) throw messageError;
       console.log('Message saved to database:', messageData);
 
-      // Then get the response from Gemini
       const { data: response, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { message }
       });
 
+      if (geminiError) throw geminiError;
       console.log('Received Gemini response:', response);
 
-      if (geminiError) throw geminiError;
-
-      // Update the message with the response
       const { error: updateError } = await supabase
         .from('chat_messages')
         .update({ response: response.response })
         .eq('id', messageData.id);
 
       if (updateError) throw updateError;
-
       console.log('Response saved to database');
-      await fetchMessages();
+
     } catch (error) {
       console.error('Error sending message:', error);
       toast({

@@ -1,3 +1,4 @@
+
 import { Send, Loader2, Check, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -15,6 +16,7 @@ interface GenerateSectionProps {
   prescribedExercises?: string;
   injuries?: string;
   numberOfDays?: number;
+  setNumberOfDays: (value: number) => void;
   weatherData?: any;
 }
 
@@ -29,6 +31,7 @@ export function GenerateSection({
   prescribedExercises = "",
   injuries = "",
   numberOfDays = 0,
+  setNumberOfDays,
   weatherData
 }: GenerateSectionProps) {
   const hasSelections = selectedExercises.length > 0 || fitnessLevel || prescribedExercises || injuries || numberOfDays > 0 || weatherData;
@@ -39,6 +42,22 @@ export function GenerateSection({
         <Send className="h-5 w-5 text-primary" />
         <h3 className="font-oswald text-lg">Create Your Workout</h3>
         {renderTooltip()}
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-white">
+            Number of Training Days:
+          </label>
+          <input
+            type="number"
+            min="1"
+            max="12"
+            value={numberOfDays}
+            onChange={(e) => setNumberOfDays(Number(e.target.value))}
+            className="w-20 rounded-md border border-primary/20 bg-black/20 px-3 py-2 text-sm text-white"
+          />
+        </div>
       </div>
       
       {hasSelections && (

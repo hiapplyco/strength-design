@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -117,12 +118,12 @@ const GeneratedWorkouts = () => {
                   className="bg-white/10 hover:bg-white/20 transition-colors cursor-pointer border-2 border-primary/20"
                   onClick={() => handleWorkoutClick(workout)}
                 >
-                  <CardHeader>
+                  <CardHeader className="px-6 pt-6">
                     <CardTitle className="text-white">
                       {workout.title || "Generated Workout"}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-6 pb-6">
                     <ScrollArea className="h-[100px] w-full rounded-md border border-white/20 p-4">
                       <div className="space-y-2">
                         <p className="text-sm text-white/80 whitespace-pre-line">

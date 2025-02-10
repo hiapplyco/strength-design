@@ -1,3 +1,4 @@
+
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 interface FileAnalysisStateProps {
@@ -7,9 +8,9 @@ interface FileAnalysisStateProps {
 
 export function FileAnalysisState({ title, steps }: FileAnalysisStateProps) {
   return (
-    <div className="bg-white/20 backdrop-blur-sm p-8 rounded-lg shadow-xl">
-      <LoadingIndicator className="py-4">
-        <h3 className="text-2xl font-oswald text-amber-700 text-center">{title}</h3>
+    <div className="bg-white/20 backdrop-blur-sm px-4 py-3 rounded-md shadow-sm max-w-[600px] mx-auto">
+      <LoadingIndicator className="py-2">
+        <h3 className="text-lg font-oswald text-amber-700 text-center">{title}</h3>
         <div className="space-y-2">
           {steps.map((step, i) => (
             <div key={step} className="flex items-center space-x-3">
@@ -18,7 +19,7 @@ export function FileAnalysisState({ title, steps }: FileAnalysisStateProps) {
                 i === 1 ? "bg-amber-400" :
                 "bg-amber-200"
               }`}/>
-              <span className="text-amber-700">{step}</span>
+              <span className="text-sm text-amber-700">{step}</span>
             </div>
           ))}
         </div>

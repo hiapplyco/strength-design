@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,25 +23,27 @@ export const ChatInput = ({ onSendMessage, onFileSelect, isLoading }: ChatInputP
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border-t border-primary/20">
-      <div className="flex items-center gap-2">
-        <FileUpload onFileSelect={onFileSelect} />
-        <Input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1"
-          disabled={isLoading}
-        />
-        <Button type="submit" size="icon" disabled={isLoading}>
-          <Send className="h-4 w-4" />
-        </Button>
-      </div>
-      {isLoading && (
-        <div className="mt-2">
-          <LoadingIndicator>Processing your request...</LoadingIndicator>
+    <div className="border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <form onSubmit={handleSubmit} className="p-4">
+        <div className="flex items-center gap-2">
+          <FileUpload onFileSelect={onFileSelect} />
+          <Input
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-1"
+            disabled={isLoading}
+          />
+          <Button type="submit" size="icon" disabled={isLoading}>
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
-      )}
-    </form>
+        {isLoading && (
+          <div className="mt-2">
+            <LoadingIndicator>Processing your request...</LoadingIndicator>
+          </div>
+        )}
+      </form>
+    </div>
   );
 };

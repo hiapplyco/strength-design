@@ -210,7 +210,7 @@ export default function ProgramChat() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Card className="w-full max-w-4xl mx-auto bg-background/5 border border-primary/20 backdrop-blur-sm">
+      <Card className="w-full max-w-4xl mx-auto overflow-hidden border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex flex-col h-[80vh]">
           <ChatHeader />
           <ChatMessages messages={messages} />

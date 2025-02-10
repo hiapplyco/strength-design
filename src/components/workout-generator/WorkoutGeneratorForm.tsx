@@ -5,7 +5,6 @@ import { ExerciseSection } from "./ExerciseSection";
 import { FitnessLevelSection } from "./FitnessLevelSection";
 import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
 import { GenerateSection } from "./GenerateSection";
-import { DaysSelection } from "./DaysSelection";
 import { TooltipWrapper } from "./TooltipWrapper";
 import type { Exercise } from "../exercise-search/types";
 import type { WeatherData } from "@/types/weather";
@@ -112,14 +111,6 @@ export function WorkoutGeneratorForm({
         </div>
 
         <div className="jupyter-cell">
-          <DaysSelection
-            numberOfDays={numberOfDays}
-            setNumberOfDays={setNumberOfDays}
-            renderTooltip={renderTooltip}
-          />
-        </div>
-
-        <div className="jupyter-cell">
           <GenerateSection
             onGenerate={onGenerate}
             onClear={onClear}
@@ -138,3 +129,4 @@ export function WorkoutGeneratorForm({
     </div>
   );
 }
+

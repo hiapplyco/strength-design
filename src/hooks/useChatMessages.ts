@@ -7,7 +7,9 @@ export const useChatMessages = () => {
     messages, 
     isLoading: messageLoading, 
     fetchMessages, 
-    handleSendMessage 
+    handleSendMessage,
+    startNewChat,
+    deleteAllMessages
   } = useMessageHandling();
 
   const { 
@@ -20,6 +22,8 @@ export const useChatMessages = () => {
     isLoading: messageLoading || fileLoading,
     fetchMessages,
     handleSendMessage,
-    handleFileSelect
+    handleFileSelect,
+    startNewChat,
+    deleteAllMessages
   };
 };

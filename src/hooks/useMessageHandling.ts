@@ -100,10 +100,49 @@ export const useMessageHandling = () => {
     }
   };
 
+  const deleteAllMessages = async () => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+      const { error } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setMessages([]);
+      toast({
+        title: "Success",
+        description: "Chat history deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting messages:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete chat history",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startNewChat = () => {
+    setMessages([]);
+    toast({
+      title: "Success",
+      description: "Started a new chat",
+    });
+  };
+
   return {
     messages,
     isLoading,
     fetchMessages,
-    handleSendMessage
+    handleSendMessage,
+    deleteAllMessages,
+    startNewChat
   };
 };

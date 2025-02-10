@@ -30,10 +30,7 @@ export const useMessageHandling = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching messages:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       console.log('Fetched messages:', data);
       setMessages(data || []);
@@ -61,6 +58,7 @@ export const useMessageHandling = () => {
       setIsLoading(true);
       console.log('Sending message:', message);
 
+      // First, save the message to the database
       const { data: messageData, error: messageError } = await supabase
         .from('chat_messages')
         .insert({
@@ -73,26 +71,35 @@ export const useMessageHandling = () => {
       if (messageError) throw messageError;
       console.log('Message saved to database:', messageData);
 
-      const { data: response, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
+      // Then, get the AI response
+      const { data, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { message }
       });
 
       if (geminiError) throw geminiError;
-      console.log('Received Gemini response:', response);
+      console.log('Received Gemini response:', data);
 
+      if (!data || !data.response) {
+        throw new Error('Invalid response from AI');
+      }
+
+      // Update the message with the response
       const { error: updateError } = await supabase
         .from('chat_messages')
-        .update({ response: response.response })
+        .update({ response: data.response })
         .eq('id', messageData.id);
 
       if (updateError) throw updateError;
       console.log('Response saved to database');
 
+      // Fetch updated messages to refresh the UI
+      await fetchMessages();
+
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
     } finally {

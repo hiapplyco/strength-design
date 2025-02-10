@@ -122,6 +122,7 @@ export function WorkoutGeneratorForm({
             prescribedExercises={prescribedExercises}
             injuries={injuries}
             numberOfDays={numberOfDays}
+            setNumberOfDays={setNumberOfDays}
             weatherData={weatherData}
           />
         </div>
@@ -129,4 +130,3 @@ export function WorkoutGeneratorForm({
     </div>
   );
 }
-

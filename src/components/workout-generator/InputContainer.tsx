@@ -1,3 +1,4 @@
+
 import { ExerciseSearch } from "@/components/ExerciseSearch";
 import { FitnessSection } from "./FitnessSection";
 import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
@@ -161,6 +162,7 @@ export function InputContainer({
         prescribedExercises={prescribedExercises}
         injuries={injuries}
         numberOfDays={numberOfDays}
+        setNumberOfDays={setNumberOfDays}
         weatherData={weatherData}
       />
     </div>

@@ -1,3 +1,4 @@
+
 import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
 import { ExerciseSection } from "./ExerciseSection";
@@ -73,14 +74,6 @@ export function WorkoutGeneratorForm({
             setNumberOfDays(preset.numberOfDays);
           }}
         />
-        
-        <div className="jupyter-cell">
-          <DaysSelection
-            numberOfDays={numberOfDays}
-            setNumberOfDays={setNumberOfDays}
-            renderTooltip={renderTooltip}
-          />
-        </div>
 
         <div className="jupyter-cell">
           <GoalsAndInjuriesSection
@@ -119,12 +112,26 @@ export function WorkoutGeneratorForm({
         </div>
 
         <div className="jupyter-cell">
+          <DaysSelection
+            numberOfDays={numberOfDays}
+            setNumberOfDays={setNumberOfDays}
+            renderTooltip={renderTooltip}
+          />
+        </div>
+
+        <div className="jupyter-cell">
           <GenerateSection
             onGenerate={onGenerate}
             onClear={onClear}
             isGenerating={isGenerating}
             renderTooltip={() => renderTooltip("Review your selections and generate your program")}
             isValid={isValid}
+            selectedExercises={selectedExercises}
+            fitnessLevel={fitnessLevel}
+            prescribedExercises={prescribedExercises}
+            injuries={injuries}
+            numberOfDays={numberOfDays}
+            weatherData={weatherData}
           />
         </div>
       </div>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PdfUploadSection } from "@/components/workout-generator/PdfUploadSection";
 
 interface GenerateWorkoutContainerProps {
   setWorkouts: (workouts: any) => void;

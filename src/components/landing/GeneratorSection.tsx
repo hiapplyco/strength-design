@@ -5,7 +5,6 @@ import { Separator } from "@/components/ui/separator";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { InputDirections } from "./InputDirections";
 import { useEffect, useState } from "react";
-import { DaysSelection } from "@/components/workout-generator/DaysSelection";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 
@@ -81,14 +80,6 @@ export const GeneratorSection = ({
             <p className="mb-2 break-words">Generate up to 12 days of customized training programs instantly, perfect for elite athletes, CrossFit competitors, and strength specialists.</p>
           </div>
         </motion.div>
-        
-        <div className="w-full max-w-[1000px]">
-          <DaysSelection 
-            numberOfDays={numberOfDays}
-            setNumberOfDays={setNumberOfDays}
-            renderTooltip={renderTooltip}
-          />
-        </div>
 
         <div className="w-full max-w-[1000px]">
           <InputDirections />

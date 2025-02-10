@@ -3,7 +3,6 @@ import { Send, Loader2, Check, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
-import { DaysSelection } from "./DaysSelection";
 import type { Exercise } from "../exercise-search/types";
 
 interface GenerateSectionProps {
@@ -44,12 +43,6 @@ export function GenerateSection({
         <h3 className="font-oswald text-lg">Create Your Workout</h3>
         {renderTooltip()}
       </div>
-
-      <DaysSelection
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
-        renderTooltip={renderTooltip}
-      />
       
       {hasSelections && (
         <Card className="bg-black/20 border-primary/20">

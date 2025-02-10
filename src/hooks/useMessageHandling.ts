@@ -71,6 +71,9 @@ export const useMessageHandling = () => {
       if (messageError) throw messageError;
       console.log('Message saved to database:', messageData);
 
+      // Update local state immediately with the new message
+      setMessages(prev => [...prev, messageData]);
+
       // Then, get the AI response
       const { data, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { message }
@@ -84,16 +87,20 @@ export const useMessageHandling = () => {
       }
 
       // Update the message with the response
-      const { error: updateError } = await supabase
+      const { data: updatedMessage, error: updateError } = await supabase
         .from('chat_messages')
         .update({ response: data.response })
-        .eq('id', messageData.id);
+        .eq('id', messageData.id)
+        .select()
+        .single();
 
       if (updateError) throw updateError;
       console.log('Response saved to database');
 
-      // Fetch updated messages to refresh the UI
-      await fetchMessages();
+      // Update local state with the response
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageData.id ? { ...msg, response: data.response } : msg
+      ));
 
     } catch (error) {
       console.error('Error sending message:', error);

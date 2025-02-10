@@ -58,7 +58,7 @@ export const useMessageHandling = () => {
       setIsLoading(true);
       console.log('Sending message:', message);
 
-      // First, save the message to the database
+      // First, save the message to the database and wait for it to complete
       const { data: messageData, error: messageError } = await supabase
         .from('chat_messages')
         .insert({
@@ -73,6 +73,9 @@ export const useMessageHandling = () => {
 
       // Update local state immediately with the new message
       setMessages(prev => [...prev, messageData]);
+
+      // Add a small delay to ensure the message is committed
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Then, get the AI response
       const { data, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {

@@ -230,6 +230,33 @@ export type Database = {
           },
         ]
       }
+      playbook: {
+        Row: {
+          content: string
+          created_at: string
+          id: number
+          page_number: number
+          section: string
+          subsection: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: number
+          page_number: number
+          section: string
+          subsection: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: number
+          page_number?: number
+          section?: string
+          subsection?: string
+        }
+        Relationships: []
+      }
       pricing_page_events: {
         Row: {
           created_at: string

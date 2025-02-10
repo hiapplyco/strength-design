@@ -5,6 +5,9 @@ import { Separator } from "@/components/ui/separator";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { InputDirections } from "./InputDirections";
 import { useEffect, useState } from "react";
+import { DaysSelection } from "@/components/workout-generator/DaysSelection";
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
 
 interface GeneratorSectionProps {
   generatePrompt: string;
@@ -41,6 +44,19 @@ export const GeneratorSection = ({
     return () => window.removeEventListener('scroll', updateScroll);
   }, []);
 
+  const renderTooltip = (content: string) => (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <HelpCircle className="h-4 w-4 text-white/60 hover:text-white/80 transition-colors" />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-sm">{content}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+
   return (
     <motion.div 
       className={`flex flex-col items-start justify-center min-h-screen w-full px-4 py-6 transition-all duration-300 ${
@@ -66,6 +82,14 @@ export const GeneratorSection = ({
           </div>
         </motion.div>
         
+        <div className="w-full max-w-[1000px]">
+          <DaysSelection 
+            numberOfDays={numberOfDays}
+            setNumberOfDays={setNumberOfDays}
+            renderTooltip={renderTooltip}
+          />
+        </div>
+
         <div className="w-full max-w-[1000px]">
           <InputDirections />
         </div>

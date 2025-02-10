@@ -1,4 +1,3 @@
-
 import { ExerciseSearch } from "@/components/ExerciseSearch";
 import { FitnessSection } from "./FitnessSection";
 import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
@@ -6,7 +5,6 @@ import { WeatherSection } from "./WeatherSection";
 import { GenerateSection } from "./GenerateSection";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { TooltipWrapper } from "./TooltipWrapper";
-import { DaysSelection } from "./DaysSelection";
 import type { Exercise } from "@/components/exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 import { useState } from "react";
@@ -151,11 +149,6 @@ export function InputContainer({
         setInjuries={setInjuries}
         isAnalyzingInjuries={isAnalyzingInjuries}
         handleInjuriesFileSelect={handleInjuriesFileSelect}
-      />
-      <DaysSelection
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
-        renderTooltip={renderTooltip}
       />
       <GenerateSection
         onGenerate={handleGenerate}

@@ -1,3 +1,4 @@
+
 project_id = "ulnsvkrrdcmfiguibkpx"
 
 [api]
@@ -37,4 +38,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.chat-with-gemini]
+verify_jwt = false
+
+[functions.playbook-query]
 verify_jwt = false

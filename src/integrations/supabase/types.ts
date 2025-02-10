@@ -234,6 +234,7 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          fts: unknown | null
           id: number
           page_number: number
           section: string
@@ -242,6 +243,7 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          fts?: unknown | null
           id?: number
           page_number: number
           section: string
@@ -250,6 +252,7 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          fts?: unknown | null
           id?: number
           page_number?: number
           section?: string

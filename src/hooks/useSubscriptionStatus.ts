@@ -25,7 +25,7 @@ export const useSubscriptionStatus = () => {
         .from('subscriptions')
         .select('*')
         .eq('user_id', session.user.id)
-        .maybeSingle();  // Changed from .single() to .maybeSingle()
+        .maybeSingle();
 
       if (subscriptionError) {
         throw subscriptionError;
@@ -51,11 +51,21 @@ export const useSubscriptionStatus = () => {
         throw error;
       }
 
+      // Ensure the status is one of the allowed values
+      let validStatus: SubscriptionStatus['status'] = null;
+      if (subscription.status === 'trialing' || 
+          subscription.status === 'active' || 
+          subscription.status === 'past_due' || 
+          subscription.status === 'canceled' || 
+          subscription.status === 'incomplete') {
+        validStatus = subscription.status;
+      }
+
       return {
         isTrialing,
         trialEndsAt: trialEnd,
         isSubscribed: stripeStatus?.subscribed || false,
-        status: subscription.status
+        status: validStatus
       };
     },
     enabled: !!session?.user,

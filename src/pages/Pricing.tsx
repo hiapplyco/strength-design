@@ -13,11 +13,12 @@ const Pricing = () => {
   const { handleSubscription, loadingStates } = useSubscription();
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black flex flex-col">
       <div 
-        className="relative bg-cover bg-center bg-fixed"
+        className="relative bg-cover bg-center bg-fixed flex-grow"
         style={{
           backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
+          minHeight: '100vh'
         }}
       >
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />

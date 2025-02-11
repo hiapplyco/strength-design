@@ -20,6 +20,8 @@ export const useSubscriptionStatus = () => {
         throw new Error('No user session found');
       }
 
+      console.log('Checking subscription status for user:', session.user.id);
+
       // Get subscription status from our database
       const { data: subscription, error: subscriptionError } = await supabase
         .from('subscriptions')
@@ -28,17 +30,21 @@ export const useSubscriptionStatus = () => {
         .maybeSingle();
 
       if (subscriptionError) {
+        console.error('Error fetching subscription from database:', subscriptionError);
         throw subscriptionError;
       }
+
+      console.log('Database subscription data:', subscription);
 
       // Check if user has an active subscription via Stripe
       const { data: stripeStatus, error } = await supabase.functions.invoke('check-subscription');
       
       if (error) {
+        console.error('Error checking Stripe subscription:', error);
         throw error;
       }
 
-      console.log('Stripe status response:', stripeStatus); // Debug log
+      console.log('Stripe status response:', stripeStatus);
 
       const now = new Date();
       const trialEnd = subscription?.trial_end ? new Date(subscription.trial_end) : null;
@@ -56,12 +62,18 @@ export const useSubscriptionStatus = () => {
         validStatus = statusValue;
       }
 
-      return {
+      const isSubscribed = stripeStatus?.subscribed || validStatus === 'active';
+
+      const result = {
         isTrialing,
         trialEndsAt: trialEnd,
-        isSubscribed: stripeStatus?.subscribed || false,
+        isSubscribed,
         status: validStatus
       };
+
+      console.log('Final subscription status:', result);
+
+      return result;
     },
     enabled: !!session?.user,
     refetchInterval: 60000, // Refetch every minute

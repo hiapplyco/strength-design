@@ -16,8 +16,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Debug log to help track subscription status
-  console.log('Current subscription status:', subscriptionStatus);
+  // Debug logs
+  console.log('Auth session:', session);
+  console.log('Current location:', location.pathname);
+  console.log('Subscription status:', subscriptionStatus);
 
   useEffect(() => {
     if (subscriptionStatus && 
@@ -25,8 +27,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         !subscriptionStatus.isSubscribed &&
         location.pathname !== '/pricing') {
       toast({
-        title: "Trial Expired",
-        description: "Your trial has expired. Please subscribe to continue using the app.",
+        title: "Subscription Required",
+        description: "Please subscribe or start a trial to access this feature.",
         variant: "destructive",
       });
     }

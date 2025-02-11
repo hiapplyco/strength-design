@@ -31,19 +31,6 @@ export const useSubscriptionStatus = () => {
         throw subscriptionError;
       }
 
-      if (!subscription) {
-        return {
-          isTrialing: false,
-          trialEndsAt: null,
-          isSubscribed: false,
-          status: null
-        };
-      }
-
-      const now = new Date();
-      const trialEnd = subscription.trial_end ? new Date(subscription.trial_end) : null;
-      const isTrialing = trialEnd ? trialEnd > now : false;
-
       // Check if user has an active subscription via Stripe
       const { data: stripeStatus, error } = await supabase.functions.invoke('check-subscription');
       
@@ -51,9 +38,15 @@ export const useSubscriptionStatus = () => {
         throw error;
       }
 
+      console.log('Stripe status response:', stripeStatus); // Debug log
+
+      const now = new Date();
+      const trialEnd = subscription?.trial_end ? new Date(subscription.trial_end) : null;
+      const isTrialing = trialEnd ? trialEnd > now : false;
+
       // Ensure the status is one of the allowed values
       let validStatus: SubscriptionStatus['status'] = null;
-      const statusValue = subscription.status;
+      const statusValue = subscription?.status;
       
       if (statusValue === 'trialing' || 
           statusValue === 'active' || 

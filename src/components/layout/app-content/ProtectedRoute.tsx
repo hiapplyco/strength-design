@@ -16,17 +16,21 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
   const { toast } = useToast();
 
+  // Debug log to help track subscription status
+  console.log('Current subscription status:', subscriptionStatus);
+
   useEffect(() => {
     if (subscriptionStatus && 
         !subscriptionStatus.isTrialing && 
-        !subscriptionStatus.isSubscribed) {
+        !subscriptionStatus.isSubscribed &&
+        location.pathname !== '/pricing') {
       toast({
         title: "Trial Expired",
         description: "Your trial has expired. Please subscribe to continue using the app.",
         variant: "destructive",
       });
     }
-  }, [subscriptionStatus, toast]);
+  }, [subscriptionStatus, toast, location.pathname]);
 
   if (authLoading || subscriptionLoading) {
     return <LoadingSpinner />;
@@ -41,17 +45,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return children;
   }
 
-  // If the user has an active subscription or is subscribed, allow access to all routes
-  if (subscriptionStatus?.isSubscribed) {
+  // Check subscription status
+  const hasAccess = subscriptionStatus?.isSubscribed || subscriptionStatus?.isTrialing;
+  
+  if (hasAccess) {
     return children;
   }
 
-  // If trial expired and not subscribed, redirect to pricing
-  if (subscriptionStatus && 
-      !subscriptionStatus.isTrialing && 
-      !subscriptionStatus.isSubscribed) {
-    return <Navigate to="/pricing" state={{ from: location }} replace />;
-  }
-
-  return children;
+  // If no access (no trial and not subscribed), redirect to pricing
+  return <Navigate to="/pricing" state={{ from: location }} replace />;
 };

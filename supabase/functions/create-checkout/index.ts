@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
@@ -8,8 +9,8 @@ const corsHeaders = {
 }
 
 const PRICE_IDS = {
-  unlimited: "price_1QjidsC3HTLX6YIcMQZNNZjb",
-  personalized: "price_1QjiebC3HTLX6YIcokWaSnIW"
+  unlimited: "prod_RcybDc11310esF", // 99.99/mo Program
+  personalized: "prod_Rcybyq5t4Exl0J" // 24.99/mo Program
 };
 
 serve(async (req) => {
@@ -56,18 +57,6 @@ serve(async (req) => {
 
     if (customers.data.length > 0) {
       customer = customers.data[0]
-      
-      // Check if already subscribed
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customer.id,
-        status: 'active',
-        price: priceId,
-        limit: 1
-      })
-
-      if (subscriptions.data.length > 0) {
-        throw new Error("You are already subscribed to this plan")
-      }
     } else {
       // Create new customer
       customer = await stripe.customers.create({
@@ -85,7 +74,7 @@ serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
       success_url: `${req.headers.get('origin')}/dashboard`,
-      cancel_url: `${req.headers.get('origin')}/`,
+      cancel_url: `${req.headers.get('origin')}/pricing`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
       payment_method_types: ['card'],

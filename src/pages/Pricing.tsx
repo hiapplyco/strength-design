@@ -23,7 +23,7 @@ const Pricing = () => {
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
         
         <div className="relative">
-          <div className="container mx-auto px-4 pt-24">
+          <div className="container mx-auto px-4 pt-24 pb-32">
             <div className="text-center mb-16">
               <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald text-destructive dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] inline-block bg-black mb-6">
                 upgrade.to.pro
@@ -55,14 +55,18 @@ const Pricing = () => {
                 </button>
               </div>
 
-              <div className="border rounded-lg p-8 shadow-lg bg-primary/5 border-primary backdrop-blur-sm">
-                <h2 className="text-2xl font-bold mb-4 text-white">Unlimited</h2>
-                <p className="text-3xl font-bold mb-6 text-white">$99<span className="text-sm font-normal">/month</span></p>
+              <div className="border rounded-lg p-8 shadow-lg bg-primary/5 border-primary backdrop-blur-sm transform scale-105">
+                <div className="absolute -top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
+                  Most Popular
+                </div>
+                <h2 className="text-2xl font-bold mb-4 text-white">Pro Program</h2>
+                <p className="text-3xl font-bold mb-6 text-white">$99.99<span className="text-sm font-normal">/month</span></p>
                 <ul className="space-y-4 mb-8 text-white/80">
                   <li>✓ Unlimited workout generation</li>
                   <li>✓ Full exercise library</li>
                   <li>✓ Progress tracking</li>
                   <li>✓ Advanced analytics</li>
+                  <li>✓ Priority support</li>
                 </ul>
                 <button 
                   className="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50"
@@ -75,20 +79,21 @@ const Pricing = () => {
               </div>
 
               <div className="border rounded-lg p-8 shadow-lg bg-white/5 backdrop-blur-sm">
-                <h2 className="text-2xl font-bold mb-4 text-white">Personalized</h2>
-                <p className="text-3xl font-bold mb-6 text-white">$199<span className="text-sm font-normal">/month</span></p>
+                <h2 className="text-2xl font-bold mb-4 text-white">Starter</h2>
+                <p className="text-3xl font-bold mb-6 text-white">$24.99<span className="text-sm font-normal">/month</span></p>
                 <ul className="space-y-4 mb-8 text-white/80">
-                  <li>✓ Everything in Unlimited</li>
-                  <li>✓ 1-on-1 Coaching</li>
-                  <li>✓ Custom Programs</li>
-                  <li>✓ Priority Support</li>
+                  <li>✓ Basic workout plans</li>
+                  <li>✓ Exercise library access</li>
+                  <li>✓ Basic tracking</li>
+                  <li>✓ Email support</li>
                 </ul>
                 <button 
                   className="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90"
                   onClick={() => handleSubscription('personalized')}
-                  disabled={loadingStates.personalized}
+                  disabled={loadingStates.personalized || subscriptionStatus?.status === 'active'}
                 >
-                  {loadingStates.personalized ? 'Loading...' : 'Contact Sales'}
+                  {loadingStates.personalized ? 'Loading...' : 
+                   subscriptionStatus?.status === 'active' ? 'Current Plan' : 'Subscribe Now'}
                 </button>
               </div>
             </div>

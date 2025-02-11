@@ -68,6 +68,7 @@ serve(async (req) => {
       ]);
 
       response = await result.response;
+      console.log('Gemini analysis response:', response.text());
     } else {
       // Fetch document content for context
       const { data: document, error: docError } = await supabase

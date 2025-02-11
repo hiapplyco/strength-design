@@ -24,18 +24,25 @@ export const useFileUpload = () => {
       const fileName = `${crypto.randomUUID()}-${file.name}`;
       const filePath = `chat-files/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      // Upload file to Supabase Storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('documents')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
+      // Get the public URL
       const { data: urlData } = supabase.storage
         .from('documents')
         .getPublicUrl(filePath);
 
+      if (!urlData || !urlData.publicUrl) {
+        throw new Error('Failed to get public URL for uploaded file');
+      }
+
       console.log('File uploaded, getting public URL:', urlData.publicUrl);
 
+      // Save initial message to database
       const { data: messageData, error: dbError } = await supabase
         .from('chat_messages')
         .insert({
@@ -49,35 +56,41 @@ export const useFileUpload = () => {
 
       if (dbError) throw dbError;
 
-      console.log('Message saved to database, calling Gemini:', messageData);
+      console.log('Message saved to database:', messageData);
 
-      const response = await supabase.functions.invoke('chat-with-gemini', {
+      // Process with Gemini
+      const { data: geminiData, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { 
           message: `Please analyze this file: ${file.name}`,
           fileUrl: urlData.publicUrl
         }
       });
 
-      console.log('Received Gemini response:', response);
+      if (geminiError) throw geminiError;
 
-      if (response.error) throw response.error;
+      console.log('Received Gemini response:', geminiData);
 
+      if (!geminiData || !geminiData.response) {
+        throw new Error('Invalid response from Gemini');
+      }
+
+      // Update message with Gemini's response
       const { error: updateError } = await supabase
         .from('chat_messages')
-        .update({ response: response.data.response })
+        .update({ response: geminiData.response })
         .eq('id', messageData.id);
 
       if (updateError) throw updateError;
 
       toast({
         title: "Success",
-        description: "File uploaded and processed successfully",
+        description: "File uploaded and analyzed successfully",
       });
     } catch (error) {
       console.error('Error uploading file:', error);
       toast({
         title: "Error",
-        description: "Failed to upload and process file",
+        description: "Failed to upload and analyze file",
         variant: "destructive",
       });
     } finally {

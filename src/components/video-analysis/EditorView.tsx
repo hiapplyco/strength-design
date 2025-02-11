@@ -1,6 +1,6 @@
+
 import { Editor } from "@/components/document-editor/Editor";
 import { RecordingInterface } from "./RecordingInterface";
-import { VideoHeader } from "./VideoHeader";
 
 interface EditorViewProps {
   showRecorder: boolean;
@@ -21,7 +21,6 @@ export const EditorView = ({
 }: EditorViewProps) => {
   return (
     <div className="container mx-auto px-4 pt-8 md:pt-16">
-      <VideoHeader className="mb-4 md:mb-8" />
       <div className="max-w-7xl mx-auto">
         {showRecorder && (
           <RecordingInterface

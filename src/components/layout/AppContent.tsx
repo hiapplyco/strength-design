@@ -29,9 +29,11 @@ const MainContent = () => {
     <div className="min-h-screen flex w-full bg-black relative">
       <SidebarOverlay />
       <AppSidebar />
-      <main className="flex-1 w-full max-w-full overflow-x-hidden transition-all duration-300 ease-in-out pl-0 lg:pl-64">
+      <main className="flex-1 w-full max-w-full relative">
         <SidebarToggle isVisible={!!session} />
-        <MainRoutes />
+        <div className="absolute inset-0 overflow-auto">
+          <MainRoutes />
+        </div>
       </main>
     </div>
   );
@@ -62,4 +64,3 @@ export const AppContent = () => {
     </QueryClientProvider>
   );
 };
-

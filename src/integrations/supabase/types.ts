@@ -126,6 +126,33 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          stripe_customer_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           content: string
@@ -260,6 +287,62 @@ export type Database = {
         }
         Relationships: []
       }
+      prices: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          interval: string | null
+          interval_count: number | null
+          metadata: Json | null
+          product_id: string | null
+          trial_period_days: number | null
+          type: string | null
+          unit_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id: string
+          interval?: string | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id?: string | null
+          trial_period_days?: number | null
+          type?: string | null
+          unit_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          interval?: string | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id?: string | null
+          trial_period_days?: number | null
+          type?: string | null
+          unit_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_page_events: {
         Row: {
           created_at: string
@@ -275,6 +358,36 @@ export type Database = {
           created_at?: string
           event_type?: string
           id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          id: string
+          metadata?: Json | null
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -391,41 +504,64 @@ export type Database = {
       subscriptions: {
         Row: {
           cancel_at: string | null
+          cancel_at_period_end: boolean | null
           canceled_at: string | null
           created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          ended_at: string | null
           id: string
-          status: Database["public"]["Enums"]["subscription_status"] | null
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
+          metadata: Json | null
+          price_id: string | null
+          quantity: number | null
+          status: string | null
           trial_end: string | null
-          updated_at: string
-          user_id: string
+          trial_start: string | null
+          user_id: string | null
         }
         Insert: {
           cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
           canceled_at?: string | null
           created_at?: string
-          id?: string
-          status?: Database["public"]["Enums"]["subscription_status"] | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          ended_at?: string | null
+          id: string
+          metadata?: Json | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: string | null
           trial_end?: string | null
-          updated_at?: string
-          user_id: string
+          trial_start?: string | null
+          user_id?: string | null
         }
         Update: {
           cancel_at?: string | null
+          cancel_at_period_end?: boolean | null
           canceled_at?: string | null
           created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          ended_at?: string | null
           id?: string
-          status?: Database["public"]["Enums"]["subscription_status"] | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
+          metadata?: Json | null
+          price_id?: string | null
+          quantity?: number | null
+          status?: string | null
           trial_end?: string | null
-          updated_at?: string
-          user_id?: string
+          trial_start?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       voice_recordings: {
         Row: {

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import { FileUpload } from "@/components/chat/FileUpload";
-import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { FileUploadAnimation } from "@/components/chat/FileUploadAnimation";
+import { AnimatePresence } from "framer-motion";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -14,6 +15,7 @@ interface ChatInputProps {
 
 export const ChatInput = ({ onSendMessage, onFileSelect, isLoading }: ChatInputProps) => {
   const [message, setMessage] = useState("");
+  const [uploadingFile, setUploadingFile] = useState<File | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +24,27 @@ export const ChatInput = ({ onSendMessage, onFileSelect, isLoading }: ChatInputP
     setMessage("");
   };
 
+  const handleFileSelection = (file: File) => {
+    setUploadingFile(file);
+    onFileSelect(file);
+  };
+
   return (
     <div className="border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <AnimatePresence>
+        {(isLoading || uploadingFile) && (
+          <div className="p-2 flex justify-center">
+            <FileUploadAnimation 
+              isLoading={isLoading} 
+              fileName={uploadingFile?.name || ''} 
+            />
+          </div>
+        )}
+      </AnimatePresence>
+
       <form onSubmit={handleSubmit} className="p-4">
         <div className="flex items-center gap-2">
-          <FileUpload onFileSelect={onFileSelect} />
+          <FileUpload onFileSelect={handleFileSelection} />
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -38,11 +56,6 @@ export const ChatInput = ({ onSendMessage, onFileSelect, isLoading }: ChatInputP
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        {isLoading && (
-          <div className="mt-2">
-            <LoadingIndicator>Processing your request...</LoadingIndicator>
-          </div>
-        )}
       </form>
     </div>
   );

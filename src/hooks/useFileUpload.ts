@@ -25,7 +25,7 @@ export const useFileUpload = () => {
       const filePath = `chat-files/${fileName}`;
 
       // Upload file to Supabase Storage
-      const { error: uploadError, data: uploadData } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('documents')
         .upload(filePath, file);
 

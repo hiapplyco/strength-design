@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -7,7 +8,7 @@ import Pricing from "@/pages/Pricing";
 import DocumentEditor from "@/pages/DocumentEditor";
 import SharedDocument from "@/pages/SharedDocument";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
-import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
+import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import ProgramChat from "@/pages/ProgramChat";
 
@@ -50,7 +51,7 @@ export const MainRoutes = () => {
         path="/video-analysis"
         element={
           <ProtectedRoute>
-            <VideoAnalysis />
+            <VideoAnalysisPage />
           </ProtectedRoute>
         }
       />

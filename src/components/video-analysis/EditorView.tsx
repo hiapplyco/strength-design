@@ -108,7 +108,7 @@ export function EditorView({
           </div>
           <div className="space-y-4">
             <Teleprompter
-              script={workoutScript}
+              content={workoutScript}
               position={teleprompterPosition}
               setPosition={setTeleprompterPosition}
             />

@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, Mic } from 'lucide-react';
+import { Camera, Mic, Link2 } from 'lucide-react';
+import { StyledHeaderButton } from '@/components/workout/header/StyledHeaderButton';
+import { toast } from '@/components/ui/use-toast';
 
 interface VideoControlsProps {
   isWebcamOn: boolean;
@@ -32,6 +34,16 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   onNarrate,
   extraControls,
 }) => {
+  const handleCopyLink = () => {
+    if (publicUrl) {
+      navigator.clipboard.writeText(publicUrl);
+      toast({
+        title: "Success",
+        description: "Link copied to clipboard!",
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 mt-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -82,16 +94,27 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           </Button>
         )}
       </div>
-      {onNarrate && (
-        <Button
-          onClick={onNarrate}
-          variant="outline"
-          className="flex items-center gap-2 w-fit"
-        >
-          <Mic className="w-4 h-4" />
-          Narrate Script
-        </Button>
-      )}
+      
+      <div className="flex flex-wrap items-center gap-2">
+        {onNarrate && (
+          <StyledHeaderButton
+            onClick={onNarrate}
+            className="flex items-center gap-2"
+          >
+            <Mic className="w-4 h-4" />
+            Narrate Script
+          </StyledHeaderButton>
+        )}
+        {publicUrl && (
+          <StyledHeaderButton
+            onClick={handleCopyLink}
+            className="flex items-center gap-2"
+          >
+            <Link2 className="w-4 h-4" />
+            Copy Link
+          </StyledHeaderButton>
+        )}
+      </div>
     </div>
   );
 };

@@ -10,6 +10,17 @@ import { LoadingSpinner } from "./app-content/LoadingSpinner";
 import { SidebarToggle } from "./app-content/SidebarToggle";
 import { MainRoutes } from "./app-content/MainRoutes";
 import { SidebarOverlay } from "./app-content/SidebarOverlay";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const MainContent = () => {
   const { session } = useAuth();
@@ -42,11 +53,13 @@ export const AppContent = () => {
   }
 
   return (
-    <SidebarProvider>
-      <Toaster />
-      <Sonner />
-      <MainContent />
-    </SidebarProvider>
+    <QueryClientProvider client={queryClient}>
+      <SidebarProvider>
+        <Toaster />
+        <Sonner />
+        <MainContent />
+      </SidebarProvider>
+    </QueryClientProvider>
   );
 };
 

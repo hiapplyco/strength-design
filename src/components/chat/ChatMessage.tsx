@@ -1,6 +1,7 @@
 
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { marked } from "marked";
 
 interface ChatMessageProps {
   message: string;
@@ -11,6 +12,10 @@ interface ChatMessageProps {
 
 export const ChatMessage = ({ message, response, file_path, created_at }: ChatMessageProps) => {
   const timestamp = format(new Date(created_at), 'HH:mm');
+
+  const renderMarkdown = (text: string) => {
+    return { __html: marked(text, { breaks: true }) };
+  };
 
   return (
     <div className="space-y-2">
@@ -33,7 +38,10 @@ export const ChatMessage = ({ message, response, file_path, created_at }: ChatMe
                 {message}
               </a>
             ) : (
-              <p className="whitespace-pre-wrap break-words">{message}</p>
+              <p 
+                className="whitespace-pre-wrap break-words"
+                dangerouslySetInnerHTML={renderMarkdown(message)}
+              />
             )}
           </div>
         </div>
@@ -48,7 +56,10 @@ export const ChatMessage = ({ message, response, file_path, created_at }: ChatMe
               "bg-muted text-muted-foreground",
               "shadow-sm"
             )}>
-              <p className="whitespace-pre-wrap break-words">{response}</p>
+              <p 
+                className="whitespace-pre-wrap break-words prose prose-invert"
+                dangerouslySetInnerHTML={renderMarkdown(response)}
+              />
             </div>
             <span className="text-xs text-muted-foreground">{timestamp}</span>
           </div>

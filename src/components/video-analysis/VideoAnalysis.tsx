@@ -1,12 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useLocation } from "react-router-dom";
 import { LoadingState } from "./LoadingState";
 import { LandingView } from "./LandingView";
 import { EditorView } from "./EditorView";
 import { useScriptGeneration } from "./hooks/useScriptGeneration";
 
-export const VideoAnalysis = () => {
+export const VideoAnalysis = memo(() => {
   const location = useLocation();
   const [showRecorder, setShowRecorder] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
@@ -57,11 +57,8 @@ export const VideoAnalysis = () => {
   }
 
   return (
-    <div className="min-h-[calc(100vh-16rem)] bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{
-        backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
-      }}>
-      <div className="min-h-[calc(100vh-16rem)] bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
+    <div className="relative">
+      <div className="rounded-lg overflow-hidden bg-black/40 backdrop-blur-sm">
         {!showRecorder && !showEditor ? (
           <LandingView onStartRecording={handleStartRecording} />
         ) : (
@@ -77,4 +74,6 @@ export const VideoAnalysis = () => {
       </div>
     </div>
   );
-};
+});
+
+VideoAnalysis.displayName = 'VideoAnalysis';

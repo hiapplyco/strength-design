@@ -8,7 +8,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// First, let's retrieve the price IDs for our products
+const PRICE_IDS = {
+  unlimited: "price_1OjiebC3HTL6YIcokWaSnIW", // 99.99/mo Program
+  personalized: "price_1OjidWC3HTL6YIcMKgKntXP" // 24.99/mo Program
+};
+
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
 });
@@ -20,24 +24,13 @@ serve(async (req) => {
 
   try {
     const { subscriptionType } = await req.json()
+    const priceId = PRICE_IDS[subscriptionType]
     
-    // First, get the product ID based on subscription type
-    const productId = subscriptionType === 'unlimited' ? 'prod_RcybDc11310esF' : 'prod_Rcybyq5t4Exl0J';
-    
-    // Get the price ID for this product
-    console.log(`Fetching prices for product: ${productId}`);
-    const prices = await stripe.prices.list({
-      product: productId,
-      active: true,
-      limit: 1
-    });
-
-    if (!prices.data.length) {
-      throw new Error(`No active price found for product ${productId}`);
+    if (!priceId) {
+      throw new Error('Invalid subscription type')
     }
 
-    const priceId = prices.data[0].id;
-    console.log(`Using price ID: ${priceId}`);
+    console.log(`Using price ID: ${priceId} for subscription type: ${subscriptionType}`);
 
     // Get user authentication
     const authHeader = req.headers.get('Authorization')

@@ -69,7 +69,7 @@ serve(async (req) => {
       })
     }
 
-    // Create checkout session
+    // Create checkout session with exact same configuration as working example
     console.log('Creating checkout session...')
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,

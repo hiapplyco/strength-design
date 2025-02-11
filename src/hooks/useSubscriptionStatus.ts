@@ -23,7 +23,7 @@ export const useSubscriptionStatus = () => {
       // Get subscription status from our database
       const { data: subscription, error: subscriptionError } = await supabase
         .from('subscriptions')
-        .select('*')
+        .select('*, prices(unit_amount, currency, interval)')
         .eq('user_id', session.user.id)
         .maybeSingle();
 
@@ -53,12 +53,14 @@ export const useSubscriptionStatus = () => {
 
       // Ensure the status is one of the allowed values
       let validStatus: SubscriptionStatus['status'] = null;
-      if (subscription.status === 'trialing' || 
-          subscription.status === 'active' || 
-          subscription.status === 'past_due' || 
-          subscription.status === 'canceled' || 
-          subscription.status === 'incomplete') {
-        validStatus = subscription.status;
+      const statusValue = subscription.status;
+      
+      if (statusValue === 'trialing' || 
+          statusValue === 'active' || 
+          statusValue === 'past_due' || 
+          statusValue === 'canceled' || 
+          statusValue === 'incomplete') {
+        validStatus = statusValue;
       }
 
       return {

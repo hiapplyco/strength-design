@@ -25,9 +25,23 @@ export const useSubscription = () => {
         return;
       }
 
+      // Get the price from our database
+      const { data: price, error: priceError } = await supabase
+        .from('prices')
+        .select('*')
+        .eq('id', 'price_1QjidsC3HTLX6YIcMQZNNZjb')
+        .single();
+
+      if (priceError || !price) {
+        throw new Error('Could not find subscription price');
+      }
+
       console.log('Creating checkout session...');
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { subscriptionType: type }
+        body: { 
+          subscriptionType: type,
+          priceId: price.id
+        }
       });
 
       if (error) {

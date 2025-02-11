@@ -9,7 +9,7 @@ import { format } from "date-fns";
 const Pricing = () => {
   const { session } = useAuth();
   const navigate = useNavigate();
-  const { data: subscriptionStatus } = useSubscriptionStatus();
+  const { data: subscriptionStatus, isLoading: subscriptionLoading } = useSubscriptionStatus();
   const { handleSubscription, loadingStates } = useSubscription();
 
   return (
@@ -55,7 +55,7 @@ const Pricing = () => {
                 </button>
               </div>
 
-              <div className="border rounded-lg p-8 shadow-lg bg-primary/5 border-primary backdrop-blur-sm">
+              <div className="relative border rounded-lg p-8 shadow-lg bg-primary/5 border-primary backdrop-blur-sm">
                 <div className="absolute -top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
                   Most Popular
                 </div>

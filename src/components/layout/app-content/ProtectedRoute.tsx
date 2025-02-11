@@ -19,8 +19,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     if (subscriptionStatus && 
         !subscriptionStatus.isTrialing && 
-        !subscriptionStatus.isSubscribed && 
-        subscriptionStatus.status !== 'active') {
+        !subscriptionStatus.isSubscribed) {
       toast({
         title: "Trial Expired",
         description: "Your trial has expired. Please subscribe to continue using the app.",
@@ -42,16 +41,15 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return children;
   }
 
-  // If the user has an active subscription, allow access to all routes
-  if (subscriptionStatus?.status === 'active' || subscriptionStatus?.isSubscribed) {
+  // If the user has an active subscription or is subscribed, allow access to all routes
+  if (subscriptionStatus?.isSubscribed) {
     return children;
   }
 
   // If trial expired and not subscribed, redirect to pricing
   if (subscriptionStatus && 
       !subscriptionStatus.isTrialing && 
-      !subscriptionStatus.isSubscribed && 
-      subscriptionStatus.status !== 'active') {
+      !subscriptionStatus.isSubscribed) {
     return <Navigate to="/pricing" state={{ from: location }} replace />;
   }
 

@@ -1,6 +1,10 @@
-
 import { Editor } from "@/components/document-editor/Editor";
 import { RecordingInterface } from "./RecordingInterface";
+import { VideoRecorder } from "./VideoRecorder";
+import { VideoUpload } from "./VideoUpload";
+import { Teleprompter } from "./Teleprompter";
+import { Dialog } from "@/components/ui/dialog";
+import { useState } from "react";
 
 interface EditorViewProps {
   showRecorder: boolean;
@@ -11,33 +15,58 @@ interface EditorViewProps {
   onEditorSave: (content: string) => void;
 }
 
-export const EditorView = ({
+export function EditorView({
   showRecorder,
   showEditor,
   workoutScript,
   teleprompterPosition,
   setTeleprompterPosition,
   onEditorSave,
-}: EditorViewProps) => {
-  return (
-    <div className="container mx-auto px-4 pt-8 md:pt-16">
-      <div className="max-w-7xl mx-auto">
-        {showRecorder && (
-          <RecordingInterface
-            workoutScript={workoutScript}
-            teleprompterPosition={teleprompterPosition}
-            setTeleprompterPosition={setTeleprompterPosition}
-          />
-        )}
+}: EditorViewProps) {
+  const [showVoiceDialog, setShowVoiceDialog] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
-        {showEditor && !workoutScript && (
-          <div className="flex flex-col space-y-4">
-            <div className="flex-grow">
-              <Editor onSave={onEditorSave} />
-            </div>
-          </div>
-        )}
+  const generateNarration = async (script: string) => {
+    setIsGenerating(true);
+    // Logic to generate narration
+    setIsGenerating(false);
+  };
+
+  return (
+    <div className="space-y-6 p-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-white">Record Your Video</h2>
       </div>
+
+      {showEditor && (
+        <div className="bg-black/30 backdrop-blur-sm rounded-lg p-6">
+          <Editor
+            content={workoutScript}
+            onChange={(content) => onEditorSave(content)}
+          />
+        </div>
+      )}
+
+      {showRecorder && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <VideoRecorder onNarrate={() => setShowVoiceDialog(true)} />
+            <VideoUpload />
+          </div>
+          <div className="space-y-4">
+            <Teleprompter
+              content={workoutScript}
+              position={teleprompterPosition}
+              setPosition={setTeleprompterPosition}
+            />
+          </div>
+        </div>
+      )}
+
+      <Dialog open={showVoiceDialog} onOpenChange={setShowVoiceDialog}>
+        {/* Dialog content for narration */}
+      </Dialog>
     </div>
   );
-};
+}

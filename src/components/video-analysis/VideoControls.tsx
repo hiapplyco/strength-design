@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Camera, Mic } from 'lucide-react';
 
 interface VideoControlsProps {
   isWebcamOn: boolean;
@@ -12,6 +14,7 @@ interface VideoControlsProps {
   onStartRecording: () => void;
   onStopRecording: () => void;
   onUploadVideo: () => void;
+  onNarrate?: () => void;
   extraControls?: React.ReactNode;
 }
 
@@ -26,53 +29,67 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   onStartRecording,
   onStopRecording,
   onUploadVideo,
+  onNarrate,
   extraControls,
 }) => {
   return (
-    <div className="flex flex-wrap items-center gap-2 mt-4">
-      {!isWebcamOn ? (
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-4 mt-4">
+      <div className="flex flex-wrap items-center gap-2">
+        {!isWebcamOn ? (
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={onStartWebcam}
+              className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white flex items-center gap-2"
+            >
+              <Camera className="w-4 h-4" />
+              Start Webcam
+            </Button>
+            {extraControls}
+          </div>
+        ) : (
+          <>
+            {!recording ? (
+              <Button 
+                onClick={onStartRecording}
+                className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+              >
+                Start Recording
+              </Button>
+            ) : (
+              <Button 
+                onClick={onStopRecording}
+                variant="destructive"
+              >
+                Stop Recording
+              </Button>
+            )}
+            <Button 
+              onClick={onStopWebcam}
+              variant="destructiveSecondary"
+            >
+              Stop Webcam
+            </Button>
+            {extraControls}
+          </>
+        )}
+        {!recording && recordedChunks.length > 0 && (
           <Button 
-            onClick={onStartWebcam}
+            onClick={onUploadVideo} 
+            disabled={uploading}
             className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
           >
-            Start Webcam
+            {uploading ? "Uploading..." : "Upload Video"}
           </Button>
-          {extraControls}
-        </div>
-      ) : (
-        <>
-          {!recording ? (
-            <Button 
-              onClick={onStartRecording}
-              className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
-            >
-              Start Recording
-            </Button>
-          ) : (
-            <Button 
-              onClick={onStopRecording}
-              variant="destructive"
-            >
-              Stop Recording
-            </Button>
-          )}
-          <Button 
-            onClick={onStopWebcam}
-            variant="destructiveSecondary"
-          >
-            Stop Webcam
-          </Button>
-          {extraControls}
-        </>
-      )}
-      {!recording && recordedChunks.length > 0 && (
-        <Button 
-          onClick={onUploadVideo} 
-          disabled={uploading}
-          className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+        )}
+      </div>
+      {onNarrate && (
+        <Button
+          onClick={onNarrate}
+          variant="outline"
+          className="flex items-center gap-2 w-fit"
         >
-          {uploading ? "Uploading..." : "Upload Video"}
+          <Mic className="w-4 h-4" />
+          Narrate Script
         </Button>
       )}
     </div>

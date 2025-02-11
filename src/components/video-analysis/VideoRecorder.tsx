@@ -11,7 +11,7 @@ interface VideoRecorderProps {
   onNarrate?: () => void;
 }
 
-const VideoRecorder: React.FC<VideoRecorderProps> = ({ onNarrate }) => {
+export const VideoRecorder: React.FC<VideoRecorderProps> = ({ onNarrate }) => {
   const { videoRef, streamRef, isWebcamOn, startWebcam, stopWebcam } = useWebcam();
   const { recording, recordedChunks, startRecording, stopRecording, mediaRecorderRef } = useRecording(streamRef);
   const { uploading, publicUrl, uploadVideo } = useVideoUpload();
@@ -42,5 +42,3 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({ onNarrate }) => {
     </div>
   );
 };
-
-export default VideoRecorder;

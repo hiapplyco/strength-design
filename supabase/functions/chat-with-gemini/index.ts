@@ -15,8 +15,9 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const { message, fileUrl } = await req.json();
     console.log('Received message:', message);
+    console.log('File URL:', fileUrl);
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
@@ -31,42 +32,77 @@ serve(async (req) => {
     }
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch document content
-    const { data: document, error: docError } = await supabase
-      .from('documents')
-      .select('content')
-      .eq('id', '3cc372b7-3863-455e-9a88-df22a54ad69b')
-      .single();
-
-    if (docError) {
-      throw new Error(`Failed to fetch document: ${docError.message}`);
-    }
-
-    if (!document?.content) {
-      throw new Error('Document content not found');
-    }
-
+    // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-    console.log('Generating response...');
-    const chat = model.startChat({
-      history: [
+    let response;
+
+    if (fileUrl) {
+      console.log('Processing file from URL:', fileUrl);
+      
+      // Fetch the file content from Supabase storage URL
+      const fileResponse = await fetch(fileUrl);
+      if (!fileResponse.ok) {
+        throw new Error('Failed to fetch file from storage');
+      }
+
+      const fileData = await fileResponse.blob();
+      const fileType = fileResponse.headers.get('content-type') || 'application/octet-stream';
+      
+      // Convert blob to base64
+      const buffer = await fileData.arrayBuffer();
+      const base64Data = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+
+      console.log('Sending file to Gemini for analysis...');
+      
+      // Send file to Gemini for analysis
+      const result = await model.generateContent([
         {
-          role: "user",
-          parts: [{ text: "You will be analyzing the following CrossFit Affiliate Playbook. Use this content for any questions I ask:" + document.content }],
+          inlineData: {
+            mimeType: fileType,
+            data: base64Data
+          }
         },
-        {
-          role: "model",
-          parts: [{ text: "I understand and will use the provided CrossFit Affiliate Playbook content to answer your questions." }],
-        }
-      ]
-    });
+        "Please analyze this document and provide a summary of its key points and important information. Focus on any training or gym-related content if present."
+      ]);
 
-    const result = await chat.sendMessage(message);
-    const response = await result.response;
+      response = await result.response;
+    } else {
+      // Fetch document content for context
+      const { data: document, error: docError } = await supabase
+        .from('documents')
+        .select('content')
+        .eq('id', '3cc372b7-3863-455e-9a88-df22a54ad69b')
+        .single();
+
+      if (docError) {
+        throw new Error(`Failed to fetch document: ${docError.message}`);
+      }
+
+      if (!document?.content) {
+        throw new Error('Document content not found');
+      }
+
+      console.log('Generating response with document context...');
+      const chat = model.startChat({
+        history: [
+          {
+            role: "user",
+            parts: [{ text: "You will be analyzing the following CrossFit Affiliate Playbook. Use this content for any questions I ask:" + document.content }],
+          },
+          {
+            role: "model",
+            parts: [{ text: "I understand and will use the provided CrossFit Affiliate Playbook content to answer your questions." }],
+          }
+        ]
+      });
+
+      const result = await chat.sendMessage(message);
+      response = await result.response;
+    }
+
     const text = response.text();
-
     console.log('Generated response:', text);
 
     return new Response(

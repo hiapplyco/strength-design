@@ -9,8 +9,8 @@ const corsHeaders = {
 }
 
 const PRICE_IDS = {
-  unlimited: "prod_RcybDc11310esF", // 99.99/mo Program
-  personalized: "prod_Rcybyq5t4Exl0J" // 24.99/mo Program
+  unlimited: "price_1OvV7uSJOuCAuXXTZxQ8q3fE", // 99.99/mo Program
+  personalized: "price_1OvV7uSJOuCAuXXTeYLwwxYp" // 24.99/mo Program
 };
 
 serve(async (req) => {

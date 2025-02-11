@@ -34,8 +34,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  // Allow access to pricing page even if trial expired
+  // Allow access to pricing page regardless of subscription status
   if (location.pathname === "/pricing") {
+    return children;
+  }
+
+  // If the user has an active subscription, allow access to all routes
+  if (subscriptionStatus?.status === 'active') {
     return children;
   }
 

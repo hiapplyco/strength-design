@@ -5,7 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 
 interface TeleprompterProps {
   script: string;
-  onPositionChange?: (position: number) => void;
+  position: number;
+  setPosition: (position: number) => void;
 }
 
 interface WordSpan {
@@ -13,7 +14,7 @@ interface WordSpan {
   isSpoken: boolean;
 }
 
-export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) => {
+export const Teleprompter = ({ script, position, setPosition }: TeleprompterProps) => {
   const { toast } = useToast();
   const [speed, setSpeed] = useState(0.25); // Start with slower default speed
   const [playing, setPlaying] = useState(false);
@@ -49,8 +50,8 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
         lastScrollPosition.current += speed;
         scrollRef.current.scrollTo(0, lastScrollPosition.current);
         
-        if (onPositionChange) {
-          onPositionChange(lastScrollPosition.current);
+        if (setPosition) {
+          setPosition(lastScrollPosition.current);
         }
         animationRef.current = requestAnimationFrame(scroll);
       };
@@ -62,7 +63,7 @@ export const Teleprompter = ({ script, onPositionChange }: TeleprompterProps) =>
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [playing, speed, onPositionChange]);
+  }, [playing, speed, setPosition]);
 
   useEffect(() => {
     if (showTimer && playing) {

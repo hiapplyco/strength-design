@@ -1,5 +1,6 @@
+
 import { Teleprompter } from "./Teleprompter";
-import VideoRecorder from "./VideoRecorder";
+import { VideoRecorder } from "./VideoRecorder";
 
 interface RecordingInterfaceProps {
   workoutScript: string;
@@ -27,7 +28,8 @@ export const RecordingInterface = ({
           <div className="flex-grow">
             <Teleprompter 
               script={workoutScript}
-              onPositionChange={setTeleprompterPosition}
+              position={teleprompterPosition}
+              setPosition={setTeleprompterPosition}
             />
           </div>
         </div>

@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { Facebook, Twitter, Linkedin, Link2, Copy } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Link2, Copy, Mic } from "lucide-react";
 import { copyToClipboard } from "./editorUtils";
 import { toast } from "@/components/ui/use-toast";
 
@@ -26,16 +27,24 @@ export function ShareSection({ shareableLink, handleShare }: ShareSectionProps) 
         <Link2 className="h-4 w-4 flex-shrink-0" />
         <span className="text-sm flex-1 break-all font-mono">{shareableLink}</span>
       </div>
-      <div className="flex flex-wrap gap-2 justify-end items-center">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-10 w-10"
-          onClick={handleCopy}
-          title="Copy link"
-        >
-          <Copy className="h-5 w-5" />
-        </Button>
+      <div className="flex flex-wrap gap-2 justify-between items-center">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleCopy}
+            className="flex items-center gap-2"
+          >
+            <Copy className="h-4 w-4" />
+            Copy Link
+          </Button>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Mic className="h-4 w-4" />
+            Narrate for me
+          </Button>
+        </div>
         <div className="flex gap-2">
           <Button
             variant="outline"

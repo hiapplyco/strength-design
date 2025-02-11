@@ -28,7 +28,7 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
         "backdrop-blur-sm border border-[#C4A052]/30 rounded-lg",
         "size-11 hover:scale-105 active:scale-95",
         isMobile ? "top-6" : "top-8",
-        isOpen ? "left-[16.5rem]" : "left-8"
+        isOpen ? "left-[15rem]" : "left-8"
       )}
       aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       aria-expanded={isOpen}

@@ -57,11 +57,11 @@ export const VideoAnalysis = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
+    <div className="min-h-[calc(100vh-16rem)] bg-cover bg-center bg-no-repeat bg-fixed"
       style={{
         backgroundImage: 'url("/lovable-uploads/842b2afa-8591-4d83-b092-99399dbeaa94.png")',
       }}>
-      <div className="min-h-screen bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
+      <div className="min-h-[calc(100vh-16rem)] bg-gradient-to-b from-transparent via-black/75 to-black/75 backdrop-blur-sm">
         {!showRecorder && !showEditor ? (
           <LandingView onStartRecording={handleStartRecording} />
         ) : (

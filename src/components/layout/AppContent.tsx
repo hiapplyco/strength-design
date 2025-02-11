@@ -11,6 +11,9 @@ import { SidebarToggle } from "./app-content/SidebarToggle";
 import { MainRoutes } from "./app-content/MainRoutes";
 import { SidebarOverlay } from "./app-content/SidebarOverlay";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useSidebar } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -24,12 +27,20 @@ const queryClient = new QueryClient({
 
 const MainContent = () => {
   const { session } = useAuth();
+  const { open, openMobile } = useSidebar();
+  const isMobile = useIsMobile();
+  const isOpen = isMobile ? openMobile : open;
 
   return (
     <div className="min-h-screen flex w-full bg-black relative">
       <AppSidebar />
       <SidebarOverlay />
-      <main className="flex-1 w-full relative transition-[margin] duration-300 ease-in-out">
+      <main 
+        className={cn(
+          "flex-1 w-full relative transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+          isOpen ? "ml-64" : "ml-0"
+        )}
+      >
         <SidebarToggle isVisible={!!session} />
         <div className="relative min-h-screen">
           <MainRoutes />

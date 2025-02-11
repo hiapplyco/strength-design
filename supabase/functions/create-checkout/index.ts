@@ -87,6 +87,8 @@ serve(async (req) => {
     }
 
     console.log('Checkout session created:', session.id)
+    console.log('Checkout URL:', session.url)
+    
     return new Response(
       JSON.stringify({ url: session.url }),
       { 

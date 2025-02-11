@@ -31,13 +31,18 @@ export const useSubscription = () => {
         body: { subscriptionType: type }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error from create-checkout:', error);
+        throw error;
+      }
+
+      console.log('Received response:', data);
 
       if (!data?.url) {
         throw new Error('No checkout URL received');
       }
 
-      console.log('Redirecting to Stripe...');
+      console.log('Redirecting to:', data.url);
       window.location.href = data.url;
     } catch (error: any) {
       console.error('Error creating checkout session:', error);

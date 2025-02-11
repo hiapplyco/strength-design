@@ -20,11 +20,7 @@ export function AppSidebar() {
       className={cn(
         "fixed top-0 left-0 h-screen z-50 w-64 bg-background border-r",
         "transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-        isMobile ? (
-          !isVisible && "-translate-x-full"
-        ) : (
-          !isVisible ? "-translate-x-full" : "lg:translate-x-0"
-        )
+        !isVisible && "-translate-x-full"
       )}
     >
       <div className="p-4">

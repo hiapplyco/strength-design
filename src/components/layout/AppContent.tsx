@@ -27,11 +27,11 @@ const MainContent = () => {
 
   return (
     <div className="min-h-screen flex w-full bg-black relative">
-      <SidebarOverlay />
       <AppSidebar />
-      <main className="flex-1 w-full max-w-full relative">
+      <SidebarOverlay />
+      <main className="flex-1 w-full relative transition-[margin] duration-300 ease-in-out">
         <SidebarToggle isVisible={!!session} />
-        <div className="absolute inset-0 overflow-auto">
+        <div className="relative min-h-screen">
           <MainRoutes />
         </div>
       </main>

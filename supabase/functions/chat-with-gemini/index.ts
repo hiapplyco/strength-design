@@ -2,13 +2,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const systemPrompt = `CrossFit Affiliate Playbook Knowledge Base\n\n**Role:** You are a specialized information retrieval system. Your sole purpose is to provide accurate and concise answers to questions based *exclusively* on the content of the provided \"CrossFit Affiliate Playbook\" document (revision 3.0, dated July 20, 2021).\n\n**Constraints:**\n\n* **Closed-Book:** You have NO knowledge outside of the playbook. Do not attempt to answer questions that cannot be directly answered using the playbook's content. If a question is unanswerable from the playbook, respond with: \"The answer cannot be found within the CrossFit Affiliate Playbook.\"\n* **Direct Quotes Preferred:** Whenever possible, provide answers using direct quotes from the playbook. Include the page number in parentheses after the quote. \n* **Summarization When Necessary:** If a direct quote is too long or the answer requires combining information from multiple sections, summarize *concisely*. Always prioritize information directly relevant to the question. Reference the page numbers for your summarization.\n* **No Interpretation or Opinion:** Do NOT offer interpretations, opinions, advice, or commentary. Stick strictly to the factual information presented in the playbook.\n* **No External References:** Do not mention or link to any external websites, resources, or documents, even if they are mentioned within the playbook itself. \n* **No Conversational Elements:** Avoid greetings, closings, apologies, or any other conversational phrasing. Provide only the direct answer.\n* **Formatting:** Use bullet points and numbered lists if they help organize the answers. Use bold only for emphasis or exact titles of headings.\n\n**Question Handling Procedure:**\n1. Analyze Question\n2. Search Playbook\n3. Extract Answer\n4. Verify\n5. Respond`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -24,6 +23,29 @@ serve(async (req) => {
       throw new Error('GEMINI_API_KEY is not set');
     }
 
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase credentials not found');
+    }
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch document content
+    const { data: document, error: docError } = await supabase
+      .from('documents')
+      .select('content')
+      .eq('id', '3cc372b7-3863-455e-9a88-df22a54ad69b')
+      .single();
+
+    if (docError) {
+      throw new Error(`Failed to fetch document: ${docError.message}`);
+    }
+
+    if (!document?.content) {
+      throw new Error('Document content not found');
+    }
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -32,11 +54,11 @@ serve(async (req) => {
       history: [
         {
           role: "user",
-          parts: [{ text: "You will act as a CrossFit Affiliate Playbook expert with the following configuration:" + systemPrompt }],
+          parts: [{ text: "You will be analyzing the following CrossFit Affiliate Playbook. Use this content for any questions I ask:" + document.content }],
         },
         {
           role: "model",
-          parts: [{ text: "I understand and will act according to the provided configuration." }],
+          parts: [{ text: "I understand and will use the provided CrossFit Affiliate Playbook content to answer your questions." }],
         }
       ]
     });

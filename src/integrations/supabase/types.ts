@@ -138,7 +138,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
-          title: string
+          title?: string
           url?: string | null
         }
         Update: {

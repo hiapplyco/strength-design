@@ -1,6 +1,6 @@
+
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { VideoHeader } from "./VideoHeader";
 
 interface LandingViewProps {
   onStartRecording: () => void;
@@ -9,7 +9,6 @@ interface LandingViewProps {
 export const LandingView = ({ onStartRecording }: LandingViewProps) => {
   return (
     <div className="container mx-auto px-4 pt-8 md:pt-16">
-      <VideoHeader className="mb-8 md:mb-16" />
       <div className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 gap-4 md:gap-8">
           <Button

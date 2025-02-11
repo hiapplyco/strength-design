@@ -25,7 +25,7 @@ export const useSubscriptionStatus = () => {
         .from('subscriptions')
         .select('*')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();  // Changed from .single() to .maybeSingle()
 
       if (subscriptionError) {
         throw subscriptionError;

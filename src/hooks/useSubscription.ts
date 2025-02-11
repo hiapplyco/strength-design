@@ -5,14 +5,13 @@ import { useToast } from "@/hooks/use-toast";
 
 export const useSubscription = () => {
   const [loadingStates, setLoadingStates] = useState({
-    unlimited: false,
     personalized: false
   });
   const { toast } = useToast();
 
-  const handleSubscription = async (type: 'unlimited' | 'personalized') => {
+  const handleSubscription = async (type: 'personalized') => {
     try {
-      console.log(`Starting ${type} subscription process...`);
+      console.log(`Starting subscription process...`);
       setLoadingStates(prev => ({ ...prev, [type]: true }));
       
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();

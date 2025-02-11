@@ -8,10 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const PRICE_IDS = {
-  unlimited: "price_1QjiebC3HTLX6YIcokWaSnIW", // Customized "Program for your Programming"
-  personalized: "price_1QjidsC3HTLX6YIcMQZNNZjb" // Standard Package
-};
+const PRICE_ID = "price_1QjidsC3HTLX6YIcMQZNNZjb"; // Standard Package $24.99/mo
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
@@ -23,15 +20,6 @@ serve(async (req) => {
   }
 
   try {
-    const { subscriptionType } = await req.json()
-    const priceId = PRICE_IDS[subscriptionType]
-    
-    if (!priceId) {
-      throw new Error('Invalid subscription type')
-    }
-
-    console.log(`Using price ID: ${priceId} for subscription type: ${subscriptionType}`);
-
     // Get user authentication
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
@@ -50,6 +38,8 @@ serve(async (req) => {
       throw new Error('Authentication failed')
     }
 
+    console.log(`Creating checkout for user: ${user.email}`);
+
     // Find or create customer
     let customer
     const customers = await stripe.customers.list({
@@ -59,6 +49,7 @@ serve(async (req) => {
 
     if (customers.data.length > 0) {
       customer = customers.data[0]
+      console.log('Found existing customer:', customer.id);
     } else {
       // Create new customer
       customer = await stripe.customers.create({
@@ -67,13 +58,14 @@ serve(async (req) => {
           supabase_user_id: user.id
         }
       })
+      console.log('Created new customer:', customer.id);
     }
 
-    // Create checkout session with exact same configuration as working example
+    // Create checkout session
     console.log('Creating checkout session...')
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: PRICE_ID, quantity: 1 }],
       mode: 'subscription',
       success_url: `${req.headers.get('origin')}/dashboard`,
       cancel_url: `${req.headers.get('origin')}/pricing`,

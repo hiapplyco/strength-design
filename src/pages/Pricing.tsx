@@ -34,11 +34,11 @@ const Pricing = () => {
                 </div>
               )}
               <p className="text-xl text-white/80 max-w-3xl mx-auto">
-                Unlock advanced features and unlimited access to our premium tools. Scale your training business with our professional suite of features.
+                Start with a free 7-day trial, then unlock unlimited access to our premium features.
               </p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <div className="border rounded-lg p-8 shadow-lg bg-white/5 backdrop-blur-sm">
                 <h2 className="text-2xl font-bold mb-4 text-white">Free Trial</h2>
                 <p className="text-3xl font-bold mb-6 text-white">7 Days<span className="text-sm font-normal">/free</span></p>
@@ -55,12 +55,12 @@ const Pricing = () => {
                 </button>
               </div>
 
-              <div className="border rounded-lg p-8 shadow-lg bg-primary/5 border-primary backdrop-blur-sm transform scale-105">
+              <div className="border rounded-lg p-8 shadow-lg bg-primary/5 border-primary backdrop-blur-sm">
                 <div className="absolute -top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
                   Most Popular
                 </div>
                 <h2 className="text-2xl font-bold mb-4 text-white">Pro Program</h2>
-                <p className="text-3xl font-bold mb-6 text-white">$99.99<span className="text-sm font-normal">/month</span></p>
+                <p className="text-3xl font-bold mb-6 text-white">$24.99<span className="text-sm font-normal">/month</span></p>
                 <ul className="space-y-4 mb-8 text-white/80">
                   <li>✓ Unlimited workout generation</li>
                   <li>✓ Full exercise library</li>
@@ -70,25 +70,6 @@ const Pricing = () => {
                 </ul>
                 <button 
                   className="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50"
-                  onClick={() => handleSubscription('unlimited')}
-                  disabled={loadingStates.unlimited || subscriptionStatus?.status === 'active'}
-                >
-                  {loadingStates.unlimited ? 'Loading...' : 
-                   subscriptionStatus?.status === 'active' ? 'Current Plan' : 'Subscribe Now'}
-                </button>
-              </div>
-
-              <div className="border rounded-lg p-8 shadow-lg bg-white/5 backdrop-blur-sm">
-                <h2 className="text-2xl font-bold mb-4 text-white">Starter</h2>
-                <p className="text-3xl font-bold mb-6 text-white">$24.99<span className="text-sm font-normal">/month</span></p>
-                <ul className="space-y-4 mb-8 text-white/80">
-                  <li>✓ Basic workout plans</li>
-                  <li>✓ Exercise library access</li>
-                  <li>✓ Basic tracking</li>
-                  <li>✓ Email support</li>
-                </ul>
-                <button 
-                  className="w-full py-2 px-4 bg-primary text-white rounded hover:bg-primary/90"
                   onClick={() => handleSubscription('personalized')}
                   disabled={loadingStates.personalized || subscriptionStatus?.status === 'active'}
                 >

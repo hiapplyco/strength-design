@@ -1,3 +1,4 @@
+
 import { Editor, EditorContent as TipTapEditorContent } from '@tiptap/react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ export function DocumentEditorContent({
               <ShareSection 
                 shareableLink={shareableLink} 
                 handleShare={handleShare}
+                content={editor.getHTML()}
               />
             </div>
           )}

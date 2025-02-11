@@ -9,8 +9,8 @@ const corsHeaders = {
 }
 
 const PRICE_IDS = {
-  unlimited: "price_1OjiebC3HTL6YIcokWaSnIWC", // 99.99/mo Program
-  personalized: "price_1OjidWC3HTL6YIcMKgKntXP" // 24.99/mo Program
+  unlimited: "price_1QjiebC3HTLX6YIcokWaSnIW", // Customized "Program for your Programming"
+  personalized: "price_1QjidsC3HTLX6YIcMQZNNZjb" // Standard Package
 };
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -105,4 +105,3 @@ serve(async (req) => {
     )
   }
 })
-

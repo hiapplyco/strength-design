@@ -18,56 +18,65 @@ export const createWorkoutGenerationPrompt = ({
   injuries,
   weatherData
 }: WorkoutGenerationParams): string => {
-  const exerciseList = selectedExercises?.length 
-    ? `INCLUDED EXERCISES: ${selectedExercises.map(e => e.name).join(", ")}`
+  // Build exercise context more explicitly
+  const exerciseContext = selectedExercises?.length 
+    ? `MUST INCLUDE THESE EXERCISES IN WORKOUT SECTIONS:\n${selectedExercises
+        .map(e => `- ${e.name}: ${e.instructions.join(' ')}`)
+        .join('\n')}`
     : '';
 
-  const weatherConsideration = weatherPrompt
-    ? `WEATHER ADAPTATIONS: Account for ${weatherPrompt.toLowerCase()} conditions`
+  // Add specific injury modifications
+  const injuryModifications = injuries
+    ? `INJURY ADAPTATIONS REQUIRED:\n- Modify exercises to avoid aggravating ${injuries}\n- Include alternative exercises where needed\n- Adjust range of motion and loading`
     : '';
 
-  const prescription = prescribedExercises
-    ? `REQUIRED MODIFICATIONS: Incorporate ${prescribedExercises}`
+  // Weather-specific instructions
+  const weatherInstructions = weatherPrompt && weatherData
+    ? `WEATHER ADAPTATIONS:\n- Warmup: ${weatherData.temperature < 15 ? 'Extend warmup duration' : 'Normal activation'}\n- Exercise Selection: ${weatherData.precipitation > 0 ? 'Include indoor alternatives' : 'Use outdoor options'}\n- Hydration: ${weatherData.humidity > 70 ? 'Increase hydration breaks' : 'Standard hydration protocol'}`
     : '';
 
-  const injuryConsideration = injuries
-    ? `INJURY CONSIDERATIONS: Adapt for ${injuries}`
+  // Prescribed exercise integration
+  const prescriptionIntegration = prescribedExercises
+    ? `PRESCRIBED MODIFICATIONS:\n- Primary focus: ${prescribedExercises}\n- Integrate into strength sections\n- Progressively overload across days`
     : '';
 
-  return `As an elite fitness coach, design a scientifically-grounded ${numberOfDays}-day training program.\n\n` +
-    `PROGRAM PARAMETERS:\n` +
-    `- Target fitness level: ${fitnessLevel}\n` +
-    `${weatherConsideration ? `- ${weatherConsideration}\n` : ''}` +
-    `${exerciseList ? `- ${exerciseList}\n` : ''}` +
-    `${prescription ? `- ${prescription}\n` : ''}` +
-    `${injuryConsideration ? `- ${injuryConsideration}\n` : ''}\n` +
-    `DAILY STRUCTURE REQUIREMENTS:\n` +
-    `1. Focus description: Scientific training stimulus and physiological adaptation\n` +
-    `2. Warmup: Progressive activation sequence\n` +
-    `3. Workout: Periodized prescription with sets/reps/tempo\n` +
-    `4. Strength component: Compound movement pattern focus\n` +
-    `5. Notes: Regeneration strategies or scaling options\n\n` +
-    `FORMAT SPECIFICATION:\n` +
-    `Generate valid JSON following this exact structure for exactly ${numberOfDays} unique days (do not repeat days):\n` +
+  return `As an elite sports scientist, create a ${numberOfDays}-day periodized program with:\n\n` +
+    `USER CONTEXT:\n` +
+    `1. FITNESS LEVEL: ${fitnessLevel} (scale intensity accordingly)\n` +
+    `2. INJURY PROFILE: ${injuries || 'none'} (modify exercises appropriately)\n` +
+    `3. ENVIRONMENT: ${weatherPrompt || 'standard conditions'}\n\n` +
+    
+    `PROGRAM REQUIREMENTS:\n` +
+    `${exerciseContext}\n\n` +
+    `${injuryModifications}\n\n` +
+    `${weatherInstructions}\n\n` +
+    `${prescriptionIntegration}\n\n` +
+    
+    `DAILY STRUCTURE TEMPLATE (JSON):\n` +
+    `Each day must contain:\n` +
+    `- Description: Physiological focus & ${fitnessLevel}-appropriate adaptations\n` +
+    `- Warmup: ${weatherData ? 'Weather-adapted' : ''} activation sequence\n` +
+    `- Workout: ${selectedExercises?.length ? 'Using specified exercises' : 'Exercise variation'} with ${fitnessLevel} volume\n` +
+    `- Strength: ${prescribedExercises ? 'Incorporate prescribed modifications' : 'Compound movement pattern'}\n` +
+    `- Notes: ${injuries ? 'Injury-specific regressions' : 'Recovery strategies'}\n\n` +
+    
+    `CRITICAL RULES:\n` +
+    `1. Apply ${fitnessLevel} parameters to ALL exercise selections\n` +
+    `2. Modify EVERY warmup based on ${weatherPrompt ? 'weather data' : 'standard conditions'}\n` +
+    `3. Include ${selectedExercises?.length || 'at least 2'} specified exercises in EACH workout\n` +
+    `4. Address ${injuries || 'no injuries'} in exercise descriptions AND notes\n` +
+    `5. Progressively overload strength components across days\n\n` +
+    
+    `JSON FORMAT EXAMPLE:\n` +
     `{\n` +
     `  "day1": {\n` +
-    `    "description": "string",\n` +
-    `    "warmup": "string",\n` +
-    `    "workout": "string",\n` +
-    `    "strength": "string",\n` +
-    `    "notes": "string"\n` +
-    `  },\n` +
-    `  // Generate unique workouts for all ${numberOfDays} days without repeating content\n` +
-    `}\n\n` +
-    `CRITICAL INSTRUCTIONS:\n` +
-    `- Generate exactly ${numberOfDays} days of UNIQUE workouts (no repeated content)\n` +
-    `- Use double quotes for all strings\n` +
-    `- Maintain consistent JSON syntax\n` +
-    `- Avoid markdown formatting\n` +
-    `- Ensure proper escape characters\n` +
-    `- Include all 5 required sections per day\n` +
-    `- Prioritize exercise science principles\n` +
-    `- Each day must be different and progressively structured`;
+    `    "description": "[${fitnessLevel}-appropriate] Focus on...",\n` +
+    `    "warmup": "${weatherData ? 'Extended' : 'Standard'} activation for...",\n` +
+    `    "workout": "3 sets of [${selectedExercises?.[0]?.name || 'exercise'}] with...",\n` +
+    `    "strength": "${prescribedExercises || 'Deadlift'} progression...",\n` +
+    `    "notes": "${injuries ? 'Modified ROM for' : 'Recovery'}..."\n` +
+    `  }\n` +
+    `}`;
 };
 
 export const getGeminiConfig = () => ({

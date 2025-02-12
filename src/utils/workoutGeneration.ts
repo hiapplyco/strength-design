@@ -1,5 +1,7 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "@/components/exercise-search/types";
+import type { WeatherData } from "@/types/weather";
 
 interface WorkoutDay {
   description: string;
@@ -11,17 +13,41 @@ interface WorkoutDay {
 
 export type WeeklyWorkouts = Record<string, WorkoutDay>;
 
-interface GenerateWorkoutParams {
+export interface WorkoutGenerationParams {
   prompt: string;
-  weatherPrompt: string;
+  numberOfDays: number;
+  weatherPrompt?: string;
   selectedExercises: Exercise[];
   fitnessLevel: string;
-  prescribedExercises: string;
-  numberOfDays: number;
+  prescribedExercises?: string;
   injuries?: string;
+  weatherData?: WeatherData;
 }
 
-export const generateWorkout = async (params: GenerateWorkoutParams): Promise<WeeklyWorkouts> => {
+const validateWorkoutDay = (
+  day: WorkoutDay,
+  dayNumber: number,
+  params: WorkoutGenerationParams
+) => {
+  if (!day.description.toLowerCase().includes(params.fitnessLevel.toLowerCase())) {
+    throw new Error(`Day ${dayNumber} missing fitness level context`);
+  }
+
+  if (params.selectedExercises?.length) {
+    const includedExercises = params.selectedExercises.filter(e => 
+      day.workout.toLowerCase().includes(e.name.toLowerCase())
+    );
+    if (includedExercises.length < Math.min(2, params.selectedExercises.length)) {
+      throw new Error(`Day ${dayNumber} missing required exercises`);
+    }
+  }
+
+  if (params.injuries && !day.notes?.toLowerCase().includes(params.injuries.toLowerCase())) {
+    throw new Error(`Day ${dayNumber} missing injury modifications`);
+  }
+};
+
+export const generateWorkout = async (params: WorkoutGenerationParams): Promise<WeeklyWorkouts> => {
   console.log("Starting workout generation with params:", params);
 
   const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
@@ -48,6 +74,16 @@ export const generateWorkout = async (params: GenerateWorkoutParams): Promise<We
     console.error("Missing days in response:", missingDays);
     throw new Error(`Missing workouts for days: ${missingDays.join(', ')}`);
   }
+
+  // Validate each day's content
+  Object.entries(data).forEach(([day, workout], index) => {
+    try {
+      validateWorkoutDay(workout, index + 1, params);
+    } catch (error) {
+      console.error(`Validation error for ${day}:`, error);
+      throw error;
+    }
+  });
 
   return data;
 };

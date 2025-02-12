@@ -58,14 +58,14 @@ export const useMessageHandling = () => {
       setIsLoading(true);
       console.log('Sending message:', message);
 
-      // First, save the message to the database and wait for it to complete
+      // First, save the message and get its ID
       const { data: messageData, error: messageError } = await supabase
         .from('chat_messages')
         .insert({
           user_id: user.id,
           message: message
         })
-        .select()
+        .select('*')
         .single();
 
       if (messageError) throw messageError;
@@ -86,7 +86,7 @@ export const useMessageHandling = () => {
         throw new Error('Invalid response from AI');
       }
 
-      // Update the message with the response directly using the messageData.id
+      // Update the message with the response
       const { error: updateError } = await supabase
         .from('chat_messages')
         .update({ response: data.response })

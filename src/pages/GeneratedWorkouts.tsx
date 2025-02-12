@@ -100,7 +100,7 @@ const GeneratedWorkouts = () => {
                   <CardContent className="px-6 pb-6">
                     <ScrollArea className="h-[100px] w-full border border-white/20 p-4 px-[13px] py-[12px] rounded-lg">
                       <div className="space-y-2">
-                        <p className="text-sm text-white/80 whitespace-pre-line">
+                        <p className="text-white/80 whitespace-pre-line py-[8px] text-base px-[7px] font-extralight">
                           {workout.summary || "A custom workout program"}
                         </p>
                         <p className="text-xs text-gray-400">

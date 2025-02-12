@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Home, FileText, Dumbbell, Video, DollarSign, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,7 @@ export const Navbar = () => {
             ))}
           </div>
 
-          <div className="md:hidden">
-            <MobileMenu />
-          </div>
+          <MobileMenu />
         </div>
       </div>
     </nav>

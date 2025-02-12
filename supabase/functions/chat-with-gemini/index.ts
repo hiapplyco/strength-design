@@ -103,11 +103,11 @@ serve(async (req) => {
       response = await result.response;
     }
 
-    const text = response.text();
-    console.log('Generated response:', text);
+    const responseText = response.text();
+    console.log('Generated response:', responseText);
 
     return new Response(
-      JSON.stringify({ response: text }),
+      JSON.stringify({ response: responseText }),
       {
         headers: { 
           ...corsHeaders,

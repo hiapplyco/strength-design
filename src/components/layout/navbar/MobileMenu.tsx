@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="md:hidden relative">
+    <div className="md:hidden">
       <Button
         variant="ghost"
         size="icon"

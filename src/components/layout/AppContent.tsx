@@ -38,7 +38,7 @@ const MainContent = () => {
       <main 
         className={cn(
           "flex-1 w-full relative transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-          isOpen ? "ml-64" : "ml-0"
+          isOpen ? "md:pl-64" : "pl-0"
         )}
       >
         <SidebarToggle isVisible={!!session} />

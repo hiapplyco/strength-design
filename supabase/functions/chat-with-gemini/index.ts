@@ -15,16 +15,17 @@ serve(async (req) => {
   }
 
   try {
-    const { message, fileUrl } = await req.json();
+    const { message, fileUrl, messageId } = await req.json();
     console.log('Received message:', message);
     console.log('File URL:', fileUrl);
+    console.log('Message ID:', messageId);
 
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY is not set');
     }
 
-    // Initialize Supabase client
+    // Initialize Supabase client with service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     if (!supabaseUrl || !supabaseKey) {
@@ -105,6 +106,20 @@ serve(async (req) => {
 
     const responseText = response.text();
     console.log('Generated response:', responseText);
+
+    // Update the message with the response using service role client
+    if (messageId) {
+      const { error: updateError } = await supabase
+        .from('chat_messages')
+        .update({ response: responseText })
+        .eq('id', messageId);
+
+      if (updateError) {
+        console.error('Error updating message:', updateError);
+        throw updateError;
+      }
+      console.log('Successfully updated message with response');
+    }
 
     return new Response(
       JSON.stringify({ response: responseText }),

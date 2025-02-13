@@ -76,7 +76,10 @@ export const useMessageHandling = () => {
 
       // Then, get the AI response
       const { data, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
-        body: { message }
+        body: { 
+          message,
+          messageId: messageData.id // Pass the message ID to the function
+        }
       });
 
       if (geminiError) throw geminiError;
@@ -86,19 +89,11 @@ export const useMessageHandling = () => {
         throw new Error('Invalid response from AI');
       }
 
-      // Update the message with the response
-      const { error: updateError } = await supabase
-        .from('chat_messages')
-        .update({ response: data.response })
-        .eq('id', messageData.id);
-
-      if (updateError) throw updateError;
-      
-      // Update local state with the response
+      // Update local state with the response from Gemini
       setMessages(prev => prev.map(msg => 
         msg.id === messageData.id ? { ...msg, response: data.response } : msg
       ));
-      console.log('Response saved to database and state updated');
+      console.log('Local state updated with response');
 
     } catch (error) {
       console.error('Error sending message:', error);

@@ -10,7 +10,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -31,39 +30,51 @@ serve(async (req) => {
       numberOfDays
     });
 
-    // Initialize Supabase client with service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Fetch exercises from the database
     const { data: exercises, error: exercisesError } = await supabase
       .from('exercises')
       .select('*')
       .limit(50)
 
     if (exercisesError) {
-      console.error('Error fetching exercises:', exercisesError);
       throw new Error(`Error fetching exercises: ${exercisesError.message}`)
     }
 
-    if (!exercises || exercises.length === 0) {
-      console.error('No exercises found in database');
+    if (!exercises?.length) {
       throw new Error('No exercises found in database')
     }
 
     console.log(`Found ${exercises.length} exercises`);
 
-    // Format exercises for the prompt
     const exercisesList = exercises.map(ex => ({
       name: ex.name,
       type: ex.category,
       equipment: ex.equipment,
       primaryMuscles: ex.primary_muscles,
-      level: ex.level
+      level: ex.level,
+      images: ex.images || []
     }))
 
-    const systemPrompt = generateSystemPrompt(exercisesList)
+    const systemPrompt = `${generateSystemPrompt(exercisesList)}
+    
+    Important: You must return a valid JSON object with exactly ${numberOfDays} workout days. Each day should be formatted as:
+    {
+      "day1": {
+        "description": "Focus of the day",
+        "warmup": "Detailed warmup routine",
+        "workout": "Main workout content",
+        "strength": "Strength focus",
+        "notes": "Additional coaching notes",
+        "images": ["Array of image URLs from the exercises used"]
+      },
+      ... (continue for all days)
+    }
+    
+    Include images array for each day by selecting relevant images from the exercises being used in that day's workout.`
+
     const userPrompt = generateUserPrompt({
       prompt,
       weatherPrompt,
@@ -72,14 +83,9 @@ serve(async (req) => {
       numberOfDays
     })
 
-    console.log('Generated prompts:', {
-      systemPrompt: systemPrompt.substring(0, 100) + '...',
-      userPrompt
-    });
+    console.log('Generated prompts');
 
-    // Let's use the direct Gemini API instead of Vertex AI since we have the API key
     const apiKey = Deno.env.get('GEMINI_API_KEY')
-
     if (!apiKey) {
       throw new Error('Missing GEMINI_API_KEY environment variable')
     }
@@ -99,7 +105,7 @@ serve(async (req) => {
           },
           {
             role: 'model',
-            parts: [{ text: 'I understand. I will create workouts using these exercises.' }]
+            parts: [{ text: 'I understand. I will create workouts using these exercises and include relevant images.' }]
           },
           {
             role: 'user',
@@ -124,9 +130,21 @@ serve(async (req) => {
     const data = await response.json()
     console.log('Received Gemini API response');
 
-    const workoutPlan = data.candidates[0].content.parts[0].text
+    let workoutPlan = data.candidates[0].content.parts[0].text;
 
-    return new Response(JSON.stringify(workoutPlan), {
+    // Clean up the response to ensure it's valid JSON
+    workoutPlan = workoutPlan.replace(/```json\s*|\s*```/g, '').trim();
+    
+    // Parse the workout plan to validate it's proper JSON
+    const parsedWorkoutPlan = JSON.parse(workoutPlan);
+    
+    // Validate the number of days matches the request
+    const daysInPlan = Object.keys(parsedWorkoutPlan).length;
+    if (daysInPlan !== numberOfDays) {
+      throw new Error(`Generated plan has ${daysInPlan} days but ${numberOfDays} were requested`);
+    }
+
+    return new Response(JSON.stringify(parsedWorkoutPlan), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {

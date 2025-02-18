@@ -77,47 +77,36 @@ serve(async (req) => {
       userPrompt
     });
 
-    const projectId = Deno.env.get('GOOGLE_CLOUD_PROJECT')
-    const location = 'us-central1'
-    const model = 'gemini-pro'
+    // Let's use the direct Gemini API instead of Vertex AI since we have the API key
     const apiKey = Deno.env.get('GEMINI_API_KEY')
 
     if (!apiKey) {
       throw new Error('Missing GEMINI_API_KEY environment variable')
     }
 
-    if (!projectId) {
-      throw new Error('Missing GOOGLE_CLOUD_PROJECT environment variable')
-    }
+    const geminiUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent'
 
-    const vertexUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:predict`
-
-    const response = await fetch(vertexUrl, {
+    const response = await fetch(`${geminiUrl}?key=${apiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        instances: [
+        contents: [
           {
-            messages: [
-              {
-                author: 'user',
-                content: systemPrompt
-              },
-              {
-                author: 'assistant',
-                content: 'I understand. I will create workouts using these exercises.'
-              },
-              {
-                author: 'user',
-                content: userPrompt
-              }
-            ]
+            role: 'user',
+            parts: [{ text: systemPrompt }]
+          },
+          {
+            role: 'model',
+            parts: [{ text: 'I understand. I will create workouts using these exercises.' }]
+          },
+          {
+            role: 'user',
+            parts: [{ text: userPrompt }]
           }
         ],
-        parameters: {
+        generationConfig: {
           temperature: 0.7,
           maxOutputTokens: 2048,
           topK: 40,
@@ -128,14 +117,14 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Vertex AI error:', errorData);
-      throw new Error(`Vertex AI error: ${response.status} ${response.statusText}`);
+      console.error('Gemini API error:', errorData);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json()
-    console.log('Received Vertex AI response');
+    console.log('Received Gemini API response');
 
-    const workoutPlan = data.predictions[0].messages[0].content
+    const workoutPlan = data.candidates[0].content.parts[0].text
 
     return new Response(JSON.stringify(workoutPlan), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

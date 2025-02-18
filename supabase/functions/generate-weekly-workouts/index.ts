@@ -11,6 +11,18 @@ interface WorkoutRequest {
   numberOfDays: number;
 }
 
+// Clean JSON text by removing markdown and invalid syntax
+function cleanJsonText(text: string): string {
+  return text
+    .replace(/```json\s*|\s*```/g, '')           // Remove markdown code blocks
+    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')     // Remove comments
+    .replace(/,(\s*[}\]])/g, '$1')               // Remove trailing commas
+    .replace(/\s+/g, ' ')                        // Normalize whitespace
+    .replace(/\\n/g, ' ')                        // Replace escaped newlines
+    .replace(/\n/g, ' ')                         // Remove actual newlines
+    .trim();                                     // Remove leading/trailing whitespace
+}
+
 serve(async (req) => {
   console.log("Function invoked with request:", req.method);
 
@@ -84,6 +96,7 @@ serve(async (req) => {
           ]
         }
       }
+      IMPORTANT: Return ONLY the JSON object, without any markdown formatting or code blocks.
     `;
 
     const finalPrompt = `${workoutPrompt}\n\n${jsonInstruction}`;
@@ -92,11 +105,16 @@ serve(async (req) => {
     const result = await model.generateContent(finalPrompt);
     const response = await result.response;
     const text = response.text();
+    console.log("Raw response from Gemini:", text);
+
+    // Clean and parse the response
+    const cleanedText = cleanJsonText(text);
+    console.log("Cleaned text:", cleanedText);
 
     // Parse the response as JSON and validate structure
     let workoutData;
     try {
-      workoutData = JSON.parse(text);
+      workoutData = JSON.parse(cleanedText);
       console.log("Successfully parsed workout data:", workoutData);
       
       // Ensure each day has the required structure and extract exercises
@@ -107,8 +125,8 @@ serve(async (req) => {
         }
       });
     } catch (error) {
-      console.error("Error parsing Gemini response:", error);
-      throw new Error("Failed to parse workout data: " + error.message);
+      console.error("Error parsing cleaned text:", error);
+      throw new Error(`Failed to parse workout data: ${error.message}\nCleaned text: ${cleanedText}`);
     }
 
     return new Response(JSON.stringify(workoutData), {

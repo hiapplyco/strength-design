@@ -8,19 +8,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const cleanAndParseJSON = (text: string) => {
-  // Remove any markdown formatting or backticks
-  let cleaned = text.replace(/```json\n|\n```|```/g, '');
-  
-  try {
-    return JSON.parse(cleaned);
-  } catch (e) {
-    console.error('JSON parse error:', e);
-    console.log('Attempted to parse:', cleaned);
-    throw new Error('Failed to parse Gemini response');
-  }
-};
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -45,44 +32,69 @@ serve(async (req) => {
     }
     const exercises = await exercisesResponse.json();
 
-    // Updated prompt to emphasize JSON format
-    const searchPrompt = `Analyze this fitness search query: "${query}"
-    Return a JSON object with these fields (no markdown, no backticks):
-    {
-      "muscle_groups": [], // array of target muscle groups
-      "difficulty_level": "", // beginner, intermediate, or advanced
-      "equipment": "", // required equipment if mentioned
-      "exercise_type": "" // type of exercise if specified
-    }`;
+    const result = await model.generateContent([
+      {
+        role: "user",
+        parts: [{
+          text: `Analyze this fitness search query: "${query}"
+          
+          Return a JSON object that follows this EXACT format, with no additional text or formatting:
+          {
+            "muscle_groups": ["list", "of", "muscles"],
+            "difficulty_level": "beginner/intermediate/advanced",
+            "equipment": "required equipment",
+            "exercise_type": "type of exercise"
+          }`
+        }]
+      }
+    ]);
 
-    const result = await model.generateContent(searchPrompt);
-    const resultText = result.response.text();
-    console.log('Raw Gemini response:', resultText);
+    console.log('Raw Gemini response:', result.response.text());
     
-    const analysis = cleanAndParseJSON(resultText);
-    console.log('Parsed analysis:', analysis);
+    let analysis;
+    try {
+      const cleanText = result.response.text().trim();
+      analysis = JSON.parse(cleanText);
+      console.log('Parsed analysis:', analysis);
+    } catch (e) {
+      console.error('Failed to parse analysis:', e);
+      throw new Error(`Invalid analysis response: ${e.message}`);
+    }
 
-    // Simplified exercise matching prompt
-    const exerciseSelectionPrompt = `Given this search criteria: ${JSON.stringify(analysis)}
-    Return a JSON object with this format (no markdown, no backticks):
-    {
-      "matches": [
-        {
-          "exercise": "exercise name exactly as in database",
-          "relevance_score": number between 0-100
-        }
-      ]
-    }`;
+    // Get exercise matches
+    const exerciseResult = await model.generateContent([
+      {
+        role: "user",
+        parts: [{
+          text: `Given these search criteria: ${JSON.stringify(analysis)}
+          
+          Return ONLY a JSON object in this EXACT format, with no additional text:
+          {
+            "matches": [
+              {
+                "exercise": "exact exercise name from database",
+                "relevance_score": 95
+              }
+            ]
+          }`
+        }]
+      }
+    ]);
 
-    const exerciseResult = await model.generateContent(exerciseSelectionPrompt);
-    const exerciseResultText = exerciseResult.response.text();
-    console.log('Raw exercise matches response:', exerciseResultText);
+    console.log('Raw exercise matches:', exerciseResult.response.text());
     
-    const exerciseMatches = cleanAndParseJSON(exerciseResultText);
-    console.log('Parsed exercise matches:', exerciseMatches);
+    let exerciseMatches;
+    try {
+      const cleanExerciseText = exerciseResult.response.text().trim();
+      exerciseMatches = JSON.parse(cleanExerciseText);
+      console.log('Parsed matches:', exerciseMatches);
+    } catch (e) {
+      console.error('Failed to parse exercise matches:', e);
+      throw new Error(`Invalid exercise matches response: ${e.message}`);
+    }
 
-    if (!Array.isArray(exerciseMatches.matches)) {
-      throw new Error('Invalid exercise matches format');
+    if (!exerciseMatches?.matches || !Array.isArray(exerciseMatches.matches)) {
+      throw new Error('Invalid exercise matches format - expected array');
     }
 
     // Filter and format results
@@ -98,7 +110,15 @@ serve(async (req) => {
       .filter(Boolean);
 
     return new Response(
-      JSON.stringify({ results, analysis }),
+      JSON.stringify({ 
+        results, 
+        analysis,
+        debug: {
+          query,
+          analysisResponse: result.response.text(),
+          matchesResponse: exerciseResult.response.text()
+        }
+      }),
       { 
         headers: {
           ...corsHeaders,

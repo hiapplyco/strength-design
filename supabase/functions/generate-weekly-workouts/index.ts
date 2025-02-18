@@ -9,6 +9,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Function to fetch exercises from GitHub
+async function fetchExercises() {
+  const response = await fetch("https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch exercises: ${response.status} ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+// Function to get full image URL
+function getFullImageUrl(imagePath: string) {
+  return `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${imagePath}`;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -30,35 +44,21 @@ serve(async (req) => {
       numberOfDays
     });
 
+    // Fetch exercises from GitHub
+    const exercises = await fetchExercises();
+    console.log(`Fetched ${exercises.length} exercises from GitHub`);
+
+    // Process exercises to include full image URLs
+    const processedExercises = exercises.map(ex => ({
+      ...ex,
+      images: ex.images.map(img => getFullImageUrl(img))
+    }));
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const { data: exercises, error: exercisesError } = await supabase
-      .from('exercises')
-      .select('*')
-      .limit(50)
-
-    if (exercisesError) {
-      throw new Error(`Error fetching exercises: ${exercisesError.message}`)
-    }
-
-    if (!exercises?.length) {
-      throw new Error('No exercises found in database')
-    }
-
-    console.log(`Found ${exercises.length} exercises`);
-
-    const exercisesList = exercises.map(ex => ({
-      name: ex.name,
-      type: ex.category,
-      equipment: ex.equipment,
-      primaryMuscles: ex.primary_muscles,
-      level: ex.level,
-      images: ex.images || []
-    }))
-
-    const systemPrompt = `${generateSystemPrompt(exercisesList)}
+    const systemPrompt = `${generateSystemPrompt(processedExercises)}
     
     Important: You must return a valid JSON object with exactly ${numberOfDays} workout days. Each day should be formatted as:
     {
@@ -73,7 +73,7 @@ serve(async (req) => {
       ... (continue for all days)
     }
     
-    Include images array for each day by selecting relevant images from the exercises being used in that day's workout.`
+    For each exercise you include in the workout, make sure to include its corresponding image URLs in the images array.`
 
     const userPrompt = generateUserPrompt({
       prompt,
@@ -105,7 +105,7 @@ serve(async (req) => {
           },
           {
             role: 'model',
-            parts: [{ text: 'I understand. I will create workouts using these exercises and include relevant images.' }]
+            parts: [{ text: 'I understand. I will create workouts using these exercises and include their images.' }]
           },
           {
             role: 'user',
@@ -131,17 +131,31 @@ serve(async (req) => {
     console.log('Received Gemini API response');
 
     let workoutPlan = data.candidates[0].content.parts[0].text;
-
-    // Clean up the response to ensure it's valid JSON
     workoutPlan = workoutPlan.replace(/```json\s*|\s*```/g, '').trim();
     
-    // Parse the workout plan to validate it's proper JSON
     const parsedWorkoutPlan = JSON.parse(workoutPlan);
     
-    // Validate the number of days matches the request
     const daysInPlan = Object.keys(parsedWorkoutPlan).length;
     if (daysInPlan !== numberOfDays) {
       throw new Error(`Generated plan has ${daysInPlan} days but ${numberOfDays} were requested`);
+    }
+
+    // Save to generated_workouts table
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user?.id) {
+      const { error: saveError } = await supabase
+        .from('generated_workouts')
+        .insert({
+          user_id: session.user.id,
+          workout_data: parsedWorkoutPlan,
+          title: `${numberOfDays}-Day Workout Plan`,
+          tags: [fitnessLevel],
+          summary: `${numberOfDays}-day workout plan`
+        });
+
+      if (saveError) {
+        console.error('Error saving workout:', saveError);
+      }
     }
 
     return new Response(JSON.stringify(parsedWorkoutPlan), {

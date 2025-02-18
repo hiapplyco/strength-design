@@ -9,6 +9,7 @@ import { ClickableExercise } from "@/components/workout/ClickableExercise";
 import { extractExerciseNames } from "@/utils/exercise-formatting";
 import type { WorkoutDay } from "@/types/fitness";
 import { useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 interface WorkoutDayCardProps {
   day: string;
@@ -96,7 +97,7 @@ export const WorkoutDayCard = ({
         }}
         warmup={workout.warmup}
         workout={workout.workout}
-        notes={workout.notes}
+        notes={workout.notes || ''}
         strength={workout.strength}
         allWorkouts={allWorkouts}
         onUpdate={(updates) => onUpdate(day, updates)}
@@ -128,6 +129,29 @@ export const WorkoutDayCard = ({
           <div>
             <h3 className="text-lg font-semibold text-destructive mb-2">Coaching Notes</h3>
             {renderTextWithClickableExercises(workout.notes)}
+          </div>
+        )}
+
+        {workout.exercises && workout.exercises.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-destructive mb-2">Exercise List</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {workout.exercises.map((exercise, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  onClick={() => handleExerciseSelect(exercise.name)}
+                  className="text-left flex justify-between items-center p-4"
+                >
+                  <span className="font-medium">{exercise.name}</span>
+                  {exercise.sets && exercise.reps && (
+                    <span className="text-sm text-muted-foreground">
+                      {exercise.sets}x{exercise.reps}
+                    </span>
+                  )}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
 

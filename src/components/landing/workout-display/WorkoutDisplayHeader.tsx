@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Database } from "lucide-react";
@@ -57,8 +58,11 @@ export const WorkoutDisplayHeader = ({
     }
   };
 
-  const handleViewWorkouts = () => {
-    navigate('/generated-workouts');
+  const handleViewWorkouts = async () => {
+    await new Promise<void>((resolve) => {
+      navigate('/generated-workouts');
+      resolve();
+    });
   };
 
   return (
@@ -81,7 +85,7 @@ export const WorkoutDisplayHeader = ({
         </Button>
 
         <HeaderActions
-          onExport={() => {}}
+          onExport={async () => {}} // Make this return a Promise
           isExporting={isExporting}
           workoutText={workoutText}
           allWorkouts={allWorkouts}

@@ -27,12 +27,21 @@ export const useWorkoutGeneration = () => {
         throw new Error("You must be logged in to generate workouts");
       }
 
+      // Sanitize and validate inputs
+      const sanitizedParams = {
+        prompt: String(params.prompt || ""),
+        weatherPrompt: String(params.weatherPrompt || ""),
+        fitnessLevel: String(params.fitnessLevel || "beginner"),
+        prescribedExercises: String(params.prescribedExercises || ""),
+        numberOfDays: Number(params.numberOfDays) || 7
+      };
+
       // First log the session input
       const { error: sessionError } = await supabase.from('session_io').insert({
-        weather_prompt: params.weatherPrompt,
-        fitness_level: params.fitnessLevel,
-        prescribed_exercises: params.prescribedExercises,
-        number_of_days: params.numberOfDays,
+        weather_prompt: sanitizedParams.weatherPrompt,
+        fitness_level: sanitizedParams.fitnessLevel,
+        prescribed_exercises: sanitizedParams.prescribedExercises,
+        number_of_days: sanitizedParams.numberOfDays,
         session_duration_ms: 0,
         success: false
       });
@@ -44,8 +53,8 @@ export const useWorkoutGeneration = () => {
       // Generate the workout
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
-          ...params,
-          numberOfDays: params.numberOfDays
+          ...sanitizedParams,
+          numberOfDays: sanitizedParams.numberOfDays
         }
       });
 
@@ -54,15 +63,19 @@ export const useWorkoutGeneration = () => {
         throw error;
       }
 
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response from workout generation');
+      }
+
       // Save to generated_workouts table
       const { error: saveError } = await supabase
         .from('generated_workouts')
         .insert({
           user_id: session.user.id,
           workout_data: data,
-          title: `${params.numberOfDays}-Day Workout Plan`,
-          tags: [params.fitnessLevel],
-          summary: `${params.numberOfDays}-day workout plan`
+          title: `${sanitizedParams.numberOfDays}-Day Workout Plan`,
+          tags: [sanitizedParams.fitnessLevel],
+          summary: `${sanitizedParams.numberOfDays}-day workout plan`
         });
 
       if (saveError) {

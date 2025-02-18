@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import { corsHeaders } from "../_shared/cors.ts";
 import { buildWorkoutPrompt } from "./prompts.ts";
 
@@ -108,6 +108,8 @@ serve(async (req) => {
 // Helper function to extract exercises from workout text if not properly formatted
 function extractExercises(workoutText: string): Array<{ name: string; sets?: string; reps?: string; details?: string }> {
   const exercises: Array<{ name: string; sets?: string; reps?: string; details?: string }> = [];
+  if (!workoutText) return exercises;
+  
   const lines = workoutText.split('\n');
   
   lines.forEach(line => {

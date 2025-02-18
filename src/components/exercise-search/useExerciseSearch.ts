@@ -1,56 +1,63 @@
+
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "./types";
+import { useToast } from "@/hooks/use-toast";
 
 export const useExerciseSearch = () => {
-  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Exercise[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchExercises = async () => {
-      try {
-        const response = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
-        if (!response.ok) {
-          throw new Error('Failed to fetch exercises');
-        }
-        const data = await response.json();
-        setExercises(data);
-      } catch (error) {
-        console.error('Error fetching exercises:', error);
+    const searchExercises = async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults([]);
+        return;
       }
-    };
-    fetchExercises();
-  }, []);
 
-  useEffect(() => {
-    const performSearch = () => {
       try {
-        if (searchQuery.trim()) {
-          const term = searchQuery.toLowerCase();
-          const results = exercises.filter(exercise => {
-            const nameMatch = exercise.name.toLowerCase().includes(term);
-            const instructionsMatch = exercise.instructions.some(
-              instruction => instruction.toLowerCase().includes(term)
-            );
-            return nameMatch || instructionsMatch;
+        setIsLoading(true);
+        const { data, error } = await supabase.functions.invoke('search-exercises', {
+          body: { query: searchQuery }
+        });
+
+        if (error) throw error;
+
+        setSearchResults(data.results);
+        
+        // Show analysis toast for better user understanding
+        if (data.analysis) {
+          toast({
+            title: "Search Analysis",
+            description: `Looking for: ${data.analysis.muscle_groups?.join(', ') || 'any exercises'}
+                        ${data.analysis.difficulty_level ? `\nDifficulty: ${data.analysis.difficulty_level}` : ''}
+                        ${data.analysis.equipment ? `\nEquipment: ${data.analysis.equipment}` : ''}`,
           });
-          setSearchResults(results);
-        } else {
-          setSearchResults([]);
         }
       } catch (error) {
         console.error('Error searching exercises:', error);
+        toast({
+          title: "Error",
+          description: "Failed to search exercises. Please try again.",
+          variant: "destructive",
+        });
+        setSearchResults([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    const debounceTimeout = setTimeout(performSearch, 300);
+    const debounceTimeout = setTimeout(searchExercises, 500);
     return () => clearTimeout(debounceTimeout);
-  }, [searchQuery, exercises]);
+  }, [searchQuery, toast]);
 
   return {
     searchQuery,
     setSearchQuery,
     searchResults,
-    setSearchResults
+    setSearchResults,
+    isLoading
   };
 };

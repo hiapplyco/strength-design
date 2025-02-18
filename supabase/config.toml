@@ -42,3 +42,6 @@ verify_jwt = false
 
 [functions.playbook-query]
 verify_jwt = false
+
+[functions.search-exercises]
+verify_jwt = false

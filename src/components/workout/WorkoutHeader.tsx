@@ -1,21 +1,21 @@
-import { useState } from "react";
+
+import React, { useState } from "react";
 import { HeaderActions } from "./header/HeaderActions";
 import { WorkoutModifier } from "./WorkoutModifier";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { triggerConfetti } from "@/utils/confetti";
-import { StyledHeaderButton } from "./header/StyledHeaderButton";
+import { Card, CardHeader } from "@/components/ui/card";
+import type { WorkoutDay } from "@/types/fitness";
 
 interface WorkoutHeaderProps {
   title: string;
   isExporting: boolean;
-  onExport: () => void;
+  onExport: () => Promise<void>;
   warmup: string;
   workout: string;
   notes?: string;
   strength: string;
-  allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>;
-  onUpdate?: (updates: { warmup: string; workout: string; notes?: string; strength: string; description?: string; }) => void;
+  allWorkouts: Record<string, WorkoutDay>;
+  onUpdate: (updates: Partial<WorkoutDay>) => void;
+  searchInputRef?: React.RefObject<HTMLInputElement>;
 }
 
 export function WorkoutHeader({
@@ -27,111 +27,37 @@ export function WorkoutHeader({
   notes,
   strength,
   allWorkouts,
-  onUpdate
+  onUpdate,
+  searchInputRef
 }: WorkoutHeaderProps) {
-  const [showModifier, setShowModifier] = useState(false);
-  const [modificationPrompt, setModificationPrompt] = useState("");
-  const [isModifying, setIsModifying] = useState(false);
-  const { toast } = useToast();
-
-  const formatDayTitle = (title: string) => {
-    const dayNumber = title.match(/\d+/)?.[0] || "1";
-    return `Day ${dayNumber}`;
-  };
-
-  const getDayKey = (title: string) => {
-    const dayNumber = title.match(/\d+/)?.[0] || "1";
-    return `day${dayNumber}`;
-  };
-
-  const formatWorkoutText = () => {
-    const sections = [
-      strength && `Strength:\n${strength}`,
-      warmup && `Warmup:\n${warmup}`,
-      workout && `Workout:\n${workout}`,
-      notes && `Notes:\n${notes}`
-    ].filter(Boolean);
-
-    return sections.join('\n\n');
-  };
-
-  const handleModify = async (prompt: string) => {
-    setIsModifying(true);
-    try {
-      const response = await fetch('https://ulnsvkrrdcmfiguibkpx.supabase.co/functions/v1/workout-modifier', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          dayToModify: getDayKey(title),
-          modificationPrompt: prompt,
-          allWorkouts
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to modify workout');
-      }
-
-      const modifiedWorkout = await response.json();
-      
-      if (onUpdate) {
-        onUpdate(modifiedWorkout);
-        triggerConfetti();
-        toast({
-          title: "Success",
-          description: "Workout modified successfully!",
-        });
-      }
-      
-      setShowModifier(false);
-    } catch (error: any) {
-      console.error('Error modifying workout:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to modify workout",
-        variant: "destructive",
-      });
-    } finally {
-      setIsModifying(false);
-    }
-  };
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 border-b">
-      <div className="flex items-center gap-4">
-        <h2 className="text-2xl font-oswald text-primary">{formatDayTitle(title)}</h2>
-        <StyledHeaderButton
-          onClick={() => setShowModifier(true)}
-          variant="secondary"
-        >
-          Edit Workout
-        </StyledHeaderButton>
-      </div>
-
-      <HeaderActions
-        isExporting={isExporting}
-        onExport={onExport}
-        workoutText={formatWorkoutText()}
-        allWorkouts={allWorkouts}
-      />
-
-      <Dialog open={showModifier} onOpenChange={setShowModifier}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Modify Workout for {formatDayTitle(title)}</DialogTitle>
-          </DialogHeader>
-          <WorkoutModifier
-            title={getDayKey(title)}
-            modificationPrompt={modificationPrompt}
-            isModifying={isModifying}
-            onModificationPromptChange={setModificationPrompt}
-            onModify={handleModify}
-          />
-        </DialogContent>
-      </Dialog>
-    </div>
+    <Card className="border-none shadow-none bg-transparent">
+      <CardHeader className="flex flex-row items-center justify-between p-6">
+        <div className="space-y-1.5">
+          <h2 className="text-2xl font-semibold leading-none tracking-tight">
+            {title}
+          </h2>
+        </div>
+        <HeaderActions
+          isExporting={isExporting}
+          onExport={onExport}
+          onEdit={() => setIsEditing(true)}
+        />
+      </CardHeader>
+      {isEditing && (
+        <WorkoutModifier
+          warmup={warmup}
+          workout={workout}
+          notes={notes}
+          strength={strength}
+          onClose={() => setIsEditing(false)}
+          onUpdate={onUpdate}
+          allWorkouts={allWorkouts}
+          searchInputRef={searchInputRef}
+        />
+      )}
+    </Card>
   );
 }

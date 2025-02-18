@@ -5,7 +5,10 @@ import { exportToCalendar } from "@/utils/calendar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Image } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ClickableExercise } from "@/components/workout/ClickableExercise";
+import { extractExerciseNames } from "@/utils/exercise-formatting";
 import type { WorkoutDay } from "@/types/fitness";
+import { useRef } from "react";
 
 interface WorkoutDayCardProps {
   day: string;
@@ -27,6 +30,50 @@ export const WorkoutDayCard = ({
   onUpdate
 }: WorkoutDayCardProps) => {
   const { toast } = useToast();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExerciseSelect = (exerciseName: string) => {
+    if (searchInputRef.current) {
+      searchInputRef.current.value = exerciseName;
+      // Trigger a search event
+      const event = new Event('input', { bubbles: true });
+      searchInputRef.current.dispatchEvent(event);
+    }
+  };
+
+  const renderTextWithClickableExercises = (text: string) => {
+    if (!text) return null;
+
+    const exercises = extractExerciseNames(text);
+    let result = text;
+
+    exercises.forEach(exercise => {
+      const regex = new RegExp(`\\b${exercise}\\b`, 'g');
+      result = result.replace(
+        regex,
+        `<span class="exercise-placeholder">${exercise}</span>`
+      );
+    });
+
+    const parts = result.split(/<span class="exercise-placeholder">|<\/span>/);
+    
+    return (
+      <p className="text-muted-foreground text-sm sm:text-base whitespace-pre-line">
+        {parts.map((part, i) => {
+          if (exercises.includes(part)) {
+            return (
+              <ClickableExercise
+                key={i}
+                name={part}
+                onSelect={handleExerciseSelect}
+              />
+            );
+          }
+          return part;
+        })}
+      </p>
+    );
+  };
 
   return (
     <div className="w-full bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 mx-auto max-w-[95%] sm:max-w-full">
@@ -53,33 +100,34 @@ export const WorkoutDayCard = ({
         strength={workout.strength}
         allWorkouts={allWorkouts}
         onUpdate={(updates) => onUpdate(day, updates)}
+        searchInputRef={searchInputRef}
       />
       
       <div className="p-4 sm:p-6 space-y-6">
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Description</h3>
-          <p className="text-muted-foreground text-sm sm:text-base">{workout.description}</p>
+          {renderTextWithClickableExercises(workout.description)}
         </div>
         
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Warm-up</h3>
-          <p className="text-muted-foreground whitespace-pre-line text-sm sm:text-base">{workout.warmup}</p>
+          {renderTextWithClickableExercises(workout.warmup)}
         </div>
         
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Workout</h3>
-          <p className="text-muted-foreground whitespace-pre-line text-sm sm:text-base">{workout.workout}</p>
+          {renderTextWithClickableExercises(workout.workout)}
         </div>
         
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Strength Focus</h3>
-          <p className="text-muted-foreground text-sm sm:text-base">{workout.strength}</p>
+          {renderTextWithClickableExercises(workout.strength)}
         </div>
         
         {workout.notes && (
           <div>
             <h3 className="text-lg font-semibold text-destructive mb-2">Coaching Notes</h3>
-            <p className="text-muted-foreground text-sm sm:text-base">{workout.notes}</p>
+            {renderTextWithClickableExercises(workout.notes)}
           </div>
         )}
 

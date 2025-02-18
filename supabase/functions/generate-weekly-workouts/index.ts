@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0'
 
@@ -63,6 +62,14 @@ serve(async (req) => {
     const filteredExercises = filterExercisesByLevel(exercises, fitnessLevel);
     console.log(`Filtered to ${filteredExercises.length} exercises for level ${fitnessLevel}`);
 
+    // Create an exercise map for easy lookup
+    const exerciseMap = new Map(
+      filteredExercises.map(ex => [
+        ex.name.toLowerCase(),
+        ex.images.map(img => getFullImageUrl(img))
+      ])
+    );
+
     const processedExercises = filteredExercises.map(ex => ({
       name: ex.name,
       equipment: ex.equipment,
@@ -104,11 +111,7 @@ serve(async (req) => {
       }
     }
 
-    For each exercise you include, add its image URL to that day's images array.
-    Available images for each exercise: ${JSON.stringify(processedExercises.map(ex => ({
-      name: ex.name,
-      images: ex.images
-    })), null, 2)}
+    IMPORTANT: For each exercise you mention in the workout, you MUST use its exact name as provided in the exercise list above.
     `;
 
     console.log('Sending request to Gemini...');
@@ -144,13 +147,33 @@ serve(async (req) => {
     let workoutPlan = data.candidates[0].content.parts[0].text;
     workoutPlan = workoutPlan.replace(/```json\s*|\s*```/g, '').trim();
     
-    const parsedWorkoutPlan = JSON.parse(workoutPlan);
+    let parsedWorkoutPlan = JSON.parse(workoutPlan);
     
-    // Validate the response
-    const daysInPlan = Object.keys(parsedWorkoutPlan).length;
-    if (daysInPlan !== numberOfDays) {
-      console.warn(`Generated plan has ${daysInPlan} days but ${numberOfDays} were requested`);
-      // Still continue with the response
+    // Process the workout plan to add images
+    for (const day in parsedWorkoutPlan) {
+      const dayPlan = parsedWorkoutPlan[day];
+      const images = new Set<string>();
+      
+      // Helper function to extract exercise names and find their images
+      const findExerciseImages = (text: string) => {
+        if (!text) return;
+        
+        processedExercises.forEach(ex => {
+          if (text.toLowerCase().includes(ex.name.toLowerCase())) {
+            ex.images.forEach(img => images.add(img));
+          }
+        });
+      };
+
+      // Search for exercises in all sections
+      findExerciseImages(dayPlan.workout);
+      findExerciseImages(dayPlan.warmup);
+      findExerciseImages(dayPlan.strength);
+
+      // Update the day plan with found images
+      parsedWorkoutPlan[day].images = Array.from(images);
+      
+      console.log(`Day ${day} images:`, parsedWorkoutPlan[day].images);
     }
 
     // Save to generated_workouts table if we have a valid session

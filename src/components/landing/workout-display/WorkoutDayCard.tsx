@@ -2,6 +2,9 @@
 import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCalendar } from "@/utils/calendar";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Image } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WorkoutDayCardProps {
   day: string;
@@ -12,6 +15,7 @@ interface WorkoutDayCardProps {
     workout: string;
     strength: string;
     notes?: string;
+    images?: string[];
   };
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
@@ -82,6 +86,33 @@ export const WorkoutDayCard = ({
           <div>
             <h3 className="text-lg font-semibold text-destructive mb-2">Coaching Notes</h3>
             <p className="text-muted-foreground text-sm sm:text-base">{workout.notes}</p>
+          </div>
+        )}
+
+        {workout.images && workout.images.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold text-destructive mb-2">Exercise Images</h3>
+            <ScrollArea className="h-[200px] rounded-md border p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {workout.images.map((image, i) => (
+                  <div key={i} className="relative">
+                    <AspectRatio ratio={1}>
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={`Exercise ${i + 1}`}
+                          className="rounded-md object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-muted rounded-md">
+                          <Image className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
+                    </AspectRatio>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         )}
       </div>

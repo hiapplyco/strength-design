@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { WorkoutDisplayHeader } from "./workout-display/WorkoutDisplayHeader";
 import { WorkoutDayCard } from "./workout-display/WorkoutDayCard";
+import { WorkoutDaySkeleton } from "./workout-display/WorkoutDaySkeleton";
 import { ArrowLeft } from "lucide-react";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { formatWorkoutToMarkdown, formatAllWorkouts } from "@/utils/workout-formatting";
@@ -12,13 +13,15 @@ interface WorkoutDisplayProps {
   resetWorkouts: () => void;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
+  isGenerating?: boolean;
 }
 
 export function WorkoutDisplay({ 
   workouts: initialWorkouts, 
   resetWorkouts,
   isExporting,
-  setIsExporting 
+  setIsExporting,
+  isGenerating = false
 }: WorkoutDisplayProps) {
   const [workouts, setWorkouts] = useState(initialWorkouts);
   const formattedWorkouts = formatAllWorkouts(workouts);
@@ -33,6 +36,20 @@ export function WorkoutDisplay({
       }
     }));
   };
+
+  if (isGenerating) {
+    return (
+      <div className="min-h-screen bg-black w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="space-y-8">
+            {Array.from({ length: Object.keys(initialWorkouts).length }).map((_, index) => (
+              <WorkoutDaySkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black w-full">
@@ -74,4 +91,3 @@ export function WorkoutDisplay({
     </div>
   );
 }
-

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
@@ -85,11 +84,11 @@ export function WorkoutPresets({ onSelectPreset, onExercisesExtracted }: Workout
         className="w-full flex items-center justify-between bg-black/50 text-white border-primary/20"
         onClick={() => setShowPresets(!showPresets)}
       >
-        <span>Would you like to try a sample workout from our database?</span>
+        <span className="text-sm sm:text-base truncate pr-2">Would you like to try a sample workout?</span>
         {showPresets ? (
-          <ChevronUp className="h-4 w-4 ml-2" />
+          <ChevronUp className="h-4 w-4 flex-shrink-0" />
         ) : (
-          <ChevronDown className="h-4 w-4 ml-2" />
+          <ChevronDown className="h-4 w-4 flex-shrink-0" />
         )}
       </Button>
 

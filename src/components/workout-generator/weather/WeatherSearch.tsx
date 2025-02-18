@@ -153,11 +153,11 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
         className="w-full flex items-center justify-between"
         onClick={() => setShowSearch(!showSearch)}
       >
-        <span>Would you like to add your location for weather-optimized workouts?</span>
+        <span className="text-sm sm:text-base truncate pr-2">Add location for weather-optimized workouts?</span>
         {showSearch ? (
-          <ChevronUp className="h-4 w-4 ml-2" />
+          <ChevronUp className="h-4 w-4 flex-shrink-0" />
         ) : (
-          <ChevronDown className="h-4 w-4 ml-2" />
+          <ChevronDown className="h-4 w-4 flex-shrink-0" />
         )}
       </Button>
 

@@ -2,9 +2,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import { corsHeaders } from "../_shared/cors.ts";
-import { buildWorkoutPrompt } from "./prompts.ts";
-
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || '';
 
 interface WorkoutRequest {
   prompt: string;
@@ -15,15 +12,39 @@ interface WorkoutRequest {
 }
 
 serve(async (req) => {
+  console.log("Function invoked with request:", req.method);
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, {
+      headers: {
+        ...corsHeaders,
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+      }
+    });
   }
 
   try {
-    const { prompt, weatherPrompt, fitnessLevel, prescribedExercises, numberOfDays } = await req.json() as WorkoutRequest;
+    if (req.method !== 'POST') {
+      throw new Error(`HTTP method ${req.method} is not allowed.`);
+    }
+
+    const reqBody = await req.json();
+    console.log("Request body:", reqBody);
+
+    const { prompt, weatherPrompt, fitnessLevel, prescribedExercises, numberOfDays } = reqBody as WorkoutRequest;
+
+    if (!prompt || !fitnessLevel || !numberOfDays) {
+      throw new Error("Missing required fields in request");
+    }
 
     // Initialize Gemini
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not set");
+    }
+
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
       model: "gemini-1.0-pro",
@@ -35,13 +56,13 @@ serve(async (req) => {
       },
     });
 
-    const workoutPrompt = buildWorkoutPrompt({
-      prompt,
-      weatherPrompt,
-      fitnessLevel,
-      prescribedExercises,
-      numberOfDays,
-    });
+    // Build the workout prompt
+    const workoutPrompt = `
+      Create a ${numberOfDays}-day workout plan for a ${fitnessLevel} level athlete.
+      ${weatherPrompt ? `Consider the weather conditions: ${weatherPrompt}` : ''}
+      ${prescribedExercises ? `Include these exercises: ${prescribedExercises}` : ''}
+      Additional requirements: ${prompt}
+    `;
 
     // Add JSON formatting instruction
     const jsonInstruction = `
@@ -61,13 +82,12 @@ serve(async (req) => {
               "details": "Additional details"
             }
           ]
-        },
-        // ... repeat for each day
+        }
       }
     `;
 
     const finalPrompt = `${workoutPrompt}\n\n${jsonInstruction}`;
-    console.log("Sending request to Gemini...");
+    console.log("Sending request to Gemini with prompt:", finalPrompt);
 
     const result = await model.generateContent(finalPrompt);
     const response = await result.response;
@@ -77,6 +97,7 @@ serve(async (req) => {
     let workoutData;
     try {
       workoutData = JSON.parse(text);
+      console.log("Successfully parsed workout data:", workoutData);
       
       // Ensure each day has the required structure and extract exercises
       Object.keys(workoutData).forEach(day => {
@@ -87,16 +108,19 @@ serve(async (req) => {
       });
     } catch (error) {
       console.error("Error parsing Gemini response:", error);
-      throw new Error("Failed to parse workout data");
+      throw new Error("Failed to parse workout data: " + error.message);
     }
 
     return new Response(JSON.stringify(workoutData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error generating workout:", error);
+    console.error("Error in generate-weekly-workouts:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack 
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -105,15 +129,13 @@ serve(async (req) => {
   }
 });
 
-// Helper function to extract exercises from workout text if not properly formatted
 function extractExercises(workoutText: string): Array<{ name: string; sets?: string; reps?: string; details?: string }> {
-  const exercises: Array<{ name: string; sets?: string; reps?: string; details?: string }> = [];
-  if (!workoutText) return exercises;
+  if (!workoutText) return [];
   
+  const exercises: Array<{ name: string; sets?: string; reps?: string; details?: string }> = [];
   const lines = workoutText.split('\n');
   
   lines.forEach(line => {
-    // Match common exercise patterns
     const exerciseMatch = line.match(/([A-Z][a-zA-Z\s-]+)(?:\s*[-:]\s*(\d+)\s*(?:sets?|x)\s*(?:of\s*)?(\d+)|.*)/i);
     if (exerciseMatch) {
       exercises.push({

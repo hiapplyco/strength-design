@@ -1,47 +1,11 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-
-interface Exercise {
-  name: string;
-  instructions: string[];
-  type: string;
-  muscle: string;
-  equipment: string;
-  difficulty: string;
-  images?: string[];
-}
-
-const exerciseDatabase: Exercise[] = [
-  {
-    name: "Push-ups",
-    instructions: [
-      "Start in a plank position with hands shoulder-width apart",
-      "Lower your body until chest nearly touches the ground",
-      "Push back up to the starting position"
-    ],
-    type: "Strength",
-    muscle: "Chest",
-    equipment: "Bodyweight",
-    difficulty: "Beginner",
-    images: ["/lovable-uploads/push-ups-1.jpg", "/lovable-uploads/push-ups-2.jpg"]
-  },
-  {
-    name: "Squats",
-    instructions: [
-      "Stand with feet shoulder-width apart",
-      "Lower your body as if sitting back into a chair",
-      "Keep chest up and back straight",
-      "Return to standing position"
-    ],
-    type: "Strength",
-    muscle: "Legs",
-    equipment: "Bodyweight",
-    difficulty: "Beginner"
-  },
-  // Add more exercises as needed
-];
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 serve(async (req) => {
+  console.log("Search exercises function invoked");
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -61,22 +25,44 @@ serve(async (req) => {
 
     console.log('Searching for:', query);
 
-    // Simple search implementation
-    const results = exerciseDatabase.filter(exercise => 
-      exercise.name.toLowerCase().includes(query.toLowerCase()) ||
-      exercise.type.toLowerCase().includes(query.toLowerCase()) ||
-      exercise.muscle.toLowerCase().includes(query.toLowerCase())
-    );
+    // Initialize Supabase client with admin privileges
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    console.log('Found results:', results.length);
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing environment variables');
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Search exercises in the database
+    const { data: results, error } = await supabase
+      .from('exercises')
+      .select('*')
+      .or(`name.ilike.%${query}%,category.ilike.%${query}%,primary_muscles.cs.{${query}},equipment.ilike.%${query}%`)
+      .limit(10);
+
+    if (error) {
+      console.error('Database search error:', error);
+      throw error;
+    }
+
+    console.log('Found results:', results?.length);
+
+    // Map the results to include preview information
+    const formattedResults = results?.map(exercise => ({
+      name: exercise.name,
+      type: exercise.category,
+      muscle: exercise.primary_muscles?.[0],
+      equipment: exercise.equipment,
+      difficulty: exercise.level,
+      instructions: exercise.instructions,
+      // Add more fields as needed from your exercise table
+    })) || [];
 
     return new Response(
       JSON.stringify({
-        results: results.map(exercise => ({
-          ...exercise,
-          // Add a preview instruction
-          preview: exercise.instructions[0]
-        }))
+        results: formattedResults
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

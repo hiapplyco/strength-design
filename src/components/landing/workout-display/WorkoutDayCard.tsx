@@ -154,21 +154,74 @@ export const WorkoutDayCard = ({
               onClick={handleSearch} 
               disabled={isSearching}
               variant="outline"
+              className="min-w-[44px]"
             >
-              <Search className="h-4 w-4" />
+              {isSearching ? (
+                <div className="animate-spin">
+                  <Search className="h-4 w-4" />
+                </div>
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
             </Button>
           </div>
           
           {/* Search Results */}
           {searchResults.length > 0 && (
-            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-              <div className="space-y-2">
+            <ScrollArea className="h-[400px] w-full rounded-md border bg-black/5 backdrop-blur-sm p-4">
+              <div className="grid grid-cols-1 gap-4">
                 {searchResults.map((exercise, i) => (
-                  <div key={i} className="p-2 hover:bg-accent rounded-md cursor-pointer" onClick={() => handleExerciseSelect(exercise.name)}>
-                    <h4 className="font-medium">{exercise.name}</h4>
-                    {exercise.instructions && (
-                      <p className="text-sm text-muted-foreground">{exercise.instructions[0]}</p>
-                    )}
+                  <div 
+                    key={i} 
+                    className="group relative overflow-hidden rounded-lg border border-red-500/20 bg-black/40 p-4 transition-all hover:border-red-500/40 hover:bg-black/60"
+                    onClick={() => handleExerciseSelect(exercise.name)}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-lg text-white group-hover:text-red-400 transition-colors">
+                          {exercise.name}
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {exercise.type && (
+                            <span className="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                              {exercise.type}
+                            </span>
+                          )}
+                          {exercise.muscle && (
+                            <span className="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                              {exercise.muscle}
+                            </span>
+                          )}
+                          {exercise.difficulty && (
+                            <span className="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                              {exercise.difficulty}
+                            </span>
+                          )}
+                        </div>
+                        {exercise.instructions && (
+                          <div className="mt-2 space-y-1">
+                            {exercise.instructions.map((instruction, idx) => (
+                              <p key={idx} className="text-sm text-gray-400">
+                                {idx + 1}. {instruction}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {exercise.images && exercise.images.length > 0 && (
+                        <div className="hidden sm:block h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-red-500/20">
+                          <img
+                            src={exercise.images[0]}
+                            alt={exercise.name}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = 'placeholder.svg';
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

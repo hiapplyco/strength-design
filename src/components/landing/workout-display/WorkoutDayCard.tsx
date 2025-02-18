@@ -86,7 +86,7 @@ export const WorkoutDayCard = ({
         {workout.images && workout.images.length > 0 && (
           <div>
             <h3 className="text-lg font-semibold text-destructive mb-2">Exercise Images</h3>
-            <ScrollArea className="h-[200px] rounded-md border p-4">
+            <ScrollArea className="h-[300px] rounded-md border p-4">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {workout.images.map((image, i) => (
                   <div key={i} className="relative">
@@ -96,6 +96,10 @@ export const WorkoutDayCard = ({
                           src={image}
                           alt={`Exercise ${i + 1}`}
                           className="rounded-md object-cover w-full h-full"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'placeholder.svg';
+                          }}
                         />
                       ) : (
                         <div className="flex items-center justify-center w-full h-full bg-muted rounded-md">

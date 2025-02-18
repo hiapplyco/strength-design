@@ -5,19 +5,29 @@ import { Edit, Loader2, Send } from "lucide-react";
 export interface HeaderActionsProps {
   isExporting: boolean;
   onExport: () => Promise<void>;
-  onEdit: () => void;  // Added this prop to fix the type error
+  onEdit?: () => void;  // Made optional since not all usages need it
+  workoutText?: string; // Added to match usage in WorkoutDisplayHeader
+  allWorkouts?: Record<string, any>; // Added to match usage in WorkoutDisplayHeader
 }
 
-export function HeaderActions({ isExporting, onExport, onEdit }: HeaderActionsProps) {
+export function HeaderActions({ 
+  isExporting, 
+  onExport, 
+  onEdit,
+  workoutText,
+  allWorkouts 
+}: HeaderActionsProps) {
   return (
     <div className="flex items-center gap-2">
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={onEdit}
-      >
-        <Edit className="h-4 w-4" />
-      </Button>
+      {onEdit && (
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={onEdit}
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+      )}
       <Button
         variant="outline"
         size="sm"

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0'
 
@@ -35,6 +36,27 @@ function filterExercisesByLevel(exercises: any[], level: string) {
 
   const allowedLevels = levelMap[level.toLowerCase()] || ['beginner'];
   return exercises.filter(ex => allowedLevels.includes(ex.level)).slice(0, 30);
+}
+
+// Function to safely parse JSON with error handling
+function safeJSONParse(text: string) {
+  try {
+    // First, try to parse the text directly
+    return JSON.parse(text);
+  } catch (e) {
+    // If that fails, try to extract JSON from the text
+    try {
+      // Look for JSON object between curly braces
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) {
+        return JSON.parse(match[0]);
+      }
+      throw new Error('No valid JSON object found in text');
+    } catch (e2) {
+      console.error('Failed to parse JSON:', text);
+      throw new Error('Failed to parse workout plan JSON');
+    }
+  }
 }
 
 serve(async (req) => {
@@ -87,19 +109,12 @@ serve(async (req) => {
     const geminiUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
     
     const userPrompt = `
-    Create a ${numberOfDays}-day workout program for a ${fitnessLevel} level athlete.
-    Weather conditions: ${weatherPrompt}
-    Prescribed exercises: ${prescribedExercises}
+    Generate a ${numberOfDays}-day workout program for a ${fitnessLevel} level athlete.
+    Weather considerations: ${weatherPrompt}
+    Required exercises: ${prescribedExercises}
     Additional requirements: ${prompt}
 
-    Use these exercises (choose appropriate ones for each day):
-    ${JSON.stringify(processedExercises.map(ex => ({
-      name: ex.name,
-      equipment: ex.equipment,
-      level: ex.level
-    })), null, 2)}
-
-    Format the response as a JSON object like this:
+    Format your response EXACTLY as a JSON object with this structure:
     {
       "day1": {
         "description": "Focus of the day",
@@ -111,7 +126,14 @@ serve(async (req) => {
       }
     }
 
-    IMPORTANT: For each exercise you mention in the workout, you MUST use its exact name as provided in the exercise list above.
+    Available exercises (use exact names):
+    ${JSON.stringify(processedExercises.map(ex => ({
+      name: ex.name,
+      equipment: ex.equipment,
+      level: ex.level
+    })), null, 2)}
+
+    IMPORTANT: Respond ONLY with the JSON object, no additional text or formatting.
     `;
 
     console.log('Sending request to Gemini...');
@@ -144,10 +166,16 @@ serve(async (req) => {
     const data = await response.json();
     console.log('Received Gemini API response');
 
-    let workoutPlan = data.candidates[0].content.parts[0].text;
-    workoutPlan = workoutPlan.replace(/```json\s*|\s*```/g, '').trim();
-    
-    let parsedWorkoutPlan = JSON.parse(workoutPlan);
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error('Invalid response format from Gemini API');
+    }
+
+    let workoutText = data.candidates[0].content.parts[0].text;
+    console.log('Raw workout text:', workoutText);
+
+    // Clean up the text and parse it
+    workoutText = workoutText.replace(/```json\s*|\s*```/g, '').trim();
+    const parsedWorkoutPlan = safeJSONParse(workoutText);
     
     // Process the workout plan to add images
     for (const day in parsedWorkoutPlan) {

@@ -8,6 +8,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const cleanAndParseJSON = (text: string) => {
+  // Remove any markdown formatting or backticks
+  let cleaned = text.replace(/```json\n|\n```|```/g, '');
+  
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error('JSON parse error:', e);
+    console.log('Attempted to parse:', cleaned);
+    throw new Error('Failed to parse Gemini response');
+  }
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -17,7 +30,6 @@ serve(async (req) => {
     const { query } = await req.json();
     console.log('Received search query:', query);
 
-    // Initialize Gemini
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY is not set');
@@ -33,84 +45,82 @@ serve(async (req) => {
     }
     const exercises = await exercisesResponse.json();
 
-    // Create Gemini prompt for search analysis
-    const searchPrompt = `
-      You are an expert fitness trainer helping to search through exercise data.
-      Search Query: "${query}"
-      
-      Analyze this search query and provide:
-      1. Key terms and synonyms to look for
-      2. Relevant muscle groups
-      3. Difficulty level (if mentioned)
-      4. Equipment requirements (if mentioned)
-      5. Exercise type preferences (if mentioned)
-      
-      Format your response as JSON with these fields.
-    `;
+    // Updated prompt to emphasize JSON format
+    const searchPrompt = `Analyze this fitness search query: "${query}"
+    Return a JSON object with these fields (no markdown, no backticks):
+    {
+      "muscle_groups": [], // array of target muscle groups
+      "difficulty_level": "", // beginner, intermediate, or advanced
+      "equipment": "", // required equipment if mentioned
+      "exercise_type": "" // type of exercise if specified
+    }`;
 
     const result = await model.generateContent(searchPrompt);
-    const analysis = JSON.parse(result.response.text());
-    console.log('Search analysis:', analysis);
+    const resultText = result.response.text();
+    console.log('Raw Gemini response:', resultText);
+    
+    const analysis = cleanAndParseJSON(resultText);
+    console.log('Parsed analysis:', analysis);
 
-    // Use Gemini to find the most relevant exercises
-    const exerciseSelectionPrompt = `
-      Given these search parameters:
-      ${JSON.stringify(analysis, null, 2)}
-      
-      Select the most relevant exercises from this list. Consider:
-      - Matching muscle groups
-      - Appropriate difficulty level
-      - Required equipment availability
-      - Exercise type preferences
-      
-      For each exercise, explain why it matches the search criteria.
-      Return your response as JSON with 'matches' array containing objects with 'exercise' and 'relevance_score' (0-100).
-    `;
+    // Simplified exercise matching prompt
+    const exerciseSelectionPrompt = `Given this search criteria: ${JSON.stringify(analysis)}
+    Return a JSON object with this format (no markdown, no backticks):
+    {
+      "matches": [
+        {
+          "exercise": "exercise name exactly as in database",
+          "relevance_score": number between 0-100
+        }
+      ]
+    }`;
 
     const exerciseResult = await model.generateContent(exerciseSelectionPrompt);
-    const exerciseMatches = JSON.parse(exerciseResult.response.text());
-    console.log('Exercise matches:', exerciseMatches);
+    const exerciseResultText = exerciseResult.response.text();
+    console.log('Raw exercise matches response:', exerciseResultText);
+    
+    const exerciseMatches = cleanAndParseJSON(exerciseResultText);
+    console.log('Parsed exercise matches:', exerciseMatches);
 
-    // Sort and filter the exercises based on Gemini's analysis
+    if (!Array.isArray(exerciseMatches.matches)) {
+      throw new Error('Invalid exercise matches format');
+    }
+
+    // Filter and format results
     const results = exerciseMatches.matches
-      .sort((a: any, b: any) => b.relevance_score - a.relevance_score)
-      .slice(0, 10) // Limit to top 10 matches
-      .map((match: any) => {
-        const exercise = exercises.find((e: any) => e.name === match.exercise);
-        if (exercise) {
-          return {
-            ...exercise,
-            relevance_score: match.relevance_score,
-          };
-        }
-        return null;
+      .sort((a, b) => b.relevance_score - a.relevance_score)
+      .slice(0, 10)
+      .map(match => {
+        const exercise = exercises.find(e => 
+          e.name.toLowerCase() === match.exercise.toLowerCase()
+        );
+        return exercise ? { ...exercise, relevance_score: match.relevance_score } : null;
       })
       .filter(Boolean);
 
     return new Response(
-      JSON.stringify({ 
-        results,
-        analysis 
-      }),
+      JSON.stringify({ results, analysis }),
       { 
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
         }
-      },
+      }
     );
 
   } catch (error) {
     console.error('Error in search-exercises function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack 
+      }),
       { 
         status: 500,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
         }
-      },
+      }
     );
   }
 });

@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
@@ -17,6 +18,17 @@ serve(async (req) => {
     const { query } = await req.json();
     console.log('Received search query:', query);
 
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase credentials');
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Initialize Gemini
     const apiKey = Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
       throw new Error('GEMINI_API_KEY is not set');
@@ -24,13 +36,6 @@ serve(async (req) => {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
-    // Fetch exercises data
-    const exercisesResponse = await fetch('https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json');
-    if (!exercisesResponse.ok) {
-      throw new Error('Failed to fetch exercises');
-    }
-    const exercises = await exercisesResponse.json();
 
     const result = await model.generateContent([
       {
@@ -61,18 +66,47 @@ serve(async (req) => {
       throw new Error(`Invalid analysis response: ${e.message}`);
     }
 
-    // Get exercise matches
+    // Query the database based on analysis
+    let query = supabase
+      .from('exercises')
+      .select('*');
+
+    // Apply filters based on analysis
+    if (analysis.muscle_groups?.length > 0) {
+      query = query.overlaps('primary_muscles', analysis.muscle_groups);
+    }
+    
+    if (analysis.difficulty_level) {
+      query = query.eq('level', analysis.difficulty_level.toLowerCase());
+    }
+    
+    if (analysis.equipment) {
+      query = query.ilike('equipment', `%${analysis.equipment}%`);
+    }
+    
+    if (analysis.exercise_type) {
+      query = query.ilike('category', `%${analysis.exercise_type}%`);
+    }
+
+    const { data: exercises, error: dbError } = await query.limit(50);
+    
+    if (dbError) {
+      throw new Error(`Database query failed: ${dbError.message}`);
+    }
+
+    // Use Gemini to rank the exercises
     const exerciseResult = await model.generateContent([
       {
         role: "user",
         parts: [{
           text: `Given these search criteria: ${JSON.stringify(analysis)}
+          And this list of exercises: ${JSON.stringify(exercises.map(e => e.name))}
           
           Return ONLY a JSON object in this EXACT format, with no additional text:
           {
             "matches": [
               {
-                "exercise": "exact exercise name from database",
+                "exercise": "exact exercise name from the list",
                 "relevance_score": 95
               }
             ]

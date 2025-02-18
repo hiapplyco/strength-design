@@ -45,3 +45,6 @@ verify_jwt = false
 
 [functions.search-exercises]
 verify_jwt = false
+
+[functions.import-exercises]
+verify_jwt = false

@@ -1,11 +1,10 @@
-import { ExerciseSearch } from "@/components/ExerciseSearch";
+
 import { FitnessSection } from "./FitnessSection";
 import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
 import { WeatherSection } from "./WeatherSection";
 import { GenerateSection } from "./GenerateSection";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { TooltipWrapper } from "./TooltipWrapper";
-import type { Exercise } from "@/components/exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 import { useState } from "react";
 
@@ -15,7 +14,6 @@ interface InputContainerProps {
   handleGenerateWorkout: (params: {
     prompt: string;
     weatherPrompt: string;
-    selectedExercises: Exercise[];
     fitnessLevel: string;
     prescribedExercises: string;
   }) => Promise<void>;
@@ -45,7 +43,6 @@ export function InputContainer({
   const [injuries, setInjuries] = useState("");
   const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
   const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
 
   const handlePresetSelect = (preset: any) => {
     if (preset.prescribedExercises) {
@@ -54,20 +51,6 @@ export function InputContainer({
       setNumberOfDays(preset.numberOfDays);
       setPrescribedExercises(preset.prescribedExercises);
     }
-  };
-
-  const handleExerciseSelect = (exercise: Exercise) => {
-    setSelectedExercises(prev => {
-      const exists = prev.some(e => e.name === exercise.name);
-      if (exists) {
-        return prev.filter(e => e.name !== exercise.name);
-      }
-      return [...prev, exercise];
-    });
-  };
-
-  const handleExtractedExercises = (exercises: Exercise[]) => {
-    setSelectedExercises(exercises);
   };
 
   const handleWeatherUpdate = (data: WeatherData | null, prompt: string) => {
@@ -80,7 +63,6 @@ export function InputContainer({
       handleGenerateWorkout({
         prompt: generatePrompt,
         weatherPrompt,
-        selectedExercises,
         fitnessLevel,
         prescribedExercises
       });
@@ -93,7 +75,6 @@ export function InputContainer({
     setFitnessLevel("");
     setWeatherData(null);
     setWeatherPrompt("");
-    setSelectedExercises([]);
   };
 
   const renderTooltip = (content: string) => (
@@ -124,16 +105,11 @@ export function InputContainer({
     <div className="space-y-8">
       <WorkoutPresets 
         onSelectPreset={handlePresetSelect}
-        onExercisesExtracted={handleExtractedExercises}
       />
       <WeatherSection
         weatherData={weatherData}
         onWeatherUpdate={handleWeatherUpdate}
         renderTooltip={() => renderTooltip("Add your location for weather-optimized workouts")}
-      />
-      <ExerciseSearch 
-        onExerciseSelect={handleExerciseSelect}
-        selectedExercises={selectedExercises}
       />
       <FitnessSection
         fitnessLevel={fitnessLevel}
@@ -156,7 +132,6 @@ export function InputContainer({
         isGenerating={isGenerating}
         renderTooltip={() => renderTooltip("Generate your custom workout program")}
         isValid={fitnessLevel !== "" && numberOfDays > 0}
-        selectedExercises={selectedExercises}
         fitnessLevel={fitnessLevel}
         prescribedExercises={prescribedExercises}
         injuries={injuries}

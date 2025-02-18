@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -6,7 +7,6 @@ import type { WeeklyWorkouts } from "@/types/fitness";
 interface GenerateWorkoutParams {
   prompt: string;
   weatherPrompt: string;
-  selectedExercises: any[];
   fitnessLevel: string;
   prescribedExercises: string;
   numberOfDays: number;
@@ -30,7 +30,6 @@ export const useWorkoutGeneration = () => {
       // First log the session input
       const { error: sessionError } = await supabase.from('session_io').insert({
         weather_prompt: params.weatherPrompt,
-        selected_exercises: params.selectedExercises,
         fitness_level: params.fitnessLevel,
         prescribed_exercises: params.prescribedExercises,
         number_of_days: params.numberOfDays,
@@ -63,12 +62,11 @@ export const useWorkoutGeneration = () => {
           workout_data: data,
           title: `${params.numberOfDays}-Day Workout Plan`,
           tags: [params.fitnessLevel],
-          summary: `${params.numberOfDays}-day workout plan generated with ${params.selectedExercises.length} selected exercises`
+          summary: `${params.numberOfDays}-day workout plan`
         });
 
       if (saveError) {
         console.error('Error saving workout:', saveError);
-        // Don't throw here - we still want to show the workout even if saving fails
       }
 
       const sessionDuration = Math.round(performance.now() - startTime);

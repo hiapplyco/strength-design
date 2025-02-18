@@ -1,12 +1,24 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+
+interface Exercise {
+  id: string;
+  name: string;
+  force: string;
+  level: string;
+  mechanic: string;
+  equipment: string;
+  primaryMuscles: string[];
+  secondaryMuscles: string[];
+  instructions: string[];
+  category: string;
+  images: string[];
+}
 
 serve(async (req) => {
   console.log("Search exercises function invoked");
 
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
@@ -25,40 +37,49 @@ serve(async (req) => {
 
     console.log('Searching for:', query);
 
-    // Initialize Supabase client with admin privileges
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    // Fetch exercises from the GitHub repo
+    const response = await fetch(
+      'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json'
+    );
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing environment variables');
+    if (!response.ok) {
+      throw new Error('Failed to fetch exercises');
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const exercises: Exercise[] = await response.json();
+    
+    // Search implementation
+    const results = exercises.filter(exercise => {
+      const searchTerms = [
+        exercise.name,
+        exercise.category,
+        ...exercise.primaryMuscles,
+        ...exercise.secondaryMuscles,
+        exercise.equipment,
+        exercise.level
+      ].map(term => term?.toLowerCase());
 
-    // Search exercises in the database
-    const { data: results, error } = await supabase
-      .from('exercises')
-      .select('*')
-      .or(`name.ilike.%${query}%,category.ilike.%${query}%,primary_muscles.cs.{${query}},equipment.ilike.%${query}%`)
-      .limit(10);
+      return searchTerms.some(term => term?.includes(query.toLowerCase()));
+    });
 
-    if (error) {
-      console.error('Database search error:', error);
-      throw error;
-    }
+    console.log('Found results:', results.length);
 
-    console.log('Found results:', results?.length);
-
-    // Map the results to include preview information
-    const formattedResults = results?.map(exercise => ({
+    // Format results with proper image URLs
+    const formattedResults = results.map(exercise => ({
       name: exercise.name,
       type: exercise.category,
-      muscle: exercise.primary_muscles?.[0],
+      muscle: exercise.primaryMuscles[0],
       equipment: exercise.equipment,
       difficulty: exercise.level,
+      mechanic: exercise.mechanic,
+      force: exercise.force,
       instructions: exercise.instructions,
-      // Add more fields as needed from your exercise table
-    })) || [];
+      primaryMuscles: exercise.primaryMuscles,
+      secondaryMuscles: exercise.secondaryMuscles,
+      images: exercise.images.map(image => 
+        `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises/${image}`
+      )
+    }));
 
     return new Response(
       JSON.stringify({

@@ -5,22 +5,16 @@ import { exportToCalendar } from "@/utils/calendar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Image } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { WorkoutDay } from "@/types/fitness";
 
 interface WorkoutDayCardProps {
   day: string;
   index: number;
-  workout: {
-    description: string;
-    warmup: string;
-    workout: string;
-    strength: string;
-    notes?: string;
-    images?: string[];
-  };
+  workout: WorkoutDay;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
-  allWorkouts: Record<string, any>;
-  onUpdate: (day: string, updates: any) => void;
+  allWorkouts: Record<string, WorkoutDay>;
+  onUpdate: (day: string, updates: Partial<WorkoutDay>) => void;
 }
 
 export const WorkoutDayCard = ({
@@ -37,7 +31,7 @@ export const WorkoutDayCard = ({
   return (
     <div className="w-full bg-card rounded-xl border-[6px] border-black shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_rgba(255,0,0,1),8px_8px_0px_0px_#C4A052] transition-all duration-200 mx-auto max-w-[95%] sm:max-w-full">
       <WorkoutHeader
-        title={`Day${index + 1}`}
+        title={`Day ${index + 1}`}
         isExporting={isExporting}
         onExport={async () => {
           try {
@@ -61,7 +55,7 @@ export const WorkoutDayCard = ({
         onUpdate={(updates) => onUpdate(day, updates)}
       />
       
-      <div className="p-4 sm:p-6 space-y-4">
+      <div className="p-4 sm:p-6 space-y-6">
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Description</h3>
           <p className="text-muted-foreground text-sm sm:text-base">{workout.description}</p>

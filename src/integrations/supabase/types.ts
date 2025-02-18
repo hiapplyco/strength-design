@@ -177,6 +177,51 @@ export type Database = {
         }
         Relationships: []
       }
+      exercises: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          equipment: string | null
+          force: string | null
+          id: string
+          instructions: string[] | null
+          level: string | null
+          mechanic: string | null
+          name: string
+          primary_muscles: string[] | null
+          secondary_muscles: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          equipment?: string | null
+          force?: string | null
+          id?: string
+          instructions?: string[] | null
+          level?: string | null
+          mechanic?: string | null
+          name: string
+          primary_muscles?: string[] | null
+          secondary_muscles?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          equipment?: string | null
+          force?: string | null
+          id?: string
+          instructions?: string[] | null
+          level?: string | null
+          mechanic?: string | null
+          name?: string
+          primary_muscles?: string[] | null
+          secondary_muscles?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       generated_workouts: {
         Row: {
           generated_at: string | null

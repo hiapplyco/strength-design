@@ -80,34 +80,22 @@ serve(async (req) => {
     const projectId = Deno.env.get('GOOGLE_CLOUD_PROJECT')
     const location = 'us-central1'
     const model = 'gemini-pro'
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
+
+    if (!apiKey) {
+      throw new Error('Missing GEMINI_API_KEY environment variable')
+    }
+
+    if (!projectId) {
+      throw new Error('Missing GOOGLE_CLOUD_PROJECT environment variable')
+    }
 
     const vertexUrl = `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:predict`
-    
-    // Get credentials from environment
-    const credentials = JSON.parse(Deno.env.get('GOOGLE_APPLICATION_CREDENTIALS') || '{}')
-
-    // Get access token using service account credentials
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion: await generateJWT(credentials),
-      }),
-    })
-
-    const { access_token } = await tokenResponse.json()
-
-    if (!access_token) {
-      throw new Error('Failed to get access token')
-    }
 
     const response = await fetch(vertexUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${access_token}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -160,49 +148,3 @@ serve(async (req) => {
     })
   }
 })
-
-// Helper function to generate JWT for Google OAuth
-async function generateJWT(credentials: any) {
-  const now = Math.floor(Date.now() / 1000)
-  const oneHour = 60 * 60
-  
-  const jwt = {
-    iss: credentials.client_email,
-    sub: credentials.client_email,
-    aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + oneHour,
-    scope: 'https://www.googleapis.com/auth/cloud-platform',
-  }
-
-  // Use SubtleCrypto for signing
-  const encoder = new TextEncoder()
-  const header = encoder.encode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
-  const payload = encoder.encode(JSON.stringify(jwt))
-  
-  const privateKey = await crypto.subtle.importKey(
-    'pkcs8',
-    base64ToArrayBuffer(credentials.private_key),
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
-  )
-  
-  const signature = await crypto.subtle.sign(
-    { name: 'RSASSA-PKCS1-v1_5' },
-    privateKey,
-    encoder.encode(`${btoa(header)}.${btoa(payload)}`)
-  )
-  
-  return `${btoa(header)}.${btoa(payload)}.${btoa(String.fromCharCode(...new Uint8Array(signature)))}`
-}
-
-// Helper function to convert base64 to ArrayBuffer
-function base64ToArrayBuffer(base64: string) {
-  const binary = atob(base64.replace(/[-_]/g, m => ({ '-': '+', '_': '/' })[m] ?? m).replace(/[^A-Za-z0-9\+\/]/g, ''))
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i)
-  }
-  return bytes.buffer
-}

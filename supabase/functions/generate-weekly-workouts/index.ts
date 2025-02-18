@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.0'
-import { generateSystemPrompt, generateUserPrompt } from './prompts.ts'
+import { generateSystemPrompt, generateUserPrompt } from "./prompts.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +23,13 @@ serve(async (req) => {
       numberOfDays
     } = await req.json()
 
+    console.log('Received request with params:', {
+      weatherPrompt,
+      fitnessLevel,
+      prescribedExercises,
+      numberOfDays
+    });
+
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -32,11 +39,19 @@ serve(async (req) => {
     const { data: exercises, error: exercisesError } = await supabase
       .from('exercises')
       .select('*')
-      .limit(50) // Adjust limit as needed
+      .limit(50)
 
     if (exercisesError) {
+      console.error('Error fetching exercises:', exercisesError);
       throw new Error(`Error fetching exercises: ${exercisesError.message}`)
     }
+
+    if (!exercises || exercises.length === 0) {
+      console.error('No exercises found in database');
+      throw new Error('No exercises found in database')
+    }
+
+    console.log(`Found ${exercises.length} exercises`);
 
     // Format exercises for the prompt
     const exercisesList = exercises.map(ex => ({
@@ -55,6 +70,11 @@ serve(async (req) => {
       prescribedExercises,
       numberOfDays
     })
+
+    console.log('Generated prompts:', {
+      systemPrompt: systemPrompt.substring(0, 100) + '...',
+      userPrompt
+    });
 
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
     if (!geminiApiKey) {
@@ -89,10 +109,17 @@ serve(async (req) => {
       })
     })
 
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('Gemini API error:', errorData);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    }
+
     const data = await response.json()
-    console.log('Gemini response:', data)
+    console.log('Received Gemini response');
 
     if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      console.error('Invalid Gemini response format:', data);
       throw new Error('Invalid response from Gemini')
     }
 
@@ -102,7 +129,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in generate-weekly-workouts:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

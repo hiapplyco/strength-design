@@ -3,13 +3,15 @@ import { WorkoutHeader } from "@/components/workout/WorkoutHeader";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCalendar } from "@/utils/calendar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Image } from "lucide-react";
+import { Image, Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ClickableExercise } from "@/components/workout/ClickableExercise";
 import { extractExerciseNames } from "@/utils/exercise-formatting";
 import type { WorkoutDay } from "@/types/fitness";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WorkoutDayCardProps {
   day: string;
@@ -32,14 +34,45 @@ export const WorkoutDayCard = ({
 }: WorkoutDayCardProps) => {
   const { toast } = useToast();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return;
+    
+    setIsSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('search-exercises', {
+        body: { query: searchTerm }
+      });
+
+      if (error) throw error;
+
+      setSearchResults(data.results || []);
+      
+      if (data.results?.length === 0) {
+        toast({
+          title: "No results found",
+          description: "Try different search terms",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error searching exercises:', error);
+      toast({
+        title: "Search failed",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const handleExerciseSelect = (exerciseName: string) => {
-    if (searchInputRef.current) {
-      searchInputRef.current.value = exerciseName;
-      // Trigger a search event
-      const event = new Event('input', { bubbles: true });
-      searchInputRef.current.dispatchEvent(event);
-    }
+    setSearchTerm(exerciseName);
+    handleSearch();
   };
 
   const renderTextWithClickableExercises = (text: string) => {
@@ -105,6 +138,44 @@ export const WorkoutDayCard = ({
       />
       
       <div className="p-4 sm:p-6 space-y-6">
+        {/* Search Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-destructive">Exercise Search</h3>
+          <div className="flex gap-2">
+            <Input
+              ref={searchInputRef}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search for exercises..."
+              className="flex-1"
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <Button 
+              onClick={handleSearch} 
+              disabled={isSearching}
+              variant="outline"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          {/* Search Results */}
+          {searchResults.length > 0 && (
+            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+              <div className="space-y-2">
+                {searchResults.map((exercise, i) => (
+                  <div key={i} className="p-2 hover:bg-accent rounded-md cursor-pointer" onClick={() => handleExerciseSelect(exercise.name)}>
+                    <h4 className="font-medium">{exercise.name}</h4>
+                    {exercise.instructions && (
+                      <p className="text-sm text-muted-foreground">{exercise.instructions[0]}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
+
         <div>
           <h3 className="text-lg font-semibold text-destructive mb-2">Description</h3>
           {renderTextWithClickableExercises(workout.description)}

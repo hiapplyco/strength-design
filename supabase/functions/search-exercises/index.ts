@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
@@ -37,7 +36,6 @@ serve(async (req) => {
 
     console.log('Searching for:', query);
 
-    // Fetch exercises from the GitHub repo
     const response = await fetch(
       'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json'
     );
@@ -48,7 +46,6 @@ serve(async (req) => {
 
     const exercises: Exercise[] = await response.json();
     
-    // Search implementation
     const results = exercises.filter(exercise => {
       const searchTerms = [
         exercise.name,
@@ -64,7 +61,6 @@ serve(async (req) => {
 
     console.log('Found results:', results.length);
 
-    // Format results with proper image URLs
     const formattedResults = results.map(exercise => ({
       name: exercise.name,
       type: exercise.category,
@@ -77,7 +73,7 @@ serve(async (req) => {
       primaryMuscles: exercise.primaryMuscles,
       secondaryMuscles: exercise.secondaryMuscles,
       images: exercise.images.map(image => 
-        `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises/${image}`
+        `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${image}`
       )
     }));
 

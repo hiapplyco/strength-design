@@ -47,7 +47,7 @@ export const useSubscriptionStatus = () => {
     enabled: !!session?.user,
     // Only refetch on mount and window focus
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity, // Previously cacheTime
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,

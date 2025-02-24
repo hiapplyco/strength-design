@@ -3,7 +3,7 @@ import { BarChart, Brain, Users, Scale } from "lucide-react";
 
 export const FeaturesSection = () => {
   return (
-    <section className="py-20 bg-black/80 backdrop-blur-sm rounded-3xl px-4 md:px-6 lg:px-12 mx-4 md:mx-6 lg:mx-12 mt-12 border border-white/5">
+    <section className="py-20 bg-black/60 backdrop-blur-sm rounded-3xl px-4 md:px-6 lg:px-12 mx-4 md:mx-6 lg:mx-12 mt-12 border border-white/5">
       <div className="text-center mb-16 max-w-4xl mx-auto">
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-collegiate text-destructive mb-4 transform -skew-x-12 uppercase tracking-wider break-words">
           strength.design

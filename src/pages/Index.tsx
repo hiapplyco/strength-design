@@ -31,11 +31,11 @@ const Index = () => {
           zIndex: 0
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-transparent pointer-events-none" />
         <HeaderSection />
         <HeroSection />
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/95 to-transparent -mt-32 h-32 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent -mt-32 h-32 pointer-events-none" />
           <div className="container mx-auto px-4 max-w-[1200px] relative">
             <FeaturesSection />
             <SolutionsSection />

@@ -34,10 +34,13 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-transparent pointer-events-none" />
         <HeaderSection />
         <HeroSection />
-        <div className="container mx-auto px-4 max-w-[1200px]">
-          <FeaturesSection />
-          <SolutionsSection />
-          <TestimonialsSection />
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/95 to-transparent -mt-32 h-32 pointer-events-none" />
+          <div className="container mx-auto px-4 max-w-[1200px] relative">
+            <FeaturesSection />
+            <SolutionsSection />
+            <TestimonialsSection />
+          </div>
         </div>
       </div>
     </div>

@@ -6,7 +6,6 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { SolutionsSection } from "@/components/landing/SolutionsSection";
 import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
-import { PlaybookSearch } from "@/components/playbook/PlaybookSearch";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
@@ -36,7 +35,6 @@ const Index = () => {
         <HeaderSection />
         <HeroSection />
         <div className="container mx-auto px-4 max-w-[1200px]">
-          <PlaybookSearch />
           <FeaturesSection />
           <SolutionsSection />
           <TestimonialsSection />

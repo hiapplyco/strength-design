@@ -17,14 +17,17 @@ export const HeaderSection = () => {
   return (
     <header className="w-full py-12 relative backdrop-blur-sm">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-3xl mx-auto"
-        >
-          <LogoHeader>strength.design</LogoHeader>
-        </motion.div>
+        {/* Logo container with flex centering */}
+        <div className="flex justify-center items-center w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-auto" // Remove max-width constraint
+          >
+            <LogoHeader>strength.design</LogoHeader>
+          </motion.div>
+        </div>
 
         <div className="mt-8 text-center">
           <Button

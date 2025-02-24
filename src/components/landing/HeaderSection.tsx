@@ -15,7 +15,7 @@ export const HeaderSection = () => {
   };
 
   return (
-    <header className="w-full py-12 relative bg-black/80 backdrop-blur-sm">
+    <header className="w-full py-12 relative backdrop-blur-sm">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

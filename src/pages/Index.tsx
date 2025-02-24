@@ -22,23 +22,21 @@ const Index = () => {
 
   return (
     <div className="relative min-h-screen">
-      {/* Background image with a single, subtle gradient overlay */}
+      {/* Background image without overlay */}
       <div
         className="fixed inset-0 bg-cover bg-center"
         style={{
           backgroundImage:
             'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
         }}
-      >
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
-      </div>
+      />
 
       {/* Content container */}
       <div className="relative z-10">
         <HeaderSection />
         <HeroSection />
         
-        {/* Sections container with simplified gradient transition */}
+        {/* Sections container without gradient transition */}
         <div className="relative mt-[-32px]">
           <div className="container mx-auto px-4 max-w-[1200px]">
             <FeaturesSection />

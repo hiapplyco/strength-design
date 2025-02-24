@@ -21,10 +21,9 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
 
   return (
     <section 
-      className="relative flex flex-col items-center space-y-8 pt-48 pb-24 w-full bg-black/40 backdrop-blur-sm"
+      className="relative flex flex-col items-center space-y-8 pt-48 pb-24 w-full"
       aria-label="Scientific Strength Programming Platform"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-transparent backdrop-blur-[2px]" />
       <div className="relative z-10 text-center space-y-4 w-full px-4">
         <h1 className="text-4xl md:text-6xl font-oswald text-primary dark:text-white">
           Evidence-Based Strength Programming
@@ -35,10 +34,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mt-8">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button 
               onClick={() => setShowAuthDialog(true)}
               className="bg-destructive text-white hover:bg-destructive/90 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"
@@ -64,10 +60,7 @@ export const HeroSection = ({ children }: HeroSectionProps) => {
               Experience enterprise-grade programming technology. Generate custom workouts powered by exercise science - no credit card required.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
                   onClick={() => setShowAuthDialog(true)}
                   className="bg-white text-black hover:bg-gray-100 font-bold text-lg px-8 py-6 rounded-lg flex items-center gap-2"

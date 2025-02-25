@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { triggerConfetti } from "@/utils/confetti";
 import type { WeeklyWorkouts } from "@/types/fitness";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info, ArrowLeft, Star } from "lucide-react";
 
 // Lazy-loaded components
@@ -238,9 +239,16 @@ const WorkoutGenerator = () => {
             <div className="mb-8 bg-black/70 p-4 rounded-lg">
               <div className="flex items-center mb-2">
                 <h3 className="text-white text-lg font-semibold mr-2">Quick Start with Templates</h3>
-                <Tooltip content="Select a template to quickly generate a workout plan with pre-configured settings">
-                  <Info size={16} className="text-gray-400" />
-                </Tooltip>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info size={16} className="text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Select a template to quickly generate a workout plan with pre-configured settings
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {WORKOUT_PRESETS.map((preset) => (

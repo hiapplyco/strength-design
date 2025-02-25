@@ -14,7 +14,6 @@ interface GenerateWorkoutParams {
 
 export const useWorkoutGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const generateWorkout = async (params: GenerateWorkoutParams): Promise<WeeklyWorkouts | null> => {
@@ -114,7 +113,6 @@ export const useWorkoutGeneration = () => {
 
   return {
     isGenerating,
-    generateWorkout,
-    error
+    generateWorkout
   };
 };

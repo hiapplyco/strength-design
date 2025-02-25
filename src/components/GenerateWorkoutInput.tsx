@@ -1,4 +1,3 @@
-
 import { InputContainer } from "./workout-generator/InputContainer";
 import type { Exercise } from "./exercise-search/types";
 import { Button } from "./ui/button";
@@ -20,8 +19,6 @@ interface GenerateWorkoutInputProps {
   setShowGenerateInput: (value: boolean) => void;
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
-  selectedPreset: string | null;
-  formErrors: Record<string, string>;
 }
 
 export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {

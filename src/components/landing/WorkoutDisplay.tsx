@@ -1,11 +1,10 @@
 
-import React from 'react';
-import type { WeeklyWorkouts } from '@/types/fitness';
 import { Button } from "@/components/ui/button";
 import { WorkoutDisplayHeader } from "./workout-display/WorkoutDisplayHeader";
 import { WorkoutDayCard } from "./workout-display/WorkoutDayCard";
 import { WorkoutDaySkeleton } from "./workout-display/WorkoutDaySkeleton";
 import { ArrowLeft } from "lucide-react";
+import type { WeeklyWorkouts } from "@/types/fitness";
 import { formatWorkoutToMarkdown, formatAllWorkouts } from "@/utils/workout-formatting";
 import { useState } from "react";
 
@@ -17,13 +16,13 @@ interface WorkoutDisplayProps {
   isGenerating?: boolean;
 }
 
-const WorkoutDisplay: React.FC<WorkoutDisplayProps> = ({
-  workouts: initialWorkouts,
+export function WorkoutDisplay({ 
+  workouts: initialWorkouts, 
   resetWorkouts,
   isExporting,
   setIsExporting,
   isGenerating = false
-}) => {
+}: WorkoutDisplayProps) {
   const [workouts, setWorkouts] = useState(initialWorkouts);
   const formattedWorkouts = formatAllWorkouts(workouts);
   const workoutText = formatWorkoutToMarkdown(formattedWorkouts);
@@ -91,6 +90,4 @@ const WorkoutDisplay: React.FC<WorkoutDisplayProps> = ({
       </div>
     </div>
   );
-};
-
-export default WorkoutDisplay;
+}

@@ -1,3 +1,4 @@
+
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -17,11 +18,9 @@ interface GeneratorSectionProps {
   setShowGenerateInput: (value: boolean) => void;
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
-  selectedPreset: string | null;
-  formErrors: Record<string, string>;
 }
 
-const GeneratorSection: React.FC<GeneratorSectionProps> = ({
+export const GeneratorSection = ({
   generatePrompt,
   setGeneratePrompt,
   handleGenerateWorkout,
@@ -31,9 +30,7 @@ const GeneratorSection: React.FC<GeneratorSectionProps> = ({
   setShowGenerateInput,
   numberOfDays,
   setNumberOfDays,
-  selectedPreset,
-  formErrors,
-}) => {
+}: GeneratorSectionProps) => {
   const [hasScrolled, setHasScrolled] = useState(false);
   const { scrollY } = useScroll();
 
@@ -99,8 +96,6 @@ const GeneratorSection: React.FC<GeneratorSectionProps> = ({
             setShowGenerateInput={setShowGenerateInput}
             numberOfDays={numberOfDays}
             setNumberOfDays={setNumberOfDays}
-            selectedPreset={selectedPreset}
-            formErrors={formErrors}
           />
         </div>
       </div>
@@ -109,5 +104,3 @@ const GeneratorSection: React.FC<GeneratorSectionProps> = ({
     </motion.div>
   );
 };
-
-export default GeneratorSection;

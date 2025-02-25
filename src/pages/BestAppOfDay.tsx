@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { useToast } from "@/hooks/use-toast";
-import WorkoutDisplay from "@/components/landing/WorkoutDisplay";
+import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Loader2 } from "lucide-react";
 
@@ -25,8 +24,6 @@ export default function BestAppOfDay() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const handleGenerateWorkout = async () => {
@@ -132,8 +129,6 @@ export default function BestAppOfDay() {
         setShowGenerateInput={setShowGenerateInput}
         numberOfDays={7}
         setNumberOfDays={() => {}}
-        selectedPreset={selectedPreset}
-        formErrors={formErrors}
       />
       {workouts && (
         <WorkoutDisplay

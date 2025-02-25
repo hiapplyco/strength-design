@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { triggerConfetti } from "@/utils/confetti";
 import type { WeeklyWorkouts } from "@/types/fitness";
@@ -12,8 +11,8 @@ import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/comp
 import { Info, ArrowLeft, Star } from "lucide-react";
 
 // Lazy-loaded components
-const GeneratorSection = lazy(() => import("@/components/landing/GeneratorSection"));
-const WorkoutDisplay = lazy(() => import("@/components/landing/WorkoutDisplay"));
+const GeneratorSection = lazy(() => import("@/components/landing/GeneratorSection").then(module => ({ default: module.default })));
+const WorkoutDisplay = lazy(() => import("@/components/landing/WorkoutDisplay").then(module => ({ default: module.default })));
 
 // Common workout presets
 const WORKOUT_PRESETS = [

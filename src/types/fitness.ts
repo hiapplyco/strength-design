@@ -14,6 +14,9 @@ export interface WorkoutDay {
   notes?: string;
   images?: string[];
   exercises?: Exercise[];
+  metadata?: {
+    goals?: string[];
+  };
 }
 
 export type WeeklyWorkouts = Record<string, WorkoutDay>;
@@ -21,3 +24,4 @@ export type WeeklyWorkouts = Record<string, WorkoutDay>;
 export interface WorkoutData {
   [key: string]: WorkoutDay;
 }
+

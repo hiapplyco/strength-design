@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ interface WorkoutDisplayProps {
   isGenerating?: boolean;
 }
 
-const WorkoutDisplay: React.FC<WorkoutDisplayProps> = ({
+export const WorkoutDisplay: React.FC<WorkoutDisplayProps> = ({
   workouts: initialWorkouts,
   resetWorkouts,
   isExporting,
@@ -90,6 +91,6 @@ const WorkoutDisplay: React.FC<WorkoutDisplayProps> = ({
       </div>
     </div>
   );
-}
+};
 
 export default WorkoutDisplay;

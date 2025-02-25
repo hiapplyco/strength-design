@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { useToast } from "@/hooks/use-toast";
-import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
+import WorkoutDisplay from "@/components/landing/WorkoutDisplay";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Loader2 } from "lucide-react";
 

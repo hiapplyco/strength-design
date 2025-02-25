@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { triggerConfetti } from "@/utils/confetti";
 import type { WeeklyWorkouts } from "@/types/fitness";
@@ -35,7 +36,7 @@ const WorkoutGenerator = () => {
   const [numberOfDays, setNumberOfDays] = useState(DEFAULT_DAYS);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [recentWorkouts, setRecentWorkouts<{id: string, name: string, date: string}[]>(() => {
+  const [recentWorkouts, setRecentWorkouts] = useState<{id: string, name: string, date: string}[]>(() => {
     // Load from localStorage on component mount
     try {
       const saved = localStorage.getItem('recentWorkouts');

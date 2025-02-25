@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { WorkoutDay } from "@/types/fitness";
-import { Loader2, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,7 @@ export interface WorkoutModifierProps {
   onUpdate: (updates: Partial<WorkoutDay>) => void;
   allWorkouts: Record<string, WorkoutDay>;
   searchInputRef?: React.RefObject<HTMLInputElement>;
+  day?: string;
 }
 
 export function WorkoutModifier({
@@ -26,7 +27,8 @@ export function WorkoutModifier({
   onClose,
   onUpdate,
   allWorkouts,
-  searchInputRef
+  searchInputRef,
+  day
 }: WorkoutModifierProps) {
   const [isModifying, setIsModifying] = useState(false);
   const [modificationPrompt, setModificationPrompt] = useState("");
@@ -44,9 +46,24 @@ export function WorkoutModifier({
     setIsModifying(true);
 
     try {
+      const currentWorkout = {
+        warmup,
+        workout,
+        notes,
+        strength,
+      };
+
+      console.log('Sending modification request:', {
+        dayToModify: day,
+        currentWorkout,
+        modificationPrompt,
+        allWorkouts,
+      });
+
       const { data, error } = await supabase.functions.invoke('workout-modifier', {
         body: {
-          dayToModify: workout,
+          dayToModify: day,
+          currentWorkout,
           modificationPrompt,
           allWorkouts,
         },
@@ -55,11 +72,12 @@ export function WorkoutModifier({
       if (error) throw error;
 
       if (data) {
+        console.log('Modification response:', data);
         onUpdate({
           warmup: data.warmup,
           workout: data.workout,
           notes: data.notes,
-          description: data.description
+          strength: data.strength
         });
         
         toast({
@@ -83,7 +101,7 @@ export function WorkoutModifier({
   return (
     <div className="space-y-2 border-4 border-destructive bg-destructive rounded-[20px] p-4 animate-scale-in">
       <Input
-        placeholder={`Examples: "Make ${workout}'s workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
+        placeholder={`Examples: "Make the workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
         value={modificationPrompt}
         onChange={(e) => setModificationPrompt(e.target.value)}
         className="border-2 border-primary bg-white text-black placeholder:text-gray-400 rounded-[20px]"

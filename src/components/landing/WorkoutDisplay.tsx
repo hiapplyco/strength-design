@@ -17,7 +17,7 @@ interface WorkoutDisplayProps {
   isGenerating?: boolean;
 }
 
-export const WorkoutDisplay: React.FC<WorkoutDisplayProps> = ({
+const WorkoutDisplay: React.FC<WorkoutDisplayProps> = ({
   workouts: initialWorkouts,
   resetWorkouts,
   isExporting,

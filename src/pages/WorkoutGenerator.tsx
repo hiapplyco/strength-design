@@ -11,8 +11,8 @@ import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/comp
 import { Info, ArrowLeft, Star } from "lucide-react";
 
 // Lazy-loaded components
-const GeneratorSection = lazy(() => import("@/components/landing/GeneratorSection").then(module => ({ default: module.default })));
-const WorkoutDisplay = lazy(() => import("@/components/landing/WorkoutDisplay").then(module => ({ default: module.default })));
+const GeneratorSection = lazy(() => import("@/components/landing/GeneratorSection"));
+const WorkoutDisplay = lazy(() => import("@/components/landing/WorkoutDisplay"));
 
 // Common workout presets
 const WORKOUT_PRESETS = [
@@ -35,7 +35,7 @@ const WorkoutGenerator = () => {
   const [numberOfDays, setNumberOfDays] = useState(DEFAULT_DAYS);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [recentWorkouts, setRecentWorkouts] = useState<{id: string, name: string, date: string}[]>(() => {
+  const [recentWorkouts, setRecentWorkouts<{id: string, name: string, date: string}[]>(() => {
     // Load from localStorage on component mount
     try {
       const saved = localStorage.getItem('recentWorkouts');

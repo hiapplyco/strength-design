@@ -5,7 +5,7 @@ import type { WeeklyWorkouts } from "@/types/fitness";
 import { useNavigate } from "react-router-dom";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PresetSelector } from "@/components/workout-generator/PresetSelector";
+import { PresetSelector, WORKOUT_PRESETS } from "@/components/workout-generator/PresetSelector";
 import { RecentWorkouts } from "@/components/workout-generator/RecentWorkouts";
 
 // Lazy-loaded components

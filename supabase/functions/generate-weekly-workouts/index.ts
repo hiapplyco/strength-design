@@ -1,7 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { buildPrompt } from "./prompts.ts";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
 const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -20,13 +19,20 @@ serve(async (req) => {
     const { prompt, weatherPrompt, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
     console.log('Generating workout with params:', { prompt, weatherPrompt, fitnessLevel, prescribedExercises, numberOfDays });
 
-    const fullPrompt = buildPrompt({
-      prompt,
-      weatherPrompt,
-      fitnessLevel,
-      prescribedExercises,
-      numberOfDays
-    });
+    const fullPrompt = `Create a ${numberOfDays}-day workout plan with the following requirements:
+      Fitness Level: ${fitnessLevel}
+      Weather Conditions: ${weatherPrompt}
+      Prescribed Exercises: ${prescribedExercises}
+      Additional Requirements: ${prompt}
+      
+      For each day, provide:
+      1. A brief description of the day's focus
+      2. A proper warmup routine
+      3. The main workout with specific exercises and sets/reps
+      4. A strength focus area
+      5. Any relevant coaching notes
+      
+      Format the response as a JSON object where each day is a key.`;
 
     console.log('Using prompt:', fullPrompt);
 

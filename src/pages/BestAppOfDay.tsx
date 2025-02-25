@@ -25,6 +25,8 @@ export default function BestAppOfDay() {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [generatedWorkouts, setGeneratedWorkouts] = useState<WeeklyWorkouts | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   const handleGenerateWorkout = async () => {
@@ -130,6 +132,8 @@ export default function BestAppOfDay() {
         setShowGenerateInput={setShowGenerateInput}
         numberOfDays={7}
         setNumberOfDays={() => {}}
+        selectedPreset={selectedPreset}
+        formErrors={formErrors}
       />
       {workouts && (
         <WorkoutDisplay

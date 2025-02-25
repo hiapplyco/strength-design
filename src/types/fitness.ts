@@ -17,6 +17,7 @@ export interface WorkoutDay {
   metadata?: {
     goals?: string[];
   };
+  goals?: string[]; // Added this line
 }
 
 export type WeeklyWorkouts = Record<string, WorkoutDay>;
@@ -24,4 +25,3 @@ export type WeeklyWorkouts = Record<string, WorkoutDay>;
 export interface WorkoutData {
   [key: string]: WorkoutDay;
 }
-

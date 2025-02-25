@@ -164,42 +164,6 @@ const WorkoutGenerator = () => {
     </div>
   );
 
-  // Render previously generated workouts list
-  const renderSavedWorkouts = () => {
-    if (recentWorkouts.length === 0) return null;
-    
-    return (
-      <div className="mb-8 bg-black/70 p-4 rounded-lg">
-        <h3 className="text-white text-lg mb-2 font-semibold flex items-center">
-          <Star size={16} className="mr-2 text-yellow-400" />
-          Recent Workouts
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {recentWorkouts.map(workout => (
-            <Badge 
-              key={workout.id} 
-              variant="outline"
-              className="cursor-pointer hover:bg-primary/20 transition-colors"
-              onClick={() => {
-                try {
-                  const saved = localStorage.getItem(workout.id);
-                  if (saved) {
-                    setWorkouts(JSON.parse(saved));
-                    setShowGenerateInput(false);
-                  }
-                } catch (e) {
-                  console.error("Failed to load saved workout", e);
-                }
-              }}
-            >
-              {workout.name} • {workout.date}
-            </Badge>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   // Main render logic with conditional component display
   if (workouts) {
     return (
@@ -270,9 +234,6 @@ const WorkoutGenerator = () => {
                 ))}
               </div>
             </div>
-            
-            {/* Recent workouts section */}
-            {renderSavedWorkouts()}
             
             {/* Error display */}
             {errorMessage && (

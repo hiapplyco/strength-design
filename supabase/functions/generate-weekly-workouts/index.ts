@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
@@ -11,68 +12,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Workout plan types and interfaces
-interface WorkoutDay {
-  title: string;
-  focus: string;
-  warmup: {
-    duration: string;
-    exercises: Array<{
-      name: string;
-      instructions: string;
-      duration?: string;
-      reps?: number;
-    }>;
-  };
-  mainWorkout: Array<{
-    exercise: string;
-    sets: number;
-    reps: string | number;
-    rest: string;
-    notes?: string;
-    modifications?: {
-      beginner?: string;
-      advanced?: string;
-    };
-  }>;
-  strengthFocus: {
-    area: string;
-    exercises: Array<{
-      name: string;
-      sets: number;
-      reps: string | number;
-      rest: string;
-    }>;
-  };
-  cooldown: {
-    duration: string;
-    exercises: Array<{
-      name: string;
-      duration: string;
-    }>;
-  };
-  coachingNotes: string;
-  nutrition?: {
-    hydration: string;
-    preWorkout?: string;
-    postWorkout?: string;
-  };
-  recovery?: {
-    suggestions: string[];
-    estimatedFatigue: string;
-  };
-}
-
-interface WorkoutPlan {
-  metadata: {
-    fitnessLevel: string;
-    weatherConditions: string;
-    durationDays: number;
-    targetAreas: string[];
-    equipment: string[];
-    goals: string[];
-  };
-  days: Record<string, WorkoutDay>;
+interface WorkoutGenerationParams {
+  prompt: string;
+  weatherPrompt: string;
+  fitnessLevel: string;
+  prescribedExercises: string;
+  numberOfDays: number;
 }
 
 serve(async (req) => {
@@ -82,104 +27,40 @@ serve(async (req) => {
   }
 
   try {
-    // Parse request
-    const { 
-      prompt = "",
-      weatherPrompt = "Any", 
-      fitnessLevel = "Intermediate", 
-      prescribedExercises = "",
-      numberOfDays = 5,
-      goals = "General fitness",
-      restrictions = "",
-      equipment = "Basic home equipment",
-      focusAreas = "",
-      intensity = "Moderate",
-      duration = "45-60 minutes",
-      restDays = true,
-      nutritionAdvice = false,
-      recoveryGuidance = false
-    } = await req.json();
-
-    console.log('Generating workout with params:', { 
-      prompt, weatherPrompt, fitnessLevel, prescribedExercises, 
-      numberOfDays, goals, restrictions, equipment, 
-      focusAreas, intensity, duration 
-    });
+    console.log('Starting workout generation...');
+    const params = await req.json() as WorkoutGenerationParams;
+    console.log('Received params:', params);
 
     // Construct a more detailed prompt
-    const fullPrompt = `Generate a comprehensive ${numberOfDays}-day workout plan with the following specifications:
+    const fullPrompt = `Generate a comprehensive ${params.numberOfDays}-day workout plan with the following specifications:
 
-ATHLETE PROFILE:
-- Fitness Level: ${fitnessLevel}
-- Goals: ${goals}
-- Restrictions/Injuries: ${restrictions}
-- Prescribed Exercises: ${prescribedExercises}
+FITNESS PROFILE:
+- Level: ${params.fitnessLevel}
+- Weather Considerations: ${params.weatherPrompt || 'None specified'}
+- Prescribed Exercises/Focus: ${params.prescribedExercises}
 
-WORKOUT PARAMETERS:
-- Weather Conditions: ${weatherPrompt}
-- Available Equipment: ${equipment}
-- Focus Areas: ${focusAreas}
-- Intensity Level: ${intensity}
-- Workout Duration: ${duration}
-- Include Rest Days: ${restDays ? "Yes" : "No"}
-- Include Nutrition Advice: ${nutritionAdvice ? "Yes" : "No"}
-- Include Recovery Guidance: ${recoveryGuidance ? "Yes" : "No"}
+REQUIREMENTS:
+For each day (day1 through day${params.numberOfDays}), provide:
+1. A description of the day's focus
+2. A warmup routine
+3. The main workout with specific exercises
+4. A strength component
+5. Additional notes if relevant
 
-Additional Requirements: ${prompt}
-
-For each workout day, provide:
-1. A title and brief description of the day's focus
-2. A proper warmup routine with specific exercises and durations
-3. The main workout with detailed exercises, sets, reps, and rest periods
-4. Modifications for beginners and advanced athletes where appropriate
-5. A strength focus section targeting specific muscle groups
-6. A cooldown routine
-7. Coaching notes with form tips and common mistakes to avoid
-${nutritionAdvice ? "8. Nutrition recommendations for before and after the workout" : ""}
-${recoveryGuidance ? "9. Recovery suggestions and estimated fatigue level" : ""}
-
-${restDays ? "Include appropriate rest days with active recovery options." : ""}
-
-Format the response as a JSON object with the following structure:
+Format the response as valid JSON following this exact structure:
 {
-  "metadata": {
-    "fitnessLevel": string,
-    "weatherConditions": string,
-    "durationDays": number,
-    "targetAreas": string[],
-    "equipment": string[],
-    "goals": string[]
+  "day1": {
+    "description": "Focus of the day",
+    "warmup": "Detailed warmup",
+    "workout": "Main workout details",
+    "strength": "Strength component",
+    "notes": "Additional notes"
   },
-  "days": {
-    "day1": {
-      "title": string,
-      "focus": string,
-      "warmup": {
-        "duration": string,
-        "exercises": [{"name": string, "instructions": string, "duration": string}]
-      },
-      "mainWorkout": [{"exercise": string, "sets": number, "reps": number or string, "rest": string, "notes": string, "modifications": {"beginner": string, "advanced": string}}],
-      "strengthFocus": {
-        "area": string,
-        "exercises": [{"name": string, "sets": number, "reps": number or string, "rest": string}]
-      },
-      "cooldown": {
-        "duration": string,
-        "exercises": [{"name": string, "duration": string}]
-      },
-      "coachingNotes": string,
-      ${nutritionAdvice ? `"nutrition": {"hydration": string, "preWorkout": string, "postWorkout": string},` : ""}
-      ${recoveryGuidance ? `"recovery": {"suggestions": string[], "estimatedFatigue": string}` : ""}
-    },
-    ... (for each day)
-  }
-}
+  // ... repeat for each day
+}`;
 
-Ensure the workout plan is scientifically sound, appropriately progressive, and considers all specified parameters.`;
+    console.log('Sending prompt to Gemini:', fullPrompt);
 
-    console.log('Using prompt:', fullPrompt);
-
-    // Generate content with Gemini
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
       generationConfig: {
@@ -188,52 +69,57 @@ Ensure the workout plan is scientifically sound, appropriately progressive, and 
       }
     });
 
+    console.log('Received response from Gemini');
     const response = result.response;
-    console.log('Response received from Gemini');
+    const responseText = response.text();
+    console.log('Raw response:', responseText);
 
-    // Process and parse the response
-    let parsedResponse: WorkoutPlan;
-    try {
-      // Clean up the response text to ensure it's valid JSON
-      const responseText = response.text().replace(/```json\n?|\n?```/g, '').trim();
-      parsedResponse = JSON.parse(responseText);
-      
-      // Validate the structure matches our expected format
-      if (!parsedResponse.metadata || !parsedResponse.days) {
-        throw new Error('Invalid response structure');
-      }
-    } catch (error) {
-      console.error('Error parsing JSON response:', error);
-      
-      // Attempt to extract any JSON-like structure from the text
-      const match = response.text().match(/\{[\s\S]*\}/);
-      if (match) {
-        try {
-          parsedResponse = JSON.parse(match[0]);
-        } catch {
-          throw new Error('Failed to parse workout data');
-        }
-      } else {
-        throw new Error('Failed to parse workout data');
-      }
+    // Try to find and parse JSON from the response
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in response');
     }
 
-    // Return the processed workout plan
-    return new Response(
-      JSON.stringify(parsedResponse),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    );
+    const workoutData = JSON.parse(jsonMatch[0]);
+    
+    // Validate the structure
+    const expectedDays = Array.from({ length: params.numberOfDays }, (_, i) => `day${i + 1}`);
+    const missingDays = expectedDays.filter(day => !workoutData[day]);
+    
+    if (missingDays.length > 0) {
+      throw new Error(`Missing workouts for days: ${missingDays.join(', ')}`);
+    }
+
+    // Validate each day has required fields
+    Object.entries(workoutData).forEach(([day, workout]: [string, any]) => {
+      const requiredFields = ['description', 'warmup', 'workout', 'strength'];
+      const missingFields = requiredFields.filter(field => !workout[field]);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Day ${day} is missing required fields: ${missingFields.join(', ')}`);
+      }
+    });
+
+    console.log('Successfully validated workout data');
+
+    return new Response(JSON.stringify(workoutData), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
   } catch (error) {
     console.error('Error generating workout:', error);
+    console.error('Error details:', error.stack);
+
     return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        message: "Failed to generate workout plan. Please try again with different parameters." 
+      JSON.stringify({
+        error: 'Failed to generate workout',
+        message: error.message,
+        details: error.stack
       }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
+      }
     );
   }
 });

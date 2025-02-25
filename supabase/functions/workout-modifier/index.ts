@@ -1,67 +1,63 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-import { corsHeaders } from '../_shared/cors.ts';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { dayToModify, modificationPrompt, allWorkouts } = await req.json();
+    console.log('Modifying workout with params:', { dayToModify, modificationPrompt });
 
-    // Create Gemini API request
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `You are an AI fitness trainer. Modify the workout for ${dayToModify} based on this request: "${modificationPrompt}". 
-                   Here are all the workouts for context: ${JSON.stringify(allWorkouts)}.
-                   Return ONLY a JSON object with these exact keys: { warmup: string, workout: string, notes: string, description: string }
-                   Make sure the response is valid JSON.`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 1000,
-        },
-      }),
+    const prompt = `
+      I have a workout plan and I want to modify ${dayToModify}'s workout according to this request: "${modificationPrompt}".
+      Here's the current workout data: ${JSON.stringify(allWorkouts[dayToModify], null, 2)}
+      
+      Please modify the workout while maintaining the same JSON structure. Ensure all exercises are realistic and the intensity matches the modification request.
+      Return ONLY the modified JSON for ${dayToModify}, maintaining the exact same structure with warmup, workout, and notes fields.
+    `;
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        maxOutputTokens: 6000,
+        temperature: 0.7
+      }
     });
 
-    const data = await response.json();
-    console.log('Gemini Response:', data);
+    const response = result.response;
+    console.log('Raw response:', response.text());
 
-    let modifiedWorkout;
+    let parsedResponse;
     try {
-      const textResponse = data.candidates[0].content.parts[0].text;
-      // Clean the response to ensure valid JSON
-      const cleanedResponse = textResponse.replace(/```json\n?|\n?```/g, '').trim();
-      modifiedWorkout = JSON.parse(cleanedResponse);
+      parsedResponse = JSON.parse(response.text().replace(/```json\n?|\n?```/g, '').trim());
     } catch (error) {
-      console.error('Error parsing Gemini response:', error);
-      throw new Error('Failed to parse workout modification response');
+      console.error('Error parsing JSON response:', error);
+      throw new Error('Failed to parse modified workout data');
     }
 
-    return new Response(JSON.stringify(modifiedWorkout), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
-
+    return new Response(
+      JSON.stringify(parsedResponse),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    console.error('Error modifying workout:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   }
 });

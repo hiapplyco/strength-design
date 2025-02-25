@@ -1,169 +1,66 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
-import { corsHeaders } from "../_shared/cors.ts";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { buildPrompt } from "./prompts.ts";
 
-interface WorkoutRequest {
-  prompt: string;
-  weatherPrompt: string;
-  fitnessLevel: string;
-  prescribedExercises: string;
-  numberOfDays: number;
-}
+const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-// Clean JSON text by removing markdown and invalid syntax
-function cleanJsonText(text: string): string {
-  return text
-    .replace(/```json\s*|\s*```/g, '')           // Remove markdown code blocks
-    .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')     // Remove comments
-    .replace(/,(\s*[}\]])/g, '$1')               // Remove trailing commas
-    .replace(/\s+/g, ' ')                        // Normalize whitespace
-    .replace(/\\n/g, ' ')                        // Replace escaped newlines
-    .replace(/\n/g, ' ')                         // Remove actual newlines
-    .trim();                                     // Remove leading/trailing whitespace
-}
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
-  console.log("Function invoked with request:", req.method);
-
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-      }
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    if (req.method !== 'POST') {
-      throw new Error(`HTTP method ${req.method} is not allowed.`);
-    }
+    const { prompt, weatherPrompt, fitnessLevel, prescribedExercises, numberOfDays } = await req.json();
+    console.log('Generating workout with params:', { prompt, weatherPrompt, fitnessLevel, prescribedExercises, numberOfDays });
 
-    const reqBody = await req.json();
-    console.log("Request body:", reqBody);
+    const fullPrompt = buildPrompt({
+      prompt,
+      weatherPrompt,
+      fitnessLevel,
+      prescribedExercises,
+      numberOfDays
+    });
 
-    const { prompt, weatherPrompt, fitnessLevel, prescribedExercises, numberOfDays } = reqBody as WorkoutRequest;
+    console.log('Using prompt:', fullPrompt);
 
-    if (!prompt || !fitnessLevel || !numberOfDays) {
-      throw new Error("Missing required fields in request");
-    }
-
-    // Initialize Gemini
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY is not set");
-    }
-
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.0-pro",
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
       generationConfig: {
-        temperature: 0.9,
-        topP: 1,
-        topK: 1,
-        maxOutputTokens: 2048,
-      },
+        maxOutputTokens: 6000,
+        temperature: 0.7
+      }
     });
 
-    // Build the workout prompt
-    const workoutPrompt = `
-      Create a ${numberOfDays}-day workout plan for a ${fitnessLevel} level athlete.
-      ${weatherPrompt ? `Consider the weather conditions: ${weatherPrompt}` : ''}
-      ${prescribedExercises ? `Include these exercises: ${prescribedExercises}` : ''}
-      Additional requirements: ${prompt}
-    `;
+    const response = result.response;
+    console.log('Raw response:', response.text());
 
-    // Add JSON formatting instruction
-    const jsonInstruction = `
-      Format your response as a JSON object with the following structure for each day:
-      {
-        "day1": {
-          "description": "Brief overview of the day's workout",
-          "warmup": "Detailed warmup routine",
-          "workout": "Main workout with exercises, sets, and reps",
-          "strength": "Strength training component",
-          "notes": "Additional coaching notes",
-          "exercises": [
-            {
-              "name": "Exercise Name",
-              "sets": "Number of sets",
-              "reps": "Number of reps",
-              "details": "Additional details"
-            }
-          ]
-        }
-      }
-      IMPORTANT: Return ONLY the JSON object, without any markdown formatting or code blocks.
-    `;
-
-    const finalPrompt = `${workoutPrompt}\n\n${jsonInstruction}`;
-    console.log("Sending request to Gemini with prompt:", finalPrompt);
-
-    const result = await model.generateContent(finalPrompt);
-    const response = await result.response;
-    const text = response.text();
-    console.log("Raw response from Gemini:", text);
-
-    // Clean and parse the response
-    const cleanedText = cleanJsonText(text);
-    console.log("Cleaned text:", cleanedText);
-
-    // Parse the response as JSON and validate structure
-    let workoutData;
+    let parsedResponse;
     try {
-      workoutData = JSON.parse(cleanedText);
-      console.log("Successfully parsed workout data:", workoutData);
-      
-      // Ensure each day has the required structure and extract exercises
-      Object.keys(workoutData).forEach(day => {
-        const dayData = workoutData[day];
-        if (!dayData.exercises) {
-          dayData.exercises = extractExercises(dayData.workout);
-        }
-      });
+      parsedResponse = JSON.parse(response.text().replace(/```json\n?|\n?```/g, '').trim());
     } catch (error) {
-      console.error("Error parsing cleaned text:", error);
-      throw new Error(`Failed to parse workout data: ${error.message}\nCleaned text: ${cleanedText}`);
+      console.error('Error parsing JSON response:', error);
+      throw new Error('Failed to parse workout data');
     }
 
-    return new Response(JSON.stringify(workoutData), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("Error in generate-weekly-workouts:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        details: error.stack 
-      }),
-      {
+      JSON.stringify(parsedResponse),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  } catch (error) {
+    console.error('Error generating workout:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     );
   }
 });
-
-function extractExercises(workoutText: string): Array<{ name: string; sets?: string; reps?: string; details?: string }> {
-  if (!workoutText) return [];
-  
-  const exercises: Array<{ name: string; sets?: string; reps?: string; details?: string }> = [];
-  const lines = workoutText.split('\n');
-  
-  lines.forEach(line => {
-    const exerciseMatch = line.match(/([A-Z][a-zA-Z\s-]+)(?:\s*[-:]\s*(\d+)\s*(?:sets?|x)\s*(?:of\s*)?(\d+)|.*)/i);
-    if (exerciseMatch) {
-      exercises.push({
-        name: exerciseMatch[1].trim(),
-        sets: exerciseMatch[2] || undefined,
-        reps: exerciseMatch[3] || undefined,
-        details: line.trim()
-      });
-    }
-  });
-  
-  return exercises;
-}

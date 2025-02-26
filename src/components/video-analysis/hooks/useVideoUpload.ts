@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,14 +19,49 @@ export const useVideoUpload = () => {
     }
     
     setUploading(true);
+    
     try {
-      const blob = new Blob(recordedChunks, { type: mimeType });
+      // Create a web worker for processing
+      const worker = new Worker(
+        new URL('../workers/video-processor.worker.ts', import.meta.url),
+        { type: 'module' }
+      );
+
+      // Create a promise to handle the worker response
+      const processedBlob = await new Promise((resolve, reject) => {
+        worker.onmessage = (e) => {
+          if (e.data.error) {
+            reject(new Error(e.data.error));
+          } else {
+            resolve(e.data.processedBlob);
+          }
+        };
+
+        worker.onerror = (error) => {
+          reject(new Error('Worker error: ' + error.message));
+        };
+
+        // Send data to worker
+        worker.postMessage({
+          chunks: recordedChunks,
+          mimeType,
+          options: {
+            compress: true,
+            targetBitrate: 1500000
+          }
+        });
+      });
+
+      // Terminate the worker after processing
+      worker.terminate();
+
       const fileName = `videos/recording_${Date.now()}.webm`;
 
+      // Upload the processed blob
       const { error: uploadError } = await supabase
         .storage
         .from('videos')
-        .upload(fileName, blob, {
+        .upload(fileName, processedBlob as Blob, {
           cacheControl: '3600',
           upsert: false,
           contentType: mimeType,

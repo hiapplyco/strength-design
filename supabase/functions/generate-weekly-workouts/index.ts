@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@1.1.0";
+import { GoogleGenerativeAI } from "npm:@google/generative-ai@1.1.0";
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
@@ -12,14 +12,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface WorkoutGenerationParams {
-  prompt: string;
-  weatherPrompt: string;
-  fitnessLevel: string;
-  prescribedExercises: string;
-  numberOfDays: number;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -28,7 +20,7 @@ serve(async (req) => {
 
   try {
     console.log('Starting workout generation...');
-    const params = await req.json() as WorkoutGenerationParams;
+    const params = await req.json();
     console.log('Received params:', params);
 
     // Construct a more detailed prompt
@@ -102,9 +94,12 @@ Format the response as valid JSON following this exact structure:
 
     console.log('Successfully validated workout data');
 
-    return new Response(JSON.stringify(workoutData), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify(workoutData),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
 
   } catch (error: any) {
     console.error('Error generating workout:', error);

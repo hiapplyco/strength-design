@@ -8,9 +8,18 @@ import { useScriptGeneration } from "./hooks/useScriptGeneration";
 
 export const VideoAnalysis = memo(() => {
   const location = useLocation();
-  const [showRecorder, setShowRecorder] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
-  const [teleprompterPosition, setTeleprompterPosition] = useState(0);
+  const [showRecorder, setShowRecorder] = useState(() => {
+    const saved = sessionStorage.getItem('video-analysis-recorder');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [showEditor, setShowEditor] = useState(() => {
+    const saved = sessionStorage.getItem('video-analysis-editor');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [teleprompterPosition, setTeleprompterPosition] = useState(() => {
+    const saved = sessionStorage.getItem('video-analysis-teleprompter');
+    return saved ? parseInt(saved, 10) : 0;
+  });
   
   const {
     workoutScript,
@@ -19,6 +28,20 @@ export const VideoAnalysis = memo(() => {
     generateMonologue
   } = useScriptGeneration();
 
+  // Persist state changes to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('video-analysis-recorder', JSON.stringify(showRecorder));
+  }, [showRecorder]);
+
+  useEffect(() => {
+    sessionStorage.setItem('video-analysis-editor', JSON.stringify(showEditor));
+  }, [showEditor]);
+
+  useEffect(() => {
+    sessionStorage.setItem('video-analysis-teleprompter', teleprompterPosition.toString());
+  }, [teleprompterPosition]);
+
+  // Handle initial state from location
   useEffect(() => {
     if (location.state?.workoutScript) {
       const tempDiv = document.createElement('div');
@@ -77,3 +100,4 @@ export const VideoAnalysis = memo(() => {
 });
 
 VideoAnalysis.displayName = 'VideoAnalysis';
+

@@ -1,3 +1,4 @@
+
 import { Editor } from "@/components/document-editor/Editor";
 import VideoRecorder from "./VideoRecorder";
 import { VideoUpload } from "./VideoUpload";
@@ -5,10 +6,11 @@ import { Teleprompter } from "./Teleprompter";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
 import { Button } from "@/components/ui/button";
-import { Mic } from "lucide-react";
+import { Mic, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { useSharedContent } from "./hooks/useSharedContent";
 
 interface EditorViewProps {
   showRecorder: boolean;
@@ -31,6 +33,7 @@ export function EditorView({
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { isSharing, sharedLink, shareContent } = useSharedContent();
 
   const generateNarration = async (voiceId: string) => {
     if (!workoutScript) {
@@ -81,11 +84,59 @@ export function EditorView({
     setSelectedFile(file);
   };
 
+  const handleShare = async () => {
+    if (!workoutScript) {
+      toast({
+        title: "Error",
+        description: "No content to share",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await shareContent(workoutScript);
+  };
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-white">Record Your Video</h2>
+        <Button
+          variant="outline"
+          onClick={handleShare}
+          disabled={isSharing || !workoutScript}
+          className="gap-2"
+        >
+          <Share2 className="w-4 h-4" />
+          {isSharing ? 'Sharing...' : 'Share Content'}
+        </Button>
       </div>
+
+      {sharedLink && (
+        <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4">
+          <p className="text-sm text-white">Share this link:</p>
+          <div className="flex items-center gap-2 mt-2">
+            <input
+              type="text"
+              value={sharedLink}
+              readOnly
+              className="flex-1 bg-black/50 text-white px-3 py-1 rounded border border-gray-700"
+            />
+            <Button
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(sharedLink);
+                toast({
+                  title: "Copied!",
+                  description: "Link copied to clipboard",
+                });
+              }}
+            >
+              Copy
+            </Button>
+          </div>
+        </div>
+      )}
 
       {showEditor && (
         <div className="bg-black/30 backdrop-blur-sm rounded-lg p-6">

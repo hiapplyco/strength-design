@@ -1,10 +1,10 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "npm:@google/generative-ai@1.1.0";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 // CORS headers
 const corsHeaders = {

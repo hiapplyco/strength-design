@@ -58,13 +58,21 @@ export const useWorkoutGeneration = () => {
         }
       });
 
-      if (error) {
-        console.error('Error generating workout:', error);
-        throw error;
+      // Check for edge function error response
+      if (error || !data) {
+        console.error('Edge function error:', error);
+        const errorMessage = error?.message || 'Failed to generate workout. Please try again.';
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return null;
       }
 
-      if (!data || typeof data !== 'object') {
-        throw new Error('Invalid response from workout generation');
+      // Validate the response data
+      if (typeof data !== 'object') {
+        throw new Error('Invalid response format from workout generation');
       }
 
       // Save to generated_workouts table

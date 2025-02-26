@@ -1,10 +1,10 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@1.1.0";
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
 // CORS headers
 const corsHeaders = {
@@ -106,7 +106,7 @@ Format the response as valid JSON following this exact structure:
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating workout:', error);
     console.error('Error details:', error.stack);
 

@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
 const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,9 +16,10 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
-    console.log('Received message:', message);
+    const { message, messageId } = await req.json();
+    console.log('Processing message:', message);
 
+    // Generate content using Gemini
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: message }] }],
       generationConfig: {
@@ -28,16 +29,18 @@ serve(async (req) => {
     });
 
     const response = result.response;
-    console.log('Generated response:', response);
+    const text = response.text();
+    console.log('Generated response:', text);
 
+    // Return the generated response
     return new Response(
-      JSON.stringify({ response: response.text() }),
+      JSON.stringify({ response: text }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       },
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in chat-with-gemini function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

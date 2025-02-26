@@ -1,16 +1,12 @@
 
 import { Editor } from "@/components/document-editor/Editor";
-import VideoRecorder from "./VideoRecorder";
-import { VideoUpload } from "./VideoUpload";
-import { Teleprompter } from "./Teleprompter";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
-import { Button } from "@/components/ui/button";
-import { Mic, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useSharedContent } from "./hooks/useSharedContent";
+import { ShareDialog } from "./components/ShareDialog";
+import { VoiceGenerationDialog } from "./components/VoiceGenerationDialog";
+import { RecordingSection } from "./components/RecordingSection";
 
 interface EditorViewProps {
   showRecorder: boolean;
@@ -80,63 +76,17 @@ export function EditorView({
     }
   };
 
-  const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
-  };
-
-  const handleShare = async () => {
-    if (!workoutScript) {
-      toast({
-        title: "Error",
-        description: "No content to share",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    await shareContent(workoutScript);
-  };
-
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-white">Record Your Video</h2>
-        <Button
-          variant="outline"
-          onClick={handleShare}
-          disabled={isSharing || !workoutScript}
-          className="gap-2"
-        >
-          <Share2 className="w-4 h-4" />
-          {isSharing ? 'Sharing...' : 'Share Content'}
-        </Button>
+        <ShareDialog 
+          isSharing={isSharing}
+          sharedLink={sharedLink}
+          onShare={() => shareContent(workoutScript)}
+          workoutScript={workoutScript}
+        />
       </div>
-
-      {sharedLink && (
-        <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4">
-          <p className="text-sm text-white">Share this link:</p>
-          <div className="flex items-center gap-2 mt-2">
-            <input
-              type="text"
-              value={sharedLink}
-              readOnly
-              className="flex-1 bg-black/50 text-white px-3 py-1 rounded border border-gray-700"
-            />
-            <Button
-              variant="outline"
-              onClick={() => {
-                navigator.clipboard.writeText(sharedLink);
-                toast({
-                  title: "Copied!",
-                  description: "Link copied to clipboard",
-                });
-              }}
-            >
-              Copy
-            </Button>
-          </div>
-        </div>
-      )}
 
       {showEditor && (
         <div className="bg-black/30 backdrop-blur-sm rounded-lg p-6">
@@ -148,79 +98,23 @@ export function EditorView({
       )}
 
       {showRecorder && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <VideoRecorder onNarrate={() => setShowVoiceDialog(true)} />
-            <VideoUpload 
-              onFileSelect={handleFileSelect}
-              selectedFile={selectedFile}
-            />
-          </div>
-          <div className="space-y-4">
-            <Teleprompter
-              script={workoutScript}
-              position={teleprompterPosition}
-              setPosition={setTeleprompterPosition}
-            />
-          </div>
-        </div>
+        <RecordingSection
+          onNarrate={() => setShowVoiceDialog(true)}
+          onFileSelect={setSelectedFile}
+          selectedFile={selectedFile}
+          workoutScript={workoutScript}
+          teleprompterPosition={teleprompterPosition}
+          setTeleprompterPosition={setTeleprompterPosition}
+        />
       )}
 
-      <Dialog open={showVoiceDialog} onOpenChange={setShowVoiceDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogTitle>Choose Voice Type</DialogTitle>
-          <DialogDescription>
-            Select a voice for your narration
-          </DialogDescription>
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-center gap-4">
-              <Button
-                variant="outline"
-                onClick={() => generateNarration('EkK5I93UQWFDigLMpZcX')}
-                disabled={isGenerating}
-              >
-                Male Voice
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => generateNarration('kPzsL2i3teMYv0FxEYQ6')}
-                disabled={isGenerating}
-              >
-                Female Voice
-              </Button>
-            </div>
-            
-            {isGenerating && (
-              <div className="flex flex-col items-center gap-2">
-                <LoadingSpinner />
-                <p className="text-sm text-muted-foreground">Generating narration...</p>
-              </div>
-            )}
-
-            {audioUrl && !isGenerating && (
-              <div className="flex flex-col gap-2">
-                <audio controls className="w-full">
-                  <source src={audioUrl} type="audio/mpeg" />
-                  Your browser does not support the audio element.
-                </audio>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const a = document.createElement('a');
-                    a.href = audioUrl;
-                    a.download = 'narration.mp3';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                  }}
-                >
-                  Download Audio
-                </Button>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <VoiceGenerationDialog
+        showDialog={showVoiceDialog}
+        onOpenChange={setShowVoiceDialog}
+        isGenerating={isGenerating}
+        audioUrl={audioUrl}
+        onGenerateNarration={generateNarration}
+      />
     </div>
   );
 }

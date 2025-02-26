@@ -1,6 +1,7 @@
 
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
+import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
 import { LoadingState } from "./LoadingState";
 import { LandingView } from "./LandingView";
 import { EditorView } from "./EditorView";
@@ -8,6 +9,8 @@ import { useScriptGeneration } from "./hooks/useScriptGeneration";
 import { Button } from "@/components/ui/button";
 import { Link2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+
+const VideoRecorder = lazy(() => import('./VideoRecorder'));
 
 export const VideoAnalysis = memo(() => {
   const location = useLocation();
@@ -112,14 +115,16 @@ export const VideoAnalysis = memo(() => {
           <LandingView onStartRecording={handleStartRecording} />
         ) : (
           <>
-            <EditorView
-              showRecorder={showRecorder}
-              showEditor={showEditor}
-              workoutScript={workoutScript}
-              teleprompterPosition={teleprompterPosition}
-              setTeleprompterPosition={setTeleprompterPosition}
-              onEditorSave={handleEditorSave}
-            />
+            <Suspense fallback={<LoadingSpinner />}>
+              <EditorView
+                showRecorder={showRecorder}
+                showEditor={showEditor}
+                workoutScript={workoutScript}
+                teleprompterPosition={teleprompterPosition}
+                setTeleprompterPosition={setTeleprompterPosition}
+                onEditorSave={handleEditorSave}
+              />
+            </Suspense>
             {sharedLink && (
               <div className="p-4 mt-4">
                 <Button
@@ -140,4 +145,3 @@ export const VideoAnalysis = memo(() => {
 });
 
 VideoAnalysis.displayName = 'VideoAnalysis';
-

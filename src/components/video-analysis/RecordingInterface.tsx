@@ -1,6 +1,5 @@
-
 import { Teleprompter } from "./Teleprompter";
-import { VideoRecorder } from "./VideoRecorder";
+import VideoRecorder from "./VideoRecorder";
 
 interface RecordingInterfaceProps {
   workoutScript: string;

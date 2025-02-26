@@ -1,6 +1,5 @@
-
 import { Editor } from "@/components/document-editor/Editor";
-import { VideoRecorder } from "./VideoRecorder";
+import VideoRecorder from "./VideoRecorder";
 import { VideoUpload } from "./VideoUpload";
 import { Teleprompter } from "./Teleprompter";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";

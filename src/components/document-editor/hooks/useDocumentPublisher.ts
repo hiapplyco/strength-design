@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,11 +76,12 @@ export function useDocumentPublisher() {
           : "Your document has been published and can now be shared.",
       });
 
-      // Navigate to video analysis with the raw HTML content
+      // Navigate to video analysis with the raw HTML content and shareableLink
       navigate('/video-analysis', { 
         state: { 
           workoutScript: content,
-          documentId: data.id
+          documentId: data.id,
+          shareableLink: shareLink
         }
       });
 

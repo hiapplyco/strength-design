@@ -5,6 +5,9 @@ import { LoadingState } from "./LoadingState";
 import { LandingView } from "./LandingView";
 import { EditorView } from "./EditorView";
 import { useScriptGeneration } from "./hooks/useScriptGeneration";
+import { Button } from "@/components/ui/button";
+import { Link2 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 export const VideoAnalysis = memo(() => {
   const location = useLocation();
@@ -19,6 +22,10 @@ export const VideoAnalysis = memo(() => {
   const [teleprompterPosition, setTeleprompterPosition] = useState(() => {
     const saved = sessionStorage.getItem('video-analysis-teleprompter');
     return saved ? parseInt(saved, 10) : 0;
+  });
+  const [sharedLink, setSharedLink] = useState(() => {
+    const saved = sessionStorage.getItem('video-analysis-shared-link');
+    return saved || '';
   });
   
   const {
@@ -41,6 +48,10 @@ export const VideoAnalysis = memo(() => {
     sessionStorage.setItem('video-analysis-teleprompter', teleprompterPosition.toString());
   }, [teleprompterPosition]);
 
+  useEffect(() => {
+    sessionStorage.setItem('video-analysis-shared-link', sharedLink);
+  }, [sharedLink]);
+
   // Handle initial state from location
   useEffect(() => {
     if (location.state?.workoutScript) {
@@ -52,6 +63,11 @@ export const VideoAnalysis = memo(() => {
       
       if (location.state.autoStartRecording) {
         setShowRecorder(true);
+      }
+
+      // Set shared link if provided in location state
+      if (location.state.shareableLink) {
+        setSharedLink(location.state.shareableLink);
       }
     } else {
       setShowEditor(true);
@@ -75,6 +91,16 @@ export const VideoAnalysis = memo(() => {
     setShowEditor(false);
   };
 
+  const handleCopyLink = () => {
+    if (sharedLink) {
+      navigator.clipboard.writeText(sharedLink);
+      toast({
+        title: "Link Copied",
+        description: "The shareable link has been copied to your clipboard.",
+      });
+    }
+  };
+
   if (isGenerating) {
     return <LoadingState />;
   }
@@ -85,14 +111,28 @@ export const VideoAnalysis = memo(() => {
         {!showRecorder && !showEditor ? (
           <LandingView onStartRecording={handleStartRecording} />
         ) : (
-          <EditorView
-            showRecorder={showRecorder}
-            showEditor={showEditor}
-            workoutScript={workoutScript}
-            teleprompterPosition={teleprompterPosition}
-            setTeleprompterPosition={setTeleprompterPosition}
-            onEditorSave={handleEditorSave}
-          />
+          <>
+            <EditorView
+              showRecorder={showRecorder}
+              showEditor={showEditor}
+              workoutScript={workoutScript}
+              teleprompterPosition={teleprompterPosition}
+              setTeleprompterPosition={setTeleprompterPosition}
+              onEditorSave={handleEditorSave}
+            />
+            {sharedLink && (
+              <div className="p-4 mt-4">
+                <Button
+                  onClick={handleCopyLink}
+                  variant="outline"
+                  className="gap-2 text-white hover:text-white/80"
+                >
+                  <Link2 className="w-4 h-4" />
+                  Copy Shareable Link
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

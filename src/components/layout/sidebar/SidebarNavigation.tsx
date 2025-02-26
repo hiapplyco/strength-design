@@ -1,5 +1,6 @@
+
 import { NavLink } from "react-router-dom";
-import { FileText, Dumbbell, Video, DollarSign, MessageSquare } from "lucide-react";
+import { FileText, Dumbbell, Video, DollarSign, MessageSquare, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,12 @@ export function SidebarNavigation() {
   };
 
   const navItems = [
+    {
+      to: "/",
+      icon: <Home className="h-5 w-5" />,
+      text: "Home",
+      requiresAuth: false,
+    },
     {
       to: "/workout-generator",
       icon: <Dumbbell className="h-5 w-5" />,

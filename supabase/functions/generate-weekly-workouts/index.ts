@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 // CORS headers
 const corsHeaders = {
@@ -118,3 +118,4 @@ Format the response as valid JSON following this exact structure:
     );
   }
 });
+

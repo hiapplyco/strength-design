@@ -1,13 +1,7 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-
-interface DaysSelectionCardProps {
-  numberOfDays: number;
-  setNumberOfDays: (value: number) => void;
-  renderTooltip: () => React.ReactNode;
-}
+import type { DaysSelectionCardProps } from "./types";
 
 export function DaysSelectionCard({ 
   numberOfDays, 

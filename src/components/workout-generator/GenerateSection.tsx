@@ -1,26 +1,10 @@
-
 import React from "react";
 import { Send } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../ui/card";
-import type { Exercise } from "../exercise-search/types";
 import { DaysSelectionCard } from "./DaysSelectionCard";
 import { ConfigurationSummary } from "./ConfigurationSummary";
 import { ActionButtons } from "./ActionButtons";
-
-interface GenerateSectionProps {
-  onGenerate: () => void;
-  onClear: () => void;
-  isGenerating: boolean;
-  renderTooltip: () => React.ReactNode;
-  isValid: boolean;
-  selectedExercises?: Exercise[];
-  fitnessLevel?: string;
-  prescribedExercises?: string;
-  injuries?: string;
-  numberOfDays?: number;
-  setNumberOfDays: (value: number) => void;
-  weatherData?: any;
-}
+import type { GenerateSectionProps } from "./types";
 
 export function GenerateSection({ 
   onGenerate, 

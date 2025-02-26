@@ -1,14 +1,7 @@
-
 import React from "react";
 import { Button } from "../ui/button";
 import { Send, Loader2, Check, X } from "lucide-react";
-
-interface ActionButtonsProps {
-  onGenerate: () => void;
-  onClear: () => void;
-  isGenerating: boolean;
-  isValid: boolean;
-}
+import type { ActionButtonsProps } from "./types";
 
 export function ActionButtons({
   onGenerate,

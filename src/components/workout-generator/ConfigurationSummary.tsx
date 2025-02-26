@@ -1,23 +1,8 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
+import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
 import type { Exercise } from "../exercise-search/types";
-
-interface ConfigurationSummaryProps {
-  numberOfDays: number;
-  fitnessLevel: string;
-  selectedExercises: Exercise[];
-  prescribedExercises: string;
-  injuries: string;
-  weatherData?: any;
-}
-
-interface ConfigSectionProps {
-  title: string;
-  content: string;
-  capitalize?: boolean;
-}
 
 function ConfigSection({ title, content, capitalize = false }: ConfigSectionProps) {
   return (

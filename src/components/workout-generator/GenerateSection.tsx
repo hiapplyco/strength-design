@@ -1,4 +1,4 @@
-
+import React from "react";
 import { Send, Loader2, Check, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -36,10 +36,28 @@ export function GenerateSection({
   setNumberOfDays,
   weatherData
 }: GenerateSectionProps) {
-  const hasSelections = selectedExercises.length > 0 || fitnessLevel || prescribedExercises || injuries || numberOfDays > 0 || weatherData;
+  const hasSelections = Boolean(
+    selectedExercises.length > 0 || 
+    fitnessLevel || 
+    prescribedExercises || 
+    injuries || 
+    numberOfDays > 0 || 
+    weatherData
+  );
+
+  const handleDaySelection = (value: string) => {
+    setNumberOfDays(parseInt(value || "7"));
+  };
+
+  const handleGenerate = () => {
+    if (isValid && !isGenerating) {
+      onGenerate();
+    }
+  };
 
   return (
     <div className="space-y-4 border border-red-500/30 rounded-lg p-4">
+      {/* Days Selection Card */}
       <Card className="bg-black/20 border-primary/20">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -53,7 +71,7 @@ export function GenerateSection({
           <ToggleGroup 
             type="single" 
             value={numberOfDays.toString()}
-            onValueChange={(value) => setNumberOfDays(parseInt(value || "7"))}
+            onValueChange={handleDaySelection}
             className="flex flex-wrap gap-2"
           >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((day) => (
@@ -71,6 +89,7 @@ export function GenerateSection({
 
       <Separator className="bg-primary/20" />
 
+      {/* Workout Creation Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Send className="h-5 w-5 text-primary" />
@@ -78,6 +97,7 @@ export function GenerateSection({
           {renderTooltip()}
         </div>
         
+        {/* Configuration Summary Card - only shown when options are selected */}
         {hasSelections && (
           <Card className="bg-black/20 border-primary/20">
             <CardHeader>
@@ -85,20 +105,24 @@ export function GenerateSection({
             </CardHeader>
             <CardContent className="space-y-4">
               <ScrollArea className="h-[200px] rounded-md border p-4">
+                {/* Training Days Summary */}
                 {numberOfDays > 0 && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-primary mb-1">Training Days</h4>
-                    <p className="text-sm text-muted-foreground">{numberOfDays} day{numberOfDays > 1 ? 's' : ''} of training</p>
-                  </div>
+                  <ConfigSection 
+                    title="Training Days"
+                    content={`${numberOfDays} day${numberOfDays > 1 ? 's' : ''} of training`}
+                  />
                 )}
                 
+                {/* Fitness Level Summary */}
                 {fitnessLevel && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-primary mb-1">Fitness Level</h4>
-                    <p className="text-sm text-muted-foreground capitalize">{fitnessLevel}</p>
-                  </div>
+                  <ConfigSection 
+                    title="Fitness Level"
+                    content={fitnessLevel}
+                    capitalize
+                  />
                 )}
 
+                {/* Selected Exercises Summary */}
                 {selectedExercises.length > 0 && (
                   <div className="mb-4">
                     <h4 className="font-semibold text-primary mb-1">Selected Exercises</h4>
@@ -110,42 +134,40 @@ export function GenerateSection({
                   </div>
                 )}
 
+                {/* Prescribed Exercises Summary */}
                 {prescribedExercises && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-primary mb-1">Prescribed Exercises</h4>
-                    <p className="text-sm text-muted-foreground">{prescribedExercises}</p>
-                  </div>
+                  <ConfigSection 
+                    title="Prescribed Exercises"
+                    content={prescribedExercises}
+                  />
                 )}
 
+                {/* Health Considerations Summary */}
                 {injuries && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-primary mb-1">Health Considerations</h4>
-                    <p className="text-sm text-muted-foreground">{injuries}</p>
-                  </div>
+                  <ConfigSection 
+                    title="Health Considerations"
+                    content={injuries}
+                  />
                 )}
 
+                {/* Weather Conditions Summary */}
                 {weatherData && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-primary mb-1">Weather Conditions</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Weather data available for workout optimization
-                    </p>
-                  </div>
+                  <ConfigSection 
+                    title="Weather Conditions"
+                    content="Weather data available for workout optimization"
+                  />
                 )}
               </ScrollArea>
             </CardContent>
           </Card>
         )}
 
+        {/* Action Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <Button 
-            onClick={() => {
-              if (isValid && !isGenerating) {
-                onGenerate();
-              }
-            }}
+            onClick={handleGenerate}
             disabled={isGenerating || !isValid}
-            className={`w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-all duration-200 ${isGenerating ? 'opacity-75' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGenerating ? (
               <>
@@ -170,6 +192,24 @@ export function GenerateSection({
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Reusable configuration section component for the summary card
+interface ConfigSectionProps {
+  title: string;
+  content: string;
+  capitalize?: boolean;
+}
+
+function ConfigSection({ title, content, capitalize = false }: ConfigSectionProps) {
+  return (
+    <div className="mb-4">
+      <h4 className="font-semibold text-primary mb-1">{title}</h4>
+      <p className={`text-sm text-muted-foreground ${capitalize ? 'capitalize' : ''}`}>
+        {content}
+      </p>
     </div>
   );
 }

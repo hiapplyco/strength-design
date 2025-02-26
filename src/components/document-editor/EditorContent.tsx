@@ -25,10 +25,10 @@ export function DocumentEditorContent({
 
   const handlePublish = async () => {
     await onPublish();
-    // Get the HTML content from the editor
+    // Get the raw HTML content from the editor without any formatting changes
     const content = editor.getHTML();
     
-    // Navigate to video analysis with the content and auto-start flags
+    // Navigate to video analysis with the raw content
     navigate('/video-analysis', { 
       state: { 
         workoutScript: content,
@@ -45,10 +45,10 @@ export function DocumentEditorContent({
           <div className="sticky top-20 z-50 bg-white border-b border-border p-4 shadow-sm">
             <EditorToolbar editor={editor} />
           </div>
-          <div className="p-6">
+          <div className="p-6 min-h-[300px] max-h-[600px] overflow-y-auto">
             <TipTapEditorContent 
               editor={editor} 
-              className="min-h-[300px] prose prose-slate max-w-none prose-h2:text-black prose-h2:text-xl prose-h2:font-bold prose-p:text-black prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-black prose-h3:text-lg prose-h3:font-semibold" 
+              className="prose prose-slate max-w-none prose-h2:text-black prose-h2:text-xl prose-h2:font-bold prose-p:text-black prose-p:mb-4 prose-hr:my-8 prose-hr:border-primary prose-h3:text-black prose-h3:text-lg prose-h3:font-semibold" 
             />
           </div>
         </div>

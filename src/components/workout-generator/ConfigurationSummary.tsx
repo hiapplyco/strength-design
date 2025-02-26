@@ -1,8 +1,8 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
 import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
-import type { Exercise } from "../exercise-search/types";
 
 function ConfigSection({ title, content, capitalize = false }: ConfigSectionProps) {
   return (
@@ -28,8 +28,8 @@ export function ConfigurationSummary({
       <CardHeader>
         <CardTitle className="text-lg text-primary">Your Workout Configuration</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <ScrollArea className="h-[200px] rounded-md border p-4">
+      <CardContent>
+        <ScrollArea className="h-[40vh] rounded-md border p-4">
           {numberOfDays > 0 && (
             <ConfigSection 
               title="Training Days"

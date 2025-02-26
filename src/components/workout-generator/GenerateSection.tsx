@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Send, Loader2, Check, X } from "lucide-react";
 import { Button } from "../ui/button";
@@ -56,8 +57,8 @@ export function GenerateSection({
   };
 
   return (
-    <div className="space-y-4 border border-red-500/30 rounded-lg p-4">
-      {/* Days Selection Card */}
+    <div className="space-y-8">
+      {/* Days Selection Card - Now in its own container */}
       <Card className="bg-black/20 border-primary/20">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -87,111 +88,112 @@ export function GenerateSection({
         </CardContent>
       </Card>
 
-      <Separator className="bg-primary/20" />
+      {/* Create Your Workout Section - Now in its own container */}
+      <Card className="bg-black/20 border-primary/20">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Send className="h-5 w-5 text-primary" />
+            <h3 className="font-oswald text-lg">Create Your Workout</h3>
+            {renderTooltip()}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Configuration Summary Card - only shown when options are selected */}
+          {hasSelections && (
+            <Card className="bg-black/20 border-primary/20">
+              <CardHeader>
+                <CardTitle className="text-lg text-primary">Your Workout Configuration</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ScrollArea className="h-[200px] rounded-md border p-4">
+                  {/* Training Days Summary */}
+                  {numberOfDays > 0 && (
+                    <ConfigSection 
+                      title="Training Days"
+                      content={`${numberOfDays} day${numberOfDays > 1 ? 's' : ''} of training`}
+                    />
+                  )}
+                  
+                  {/* Fitness Level Summary */}
+                  {fitnessLevel && (
+                    <ConfigSection 
+                      title="Fitness Level"
+                      content={fitnessLevel}
+                      capitalize
+                    />
+                  )}
 
-      {/* Workout Creation Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Send className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Create Your Workout</h3>
-          {renderTooltip()}
-        </div>
-        
-        {/* Configuration Summary Card - only shown when options are selected */}
-        {hasSelections && (
-          <Card className="bg-black/20 border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-lg text-primary">Your Workout Configuration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ScrollArea className="h-[200px] rounded-md border p-4">
-                {/* Training Days Summary */}
-                {numberOfDays > 0 && (
-                  <ConfigSection 
-                    title="Training Days"
-                    content={`${numberOfDays} day${numberOfDays > 1 ? 's' : ''} of training`}
-                  />
-                )}
-                
-                {/* Fitness Level Summary */}
-                {fitnessLevel && (
-                  <ConfigSection 
-                    title="Fitness Level"
-                    content={fitnessLevel}
-                    capitalize
-                  />
-                )}
+                  {/* Selected Exercises Summary */}
+                  {selectedExercises.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-primary mb-1">Selected Exercises</h4>
+                      <ul className="list-disc list-inside text-sm text-muted-foreground">
+                        {selectedExercises.map((exercise, index) => (
+                          <li key={index}>{exercise.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {/* Selected Exercises Summary */}
-                {selectedExercises.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-primary mb-1">Selected Exercises</h4>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground">
-                      {selectedExercises.map((exercise, index) => (
-                        <li key={index}>{exercise.name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  {/* Prescribed Exercises Summary */}
+                  {prescribedExercises && (
+                    <ConfigSection 
+                      title="Prescribed Exercises"
+                      content={prescribedExercises}
+                    />
+                  )}
 
-                {/* Prescribed Exercises Summary */}
-                {prescribedExercises && (
-                  <ConfigSection 
-                    title="Prescribed Exercises"
-                    content={prescribedExercises}
-                  />
-                )}
+                  {/* Health Considerations Summary */}
+                  {injuries && (
+                    <ConfigSection 
+                      title="Health Considerations"
+                      content={injuries}
+                    />
+                  )}
 
-                {/* Health Considerations Summary */}
-                {injuries && (
-                  <ConfigSection 
-                    title="Health Considerations"
-                    content={injuries}
-                  />
-                )}
+                  {/* Weather Conditions Summary */}
+                  {weatherData && (
+                    <ConfigSection 
+                      title="Weather Conditions"
+                      content="Weather data available for workout optimization"
+                    />
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          )}
 
-                {/* Weather Conditions Summary */}
-                {weatherData && (
-                  <ConfigSection 
-                    title="Weather Conditions"
-                    content="Weather data available for workout optimization"
-                  />
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Button 
-            onClick={handleGenerate}
-            disabled={isGenerating || !isValid}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Check className="mr-2 h-4 w-4" />
-                Generate
-              </>
-            )}
-          </Button>
-          <Button 
-            onClick={onClear}
-            variant="outline"
-            disabled={isGenerating}
-            className="w-full hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Clear All
-          </Button>
-        </div>
-      </div>
+          {/* Action Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Button 
+              onClick={handleGenerate}
+              disabled={isGenerating || !isValid}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Check className="mr-2 h-4 w-4" />
+                  Generate
+                </>
+              )}
+            </Button>
+            <Button 
+              onClick={onClear}
+              variant="outline"
+              disabled={isGenerating}
+              className="w-full hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Clear All
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -213,3 +215,4 @@ function ConfigSection({ title, content, capitalize = false }: ConfigSectionProp
     </div>
   );
 }
+

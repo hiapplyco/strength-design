@@ -1,3 +1,4 @@
+
 import { InputContainer } from "./workout-generator/InputContainer";
 import type { Exercise } from "./exercise-search/types";
 import { Button } from "./ui/button";

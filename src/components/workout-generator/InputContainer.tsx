@@ -1,12 +1,14 @@
 
-import { FitnessSection } from "./FitnessSection";
-import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
+import { useState, useCallback } from "react";
+import { FitnessLevelSection } from "./FitnessLevelSection";
 import { WeatherSection } from "./WeatherSection";
+import { InjuriesSection } from "./InjuriesSection";
+import { DaysSelectionCard } from "./DaysSelectionCard";
+import { ConfigurationSummary } from "./ConfigurationSummary";
 import { GenerateSection } from "./GenerateSection";
+import { PrescribedExercisesSection } from "./PrescribedExercisesSection";
 import { WorkoutPresets } from "./WorkoutPresets";
-import { TooltipWrapper } from "./TooltipWrapper";
-import type { WeatherData } from "@/types/weather";
-import { useState } from "react";
+import type { Exercise } from "../exercise-search/types";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -14,6 +16,7 @@ interface InputContainerProps {
   handleGenerateWorkout: (params: {
     prompt: string;
     weatherPrompt: string;
+    selectedExercises: Exercise[];
     fitnessLevel: string;
     prescribedExercises: string;
   }) => Promise<void>;
@@ -36,109 +39,104 @@ export function InputContainer({
   numberOfDays,
   setNumberOfDays,
 }: InputContainerProps) {
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [weatherPrompt, setWeatherPrompt] = useState("");
+  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [fitnessLevel, setFitnessLevel] = useState("");
   const [prescribedExercises, setPrescribedExercises] = useState("");
   const [injuries, setInjuries] = useState("");
-  const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
-  const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
+  const [weatherData, setWeatherData] = useState("");
+  const [weatherPrompt, setWeatherPrompt] = useState("");
 
-  const handlePresetSelect = (preset: any) => {
-    if (preset.prescribedExercises) {
-      setGeneratePrompt(preset.prescribedExercises);
+  const handleSelectPreset = useCallback(
+    (preset: {
+      title: string;
+      prescribedExercises: string;
+      fitnessLevel: string;
+      numberOfDays: number;
+    }) => {
+      setPrescribedExercises(preset.prescribedExercises);
       setFitnessLevel(preset.fitnessLevel);
       setNumberOfDays(preset.numberOfDays);
-      setPrescribedExercises(preset.prescribedExercises);
-    }
-  };
-
-  const handleWeatherUpdate = (data: WeatherData | null, prompt: string) => {
-    setWeatherData(data);
-    setWeatherPrompt(prompt);
-  };
-
-  const handleGenerate = () => {
-    if (fitnessLevel && numberOfDays > 0) {
-      handleGenerateWorkout({
-        prompt: generatePrompt,
-        weatherPrompt,
-        fitnessLevel,
-        prescribedExercises
-      });
-    }
-  };
-
-  const handleClear = () => {
-    setPrescribedExercises("");
-    setInjuries("");
-    setFitnessLevel("");
-    setWeatherData(null);
-    setWeatherPrompt("");
-  };
-
-  const renderTooltip = (content: string) => (
-    <TooltipWrapper content={content} />
+      setGeneratePrompt(preset.title);
+    },
+    [setNumberOfDays, setGeneratePrompt]
   );
 
-  const handlePrescribedFileSelect = async (file: File) => {
-    setIsAnalyzingPrescribed(true);
-    try {
-      // Implementation for file analysis would go here
-      console.log("Analyzing prescribed exercises file:", file.name);
-    } finally {
-      setIsAnalyzingPrescribed(false);
-    }
-  };
-
-  const handleInjuriesFileSelect = async (file: File) => {
-    setIsAnalyzingInjuries(true);
-    try {
-      // Implementation for file analysis would go here
-      console.log("Analyzing injuries file:", file.name);
-    } finally {
-      setIsAnalyzingInjuries(false);
-    }
-  };
+  const handleSubmit = useCallback(() => {
+    setIsGenerating(true);
+    
+    handleGenerateWorkout({
+      prompt: generatePrompt,
+      weatherPrompt,
+      selectedExercises,
+      fitnessLevel,
+      prescribedExercises,
+    }).finally(() => {
+      setIsGenerating(false);
+    });
+  }, [
+    generatePrompt,
+    weatherPrompt,
+    selectedExercises,
+    fitnessLevel,
+    prescribedExercises,
+    handleGenerateWorkout,
+    setIsGenerating,
+  ]);
 
   return (
-    <div className="space-y-8">
-      <WorkoutPresets 
-        onSelectPreset={handlePresetSelect}
-      />
-      <WeatherSection
-        weatherData={weatherData}
-        onWeatherUpdate={handleWeatherUpdate}
-        renderTooltip={() => renderTooltip("Add your location for weather-optimized workouts")}
-      />
-      <FitnessSection
-        fitnessLevel={fitnessLevel}
-        onFitnessLevelChange={setFitnessLevel}
-        renderTooltip={() => renderTooltip("Select your fitness level")}
-      />
-      <GoalsAndInjuriesSection
-        prescribedExercises={prescribedExercises}
-        setPrescribedExercises={setPrescribedExercises}
-        isAnalyzingPrescribed={isAnalyzingPrescribed}
-        handlePrescribedFileSelect={handlePrescribedFileSelect}
-        injuries={injuries}
-        setInjuries={setInjuries}
-        isAnalyzingInjuries={isAnalyzingInjuries}
-        handleInjuriesFileSelect={handleInjuriesFileSelect}
-      />
-      <GenerateSection
-        onGenerate={handleGenerate}
-        onClear={handleClear}
-        isGenerating={isGenerating}
-        renderTooltip={() => renderTooltip("Generate your custom workout program")}
-        isValid={fitnessLevel !== "" && numberOfDays > 0}
-        fitnessLevel={fitnessLevel}
-        prescribedExercises={prescribedExercises}
-        injuries={injuries}
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
-        weatherData={weatherData}
-      />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-6">
+        <WorkoutPresets 
+          onSelectPreset={handleSelectPreset}
+          onExercisesExtracted={(exercises) => setSelectedExercises(exercises)}
+        />
+        
+        <PrescribedExercisesSection
+          prescribedExercises={prescribedExercises}
+          setPrescribedExercises={setPrescribedExercises}
+        />
+        
+        <DaysSelectionCard 
+          numberOfDays={numberOfDays} 
+          setNumberOfDays={setNumberOfDays} 
+        />
+        
+        <FitnessLevelSection
+          fitnessLevel={fitnessLevel}
+          setFitnessLevel={setFitnessLevel}
+        />
+        
+        <InjuriesSection
+          injuries={injuries}
+          setInjuries={setInjuries}
+          generatePrompt={generatePrompt}
+          setGeneratePrompt={setGeneratePrompt}
+        />
+        
+        <WeatherSection
+          weatherData={weatherData}
+          setWeatherData={setWeatherData}
+          setWeatherPrompt={setWeatherPrompt}
+        />
+      </div>
+      
+      <div className="space-y-6">
+        <ConfigurationSummary
+          numberOfDays={numberOfDays}
+          fitnessLevel={fitnessLevel}
+          selectedExercises={selectedExercises}
+          prescribedExercises={prescribedExercises}
+          injuries={injuries}
+          weatherData={weatherData}
+        />
+        
+        <GenerateSection
+          isGenerating={isGenerating}
+          generatePrompt={generatePrompt}
+          setGeneratePrompt={setGeneratePrompt}
+          handleSubmit={handleSubmit}
+        />
+      </div>
     </div>
   );
 }

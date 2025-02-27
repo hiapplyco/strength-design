@@ -6,9 +6,9 @@ import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
 
 function ConfigSection({ title, content, capitalize = false }: ConfigSectionProps) {
   return (
-    <div className="mb-4">
-      <h4 className="font-semibold text-primary mb-1">{title}</h4>
-      <p className={`text-sm text-muted-foreground ${capitalize ? 'capitalize' : ''}`}>
+    <div className="mb-6">
+      <h4 className="font-semibold text-primary text-lg mb-2">{title}</h4>
+      <p className={`text-base text-white/80 ${capitalize ? 'capitalize' : ''}`}>
         {content}
       </p>
     </div>
@@ -24,12 +24,12 @@ export function ConfigurationSummary({
   weatherData
 }: ConfigurationSummaryProps) {
   return (
-    <Card className="bg-black/20 border-primary/20">
-      <CardHeader>
-        <CardTitle className="text-lg text-primary">Your Workout Configuration</CardTitle>
+    <Card className="bg-black/30 border-primary/30 shadow-md">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl text-primary font-oswald tracking-wide">Your Workout Configuration</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[40vh] rounded-md border p-4">
+        <ScrollArea className="h-[40vh] rounded-md border border-primary/20 bg-black/40 p-6">
           {numberOfDays > 0 && (
             <ConfigSection 
               title="Training Days"
@@ -46,11 +46,11 @@ export function ConfigurationSummary({
           )}
 
           {selectedExercises.length > 0 && (
-            <div className="mb-4">
-              <h4 className="font-semibold text-primary mb-1">Selected Exercises</h4>
-              <ul className="list-disc list-inside text-sm text-muted-foreground">
+            <div className="mb-6">
+              <h4 className="font-semibold text-primary text-lg mb-2">Selected Exercises</h4>
+              <ul className="list-disc list-inside text-base text-white/80 pl-2 space-y-1">
                 {selectedExercises.map((exercise, index) => (
-                  <li key={index}>{exercise.name}</li>
+                  <li key={index} className="pl-2">{exercise.name}</li>
                 ))}
               </ul>
             </div>

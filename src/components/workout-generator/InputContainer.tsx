@@ -9,6 +9,7 @@ import { GenerateSection } from "./GenerateSection";
 import { PrescribedExercisesSection } from "./PrescribedExercisesSection";
 import { WorkoutPresets } from "./WorkoutPresets";
 import type { Exercise } from "../exercise-search/types";
+import type { WeatherData } from "@/types/weather";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -45,6 +46,8 @@ export function InputContainer({
   const [injuries, setInjuries] = useState("");
   const [weatherData, setWeatherData] = useState("");
   const [weatherPrompt, setWeatherPrompt] = useState("");
+  const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
+  const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
 
   const handleSelectPreset = useCallback(
     (preset: {
@@ -60,6 +63,33 @@ export function InputContainer({
     },
     [setNumberOfDays, setGeneratePrompt]
   );
+  
+  const handlePrescribedFileSelect = async (file: File) => {
+    setIsAnalyzingPrescribed(true);
+    try {
+      // Simulate file analysis
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setPrescribedExercises("File content would be analyzed and extracted here");
+    } finally {
+      setIsAnalyzingPrescribed(false);
+    }
+  };
+  
+  const handleInjuriesFileSelect = async (file: File) => {
+    setIsAnalyzingInjuries(true);
+    try {
+      // Simulate file analysis
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setInjuries("Health considerations would be extracted from file here");
+    } finally {
+      setIsAnalyzingInjuries(false);
+    }
+  };
+
+  const handleWeatherUpdate = (weatherData: WeatherData | null, newWeatherPrompt: string) => {
+    setWeatherData(weatherData ? JSON.stringify(weatherData) : "");
+    setWeatherPrompt(newWeatherPrompt);
+  };
 
   const handleSubmit = useCallback(() => {
     setIsGenerating(true);
@@ -94,6 +124,8 @@ export function InputContainer({
         <PrescribedExercisesSection
           prescribedExercises={prescribedExercises}
           setPrescribedExercises={setPrescribedExercises}
+          isAnalyzingPrescribed={isAnalyzingPrescribed}
+          handlePrescribedFileSelect={handlePrescribedFileSelect}
         />
         
         <DaysSelectionCard 
@@ -109,14 +141,14 @@ export function InputContainer({
         <InjuriesSection
           injuries={injuries}
           setInjuries={setInjuries}
-          generatePrompt={generatePrompt}
-          setGeneratePrompt={setGeneratePrompt}
+          isAnalyzingInjuries={isAnalyzingInjuries}
+          handleInjuriesFileSelect={handleInjuriesFileSelect}
         />
         
         <WeatherSection
-          weatherData={weatherData}
-          setWeatherData={setWeatherData}
-          setWeatherPrompt={setWeatherPrompt}
+          weatherData={weatherData ? JSON.parse(weatherData) as WeatherData : null}
+          onWeatherUpdate={handleWeatherUpdate}
+          renderTooltip={() => null}
         />
       </div>
       
@@ -132,9 +164,23 @@ export function InputContainer({
         
         <GenerateSection
           isGenerating={isGenerating}
-          generatePrompt={generatePrompt}
-          setGeneratePrompt={setGeneratePrompt}
-          handleSubmit={handleSubmit}
+          onGenerate={handleSubmit}
+          onClear={() => {
+            setSelectedExercises([]);
+            setFitnessLevel("");
+            setPrescribedExercises("");
+            setInjuries("");
+            setWeatherData("");
+            setWeatherPrompt("");
+          }}
+          isValid={true}
+          numberOfDays={numberOfDays}
+          setNumberOfDays={setNumberOfDays}
+          selectedExercises={selectedExercises}
+          fitnessLevel={fitnessLevel}
+          prescribedExercises={prescribedExercises}
+          injuries={injuries}
+          weatherData={weatherData}
         />
       </div>
     </div>

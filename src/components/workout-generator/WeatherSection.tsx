@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import type { WeatherData } from "@/types/weather";
 import { WeatherSearch } from "./weather/WeatherSearch";
 import { WeatherDisplay } from "./weather/WeatherDisplay";
 import { WeatherForecast } from "./weather/WeatherForecast";
 
-interface WeatherSectionProps {
+export interface WeatherSectionProps {
   weatherData: WeatherData | null;
   onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
   renderTooltip: () => React.ReactNode;

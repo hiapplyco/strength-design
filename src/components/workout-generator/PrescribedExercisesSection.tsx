@@ -1,10 +1,11 @@
+
 import { Dumbbell, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploadSection } from "./FileUploadSection";
 import { TooltipWrapper } from "./TooltipWrapper";
 import { Button } from "@/components/ui/button";
 
-interface PrescribedExercisesSectionProps {
+export interface PrescribedExercisesSectionProps {
   prescribedExercises: string;
   setPrescribedExercises: (value: string) => void;
   isAnalyzingPrescribed: boolean;

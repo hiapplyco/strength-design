@@ -6,7 +6,8 @@ import { WorkoutDaySkeleton } from "./workout-display/WorkoutDaySkeleton";
 import { ArrowLeft } from "lucide-react";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { formatWorkoutToMarkdown, formatAllWorkouts } from "@/utils/workout-formatting";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WorkoutDisplayProps {
   workouts: WeeklyWorkouts;
@@ -15,6 +16,8 @@ interface WorkoutDisplayProps {
   setIsExporting: (value: boolean) => void;
   isGenerating?: boolean;
 }
+
+const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
 export function WorkoutDisplay({ 
   workouts: initialWorkouts, 
@@ -26,15 +29,30 @@ export function WorkoutDisplay({
   const [workouts, setWorkouts] = useState(initialWorkouts);
   const formattedWorkouts = formatAllWorkouts(workouts);
   const workoutText = formatWorkoutToMarkdown(formattedWorkouts);
+  const { session } = useAuth();
+
+  useEffect(() => {
+    setWorkouts(initialWorkouts);
+  }, [initialWorkouts]);
 
   const handleUpdate = (day: string, updates: any) => {
-    setWorkouts(prev => ({
-      ...prev,
+    const updatedWorkouts = {
+      ...workouts,
       [day]: {
-        ...prev[day],
+        ...workouts[day],
         ...updates
       }
-    }));
+    };
+    
+    setWorkouts(updatedWorkouts);
+    
+    // Save updated workouts to localStorage
+    localStorage.setItem(
+      session?.user?.id 
+        ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+        : WORKOUT_STORAGE_KEY,
+      JSON.stringify(updatedWorkouts)
+    );
   };
 
   if (isGenerating) {

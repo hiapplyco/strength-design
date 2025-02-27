@@ -1,13 +1,15 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
 import { triggerConfetti } from "@/utils/confetti";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { useNavigate } from "react-router-dom";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DEFAULT_DAYS = 7;
+const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
 const WorkoutGenerator = () => {
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
@@ -17,11 +19,45 @@ const WorkoutGenerator = () => {
   const [numberOfDays, setNumberOfDays] = useState(DEFAULT_DAYS);
   const { isGenerating, generateWorkout } = useWorkoutGeneration();
   const navigate = useNavigate();
+  const { session } = useAuth();
+  
+  // Load saved workouts on component mount
+  useEffect(() => {
+    const loadSavedWorkout = () => {
+      const storedData = localStorage.getItem(
+        session?.user?.id 
+          ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+          : WORKOUT_STORAGE_KEY
+      );
+      
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          setWorkouts(parsedData);
+          setShowGenerateInput(false);
+        } catch (error) {
+          console.error("Error parsing stored workout data:", error);
+          localStorage.removeItem(
+            session?.user?.id 
+              ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+              : WORKOUT_STORAGE_KEY
+          );
+        }
+      }
+    };
+    
+    loadSavedWorkout();
+  }, [session]);
 
   const resetWorkouts = useCallback(() => {
     setWorkouts(null);
     setShowGenerateInput(true);
-  }, []);
+    localStorage.removeItem(
+      session?.user?.id 
+        ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+        : WORKOUT_STORAGE_KEY
+    );
+  }, [session]);
 
   const handleGenerateWorkout = async (params: {
     prompt: string;
@@ -39,6 +75,14 @@ const WorkoutGenerator = () => {
       setWorkouts(data);
       setShowGenerateInput(false);
       triggerConfetti();
+      
+      // Save workout data to localStorage
+      localStorage.setItem(
+        session?.user?.id 
+          ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+          : WORKOUT_STORAGE_KEY,
+        JSON.stringify(data)
+      );
     }
   };
 
@@ -49,6 +93,7 @@ const WorkoutGenerator = () => {
         resetWorkouts={resetWorkouts}
         isExporting={isExporting}
         setIsExporting={setIsExporting}
+        isGenerating={isGenerating}
       />
     );
   }

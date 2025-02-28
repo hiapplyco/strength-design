@@ -15,7 +15,7 @@ export const InputDirections = () => {
           <Info className="h-5 w-5" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-medium text-primary">How to Use the Generator</h3>
+          <h3 className="text-lg font-medium text-white">How to Use the Generator</h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-white/90">
             <li>Be specific about your goals and limitations</li>
             <li>Include any equipment you have available</li>

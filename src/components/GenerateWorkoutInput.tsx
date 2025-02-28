@@ -27,13 +27,13 @@ export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {
 
   return (
     <AnimatePresence mode="wait">
-      <div className="relative w-full">
+      <div className="relative w-full max-w-7xl mx-auto px-2 sm:px-4">
         {!props.isGenerating && !showGenerateInput && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex justify-center items-center py-12"
+            className="flex justify-center items-center py-8 sm:py-12"
           >
             <Button
               onClick={() => setShowGenerateInput(true)}

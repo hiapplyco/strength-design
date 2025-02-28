@@ -73,9 +73,9 @@ const Index = () => {
       />
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-3 sm:px-4 py-6 sm:py-12">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-7xl">
         {/* Welcome Section */}
-        <div className="text-center mb-8 sm:mb-16">
+        <div className="text-center mb-10 sm:mb-16">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -87,33 +87,34 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg md:text-xl text-gray-200 max-w-2xl mx-auto px-2"
+            className="text-base sm:text-lg md:text-xl text-gray-200 max-w-3xl mx-auto px-4"
           >
             Your all-in-one platform for AI-powered workout programming and analysis
           </motion.p>
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {cards.map((card, index) => (
             <motion.div
               key={card.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * (index + 1) }}
+              className="w-full"
             >
-              <Card className="bg-black/20 border-primary/20 backdrop-blur-sm hover:bg-black/30 transition-all duration-300">
-                <CardHeader className="p-3 sm:p-6">
+              <Card className="bg-black/20 border-primary/20 backdrop-blur-sm hover:bg-black/30 transition-all duration-300 h-full">
+                <CardHeader className="p-4 sm:p-6">
                   <CardTitle className="flex items-center gap-2 sm:gap-3 text-primary text-base sm:text-xl">
                     {card.icon}
                     {card.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-                  <p className="text-gray-300 mb-3 sm:mb-4 text-sm sm:text-base">{card.description}</p>
+                <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                  <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base">{card.description}</p>
                   <Button
                     variant="outline"
-                    className="w-full text-sm sm:text-base py-1 sm:py-2"
+                    className="w-full text-sm sm:text-base py-1.5 sm:py-2"
                     onClick={() => navigate(card.path)}
                   >
                     Get Started

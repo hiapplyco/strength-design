@@ -113,6 +113,7 @@ export const fetchWeatherData = async (lat: number, lon: number, locationName: s
     const tempF = (tempC * 9/5) + 32;
     const humidity = data.current.relative_humidity_2m;
 
+    // Transformed to match WeatherData interface
     return {
       current: {
         location: locationName,

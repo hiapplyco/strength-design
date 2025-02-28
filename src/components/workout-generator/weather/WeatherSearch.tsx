@@ -54,11 +54,26 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
 
   const handleLocationSelect = async (location: LocationResult) => {
     try {
-      const data = await fetchWeatherData(location.latitude, location.longitude, location.name);
+      const apiData = await fetchWeatherData(location.latitude, location.longitude, location.name);
       
-      const weatherPrompt = `Consider the weather in ${location.name}: ${data.current.weatherDescription}, temperature of ${data.current.tempC}°C (${data.current.tempF}°F), and ${data.current.humidity}% humidity.`;
+      // Transform the data to match the WeatherData interface
+      const weatherData: WeatherData = {
+        temperature: apiData.current.temperature,
+        humidity: apiData.current.humidity,
+        windSpeed: apiData.current.windSpeed,
+        location: apiData.current.location,
+        apparentTemperature: apiData.current.apparentTemperature,
+        precipitation: apiData.current.precipitation,
+        weatherCode: apiData.current.weatherCode,
+        windDirection: apiData.current.windDirection,
+        windGusts: apiData.current.windGusts,
+        isDay: apiData.current.isDay,
+        forecast: apiData.forecast
+      };
       
-      onWeatherUpdate(data, weatherPrompt);
+      const weatherPrompt = `Consider the weather in ${location.name}: ${apiData.current.weatherDescription}, temperature of ${apiData.current.tempC}°C (${apiData.current.tempF}°F), and ${apiData.current.humidity}% humidity.`;
+      
+      onWeatherUpdate(weatherData, weatherPrompt);
       toast({
         title: "Weather updated",
         description: `Weather data loaded for ${location.name}`,

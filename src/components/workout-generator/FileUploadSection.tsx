@@ -1,8 +1,10 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileAnalysisState } from "./FileAnalysisState";
 import { PdfUploadSection } from "./PdfUploadSection";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 interface FileUploadSectionProps {
   title: string;
   isAnalyzing: boolean;
@@ -12,6 +14,7 @@ interface FileUploadSectionProps {
   analysisSteps: string[];
   className?: string;
 }
+
 export function FileUploadSection({
   title,
   isAnalyzing,
@@ -21,7 +24,8 @@ export function FileUploadSection({
   analysisSteps,
   className = ""
 }: FileUploadSectionProps) {
-  return <Card className="">
+  return (
+    <Card className={cn("", className)}>
       <CardHeader className="p-0 pb-1">
         <div className="flex items-center gap-2">
           <CardTitle className="text-xs font-medium text-white/80">{title}</CardTitle>
@@ -29,7 +33,11 @@ export function FileUploadSection({
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {isAnalyzing ? <FileAnalysisState title={`Analyzing ${title}`} steps={analysisSteps} /> : <PdfUploadSection onFileSelect={onFileSelect} />}
+        {isAnalyzing ? 
+          <FileAnalysisState title={`Analyzing ${title}`} steps={analysisSteps} /> : 
+          <PdfUploadSection onFileSelect={onFileSelect} />
+        }
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }

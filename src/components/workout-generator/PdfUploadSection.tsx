@@ -1,5 +1,5 @@
 
-import { ArrowUp } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useRef, type ChangeEvent } from "react";
 import { cn } from "@/lib/utils";
 
@@ -29,26 +29,19 @@ export function PdfUploadSection({
   };
 
   return (
-    <div className={cn("w-full", className)}>
-      <div className="mb-2 text-xs text-white/80">
-        Upload Exercise Program
-      </div>
+    <div 
+      className={cn("relative flex items-center justify-center w-full min-h-[100px] cursor-pointer rounded-md bg-black/60 overflow-hidden before:absolute before:inset-0 before:rounded-md before:p-[1px] before:-z-10 before:bg-gradient-to-r before:from-[#4CAF50] before:via-[#9C27B0] before:to-[#FF1493] before:opacity-70", className)}
+      onClick={handleClick}
+    >
+      <Upload className="h-6 w-6 text-white/70" />
       
-      <div 
-        onClick={handleClick}
-        className="relative flex flex-col items-center justify-center w-full min-h-[120px] cursor-pointer rounded-md bg-black/60 overflow-hidden before:absolute before:inset-0 before:rounded-md before:p-[1px] before:-z-10 before:bg-gradient-to-r before:from-[#4CAF50] before:via-[#9C27B0] before:to-[#FF1493] before:opacity-70"
-      >
-        <ArrowUp className="h-6 w-6 text-white/70 mb-2" />
-        <span className="text-xs text-white/70">Upload PDF</span>
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          onChange={handleFileChange}
-          accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
-          className="hidden"
-        />
-      </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileChange}
+        accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
+        className="hidden"
+      />
     </div>
   );
 }

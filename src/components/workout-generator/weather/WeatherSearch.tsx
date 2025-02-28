@@ -74,6 +74,10 @@ export function WeatherSearch({
     }
   };
 
+  const handleCloseDialog = () => {
+    setIsLocationsDialogOpen(false);
+  };
+
   return (
     <>
       <Card className="bg-black/20 border-primary/20 shadow-sm hover:shadow-md transition-all duration-300">
@@ -103,9 +107,10 @@ export function WeatherSearch({
       
       <LocationResultsDialog
         isOpen={isLocationsDialogOpen}
-        setIsOpen={setIsLocationsDialogOpen}
-        locations={locations}
-        onSelectLocation={handleSelectLocation}
+        onClose={handleCloseDialog}
+        results={locations}
+        onSelect={handleSelectLocation}
+        isLoading={isSearching}
       />
     </>
   );

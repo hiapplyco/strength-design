@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 interface SearchFormProps {
+  searchQuery?: string;
+  isSearching: boolean;
+  searchError?: string;
   onSearch: (location: string) => void;
-  isLoading: boolean;
 }
 
-export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
-  const [location, setLocation] = useState("");
+export function SearchForm({ searchQuery = "", isSearching, searchError, onSearch }: SearchFormProps) {
+  const [location, setLocation] = useState(searchQuery);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -30,14 +32,17 @@ export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
           className="bg-black text-white placeholder:text-gray-400 w-full"
           borderStyle="multicolor"
         />
+        {searchError && (
+          <p className="text-red-400 text-sm mt-1">{searchError}</p>
+        )}
       </div>
       <Button 
         type="submit" 
         variant="default" 
         className="bg-primary hover:bg-primary/90 text-black font-medium"
-        disabled={isLoading}
+        disabled={isSearching}
       >
-        {isLoading ? (
+        {isSearching ? (
           <div className="flex items-center gap-2">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent"></div>
             <span>Searching...</span>

@@ -36,7 +36,7 @@ export function PrescribedExercisesSection({
             placeholder="List any specific exercises you need to include"
             value={prescribedExercises}
             onChange={(e) => setPrescribedExercises(e.target.value)}
-            className="min-h-[100px] bg-jupyter-cell border border-jupyter-border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white"
+            className="min-h-[100px] rounded-[20px] px-6 py-4 w-full text-black"
           />
         </div>
         <div className="md:col-span-1 min-w-[200px]">

@@ -54,11 +54,15 @@
 
   /* Apply base input styling to all form elements */
   input,
-  textarea,
   .collapsible-section button[type="button"],
   .collapsible-section,
   [role="combobox"] {
     @apply base-input;
+  }
+  
+  /* Textarea styling */
+  textarea {
+    @apply bg-white text-black rounded-md px-6 py-4 w-full placeholder:text-gray-500;
   }
 
   /* Jupyter-style collapsible sections */

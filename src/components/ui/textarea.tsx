@@ -14,7 +14,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       <div className="relative rounded-md">
         <textarea
           className={cn(
-            "flex min-h-[80px] w-full rounded-md border border-transparent bg-black/70 px-4 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 relative z-10",
+            "flex min-h-[80px] w-full rounded-md border border-transparent bg-white px-4 py-2 text-sm text-black ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 relative z-10",
             className
           )}
           ref={ref}
@@ -28,7 +28,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               : "bg-primary"
           )}
         ></div>
-        <div className="absolute inset-[1px] rounded-[calc(0.375rem-1px)] bg-black/70 -z-[5]"></div>
+        <div className="absolute inset-[1px] rounded-[calc(0.375rem-1px)] bg-white -z-[5]"></div>
       </div>
     )
   }

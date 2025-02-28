@@ -26,10 +26,10 @@ export function FileUploadSection({
 }: FileUploadSectionProps) {
   return (
     <Card className={`border-none bg-transparent ${className}`}>
-      <CardHeader className="p-0 pb-2">
+      <CardHeader className="p-0 pb-1">
         <div className="flex items-center gap-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-          {isSuccess && <Check className="h-4 w-4 text-green-500" />}
+          <CardTitle className="text-xs font-medium text-muted-foreground">{title}</CardTitle>
+          {isSuccess && <Check className="h-3 w-3 text-green-500" />}
         </div>
       </CardHeader>
       <CardContent className="p-0">

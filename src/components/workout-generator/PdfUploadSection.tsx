@@ -1,3 +1,4 @@
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -67,8 +68,8 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
         onChange={handleFileChange}
         className="cursor-pointer text-xs h-8 file:text-xs file:font-medium py-0 w-full bg-background/5 hover:bg-background/10 transition-colors"
       />
-      <p className="text-[10px] text-muted-foreground/70 mt-1">
-        PDF, JPG, PNG, WEBP, HEIC, HEIF (max 4MB)
+      <p className="text-[9px] text-muted-foreground/70 mt-1">
+        PDF, JPG, PNG, WEBP (max 4MB)
       </p>
     </div>
   );

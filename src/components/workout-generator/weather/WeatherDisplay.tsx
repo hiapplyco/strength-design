@@ -1,8 +1,7 @@
-
-import { X } from "lucide-react";
+import { X, CloudSun, Droplets, Wind, ThermometerSun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { WeatherData } from "@/types/weather";
 import { getWeatherDescription } from "./weather-utils";
+import type { WeatherData } from "@/types/weather";
 
 interface WeatherDisplayProps {
   weather?: WeatherData;
@@ -11,7 +10,6 @@ interface WeatherDisplayProps {
 }
 
 export function WeatherDisplay({ weather, weatherData, onClear }: WeatherDisplayProps) {
-  // Use either weather or weatherData prop, prioritizing weather
   const data = weather || weatherData;
   
   if (!data) return null;

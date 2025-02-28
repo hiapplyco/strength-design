@@ -29,14 +29,17 @@ export function DaysSelectionCard({
               key={day}
               variant={numberOfDays === day ? "default" : "outline"}
               onClick={() => setNumberOfDays(day)}
-              className={`h-10 sm:h-12 w-full text-center border ${
+              className={`h-10 sm:h-12 w-full text-center border relative ${
                 numberOfDays === day 
-                  ? "bg-primary text-black hover:bg-primary/90"
+                  ? "text-white hover:text-white"
                   : "bg-black/40 text-white border-primary/30 hover:bg-black/60"
               }`}
               size="sm"
             >
-              {day}
+              {numberOfDays === day && (
+                <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-90 hover:opacity-100 transition-opacity rounded-md"></div>
+              )}
+              <span className="relative z-10">{day}</span>
             </Button>
           ))}
         </div>

@@ -64,7 +64,7 @@ export function ConfigurationSummary({
           </div>
         ) : (
           <ScrollArea className="h-[40vh] rounded-md border border-primary/20 bg-black/40 p-4 overflow-hidden">
-            <div className="pr-4">
+            <div className="pr-6 pb-2">
               {numberOfDays > 0 && (
                 <ConfigSection 
                   title="Training Days"

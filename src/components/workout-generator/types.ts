@@ -14,27 +14,7 @@ export interface ConfigurationSummaryProps {
   selectedExercises: Exercise[];
   prescribedExercises: string;
   injuries: string;
-  weatherData: WeatherData | string | null;
-}
-
-export interface WeatherLocation {
-  name: string;
-  country: string;
-  lat: number;
-  lon: number;
-}
-
-export interface ActionButtonsProps {
-  onGenerate: () => void;
-  onClear: () => void;
-  isGenerating: boolean;
-  isValid: boolean;
-}
-
-export interface DaysSelectionCardProps {
-  numberOfDays: number;
-  setNumberOfDays: (value: number) => void;
-  renderTooltip?: () => React.ReactNode;
+  weatherData: WeatherData | null | string;
 }
 
 export interface GenerateSectionProps {
@@ -43,11 +23,17 @@ export interface GenerateSectionProps {
   isGenerating: boolean;
   renderTooltip?: () => React.ReactNode;
   isValid: boolean;
+  numberOfDays?: number;
+  setNumberOfDays?: (value: number) => void;
   selectedExercises?: Exercise[];
   fitnessLevel?: string;
   prescribedExercises?: string;
   injuries?: string;
-  numberOfDays?: number;
+  weatherData?: WeatherData | null | string;
+}
+
+export interface DaysSelectionCardProps {
+  numberOfDays: number;
   setNumberOfDays: (value: number) => void;
-  weatherData?: WeatherData | string | null;
+  renderTooltip?: () => React.ReactNode;
 }

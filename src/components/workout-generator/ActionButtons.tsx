@@ -19,7 +19,7 @@ export function ActionButtons({
       <button
         onClick={onGenerate}
         disabled={isGenerating || !isValid}
-        className="relative w-full py-3 flex justify-center items-center bg-primary text-white font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+        className="relative w-full h-12 flex justify-center items-center bg-primary text-white font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70 -z-10"></div>
         {isGenerating ? (
@@ -41,7 +41,7 @@ export function ActionButtons({
       <button
         onClick={onClear}
         disabled={isGenerating}
-        className="w-full py-3 flex justify-center items-center bg-transparent text-white font-medium rounded-lg border border-red-500/50 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-12 flex justify-center items-center bg-transparent text-white font-medium rounded-lg border border-red-500/50 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <X className="h-4 w-4 mr-2" />
         Clear All

@@ -9,8 +9,8 @@ import type { WeatherData } from "@/types/weather";
 
 function ConfigSection({ title, content, capitalize = false, icon }: ConfigSectionProps & { icon?: React.ReactNode }) {
   return (
-    <div className="mb-5">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="mb-3">
+      <div className="flex items-center gap-2 mb-1">
         {icon || <Check className="h-4 w-4 text-primary" />}
         <h4 className="font-semibold text-primary text-base">{title}</h4>
       </div>
@@ -27,8 +27,9 @@ export function ConfigurationSummary({
   selectedExercises,
   prescribedExercises,
   injuries,
-  weatherData
-}: ConfigurationSummaryProps) {
+  weatherData,
+  maxHeight = "40vh"
+}: ConfigurationSummaryProps & { maxHeight?: string }) {
   // Function to check if weatherData is a WeatherData object
   const isWeatherDataObject = (data: any): data is WeatherData => {
     return data && typeof data === 'object' && 'location' in data;
@@ -50,21 +51,21 @@ export function ConfigurationSummary({
 
   return (
     <Card className="bg-black/30 border-primary/30 shadow-md">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl text-primary font-oswald tracking-wide flex items-center gap-2">
-          <Info className="h-5 w-5" />
-          Your Workout Configuration
+      <CardHeader className="py-2 px-4">
+        <CardTitle className="text-base text-primary font-oswald tracking-wide flex items-center gap-2">
+          <Info className="h-4 w-4" />
+          Your Configuration
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 py-2">
         {!hasAnyConfig ? (
-          <div className="text-center py-8 text-white/60">
+          <div className="text-center py-4 text-white/60">
             <p>No configuration settings yet.</p>
-            <p className="text-sm mt-2">Use the options on the left to customize your workout.</p>
+            <p className="text-sm mt-1">Use the options above to customize your workout.</p>
           </div>
         ) : (
-          <ScrollArea className="h-[40vh] rounded-md border border-primary/20 bg-black/40 p-4 pr-8 overflow-hidden">
-            <div className="pr-4 pb-4">
+          <ScrollArea className={`h-[${maxHeight}] rounded-md border border-primary/20 bg-black/40 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
+            <div className="pr-2 pb-2">
               {numberOfDays > 0 && (
                 <ConfigSection 
                   title="Training Days"
@@ -81,8 +82,8 @@ export function ConfigurationSummary({
               )}
 
               {selectedExercises.length > 0 && (
-                <div className="mb-5">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="mb-3">
+                  <div className="flex items-center gap-2 mb-1">
                     <Check className="h-4 w-4 text-primary" />
                     <h4 className="font-semibold text-primary text-base">Selected Exercises</h4>
                   </div>

@@ -30,17 +30,17 @@ export function GenerateSection({
   );
 
   return (
-    <div className="space-y-8">
-      <Card className="bg-black/20 border border-primary/30 rounded-xl relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-pink-500/10 rounded-xl" />
-        <CardHeader className="relative z-10">
-          <div className="flex items-center gap-2">
-            <Send className="h-5 w-5 text-primary" />
-            <h3 className="font-oswald text-lg text-primary">Create Your Workout</h3>
-            {renderTooltip && renderTooltip()}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4 relative z-10">
+    <Card className="bg-black/20 border border-primary/30 rounded-xl relative">
+      <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-pink-500/10 rounded-xl" />
+      <CardHeader className="relative z-10 p-4">
+        <div className="flex items-center gap-2">
+          <Send className="h-5 w-5 text-primary" />
+          <h3 className="font-oswald text-lg text-primary">Create Your Workout</h3>
+          {renderTooltip && renderTooltip()}
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 relative z-10">
+        <div className="space-y-4">
           <ActionButtons
             onGenerate={onGenerate}
             onClear={onClear}
@@ -49,7 +49,7 @@ export function GenerateSection({
           />
           
           {hasSelections && (
-            <div className="mt-6">
+            <div className="mt-2">
               <ConfigurationSummary 
                 numberOfDays={numberOfDays}
                 fitnessLevel={fitnessLevel}
@@ -57,11 +57,12 @@ export function GenerateSection({
                 prescribedExercises={prescribedExercises}
                 injuries={injuries}
                 weatherData={weatherData}
+                maxHeight="20vh"
               />
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

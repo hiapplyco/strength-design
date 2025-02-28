@@ -5,20 +5,22 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { LocationResult } from "./types";
 
 interface LocationResultsDialogProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
   results: LocationResult[];
   onSelect: (location: LocationResult) => void;
+  isLoading?: boolean;
 }
 
 export function LocationResultsDialog({
-  open,
-  setOpen,
+  isOpen,
+  onClose,
   results,
   onSelect,
+  isLoading,
 }: LocationResultsDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md mx-auto gradient-border bg-black/70">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-center">Select Location</DialogTitle>

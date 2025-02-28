@@ -63,58 +63,60 @@ export function ConfigurationSummary({
             <p className="text-sm mt-2">Use the options on the left to customize your workout.</p>
           </div>
         ) : (
-          <ScrollArea className="h-[40vh] rounded-md border border-primary/20 bg-black/40 p-4">
-            {numberOfDays > 0 && (
-              <ConfigSection 
-                title="Training Days"
-                content={`${numberOfDays} day${numberOfDays > 1 ? 's' : ''} of training`}
-              />
-            )}
-            
-            {fitnessLevel && (
-              <ConfigSection 
-                title="Fitness Level"
-                content={fitnessLevel}
-                capitalize
-              />
-            )}
+          <ScrollArea className="h-[40vh] rounded-md border border-primary/20 bg-black/40 p-4 overflow-hidden">
+            <div className="pr-4">
+              {numberOfDays > 0 && (
+                <ConfigSection 
+                  title="Training Days"
+                  content={`${numberOfDays} day${numberOfDays > 1 ? 's' : ''} of training`}
+                />
+              )}
+              
+              {fitnessLevel && (
+                <ConfigSection 
+                  title="Fitness Level"
+                  content={fitnessLevel}
+                  capitalize
+                />
+              )}
 
-            {selectedExercises.length > 0 && (
-              <div className="mb-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Check className="h-4 w-4 text-primary" />
-                  <h4 className="font-semibold text-primary text-base">Selected Exercises</h4>
+              {selectedExercises.length > 0 && (
+                <div className="mb-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <h4 className="font-semibold text-primary text-base">Selected Exercises</h4>
+                  </div>
+                  <div className="pl-6 flex flex-wrap gap-2">
+                    {selectedExercises.map((exercise, index) => (
+                      <Badge key={index} variant="outline" className="bg-black/50">
+                        {exercise.name}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-                <div className="pl-6 flex flex-wrap gap-2">
-                  {selectedExercises.map((exercise, index) => (
-                    <Badge key={index} variant="outline" className="bg-black/50">
-                      {exercise.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
 
-            {prescribedExercises && (
-              <ConfigSection 
-                title="Prescribed Exercises"
-                content={prescribedExercises}
-              />
-            )}
+              {prescribedExercises && (
+                <ConfigSection 
+                  title="Prescribed Exercises"
+                  content={prescribedExercises}
+                />
+              )}
 
-            {injuries && (
-              <ConfigSection 
-                title="Health Considerations"
-                content={injuries}
-              />
-            )}
+              {injuries && (
+                <ConfigSection 
+                  title="Health Considerations"
+                  content={injuries}
+                />
+              )}
 
-            {weatherData && getWeatherDisplay() && (
-              <ConfigSection 
-                title="Weather Conditions"
-                content={getWeatherDisplay() || "Weather data available for workout optimization"}
-              />
-            )}
+              {weatherData && getWeatherDisplay() && (
+                <ConfigSection 
+                  title="Weather Conditions"
+                  content={getWeatherDisplay() || "Weather data available for workout optimization"}
+                />
+              )}
+            </div>
           </ScrollArea>
         )}
       </CardContent>

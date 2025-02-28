@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
@@ -17,11 +16,13 @@ interface WorkoutPresetsProps {
     numberOfDays: number;
   }) => void;
   onExercisesExtracted?: (exercises: Exercise[]) => void;
+  currentPrescribedExercises?: string;
 }
 
 export function WorkoutPresets({
   onSelectPreset,
-  onExercisesExtracted
+  onExercisesExtracted,
+  currentPrescribedExercises = ''
 }: WorkoutPresetsProps) {
   const [selectedWorkouts, setSelectedWorkouts] = useState<Record<string, string>>({});
   const [showPresets, setShowPresets] = useState(false);
@@ -46,14 +47,19 @@ export function WorkoutPresets({
       if (categoryKey) {
         const workoutDescription = WORKOUT_PROGRAMS[categoryKey][workoutName as keyof (typeof WORKOUT_PROGRAMS)[typeof categoryKey]];
         
+        const newWorkoutContent = `${preset.title}\n\nDescription:\n${workoutDescription}\n\nWorkout Details:\n${preset.prescribedExercises}`;
+        
+        const updatedExercises = currentPrescribedExercises 
+          ? `${currentPrescribedExercises}\n\n------ NEW WORKOUT ------\n\n${newWorkoutContent}`
+          : newWorkoutContent;
+        
         const formattedPreset = {
           title: preset.title,
-          prescribedExercises: `${preset.title}\n\nDescription:\n${workoutDescription}\n\nWorkout Details:\n${preset.prescribedExercises}`,
+          prescribedExercises: updatedExercises,
           fitnessLevel: preset.fitnessLevel,
           numberOfDays: preset.numberOfDays
         };
 
-        // Since we don't have direct access to exercise extraction, we'll just pass the formatted preset
         onSelectPreset(formattedPreset);
       }
     }

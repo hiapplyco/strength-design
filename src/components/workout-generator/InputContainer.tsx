@@ -131,6 +131,7 @@ export function InputContainer({
           <WorkoutPresets 
             onSelectPreset={handleSelectPreset}
             onExercisesExtracted={(exercises) => setSelectedExercises(exercises)}
+            currentPrescribedExercises={prescribedExercises}
           />
           
           <DaysSelectionCard 

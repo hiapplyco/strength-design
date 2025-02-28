@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
+    // Get initial session without showing toast
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (mounted) {
         setSession(session);
@@ -38,17 +39,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (mounted) {
         setSession(session);
         setIsLoading(false);
         
-        if (session) {
+        // Only show toast for specific auth events, not for initial session detection
+        if (event === 'SIGNED_IN') {
           toast({
             title: "Welcome back!",
             description: "You are now signed in",
           });
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           toast({
             title: "Signed out",
             description: "Come back soon!",

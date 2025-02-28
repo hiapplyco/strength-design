@@ -78,7 +78,7 @@ export function WeatherSearch({
     try {
       // Call weather API with latitude and longitude
       const response = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,is_day,weathercode,wind_speed_10m,relative_humidity_2m`
+        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,is_day,weathercode,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,precipitation`
       );
       
       if (!response.ok) {
@@ -93,8 +93,12 @@ export function WeatherSearch({
         apparentTemperature: data.current.apparent_temperature,
         weatherCode: data.current.weathercode,
         windSpeed: data.current.wind_speed_10m,
+        windDirection: data.current.wind_direction_10m,
+        windGusts: data.current.wind_gusts_10m,
         humidity: data.current.relative_humidity_2m,
+        precipitation: data.current.precipitation,
         isDay: data.current.is_day === 1,
+        forecast: null // We're not fetching forecast data in this simplified version
       };
       
       setWeather(weatherData);
@@ -124,8 +128,8 @@ export function WeatherSearch({
   }, [onWeatherUpdate]);
 
   return (
-    <Card className="bg-black/20 border-primary/20">
-      <CardHeader className="flex flex-row items-center">
+    <Card className="bg-black/20 border-primary/20 shadow-sm hover:shadow-md transition-all duration-300">
+      <CardHeader className="flex flex-row items-center pb-2">
         <div className="flex items-center gap-2">
           <Search className="h-5 w-5 text-primary" />
           <h3 className="font-oswald text-lg">Add Weather Conditions</h3>
@@ -145,20 +149,24 @@ export function WeatherSearch({
                 placeholder="Enter location (city, country)"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="bg-black/30 border-primary/30"
+                className="bg-black/30 border-primary/30 focus:border-primary focus:ring-1 focus:ring-primary"
               />
               <Button 
                 type="submit" 
                 disabled={searching}
-                className="bg-primary text-primary-foreground min-w-24"
+                className="bg-primary text-primary-foreground min-w-24 hover:bg-primary/90"
               >
                 {searching ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Searching...
+                    <span className="hidden sm:inline">Searching...</span>
+                    <span className="sm:hidden">...</span>
                   </>
                 ) : (
-                  "Search"
+                  <>
+                    <span className="hidden sm:inline">Search</span>
+                    <Search className="h-4 w-4 sm:hidden" />
+                  </>
                 )}
               </Button>
             </div>

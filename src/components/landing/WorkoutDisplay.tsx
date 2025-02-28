@@ -51,9 +51,9 @@ export function WorkoutDisplay({
   };
 
   return (
-    <div className="min-h-screen bg-black w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 transition-all duration-300 ease-in-out">
-        <div className="space-y-4 sm:space-y-8">
+    <div className="min-h-screen bg-black/90 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 transition-all duration-300 ease-in-out">
+        <div className="space-y-6">
           <WorkoutDisplayButtons resetWorkouts={resetWorkouts} />
 
           {isGenerating ? (

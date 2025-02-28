@@ -18,19 +18,21 @@ export function LocationResultsDialog({
 }: LocationResultsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="max-w-md mx-auto">
         <DialogHeader>
-          <DialogTitle>Select Location</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-center">Select Location</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-3 py-4 max-h-[60vh] overflow-y-auto pr-1">
           {results.map((result, index) => (
             <Button
               key={index}
               variant="outline"
-              className="w-full justify-start rounded-full"
+              className="w-full justify-start rounded-full text-left px-4 py-3 hover:bg-primary/10 transition-colors"
               onClick={() => onSelect(result)}
             >
-              {result.name}, {result.country} {result.admin1 ? `(${result.admin1})` : ''}
+              <span className="truncate">
+                {result.name}, {result.country} {result.admin1 ? `(${result.admin1})` : ''}
+              </span>
             </Button>
           ))}
         </div>

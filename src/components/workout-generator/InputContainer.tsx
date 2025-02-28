@@ -176,11 +176,6 @@ export function InputContainer({
             isValid={true}
             numberOfDays={numberOfDays}
             setNumberOfDays={setNumberOfDays}
-            selectedExercises={selectedExercises}
-            fitnessLevel={fitnessLevel}
-            prescribedExercises={prescribedExercises}
-            injuries={injuries}
-            weatherData={weatherData}
           />
         </div>
       </ScrollArea>

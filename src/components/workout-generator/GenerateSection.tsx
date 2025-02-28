@@ -3,10 +3,8 @@ import React from "react";
 import { Send } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { DaysSelectionCard } from "./DaysSelectionCard";
-import { ConfigurationSummary } from "./ConfigurationSummary";
 import { ActionButtons } from "./ActionButtons";
 import type { GenerateSectionProps } from "./types";
-import type { WeatherData } from "@/types/weather";
 
 export function GenerateSection({ 
   onGenerate, 
@@ -14,23 +12,9 @@ export function GenerateSection({
   isGenerating,
   renderTooltip,
   isValid,
-  selectedExercises = [],
-  fitnessLevel = "",
-  prescribedExercises = "",
-  injuries = "",
   numberOfDays = 0,
-  setNumberOfDays,
-  weatherData
+  setNumberOfDays
 }: GenerateSectionProps) {
-  const hasSelections = Boolean(
-    selectedExercises.length > 0 || 
-    fitnessLevel || 
-    prescribedExercises || 
-    injuries || 
-    numberOfDays > 0 || 
-    weatherData
-  );
-
   return (
     <div className="space-y-8">
       <DaysSelectionCard 
@@ -48,17 +32,6 @@ export function GenerateSection({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {hasSelections && (
-            <ConfigurationSummary 
-              numberOfDays={numberOfDays}
-              fitnessLevel={fitnessLevel}
-              selectedExercises={selectedExercises}
-              prescribedExercises={prescribedExercises}
-              injuries={injuries}
-              weatherData={weatherData}
-            />
-          )}
-
           <ActionButtons 
             onGenerate={onGenerate}
             onClear={onClear}

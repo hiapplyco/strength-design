@@ -8,6 +8,7 @@ import { ConfigurationSummary } from "./ConfigurationSummary";
 import { GenerateSection } from "./GenerateSection";
 import { PrescribedExercisesSection } from "./PrescribedExercisesSection";
 import { WorkoutPresets } from "./WorkoutPresets";
+import { ScrollArea } from "../ui/scroll-area";
 import type { Exercise } from "../exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 
@@ -114,75 +115,75 @@ export function InputContainer({
   ]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-6">
-        <WorkoutPresets 
-          onSelectPreset={handleSelectPreset}
-          onExercisesExtracted={(exercises) => setSelectedExercises(exercises)}
-        />
-        
-        <PrescribedExercisesSection
-          prescribedExercises={prescribedExercises}
-          setPrescribedExercises={setPrescribedExercises}
-          isAnalyzingPrescribed={isAnalyzingPrescribed}
-          handlePrescribedFileSelect={handlePrescribedFileSelect}
-        />
-        
-        <DaysSelectionCard 
-          numberOfDays={numberOfDays} 
-          setNumberOfDays={setNumberOfDays} 
-        />
-        
-        <FitnessLevelSection
-          fitnessLevel={fitnessLevel}
-          setFitnessLevel={setFitnessLevel}
-        />
-        
-        <InjuriesSection
-          injuries={injuries}
-          setInjuries={setInjuries}
-          isAnalyzingInjuries={isAnalyzingInjuries}
-          handleInjuriesFileSelect={handleInjuriesFileSelect}
-        />
-        
-        <WeatherSection
-          weatherData={weatherData}
-          onWeatherUpdate={handleWeatherUpdate}
-          renderTooltip={() => null}
-        />
-      </div>
-      
-      <div className="space-y-6">
-        <ConfigurationSummary
-          numberOfDays={numberOfDays}
-          fitnessLevel={fitnessLevel}
-          selectedExercises={selectedExercises}
-          prescribedExercises={prescribedExercises}
-          injuries={injuries}
-          weatherData={weatherData}
-        />
-        
-        <GenerateSection
-          isGenerating={isGenerating}
-          onGenerate={handleSubmit}
-          onClear={() => {
-            setSelectedExercises([]);
-            setFitnessLevel("");
-            setPrescribedExercises("");
-            setInjuries("");
-            setWeatherData(null);
-            setWeatherPrompt("");
-          }}
-          isValid={true}
-          numberOfDays={numberOfDays}
-          setNumberOfDays={setNumberOfDays}
-          selectedExercises={selectedExercises}
-          fitnessLevel={fitnessLevel}
-          prescribedExercises={prescribedExercises}
-          injuries={injuries}
-          weatherData={weatherData}
-        />
-      </div>
+    <div className="w-full max-w-3xl mx-auto">
+      <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+        <div className="space-y-6 pb-6">
+          <WorkoutPresets 
+            onSelectPreset={handleSelectPreset}
+            onExercisesExtracted={(exercises) => setSelectedExercises(exercises)}
+          />
+          
+          <ConfigurationSummary
+            numberOfDays={numberOfDays}
+            fitnessLevel={fitnessLevel}
+            selectedExercises={selectedExercises}
+            prescribedExercises={prescribedExercises}
+            injuries={injuries}
+            weatherData={weatherData}
+          />
+          
+          <DaysSelectionCard 
+            numberOfDays={numberOfDays} 
+            setNumberOfDays={setNumberOfDays} 
+          />
+          
+          <FitnessLevelSection
+            fitnessLevel={fitnessLevel}
+            setFitnessLevel={setFitnessLevel}
+          />
+          
+          <PrescribedExercisesSection
+            prescribedExercises={prescribedExercises}
+            setPrescribedExercises={setPrescribedExercises}
+            isAnalyzingPrescribed={isAnalyzingPrescribed}
+            handlePrescribedFileSelect={handlePrescribedFileSelect}
+          />
+          
+          <InjuriesSection
+            injuries={injuries}
+            setInjuries={setInjuries}
+            isAnalyzingInjuries={isAnalyzingInjuries}
+            handleInjuriesFileSelect={handleInjuriesFileSelect}
+          />
+          
+          <WeatherSection
+            weatherData={weatherData}
+            onWeatherUpdate={handleWeatherUpdate}
+            renderTooltip={() => null}
+          />
+          
+          <GenerateSection
+            isGenerating={isGenerating}
+            onGenerate={handleSubmit}
+            onClear={() => {
+              setSelectedExercises([]);
+              setFitnessLevel("");
+              setPrescribedExercises("");
+              setInjuries("");
+              setWeatherData(null);
+              setWeatherPrompt("");
+            }}
+            isValid={true}
+            numberOfDays={numberOfDays}
+            setNumberOfDays={setNumberOfDays}
+            selectedExercises={selectedExercises}
+            fitnessLevel={fitnessLevel}
+            prescribedExercises={prescribedExercises}
+            injuries={injuries}
+            weatherData={weatherData}
+          />
+        </div>
+      </ScrollArea>
     </div>
   );
 }

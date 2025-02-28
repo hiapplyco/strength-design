@@ -33,11 +33,11 @@ export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex justify-center items-center"
+            className="flex justify-center items-center py-12"
           >
             <Button
               onClick={() => setShowGenerateInput(true)}
-              className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald font-bold text-black dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-primary rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_#C4A052,12px_12px_0px_0px_#B8860B] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_#C4A052,8px_8px_0px_0px_#B8860B] transition-all duration-200 bg-gradient-to-r from-[#C4A052] to-[#DAA520] min-w-[300px]"
+              className="text-3xl sm:text-4xl md:text-5xl font-oswald font-bold text-black dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-primary rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_#C4A052,12px_12px_0px_0px_#B8860B] hover:shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),4px_4px_0px_0px_#C4A052,8px_8px_0px_0px_#B8860B] transition-all duration-200 bg-gradient-to-r from-[#C4A052] to-[#DAA520] min-w-[280px]"
             >
               Click here
             </Button>
@@ -46,9 +46,9 @@ export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {
         
         {(showGenerateInput || props.isGenerating) && (
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
+            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
             className="w-full"
           >

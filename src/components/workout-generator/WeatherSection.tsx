@@ -22,9 +22,9 @@ export function WeatherSection({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="w-full">
       {weatherData ? (
-        <Card className="bg-black/20 border-primary/20 shadow-sm hover:shadow-md transition-all duration-300">
+        <Card className="bg-black/20 border-primary/20 shadow-sm hover:shadow-md transition-all duration-300 w-full">
           <CardHeader className="flex flex-row items-center pb-2">
             <div className="flex items-center gap-2">
               <CloudSun className="h-5 w-5 text-primary" />

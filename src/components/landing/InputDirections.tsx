@@ -1,3 +1,4 @@
+
 import { Circle } from "lucide-react";
 
 const NumberedCircle = ({ number }: { number: number }) => (
@@ -11,9 +12,9 @@ const NumberedCircle = ({ number }: { number: number }) => (
 
 export const InputDirections = () => {
   return (
-    <div className="mt-8 max-w-2xl mx-auto text-left space-y-2 bg-white/5 p-6 rounded-lg">
+    <div className="max-w-3xl mx-auto text-left space-y-2 bg-white/5 p-6 rounded-lg border border-white/10">
       <h3 className="text-xl font-oswald text-accent mb-4">Program Generation Steps:</h3>
-      <ul className="list-none space-y-3">
+      <ul className="list-none space-y-4">
         <li className="flex items-center text-white">
           <NumberedCircle number={1} />
           <span className="ml-3">Location & Weather Conditions</span>

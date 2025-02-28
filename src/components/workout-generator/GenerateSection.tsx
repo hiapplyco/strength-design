@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Send } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../ui/card";
@@ -5,6 +6,7 @@ import { DaysSelectionCard } from "./DaysSelectionCard";
 import { ConfigurationSummary } from "./ConfigurationSummary";
 import { ActionButtons } from "./ActionButtons";
 import type { GenerateSectionProps } from "./types";
+import type { WeatherData } from "@/types/weather";
 
 export function GenerateSection({ 
   onGenerate, 
@@ -42,7 +44,7 @@ export function GenerateSection({
           <div className="flex items-center gap-2">
             <Send className="h-5 w-5 text-primary" />
             <h3 className="font-oswald text-lg">Create Your Workout</h3>
-            {renderTooltip()}
+            {renderTooltip && renderTooltip()}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

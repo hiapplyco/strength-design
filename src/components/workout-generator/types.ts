@@ -14,7 +14,7 @@ export interface ConfigurationSummaryProps {
   selectedExercises: Exercise[];
   prescribedExercises: string;
   injuries: string;
-  weatherData: string;
+  weatherData: WeatherData | string | null;
 }
 
 export interface WeatherLocation {
@@ -49,5 +49,5 @@ export interface GenerateSectionProps {
   injuries?: string;
   numberOfDays?: number;
   setNumberOfDays: (value: number) => void;
-  weatherData?: string;
+  weatherData?: WeatherData | string | null;
 }

@@ -3,6 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
 import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
+import type { WeatherData } from "@/types/weather";
 
 function ConfigSection({ title, content, capitalize = false }: ConfigSectionProps) {
   return (
@@ -23,6 +24,22 @@ export function ConfigurationSummary({
   injuries,
   weatherData
 }: ConfigurationSummaryProps) {
+  // Function to check if weatherData is a WeatherData object
+  const isWeatherDataObject = (data: any): data is WeatherData => {
+    return data && typeof data === 'object' && 'location' in data;
+  };
+
+  // Format weather data for display
+  const getWeatherDisplay = () => {
+    if (!weatherData) return null;
+    
+    if (isWeatherDataObject(weatherData)) {
+      return `Weather data from ${weatherData.location}`;
+    }
+    
+    return typeof weatherData === 'string' ? weatherData : 'Weather data available';
+  };
+
   return (
     <Card className="bg-black/30 border-primary/30 shadow-md">
       <CardHeader className="pb-2">
@@ -70,10 +87,10 @@ export function ConfigurationSummary({
             />
           )}
 
-          {weatherData && (
+          {weatherData && getWeatherDisplay() && (
             <ConfigSection 
               title="Weather Conditions"
-              content="Weather data available for workout optimization"
+              content={getWeatherDisplay() || "Weather data available for workout optimization"}
             />
           )}
         </ScrollArea>

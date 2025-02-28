@@ -19,6 +19,7 @@ export const VideoUpload = ({ onFileSelect, selectedFile }: VideoUploadProps) =>
           accept="video/*"
           onChange={(e) => onFileSelect(e.target.files?.[0] || null)}
           className="cursor-pointer h-8 text-xs file:text-xs py-0"
+          borderStyle="multicolor"
         />
       </div>
       {selectedFile && (

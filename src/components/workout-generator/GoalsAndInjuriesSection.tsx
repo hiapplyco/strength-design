@@ -1,5 +1,5 @@
 
-import { Target, Heart } from "lucide-react";
+import { Dumbbell, HeartPulse } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { TooltipWrapper } from "./TooltipWrapper";
 
@@ -26,10 +26,10 @@ export function GoalsAndInjuriesSection({
 }: GoalsAndInjuriesSectionProps) {
   return (
     <div className="grid grid-cols-1 gap-6">
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">What are your Goals?</h3>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Dumbbell className="h-5 w-5 text-primary" />
+          <h3 className="font-oswald text-lg">What are your fitness goals?</h3>
           <TooltipWrapper content="Tell us about your fitness goals to help AI personalize your workout plan" />
         </div>
         <Textarea
@@ -40,17 +40,17 @@ export function GoalsAndInjuriesSection({
           borderStyle="multicolor"
         />
       </div>
-
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Heart className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Any Injuries or Health Considerations?</h3>
-          <TooltipWrapper content="Let us know about any injuries or health issues to ensure a safe workout plan" />
+      
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <HeartPulse className="h-5 w-5 text-primary" />
+          <h3 className="font-oswald text-lg">Any injuries or health considerations?</h3>
+          <TooltipWrapper content="List any injuries or health conditions that your workout should accommodate" />
         </div>
-        <Textarea
+        <Textarea 
           value={injuries}
           onChange={(e) => setInjuries(e.target.value)}
-          placeholder="List any injuries, medical conditions, or movement limitations"
+          placeholder="List any injuries or health conditions"
           rows={4}
           borderStyle="multicolor"
         />

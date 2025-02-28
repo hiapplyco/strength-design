@@ -52,6 +52,7 @@ export const FileUpload = ({ onFileSelect }: FileUploadProps) => {
         accept=".pdf,.jpg,.jpeg,.png,.webp,.txt"
         className="hidden"
         id="file-upload"
+        borderStyle="multicolor"
       />
       <Button
         variant="outline"
@@ -65,4 +66,4 @@ export const FileUpload = ({ onFileSelect }: FileUploadProps) => {
       </Button>
     </div>
   );
-};
+}

@@ -1,40 +1,54 @@
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface SearchFormProps {
   onSearch: (location: string) => void;
-  location: string;
-  setLocation: (location: string) => void;
+  isLoading: boolean;
 }
 
-export function SearchForm({ onSearch, location, setLocation }: SearchFormProps) {
-  const handleSubmit = (e: React.FormEvent) => {
+export function SearchForm({ onSearch, isLoading }: SearchFormProps) {
+  const [location, setLocation] = useState("");
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (location.trim()) {
-      onSearch(location.trim());
+      onSearch(location);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <Input
-        type="text"
-        placeholder="Enter city name..."
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        className="bg-black text-white placeholder:text-gray-400 w-full"
-      />
-      {location && (
-        <button
-          type="button"
-          onClick={() => setLocation("")}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      )}
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="flex-1">
+        <Input
+          type="text"
+          placeholder="Enter city name..."
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="bg-black text-white placeholder:text-gray-400 w-full"
+          borderStyle="multicolor"
+        />
+      </div>
+      <Button 
+        type="submit" 
+        variant="default" 
+        className="bg-primary hover:bg-primary/90 text-black font-medium"
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent"></div>
+            <span>Searching...</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            <span>Search</span>
+          </div>
+        )}
+      </Button>
     </form>
   );
 }

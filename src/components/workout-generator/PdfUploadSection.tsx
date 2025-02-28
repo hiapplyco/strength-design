@@ -67,6 +67,7 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
         accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
         onChange={handleFileChange}
         className="cursor-pointer text-xs h-8 file:text-xs file:font-medium py-0 w-full bg-background/5 hover:bg-background/10 transition-colors"
+        borderStyle="multicolor"
       />
       <p className="text-[9px] text-muted-foreground/70 mt-1">
         PDF, JPG, PNG, WEBP (max 4MB)

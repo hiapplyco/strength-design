@@ -4,17 +4,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { TooltipWrapper } from "./TooltipWrapper";
 
 interface GoalsAndInjuriesSectionProps {
-  goals: string;
-  setGoals: (value: string) => void;
+  prescribedExercises: string;
+  setPrescribedExercises: (value: string) => void;
+  isAnalyzingPrescribed?: boolean;
+  handlePrescribedFileSelect?: (file: File) => Promise<void>;
   injuries: string;
   setInjuries: (value: string) => void;
+  isAnalyzingInjuries?: boolean;
+  handleInjuriesFileSelect?: (file: File) => Promise<void>;
 }
 
 export function GoalsAndInjuriesSection({
-  goals,
-  setGoals,
+  prescribedExercises,
+  setPrescribedExercises,
+  isAnalyzingPrescribed,
+  handlePrescribedFileSelect,
   injuries,
   setInjuries,
+  isAnalyzingInjuries,
+  handleInjuriesFileSelect,
 }: GoalsAndInjuriesSectionProps) {
   return (
     <div className="grid grid-cols-1 gap-6">
@@ -25,8 +33,8 @@ export function GoalsAndInjuriesSection({
           <TooltipWrapper content="Tell us about your fitness goals to help AI personalize your workout plan" />
         </div>
         <Textarea
-          value={goals}
-          onChange={(e) => setGoals(e.target.value)}
+          value={prescribedExercises}
+          onChange={(e) => setPrescribedExercises(e.target.value)}
           placeholder="List any specific exercises you need to include"
           rows={4}
           borderStyle="multicolor"

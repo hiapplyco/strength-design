@@ -24,7 +24,7 @@ export function FitnessLevelSection({
     <div className="w-full">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="h-5 w-5 text-primary" />
-        <h3 className="font-oswald text-lg">Fitness Level</h3>
+        <h3 className="text-lg">Fitness Level</h3>
         <TooltipWrapper content="Select your fitness level to receive appropriately challenging workouts" />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -34,10 +34,10 @@ export function FitnessLevelSection({
             onClick={() => setFitnessLevel(level)}
             variant={fitnessLevel === level ? "default" : "outline"}
             className={cn(
-              "w-full transition-all duration-200 flex items-center gap-2 justify-center transform hover:scale-105 relative",
+              "w-full transition-all duration-200 flex items-center gap-2 justify-center",
               fitnessLevel === level 
-                ? "bg-[#FFD700] text-black hover:bg-[#FFD700]/90" 
-                : "bg-black/50 text-white hover:bg-black/70 hover:border-[#FFD700]/50 border-2 gradient-border"
+                ? "text-white" 
+                : "bg-black/50 text-white hover:bg-black/70 border gradient-border"
             )}
           >
             <Icon className="h-4 w-4" />

@@ -1,9 +1,6 @@
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { Cloud } from "lucide-react";
+import React from "react";
 import { WeatherSearch } from "./weather/WeatherSearch";
-import { WeatherDisplay } from "./weather/WeatherDisplay";
 import type { WeatherData } from "@/types/weather";
 
 interface WeatherSectionProps {
@@ -15,33 +12,14 @@ interface WeatherSectionProps {
 export function WeatherSection({ 
   weatherData, 
   onWeatherUpdate,
-  renderTooltip 
+  renderTooltip
 }: WeatherSectionProps) {
-  const [isSearching, setIsSearching] = useState(false);
-
   return (
-    <Card className="bg-black/20 border-primary/20">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Cloud className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Local Weather</h3>
-          {renderTooltip && renderTooltip()}
-        </div>
-      </CardHeader>
-      <CardContent>
-        {weatherData ? (
-          <WeatherDisplay 
-            weather={weatherData} 
-            onClear={() => onWeatherUpdate(null, "")}
-          />
-        ) : (
-          <WeatherSearch 
-            onWeatherUpdate={onWeatherUpdate}
-            isSearching={isSearching}
-            setIsSearching={setIsSearching}
-          />
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <WeatherSearch 
+        onWeatherUpdate={onWeatherUpdate} 
+        renderTooltip={renderTooltip}
+      />
+    </div>
   );
 }

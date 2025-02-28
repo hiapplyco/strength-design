@@ -1,183 +1,177 @@
-import { useState } from "react";
-import { MapPin, ChevronDown, ChevronUp } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { getWeatherDescription } from "./weather-utils";
-import { SearchForm } from "./SearchForm";
-import { LocationResultsDialog } from "./LocationResultsDialog";
+
+import { useState, useCallback } from "react";
+import { Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { WeatherSearchProps, LocationResult } from "./types";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/use-toast";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { WeatherDisplay } from "./WeatherDisplay";
+import { LocationResultsDialog } from "./LocationResultsDialog";
+import type { WeatherData } from "@/types/weather";
+import type { LocationResult, WeatherSearchProps } from "./types";
 
-export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchProps) {
+export function WeatherSearch({ 
+  onWeatherUpdate, 
+  renderTooltip,
+  isSearching: externalIsSearching,
+  setIsSearching: externalSetIsSearching 
+}: WeatherSearchProps) {
   const [location, setLocation] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isWeatherLoading, setIsWeatherLoading] = useState(false);
-  const [locationResults, setLocationResults] = useState<LocationResult[]>([]);
-  const [showLocationDialog, setShowLocationDialog] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const { toast } = useToast();
+  const [results, setResults] = useState<LocationResult[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const formatLocation = (result: LocationResult) => {
-    const parts = [result.name];
-    if (result.admin1) {
-      parts.push(result.admin1);
-    }
-    parts.push(result.country);
-    return parts.join(", ");
-  };
+  // Use external state if provided
+  const searching = externalIsSearching !== undefined ? externalIsSearching : isSearching;
+  const setSearching = externalSetIsSearching || setIsSearching;
 
-  const handleSearch = async (searchLocation: string) => {
-    if (!searchLocation.trim()) {
+  const handleSearch = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!location.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a location",
+        title: "Location Required",
+        description: "Please enter a location to search for.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
-    
+    setSearching(true);
+
     try {
-      const geocodingResponse = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(searchLocation)}&count=5&language=en&format=json`
-      );
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=5&language=en&format=json`);
       
-      if (!geocodingResponse.ok) {
-        throw new Error("Failed to find location");
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.statusText}`);
       }
-
-      const geocodingData = await geocodingResponse.json();
       
-      if (!geocodingData.results?.length) {
-        throw new Error("No locations found");
+      const data = await response.json();
+      
+      if (data.results && data.results.length > 0) {
+        setResults(data.results);
+        setDialogOpen(true);
+      } else {
+        toast({
+          title: "No Results Found",
+          description: "We couldn't find any locations matching your search.",
+          variant: "destructive",
+        });
       }
-
-      setLocationResults(geocodingData.results);
-      setShowLocationDialog(true);
-    } catch (err) {
-      console.error("Error searching locations:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to search locations";
-      
+    } catch (error) {
+      console.error("Weather search error:", error);
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: "Search Failed",
+        description: "An error occurred while searching for weather data.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setSearching(false);
     }
-  };
+  }, [location, setSearching]);
 
-  const handleLocationSelect = async (selectedLocation: LocationResult) => {
-    setIsLoading(true);
-    setIsWeatherLoading(true);
-    setShowLocationDialog(false);
-    
+  const handleSelectLocation = useCallback(async (location: LocationResult) => {
+    setDialogOpen(false);
+    setSearching(true);
+
     try {
-      const weatherResponse = await fetch(
-        `https://api.open-meteo.com/v1/forecast?` +
-        `latitude=${selectedLocation.latitude}&longitude=${selectedLocation.longitude}` +
-        `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m` +
-        `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max` +
-        `&timezone=auto`
+      // Call weather API with latitude and longitude
+      const response = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,apparent_temperature,is_day,weathercode,wind_speed_10m,relative_humidity_2m`
       );
-
-      if (!weatherResponse.ok) {
-        throw new Error("Failed to fetch weather data");
-      }
-
-      const weatherData = await weatherResponse.json();
       
-      if (!weatherData.current) {
-        throw new Error("Weather data not available");
+      if (!response.ok) {
+        throw new Error(`Weather API error: ${response.statusText}`);
       }
-
-      const transformedData = {
-        location: formatLocation(selectedLocation),
-        temperature: weatherData.current.temperature_2m,
-        humidity: weatherData.current.relative_humidity_2m,
-        windSpeed: weatherData.current.wind_speed_10m,
-        apparentTemperature: weatherData.current.apparent_temperature,
-        precipitation: weatherData.current.precipitation,
-        weatherCode: weatherData.current.weather_code,
-        windDirection: weatherData.current.wind_direction_10m,
-        windGusts: weatherData.current.wind_gusts_10m,
-        forecast: weatherData.daily ? {
-          dates: weatherData.daily.time,
-          weatherCodes: weatherData.daily.weather_code,
-          maxTemps: weatherData.daily.temperature_2m_max,
-          minTemps: weatherData.daily.temperature_2m_min,
-          precipitationProb: weatherData.daily.precipitation_probability_max,
-          maxWindSpeed: weatherData.daily.wind_speed_10m_max
-        } : null
+      
+      const data = await response.json();
+      
+      const weatherData: WeatherData = {
+        location: `${location.name}, ${location.country}`,
+        temperature: data.current.temperature_2m,
+        apparentTemperature: data.current.apparent_temperature,
+        weatherCode: data.current.weathercode,
+        windSpeed: data.current.wind_speed_10m,
+        humidity: data.current.relative_humidity_2m,
+        isDay: data.current.is_day === 1,
       };
-
-      const weatherDescription = getWeatherDescription(weatherData.current.weather_code);
-      onWeatherUpdate(
-        transformedData, 
-        `The weather in ${formatLocation(selectedLocation)} is ${weatherDescription} with a temperature of ${weatherData.current.temperature_2m}°C.`
-      );
       
-      toast({
-        title: "Success",
-        description: `Weather data loaded for ${formatLocation(selectedLocation)}`,
-      });
-
-    } catch (err) {
-      console.error("Error fetching weather:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch weather data";
+      setWeather(weatherData);
       
+      // Generate a descriptive prompt about the weather
+      const prompt = `The current weather in ${weatherData.location} is ${weatherData.temperature}°C, feels like ${weatherData.apparentTemperature}°C, with ${weatherData.humidity}% humidity and wind speeds of ${weatherData.windSpeed} km/h.`;
+      
+      // Pass the data back to the parent
+      onWeatherUpdate(weatherData, prompt);
+      
+      setLocation("");
+    } catch (error) {
+      console.error("Weather data fetch error:", error);
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: "Weather Data Error",
+        description: "We couldn't retrieve weather data for this location.",
         variant: "destructive",
       });
-      
-      onWeatherUpdate(null, "");
     } finally {
-      setIsLoading(false);
-      setIsWeatherLoading(false);
+      setSearching(false);
     }
-  };
+  }, [onWeatherUpdate, setSearching]);
+
+  const handleClearWeather = useCallback(() => {
+    setWeather(null);
+    onWeatherUpdate(null, "");
+  }, [onWeatherUpdate]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <MapPin className="h-5 w-5 text-primary" />
-        <h3 className="font-oswald text-lg">Add Your Location</h3>
-        {renderTooltip()}
-      </div>
-
-      <Button
-        variant="outline"
-        className="w-full flex items-center justify-between"
-        onClick={() => setShowSearch(!showSearch)}
-      >
-        <span className="text-sm sm:text-base truncate pr-2">Add location for weather-optimized workouts?</span>
-        {showSearch ? (
-          <ChevronUp className="h-4 w-4 flex-shrink-0" />
-        ) : (
-          <ChevronDown className="h-4 w-4 flex-shrink-0" />
-        )}
-      </Button>
-
-      {showSearch && (
-        <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-          <SearchForm
-            location={location}
-            setLocation={setLocation}
-            onSearch={handleSearch}
-          />
-
-          <LocationResultsDialog
-            open={showLocationDialog}
-            onOpenChange={setShowLocationDialog}
-            locationResults={locationResults}
-            onLocationSelect={handleLocationSelect}
-            formatLocation={formatLocation}
-          />
+    <Card className="bg-black/20 border-primary/20">
+      <CardHeader className="flex flex-row items-center">
+        <div className="flex items-center gap-2">
+          <Search className="h-5 w-5 text-primary" />
+          <h3 className="font-oswald text-lg">Add Weather Conditions</h3>
+          {renderTooltip && renderTooltip()}
         </div>
-      )}
-    </div>
+      </CardHeader>
+      <CardContent>
+        {weather ? (
+          <WeatherDisplay 
+            weather={weather} 
+            onClear={handleClearWeather} 
+          />
+        ) : (
+          <form onSubmit={handleSearch} className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter location (city, country)"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="bg-black/30 border-primary/30"
+              />
+              <Button 
+                type="submit" 
+                disabled={searching}
+                className="bg-primary text-primary-foreground min-w-24"
+              >
+                {searching ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Searching...
+                  </>
+                ) : (
+                  "Search"
+                )}
+              </Button>
+            </div>
+          </form>
+        )}
+        
+        <LocationResultsDialog
+          open={dialogOpen}
+          setOpen={setDialogOpen}
+          results={results}
+          onSelect={handleSelectLocation}
+        />
+      </CardContent>
+    </Card>
   );
 }

@@ -1,134 +1,112 @@
 
 import React, { useState } from "react";
-import { Search, CloudSun, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CloudSun, Loader2 } from "lucide-react";
+import { fetchWeatherData, searchLocations } from "./weather-utils";
+import { TooltipWrapper } from "../TooltipWrapper";
 import { LocationResultsDialog } from "./LocationResultsDialog";
-import { useToast } from "@/components/ui/use-toast";
-import { getWeatherDescription, searchLocations, fetchWeatherData } from "./weather-utils";
+import { SearchForm } from "./SearchForm";
 import type { LocationResult } from "./types";
-import type { WeatherData } from "@/types/weather";
 
 interface WeatherSearchProps {
-  onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
+  onWeatherUpdate: (weatherData: any | null) => void;
   renderTooltip?: () => React.ReactNode;
   numberOfDays?: number;
 }
 
-export function WeatherSearch({ onWeatherUpdate, renderTooltip, numberOfDays = 7 }: WeatherSearchProps) {
-  const [locationQuery, setLocationQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
+export function WeatherSearch({ 
+  onWeatherUpdate, 
+  renderTooltip,
+  numberOfDays = 7
+}: WeatherSearchProps) {
   const [isSearching, setIsSearching] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [locations, setLocations] = useState<LocationResult[]>([]);
+  const [isLocationsDialogOpen, setIsLocationsDialogOpen] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!locationQuery.trim()) return;
-
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchError("Please enter a location");
+      return;
+    }
+    
+    setSearchQuery(query);
+    setSearchError("");
     setIsSearching(true);
+    
     try {
-      const results = await searchLocations(locationQuery);
-      setSearchResults(results || []);
-      setShowResults(true);
+      const locationResults = await searchLocations(query);
       
-      if (results.length === 0) {
-        toast({
-          title: "No locations found",
-          description: "Try a different search term",
-          variant: "destructive"
-        });
+      if (locationResults.length === 0) {
+        setSearchError(`No locations found for "${query}"`);
+        setLocations([]);
+      } else {
+        setLocations(locationResults);
+        setIsLocationsDialogOpen(true);
       }
     } catch (error) {
-      console.error("Error searching locations:", error);
-      toast({
-        title: "Search failed",
-        description: "Failed to search locations. Please try again.",
-        variant: "destructive"
-      });
-      setSearchResults([]);
+      console.error('Search error:', error);
+      setSearchError("Error searching for locations. Please try again.");
     } finally {
       setIsSearching(false);
     }
   };
 
-  const handleLocationSelect = async (location: LocationResult) => {
-    try {
-      const weatherData = await fetchWeatherData(location.latitude, location.longitude, location.name);
-      
-      // Let the parent component handle creating the weather prompt
-      onWeatherUpdate(weatherData, "");
-      
-      toast({
-        title: "Weather updated",
-        description: `Weather data loaded for ${location.name}`,
-      });
-    } catch (error) {
-      console.error("Error fetching weather data:", error);
-      toast({
-        title: "Weather fetch failed",
-        description: "Failed to fetch weather data. Please try again.",
-        variant: "destructive"
-      });
-    }
+  const handleSelectLocation = async (location: LocationResult) => {
+    setIsLocationsDialogOpen(false);
+    setIsSearching(true);
     
-    setShowResults(false);
+    try {
+      const weatherData = await fetchWeatherData(
+        location.latitude,
+        location.longitude,
+        location.name,
+        numberOfDays
+      );
+      
+      onWeatherUpdate(weatherData);
+    } catch (error) {
+      console.error('Weather fetch error:', error);
+      setSearchError("Error fetching weather data. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
-    <Card className="bg-black/20 border-transparent shadow-sm hover:shadow-md transition-all duration-300 relative">
-      <div className="absolute inset-0 rounded-lg p-[1px] -z-10 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40"></div>
-      <div className="absolute inset-[1px] rounded-[calc(0.5rem-1px)] bg-black/70 -z-[5]"></div>
-      <CardHeader className="flex flex-row items-center pb-2 relative z-10">
-        <div className="flex items-center gap-2">
-          <CloudSun className="h-5 w-5 text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text" />
-          <h3 className="font-oswald text-lg text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text">Add Weather Conditions</h3>
-          {renderTooltip && renderTooltip()}
-        </div>
-      </CardHeader>
-      <CardContent className="relative z-10">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="flex-1">
-            <Input
-              placeholder="Enter location (city, country)"
-              value={locationQuery}
-              onChange={(e) => setLocationQuery(e.target.value)}
-              className="w-full"
-              borderStyle="multicolor"
+    <>
+      <Card className="bg-black/20 border-primary/20 shadow-sm hover:shadow-md transition-all duration-300">
+        <CardHeader className="flex flex-row items-center gap-2 pb-2">
+          <CloudSun className="h-5 w-5 text-primary" />
+          <h3 className="font-oswald text-lg">Add Weather Conditions</h3>
+          {renderTooltip ? (
+            renderTooltip()
+          ) : (
+            <TooltipWrapper 
+              content="Add local weather conditions to optimize your workout for the current environment"
             />
-          </div>
-          <Button 
-            type="submit" 
-            variant="default" 
-            className="relative overflow-hidden text-black font-medium"
-            disabled={isSearching}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-100 group-hover:opacity-90 transition-opacity"></div>
-            <span className="relative z-10 flex items-center gap-2">
-              {isSearching ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Searching...</span>
-                </>
-              ) : (
-                <>
-                  <Search className="h-4 w-4" />
-                  <span>Search</span>
-                </>
-              )}
-            </span>
-          </Button>
-        </form>
-      </CardContent>
+          )}
+          {isSearching && (
+            <Loader2 className="h-4 w-4 text-primary animate-spin ml-auto" />
+          )}
+        </CardHeader>
+        <CardContent>
+          <SearchForm
+            searchQuery={searchQuery}
+            isSearching={isSearching}
+            searchError={searchError}
+            onSearch={handleSearch}
+          />
+        </CardContent>
+      </Card>
       
       <LocationResultsDialog
-        isOpen={showResults}
-        onClose={() => setShowResults(false)}
-        results={searchResults}
-        onSelect={handleLocationSelect}
-        isLoading={isSearching}
+        isOpen={isLocationsDialogOpen}
+        setIsOpen={setIsLocationsDialogOpen}
+        locations={locations}
+        onSelectLocation={handleSelectLocation}
       />
-    </Card>
+    </>
   );
 }

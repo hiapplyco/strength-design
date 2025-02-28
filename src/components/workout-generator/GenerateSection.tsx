@@ -2,7 +2,6 @@
 import React from "react";
 import { Send, Check, X } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../ui/card";
-import { DaysSelectionCard } from "./DaysSelectionCard";
 import { ActionButtons } from "./ActionButtons";
 import { ConfigurationSummary } from "./ConfigurationSummary";
 import type { GenerateSectionProps } from "./types";
@@ -32,12 +31,6 @@ export function GenerateSection({
 
   return (
     <div className="space-y-8">
-      <DaysSelectionCard 
-        numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
-        renderTooltip={renderTooltip}
-      />
-
       <Card className="bg-black/20 border border-primary/30 rounded-xl relative">
         <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-pink-500/10 rounded-xl" />
         <CardHeader className="relative z-10">

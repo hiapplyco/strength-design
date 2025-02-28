@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
 import { Check, Info, CloudSun } from "lucide-react";
+import { getWeatherDescription } from "./weather/weather-utils";
 import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
 import type { WeatherData } from "@/types/weather";
-import { getWeatherDescription } from "./weather-utils";
 
 function ConfigSection({ title, content, capitalize = false, icon }: ConfigSectionProps & { icon?: React.ReactNode }) {
   return (
@@ -30,12 +30,10 @@ export function ConfigurationSummary({
   weatherData,
   maxHeight = "40vh"
 }: ConfigurationSummaryProps & { maxHeight?: string }) {
-  // Function to check if weatherData is a WeatherData object
   const isWeatherDataObject = (data: any): data is WeatherData => {
     return data && typeof data === 'object' && 'location' in data;
   };
 
-  // Format weather data for display
   const getWeatherDisplay = () => {
     if (!weatherData) return null;
     

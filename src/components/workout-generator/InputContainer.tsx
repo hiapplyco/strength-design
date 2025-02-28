@@ -108,12 +108,19 @@ export function InputContainer({
   };
 
   const handleWeatherUpdate = (newWeatherData: WeatherData | null, newWeatherPrompt: string) => {
+    console.log('Weather data updated:', newWeatherData);
+    console.log('Weather prompt:', newWeatherPrompt);
     setWeatherData(newWeatherData);
     setWeatherPrompt(newWeatherPrompt);
   };
 
   const handleSubmit = useCallback(() => {
     setIsGenerating(true);
+    
+    console.log('Sending to workout generator:');
+    console.log('- Weather prompt:', weatherPrompt);
+    console.log('- Fitness level:', fitnessLevel);
+    console.log('- Number of days:', numberOfDays);
     
     handleGenerateWorkout({
       prompt: generatePrompt,
@@ -132,6 +139,7 @@ export function InputContainer({
     prescribedExercises,
     handleGenerateWorkout,
     setIsGenerating,
+    numberOfDays,
   ]);
 
   return (

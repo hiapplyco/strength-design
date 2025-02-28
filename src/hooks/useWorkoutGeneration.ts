@@ -36,6 +36,8 @@ export const useWorkoutGeneration = () => {
         numberOfDays: Number(params.numberOfDays) || 7
       };
 
+      console.log('Weather prompt being sent to edge function:', sanitizedParams.weatherPrompt);
+
       // First log the session input
       const { error: sessionError } = await supabase.from('session_io').insert({
         weather_prompt: sanitizedParams.weatherPrompt,

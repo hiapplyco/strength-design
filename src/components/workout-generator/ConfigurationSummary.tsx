@@ -1,11 +1,11 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
-import { Check, Info } from "lucide-react";
+import { Check, Info, CloudSun } from "lucide-react";
 import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
 import type { WeatherData } from "@/types/weather";
+import { getWeatherDescription } from "./weather-utils";
 
 function ConfigSection({ title, content, capitalize = false, icon }: ConfigSectionProps & { icon?: React.ReactNode }) {
   return (
@@ -40,7 +40,9 @@ export function ConfigurationSummary({
     if (!weatherData) return null;
     
     if (isWeatherDataObject(weatherData)) {
-      return `Weather data from ${weatherData.location}`;
+      const tempF = Math.round((weatherData.temperature * 9/5) + 32);
+      const description = getWeatherDescription(weatherData.weatherCode);
+      return `${description} in ${weatherData.location}, ${Math.round(weatherData.temperature)}°C (${tempF}°F), ${weatherData.humidity}% humidity`;
     }
     
     return typeof weatherData === 'string' ? weatherData : 'Weather data available';
@@ -115,6 +117,7 @@ export function ConfigurationSummary({
                 <ConfigSection 
                   title="Weather Conditions"
                   content={getWeatherDisplay() || "Weather data available for workout optimization"}
+                  icon={<CloudSun className="h-4 w-4 text-yellow-400" />}
                 />
               )}
             </div>

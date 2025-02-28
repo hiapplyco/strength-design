@@ -54,26 +54,16 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
 
   const handleLocationSelect = async (location: LocationResult) => {
     try {
-      const apiData = await fetchWeatherData(location.latitude, location.longitude, location.name);
+      const weatherData = await fetchWeatherData(location.latitude, location.longitude, location.name);
       
-      // Transform the data to match the WeatherData interface
-      const weatherData: WeatherData = {
-        temperature: apiData.current.temperature,
-        humidity: apiData.current.humidity,
-        windSpeed: apiData.current.windSpeed,
-        location: apiData.current.location,
-        apparentTemperature: apiData.current.apparentTemperature,
-        precipitation: apiData.current.precipitation,
-        weatherCode: apiData.current.weatherCode,
-        windDirection: apiData.current.windDirection,
-        windGusts: apiData.current.windGusts,
-        isDay: apiData.current.isDay,
-        forecast: apiData.forecast
-      };
+      // Create a detailed weather prompt for the workout generator
+      const tempF = Math.round((weatherData.temperature * 9/5) + 32);
+      const weatherDescription = getWeatherDescription(weatherData.weatherCode);
       
-      const weatherPrompt = `Consider the weather in ${location.name}: ${apiData.current.weatherDescription}, temperature of ${apiData.current.tempC}°C (${apiData.current.tempF}°F), and ${apiData.current.humidity}% humidity.`;
+      const weatherPrompt = `Consider the weather in ${location.name}: ${weatherDescription}, temperature of ${Math.round(weatherData.temperature)}°C (${tempF}°F), ${weatherData.humidity}% humidity, and wind speed of ${Math.round(weatherData.windSpeed)} km/h. Weather conditions may affect workout intensity, hydration needs, and exercise selection.`;
       
       onWeatherUpdate(weatherData, weatherPrompt);
+      
       toast({
         title: "Weather updated",
         description: `Weather data loaded for ${location.name}`,
@@ -122,7 +112,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
             <span className="relative z-10 flex items-center gap-2">
               {isSearching ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent"></div>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Searching...</span>
                 </>
               ) : (

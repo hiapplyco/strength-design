@@ -113,23 +113,18 @@ export const fetchWeatherData = async (lat: number, lon: number, locationName: s
     const tempF = (tempC * 9/5) + 32;
     const humidity = data.current.relative_humidity_2m;
 
-    // Transformed to match WeatherData interface
+    // Transform data to match WeatherData interface
     return {
-      current: {
-        location: locationName,
-        temperature: data.current.temperature_2m,
-        tempC: tempC,
-        tempF: tempF.toFixed(1),
-        humidity: humidity,
-        windSpeed: data.current.wind_speed_10m,
-        apparentTemperature: data.current.apparent_temperature,
-        precipitation: data.current.precipitation,
-        weatherCode: weatherCode,
-        weatherDescription: weatherDescription,
-        windDirection: data.current.wind_direction_10m,
-        windGusts: data.current.wind_gusts_10m,
-        isDay: data.current.is_day === 1
-      },
+      temperature: data.current.temperature_2m,
+      humidity: data.current.relative_humidity_2m,
+      windSpeed: data.current.wind_speed_10m,
+      location: locationName,
+      apparentTemperature: data.current.apparent_temperature,
+      precipitation: data.current.precipitation,
+      weatherCode: data.current.weather_code,
+      windDirection: data.current.wind_direction_10m,
+      windGusts: data.current.wind_gusts_10m,
+      isDay: data.current.is_day === 1,
       forecast: data.daily ? {
         dates: data.daily.time,
         weatherCodes: data.daily.weather_code,

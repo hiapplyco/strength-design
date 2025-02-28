@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "../ui/button";
 import { Send, Loader2, Check, X } from "lucide-react";
@@ -14,7 +15,7 @@ export function ActionButtons({
       <Button 
         onClick={onGenerate}
         disabled={isGenerating || !isValid}
-        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-oswald uppercase tracking-wide transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full font-oswald uppercase tracking-wide transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isGenerating ? (
           <>

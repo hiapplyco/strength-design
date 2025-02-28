@@ -38,7 +38,7 @@ export function GenerateSection({
         renderTooltip={renderTooltip}
       />
 
-      <Card className="bg-black/20 border-primary/20">
+      <Card className="bg-black/20 gradient-border">
         <CardHeader>
           <div className="flex items-center gap-2">
             <Send className="h-5 w-5 text-primary" />

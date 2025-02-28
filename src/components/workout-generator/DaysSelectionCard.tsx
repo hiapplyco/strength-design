@@ -13,7 +13,7 @@ export function DaysSelectionCard({
   const days = [1, 2, 3, 4, 5, 6, 7];
 
   return (
-    <Card className="bg-black/20 border-primary/20">
+    <Card className="bg-black/20 gradient-border">
       <CardHeader>
         <div className="flex items-center gap-2">
           <Dumbbell className="h-5 w-5 text-primary" />

@@ -19,7 +19,7 @@ export function LocationResultsDialog({
 }: LocationResultsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md mx-auto">
+      <DialogContent className="max-w-md mx-auto gradient-border bg-black/70">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-center">Select Location</DialogTitle>
         </DialogHeader>

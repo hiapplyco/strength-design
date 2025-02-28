@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -48,7 +49,8 @@
 
   /* Base input styling */
   .base-input {
-    @apply bg-black border border-jupyter-border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white h-14;
+    @apply bg-black border rounded-[20px] px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white h-14;
+    border-image: linear-gradient(to right, #DAA520, #FF4500, #FFFFFF) 1;
   }
 
   /* Apply base input styling to all form elements */
@@ -72,12 +74,16 @@
 
   /* Jupyter-style code cells */
   .code-cell {
-    @apply bg-black border border-jupyter-border rounded-[20px] p-4 font-mono text-sm;
+    @apply bg-black rounded-[20px] p-4 font-mono text-sm;
+    border: 1px solid transparent;
+    border-image: linear-gradient(to right, #DAA520, #FF4500, #FFFFFF) 1;
   }
 
   /* Jupyter-style output cells */
   .output-cell {
-    @apply bg-black border-l-4 border-primary pl-4 py-2 mt-2;
+    @apply bg-black pl-4 py-2 mt-2;
+    border-left: 4px solid transparent;
+    border-image: linear-gradient(to bottom, #DAA520, #FF4500, #FFFFFF) 1;
   }
 
   /* Remove double borders from collapsible sections */
@@ -97,11 +103,19 @@
 
   /* Consistent dropdown menu styling */
   [role="listbox"] {
-    @apply bg-black border border-jupyter-border rounded-[20px] mt-2 py-2;
+    @apply bg-black mt-2 py-2 rounded-[20px];
+    border: 1px solid transparent;
+    border-image: linear-gradient(to right, #DAA520, #FF4500, #FFFFFF) 1;
   }
 
   /* Dropdown option styling */
   [role="option"] {
     @apply px-6 py-2 hover:bg-primary/10 cursor-pointer;
+  }
+
+  /* Gradient border utility class */
+  .gradient-border {
+    border: 1px solid transparent;
+    border-image: linear-gradient(to right, #DAA520, #FF4500, #FFFFFF) 1;
   }
 }

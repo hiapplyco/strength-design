@@ -1,37 +1,36 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import type { LocationResult } from "./types";
 
 interface LocationResultsDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  locationResults: LocationResult[];
-  onLocationSelect: (location: LocationResult) => void;
-  formatLocation: (location: LocationResult) => string;
+  setOpen: (open: boolean) => void;
+  results: LocationResult[];
+  onSelect: (location: LocationResult) => void;
 }
 
 export function LocationResultsDialog({
   open,
-  onOpenChange,
-  locationResults,
-  onLocationSelect,
-  formatLocation,
+  setOpen,
+  results,
+  onSelect,
 }: LocationResultsDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Select Location</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {locationResults.map((result, index) => (
+          {results.map((result, index) => (
             <Button
               key={index}
               variant="outline"
               className="w-full justify-start rounded-full"
-              onClick={() => onLocationSelect(result)}
+              onClick={() => onSelect(result)}
             >
-              {formatLocation(result)}
+              {result.name}, {result.country} {result.admin1 ? `(${result.admin1})` : ''}
             </Button>
           ))}
         </div>

@@ -1,3 +1,4 @@
+
 export interface WeatherData {
   temperature: number;
   humidity: number;
@@ -8,6 +9,7 @@ export interface WeatherData {
   weatherCode: number;
   windDirection: number;
   windGusts: number;
+  isDay: boolean;
   forecast: {
     dates: string[];
     weatherCodes: number[];

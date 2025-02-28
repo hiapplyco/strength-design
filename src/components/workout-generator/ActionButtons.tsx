@@ -15,19 +15,22 @@ export function ActionButtons({
       <Button 
         onClick={onGenerate}
         disabled={isGenerating || !isValid}
-        className="w-full py-3 bg-primary text-black font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3 text-black font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
       >
-        {isGenerating ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Generating...
-          </>
-        ) : (
-          <>
-            <Check className="mr-2 h-4 w-4" />
-            GENERATE
-          </>
-        )}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-100 group-hover:opacity-90 transition-opacity"></div>
+        <span className="relative z-10 flex items-center justify-center">
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Check className="mr-2 h-4 w-4" />
+              GENERATE
+            </>
+          )}
+        </span>
       </Button>
       
       <Button 

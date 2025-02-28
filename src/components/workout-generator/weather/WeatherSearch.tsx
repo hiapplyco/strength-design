@@ -62,15 +62,17 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
   };
 
   return (
-    <Card className="bg-black/20 border-primary/20 shadow-sm hover:shadow-md transition-all duration-300">
-      <CardHeader className="flex flex-row items-center pb-2">
+    <Card className="bg-black/20 border-transparent shadow-sm hover:shadow-md transition-all duration-300 relative">
+      <div className="absolute inset-0 rounded-lg p-[1px] -z-10 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40"></div>
+      <div className="absolute inset-[1px] rounded-[calc(0.5rem-1px)] bg-black/70 -z-[5]"></div>
+      <CardHeader className="flex flex-row items-center pb-2 relative z-10">
         <div className="flex items-center gap-2">
-          <CloudSun className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Add Weather Conditions</h3>
+          <CloudSun className="h-5 w-5 text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text" />
+          <h3 className="font-oswald text-lg text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text">Add Weather Conditions</h3>
           {renderTooltip && renderTooltip()}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative z-10">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="flex-1">
             <Input
@@ -84,20 +86,23 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
           <Button 
             type="submit" 
             variant="default" 
-            className="bg-primary hover:bg-primary/90 text-black font-medium"
+            className="relative overflow-hidden text-black font-medium"
             disabled={isSearching}
           >
-            {isSearching ? (
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent"></div>
-                <span>Searching...</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4" />
-                <span>Search</span>
-              </div>
-            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-100 group-hover:opacity-90 transition-opacity"></div>
+            <span className="relative z-10 flex items-center gap-2">
+              {isSearching ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent"></div>
+                  <span>Searching...</span>
+                </>
+              ) : (
+                <>
+                  <Search className="h-4 w-4" />
+                  <span>Search</span>
+                </>
+              )}
+            </span>
           </Button>
         </form>
       </CardContent>

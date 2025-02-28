@@ -49,7 +49,7 @@
 
   /* Base input styling */
   .base-input {
-    @apply bg-black/70 border rounded-md px-6 py-4 w-full focus:border-primary focus:ring-1 focus:ring-primary text-white h-12 relative border-transparent;
+    @apply bg-black/70 border rounded-md px-6 py-4 w-full focus:border-transparent focus:ring-1 focus:ring-transparent text-white h-12 relative border-transparent;
   }
 
   /* Apply base input styling to all form elements */
@@ -68,7 +68,10 @@
 
   /* Jupyter-style section headers */
   .section-header {
-    @apply text-lg font-medium text-primary flex items-center gap-2 mb-2;
+    @apply text-lg font-medium flex items-center gap-2 mb-2;
+    background: linear-gradient(to right, #4CAF50, #9C27B0, #FF1493);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   /* Jupyter-style code cells */

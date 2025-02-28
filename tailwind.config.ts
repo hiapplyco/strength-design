@@ -27,11 +27,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#DAA520", // Updated gold color
+          DEFAULT: "transparent", // Changed from gold to transparent to use with gradients
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#FFD700", // Brighter gold for selected states
+          DEFAULT: "transparent", // Changed from gold to transparent
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
@@ -43,7 +43,7 @@ export default {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#B8860B", // Darker gold
+          DEFAULT: "transparent", // Changed from dark gold to transparent
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
@@ -56,8 +56,8 @@ export default {
         },
         jupyter: {
           cell: "rgba(0, 0, 0, 0.7)",
-          border: "#DAA520",
-          hover: "rgba(218, 165, 32, 0.1)",
+          border: "transparent", // Changed from gold to transparent
+          hover: "rgba(0, 0, 0, 0.1)",
         }
       },
       borderRadius: {
@@ -83,6 +83,11 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      backgroundImage: {
+        'primary-gradient': 'linear-gradient(to right, #4CAF50, #9C27B0, #FF1493)',
+        'button-gradient': 'linear-gradient(to right, #C4A052, #E5C88E)',
+        'selected-gradient': 'linear-gradient(to right, #B8860B, #DAA520)',
+      }
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],

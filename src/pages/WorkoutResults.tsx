@@ -4,6 +4,9 @@ import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
+import { useAuth } from "@/contexts/AuthContext";
+
+const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
 const WorkoutResults = () => {
   const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
@@ -11,16 +14,35 @@ const WorkoutResults = () => {
   const { isGenerating } = useWorkoutGeneration();
   const location = useLocation();
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   useEffect(() => {
-    // Get workouts from location state
+    // First try to get workouts from location state
     if (location.state?.workouts) {
       setWorkouts(location.state.workouts);
+      return;
+    }
+    
+    // If no workouts in state, try to get from localStorage
+    const storedData = localStorage.getItem(
+      session?.user?.id 
+        ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+        : WORKOUT_STORAGE_KEY
+    );
+    
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        setWorkouts(parsedData);
+      } catch (error) {
+        console.error("Error parsing stored workout data:", error);
+        navigate("/workout-generator");
+      }
     } else {
-      // If no workouts in state, redirect back to generator
+      // If no workouts in state or localStorage, redirect to generator
       navigate("/workout-generator");
     }
-  }, [location.state, navigate]);
+  }, [location.state, navigate, session]);
 
   const resetWorkouts = () => {
     navigate("/workout-generator");

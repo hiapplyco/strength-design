@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WorkoutDisplayButtonsProps {
   resetWorkouts: () => void;
@@ -9,10 +10,20 @@ interface WorkoutDisplayButtonsProps {
 
 export const WorkoutDisplayButtons = ({ resetWorkouts }: WorkoutDisplayButtonsProps) => {
   const navigate = useNavigate();
+  const { session } = useAuth();
   
   const handleBackClick = () => {
     // Clear any saved workout data from localStorage
+    const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
+    localStorage.removeItem(
+      session?.user?.id 
+        ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+        : WORKOUT_STORAGE_KEY
+    );
+    
+    // Call the resetWorkouts function passed as prop
     resetWorkouts();
+    
     // Navigate back to the workout generator page
     navigate("/workout-generator");
   };

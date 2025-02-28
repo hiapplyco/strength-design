@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
 import { triggerConfetti } from "@/utils/confetti";
@@ -18,34 +17,6 @@ const WorkoutGenerator = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   
-  // Load saved workouts on component mount - if found, go to results page
-  useEffect(() => {
-    const loadSavedWorkout = () => {
-      const storedData = localStorage.getItem(
-        session?.user?.id 
-          ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
-          : WORKOUT_STORAGE_KEY
-      );
-      
-      if (storedData) {
-        try {
-          const parsedData = JSON.parse(storedData);
-          // Navigate to workout results with the saved workout data
-          navigate("/workout-results", { state: { workouts: parsedData } });
-        } catch (error) {
-          console.error("Error parsing stored workout data:", error);
-          localStorage.removeItem(
-            session?.user?.id 
-              ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
-              : WORKOUT_STORAGE_KEY
-          );
-        }
-      }
-    };
-    
-    loadSavedWorkout();
-  }, [session, navigate]);
-
   const handleGenerateWorkout = async (params: {
     prompt: string;
     weatherPrompt: string;
@@ -61,7 +32,6 @@ const WorkoutGenerator = () => {
     if (data) {
       triggerConfetti();
       
-      // Save workout data to localStorage
       localStorage.setItem(
         session?.user?.id 
           ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
@@ -69,7 +39,6 @@ const WorkoutGenerator = () => {
         JSON.stringify(data)
       );
       
-      // Navigate to workout results page with the generated workout data
       navigate("/workout-results", { state: { workouts: data } });
     }
   };

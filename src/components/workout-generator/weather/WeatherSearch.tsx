@@ -13,9 +13,10 @@ import type { WeatherData } from "@/types/weather";
 interface WeatherSearchProps {
   onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
   renderTooltip?: () => React.ReactNode;
+  numberOfDays?: number;
 }
 
-export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchProps) {
+export function WeatherSearch({ onWeatherUpdate, renderTooltip, numberOfDays = 7 }: WeatherSearchProps) {
   const [locationQuery, setLocationQuery] = useState("");
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -56,13 +57,8 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
     try {
       const weatherData = await fetchWeatherData(location.latitude, location.longitude, location.name);
       
-      // Create a detailed weather prompt for the workout generator
-      const tempF = Math.round((weatherData.temperature * 9/5) + 32);
-      const weatherDescription = getWeatherDescription(weatherData.weatherCode);
-      
-      const weatherPrompt = `Consider the weather in ${location.name}: ${weatherDescription}, temperature of ${Math.round(weatherData.temperature)}°C (${tempF}°F), ${weatherData.humidity}% humidity, and wind speed of ${Math.round(weatherData.windSpeed)} km/h. Weather conditions may affect workout intensity, hydration needs, and exercise selection.`;
-      
-      onWeatherUpdate(weatherData, weatherPrompt);
+      // Let the parent component handle creating the weather prompt
+      onWeatherUpdate(weatherData, "");
       
       toast({
         title: "Weather updated",

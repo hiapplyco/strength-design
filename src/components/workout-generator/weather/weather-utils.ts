@@ -69,8 +69,11 @@ export const searchLocations = async (query: string) => {
   }
 };
 
-export const fetchWeatherData = async (lat: number, lon: number, locationName: string = '') => {
+export const fetchWeatherData = async (lat: number, lon: number, locationName: string = '', forecastDays: number = 7) => {
   try {
+    // Ensure forecast days is between 1 and 16 (API limit)
+    const days = Math.max(1, Math.min(forecastDays, 16));
+    
     const weatherUrl = new URL('https://api.open-meteo.com/v1/forecast');
     weatherUrl.searchParams.append('latitude', lat.toString());
     weatherUrl.searchParams.append('longitude', lon.toString());
@@ -93,8 +96,9 @@ export const fetchWeatherData = async (lat: number, lon: number, locationName: s
       'wind_speed_10m_max'
     ].join(','));
     weatherUrl.searchParams.append('timezone', 'auto');
-    weatherUrl.searchParams.append('forecast_days', '7');
+    weatherUrl.searchParams.append('forecast_days', days.toString());
 
+    console.log(`Fetching weather forecast for ${days} days`);
     const response = await fetch(weatherUrl);
     
     if (!response.ok) {

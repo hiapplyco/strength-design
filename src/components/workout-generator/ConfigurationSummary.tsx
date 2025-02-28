@@ -1,8 +1,9 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
-import { Check, Info, CloudSun } from "lucide-react";
+import { Check, Info, CloudSun, Calendar } from "lucide-react";
 import { getWeatherDescription } from "./weather/weather-utils";
 import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
 import type { WeatherData } from "@/types/weather";
@@ -44,6 +45,47 @@ export function ConfigurationSummary({
     }
     
     return typeof weatherData === 'string' ? weatherData : 'Weather data available';
+  };
+
+  const getForecastDisplay = () => {
+    if (!weatherData || !isWeatherDataObject(weatherData) || !weatherData.forecast) return null;
+    
+    const forecast = weatherData.forecast;
+    // Only display forecast for the number of days selected for the workout
+    const limitedDays = Math.min(numberOfDays, forecast.dates.length);
+    
+    if (limitedDays <= 0) return null;
+    
+    return (
+      <div className="mt-2 space-y-2">
+        {Array.from({ length: limitedDays }).map((_, index) => {
+          if (index >= forecast.dates.length) return null;
+          
+          const date = new Date(forecast.dates[index]);
+          const formattedDate = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+          const description = getWeatherDescription(forecast.weatherCodes[index]);
+          const maxTemp = Math.round(forecast.maxTemps[index]);
+          const minTemp = Math.round(forecast.minTemps[index]);
+          const maxTempF = Math.round((forecast.maxTemps[index] * 9/5) + 32);
+          const minTempF = Math.round((forecast.minTemps[index] * 9/5) + 32);
+          const precipProb = forecast.precipitationProb[index];
+          
+          return (
+            <div key={index} className="text-sm pl-2 border-l border-primary/30">
+              <div className="flex items-center gap-1 text-primary font-medium">
+                <Calendar className="h-3 w-3" />
+                <span>{formattedDate} {index === 0 ? '(Today)' : ''}</span>
+              </div>
+              <div className="pl-4 text-white/80">
+                <div>{description}</div>
+                <div>Temp: {minTemp}-{maxTemp}°C ({minTempF}-{maxTempF}°F)</div>
+                <div>Precipitation: {precipProb}%</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   const hasAnyConfig = numberOfDays > 0 || fitnessLevel || selectedExercises.length > 0 || 
@@ -112,11 +154,22 @@ export function ConfigurationSummary({
               )}
 
               {weatherData && getWeatherDisplay() && (
-                <ConfigSection 
-                  title="Weather Conditions"
-                  content={getWeatherDisplay() || "Weather data available for workout optimization"}
-                  icon={<CloudSun className="h-4 w-4 text-yellow-400" />}
-                />
+                <div className="mb-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <CloudSun className="h-4 w-4 text-yellow-400" />
+                    <h4 className="font-semibold text-primary text-base">Weather Conditions</h4>
+                  </div>
+                  <p className="text-sm text-white/80 pl-6">
+                    {getWeatherDisplay() || "Weather data available for workout optimization"}
+                  </p>
+                  
+                  {isWeatherDataObject(weatherData) && weatherData.forecast && (
+                    <div className="mt-1 pl-6">
+                      <div className="text-sm font-medium text-primary mb-1">Forecast for your workout days:</div>
+                      {getForecastDisplay()}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </ScrollArea>

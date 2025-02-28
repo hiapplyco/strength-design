@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { FitnessLevelSection } from "./FitnessLevelSection";
 import { WeatherSection } from "./WeatherSection";
@@ -180,6 +181,7 @@ export function InputContainer({
             weatherData={weatherData}
             onWeatherUpdate={handleWeatherUpdate}
             renderTooltip={() => null}
+            numberOfDays={numberOfDays}
           />
           
           <GenerateSection

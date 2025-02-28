@@ -14,4 +14,5 @@ export interface WeatherSearchProps {
   renderTooltip?: () => React.ReactNode;
   isSearching?: boolean;
   setIsSearching?: Dispatch<SetStateAction<boolean>>;
+  numberOfDays?: number;
 }

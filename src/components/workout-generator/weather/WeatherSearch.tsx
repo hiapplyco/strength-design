@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LocationResultsDialog } from "./LocationResultsDialog";
 import { useToast } from "@/components/ui/use-toast";
-import { getWeatherDescription } from "./weather-utils";
+import { getWeatherDescription, searchLocations, fetchWeatherData } from "./weather-utils";
 import type { LocationResult } from "./types";
 import type { WeatherData } from "@/types/weather";
 
@@ -20,6 +20,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const { toast } = useToast();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,17 +28,24 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
 
     setIsSearching(true);
     try {
-      const response = await fetch(`/api/search-locations?query=${encodeURIComponent(locationQuery)}`);
-      
-      if (!response.ok) {
-        throw new Error("Failed to search locations");
-      }
-      
-      const data = await response.json();
-      setSearchResults(data.results || []);
+      const results = await searchLocations(locationQuery);
+      setSearchResults(results || []);
       setShowResults(true);
+      
+      if (results.length === 0) {
+        toast({
+          title: "No locations found",
+          description: "Try a different search term",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error("Error searching locations:", error);
+      toast({
+        title: "Search failed",
+        description: "Failed to search locations. Please try again.",
+        variant: "destructive"
+      });
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -46,18 +54,22 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
 
   const handleLocationSelect = async (location: LocationResult) => {
     try {
-      const response = await fetch(`/api/weather?lat=${location.latitude}&lon=${location.longitude}`);
+      const data = await fetchWeatherData(location.latitude, location.longitude, location.name);
       
-      if (!response.ok) {
-        throw new Error("Failed to fetch weather data");
-      }
-      
-      const data = await response.json();
       const weatherPrompt = `Consider the weather in ${location.name}: ${data.current.weatherDescription}, temperature of ${data.current.tempC}°C (${data.current.tempF}°F), and ${data.current.humidity}% humidity.`;
       
       onWeatherUpdate(data, weatherPrompt);
+      toast({
+        title: "Weather updated",
+        description: `Weather data loaded for ${location.name}`,
+      });
     } catch (error) {
       console.error("Error fetching weather data:", error);
+      toast({
+        title: "Weather fetch failed",
+        description: "Failed to fetch weather data. Please try again.",
+        variant: "destructive"
+      });
     }
     
     setShowResults(false);

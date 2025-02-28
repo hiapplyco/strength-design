@@ -115,9 +115,9 @@ export function InputContainer({
   ]);
 
   return (
-    <div className="w-full mx-auto px-2 sm:px-4">
-      <ScrollArea className="h-[calc(100vh-200px)] pr-2 sm:pr-4">
-        <div className="space-y-5 sm:space-y-6 pb-6">
+    <div className="w-full mx-auto max-w-full px-0 sm:px-2">
+      <ScrollArea className="h-[calc(100vh-200px)] pr-2">
+        <div className="space-y-5 sm:space-y-6 pb-6 px-2">
           <WorkoutPresets 
             onSelectPreset={handleSelectPreset}
             onExercisesExtracted={(exercises) => setSelectedExercises(exercises)}

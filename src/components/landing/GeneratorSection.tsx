@@ -58,7 +58,7 @@ export const GeneratorSection = ({
 
   return (
     <motion.div 
-      className={`flex flex-col items-center justify-center min-h-screen w-full px-4 py-12 transition-all duration-300 ${
+      className={`flex flex-col items-center justify-center min-h-screen w-full px-2 sm:px-4 py-12 transition-all duration-300 ${
         hasScrolled ? 'bg-black/90' : 'bg-transparent'
       }`}
     >
@@ -69,7 +69,7 @@ export const GeneratorSection = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className={`text-4xl sm:text-5xl md:text-6xl font-oswald text-accent mb-4 tracking-tight transition-all duration-300 ${
+          <h2 className={`text-3xl sm:text-4xl md:text-5xl font-oswald text-accent mb-4 tracking-tight transition-all duration-300 ${
             hasScrolled ? 'scale-90' : 'scale-100'
           }`}>
             Generate Your Program
@@ -85,7 +85,7 @@ export const GeneratorSection = ({
           <InputDirections />
         </div>
 
-        <div id="generate-workout" className="w-full max-w-3xl mx-auto">
+        <div id="generate-workout" className="w-full max-w-3xl mx-auto overflow-x-hidden">
           <GenerateWorkoutInput
             generatePrompt={generatePrompt}
             setGeneratePrompt={setGeneratePrompt}

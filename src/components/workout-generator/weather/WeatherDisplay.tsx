@@ -27,14 +27,14 @@ export function WeatherDisplay({ weather, weatherData, onClear }: WeatherDisplay
   };
 
   return (
-    <div className="bg-black/40 text-white p-4 rounded-lg shadow-md border border-primary/30">
+    <div className="bg-black/40 text-white p-4 rounded-sm shadow-md border border-primary/30">
       <div className="flex justify-between items-start mb-3">
         <h4 className="font-medium text-lg text-primary">{data.location}</h4>
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={onClear} 
-          className="h-8 w-8 p-0 rounded-full hover:bg-primary/20"
+          className="h-8 w-8 p-0 rounded-sm hover:bg-primary/20"
         >
           <X className="h-4 w-4" />
           <span className="sr-only">Clear weather data</span>

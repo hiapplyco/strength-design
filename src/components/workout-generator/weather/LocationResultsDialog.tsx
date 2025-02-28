@@ -29,7 +29,7 @@ export function LocationResultsDialog({
               <Button
                 key={index}
                 variant="outline"
-                className="w-full justify-start rounded-full text-left px-4 py-3 hover:bg-primary/10 transition-colors"
+                className="w-full justify-start rounded-sm text-left px-4 py-3 hover:bg-primary/10 transition-colors"
                 onClick={() => onSelect(result)}
               >
                 <span className="truncate">

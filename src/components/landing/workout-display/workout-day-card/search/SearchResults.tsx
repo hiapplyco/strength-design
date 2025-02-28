@@ -9,7 +9,7 @@ interface SearchResultsProps {
 
 export const SearchResults = ({ searchResults, onExerciseSelect }: SearchResultsProps) => {
   return (
-    <ScrollArea className="h-[400px] w-full rounded-md border bg-black/5 backdrop-blur-sm p-4">
+    <ScrollArea className="h-[400px] w-full rounded-sm border bg-black/5 backdrop-blur-sm p-4">
       <div className="grid grid-cols-1 gap-4">
         {searchResults.map((exercise, i) => (
           <SearchResultCard 
@@ -31,7 +31,7 @@ interface SearchResultCardProps {
 const SearchResultCard = ({ exercise, onSelect }: SearchResultCardProps) => {
   return (
     <div 
-      className="group relative overflow-hidden rounded-lg border border-red-500/20 bg-black/40 p-4 transition-all hover:border-red-500/40 hover:bg-black/60"
+      className="group relative overflow-hidden rounded-sm border border-red-500/20 bg-black/40 p-4 transition-all hover:border-red-500/40 hover:bg-black/60"
       onClick={onSelect}
     >
       <div className="flex items-start justify-between gap-4">
@@ -42,22 +42,22 @@ const SearchResultCard = ({ exercise, onSelect }: SearchResultCardProps) => {
             </h4>
             <div className="flex flex-wrap gap-2 mt-2">
               {exercise.type && (
-                <span className="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                <span className="inline-flex items-center rounded-sm bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
                   {exercise.type}
                 </span>
               )}
               {exercise.muscle && (
-                <span className="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                <span className="inline-flex items-center rounded-sm bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
                   {exercise.muscle}
                 </span>
               )}
               {exercise.difficulty && (
-                <span className="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                <span className="inline-flex items-center rounded-sm bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
                   {exercise.difficulty}
                 </span>
               )}
               {exercise.equipment && (
-                <span className="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                <span className="inline-flex items-center rounded-sm bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
                   {exercise.equipment}
                 </span>
               )}
@@ -113,7 +113,7 @@ const SearchResultCard = ({ exercise, onSelect }: SearchResultCardProps) => {
         {exercise.images && exercise.images.length > 0 && (
           <div className="hidden sm:flex flex-col gap-2">
             {exercise.images.slice(0, 2).map((image: string, idx: number) => (
-              <div key={idx} className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-red-500/20">
+              <div key={idx} className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-sm border border-red-500/20">
                 <img
                   src={image}
                   alt={`${exercise.name} - View ${idx + 1}`}

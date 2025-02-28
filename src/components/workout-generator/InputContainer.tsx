@@ -44,7 +44,7 @@ export function InputContainer({
   const [fitnessLevel, setFitnessLevel] = useState("");
   const [prescribedExercises, setPrescribedExercises] = useState("");
   const [injuries, setInjuries] = useState("");
-  const [weatherData, setWeatherData] = useState("");
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherPrompt, setWeatherPrompt] = useState("");
   const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
   const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
@@ -86,8 +86,8 @@ export function InputContainer({
     }
   };
 
-  const handleWeatherUpdate = (weatherData: WeatherData | null, newWeatherPrompt: string) => {
-    setWeatherData(weatherData ? JSON.stringify(weatherData) : "");
+  const handleWeatherUpdate = (newWeatherData: WeatherData | null, newWeatherPrompt: string) => {
+    setWeatherData(newWeatherData);
     setWeatherPrompt(newWeatherPrompt);
   };
 
@@ -146,7 +146,7 @@ export function InputContainer({
         />
         
         <WeatherSection
-          weatherData={weatherData ? JSON.parse(weatherData) as WeatherData : null}
+          weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
           renderTooltip={() => null}
         />
@@ -170,7 +170,7 @@ export function InputContainer({
             setFitnessLevel("");
             setPrescribedExercises("");
             setInjuries("");
-            setWeatherData("");
+            setWeatherData(null);
             setWeatherPrompt("");
           }}
           isValid={true}

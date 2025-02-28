@@ -1,53 +1,47 @@
 
-import { useState } from "react";
-import type { WeatherData } from "@/types/weather";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Cloud } from "lucide-react";
 import { WeatherSearch } from "./weather/WeatherSearch";
 import { WeatherDisplay } from "./weather/WeatherDisplay";
-import { WeatherForecast } from "./weather/WeatherForecast";
+import type { WeatherData } from "@/types/weather";
 
-export interface WeatherSectionProps {
+interface WeatherSectionProps {
   weatherData: WeatherData | null;
   onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
-  renderTooltip: () => React.ReactNode;
+  renderTooltip?: () => React.ReactNode;
 }
 
-export function WeatherSection({ weatherData, onWeatherUpdate, renderTooltip }: WeatherSectionProps) {
-  const formatTemp = (temp: number | undefined) => {
-    if (temp === undefined) return 'N/A';
-    const fahrenheit = (temp * 9/5) + 32;
-    return `${fahrenheit.toFixed(1)}°F (${temp}°C)`;
-  };
-
-  const formatValue = (value: number | undefined, unit: string) => {
-    return value !== undefined ? `${value}${unit}` : 'N/A';
-  };
+export function WeatherSection({ 
+  weatherData, 
+  onWeatherUpdate,
+  renderTooltip 
+}: WeatherSectionProps) {
+  const [isSearching, setIsSearching] = useState(false);
 
   return (
-    <div className="space-y-4">
-      <WeatherSearch 
-        onWeatherUpdate={onWeatherUpdate}
-        renderTooltip={renderTooltip}
-      />
-
-      {weatherData && (
-        <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <WeatherDisplay 
-              weatherData={weatherData}
-              formatTemp={formatTemp}
-              formatValue={formatValue}
-            />
-
-            {weatherData.forecast && (
-              <WeatherForecast 
-                forecast={weatherData.forecast}
-                formatTemp={formatTemp}
-                formatValue={formatValue}
-              />
-            )}
-          </div>
+    <Card className="bg-black/20 border-primary/20">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Cloud className="h-5 w-5 text-primary" />
+          <h3 className="font-oswald text-lg">Local Weather</h3>
+          {renderTooltip && renderTooltip()}
         </div>
-      )}
-    </div>
+      </CardHeader>
+      <CardContent>
+        {weatherData ? (
+          <WeatherDisplay 
+            weather={weatherData} 
+            onClear={() => onWeatherUpdate(null, "")}
+          />
+        ) : (
+          <WeatherSearch 
+            onWeatherUpdate={onWeatherUpdate}
+            isSearching={isSearching}
+            setIsSearching={setIsSearching}
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 }

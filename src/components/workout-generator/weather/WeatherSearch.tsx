@@ -78,7 +78,7 @@ export function WeatherSearch({ onWeatherUpdate, renderTooltip }: WeatherSearchP
               value={locationQuery}
               onChange={(e) => setLocationQuery(e.target.value)}
               className="w-full"
-              borderStyle="gold"
+              borderStyle="multicolor"
             />
           </div>
           <Button 

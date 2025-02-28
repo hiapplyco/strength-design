@@ -4,10 +4,12 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  borderStyle?: "gold" | "multicolor";
+}
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, borderStyle = "multicolor", ...props }, ref) => {
     return (
       <div className="relative rounded-md">
         <textarea
@@ -18,7 +20,14 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           {...props}
         />
-        <div className="absolute inset-0 rounded-md bg-primary p-[1px] -z-10"></div>
+        <div 
+          className={cn(
+            "absolute inset-0 rounded-md p-[1px] -z-10",
+            borderStyle === "multicolor" 
+              ? "bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493]" 
+              : "bg-primary"
+          )}
+        ></div>
         <div className="absolute inset-[1px] rounded-[calc(0.375rem-1px)] bg-black/70 -z-[5]"></div>
       </div>
     )

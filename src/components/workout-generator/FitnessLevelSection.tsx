@@ -1,3 +1,4 @@
+
 import { Activity, User, Dumbbell, BicepsFlexed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,10 +34,10 @@ export function FitnessLevelSection({
             onClick={() => setFitnessLevel(level)}
             variant={fitnessLevel === level ? "default" : "outline"}
             className={cn(
-              "w-full transition-all duration-200 flex items-center gap-2 justify-center transform hover:scale-105",
+              "w-full transition-all duration-200 flex items-center gap-2 justify-center transform hover:scale-105 relative",
               fitnessLevel === level 
                 ? "bg-[#FFD700] text-black hover:bg-[#FFD700]/90" 
-                : "bg-black/50 text-white hover:bg-black/70 hover:border-[#FFD700]/50 border-2"
+                : "bg-black/50 text-white hover:bg-black/70 hover:border-[#FFD700]/50 border-2 gradient-border"
             )}
           >
             <Icon className="h-4 w-4" />

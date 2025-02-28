@@ -73,7 +73,12 @@ export function InputContainer({
       console.log('Processing prescribed exercises file:', file.name);
       const result = await parseDocument(file);
       if (result.success) {
-        setPrescribedExercises(result.text);
+        const parsedText = `${result.text}`;
+        const updatedText = prescribedExercises 
+          ? `${prescribedExercises}\n\n------ PARSED WORKOUT ------\n\n${parsedText}`
+          : parsedText;
+          
+        setPrescribedExercises(updatedText);
       }
     } catch (error) {
       console.error('Error processing prescribed file:', error);
@@ -88,7 +93,12 @@ export function InputContainer({
       console.log('Processing injuries file:', file.name);
       const result = await parseDocument(file);
       if (result.success) {
-        setInjuries(result.text);
+        const parsedText = `${result.text}`;
+        const updatedText = injuries 
+          ? `${injuries}\n\n------ PARSED INFORMATION ------\n\n${parsedText}`
+          : parsedText;
+          
+        setInjuries(updatedText);
       }
     } catch (error) {
       console.error('Error processing injuries file:', error);

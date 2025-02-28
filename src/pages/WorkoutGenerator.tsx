@@ -3,7 +3,6 @@ import { useState, useCallback, useEffect } from "react";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
 import { triggerConfetti } from "@/utils/confetti";
 import type { WeeklyWorkouts } from "@/types/fitness";
-import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { useNavigate } from "react-router-dom";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,8 +11,6 @@ const DEFAULT_DAYS = 7;
 const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
 const WorkoutGenerator = () => {
-  const [workouts, setWorkouts] = useState<WeeklyWorkouts | null>(null);
-  const [isExporting, setIsExporting] = useState(false);
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const [numberOfDays, setNumberOfDays] = useState(DEFAULT_DAYS);
@@ -21,7 +18,7 @@ const WorkoutGenerator = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   
-  // Load saved workouts on component mount
+  // Load saved workouts on component mount - if found, go to results page
   useEffect(() => {
     const loadSavedWorkout = () => {
       const storedData = localStorage.getItem(
@@ -33,8 +30,8 @@ const WorkoutGenerator = () => {
       if (storedData) {
         try {
           const parsedData = JSON.parse(storedData);
-          setWorkouts(parsedData);
-          setShowGenerateInput(false);
+          // Navigate to workout results with the saved workout data
+          navigate("/workout-results", { state: { workouts: parsedData } });
         } catch (error) {
           console.error("Error parsing stored workout data:", error);
           localStorage.removeItem(
@@ -47,17 +44,7 @@ const WorkoutGenerator = () => {
     };
     
     loadSavedWorkout();
-  }, [session]);
-
-  const resetWorkouts = useCallback(() => {
-    setWorkouts(null);
-    setShowGenerateInput(true);
-    localStorage.removeItem(
-      session?.user?.id 
-        ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
-        : WORKOUT_STORAGE_KEY
-    );
-  }, [session]);
+  }, [session, navigate]);
 
   const handleGenerateWorkout = async (params: {
     prompt: string;
@@ -72,8 +59,6 @@ const WorkoutGenerator = () => {
     });
 
     if (data) {
-      setWorkouts(data);
-      setShowGenerateInput(false);
       triggerConfetti();
       
       // Save workout data to localStorage
@@ -83,20 +68,11 @@ const WorkoutGenerator = () => {
           : WORKOUT_STORAGE_KEY,
         JSON.stringify(data)
       );
+      
+      // Navigate to workout results page with the generated workout data
+      navigate("/workout-results", { state: { workouts: data } });
     }
   };
-
-  if (workouts) {
-    return (
-      <WorkoutDisplay
-        workouts={workouts}
-        resetWorkouts={resetWorkouts}
-        isExporting={isExporting}
-        setIsExporting={setIsExporting}
-        isGenerating={isGenerating}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-black">

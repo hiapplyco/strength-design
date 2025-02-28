@@ -8,6 +8,7 @@ import Pricing from "@/pages/Pricing";
 import DocumentEditor from "@/pages/DocumentEditor";
 import SharedDocument from "@/pages/SharedDocument";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
+import WorkoutResults from "@/pages/WorkoutResults";
 import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import ProgramChat from "@/pages/ProgramChat";
@@ -44,6 +45,14 @@ export const MainRoutes = () => {
         element={
           <ProtectedRoute>
             <WorkoutGenerator />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workout-results"
+        element={
+          <ProtectedRoute>
+            <WorkoutResults />
           </ProtectedRoute>
         }
       />

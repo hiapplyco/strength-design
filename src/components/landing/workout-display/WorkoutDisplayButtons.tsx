@@ -14,7 +14,7 @@ export const WorkoutDisplayButtons = ({ resetWorkouts }: WorkoutDisplayButtonsPr
         shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
     >
       <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-      Back
+      Back to Generator
     </Button>
   );
 };

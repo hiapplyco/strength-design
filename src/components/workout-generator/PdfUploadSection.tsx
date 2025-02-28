@@ -2,7 +2,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { File, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PdfUploadSectionProps {
@@ -73,13 +73,12 @@ export function PdfUploadSection({ onFileSelect }: PdfUploadSectionProps) {
         />
         <label 
           htmlFor="pdf" 
-          className="flex flex-col items-center justify-center w-full h-16 gap-2 cursor-pointer rounded-md border border-transparent hover:bg-background/10 transition-colors"
+          className="flex items-center justify-center w-10 h-10 cursor-pointer rounded-md"
         >
           <div className="relative">
-            <File className="w-6 h-6" />
+            <Upload className="w-5 h-5" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70 blur-[1px] -z-10 rounded-md" />
           </div>
-          <span className="text-[9px] text-muted-foreground">Upload PDF, JPG, PNG (max 4MB)</span>
         </label>
       </div>
     </div>

@@ -1,7 +1,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Video } from "lucide-react";
+import { Upload } from "lucide-react";
 
 interface VideoUploadProps {
   onFileSelect: (file: File | null) => void;
@@ -22,13 +22,12 @@ export const VideoUpload = ({ onFileSelect, selectedFile }: VideoUploadProps) =>
         />
         <label 
           htmlFor="video" 
-          className="flex flex-col items-center justify-center w-full h-16 gap-2 cursor-pointer rounded-md border border-transparent hover:bg-background/10 transition-colors"
+          className="flex items-center justify-center w-10 h-10 cursor-pointer rounded-md"
         >
           <div className="relative">
-            <Video className="w-6 h-6" />
+            <Upload className="w-5 h-5" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70 blur-[1px] -z-10 rounded-md" />
           </div>
-          <span className="text-[9px] text-muted-foreground">Upload video</span>
         </label>
       </div>
       

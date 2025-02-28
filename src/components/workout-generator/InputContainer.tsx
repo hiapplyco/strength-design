@@ -123,15 +123,6 @@ export function InputContainer({
             onExercisesExtracted={(exercises) => setSelectedExercises(exercises)}
           />
           
-          <ConfigurationSummary
-            numberOfDays={numberOfDays}
-            fitnessLevel={fitnessLevel}
-            selectedExercises={selectedExercises}
-            prescribedExercises={prescribedExercises}
-            injuries={injuries}
-            weatherData={weatherData}
-          />
-          
           <DaysSelectionCard 
             numberOfDays={numberOfDays} 
             setNumberOfDays={setNumberOfDays} 
@@ -176,6 +167,11 @@ export function InputContainer({
             isValid={true}
             numberOfDays={numberOfDays}
             setNumberOfDays={setNumberOfDays}
+            selectedExercises={selectedExercises}
+            fitnessLevel={fitnessLevel}
+            prescribedExercises={prescribedExercises}
+            injuries={injuries}
+            weatherData={weatherData}
           />
         </div>
       </ScrollArea>

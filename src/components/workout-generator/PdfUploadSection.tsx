@@ -35,25 +35,19 @@ export function PdfUploadSection({
       </div>
       
       <div 
-        className="relative flex flex-col items-center justify-center w-full min-h-[120px] cursor-pointer border-0 rounded-md"
         onClick={handleClick}
+        className="relative flex flex-col items-center justify-center w-full min-h-[120px] cursor-pointer rounded-md bg-black/60 overflow-hidden before:absolute before:inset-0 before:rounded-md before:p-[1px] before:-z-10 before:bg-gradient-to-r before:from-[#4CAF50] before:via-[#9C27B0] before:to-[#FF1493] before:opacity-70"
       >
-        {/* Gradient border with background */}
-        <div className="absolute inset-0 rounded-md bg-black/60"></div>
-        <div className="absolute inset-0 rounded-md p-[1px] -z-10 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70"></div>
+        <ArrowUp className="h-6 w-6 text-white/70 mb-2" />
+        <span className="text-xs text-white/70">Upload PDF</span>
         
-        <div className="relative z-10 flex flex-col items-center justify-center p-4">
-          <ArrowUp className="h-6 w-6 text-white/70 mb-2" />
-          <span className="text-xs text-white/70">Upload PDF</span>
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileChange}
-            accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
-            className="hidden"
-          />
-        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleFileChange}
+          accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
+          className="hidden"
+        />
       </div>
     </div>
   );

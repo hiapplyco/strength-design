@@ -15,6 +15,7 @@ export interface ConfigurationSummaryProps {
   prescribedExercises: string;
   injuries: string;
   weatherData: WeatherData | null | string;
+  maxHeight?: string;
 }
 
 export interface GenerateSectionProps {

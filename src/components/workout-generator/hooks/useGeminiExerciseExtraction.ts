@@ -1,9 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import type { Exercise } from "@/components/exercise-search/types";
 import { useToast } from "@/hooks/use-toast";
-import { Check } from "lucide-react";
 
 interface DocumentParsingResponse {
   text: string;
@@ -20,6 +18,7 @@ export function useGeminiExerciseExtraction() {
     setIsSuccess(false);
     
     try {
+      console.log('Extracting text from file:', file.name);
       const formData = new FormData();
       formData.append('file', file);
 
@@ -30,6 +29,12 @@ export function useGeminiExerciseExtraction() {
       if (response.error) {
         console.error('Error processing file:', response.error);
         throw response.error;
+      }
+
+      console.log('File processed successfully:', response.data);
+      
+      if (!response.data || !response.data.text) {
+        throw new Error('No text extracted from file');
       }
 
       setIsSuccess(true);

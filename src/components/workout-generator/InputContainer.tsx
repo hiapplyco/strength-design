@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { FitnessLevelSection } from "./FitnessLevelSection";
 import { WeatherSection } from "./WeatherSection";
@@ -11,6 +10,7 @@ import { WorkoutPresets } from "./WorkoutPresets";
 import { ScrollArea } from "../ui/scroll-area";
 import type { Exercise } from "../exercise-search/types";
 import type { WeatherData } from "@/types/weather";
+import { useGeminiExerciseExtraction } from "./hooks/useGeminiExerciseExtraction";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -50,6 +50,8 @@ export function InputContainer({
   const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
   const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
 
+  const { parseDocument, isExtracting, isSuccess } = useGeminiExerciseExtraction();
+
   const handleSelectPreset = useCallback(
     (preset: {
       title: string;
@@ -68,9 +70,13 @@ export function InputContainer({
   const handlePrescribedFileSelect = async (file: File) => {
     setIsAnalyzingPrescribed(true);
     try {
-      // Simulate file analysis
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPrescribedExercises("File content would be analyzed and extracted here");
+      console.log('Processing prescribed exercises file:', file.name);
+      const result = await parseDocument(file);
+      if (result.success) {
+        setPrescribedExercises(result.text);
+      }
+    } catch (error) {
+      console.error('Error processing prescribed file:', error);
     } finally {
       setIsAnalyzingPrescribed(false);
     }
@@ -79,9 +85,13 @@ export function InputContainer({
   const handleInjuriesFileSelect = async (file: File) => {
     setIsAnalyzingInjuries(true);
     try {
-      // Simulate file analysis
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setInjuries("Health considerations would be extracted from file here");
+      console.log('Processing injuries file:', file.name);
+      const result = await parseDocument(file);
+      if (result.success) {
+        setInjuries(result.text);
+      }
+    } catch (error) {
+      console.error('Error processing injuries file:', error);
     } finally {
       setIsAnalyzingInjuries(false);
     }

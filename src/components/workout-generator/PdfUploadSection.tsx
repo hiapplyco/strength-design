@@ -31,15 +31,14 @@ export function PdfUploadSection({
   return (
     <div 
       className={cn(
-        "relative flex items-center justify-center w-full min-h-[100px] cursor-pointer rounded-md overflow-hidden", 
-        "bg-black/60 border border-transparent",
-        "hover:bg-black/80 transition-colors duration-200",
+        "relative flex items-center justify-center w-full min-h-[100px] cursor-pointer rounded-lg", 
+        "bg-black/30 border border-primary/30",
+        "hover:bg-black/40 transition-colors duration-200",
         className
       )}
       onClick={handleClick}
     >
-      {/* Gradient border using pseudo-element */}
-      <div className="absolute inset-0 -z-10 rounded-md p-[1px] bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70" />
+      <div className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-r from-[#4CAF50]/20 via-[#9C27B0]/20 to-[#FF1493]/20 opacity-60" />
       
       <Upload className="h-6 w-6 text-white/70" />
       

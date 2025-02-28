@@ -63,8 +63,8 @@ export function ConfigurationSummary({
             <p className="text-sm mt-2">Use the options on the left to customize your workout.</p>
           </div>
         ) : (
-          <ScrollArea className="h-[40vh] rounded-md border border-primary/20 bg-black/40 p-4 overflow-hidden">
-            <div className="pr-6 pb-2">
+          <ScrollArea className="h-[40vh] rounded-md border border-primary/20 bg-black/40 p-4 pr-8 overflow-hidden">
+            <div className="pr-4 pb-4">
               {numberOfDays > 0 && (
                 <ConfigSection 
                   title="Training Days"

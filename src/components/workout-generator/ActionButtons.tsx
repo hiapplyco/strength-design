@@ -11,11 +11,11 @@ export function ActionButtons({
   isValid
 }: ActionButtonsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div className="grid grid-cols-1 gap-3">
       <Button 
         onClick={onGenerate}
         disabled={isGenerating || !isValid}
-        className="w-full font-oswald uppercase tracking-wide transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3 bg-primary text-black font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isGenerating ? (
           <>
@@ -25,15 +25,16 @@ export function ActionButtons({
         ) : (
           <>
             <Check className="mr-2 h-4 w-4" />
-            Generate
+            GENERATE
           </>
         )}
       </Button>
+      
       <Button 
         onClick={onClear}
         variant="outline"
         disabled={isGenerating}
-        className="w-full hover:bg-destructive/10 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3 bg-transparent text-white font-medium border border-red-500/50 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <X className="h-4 w-4 mr-2" />
         Clear All

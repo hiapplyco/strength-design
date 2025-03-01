@@ -99,7 +99,7 @@ export function WorkoutModifier({
   };
 
   return (
-    <div className="space-y-2 border-4 border-destructive bg-destructive rounded-[20px] p-4 animate-scale-in">
+    <div className="space-y-2 border-4 border-primary bg-black/70 rounded-[20px] p-4 animate-scale-in">
       <Input
         placeholder={`Examples: "Make the workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
         value={modificationPrompt}

@@ -99,17 +99,18 @@ export function WorkoutModifier({
   };
 
   return (
-    <div className="space-y-2 border-4 border-primary bg-black/70 rounded-[20px] p-4 animate-scale-in">
+    <div className="space-y-3 bg-card/90 backdrop-blur-sm border-2 border-primary/40 rounded-lg p-5 shadow-lg animate-in fade-in duration-300">
       <Input
-        placeholder={`Examples: "Make the workout easier", "Add more cardio", "Focus on strength", "Modify for knee injury"`}
+        placeholder="How would you like to modify this workout?"
         value={modificationPrompt}
         onChange={(e) => setModificationPrompt(e.target.value)}
-        className="border-2 border-primary bg-white text-black placeholder:text-gray-400 rounded-[20px]"
+        className="border border-primary/30 bg-background/80 text-foreground placeholder:text-muted-foreground"
       />
       <Button 
         onClick={handleModifyWorkout}
         disabled={isModifying}
-        className="w-full border-2 border-primary bg-card font-bold uppercase tracking-tight text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50 rounded-[20px]"
+        className="w-full"
+        variant="default"
       >
         <RefreshCw className={`mr-2 h-4 w-4 ${isModifying ? 'animate-spin' : ''}`} />
         {isModifying ? 'Modifying...' : 'Modify Workout'}

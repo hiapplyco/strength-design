@@ -1,23 +1,55 @@
 
+// Add, modify or inspect types here - don't delete existing types
+export interface WorkoutDay {
+  description?: string;
+  warmup?: string;
+  strength?: string;
+  workout?: string;
+  notes?: string;
+}
+
+export interface WorkoutMeta {
+  title?: string;
+  summary?: string;
+}
+
+export interface WeeklyWorkouts {
+  [day: string]: WorkoutDay;
+  _meta?: WorkoutMeta;
+}
+
+export type WorkoutData = WeeklyWorkouts;
+
+export interface StrengthExercises {
+  parts: string[];
+  weight: string[];
+  rep_type: string[];
+  reps: string[];
+}
+
 export interface Exercise {
   name: string;
-  sets?: string;
-  reps?: string;
-  details?: string;
+  target: string;
+  bodyPart: string;
+  equipment: string;
+  gifUrl?: string;
+  id?: string;
 }
 
-export interface WorkoutDay {
+export interface ExerciseSearchProps {
+  onSelect?: (exercise: Exercise) => void;
+  onClose?: () => void;
+  defaultOpen?: boolean;
+}
+
+export interface Playbook {
+  title: string;
   description: string;
-  warmup: string;
-  workout: string;
-  strength: string;
-  notes?: string;
-  images?: string[];
-  exercises?: Exercise[];
+  steps: PlaybookStep[];
 }
 
-export type WeeklyWorkouts = Record<string, WorkoutDay>;
-
-export interface WorkoutData {
-  [key: string]: WorkoutDay;
+export interface PlaybookStep {
+  title: string;
+  content: string;
+  keywords?: string[];
 }

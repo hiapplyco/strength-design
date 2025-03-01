@@ -121,7 +121,7 @@ const GeneratedWorkouts = () => {
       <div className="min-h-screen bg-black/75 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center mb-16">
-            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald text-destructive dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] inline-block bg-black mb-6">
+            <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(0,112,243,1),12px_12px_0px_0px_#C4A052] inline-block bg-black mb-6">
               previous.programs
             </h1>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
@@ -148,7 +148,7 @@ const GeneratedWorkouts = () => {
                   >
                     <CardHeader className="px-6 pt-6 pb-2">
                       <CardTitle className="text-white flex items-center gap-2">
-                        <Dumbbell className="h-5 w-5 text-destructive" />
+                        <Dumbbell className="h-5 w-5 text-primary" />
                         {workout.title || "Generated Workout"}
                       </CardTitle>
                       
@@ -174,7 +174,7 @@ const GeneratedWorkouts = () => {
                         <div className="space-y-3">
                           {workout.summary && (
                             <div>
-                              <h3 className="text-sm font-semibold text-destructive mb-1">Program Summary</h3>
+                              <h3 className="text-sm font-semibold text-primary mb-1">Program Summary</h3>
                               <p className="text-white/80 whitespace-pre-line text-sm pb-2 font-light leading-relaxed">
                                 {workout.summary}
                               </p>
@@ -183,7 +183,7 @@ const GeneratedWorkouts = () => {
                           
                           {firstDay && (
                             <div>
-                              <h3 className="text-sm font-semibold text-destructive mb-1">
+                              <h3 className="text-sm font-semibold text-primary mb-1">
                                 {firstDay.day} Preview
                               </h3>
                               {firstDay.workout.description && (

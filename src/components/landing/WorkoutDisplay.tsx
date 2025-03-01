@@ -31,6 +31,9 @@ export function WorkoutDisplay({
   }, [initialWorkouts]);
 
   const handleUpdate = (day: string, updates: any) => {
+    // Don't update special fields like _meta
+    if (day === '_meta') return;
+    
     const updatedWorkouts = {
       ...workouts,
       [day]: {
@@ -55,7 +58,7 @@ export function WorkoutDisplay({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 transition-all duration-300 ease-in-out">
         <div className="space-y-6">
           {isGenerating ? (
-            <WorkoutLoadingState count={Object.keys(initialWorkouts).length} />
+            <WorkoutLoadingState count={Object.keys(initialWorkouts).filter(key => key !== '_meta').length} />
           ) : (
             <WorkoutContent
               workouts={workouts}
@@ -69,4 +72,4 @@ export function WorkoutDisplay({
       </div>
     </div>
   );
-}
+};

@@ -52,6 +52,22 @@ export const useWorkoutGeneration = () => {
         console.error('Error storing session:', sessionError);
       }
 
+      // Generate a cute title for the workout
+      const { data: titleData, error: titleError } = await supabase.functions.invoke('generate-workout-title', {
+        body: {
+          prompt: sanitizedParams.prompt,
+          fitnessLevel: sanitizedParams.fitnessLevel,
+          prescribedExercises: sanitizedParams.prescribedExercises,
+          numberOfDays: sanitizedParams.numberOfDays
+        }
+      });
+
+      if (titleError) {
+        console.error('Error generating workout title:', titleError);
+      }
+
+      const workoutTitle = titleData?.title || `${sanitizedParams.numberOfDays}-Day Workout Plan`;
+
       // Generate the workout
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
@@ -77,15 +93,18 @@ export const useWorkoutGeneration = () => {
         throw new Error('Invalid response format from workout generation');
       }
 
-      // Save to generated_workouts table
+      // Generate a summary for the workout
+      const workoutSummary = generateWorkoutSummary(data, sanitizedParams);
+
+      // Save to generated_workouts table with the title
       const { error: saveError } = await supabase
         .from('generated_workouts')
         .insert({
           user_id: session.user.id,
           workout_data: data,
-          title: `${sanitizedParams.numberOfDays}-Day Workout Plan`,
+          title: workoutTitle,
           tags: [sanitizedParams.fitnessLevel],
-          summary: `${sanitizedParams.numberOfDays}-day workout plan`
+          summary: workoutSummary
         });
 
       if (saveError) {
@@ -107,7 +126,16 @@ export const useWorkoutGeneration = () => {
         console.error('Error updating session:', updateError);
       }
 
-      return data;
+      // Return data with title and summary for the UI
+      const enhancedData = {
+        ...data,
+        _meta: {
+          title: workoutTitle,
+          summary: workoutSummary
+        }
+      };
+
+      return enhancedData;
     } catch (error: any) {
       console.error('Error generating workout:', error);
       toast({
@@ -119,6 +147,27 @@ export const useWorkoutGeneration = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Helper function to generate a summary based on the workout data
+  const generateWorkoutSummary = (workoutData: WeeklyWorkouts, params: GenerateWorkoutParams): string => {
+    const dayCount = Object.keys(workoutData).length;
+    const focusAreas = new Set<string>();
+    
+    // Extract workout focus areas from the data
+    Object.values(workoutData).forEach(day => {
+      const allText = [day.description, day.strength, day.workout].join(' ').toLowerCase();
+      
+      if (allText.includes('cardio') || allText.includes('endurance')) focusAreas.add('cardio');
+      if (allText.includes('strength') || allText.includes('weight')) focusAreas.add('strength');
+      if (allText.includes('hiit') || allText.includes('interval')) focusAreas.add('HIIT');
+      if (allText.includes('mobility') || allText.includes('flexibility')) focusAreas.add('mobility');
+      if (allText.includes('core') || allText.includes('abs')) focusAreas.add('core');
+    });
+    
+    const focusString = Array.from(focusAreas).join(', ');
+    
+    return `This ${dayCount}-day ${params.fitnessLevel || ''} workout program focuses on ${focusString || 'overall fitness'} training.`;
   };
 
   return {

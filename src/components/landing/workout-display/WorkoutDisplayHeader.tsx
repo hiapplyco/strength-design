@@ -29,8 +29,16 @@ export const WorkoutDisplayHeader = ({
     try {
       setIsPublishing(true);
       
+      // Create a copy without the _meta field for the document generation
+      const workoutsForDocument = { ...allWorkouts };
+      delete workoutsForDocument._meta;
+      
       const { data, error } = await supabase.functions.invoke('generate-tiptap-document', {
-        body: { workouts: allWorkouts }
+        body: { 
+          workouts: workoutsForDocument,
+          title: allWorkouts._meta?.title,
+          summary: allWorkouts._meta?.summary
+        }
       });
 
       if (error) {

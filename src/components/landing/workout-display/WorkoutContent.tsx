@@ -1,7 +1,7 @@
 
 import { WorkoutDayCard } from "./WorkoutDayCard";
 import { WorkoutDisplayHeader } from "./WorkoutDisplayHeader";
-import type { WeeklyWorkouts } from "@/types/fitness";
+import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta, isWorkoutDay } from "@/types/fitness";
 import { formatAllWorkouts, formatWorkoutToMarkdown } from "@/utils/workout-formatting";
 
 interface WorkoutContentProps {
@@ -9,7 +9,7 @@ interface WorkoutContentProps {
   resetWorkouts: () => void;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
-  onUpdate: (day: string, updates: any) => void;
+  onUpdate: (day: string, updates: Partial<WorkoutDay>) => void;
 }
 
 export const WorkoutContent = ({
@@ -23,8 +23,9 @@ export const WorkoutContent = ({
   const workoutText = formatWorkoutToMarkdown(formattedWorkouts);
   
   // Extract title and summary from _meta if available
-  const workoutTitle = workouts._meta?.title || "Custom Workout Program";
-  const workoutSummary = workouts._meta?.summary || "";
+  const meta = workouts._meta as WorkoutMeta | undefined;
+  const workoutTitle = meta?.title || "Custom Workout Program";
+  const workoutSummary = meta?.summary || "";
 
   return (
     <div className="bg-background p-3 sm:p-4 md:p-6 rounded-lg overflow-hidden">
@@ -49,12 +50,12 @@ export const WorkoutContent = ({
 
       <div className="grid gap-4 sm:gap-6 md:gap-8 mt-4 sm:mt-6 md:mt-8">
         {Object.entries(workouts)
-          .filter(([key]) => key !== '_meta') // Filter out the _meta entry
+          .filter(([key, value]) => key !== '_meta' && isWorkoutDay(value)) // Filter out the _meta entry and ensure it's a WorkoutDay
           .map(([day, workout], index) => (
             <WorkoutDayCard 
               key={day} 
               day={day} 
-              workout={workout}
+              workout={workout as WorkoutDay}
               index={index}
               isExporting={isExporting}
               setIsExporting={setIsExporting}

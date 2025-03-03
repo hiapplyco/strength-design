@@ -1,4 +1,6 @@
 
+import { WeeklyWorkouts, WorkoutDay, isWorkoutDay } from "@/types/fitness";
+
 export const formatWorkoutToMarkdown = (workoutText: string): string => {
   // First, let's properly format the day headers
   const formattedText = workoutText.replace(/Day: day(\d+)/g, 'Day $1');
@@ -7,21 +9,24 @@ export const formatWorkoutToMarkdown = (workoutText: string): string => {
   return `# Weekly Workout Plan\n\n${formattedText}`;
 };
 
-export const formatAllWorkouts = (allWorkouts?: Record<string, { warmup?: string; workout?: string; notes?: string; strength?: string; }>) => {
+export const formatAllWorkouts = (allWorkouts?: WeeklyWorkouts) => {
   if (!allWorkouts) return '';
   
   return Object.entries(allWorkouts)
-    .filter(([day]) => day !== '_meta') // Skip _meta in formatting
+    .filter(([day, workout]) => day !== '_meta' && isWorkoutDay(workout)) // Skip _meta and ensure it's a WorkoutDay
     .map(([day, workout]) => {
+      // Cast to WorkoutDay since we've filtered with isWorkoutDay
+      const workoutDay = workout as WorkoutDay;
+      
       // Format the day number properly (e.g., "day1" to "Day 1")
       const formattedDay = day.replace(/day(\d+)/, 'Day $1');
       
       const sections = [
         `${formattedDay}`,
-        workout.strength && `Strength:\n${workout.strength}`,
-        workout.warmup && `Warmup:\n${workout.warmup}`,
-        workout.workout && `Workout:\n${workout.workout}`,
-        workout.notes && `Notes:\n${workout.notes}`
+        workoutDay.strength && `Strength:\n${workoutDay.strength}`,
+        workoutDay.warmup && `Warmup:\n${workoutDay.warmup}`,
+        workoutDay.workout && `Workout:\n${workoutDay.workout}`,
+        workoutDay.notes && `Notes:\n${workoutDay.notes}`
       ].filter(Boolean);
       
       return sections.join('\n\n');

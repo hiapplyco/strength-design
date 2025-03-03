@@ -1,4 +1,3 @@
-
 // Add, modify or inspect types here - don't delete existing types
 export interface WorkoutDay {
   description?: string;
@@ -15,9 +14,17 @@ export interface WorkoutMeta {
   summary?: string;
 }
 
+// Fix the WeeklyWorkouts interface to properly handle the _meta property
 export interface WeeklyWorkouts {
-  [key: string]: WorkoutDay; // Use key instead of day for better type clarity
+  [key: string]: WorkoutDay | WorkoutMeta;
   _meta?: WorkoutMeta;
+}
+
+// Create a type guard to check if an entry is a WorkoutDay
+export function isWorkoutDay(value: WorkoutDay | WorkoutMeta): value is WorkoutDay {
+  return (value as WorkoutDay).workout !== undefined || 
+         (value as WorkoutDay).warmup !== undefined || 
+         (value as WorkoutDay).strength !== undefined;
 }
 
 // Explicitly exclude _meta from the string index type

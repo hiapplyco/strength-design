@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { VideoPreview } from './VideoPreview';
 import { VideoControls } from './VideoControls';
 import { UploadStatus } from './UploadStatus';
@@ -9,12 +9,19 @@ import { useVideoUpload } from './hooks/useVideoUpload';
 
 interface VideoRecorderProps {
   onNarrate?: () => void;
+  onVideoUploaded?: (url: string) => void;
 }
 
-const VideoRecorder: React.FC<VideoRecorderProps> = ({ onNarrate }) => {
+const VideoRecorder: React.FC<VideoRecorderProps> = ({ onNarrate, onVideoUploaded }) => {
   const { videoRef, streamRef, isWebcamOn, startWebcam, stopWebcam } = useWebcam();
   const { recording, recordedChunks, startRecording, stopRecording, mediaRecorderRef } = useRecording(streamRef);
   const { uploading, publicUrl, uploadVideo } = useVideoUpload();
+
+  useEffect(() => {
+    if (publicUrl && onVideoUploaded) {
+      onVideoUploaded(publicUrl);
+    }
+  }, [publicUrl, onVideoUploaded]);
 
   const handleUploadVideo = async () => {
     if (mediaRecorderRef.current) {

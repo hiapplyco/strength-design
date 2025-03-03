@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { WeeklyWorkouts } from "@/types/fitness";
+import { safelyGetWorkoutProperty } from "@/utils/workout-helpers";
 
 interface GenerateWorkoutParams {
   prompt: string;
@@ -156,7 +156,7 @@ export const useWorkoutGeneration = () => {
     
     // Extract workout focus areas from the data
     Object.values(workoutData).forEach(day => {
-      const allText = [day.description, day.strength, day.workout].join(' ').toLowerCase();
+      const allText = [safelyGetWorkoutProperty(day, 'description'), safelyGetWorkoutProperty(day, 'strength'), safelyGetWorkoutProperty(day, 'workout')].join(' ').toLowerCase();
       
       if (allText.includes('cardio') || allText.includes('endurance')) focusAreas.add('cardio');
       if (allText.includes('strength') || allText.includes('weight')) focusAreas.add('strength');

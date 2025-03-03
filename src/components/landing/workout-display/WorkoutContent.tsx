@@ -4,6 +4,7 @@ import { WorkoutDisplayHeader } from "./WorkoutDisplayHeader";
 import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta } from "@/types/fitness";
 import { isWorkoutDay } from "@/types/fitness";
 import { formatAllWorkouts, formatWorkoutToMarkdown } from "@/utils/workout-formatting";
+import { filterWorkoutDays } from "@/utils/workout-helpers";
 
 interface WorkoutContentProps {
   workouts: WeeklyWorkouts;
@@ -27,6 +28,9 @@ export const WorkoutContent = ({
   const meta = workouts._meta as WorkoutMeta | undefined;
   const workoutTitle = meta?.title || "Custom Workout Program";
   const workoutSummary = meta?.summary || "";
+
+  // Filter out non-workout day entries
+  const workoutDays = filterWorkoutDays(workouts);
 
   return (
     <div className="bg-background p-3 sm:p-4 md:p-6 rounded-lg overflow-hidden">
@@ -60,7 +64,7 @@ export const WorkoutContent = ({
               index={index}
               isExporting={isExporting}
               setIsExporting={setIsExporting}
-              allWorkouts={workouts}
+              allWorkouts={workoutDays}
               onUpdate={onUpdate}
             />
           ))}

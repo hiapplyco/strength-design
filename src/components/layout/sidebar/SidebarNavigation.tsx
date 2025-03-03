@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { FileText, Dumbbell, Video, DollarSign, MessageSquare, Home } from "lucide-react";
+import { FileText, Dumbbell, Video, DollarSign, MessageSquare, Home, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +42,12 @@ export function SidebarNavigation() {
       to: "/video-analysis",
       icon: <Video className="h-5 w-5" />,
       text: "Publish Program",
+      requiresAuth: true,
+    },
+    {
+      to: "/technique-analysis",
+      icon: <Activity className="h-5 w-5" />,
+      text: "Technique Analysis",
       requiresAuth: true,
     },
     {

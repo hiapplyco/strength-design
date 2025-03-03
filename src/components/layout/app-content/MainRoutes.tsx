@@ -12,6 +12,7 @@ import WorkoutResults from "@/pages/WorkoutResults";
 import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import ProgramChat from "@/pages/ProgramChat";
+import TechniqueAnalysis from "@/pages/TechniqueAnalysis";
 
 export const MainRoutes = () => {
   const { session } = useAuth();
@@ -61,6 +62,14 @@ export const MainRoutes = () => {
         element={
           <ProtectedRoute>
             <VideoAnalysisPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/technique-analysis"
+        element={
+          <ProtectedRoute>
+            <TechniqueAnalysis />
           </ProtectedRoute>
         }
       />

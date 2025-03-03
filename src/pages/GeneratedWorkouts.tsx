@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 import { WorkoutDay, WorkoutData } from "@/types/fitness";
 import { Database } from "@/integrations/supabase/types";
 import { Dumbbell, Calendar, Tag, ClipboardList } from "lucide-react";
+import { safelyGetWorkoutProperty } from "@/utils/workout-helpers";
 
 type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
 
@@ -46,7 +46,6 @@ const GeneratedWorkouts = () => {
   }, [toast]);
 
   const handleWorkoutClick = (workout: GeneratedWorkout) => {
-    // Safely cast the workout_data to WorkoutData type
     const workoutData = workout.workout_data as unknown as WorkoutData;
     let content = '';
     
@@ -91,7 +90,6 @@ const GeneratedWorkouts = () => {
     });
   };
 
-  // Helper function to get first day workout preview
   const getFirstDayPreview = (workoutData: WorkoutData): { day: string, workout: WorkoutDay } | null => {
     if (!workoutData) return null;
     const entries = Object.entries(workoutData);
@@ -99,15 +97,12 @@ const GeneratedWorkouts = () => {
     return { day: entries[0][0], workout: entries[0][1] };
   };
 
-  // Helper function to count total exercises
   const countExercises = (workoutData: WorkoutData): number => {
     if (!workoutData) return 0;
     
     let count = 0;
     Object.values(workoutData).forEach(day => {
-      // Count exercises from the workout text using a simple heuristic
       const workoutText = [day.warmup, day.workout, day.strength].join(' ');
-      // Count exercise occurrences by looking for patterns like "3x10" or exercises followed by sets
       const exerciseMatches = workoutText.match(/\b\d+\s*[xX]\s*\d+\b/g);
       count += exerciseMatches ? exerciseMatches.length : 0;
     });
@@ -134,7 +129,6 @@ const GeneratedWorkouts = () => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {workouts.map(workout => {
-                // Cast workout data for preview
                 const workoutData = workout.workout_data as unknown as WorkoutData;
                 const firstDay = getFirstDayPreview(workoutData);
                 const totalExercises = countExercises(workoutData);

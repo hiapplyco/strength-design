@@ -6,6 +6,8 @@ export interface WorkoutDay {
   strength?: string;
   workout?: string;
   notes?: string;
+  exercises?: Array<{ name: string; sets?: string; reps?: string; }>;
+  images?: string[];
 }
 
 export interface WorkoutMeta {

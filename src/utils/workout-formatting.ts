@@ -1,3 +1,4 @@
+
 export const formatWorkoutToMarkdown = (workoutText: string): string => {
   // First, let's properly format the day headers
   const formattedText = workoutText.replace(/Day: day(\d+)/g, 'Day $1');
@@ -6,10 +7,11 @@ export const formatWorkoutToMarkdown = (workoutText: string): string => {
   return `# Weekly Workout Plan\n\n${formattedText}`;
 };
 
-export const formatAllWorkouts = (allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>) => {
+export const formatAllWorkouts = (allWorkouts?: Record<string, { warmup?: string; workout?: string; notes?: string; strength?: string; }>) => {
   if (!allWorkouts) return '';
   
   return Object.entries(allWorkouts)
+    .filter(([day]) => day !== '_meta') // Skip _meta in formatting
     .map(([day, workout]) => {
       // Format the day number properly (e.g., "day1" to "Day 1")
       const formattedDay = day.replace(/day(\d+)/, 'Day $1');

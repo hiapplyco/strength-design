@@ -66,7 +66,7 @@ export const WorkoutContentSection = ({
 
 interface SectionWithTitleProps {
   title: string;
-  content: string;
+  content?: string; // Make content optional to handle undefined values
   onExerciseSelect: (exerciseName: string) => void;
 }
 
@@ -147,7 +147,7 @@ const ExerciseImagesSection = ({ images }: ExerciseImagesSectionProps) => {
 };
 
 // Helper function to render text with clickable exercises
-export const renderTextWithClickableExercises = (text: string, onExerciseSelect: (name: string) => void) => {
+export const renderTextWithClickableExercises = (text: string | undefined, onExerciseSelect: (name: string) => void) => {
   if (!text) return null;
 
   const exercises = extractExerciseNames(text);

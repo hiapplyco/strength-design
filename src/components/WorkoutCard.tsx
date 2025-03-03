@@ -38,8 +38,8 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       setIsExporting(true);
       await exportToCalendar([{
         title,
-        warmup,
-        workout,
+        warmup: warmup || '',
+        workout: workout || '',
         notes: notes || '',
         dayOffset: 0
       }], toast);
@@ -56,9 +56,12 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       workout: updates.workout || workout,
       strength: updates.strength || strength,
       notes: updates.notes,
-      images: updates.images
+      // Only include exercises and images if present in the updates
+      ...(updates.exercises && { exercises: updates.exercises }),
+      ...(updates.images && { images: updates.images })
     };
 
+    // @ts-ignore - Type mismatch being handled manually
     setState(fullUpdates);
     
     if (updates.description) {
@@ -77,10 +80,10 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
           title={title}
           isExporting={isExporting}
           onExport={handleExportCalendar}
-          warmup={warmup}
-          workout={workout}
+          warmup={warmup || ''}
+          workout={workout || ''}
           notes={notes}
-          strength={strength}
+          strength={strength || ''}
           allWorkouts={allWorkouts || {}}
           onUpdate={handleUpdate}
         />

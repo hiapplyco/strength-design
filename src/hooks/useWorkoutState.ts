@@ -1,4 +1,6 @@
+
 import { useState, useEffect } from "react";
+import type { WorkoutDay } from "@/types/fitness";
 
 interface WorkoutState {
   warmup: string;
@@ -9,7 +11,7 @@ interface WorkoutState {
 
 export function useWorkoutState(
   title: string,
-  allWorkouts?: Record<string, { warmup: string; workout: string; notes?: string; strength: string; }>
+  allWorkouts?: Record<string, WorkoutDay>
 ) {
   const [state, setState] = useState<WorkoutState>({
     warmup: "",

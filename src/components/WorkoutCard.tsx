@@ -61,8 +61,15 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
       ...(updates.images && { images: updates.images })
     };
 
-    // @ts-ignore - Type mismatch being handled manually
-    setState(fullUpdates);
+    // Convert WorkoutDay to WorkoutState for setState
+    const stateUpdate = {
+      warmup: fullUpdates.warmup || '',
+      workout: fullUpdates.workout || '',
+      notes: fullUpdates.notes,
+      strength: fullUpdates.strength || ''
+    };
+    
+    setState(stateUpdate);
     
     if (updates.description) {
       setCurrentDescription(updates.description);

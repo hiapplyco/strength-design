@@ -16,10 +16,11 @@ export interface WorkoutMeta {
 }
 
 export interface WeeklyWorkouts {
-  [day: string]: WorkoutDay;
+  [key: string]: WorkoutDay; // Use key instead of day for better type clarity
   _meta?: WorkoutMeta;
 }
 
+// Explicitly exclude _meta from the string index type
 export type WorkoutData = WeeklyWorkouts;
 
 export interface StrengthExercises {

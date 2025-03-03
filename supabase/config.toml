@@ -46,4 +46,3 @@ verify_jwt = true
 
 [functions.analyze-video]
 verify_jwt = true
-

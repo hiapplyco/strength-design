@@ -26,10 +26,11 @@ serve(async (req) => {
     const uploadResponse = await uploadVideoToGemini(videoUrl, apiKey);
     
     if (!uploadResponse || !uploadResponse.file || !uploadResponse.file.uri) {
-      throw new Error('Failed to upload video to Gemini');
+      throw new Error('Failed to upload video to Gemini: Invalid response format');
     }
 
     console.log('Video uploaded successfully to Gemini, URI:', uploadResponse.file.uri);
+    console.log('File details:', JSON.stringify(uploadResponse.file));
 
     // Now we can analyze the video with Gemini
     const prompt = userPrompt || getDefaultPrompt();

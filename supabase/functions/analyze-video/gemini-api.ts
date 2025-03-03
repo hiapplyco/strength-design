@@ -12,29 +12,26 @@ export async function uploadVideoToGemini(videoUrl: string, apiKey: string) {
     const videoBuffer = await videoResponse.arrayBuffer();
     const videoBlob = new Blob([videoBuffer], { type: 'video/mp4' });
     
-    console.log('Video downloaded, size:', videoBuffer.byteLength, 'bytes');
+    console.log('Video downloaded successfully, size:', videoBuffer.byteLength, 'bytes');
     
-    // Prepare for upload to Gemini
+    // Prepare for upload to Gemini API
     const formData = new FormData();
     formData.append('file', videoBlob, 'video.mp4');
-
-    const uploadHeaders = {
-      'X-Goog-Upload-Command': 'start, upload, finalize',
-      'X-Goog-Upload-Header-Content-Length': videoBuffer.byteLength.toString(),
-      'X-Goog-Upload-Header-Content-Type': 'video/mp4',
-      'Content-Type': 'application/json'
-    };
-
-    const metadata = {
-      file: { display_name: 'jiu_jitsu_analysis.mp4' }
-    };
-
-    // Upload to Gemini API
+    
+    const metadata = JSON.stringify({
+      display_name: 'jiu_jitsu_analysis.mp4'
+    });
+    
+    // Upload to Gemini API using the correct upload endpoint and format
     const uploadUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
+    
+    console.log('Uploading video to Gemini API...');
     const uploadResult = await fetch(uploadUrl, {
       method: 'POST',
-      headers: uploadHeaders,
-      body: JSON.stringify(metadata) + videoBlob // Append binary data to metadata
+      body: formData,
+      headers: {
+        'X-Goog-Upload-Protocol': 'multipart'
+      }
     });
 
     if (!uploadResult.ok) {
@@ -42,7 +39,9 @@ export async function uploadVideoToGemini(videoUrl: string, apiKey: string) {
       throw new Error(`Failed to upload video to Gemini: ${uploadResult.status} ${uploadResult.statusText} - ${errorText}`);
     }
 
-    return await uploadResult.json();
+    const uploadResponse = await uploadResult.json();
+    console.log('Video upload response:', JSON.stringify(uploadResponse));
+    return uploadResponse;
   } catch (error) {
     console.error('Error uploading video to Gemini:', error);
     throw error;
@@ -52,6 +51,7 @@ export async function uploadVideoToGemini(videoUrl: string, apiKey: string) {
 export async function analyzeVideoWithGemini(fileUri: string, mimeType: string, prompt: string, apiKey: string) {
   try {
     console.log('Analyzing video with Gemini, URI:', fileUri);
+    console.log('Using mime type:', mimeType);
     
     const requestBody = {
       contents: [
@@ -63,12 +63,7 @@ export async function analyzeVideoWithGemini(fileUri: string, mimeType: string, 
                 fileUri: fileUri,
                 mimeType: mimeType
               }
-            }
-          ]
-        },
-        {
-          role: "user",
-          parts: [
+            },
             {
               text: prompt
             }
@@ -79,12 +74,13 @@ export async function analyzeVideoWithGemini(fileUri: string, mimeType: string, 
         temperature: 1,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 8192,
-        responseMimeType: "text/plain"
+        maxOutputTokens: 8192
       }
     };
 
     const analysisUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    
+    console.log('Sending analysis request to Gemini...');
     const analysisResult = await fetch(analysisUrl, {
       method: 'POST',
       headers: {
@@ -99,6 +95,12 @@ export async function analyzeVideoWithGemini(fileUri: string, mimeType: string, 
     }
 
     const response = await analysisResult.json();
+    console.log('Analysis response received:', JSON.stringify(response));
+    
+    if (!response.candidates || response.candidates.length === 0 || !response.candidates[0].content) {
+      throw new Error('Invalid response format from Gemini API');
+    }
+    
     return response.candidates[0].content.parts[0].text;
   } catch (error) {
     console.error('Error analyzing video with Gemini:', error);

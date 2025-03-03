@@ -2,7 +2,8 @@
 import { WorkoutDisplayButtons } from "./workout-display/WorkoutDisplayButtons";
 import { WorkoutContent } from "./workout-display/WorkoutContent";
 import { WorkoutLoadingState } from "./workout-display/WorkoutLoadingState";
-import type { WeeklyWorkouts, WorkoutDay, isWorkoutDay } from "@/types/fitness";
+import type { WeeklyWorkouts, WorkoutDay } from "@/types/fitness";
+import { isWorkoutDay } from "@/types/fitness";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 

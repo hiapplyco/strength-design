@@ -1,7 +1,8 @@
 
 import { WorkoutDayCard } from "./WorkoutDayCard";
 import { WorkoutDisplayHeader } from "./WorkoutDisplayHeader";
-import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta, isWorkoutDay } from "@/types/fitness";
+import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta } from "@/types/fitness";
+import { isWorkoutDay } from "@/types/fitness";
 import { formatAllWorkouts, formatWorkoutToMarkdown } from "@/utils/workout-formatting";
 
 interface WorkoutContentProps {

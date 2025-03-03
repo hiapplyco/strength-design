@@ -1,3 +1,4 @@
+
 // Add, modify or inspect types here - don't delete existing types
 export interface WorkoutDay {
   description?: string;

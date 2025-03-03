@@ -96,9 +96,9 @@ export const VideoUpload = ({
               <p className="text-lg font-medium text-white">Upload Video Here</p>
               <p className="text-sm text-gray-400">MP4, MOV, or WebM (max 100MB)</p>
               <Button 
-                variant="outline" 
-                size="sm"
-                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                variant="default" 
+                size="lg"
+                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Upload Video
               </Button>

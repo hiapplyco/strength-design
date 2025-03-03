@@ -1,29 +1,61 @@
 
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, LoaderCircle } from "lucide-react";
-import { RecordingSection } from "@/components/video-analysis/components/RecordingSection";
-import { useState } from "react";
-import { useScriptGeneration } from "@/components/video-analysis/hooks/useScriptGeneration";
+import { VideoUpload } from "@/components/video-analysis/VideoUpload";
 import { useVideoAnalysis } from "@/components/video-analysis/hooks/useVideoAnalysis";
 import { LogoHeader } from "@/components/ui/logo-header";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const TechniqueAnalysis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [teleprompterPosition, setTeleprompterPosition] = useState(0);
-  const { workoutScript, isGenerating, generateMonologue } = useScriptGeneration();
   const { analyzing, analysis, analyzeVideo } = useVideoAnalysis();
   const [publicUrl, setPublicUrl] = useState<string>('');
+  const [customPrompt, setCustomPrompt] = useState<string>('');
 
   const handleAnalyzeVideo = () => {
     if (publicUrl) {
-      analyzeVideo(publicUrl);
+      analyzeVideo(publicUrl, customPrompt || undefined);
     }
   };
 
   // Update this function to save the URL when a video is uploaded
   const handleVideoUploaded = (url: string) => {
     setPublicUrl(url);
+  };
+
+  const handleUpload = async (file: File) => {
+    if (!file) return;
+    
+    // Upload logic will be handled by supabase client directly
+    const fileName = `videos/technique_${Date.now()}_${file.name}`;
+    
+    try {
+      const { data: storageData, error: storageError } = await import('@/integrations/supabase/client')
+        .then(({ supabase }) => supabase.storage
+          .from('videos')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+        );
+      
+      if (storageError) throw storageError;
+      
+      const { data } = await import('@/integrations/supabase/client')
+        .then(({ supabase }) => supabase.storage
+          .from('videos')
+          .getPublicUrl(fileName)
+        );
+      
+      if (data?.publicUrl) {
+        setPublicUrl(data.publicUrl);
+      }
+    } catch (error) {
+      console.error("Error uploading video:", error);
+    }
   };
 
   return (
@@ -45,7 +77,7 @@ const TechniqueAnalysis = () => {
             <div className="text-center mb-8 md:mb-12">
               <LogoHeader>Jiu-Jitsu Technique Analysis</LogoHeader>
               <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-                Upload or record a video of your jiu-jitsu technique for expert AI analysis and feedback
+                Upload a video of your jiu-jitsu technique for expert AI analysis and feedback
               </p>
             </div>
             
@@ -53,19 +85,33 @@ const TechniqueAnalysis = () => {
               <CardHeader>
                 <CardTitle className="text-xl">Technique Analysis</CardTitle>
                 <CardDescription>
-                  Upload or record a video of your jiu-jitsu technique for expert AI analysis
+                  Upload a video of your jiu-jitsu technique for expert AI analysis
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <RecordingSection
-                  onNarrate={() => {}}
-                  onFileSelect={setSelectedFile}
-                  selectedFile={selectedFile}
-                  workoutScript={""}
-                  teleprompterPosition={teleprompterPosition}
-                  setTeleprompterPosition={setTeleprompterPosition}
-                  onVideoUploaded={handleVideoUploaded}
-                />
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="video">Video</Label>
+                    <VideoUpload 
+                      onFileSelect={setSelectedFile}
+                      selectedFile={selectedFile}
+                      onFileUpload={handleUpload}
+                      onUploadComplete={handleVideoUploaded}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="custom-prompt">Custom Analysis Instructions (Optional)</Label>
+                    <Textarea 
+                      id="custom-prompt"
+                      placeholder="Add specific instructions for the analysis, e.g., 'Focus on my guard passing technique' or leave blank for standard analysis."
+                      value={customPrompt}
+                      onChange={(e) => setCustomPrompt(e.target.value)}
+                      className="h-24"
+                      borderStyle="multicolor"
+                    />
+                  </div>
+                </div>
                 
                 {publicUrl && (
                   <Button 

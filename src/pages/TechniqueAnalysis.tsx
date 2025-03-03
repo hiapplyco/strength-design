@@ -21,7 +21,6 @@ const TechniqueAnalysis = () => {
     }
   };
 
-  // Update this function to save the URL when a video is uploaded
   const handleVideoUploaded = (url: string) => {
     setPublicUrl(url);
   };
@@ -29,7 +28,6 @@ const TechniqueAnalysis = () => {
   const handleUpload = async (file: File) => {
     if (!file) return;
     
-    // Upload logic will be handled by supabase client directly
     const fileName = `videos/technique_${Date.now()}_${file.name}`;
     
     try {

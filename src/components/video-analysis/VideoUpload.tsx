@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Upload, FileText, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -88,20 +87,20 @@ export const VideoUpload = ({
                   onFileSelect(null);
                 }}
               >
-                Change File
+                Change Video
               </Button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
               <Upload className="h-10 w-10 text-gray-400" />
-              <p className="text-sm text-gray-400">Drag and drop or click to upload</p>
-              <p className="text-xs text-gray-500">MP4, MOV, or WebM (max 100MB)</p>
+              <p className="text-lg font-medium text-white">Upload Video Here</p>
+              <p className="text-sm text-gray-400">MP4, MOV, or WebM (max 100MB)</p>
               <Button 
                 variant="outline" 
                 size="sm"
-                className="mt-2"
+                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
               >
-                Choose File
+                Upload Video
               </Button>
             </div>
           )}

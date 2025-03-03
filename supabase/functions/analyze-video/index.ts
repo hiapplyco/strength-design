@@ -21,39 +21,48 @@ serve(async (req) => {
     console.log('Custom prompt:', userPrompt || 'Using default prompt');
 
     const apiKey = Deno.env.get('GEMINI_API_KEY')!;
-
-    // First, we need to upload the video to Gemini API
-    const uploadResponse = await uploadVideoToGemini(videoUrl, apiKey);
-    
-    if (!uploadResponse || !uploadResponse.file || !uploadResponse.file.uri) {
-      throw new Error('Failed to upload video to Gemini: Invalid response format');
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is not configured in Edge Function secrets');
     }
 
-    console.log('Video uploaded successfully to Gemini, URI:', uploadResponse.file.uri);
-    console.log('File details:', JSON.stringify(uploadResponse.file));
-
-    // Now we can analyze the video with Gemini
-    const prompt = userPrompt || getDefaultPrompt();
-    const analysisResponse = await analyzeVideoWithGemini(
-      uploadResponse.file.uri, 
-      uploadResponse.file.mimeType || "video/mp4",
-      prompt,
-      apiKey
-    );
-
-    console.log('Video analysis completed successfully');
-
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        analysis: analysisResponse,
-        videoUri: uploadResponse.file.uri
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
+    // First, we need to upload the video to Gemini API
+    console.log('Uploading video to Gemini API...');
+    try {
+      const uploadResponse = await uploadVideoToGemini(videoUrl, apiKey);
+      
+      if (!uploadResponse || !uploadResponse.file || !uploadResponse.file.uri) {
+        throw new Error('Failed to upload video to Gemini: Invalid response format');
       }
-    );
+
+      console.log('Video uploaded successfully to Gemini, URI:', uploadResponse.file.uri);
+      console.log('File details:', JSON.stringify(uploadResponse.file));
+
+      // Now we can analyze the video with Gemini
+      const prompt = userPrompt || getDefaultPrompt();
+      const analysisResponse = await analyzeVideoWithGemini(
+        uploadResponse.file.uri, 
+        uploadResponse.file.mimeType || "video/mp4",
+        prompt,
+        apiKey
+      );
+
+      console.log('Video analysis completed successfully');
+
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          analysis: analysisResponse,
+          videoUri: uploadResponse.file.uri
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200 
+        }
+      );
+    } catch (uploadError) {
+      console.error('Detailed upload error:', uploadError);
+      throw new Error(`Video upload failed: ${uploadError.message}`);
+    }
   } catch (error) {
     console.error('Error in video analysis:', error);
     return new Response(

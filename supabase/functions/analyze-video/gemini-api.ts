@@ -18,11 +18,10 @@ export async function uploadVideoToGemini(videoUrl: string, apiKey: string) {
     const formData = new FormData();
     formData.append('file', videoBlob, 'video.mp4');
     
-    const metadata = JSON.stringify({
-      display_name: 'jiu_jitsu_analysis.mp4'
-    });
+    // Use simplified metadata to avoid size limitations
+    // Removing the JSON.stringify step as it's not necessary with FormData
     
-    // Upload to Gemini API using the correct upload endpoint and format
+    // Upload to Gemini API using the correct upload endpoint
     const uploadUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`;
     
     console.log('Uploading video to Gemini API...');

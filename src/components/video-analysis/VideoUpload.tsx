@@ -99,6 +99,10 @@ export const VideoUpload = ({
                 variant="default" 
                 size="lg"
                 className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('video')?.click();
+                }}
               >
                 Upload Video
               </Button>

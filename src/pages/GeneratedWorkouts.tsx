@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +11,7 @@ import { formatDistanceToNow } from "date-fns";
 import { WorkoutDay, WorkoutData } from "@/types/fitness";
 import { Database } from "@/integrations/supabase/types";
 import { Dumbbell, Calendar, Tag, ClipboardList } from "lucide-react";
-import { safelyGetWorkoutProperty } from "@/utils/workout-helpers";
+import { safelyGetWorkoutProperty, isWorkoutDay } from "@/utils/workout-helpers";
 
 type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
 
@@ -59,26 +60,33 @@ const GeneratedWorkouts = () => {
     
     if (workoutData) {
       Object.entries(workoutData).forEach(([day, dayWorkout]) => {
+        if (!isWorkoutDay(dayWorkout)) return; // Skip if not a workout day (like _meta)
+        
         content += `## ${day}\n\n`;
         
-        if (dayWorkout.description) {
-          content += `### Description\n${dayWorkout.description}\n\n`;
+        const description = safelyGetWorkoutProperty(dayWorkout, 'description');
+        if (description) {
+          content += `### Description\n${description}\n\n`;
         }
         
-        if (dayWorkout.warmup) {
-          content += `### Warmup\n${dayWorkout.warmup}\n\n`;
+        const warmup = safelyGetWorkoutProperty(dayWorkout, 'warmup');
+        if (warmup) {
+          content += `### Warmup\n${warmup}\n\n`;
         }
         
-        if (dayWorkout.strength) {
-          content += `### Strength\n${dayWorkout.strength}\n\n`;
+        const strength = safelyGetWorkoutProperty(dayWorkout, 'strength');
+        if (strength) {
+          content += `### Strength\n${strength}\n\n`;
         }
         
-        if (dayWorkout.workout) {
-          content += `### Workout\n${dayWorkout.workout}\n\n`;
+        const workoutContent = safelyGetWorkoutProperty(dayWorkout, 'workout');
+        if (workoutContent) {
+          content += `### Workout\n${workoutContent}\n\n`;
         }
         
-        if (dayWorkout.notes) {
-          content += `### Notes\n${dayWorkout.notes}\n\n`;
+        const notes = safelyGetWorkoutProperty(dayWorkout, 'notes');
+        if (notes) {
+          content += `### Notes\n${notes}\n\n`;
         }
       });
     }
@@ -92,17 +100,24 @@ const GeneratedWorkouts = () => {
 
   const getFirstDayPreview = (workoutData: WorkoutData): { day: string, workout: WorkoutDay } | null => {
     if (!workoutData) return null;
-    const entries = Object.entries(workoutData);
+    const entries = Object.entries(workoutData).filter(([key, value]) => isWorkoutDay(value));
     if (entries.length === 0) return null;
-    return { day: entries[0][0], workout: entries[0][1] };
+    return { day: entries[0][0], workout: entries[0][1] as WorkoutDay };
   };
 
   const countExercises = (workoutData: WorkoutData): number => {
     if (!workoutData) return 0;
     
     let count = 0;
-    Object.values(workoutData).forEach(day => {
-      const workoutText = [day.warmup, day.workout, day.strength].join(' ');
+    Object.entries(workoutData).forEach(([_, day]) => {
+      if (!isWorkoutDay(day)) return; // Skip if not a workout day
+      
+      const workoutText = [
+        safelyGetWorkoutProperty(day, 'warmup') || '',
+        safelyGetWorkoutProperty(day, 'workout') || '',
+        safelyGetWorkoutProperty(day, 'strength') || ''
+      ].join(' ');
+      
       const exerciseMatches = workoutText.match(/\b\d+\s*[xX]\s*\d+\b/g);
       count += exerciseMatches ? exerciseMatches.length : 0;
     });
@@ -132,7 +147,7 @@ const GeneratedWorkouts = () => {
                 const workoutData = workout.workout_data as unknown as WorkoutData;
                 const firstDay = getFirstDayPreview(workoutData);
                 const totalExercises = countExercises(workoutData);
-                const totalDays = workoutData ? Object.keys(workoutData).length : 0;
+                const totalDays = workoutData ? Object.entries(workoutData).filter(([key, value]) => isWorkoutDay(value)).length : 0;
                 
                 return (
                   <Card 
@@ -180,18 +195,18 @@ const GeneratedWorkouts = () => {
                               <h3 className="text-sm font-semibold text-primary mb-1">
                                 {firstDay.day} Preview
                               </h3>
-                              {firstDay.workout.description && (
+                              {safelyGetWorkoutProperty(firstDay.workout, 'description') && (
                                 <p className="text-white/80 text-xs italic mb-1">
-                                  {firstDay.workout.description.substring(0, 120)}
-                                  {firstDay.workout.description.length > 120 ? '...' : ''}
+                                  {(safelyGetWorkoutProperty(firstDay.workout, 'description') || '').substring(0, 120)}
+                                  {(safelyGetWorkoutProperty(firstDay.workout, 'description') || '').length > 120 ? '...' : ''}
                                 </p>
                               )}
-                              {firstDay.workout.strength && (
+                              {safelyGetWorkoutProperty(firstDay.workout, 'strength') && (
                                 <div className="mt-1">
                                   <span className="text-white/90 text-xs font-semibold">Strength:</span>
                                   <p className="text-white/70 text-xs pl-2">
-                                    {firstDay.workout.strength.substring(0, 100)}
-                                    {firstDay.workout.strength.length > 100 ? '...' : ''}
+                                    {(safelyGetWorkoutProperty(firstDay.workout, 'strength') || '').substring(0, 100)}
+                                    {(safelyGetWorkoutProperty(firstDay.workout, 'strength') || '').length > 100 ? '...' : ''}
                                   </p>
                                 </div>
                               )}

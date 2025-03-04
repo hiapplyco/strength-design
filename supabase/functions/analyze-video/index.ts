@@ -1,5 +1,4 @@
 
-// supabase/functions/analyze-video/index.ts
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { uploadVideoToGemini, analyzeVideoWithGemini } from './gemini-api.ts'
 import { corsHeaders, validateRequest, getDefaultPrompt } from './utils.ts'
@@ -29,8 +28,14 @@ serve(async (req) => {
 
     console.log('Starting video analysis for URL:', videoUrl)
     
-    // Upload video to Gemini
-    const uploadResponse = await uploadVideoToGemini(videoUrl, apiKey)
+    // Upload video to Gemini with additional error handling
+    let uploadResponse
+    try {
+      uploadResponse = await uploadVideoToGemini(videoUrl, apiKey)
+    } catch (uploadError: any) {
+      console.error('Video upload error:', uploadError?.message || uploadError)
+      throw new Error(`Failed to upload video: ${uploadError?.message || 'Unknown error'}`)
+    }
     
     if (!uploadResponse || !uploadResponse.file || !uploadResponse.file.uri) {
       throw new Error('Failed to get valid upload response from Gemini API')
@@ -44,13 +49,19 @@ serve(async (req) => {
     
     console.log('Video uploaded successfully, proceeding with analysis')
     
-    // Analyze the video
-    const analysisResult = await analyzeVideoWithGemini(
-      uploadResponse.file.uri,
-      uploadResponse.file.mimeType || 'video/mp4',
-      fullPrompt,
-      apiKey
-    )
+    // Analyze the video with enhanced error handling
+    let analysisResult
+    try {
+      analysisResult = await analyzeVideoWithGemini(
+        uploadResponse.file.uri,
+        uploadResponse.file.mimeType || 'video/mp4',
+        fullPrompt,
+        apiKey
+      )
+    } catch (analysisError: any) {
+      console.error('Video analysis error:', analysisError?.message || analysisError)
+      throw new Error(`Failed to analyze video: ${analysisError?.message || 'Unknown error'}`)
+    }
     
     console.log('Analysis complete, returning results')
     

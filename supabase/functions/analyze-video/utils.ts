@@ -10,6 +10,13 @@ export function validateRequest(videoUrl?: string): Error | null {
     return new Error('No video URL provided');
   }
   
+  try {
+    // Simple URL validation
+    new URL(videoUrl);
+  } catch (e) {
+    return new Error('Invalid video URL format');
+  }
+  
   const apiKey = Deno.env.get('GEMINI_API_KEY');
   if (!apiKey) {
     return new Error('GEMINI_API_KEY is not set');

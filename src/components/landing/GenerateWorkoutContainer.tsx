@@ -13,6 +13,7 @@ import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { WorkoutDisplay } from './WorkoutDisplay';
 import { Dumbbell, Zap } from 'lucide-react';
 import type { WeeklyWorkouts } from '@/types/fitness';
+import type { Json } from '@/integrations/supabase/types';
 
 export function GenerateWorkoutContainer() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,11 +68,14 @@ export function GenerateWorkoutContainer() {
     if (!workoutData) return;
 
     try {
-      // Store workout in the generated_workouts table instead of saved_workouts
+      // Store workout in the generated_workouts table
+      // Convert WeeklyWorkouts to Json compatible object using JSON.stringify and JSON.parse
+      const workoutDataJson = JSON.parse(JSON.stringify(workoutData)) as Json;
+      
       const { error } = await supabase
         .from('generated_workouts')
         .insert({
-          workout_data: workoutData,
+          workout_data: workoutDataJson,
           title: workoutGoal || 'Custom Workout',
           tags: [fitnessLevel, workoutGoal, equipment].filter(Boolean),
           summary: `A ${fitnessLevel} level workout focusing on ${workoutGoal || 'general fitness'} using ${equipment || 'bodyweight'} for ${workoutLength} minutes.`

@@ -1,62 +1,7 @@
 
-import { useState } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Play, LoaderCircle, AlertCircle } from "lucide-react";
-import { VideoUpload } from "@/components/video-analysis/VideoUpload";
-import { useVideoAnalysis } from "@/components/video-analysis/hooks/useVideoAnalysis";
 import { LogoHeader } from "@/components/ui/logo-header";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const TechniqueAnalysis = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { analyzing, analysis, error, analyzeVideo } = useVideoAnalysis();
-  const [publicUrl, setPublicUrl] = useState<string>('');
-  const [customPrompt, setCustomPrompt] = useState<string>('');
-
-  const handleAnalyzeVideo = () => {
-    if (publicUrl) {
-      analyzeVideo(publicUrl, customPrompt || undefined);
-    }
-  };
-
-  const handleVideoUploaded = (url: string) => {
-    setPublicUrl(url);
-  };
-
-  const handleUpload = async (file: File) => {
-    if (!file) return;
-    
-    const fileName = `videos/technique_${Date.now()}_${file.name}`;
-    
-    try {
-      const { data: storageData, error: storageError } = await import('@/integrations/supabase/client')
-        .then(({ supabase }) => supabase.storage
-          .from('videos')
-          .upload(fileName, file, {
-            cacheControl: '3600',
-            upsert: false
-          })
-        );
-      
-      if (storageError) throw storageError;
-      
-      const { data } = await import('@/integrations/supabase/client')
-        .then(({ supabase }) => supabase.storage
-          .from('videos')
-          .getPublicUrl(fileName)
-        );
-      
-      if (data?.publicUrl) {
-        setPublicUrl(data.publicUrl);
-      }
-    } catch (error) {
-      console.error("Error uploading video:", error);
-    }
-  };
-
   return (
     <div className="min-h-screen w-full">
       <div className="relative isolate">
@@ -80,75 +25,14 @@ const TechniqueAnalysis = () => {
               </p>
             </div>
             
-            <Card className="bg-black/50 backdrop-blur-sm border border-gray-800 max-w-4xl mx-auto">
-              <CardHeader>
-                <CardTitle className="text-xl">Technique Analysis</CardTitle>
-                <CardDescription>
-                  Upload a video of your jiu-jitsu technique for expert AI analysis
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {error && (
-                  <Alert variant="destructive" className="bg-red-900/50 border-red-800">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="video">Video</Label>
-                    <VideoUpload 
-                      onFileSelect={setSelectedFile}
-                      selectedFile={selectedFile}
-                      onFileUpload={handleUpload}
-                      onUploadComplete={handleVideoUploaded}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="custom-prompt">Custom Analysis Instructions (Optional)</Label>
-                    <Textarea 
-                      id="custom-prompt"
-                      placeholder="Add specific instructions for the analysis, e.g., 'Focus on my guard passing technique' or leave blank for standard analysis."
-                      value={customPrompt}
-                      onChange={(e) => setCustomPrompt(e.target.value)}
-                      className="h-24"
-                      borderStyle="multicolor"
-                    />
-                  </div>
-                </div>
-                
-                {publicUrl && (
-                  <Button 
-                    onClick={handleAnalyzeVideo} 
-                    disabled={analyzing}
-                    className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700"
-                  >
-                    {analyzing ? (
-                      <>
-                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                        Analyzing technique...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4" />
-                        Analyze Technique
-                      </>
-                    )}
-                  </Button>
-                )}
-                
-                {analysis && (
-                  <div className="mt-4 bg-black/40 p-4 rounded-md border border-gray-700">
-                    <h3 className="text-lg font-medium mb-4">Analysis Results</h3>
-                    <div className="prose prose-invert max-w-none">
-                      <div dangerouslySetInnerHTML={{ __html: analysis.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br />') }} />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="max-w-5xl mx-auto h-[800px] rounded-lg overflow-hidden border border-gray-800 shadow-xl">
+              <iframe 
+                src="https://cfvideoanalysis.streamlit.app/" 
+                title="BJJ Video Analysis Tool"
+                className="w-full h-full"
+                allow="camera; microphone; autoplay; clipboard-write; encrypted-media"
+              />
+            </div>
           </div>
         </main>
       </div>

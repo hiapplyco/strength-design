@@ -12,7 +12,8 @@ serve(async (req) => {
 
   try {
     // Get request data
-    const { videoUrl, userPrompt } = await req.json()
+    const requestData = await req.json()
+    const { videoUrl, userPrompt } = requestData
 
     // Validate the request
     const validationError = validateRequest(videoUrl)
@@ -58,10 +59,14 @@ serve(async (req) => {
       JSON.stringify({ analysis: analysisResult }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing request:', error)
+    // Return a detailed error response
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

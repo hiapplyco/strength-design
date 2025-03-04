@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,10 +12,11 @@ import { useToast } from '@/hooks/use-toast';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { WorkoutDisplay } from './WorkoutDisplay';
 import { Dumbbell, Zap } from 'lucide-react';
+import type { WeeklyWorkouts } from '@/types/fitness';
 
 export function GenerateWorkoutContainer() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [workoutData, setWorkoutData] = useState(null);
+  const [workoutData, setWorkoutData] = useState<WeeklyWorkouts | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [workoutLength, setWorkoutLength] = useState(30);
   const [fitnessLevel, setFitnessLevel] = useState('intermediate');
@@ -65,15 +67,14 @@ export function GenerateWorkoutContainer() {
     if (!workoutData) return;
 
     try {
+      // Store workout in the generated_workouts table instead of saved_workouts
       const { error } = await supabase
-        .from('saved_workouts')
+        .from('generated_workouts')
         .insert({
           workout_data: workoutData,
-          workout_length: workoutLength,
-          fitness_level: fitnessLevel,
-          workout_goal: workoutGoal,
-          equipment: equipment,
-          additional_info: additionalInfo
+          title: workoutGoal || 'Custom Workout',
+          tags: [fitnessLevel, workoutGoal, equipment].filter(Boolean),
+          summary: `A ${fitnessLevel} level workout focusing on ${workoutGoal || 'general fitness'} using ${equipment || 'bodyweight'} for ${workoutLength} minutes.`
         });
 
       if (error) throw error;
@@ -201,7 +202,12 @@ export function GenerateWorkoutContainer() {
             <TabsContent value="results">
               {workoutData && (
                 <div className="space-y-6">
-                  <WorkoutDisplay workout={workoutData} />
+                  <WorkoutDisplay 
+                    workouts={workoutData} 
+                    resetWorkouts={() => {}} 
+                    isExporting={false}
+                    setIsExporting={() => {}}
+                  />
                   <Button onClick={handleSaveWorkout} className="w-full">
                     Save Workout
                   </Button>

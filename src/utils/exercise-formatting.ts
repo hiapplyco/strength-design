@@ -1,3 +1,4 @@
+
 export function extractExerciseNames(text: string): string[] {
   if (!text) return [];
   
@@ -11,8 +12,10 @@ export function extractExerciseNames(text: string): string[] {
   const exercises = new Set<string>();
   
   patterns.forEach(pattern => {
-    const matches = text.matchAll(pattern);
-    for (const match of matches) {
+    // Use exec in a loop instead of matchAll for better compatibility
+    let match;
+    const regex = new RegExp(pattern);
+    while ((match = regex.exec(text)) !== null) {
       if (match[1]) {
         exercises.add(match[1].trim());
       }

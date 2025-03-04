@@ -18,14 +18,18 @@ export async function uploadVideoToGemini(videoUrl: string, apiKey: string) {
     // Create form data with the video file
     const formData = new FormData()
     
-    // Add file metadata as a JSON string
-    const metadata = JSON.stringify({
+    // Create proper metadata as a JSON Blob
+    const metadata = {
       displayName: `video_analysis_${Date.now()}.mp4`,
       mimeType: videoBlob.type || 'video/mp4'
-    })
+    }
     
-    // Create the multipart request
-    formData.append('metadata', new Blob([metadata], { type: 'application/json' }))
+    // Add the metadata as a JSON blob with the correct content type
+    formData.append('metadata', 
+      new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+    )
+    
+    // Add the video file
     formData.append('file', videoBlob, 'video.mp4')
     
     // Upload to Gemini's file upload endpoint

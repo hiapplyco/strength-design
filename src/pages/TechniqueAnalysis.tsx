@@ -2,16 +2,17 @@
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, LoaderCircle } from "lucide-react";
+import { Play, LoaderCircle, AlertCircle } from "lucide-react";
 import { VideoUpload } from "@/components/video-analysis/VideoUpload";
 import { useVideoAnalysis } from "@/components/video-analysis/hooks/useVideoAnalysis";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const TechniqueAnalysis = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { analyzing, analysis, analyzeVideo } = useVideoAnalysis();
+  const { analyzing, analysis, error, analyzeVideo } = useVideoAnalysis();
   const [publicUrl, setPublicUrl] = useState<string>('');
   const [customPrompt, setCustomPrompt] = useState<string>('');
 
@@ -87,6 +88,13 @@ const TechniqueAnalysis = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {error && (
+                  <Alert variant="destructive" className="bg-red-900/50 border-red-800">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="video">Video</Label>

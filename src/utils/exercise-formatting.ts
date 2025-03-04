@@ -1,4 +1,3 @@
-
 export function extractExerciseNames(text: string): string[] {
   if (!text) return [];
   
@@ -21,4 +20,18 @@ export function extractExerciseNames(text: string): string[] {
   });
 
   return Array.from(exercises);
+}
+
+export function extractImageUrlsFromMarkdown(markdown: string): string[] {
+  const imageUrls: string[] = [];
+  const regex = /!\[.*?\]\((.*?)\)/g;
+  
+  let match;
+  while ((match = regex.exec(markdown)) !== null) {
+    if (match[1]) {
+      imageUrls.push(match[1]);
+    }
+  }
+  
+  return imageUrls;
 }

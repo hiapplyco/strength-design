@@ -1,171 +1,216 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { LoadingIndicator } from '@/components/ui/loading-indicator';
+import { WorkoutDisplay } from './WorkoutDisplay';
+import { Dumbbell, Zap } from 'lucide-react';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Exercise } from "@/components/exercise-search/types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { PdfUploadSection } from "@/components/workout-generator/PdfUploadSection";
-
-interface GenerateWorkoutContainerProps {
-  setWorkouts: (workouts: any) => void;
-}
-
-export const GenerateWorkoutContainer = ({ setWorkouts }: GenerateWorkoutContainerProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+export function GenerateWorkoutContainer() {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [workoutData, setWorkoutData] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [workoutLength, setWorkoutLength] = useState(30);
+  const [fitnessLevel, setFitnessLevel] = useState('intermediate');
+  const [workoutGoal, setWorkoutGoal] = useState('');
+  const [equipment, setEquipment] = useState('');
+  const [additionalInfo, setAdditionalInfo] = useState('');
   const { toast } = useToast();
-  const [prescribedExercises, setPrescribedExercises] = useState<string>("");
-  const [numberOfDays, setNumberOfDays] = useState<number>(7);
-
-  const handleFileSelect = async (file: File) => {
-    try {
-      setIsLoading(true);
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await supabase.functions.invoke('process-file', {
-        body: formData,
-      });
-
-      if (response.error) {
-        throw response.error;
-      }
-
-      const { text } = response.data;
-      setPrescribedExercises(text);
-      
-      toast({
-        title: "Success",
-        description: "File processed successfully",
-      });
-    } catch (error) {
-      console.error('Error processing file:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process file. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleGenerateWorkout = async () => {
-    setIsLoading(true);
-    const startTime = performance.now();
-    
+    setIsGenerating(true);
+    setErrorMessage('');
+    setWorkoutData(null);
+
     try {
-      const { data: workoutData, error: workoutError } = await supabase.functions.invoke('generate-weekly-workouts', {
+      const { data, error } = await supabase.functions.invoke('generate-workout', {
         body: {
-          numberOfDays,
-          selectedExercises: [],
-          prescribedExercises: prescribedExercises
+          workoutLength,
+          fitnessLevel,
+          workoutGoal,
+          equipment,
+          additionalInfo
         }
       });
 
-      if (workoutError) throw workoutError;
-      if (!workoutData) throw new Error('No data received from workout generation');
+      if (error) {
+        throw error;
+      }
 
-      setWorkouts(workoutData);
+      if (!data || !data.workout) {
+        throw new Error('No workout data received');
+      }
 
-      await supabase.from('session_io').insert({
-        prescribed_exercises: prescribedExercises,
-        number_of_days: numberOfDays,
-        generated_workouts: workoutData,
-        session_duration_ms: Math.round(performance.now() - startTime),
-        success: true
+      setWorkoutData(data.workout);
+      toast({
+        title: "Workout Generated",
+        description: "Your custom workout has been created successfully!",
       });
+    } catch (error: any) {
+      console.error("Error generating workout:", error);
+      setErrorMessage(error?.message || "Failed to generate workout. Please try again.");
+      setIsGenerating(false);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSaveWorkout = async () => {
+    if (!workoutData) return;
+
+    try {
+      const { error } = await supabase
+        .from('saved_workouts')
+        .insert({
+          workout_data: workoutData,
+          workout_length: workoutLength,
+          fitness_level: fitnessLevel,
+          workout_goal: workoutGoal,
+          equipment: equipment,
+          additional_info: additionalInfo
+        });
+
+      if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Workout generated successfully!",
+        title: "Workout Saved",
+        description: "Your workout has been saved to your profile.",
       });
-
-    } catch (error) {
-      console.error('Error generating workout:', error);
-      
-      await supabase.from('session_io').insert({
-        prescribed_exercises: prescribedExercises,
-        number_of_days: numberOfDays,
-        session_duration_ms: Math.round(performance.now() - startTime),
-        success: false,
-        error_message: error.message || "Unknown error occurred"
-      });
-
+    } catch (error: any) {
+      console.error("Error:", error);
+      setErrorMessage(error?.message || "An error occurred. Please try again.");
       toast({
         title: "Error",
-        description: error.message || "Failed to generate workout. Please try again.",
+        description: "Failed to save workout. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-4">
-      <Card className="w-full max-w-2xl">
+    <div className="container mx-auto px-4 py-8">
+      <Card className="bg-black/30 backdrop-blur-sm border-gray-800">
         <CardHeader>
-          <CardTitle>Upload Your Exercise Program</CardTitle>
+          <CardTitle className="text-2xl font-bold">Workout Generator</CardTitle>
           <CardDescription>
-            Upload a PDF or image file containing your prescribed exercises or physical therapy program. 
-            We'll analyze it and create a workout plan that incorporates these exercises.
+            Create a personalized workout based on your preferences
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium">
-                How many days would you like to train?
-              </h3>
-            </div>
-            <ToggleGroup 
-              type="single" 
-              value={numberOfDays.toString()}
-              onValueChange={(value) => setNumberOfDays(parseInt(value || "7"))}
-              className="flex flex-wrap gap-2"
-            >
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((day) => (
-                <ToggleGroupItem 
-                  key={day} 
-                  value={day.toString()}
-                  className="h-14 w-14 rounded-full bg-black/20 text-white data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:bg-white/20"
+        <CardContent>
+          <Tabs defaultValue="generate" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="generate" className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                Generate Workout
+              </TabsTrigger>
+              <TabsTrigger value="results" className="flex items-center gap-2" disabled={!workoutData}>
+                <Dumbbell className="h-4 w-4" />
+                View Workout
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="generate" className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="workoutLength">Workout Length (minutes)</Label>
+                  <div className="flex items-center space-x-4">
+                    <Slider
+                      id="workoutLength"
+                      min={10}
+                      max={90}
+                      step={5}
+                      value={[workoutLength]}
+                      onValueChange={(value) => setWorkoutLength(value[0])}
+                      className="flex-1"
+                    />
+                    <span className="w-12 text-center">{workoutLength}</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="fitnessLevel">Fitness Level</Label>
+                  <select
+                    id="fitnessLevel"
+                    value={fitnessLevel}
+                    onChange={(e) => setFitnessLevel(e.target.value)}
+                    className="w-full p-2 rounded-md bg-black/50 border border-gray-700 text-white"
+                  >
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="workoutGoal">Workout Goal</Label>
+                  <Input
+                    id="workoutGoal"
+                    placeholder="e.g., Strength, Cardio, Weight Loss"
+                    value={workoutGoal}
+                    onChange={(e) => setWorkoutGoal(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="equipment">Available Equipment</Label>
+                  <Input
+                    id="equipment"
+                    placeholder="e.g., Dumbbells, Resistance Bands, None"
+                    value={equipment}
+                    onChange={(e) => setEquipment(e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="additionalInfo">Additional Information</Label>
+                  <Textarea
+                    id="additionalInfo"
+                    placeholder="Any injuries, preferences, or specific needs"
+                    value={additionalInfo}
+                    onChange={(e) => setAdditionalInfo(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                </div>
+                
+                {errorMessage && (
+                  <div className="text-red-500 text-sm p-2 bg-red-500/10 rounded-md">
+                    {errorMessage}
+                  </div>
+                )}
+                
+                <Button 
+                  onClick={handleGenerateWorkout} 
+                  disabled={isGenerating}
+                  className="w-full"
                 >
-                  {day}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          <PdfUploadSection onFileSelect={handleFileSelect} />
-          
-          {prescribedExercises && (
-            <Card className="bg-muted">
-              <CardHeader>
-                <CardTitle className="text-sm">Extracted Exercises</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">
-                    {prescribedExercises}
-                  </p>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          )}
-
-          <Button
-            onClick={handleGenerateWorkout}
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? "Generating..." : "Generate Workout"}
-          </Button>
+                  {isGenerating ? (
+                    <LoadingIndicator>Generating your workout...</LoadingIndicator>
+                  ) : (
+                    "Generate Workout"
+                  )}
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="results">
+              {workoutData && (
+                <div className="space-y-6">
+                  <WorkoutDisplay workout={workoutData} />
+                  <Button onClick={handleSaveWorkout} className="w-full">
+                    Save Workout
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
   );
-};
+}

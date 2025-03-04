@@ -46,7 +46,7 @@ serve(async (req) => {
     // Analyze the video
     const analysisResult = await analyzeVideoWithGemini(
       uploadResponse.file.uri,
-      uploadResponse.file.mimeType,
+      uploadResponse.file.mimeType || 'video/mp4',
       fullPrompt,
       apiKey
     )

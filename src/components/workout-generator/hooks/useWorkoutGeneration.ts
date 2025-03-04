@@ -99,13 +99,14 @@ export const useWorkoutGeneration = ({
         fitnessLevel,
         prescribedExercises
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating workout:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate workout. Please try again.",
+        description: error?.message || "Failed to generate workout. Please try again.",
         variant: "destructive",
       });
+      return null;
     }
   };
 

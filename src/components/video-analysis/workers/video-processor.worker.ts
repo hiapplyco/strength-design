@@ -1,4 +1,3 @@
-
 // This is a web worker file for processing video chunks
 self.onmessage = async (e) => {
   try {
@@ -14,8 +13,11 @@ self.onmessage = async (e) => {
     
     // Send back the processed blob
     self.postMessage({ processedBlob });
-  } catch (error) {
-    self.postMessage({ error: error.message });
+  } catch (error: any) {
+    console.error('Error processing video:', error);
+    self.postMessage({
+      error: error?.message || 'Failed to process video',
+    });
   }
 };
 

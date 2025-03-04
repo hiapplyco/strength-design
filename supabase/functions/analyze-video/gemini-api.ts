@@ -13,9 +13,19 @@ export async function uploadVideoToGemini(videoUrl: string, apiKey: string) {
     }
     
     const videoBlob = await response.blob()
+    console.log('Video blob fetched, size:', videoBlob.size, 'type:', videoBlob.type)
     
-    // Create form data with the video
+    // Create form data with the video file
     const formData = new FormData()
+    
+    // Add file metadata as a JSON string
+    const metadata = JSON.stringify({
+      displayName: `video_analysis_${Date.now()}.mp4`,
+      mimeType: videoBlob.type || 'video/mp4'
+    })
+    
+    // Create the multipart request
+    formData.append('metadata', new Blob([metadata], { type: 'application/json' }))
     formData.append('file', videoBlob, 'video.mp4')
     
     // Upload to Gemini's file upload endpoint
@@ -31,12 +41,21 @@ export async function uploadVideoToGemini(videoUrl: string, apiKey: string) {
     )
     
     if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json()
-      throw new Error(`Gemini upload failed: ${errorData?.error?.message || uploadResponse.statusText}`)
+      const errorText = await uploadResponse.text()
+      let errorMessage = `Gemini upload failed: HTTP ${uploadResponse.status}`
+      
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = `Gemini upload failed: ${errorData?.error?.message || errorData?.message || errorText}`
+      } catch (e) {
+        errorMessage = `Gemini upload failed: ${errorText}`
+      }
+      
+      throw new Error(errorMessage)
     }
     
     const uploadResult = await uploadResponse.json()
-    console.log('Video uploaded successfully to Gemini')
+    console.log('Video uploaded successfully to Gemini:', uploadResult)
     
     return uploadResult
   } catch (error: any) {
@@ -53,7 +72,7 @@ export async function analyzeVideoWithGemini(
   apiKey: string
 ) {
   try {
-    console.log('Analyzing video with Gemini')
+    console.log('Analyzing video with Gemini using URI:', fileUri)
     
     const analysisResponse = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
@@ -91,8 +110,17 @@ export async function analyzeVideoWithGemini(
     )
     
     if (!analysisResponse.ok) {
-      const errorData = await analysisResponse.json()
-      throw new Error(`Gemini analysis failed: ${errorData?.error?.message || analysisResponse.statusText}`)
+      const errorText = await analysisResponse.text()
+      let errorMessage = `Gemini analysis failed: HTTP ${analysisResponse.status}`
+      
+      try {
+        const errorData = JSON.parse(errorText)
+        errorMessage = `Gemini analysis failed: ${errorData?.error?.message || errorData?.message || errorText}`
+      } catch (e) {
+        errorMessage = `Gemini analysis failed: ${errorText}`
+      }
+      
+      throw new Error(errorMessage)
     }
     
     const analysisResult = await analysisResponse.json()

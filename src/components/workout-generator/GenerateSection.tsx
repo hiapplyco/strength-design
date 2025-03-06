@@ -57,7 +57,6 @@ export function GenerateSection({
                 prescribedExercises={prescribedExercises}
                 injuries={injuries}
                 weatherData={weatherData}
-                maxHeight="20vh"
               />
             </div>
           )}

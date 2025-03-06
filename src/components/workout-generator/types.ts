@@ -1,4 +1,3 @@
-
 import type { Exercise } from "../exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 
@@ -15,7 +14,6 @@ export interface ConfigurationSummaryProps {
   prescribedExercises: string;
   injuries: string;
   weatherData: WeatherData | null | string;
-  maxHeight?: string;
 }
 
 export interface GenerateSectionProps {

@@ -1,4 +1,3 @@
-
 // Add, modify or inspect types here - don't delete existing types
 export interface WorkoutDay {
   description?: string;
@@ -13,6 +12,15 @@ export interface WorkoutDay {
 export interface WorkoutMeta {
   title?: string;
   summary?: string;
+  inputs?: {
+    numberOfDays: number;
+    fitnessLevel: string;
+    weatherPrompt: string;
+    prescribedExercises: string;
+    injuries?: string;
+    prompt?: string;
+  };
+  debug?: any;
 }
 
 // Fix the WeeklyWorkouts interface to properly handle the _meta property

@@ -1,35 +1,77 @@
 
 import { LogoHeader } from "@/components/ui/logo-header";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 const TechniqueAnalysis = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [loadAttempts, setLoadAttempts] = useState(0);
+
+  // Log when component mounts
+  useEffect(() => {
+    console.log('TechniqueAnalysis component mounted');
+    
+    // Add an event listener to window to catch any errors
+    const handleWindowError = (event: ErrorEvent) => {
+      console.error('Window error caught:', event);
+      if (event.message.includes('iframe') || event.message.includes('streamlit')) {
+        toast.error("Error loading analysis tool: " + event.message);
+      }
+    };
+    
+    window.addEventListener('error', handleWindowError);
+    return () => window.removeEventListener('error', handleWindowError);
+  }, []);
 
   // Handle iframe loading state and errors
   const handleIframeLoad = () => {
+    console.log('Iframe loaded successfully');
     setIsLoading(false);
+    // Reset load attempts on successful load
+    setLoadAttempts(0);
   };
 
-  const handleIframeError = () => {
+  const handleIframeError = (e: React.SyntheticEvent<HTMLIFrameElement, Event>) => {
+    console.error('Iframe failed to load:', e);
     setLoadError(true);
     setIsLoading(false);
+    setLoadAttempts(prev => prev + 1);
     toast.error("Failed to load the video analysis tool. Please try again later.");
   };
 
   // Attempt to reload the iframe
   const handleRetry = () => {
+    console.log('Attempting to reload the iframe');
     setIsLoading(true);
     setLoadError(false);
     
-    // Force iframe refresh by changing the key
-    const iframe = document.getElementById('analysis-iframe') as HTMLIFrameElement;
-    if (iframe) {
-      iframe.src = `https://cfvideoanalysis.streamlit.app/?t=${Date.now()}`;
+    try {
+      // Force iframe refresh with cache-busting parameter
+      if (iframeRef.current) {
+        const timestamp = Date.now();
+        console.log(`Reloading iframe with timestamp: ${timestamp}`);
+        iframeRef.current.src = `https://cfvideoanalysis.streamlit.app/?t=${timestamp}`;
+      }
+    } catch (error) {
+      console.error('Error during iframe reload:', error);
+      setLoadError(true);
+      setIsLoading(false);
+      toast.error("Failed to reload. Please try again later.");
     }
   };
+
+  // Try different approach after multiple failures
+  useEffect(() => {
+    if (loadAttempts >= 3) {
+      console.log('Multiple load attempts failed, trying alternative approach');
+      // Could implement alternative loading strategy here
+      toast.info("Having trouble loading the analysis tool. We're trying an alternative approach.");
+    }
+  }, [loadAttempts]);
 
   return (
     <div className="min-h-screen w-full">
@@ -57,10 +99,9 @@ const TechniqueAnalysis = () => {
             <div className="max-w-5xl mx-auto rounded-lg overflow-hidden border border-gray-800 shadow-xl bg-black/40">
               {isLoading && (
                 <div className="flex items-center justify-center h-[600px]">
-                  <div className="flex flex-col items-center">
-                    <div className="h-10 w-10 border-4 border-t-blue-500 border-gray-700 rounded-full animate-spin mb-4"></div>
-                    <p className="text-white/70">Loading analysis tool...</p>
-                  </div>
+                  <LoadingIndicator>
+                    Loading analysis tool...
+                  </LoadingIndicator>
                 </div>
               )}
 
@@ -70,7 +111,9 @@ const TechniqueAnalysis = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-2">Failed to load analysis tool</h3>
-                  <p className="text-white/70 mb-6">The external analysis tool is currently unavailable. This may be due to high traffic or temporary maintenance.</p>
+                  <p className="text-white/70 mb-6">
+                    The external analysis tool is currently unavailable. This may be due to high traffic or temporary maintenance.
+                  </p>
                   <Button onClick={handleRetry} variant="default">
                     Try Again
                   </Button>
@@ -78,6 +121,7 @@ const TechniqueAnalysis = () => {
               )}
 
               <iframe 
+                ref={iframeRef}
                 id="analysis-iframe"
                 src="https://cfvideoanalysis.streamlit.app/"
                 title="BJJ Video Analysis Tool"
@@ -85,6 +129,7 @@ const TechniqueAnalysis = () => {
                 onLoad={handleIframeLoad}
                 onError={handleIframeError}
                 allow="camera; microphone; autoplay; clipboard-write; encrypted-media"
+                referrerPolicy="origin"
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
               />
             </div>
@@ -97,7 +142,10 @@ const TechniqueAnalysis = () => {
                 <li>Click "Analyze" and wait for the AI to evaluate your movement</li>
                 <li>Review the detailed feedback and implement the suggestions</li>
               </ol>
-              <p className="mt-4 text-sm text-white/60">Note: All videos are processed securely and not stored permanently.</p>
+              <p className="mt-4 text-sm text-white/60">
+                Note: All videos are processed securely and not stored permanently. 
+                If you encounter loading issues, please try refreshing the page or using another browser.
+              </p>
             </div>
           </div>
         </main>

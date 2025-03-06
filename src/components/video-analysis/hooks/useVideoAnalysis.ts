@@ -39,13 +39,17 @@ export const useVideoAnalysis = () => {
       
       console.log('Submitting video for analysis, size:', videoBlob.size, 'type:', videoBlob.type);
       
+      // Use environment variables or constants for the URL and API key
+      const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://ulnsvkrrdcmfiguibkpx.supabase.co';
+      const functionUrl = `${supabaseUrl}/functions/v1/bjj-analyzer`;
+
       // Call the bjj-analyzer function directly
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/bjj-analyzer`, {
+      const response = await fetch(functionUrl, {
         method: 'POST',
         body: formData,
         headers: {
           // No Content-Type header - browser will set it with boundary for multipart/form-data
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'Authorization': `Bearer ${process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsbnN2a3JyZGNtZmlndWlia3B4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxMTk4NzcsImV4cCI6MjA1MjY5NTg3N30.L_ysW1DZXZPXwJT5pn_IepuZwP9zILravQTqv38MccI'}`
         }
       });
       

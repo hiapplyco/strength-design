@@ -45,8 +45,6 @@ serve(async (req) => {
       - Include a fitness-related word
       - Don't include emojis
       
-      The title should be motivating and make someone excited to start the workout program!
-      
       Output the title only, with no quotes or explanation.
     `;
 

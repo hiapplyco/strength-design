@@ -21,35 +21,66 @@ serve(async (req) => {
   try {
     console.log('Starting workout generation...');
     const params = await req.json();
-    console.log('Received params:', params);
+    console.log('Received params:', JSON.stringify(params, null, 2));
 
-    // Construct a more detailed prompt
-    const fullPrompt = `Generate a comprehensive ${params.numberOfDays}-day workout plan with the following specifications:
+    // Validate and process all input parameters
+    const processedParams = {
+      numberOfDays: Number(params.numberOfDays) || 7,
+      fitnessLevel: String(params.fitnessLevel || 'beginner'),
+      weatherPrompt: String(params.weatherPrompt || ''),
+      prescribedExercises: String(params.prescribedExercises || ''),
+      injuries: String(params.injuries || ''),
+      prompt: String(params.prompt || '')
+    };
 
-FITNESS PROFILE:
-- Level: ${params.fitnessLevel}
-- Weather Considerations: ${params.weatherPrompt || 'None specified'}
-- Prescribed Exercises/Focus: ${params.prescribedExercises}
-
-REQUIREMENTS:
-For each day (day1 through day${params.numberOfDays}), provide:
-1. A description of the day's focus
-2. A warmup routine
-3. The main workout with specific exercises
-4. A strength component
-5. Additional notes if relevant
-
-Format the response as valid JSON following this exact structure:
-{
-  "day1": {
-    "description": "Focus of the day",
-    "warmup": "Detailed warmup",
-    "workout": "Main workout details",
-    "strength": "Strength component",
-    "notes": "Additional notes"
-  },
-  // ... repeat for each day
-}`;
+    // Build a detailed contextual prompt including ALL input parameters
+    let fullPrompt = `Generate a comprehensive ${processedParams.numberOfDays}-day workout plan with the following specifications:\n\n`;
+    
+    // Add fitness profile section
+    fullPrompt += `FITNESS PROFILE:\n`;
+    fullPrompt += `- Level: ${processedParams.fitnessLevel}\n`;
+    
+    // Add weather information if available
+    if (processedParams.weatherPrompt) {
+      fullPrompt += `- Weather Considerations: ${processedParams.weatherPrompt}\n`;
+    }
+    
+    // Add prescribed exercises if available
+    if (processedParams.prescribedExercises) {
+      fullPrompt += `- Prescribed Exercises/Focus: ${processedParams.prescribedExercises}\n`;
+    }
+    
+    // Add injuries/limitations if available
+    if (processedParams.injuries) {
+      fullPrompt += `- Injury Considerations: ${processedParams.injuries}\n`;
+    }
+    
+    // Add additional prompt/requirements if available
+    if (processedParams.prompt) {
+      fullPrompt += `- Additional Requirements: ${processedParams.prompt}\n`;
+    }
+    
+    // Add detailed structure requirements
+    fullPrompt += `\nREQUIREMENTS:\n`;
+    fullPrompt += `For each day (day1 through day${processedParams.numberOfDays}), provide:\n`;
+    fullPrompt += `1. A description of the day's focus\n`;
+    fullPrompt += `2. A warmup routine\n`;
+    fullPrompt += `3. The main workout with specific exercises\n`;
+    fullPrompt += `4. A strength component\n`;
+    fullPrompt += `5. Additional notes if relevant\n\n`;
+    
+    // Add format requirements
+    fullPrompt += `Format the response as valid JSON following this exact structure:\n`;
+    fullPrompt += `{\n`;
+    fullPrompt += `  "day1": {\n`;
+    fullPrompt += `    "description": "Focus of the day",\n`;
+    fullPrompt += `    "warmup": "Detailed warmup",\n`;
+    fullPrompt += `    "workout": "Main workout details",\n`;
+    fullPrompt += `    "strength": "Strength component",\n`;
+    fullPrompt += `    "notes": "Additional notes"\n`;
+    fullPrompt += `  },\n`;
+    fullPrompt += `  // ... repeat for each day\n`;
+    fullPrompt += `}\n`;
 
     console.log('Sending prompt to Gemini:', fullPrompt);
 
@@ -64,7 +95,7 @@ Format the response as valid JSON following this exact structure:
     console.log('Received response from Gemini');
     const response = result.response;
     const responseText = response.text();
-    console.log('Raw response:', responseText);
+    console.log('Raw response:', responseText.substring(0, 200) + '...'); // Log a sample of the response
 
     // Try to find and parse JSON from the response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
@@ -75,7 +106,7 @@ Format the response as valid JSON following this exact structure:
     const workoutData = JSON.parse(jsonMatch[0]);
     
     // Validate the structure
-    const expectedDays = Array.from({ length: params.numberOfDays }, (_, i) => `day${i + 1}`);
+    const expectedDays = Array.from({ length: processedParams.numberOfDays }, (_, i) => `day${i + 1}`);
     const missingDays = expectedDays.filter(day => !workoutData[day]);
     
     if (missingDays.length > 0) {
@@ -93,9 +124,26 @@ Format the response as valid JSON following this exact structure:
     });
 
     console.log('Successfully validated workout data');
+    
+    // Add debug information to the response for transparency
+    const responseData = {
+      ...workoutData,
+      _debug: {
+        inputsUsed: {
+          numberOfDays: processedParams.numberOfDays,
+          fitnessLevel: processedParams.fitnessLevel,
+          weatherPrompt: processedParams.weatherPrompt ? 'provided' : 'none',
+          prescribedExercises: processedParams.prescribedExercises ? 'provided' : 'none',
+          injuries: processedParams.injuries ? 'provided' : 'none',
+          additionalPrompt: processedParams.prompt ? 'provided' : 'none'
+        },
+        promptLength: fullPrompt.length,
+        responseLength: responseText.length
+      }
+    };
 
     return new Response(
-      JSON.stringify(workoutData),
+      JSON.stringify(responseData),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
@@ -118,4 +166,3 @@ Format the response as valid JSON following this exact structure:
     );
   }
 });
-

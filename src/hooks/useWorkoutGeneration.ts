@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,15 +11,18 @@ interface GenerateWorkoutParams {
   fitnessLevel: string;
   prescribedExercises: string;
   numberOfDays: number;
+  injuries?: string;
 }
 
 export const useWorkoutGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const { toast } = useToast();
 
   const generateWorkout = async (params: GenerateWorkoutParams): Promise<WeeklyWorkouts | null> => {
     const startTime = performance.now();
     setIsGenerating(true);
+    setDebugInfo(null);
 
     try {
       // Get current session to ensure user is authenticated
@@ -33,16 +37,18 @@ export const useWorkoutGeneration = () => {
         weatherPrompt: String(params.weatherPrompt || ""),
         fitnessLevel: String(params.fitnessLevel || "beginner"),
         prescribedExercises: String(params.prescribedExercises || ""),
+        injuries: String(params.injuries || ""),
         numberOfDays: Number(params.numberOfDays) || 7
       };
 
-      console.log('Weather prompt being sent to edge function:', sanitizedParams.weatherPrompt);
+      console.log('Inputs being sent to edge function:', sanitizedParams);
 
       // First log the session input
       const { error: sessionError } = await supabase.from('session_io').insert({
         weather_prompt: sanitizedParams.weatherPrompt,
         fitness_level: sanitizedParams.fitnessLevel,
         prescribed_exercises: sanitizedParams.prescribedExercises,
+        injuries: sanitizedParams.injuries,
         number_of_days: sanitizedParams.numberOfDays,
         session_duration_ms: 0,
         success: false
@@ -88,6 +94,13 @@ export const useWorkoutGeneration = () => {
         return null;
       }
 
+      // Extract any debug information from the response
+      if (data._debug) {
+        setDebugInfo(data._debug);
+        console.log('Debug info from workout generation:', data._debug);
+        delete data._debug; // Remove debug info from the workout data
+      }
+
       // Validate the response data
       if (typeof data !== 'object') {
         throw new Error('Invalid response format from workout generation');
@@ -131,7 +144,9 @@ export const useWorkoutGeneration = () => {
         ...data,
         _meta: {
           title: workoutTitle,
-          summary: workoutSummary
+          summary: workoutSummary,
+          inputs: sanitizedParams,  // Include all inputs used
+          debug: debugInfo  // Include debug info
         }
       };
 
@@ -172,6 +187,7 @@ export const useWorkoutGeneration = () => {
 
   return {
     isGenerating,
-    generateWorkout
+    generateWorkout,
+    debugInfo
   };
 };

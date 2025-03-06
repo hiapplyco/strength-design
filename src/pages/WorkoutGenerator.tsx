@@ -27,7 +27,7 @@ const WorkoutGenerator = () => {
   const [showContent, setShowContent] = useState(false);
   
   // Hooks
-  const { isGenerating, generateWorkout } = useWorkoutGeneration();
+  const { isGenerating, generateWorkout, debugInfo } = useWorkoutGeneration();
   const navigate = useNavigate();
   const { session } = useAuth();
 
@@ -72,8 +72,11 @@ const WorkoutGenerator = () => {
     selectedExercises: any[];
     fitnessLevel: string;
     prescribedExercises: string;
+    injuries?: string;
   }) => {
     try {
+      console.log("Sending all inputs to generate workout:", params);
+      
       const data = await generateWorkout({
         ...params,
         numberOfDays
@@ -92,6 +95,11 @@ const WorkoutGenerator = () => {
         
         // Navigate to results page with workout data
         navigate("/workout-results", { state: { workouts: data } });
+        
+        // Log the input data that was sent to generate the workout
+        if (data._meta?.inputs) {
+          console.log("Inputs used for workout generation:", data._meta.inputs);
+        }
       }
     } catch (error) {
       console.error("Error generating workout:", error);
@@ -190,6 +198,19 @@ const WorkoutGenerator = () => {
                     setNumberOfDays={setNumberOfDays}
                   />
                 </motion.div>
+              
+                {/* Optional debug info display for development/testing */}
+                {debugInfo && (
+                  <motion.div 
+                    variants={itemVariants}
+                    className="container mx-auto mt-4 p-4 bg-black/50 border border-primary/20 rounded-md"
+                  >
+                    <h3 className="text-white/80 text-sm font-mono">Workout Generation Debug Info:</h3>
+                    <pre className="text-white/60 text-xs mt-2 bg-black/50 p-3 rounded overflow-auto max-h-[200px]">
+                      {JSON.stringify(debugInfo, null, 2)}
+                    </pre>
+                  </motion.div>
+                )}
               </motion.div>
             </div>
           </motion.div>

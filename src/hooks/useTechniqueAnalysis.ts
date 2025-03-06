@@ -12,11 +12,6 @@ export const useTechniqueAnalysis = () => {
   const [analysis, setAnalysis] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Create Supabase client
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
-  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
   // Reset form
   const handleReset = () => {
     setUploadedVideo(null);

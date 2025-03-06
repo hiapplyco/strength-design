@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { FitnessLevelSection } from "./FitnessLevelSection";
 import { WeatherSection } from "./WeatherSection";
@@ -22,6 +21,7 @@ interface InputContainerProps {
     selectedExercises: Exercise[];
     fitnessLevel: string;
     prescribedExercises: string;
+    injuries?: string;
   }) => Promise<void>;
   isGenerating: boolean;
   setIsGenerating: (value: boolean) => void;
@@ -122,6 +122,8 @@ export function InputContainer({
     console.log('- Weather prompt:', weatherPrompt);
     console.log('- Fitness level:', fitnessLevel);
     console.log('- Number of days:', numberOfDays);
+    console.log('- Prescribed exercises:', prescribedExercises ? 'provided' : 'none');
+    console.log('- Injuries:', injuries ? 'provided' : 'none');
     
     handleGenerateWorkout({
       prompt: generatePrompt,
@@ -129,6 +131,7 @@ export function InputContainer({
       selectedExercises,
       fitnessLevel,
       prescribedExercises,
+      injuries
     }).finally(() => {
       setIsGenerating(false);
     });
@@ -138,6 +141,7 @@ export function InputContainer({
     selectedExercises,
     fitnessLevel,
     prescribedExercises,
+    injuries,
     handleGenerateWorkout,
     setIsGenerating,
     numberOfDays,

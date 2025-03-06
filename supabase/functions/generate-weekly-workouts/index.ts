@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.1.3";
+import { createWorkoutGenerationPrompt, getGeminiConfig } from "./prompts.ts";
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(Deno.env.get('GEMINI_API_KEY') || '');
@@ -33,55 +34,15 @@ serve(async (req) => {
       prompt: String(params.prompt || '')
     };
 
-    // Build a detailed contextual prompt including ALL input parameters
-    let fullPrompt = `Generate a comprehensive ${processedParams.numberOfDays}-day workout plan with the following specifications:\n\n`;
+    // Create the workout generation prompt using all parameters
+    const fullPrompt = createWorkoutGenerationPrompt({
+      numberOfDays: processedParams.numberOfDays,
+      fitnessLevel: processedParams.fitnessLevel,
+      weatherPrompt: processedParams.weatherPrompt,
+      prescribedExercises: processedParams.prescribedExercises,
+      injuries: processedParams.injuries
+    });
     
-    // Add fitness profile section
-    fullPrompt += `FITNESS PROFILE:\n`;
-    fullPrompt += `- Level: ${processedParams.fitnessLevel}\n`;
-    
-    // Add weather information if available
-    if (processedParams.weatherPrompt) {
-      fullPrompt += `- Weather Considerations: ${processedParams.weatherPrompt}\n`;
-    }
-    
-    // Add prescribed exercises if available
-    if (processedParams.prescribedExercises) {
-      fullPrompt += `- Prescribed Exercises/Focus: ${processedParams.prescribedExercises}\n`;
-    }
-    
-    // Add injuries/limitations if available
-    if (processedParams.injuries) {
-      fullPrompt += `- Injury Considerations: ${processedParams.injuries}\n`;
-    }
-    
-    // Add additional prompt/requirements if available
-    if (processedParams.prompt) {
-      fullPrompt += `- Additional Requirements: ${processedParams.prompt}\n`;
-    }
-    
-    // Add detailed structure requirements
-    fullPrompt += `\nREQUIREMENTS:\n`;
-    fullPrompt += `For each day (day1 through day${processedParams.numberOfDays}), provide:\n`;
-    fullPrompt += `1. A description of the day's focus\n`;
-    fullPrompt += `2. A warmup routine\n`;
-    fullPrompt += `3. The main workout with specific exercises\n`;
-    fullPrompt += `4. A strength component\n`;
-    fullPrompt += `5. Additional notes if relevant\n\n`;
-    
-    // Add format requirements
-    fullPrompt += `Format the response as valid JSON following this exact structure:\n`;
-    fullPrompt += `{\n`;
-    fullPrompt += `  "day1": {\n`;
-    fullPrompt += `    "description": "Focus of the day",\n`;
-    fullPrompt += `    "warmup": "Detailed warmup",\n`;
-    fullPrompt += `    "workout": "Main workout details",\n`;
-    fullPrompt += `    "strength": "Strength component",\n`;
-    fullPrompt += `    "notes": "Additional notes"\n`;
-    fullPrompt += `  },\n`;
-    fullPrompt += `  // ... repeat for each day\n`;
-    fullPrompt += `}\n`;
-
     console.log('Sending prompt to Gemini:', fullPrompt);
 
     const result = await model.generateContent({
@@ -138,7 +99,8 @@ serve(async (req) => {
           additionalPrompt: processedParams.prompt ? 'provided' : 'none'
         },
         promptLength: fullPrompt.length,
-        responseLength: responseText.length
+        responseLength: responseText.length,
+        fullPromptUsed: fullPrompt  // Include the full prompt in debug data
       }
     };
 

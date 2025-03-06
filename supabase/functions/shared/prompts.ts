@@ -24,7 +24,7 @@ export const createWorkoutGenerationPrompt = ({
     : '';
 
   const prescription = prescribedExercises
-    ? `REQUIRED MODIFICATIONS: Incorporate ${prescribedExercises}`
+    ? `REQUIRED MODIFICATIONS: Incorporate the following prescribed exercises/workouts:\n${prescribedExercises}`
     : '';
 
   const injuryConsideration = injuries

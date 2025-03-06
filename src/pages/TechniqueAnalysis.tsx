@@ -1,4 +1,3 @@
-
 import { LogoHeader } from "@/components/ui/logo-header";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -100,9 +99,9 @@ const TechniqueAnalysis = () => {
       } else {
         throw new Error("No analysis data returned");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during analysis:", error);
-      toast.error(error.message || "Failed to analyze video. Please try again later.");
+      toast.error(error?.message || "Failed to analyze video. Please try again later.");
     } finally {
       setIsLoading(false);
     }

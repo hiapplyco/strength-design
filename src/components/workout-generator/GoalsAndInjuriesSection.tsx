@@ -36,7 +36,7 @@ export function GoalsAndInjuriesSection({
           value={prescribedExercises}
           onChange={(e) => setPrescribedExercises(e.target.value)}
           placeholder="List any specific exercises you need to include"
-          rows={4}
+          className="min-h-[100px]"
           borderStyle="multicolor"
         />
       </div>
@@ -51,7 +51,7 @@ export function GoalsAndInjuriesSection({
           value={injuries}
           onChange={(e) => setInjuries(e.target.value)}
           placeholder="List any injuries or health conditions"
-          rows={4}
+          className="min-h-[100px]"
           borderStyle="multicolor"
         />
       </div>

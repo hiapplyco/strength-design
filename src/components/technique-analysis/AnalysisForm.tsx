@@ -11,8 +11,10 @@ interface AnalysisFormProps {
   analysis: string | null;
   setAnalysis: (analysis: string | null) => void;
   isLoading: boolean;
+  isSaving: boolean;
   handleSubmitForAnalysis: () => void;
   handleReset: () => void;
+  saveAnalysis: () => void;
 }
 
 export const AnalysisForm = ({
@@ -23,8 +25,10 @@ export const AnalysisForm = ({
   analysis,
   setAnalysis,
   isLoading,
+  isSaving,
   handleSubmitForAnalysis,
-  handleReset
+  handleReset,
+  saveAnalysis
 }: AnalysisFormProps) => {
   return (
     <div className="space-y-6">
@@ -42,9 +46,12 @@ export const AnalysisForm = ({
       <ActionButtons 
         handleSubmitForAnalysis={handleSubmitForAnalysis}
         handleReset={handleReset}
+        saveAnalysis={saveAnalysis}
         isLoading={isLoading}
+        isSaving={isSaving}
         uploadedVideo={uploadedVideo}
         question={question}
+        analysis={analysis}
       />
     </div>
   );

@@ -4,10 +4,15 @@ import { AnalysisResults } from "./AnalysisResults";
 import { AnalysisTips } from "./AnalysisTips";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { useTechniqueAnalysis } from "@/hooks/useTechniqueAnalysis";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { UserIcon } from "lucide-react";
 
 export const TechniqueAnalysisContent = () => {
   const {
     isLoading,
+    isSaving,
     uploadedVideo,
     setUploadedVideo,
     question,
@@ -15,8 +20,11 @@ export const TechniqueAnalysisContent = () => {
     analysis,
     setAnalysis,
     handleReset,
-    handleSubmitForAnalysis
+    handleSubmitForAnalysis,
+    saveAnalysis
   } = useTechniqueAnalysis();
+
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen w-full">
@@ -39,6 +47,18 @@ export const TechniqueAnalysisContent = () => {
               <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
                 Upload a video of your jiu-jitsu technique for expert AI analysis and feedback
               </p>
+              
+              {!user && analysis && (
+                <div className="mt-4 p-3 bg-black/30 border border-gray-700 rounded-lg inline-block">
+                  <p className="text-white/90 mb-2">Sign in to save your analysis results</p>
+                  <Button asChild variant="secondary" size="sm">
+                    <Link to="/auth">
+                      <UserIcon className="w-4 h-4 mr-2" />
+                      Sign In
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </div>
             
             <div className="max-w-4xl mx-auto rounded-lg overflow-hidden border border-gray-800 shadow-xl bg-black/40 p-6">
@@ -51,8 +71,10 @@ export const TechniqueAnalysisContent = () => {
                   analysis={analysis}
                   setAnalysis={setAnalysis}
                   isLoading={isLoading}
+                  isSaving={isSaving}
                   handleSubmitForAnalysis={handleSubmitForAnalysis}
                   handleReset={handleReset}
+                  saveAnalysis={saveAnalysis}
                 />
                 
                 <AnalysisResults 

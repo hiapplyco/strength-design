@@ -1,13 +1,16 @@
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const useTechniqueAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
   const [question, setQuestion] = useState("");
   const [analysis, setAnalysis] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // Create Supabase client
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -72,8 +75,44 @@ export const useTechniqueAnalysis = () => {
     }
   };
 
+  // Save analysis to user account
+  const saveAnalysis = async () => {
+    if (!user) {
+      toast.error("You must be logged in to save analyses");
+      return;
+    }
+
+    if (!analysis || !uploadedVideo || !question) {
+      toast.error("Cannot save: Missing analysis data");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const { error } = await supabase.from("technique_analyses").insert({
+        user_id: user.id,
+        question,
+        analysis,
+        video_name: uploadedVideo.name
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Analysis saved to your account!");
+    } catch (error: any) {
+      console.error("Error saving analysis:", error);
+      toast.error(error?.message || "Failed to save analysis");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return {
     isLoading,
+    isSaving,
     uploadedVideo,
     setUploadedVideo,
     question,
@@ -81,6 +120,7 @@ export const useTechniqueAnalysis = () => {
     analysis,
     setAnalysis,
     handleReset,
-    handleSubmitForAnalysis
+    handleSubmitForAnalysis,
+    saveAnalysis
   };
 };

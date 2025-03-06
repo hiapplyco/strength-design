@@ -1,7 +1,9 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Check, Info, CloudSun, Calendar } from "lucide-react";
+import { ScrollArea } from "../ui/scroll-area";
 import { getWeatherDescription } from "./weather/weather-utils";
 import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
 import type { WeatherData } from "@/types/weather";

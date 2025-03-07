@@ -26,26 +26,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Track component mount state
-    let mounted = true;
-    
     // Get initial session
     const initializeAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
         
-        if (mounted) {
-          if (data.session) {
-            setSession(data.session);
-          }
-          // Set loading to false even if no session
-          setIsLoading(false);
+        if (data.session) {
+          setSession(data.session);
         }
+        // Set loading to false even if no session
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching auth session:", error);
-        if (mounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
     
@@ -53,28 +46,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      if (mounted) {
-        console.log("Auth state change", event);
-        setSession(newSession);
-        
-        // Only show toast for explicit auth events
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Welcome back!",
-            description: "You are now signed in"
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Signed out",
-            description: "Come back soon!"
-          });
-        }
+      console.log("Auth state change", event);
+      setSession(newSession);
+      
+      // Only show toast for explicit auth events
+      if (event === 'SIGNED_IN') {
+        toast({
+          title: "Welcome back!",
+          description: "You are now signed in"
+        });
+      } else if (event === 'SIGNED_OUT') {
+        toast({
+          title: "Signed out",
+          description: "Come back soon!"
+        });
       }
     });
 
-    // Clean up subscription on unmount
+    // Clean up subscription without checking session again
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
   }, [toast]);

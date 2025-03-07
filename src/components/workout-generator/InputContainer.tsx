@@ -1,27 +1,19 @@
-import { useState, useCallback } from "react";
-import { FitnessLevelSection } from "./FitnessLevelSection";
-import { WeatherSection } from "./WeatherSection";
-import { InjuriesSection } from "./InjuriesSection";
+
+import { useCallback } from "react";
+import { PresetsSection } from "./input-sections/PresetsSection";
 import { DaysSelectionCard } from "./DaysSelectionCard";
-import { ConfigurationSummary } from "./ConfigurationSummary";
-import { GenerateSection } from "./GenerateSection";
+import { FitnessLevelSection } from "./FitnessLevelSection";
 import { PrescribedExercisesSection } from "./PrescribedExercisesSection";
-import { WorkoutPresets } from "./WorkoutPresets";
-import type { Exercise } from "../exercise-search/types";
-import type { WeatherData } from "@/types/weather";
+import { InjuriesSection } from "./InjuriesSection";
+import { WeatherSection } from "./WeatherSection";
+import { GenerateSection } from "./GenerateSection";
 import { useGeminiExerciseExtraction } from "./hooks/useGeminiExerciseExtraction";
+import { useWorkoutInputState } from "./hooks/useWorkoutInputState";
 
 interface InputContainerProps {
   generatePrompt: string;
   setGeneratePrompt: (value: string) => void;
-  handleGenerateWorkout: (params: {
-    prompt: string;
-    weatherPrompt: string;
-    selectedExercises: Exercise[];
-    fitnessLevel: string;
-    prescribedExercises: string;
-    injuries?: string;
-  }) => Promise<void>;
+  handleGenerateWorkout: (params: any) => Promise<void>;
   isGenerating: boolean;
   setIsGenerating: (value: boolean) => void;
   showGenerateInput: boolean;
@@ -41,16 +33,26 @@ export function InputContainer({
   numberOfDays,
   setNumberOfDays,
 }: InputContainerProps) {
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
-  const [fitnessLevel, setFitnessLevel] = useState("");
-  const [prescribedExercises, setPrescribedExercises] = useState("");
-  const [injuries, setInjuries] = useState("");
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [weatherPrompt, setWeatherPrompt] = useState("");
-  const [isAnalyzingPrescribed, setIsAnalyzingPrescribed] = useState(false);
-  const [isAnalyzingInjuries, setIsAnalyzingInjuries] = useState(false);
+  const {
+    selectedExercises,
+    setSelectedExercises,
+    fitnessLevel,
+    setFitnessLevel,
+    prescribedExercises,
+    setPrescribedExercises,
+    injuries,
+    setInjuries,
+    weatherData,
+    weatherPrompt,
+    isAnalyzingPrescribed,
+    setIsAnalyzingPrescribed,
+    isAnalyzingInjuries,
+    setIsAnalyzingInjuries,
+    handleWeatherUpdate,
+    clearInputs
+  } = useWorkoutInputState();
 
-  const { parseDocument, isExtracting, isSuccess } = useGeminiExerciseExtraction();
+  const { parseDocument } = useGeminiExerciseExtraction();
 
   const handleSelectPreset = useCallback(
     (preset: {
@@ -64,7 +66,7 @@ export function InputContainer({
       setNumberOfDays(preset.numberOfDays);
       setGeneratePrompt(preset.title);
     },
-    [setNumberOfDays, setGeneratePrompt]
+    [setNumberOfDays, setGeneratePrompt, setPrescribedExercises, setFitnessLevel]
   );
   
   const handlePrescribedFileSelect = async (file: File) => {
@@ -107,13 +109,6 @@ export function InputContainer({
     }
   };
 
-  const handleWeatherUpdate = (newWeatherData: WeatherData | null, newWeatherPrompt: string) => {
-    console.log('Weather data updated:', newWeatherData);
-    console.log('Weather prompt:', newWeatherPrompt);
-    setWeatherData(newWeatherData);
-    setWeatherPrompt(newWeatherPrompt);
-  };
-
   const handleSubmit = useCallback(() => {
     setIsGenerating(true);
     
@@ -149,7 +144,7 @@ export function InputContainer({
   return (
     <div className="w-full mx-auto max-w-full px-0 sm:px-2">
       <div className="space-y-5 sm:space-y-6 pb-6 px-2">
-        <WorkoutPresets 
+        <PresetsSection 
           onSelectPreset={handleSelectPreset}
           onExercisesExtracted={(exercises) => setSelectedExercises(exercises)}
           currentPrescribedExercises={prescribedExercises}
@@ -189,14 +184,7 @@ export function InputContainer({
         <GenerateSection
           isGenerating={isGenerating}
           onGenerate={handleSubmit}
-          onClear={() => {
-            setSelectedExercises([]);
-            setFitnessLevel("");
-            setPrescribedExercises("");
-            setInjuries("");
-            setWeatherData(null);
-            setWeatherPrompt("");
-          }}
+          onClear={clearInputs}
           isValid={true}
           numberOfDays={numberOfDays}
           setNumberOfDays={setNumberOfDays}

@@ -13,6 +13,7 @@ interface GenerateWorkoutInputProps {
     selectedExercises: Exercise[];
     fitnessLevel: string;
     prescribedExercises: string;
+    injuries?: string;
   }) => Promise<void>;
   isGenerating: boolean;
   setIsGenerating: (value: boolean) => void;

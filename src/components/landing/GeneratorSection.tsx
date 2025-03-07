@@ -1,7 +1,6 @@
-
 import { motion, useScroll } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
-import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
+import { GenerateWorkoutInput } from "../GenerateWorkoutInput";
 import { InputDirections } from "./InputDirections";
 import { useEffect, useState } from "react";
 

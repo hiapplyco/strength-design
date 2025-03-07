@@ -25,7 +25,7 @@ export const ChatMessage = ({ message, response, file_path, created_at }: ChatMe
           <span className="text-xs text-muted-foreground">{timestamp}</span>
           <div className={cn(
             "max-w-[80%] rounded-2xl px-4 py-2",
-            "bg-primary text-primary-foreground",
+            "bg-white text-black", // Changed from bg-primary text-primary-foreground to white background with black text
             "shadow-sm"
           )}>
             {file_path ? (

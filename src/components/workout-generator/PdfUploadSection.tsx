@@ -31,16 +31,19 @@ export function PdfUploadSection({
   return (
     <div 
       className={cn(
-        "relative flex items-center justify-center w-full min-h-[100px] cursor-pointer rounded-lg", 
-        "bg-black/30 border border-primary/30",
-        "hover:bg-black/40 transition-colors duration-200",
+        "relative flex items-center justify-center w-full min-h-[60px] cursor-pointer rounded-lg", 
+        "bg-black/20 border border-primary/30",
+        "hover:bg-black/30 transition-colors duration-200",
         className
       )}
       onClick={handleClick}
     >
-      <div className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-r from-[#4CAF50]/20 via-[#9C27B0]/20 to-[#FF1493]/20 opacity-60" />
+      <div className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-r from-[#4CAF50]/10 via-[#9C27B0]/10 to-[#FF1493]/10 opacity-60" />
       
-      <Upload className="h-6 w-6 text-white/70" />
+      <div className="flex items-center gap-2 text-white/70 text-xs">
+        <Upload className="h-4 w-4" />
+        <span>Upload</span>
+      </div>
       
       <input
         ref={fileInputRef}

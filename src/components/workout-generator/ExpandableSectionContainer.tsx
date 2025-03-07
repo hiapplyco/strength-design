@@ -82,8 +82,8 @@ export function ExpandableSectionContainer({
                 {renderCustomContent()}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2 relative z-10">
-                <div className="md:col-span-3">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2 relative z-10">
+                <div className="md:col-span-4">
                   <Textarea
                     placeholder={textAreaPlaceholder}
                     value={content}
@@ -92,7 +92,7 @@ export function ExpandableSectionContainer({
                     borderStyle="multicolor"
                   />
                 </div>
-                <div className="md:col-span-1 min-w-[200px]">
+                <div className="md:col-span-1">
                   <FileUploadSection
                     title={fileUploadTitle}
                     isAnalyzing={isAnalyzing}

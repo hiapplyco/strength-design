@@ -25,7 +25,7 @@ export function FileUploadSection({
   className = ""
 }: FileUploadSectionProps) {
   return (
-    <Card className={cn("", className)}>
+    <Card className={cn("bg-transparent border-0 shadow-none", className)}>
       <CardHeader className="p-0 pb-1">
         <div className="flex items-center gap-2">
           <CardTitle className="text-xs font-medium text-white/80">{title}</CardTitle>

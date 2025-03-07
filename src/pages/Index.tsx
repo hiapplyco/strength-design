@@ -14,11 +14,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
+import { AuthDialog } from "@/components/auth/AuthDialog";
 
 const Index = () => {
   const { session } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   const cards = [
     {
@@ -67,9 +70,8 @@ const Index = () => {
 
   const handleCardClick = (path: string, requiresAuth: boolean) => {
     if (requiresAuth && !session) {
-      // If auth is required but user is not logged in, show auth dialog
-      // This could be replaced with a toast or redirect to login
-      navigate("/");
+      // Show auth dialog if authentication is required but user is not logged in
+      setShowAuthDialog(true);
     } else {
       navigate(path);
     }
@@ -140,6 +142,18 @@ const Index = () => {
           ))}
         </div>
       </div>
+      
+      {/* Auth Dialog */}
+      <AuthDialog
+        isOpen={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          // Navigate to the previously selected path after successful authentication
+          const activePath = cards.find(card => card.requiresAuth)?.path || "/workout-generator";
+          navigate(activePath);
+        }}
+      />
     </div>
   );
 };

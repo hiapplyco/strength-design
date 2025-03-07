@@ -6,16 +6,13 @@ import { InjuriesSection } from "../InjuriesSection";
 import { ExerciseSection } from "../ExerciseSection";
 import { PrescribedExercisesSection } from "../PrescribedExercisesSection";
 import { WeatherSection } from "../WeatherSection";
-import { FileUploadSection } from "../FileUploadSection";
 import { GenerateSection } from "../GenerateSection";
 import { useWorkoutInputState } from "../hooks/useWorkoutInputState";
 import type { Exercise } from "@/components/exercise-search/types";
-import { Card } from "@/components/ui/card";
 import { PresetsSection } from "../input-sections/PresetsSection";
 import { motion } from "framer-motion";
-import { SectionsContainer } from "./SectionsContainer";
-import { FileHandlers } from "./FileHandlers";
-import { PresetHandler } from "./PresetHandler";
+import { useFileHandlers } from "./FileHandlers";
+import { useGeminiExerciseExtraction } from "../hooks/useGeminiExerciseExtraction";
 
 interface InputContainerProps {
   generatePrompt: string;
@@ -31,6 +28,8 @@ interface InputContainerProps {
   isGenerating: boolean;
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
+  showGenerateInput?: boolean;
+  setShowGenerateInput?: (value: boolean) => void;
 }
 
 export function InputContainer(props: InputContainerProps) {
@@ -48,17 +47,27 @@ export function InputContainer(props: InputContainerProps) {
     selectedExercises, setSelectedExercises,
     prescribedExercises, setPrescribedExercises,
     weatherData, setWeatherData,
+    isAnalyzingPrescribed, setIsAnalyzingPrescribed,
+    isAnalyzingInjuries, setIsAnalyzingInjuries,
+    handleFileProcessing,
   } = useWorkoutInputState();
 
-  // File handling state
-  const [fileContent, setFileContent] = useState<string>("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  // Set up document parsing
+  const { parseDocument } = useGeminiExerciseExtraction();
+
+  // Set up file handlers
+  const fileHandlingProps = {
+    handleFileProcessing,
+    parseDocument
+  };
+  
+  const { handlePrescribedFileSelect, handleInjuriesFileSelect } = useFileHandlers(fileHandlingProps);
 
   // Generate workout handler
   const onGenerate = async () => {
     await handleGenerateWorkout({
       prompt: props.generatePrompt,
-      weatherPrompt: weatherData?.summary || "",
+      weatherPrompt: weatherData?.forecast?.summary || "",
       selectedExercises,
       fitnessLevel,
       prescribedExercises,
@@ -73,7 +82,6 @@ export function InputContainer(props: InputContainerProps) {
     setSelectedExercises([]);
     setPrescribedExercises("");
     setWeatherData(null);
-    setFileContent("");
   };
 
   // Handler for preset selection
@@ -91,20 +99,9 @@ export function InputContainer(props: InputContainerProps) {
   // Determine form validity
   const isFormValid = fitnessLevel.trim() !== "" || selectedExercises.length > 0 || prescribedExercises.trim() !== "";
 
-  // Props for file handling components
-  const fileHandlerProps = {
-    setFileContent,
-    isAnalyzing, 
-    setIsAnalyzing,
-    prescribedExercises,
-    setPrescribedExercises
-  };
-
-  // Props for preset handling component
-  const presetHandlerProps = {
-    handleSelectPreset,
-    selectedExercises,
-    prescribedExercises
+  // Handle weather update
+  const handleWeatherUpdate = (newWeatherData: any, weatherPrompt: string) => {
+    setWeatherData(newWeatherData);
   };
 
   return (
@@ -121,7 +118,7 @@ export function InputContainer(props: InputContainerProps) {
       />
 
       {/* Main Form Sections */}
-      <SectionsContainer>
+      <div className="space-y-5 sm:space-y-6 pb-6 px-2">
         <DaysSelectionCard
           numberOfDays={numberOfDays}
           setNumberOfDays={setNumberOfDays}
@@ -129,31 +126,45 @@ export function InputContainer(props: InputContainerProps) {
         
         <FitnessSection 
           fitnessLevel={fitnessLevel}
-          setFitnessLevel={setFitnessLevel}
+          onFitnessLevelChange={setFitnessLevel}
+          renderTooltip={() => null}
         />
         
         <InjuriesSection 
           injuries={injuries}
           setInjuries={setInjuries}
+          isAnalyzingInjuries={isAnalyzingInjuries}
+          handleInjuriesFileSelect={handleInjuriesFileSelect}
         />
         
         <ExerciseSection 
           selectedExercises={selectedExercises}
-          setSelectedExercises={setSelectedExercises}
+          onExerciseSelect={(exercise) => {
+            // Toggle exercise selection
+            const isSelected = selectedExercises.some(e => e.id === exercise.id);
+            if (isSelected) {
+              setSelectedExercises(selectedExercises.filter(e => e.id !== exercise.id));
+            } else {
+              setSelectedExercises([...selectedExercises, exercise]);
+            }
+          }}
+          renderTooltip={() => null}
         />
         
         <PrescribedExercisesSection 
           prescribedExercises={prescribedExercises}
           setPrescribedExercises={setPrescribedExercises}
+          isAnalyzingPrescribed={isAnalyzingPrescribed}
+          handlePrescribedFileSelect={handlePrescribedFileSelect}
         />
         
         <WeatherSection 
           weatherData={weatherData}
-          setWeatherData={setWeatherData}
+          onWeatherUpdate={handleWeatherUpdate}
+          renderTooltip={() => null}
+          numberOfDays={numberOfDays}
         />
-
-        <FileHandlers {...fileHandlerProps} />
-      </SectionsContainer>
+      </div>
 
       {/* Generate Button Section */}
       <GenerateSection

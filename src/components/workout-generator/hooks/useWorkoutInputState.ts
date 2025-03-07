@@ -75,6 +75,7 @@ export function useWorkoutInputState() {
     injuries,
     setInjuries,
     weatherData,
+    setWeatherData,
     weatherPrompt,
     isAnalyzingPrescribed,
     setIsAnalyzingPrescribed,

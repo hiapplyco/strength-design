@@ -6,7 +6,6 @@ export function GeneratorSection({
   setGeneratePrompt,
   handleGenerateWorkout,
   isGenerating,
-  setIsGenerating,
   showGenerateInput,
   setShowGenerateInput,
   numberOfDays,
@@ -20,11 +19,10 @@ export function GeneratorSection({
           setGeneratePrompt={setGeneratePrompt}
           handleGenerateWorkout={handleGenerateWorkout}
           isGenerating={isGenerating}
-          setIsGenerating={setIsGenerating}
-          showGenerateInput={showGenerateInput}
-          setShowGenerateInput={setShowGenerateInput}
           numberOfDays={numberOfDays}
           setNumberOfDays={setNumberOfDays}
+          showGenerateInput={showGenerateInput}
+          setShowGenerateInput={setShowGenerateInput}
         />
       </div>
     </div>

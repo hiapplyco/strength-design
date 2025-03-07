@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
+import { StyledLogo } from "@/components/ui/styled-logo";
 
 const Index = () => {
   const { session } = useAuth();
@@ -92,6 +93,13 @@ const Index = () => {
       <div className="relative z-10 container mx-auto px-3 sm:px-6 py-8 sm:py-12 max-w-7xl">
         {/* Welcome Section */}
         <div className="text-center mb-8 sm:mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4"
+          >
+            <StyledLogo size="large" className="mb-2" />
+          </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

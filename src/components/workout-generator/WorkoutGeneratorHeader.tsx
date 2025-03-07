@@ -8,6 +8,7 @@ import {
   TooltipTrigger 
 } from "@/components/ui/tooltip";
 import { itemVariants } from "./animations";
+import { StyledLogo } from "@/components/ui/styled-logo";
 
 export function WorkoutGeneratorHeader() {
   return (
@@ -21,6 +22,10 @@ export function WorkoutGeneratorHeader() {
           generate.workout
         </h1>
       </div>
+      
+      <motion.div className="flex items-center justify-center mb-4" variants={itemVariants}>
+        <StyledLogo size="large" className="mb-2" />
+      </motion.div>
       
       <motion.p 
         className="text-xl text-white/80 max-w-3xl mx-auto px-2"

@@ -2,6 +2,7 @@
 import { StreamlitEmbed } from "./StreamlitEmbed";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { useEffect, useState } from "react";
+import { StyledLogo } from "@/components/ui/styled-logo";
 
 export const TechniqueAnalysisContent = () => {
   // Hardcoded Streamlit URL
@@ -32,6 +33,7 @@ export const TechniqueAnalysisContent = () => {
         <main className="relative z-10 w-full">
           <div className="container mx-auto px-4 pt-20">
             <div className="text-center mb-8">
+              <StyledLogo size="large" className="mb-4" />
               <LogoHeader>TECHNIQUE ANALYSIS</LogoHeader>
             </div>
             

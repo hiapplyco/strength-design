@@ -1,14 +1,15 @@
 
 import { NavLink } from "react-router-dom";
+import { StyledLogo } from "@/components/ui/styled-logo";
 
 export const SidebarLogo = () => {
   return (
     <div className="flex items-center justify-between">
       <NavLink
-        to="/workout-generator"
-        className="text-2xl font-collegiate text-accent tracking-wider hover:text-accent/80 transition-colors"
+        to="/"
+        className="hover:opacity-80 transition-opacity"
       >
-        STRENGTH.DESIGN
+        <StyledLogo size="medium" />
       </NavLink>
     </div>
   );

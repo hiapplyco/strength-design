@@ -7,7 +7,7 @@ export const AnalysisTips = () => {
         <li>Record clear video from a stable position where your entire body is visible</li>
         <li>Perform the technique at a moderate speed so details are visible</li>
         <li>Ask specific questions about aspects you want to improve</li>
-        <li>For partner techniques, ensure both practitioners are visible</li>
+        <li>For partner techniques, ensure both participants are visible</li>
         <li>Good lighting makes a significant difference in analysis quality</li>
       </ul>
       <p className="mt-4 text-sm text-white/60">

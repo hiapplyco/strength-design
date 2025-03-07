@@ -43,9 +43,9 @@ export const TechniqueAnalysisContent = () => {
         <main className="relative z-10 w-full">
           <div className="container mx-auto px-4 pt-20 pb-12">
             <div className="text-center mb-8 md:mb-12">
-              <LogoHeader>Jiu-Jitsu Technique Analysis</LogoHeader>
+              <LogoHeader>Technique Analysis</LogoHeader>
               <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-                Upload a video of your jiu-jitsu technique for expert AI analysis and feedback
+                Upload a video of your technique for expert AI analysis and feedback
               </p>
               
               {!user && analysis && (

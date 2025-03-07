@@ -13,7 +13,7 @@ export const QuestionInput = ({ question, setQuestion }: QuestionInputProps) => 
       <Textarea 
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        placeholder="E.g., How can I improve my triangle choke setup? What am I doing wrong with my guard passing?"
+        placeholder="E.g., How can I improve my form? What am I doing wrong with my technique?"
         className="h-32 bg-black/30 border-gray-700 text-white"
       />
     </div>

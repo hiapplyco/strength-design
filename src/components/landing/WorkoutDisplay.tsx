@@ -2,7 +2,7 @@
 import { WorkoutDisplayButtons } from "./workout-display/WorkoutDisplayButtons";
 import { WorkoutContent } from "./workout-display/WorkoutContent";
 import { WorkoutLoadingState } from "./workout-display/WorkoutLoadingState";
-import type { WeeklyWorkouts, WorkoutDay } from "@/types/fitness";
+import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta } from "@/types/fitness";
 import { isWorkoutDay } from "@/types/fitness";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,17 +31,25 @@ export function WorkoutDisplay({
     setWorkouts(initialWorkouts);
   }, [initialWorkouts]);
 
-  const handleUpdate = (day: string, updates: Partial<WorkoutDay>) => {
-    // Don't update special fields like _meta
-    if (day === '_meta') return;
+  const handleUpdate = (day: string, updates: Partial<WorkoutDay | WorkoutMeta>) => {
+    const updatedWorkouts = { ...workouts };
     
-    const updatedWorkouts = {
-      ...workouts,
-      [day]: {
+    if (day === '_meta') {
+      // Update meta information
+      updatedWorkouts._meta = {
+        ...(updatedWorkouts._meta as WorkoutMeta || {}),
+        ...updates
+      };
+    } else if (isWorkoutDay(workouts[day])) {
+      // Update workout day
+      updatedWorkouts[day] = {
         ...(workouts[day] as WorkoutDay),
         ...updates
-      }
-    };
+      };
+    } else {
+      // Skip if not a valid day or _meta
+      return;
+    }
     
     setWorkouts(updatedWorkouts);
     

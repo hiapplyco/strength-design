@@ -78,7 +78,7 @@ export function SidebarNavigation() {
             className={({ isActive }) =>
               `flex items-center gap-2 ${isActive ? "text-accent" : "text-muted-foreground hover:text-accent"}`
             }
-            onClick={(e) => item.requiresAuth && handleAuthRequired(e)}
+            onClick={(e) => item.requiresAuth && !session && handleAuthRequired(e)}
           >
             {item.icon}
             <span>{item.text}</span>

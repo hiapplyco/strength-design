@@ -1,3 +1,4 @@
+
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -6,6 +7,7 @@ import { InputDirections } from "./InputDirections";
 import { useEffect, useState } from "react";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
+
 interface GeneratorSectionProps {
   generatePrompt: string;
   setGeneratePrompt: (value: string) => void;
@@ -17,6 +19,7 @@ interface GeneratorSectionProps {
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
 }
+
 export const GeneratorSection = ({
   generatePrompt,
   setGeneratePrompt,
@@ -32,6 +35,7 @@ export const GeneratorSection = ({
   const {
     scrollY
   } = useScroll();
+  
   useEffect(() => {
     const updateScroll = () => {
       setHasScrolled(window.scrollY > 100);
@@ -39,6 +43,7 @@ export const GeneratorSection = ({
     window.addEventListener('scroll', updateScroll);
     return () => window.removeEventListener('scroll', updateScroll);
   }, []);
+  
   const renderTooltip = (content: string) => <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -49,7 +54,9 @@ export const GeneratorSection = ({
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>;
-  return <motion.div className={`flex flex-col items-center justify-center min-h-screen w-full px-2 sm:px-4 py-12 transition-all duration-300 ${hasScrolled ? 'bg-black/90' : 'bg-transparent'}`}>
+    
+  return (
+    <motion.div className={`flex flex-col items-center justify-start w-full px-2 sm:px-4 py-12 transition-all duration-300 ${hasScrolled ? 'bg-black/90' : 'bg-transparent'}`}>
       <div className="w-full max-w-3xl mx-auto space-y-6">
         <motion.div className="text-center w-full" initial={{
         opacity: 0,
@@ -72,11 +79,12 @@ export const GeneratorSection = ({
           <InputDirections />
         </div>
 
-        <div id="generate-workout" className="w-full max-w-3xl mx-auto overflow-x-hidden">
+        <div id="generate-workout" className="w-full max-w-3xl mx-auto">
           <GenerateWorkoutInput generatePrompt={generatePrompt} setGeneratePrompt={setGeneratePrompt} handleGenerateWorkout={handleGenerateWorkout} isGenerating={isGenerating} setIsGenerating={setIsGenerating} showGenerateInput={showGenerateInput} setShowGenerateInput={setShowGenerateInput} numberOfDays={numberOfDays} setNumberOfDays={setNumberOfDays} />
         </div>
       </div>
       
       <Separator className="mt-12 bg-primary/20 w-full max-w-5xl mx-auto" />
-    </motion.div>;
+    </motion.div>
+  );
 };

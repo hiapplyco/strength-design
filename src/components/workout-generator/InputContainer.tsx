@@ -28,8 +28,6 @@ export function InputContainer({
   handleGenerateWorkout,
   isGenerating,
   setIsGenerating,
-  showGenerateInput,
-  setShowGenerateInput,
   numberOfDays,
   setNumberOfDays,
 }: InputContainerProps) {
@@ -45,10 +43,9 @@ export function InputContainer({
     weatherData,
     weatherPrompt,
     isAnalyzingPrescribed,
-    setIsAnalyzingPrescribed,
     isAnalyzingInjuries,
-    setIsAnalyzingInjuries,
     handleWeatherUpdate,
+    handleFileProcessing,
     clearInputs
   } = useWorkoutInputState();
 
@@ -70,43 +67,11 @@ export function InputContainer({
   );
   
   const handlePrescribedFileSelect = async (file: File) => {
-    setIsAnalyzingPrescribed(true);
-    try {
-      console.log('Processing prescribed exercises file:', file.name);
-      const result = await parseDocument(file);
-      if (result.success) {
-        const parsedText = `${result.text}`;
-        const updatedText = prescribedExercises 
-          ? `${prescribedExercises}\n\n------ PARSED WORKOUT ------\n\n${parsedText}`
-          : parsedText;
-          
-        setPrescribedExercises(updatedText);
-      }
-    } catch (error) {
-      console.error('Error processing prescribed file:', error);
-    } finally {
-      setIsAnalyzingPrescribed(false);
-    }
+    await handleFileProcessing(file, 'prescribed', parseDocument);
   };
   
   const handleInjuriesFileSelect = async (file: File) => {
-    setIsAnalyzingInjuries(true);
-    try {
-      console.log('Processing injuries file:', file.name);
-      const result = await parseDocument(file);
-      if (result.success) {
-        const parsedText = `${result.text}`;
-        const updatedText = injuries 
-          ? `${injuries}\n\n------ PARSED INFORMATION ------\n\n${parsedText}`
-          : parsedText;
-          
-        setInjuries(updatedText);
-      }
-    } catch (error) {
-      console.error('Error processing injuries file:', error);
-    } finally {
-      setIsAnalyzingInjuries(false);
-    }
+    await handleFileProcessing(file, 'injuries', parseDocument);
   };
 
   const handleSubmit = useCallback(() => {

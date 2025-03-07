@@ -20,6 +20,42 @@ export function useWorkoutInputState() {
     setWeatherPrompt(newWeatherPrompt);
   };
 
+  const handleFileProcessing = async (file: File, contentType: 'prescribed' | 'injuries', parseDocument: Function) => {
+    if (contentType === 'prescribed') {
+      setIsAnalyzingPrescribed(true);
+    } else {
+      setIsAnalyzingInjuries(true);
+    }
+    
+    try {
+      console.log(`Processing ${contentType} file:`, file.name);
+      const result = await parseDocument(file);
+      if (result.success) {
+        const parsedText = `${result.text}`;
+        
+        if (contentType === 'prescribed') {
+          const updatedText = prescribedExercises 
+            ? `${prescribedExercises}\n\n------ PARSED WORKOUT ------\n\n${parsedText}`
+            : parsedText;
+          setPrescribedExercises(updatedText);
+        } else {
+          const updatedText = injuries 
+            ? `${injuries}\n\n------ PARSED INFORMATION ------\n\n${parsedText}`
+            : parsedText;
+          setInjuries(updatedText);
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing ${contentType} file:`, error);
+    } finally {
+      if (contentType === 'prescribed') {
+        setIsAnalyzingPrescribed(false);
+      } else {
+        setIsAnalyzingInjuries(false);
+      }
+    }
+  };
+
   const clearInputs = () => {
     setSelectedExercises([]);
     setFitnessLevel("");
@@ -45,6 +81,7 @@ export function useWorkoutInputState() {
     isAnalyzingInjuries,
     setIsAnalyzingInjuries,
     handleWeatherUpdate,
+    handleFileProcessing,
     clearInputs
   };
 }

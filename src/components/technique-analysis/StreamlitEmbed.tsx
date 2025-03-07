@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface StreamlitEmbedProps {
@@ -9,6 +9,7 @@ interface StreamlitEmbedProps {
 
 export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbedProps) => {
   const [isLoading, setIsLoading] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   // Format the embed URL with proper query parameters
   const getEmbedUrl = () => {
@@ -52,6 +53,20 @@ export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbe
     return () => clearTimeout(timer);
   }, [streamlitUrl]);
 
+  // Preserve iframe state across route changes
+  useEffect(() => {
+    // Store a reference to the iframe element
+    const iframe = iframeRef.current;
+    
+    return () => {
+      // When component unmounts, don't destroy iframe content
+      if (iframe && iframe.parentNode) {
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+    };
+  }, []);
+
   return (
     <div className="w-full">
       {isLoading ? (
@@ -62,6 +77,7 @@ export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbe
         </div>
       ) : (
         <iframe
+          ref={iframeRef}
           src={getEmbedUrl()}
           style={{ 
             width: '100%', 

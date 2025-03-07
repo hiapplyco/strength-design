@@ -1,10 +1,19 @@
 
 import { StreamlitEmbed } from "./StreamlitEmbed";
 import { LogoHeader } from "@/components/ui/logo-header";
+import { useEffect, useState } from "react";
 
 export const TechniqueAnalysisContent = () => {
   // Hardcoded Streamlit URL
   const streamlitUrl = "https://cfvideoanalysis.streamlit.app/";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => {
+      setMounted(false);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen w-full">
@@ -28,7 +37,7 @@ export const TechniqueAnalysisContent = () => {
             
             <div className="max-w-5xl mx-auto">
               <div className="bg-black/30 rounded-lg overflow-hidden border border-gray-800 shadow-xl">
-                <StreamlitEmbed streamlitUrl={streamlitUrl} height="800px" />
+                {mounted && <StreamlitEmbed streamlitUrl={streamlitUrl} height="800px" />}
               </div>
             </div>
           </div>

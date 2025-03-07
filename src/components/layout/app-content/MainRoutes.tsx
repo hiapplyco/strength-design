@@ -13,11 +13,21 @@ import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import ProgramChat from "@/pages/ProgramChat";
 import TechniqueAnalysis from "@/pages/TechniqueAnalysis";
-import { memo } from "react";
+import { memo, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 // Use memo to prevent unnecessary re-renders
 export const MainRoutes = memo(() => {
   const { session } = useAuth();
+  const location = useLocation();
+  
+  // Scroll to top on route change but preserve state for specific routes
+  useEffect(() => {
+    const preserveStateRoutes = ['/technique-analysis'];
+    if (!preserveStateRoutes.includes(location.pathname)) {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
 
   return (
     <Routes>

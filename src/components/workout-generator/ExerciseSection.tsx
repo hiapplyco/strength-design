@@ -5,6 +5,7 @@ import { ExerciseSearch } from "../ExerciseSearch";
 import type { Exercise } from "../exercise-search/types";
 import { ExpandableSectionContainer } from "./ExpandableSectionContainer";
 import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 
 interface ExerciseSectionProps {
   selectedExercises: Exercise[];

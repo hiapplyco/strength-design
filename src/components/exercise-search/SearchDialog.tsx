@@ -1,7 +1,9 @@
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "./SearchInput";
 import { SearchResults } from "./SearchResults";
+import { Loader2 } from "lucide-react";
 import type { Exercise } from "./types";
 
 interface SearchDialogProps {
@@ -14,6 +16,7 @@ interface SearchDialogProps {
   selectedExercises: Exercise[];
   onExerciseSelect: (exercise: Exercise) => void;
   sanitizeText: (text: string) => string;
+  isLoading?: boolean;
 }
 
 export function SearchDialog({
@@ -26,6 +29,7 @@ export function SearchDialog({
   selectedExercises,
   onExerciseSelect,
   sanitizeText,
+  isLoading = false,
 }: SearchDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -42,12 +46,20 @@ export function SearchDialog({
             onChange={onSearchChange}
             onClear={onClearSearch}
           />
-          <SearchResults
-            results={searchResults}
-            selectedExercises={selectedExercises}
-            onExerciseSelect={onExerciseSelect}
-            sanitizeText={sanitizeText}
-          />
+          
+          {isLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            </div>
+          ) : (
+            <SearchResults
+              results={searchResults}
+              selectedExercises={selectedExercises}
+              onExerciseSelect={onExerciseSelect}
+              sanitizeText={sanitizeText}
+            />
+          )}
+          
           <div className="flex justify-end pt-4">
             <Button 
               onClick={onClose}

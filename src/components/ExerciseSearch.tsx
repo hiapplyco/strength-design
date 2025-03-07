@@ -1,11 +1,5 @@
+
 import React, { useState, useEffect } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Dumbbell } from "lucide-react";
 import type { Exercise } from "./exercise-search/types";
 import { useExerciseSearch } from "./exercise-search/useExerciseSearch";
@@ -20,7 +14,7 @@ interface ExerciseSearchProps {
 
 export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: ExerciseSearchProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { searchQuery, setSearchQuery, searchResults, setSearchResults } = useExerciseSearch();
+  const { searchQuery, setSearchQuery, searchResults, setSearchResults, isLoading } = useExerciseSearch();
 
   const handleExerciseSelect = (exercise: Exercise) => {
     if (onExerciseSelect) {
@@ -59,6 +53,7 @@ export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: Exe
         selectedExercises={selectedExercises}
         onExerciseSelect={handleExerciseSelect}
         sanitizeText={sanitizeText}
+        isLoading={isLoading}
       />
     </div>
   );

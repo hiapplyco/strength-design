@@ -1,11 +1,10 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscription } from "@/hooks/useSubscription";
 import { format } from "date-fns";
-import { StyledLogo } from "@/components/ui/styled-logo";
+import { LogoHeader } from "@/components/ui/logo-header";
 
 const Pricing = () => {
   const { session } = useAuth();
@@ -27,10 +26,7 @@ const Pricing = () => {
         <div className="relative">
           <div className="container mx-auto px-4 pt-24 pb-32">
             <div className="text-center mb-16">
-              <StyledLogo size="large" className="mb-4" />
-              <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald text-destructive dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-lg px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] inline-block bg-black mb-6">
-                upgrade.to.pro
-              </h1>
+              <LogoHeader>upgrade.to.pro</LogoHeader>
               {subscriptionStatus?.isTrialing && subscriptionStatus.trialEndsAt && (
                 <div className="text-xl text-white/80 mb-4">
                   Trial expires {format(new Date(subscriptionStatus.trialEndsAt), 'PPP')}

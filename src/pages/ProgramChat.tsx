@@ -1,7 +1,6 @@
 
 import { ChatContainer } from "@/components/chat/ChatContainer";
 import { LogoHeader } from "@/components/ui/logo-header";
-import { StyledLogo } from "@/components/ui/styled-logo";
 
 export default function ProgramChat() {
   return (
@@ -17,7 +16,6 @@ export default function ProgramChat() {
         
         <div className="container mx-auto px-4 pt-24 pb-8 relative">
           <div className="text-center mb-16">
-            <StyledLogo size="large" className="mb-4" />
             <LogoHeader>program.chat</LogoHeader>
             <p className="text-xl text-white/80 max-w-3xl mx-auto">
               Your personal coach for building your own gym. Chat about the CrossFit Affiliate Playbook or upload your own training materials to get expert guidance and answers to all your questions.

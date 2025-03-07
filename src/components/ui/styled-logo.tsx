@@ -4,9 +4,10 @@ import { cn } from "@/lib/utils";
 interface StyledLogoProps {
   className?: string;
   size?: "small" | "medium" | "large";
+  children?: React.ReactNode;
 }
 
-export const StyledLogo = ({ className, size = "medium" }: StyledLogoProps) => {
+export const StyledLogo = ({ className, size = "medium", children = "strength.design" }: StyledLogoProps) => {
   const sizeClasses = {
     small: "text-lg sm:text-xl",
     medium: "text-xl sm:text-2xl",
@@ -23,7 +24,7 @@ export const StyledLogo = ({ className, size = "medium" }: StyledLogoProps) => {
         className
       )}
     >
-      strength.design
+      {children}
     </h1>
   );
 };

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +15,7 @@ import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
-import { StyledLogo } from "@/components/ui/styled-logo";
+import { LogoHeader } from "@/components/ui/logo-header";
 
 const Index = () => {
   const { session } = useAuth();
@@ -98,15 +97,8 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-4"
           >
-            <StyledLogo size="large" className="mb-2" />
+            <LogoHeader>strength.design</LogoHeader>
           </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 sm:mb-6"
-          >
-            Welcome to strength.design
-          </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

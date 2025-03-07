@@ -8,7 +8,7 @@ import {
   TooltipTrigger 
 } from "@/components/ui/tooltip";
 import { itemVariants } from "./animations";
-import { StyledLogo } from "@/components/ui/styled-logo";
+import { LogoHeader } from "@/components/ui/logo-header";
 
 export function WorkoutGeneratorHeader() {
   return (
@@ -17,15 +17,9 @@ export function WorkoutGeneratorHeader() {
       variants={itemVariants}
     >
       <div className="flex items-center justify-center mb-6">
-        <Dumbbell className="h-10 w-10 text-destructive mr-3 animate-pulse" />
-        <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-6xl font-oswald text-destructive dark:text-white transform -skew-x-12 uppercase tracking-wider text-center border-[6px] border-black rounded-md px-2 sm:px-4 py-3 shadow-[inset_0px_0px_0px_2px_rgba(255,255,255,1),8px_8px_0px_0px_rgba(255,0,0,1),12px_12px_0px_0px_#C4A052] inline-block bg-black mb-0 max-w-full break-words">
-          generate.workout
-        </h1>
+        <Dumbbell className="h-10 w-10 text-primary mr-3 animate-pulse" />
+        <LogoHeader>generate.workout</LogoHeader>
       </div>
-      
-      <motion.div className="flex items-center justify-center mb-4" variants={itemVariants}>
-        <StyledLogo size="large" className="mb-2" />
-      </motion.div>
       
       <motion.p 
         className="text-xl text-white/80 max-w-3xl mx-auto px-2"

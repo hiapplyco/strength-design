@@ -2,12 +2,16 @@
 import { AnalysisForm } from "./AnalysisForm";
 import { AnalysisResults } from "./AnalysisResults";
 import { AnalysisTips } from "./AnalysisTips";
+import { StreamlitEmbed } from "./StreamlitEmbed";
+import { StreamlitConfig } from "./StreamlitConfig";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { useTechniqueAnalysis } from "@/hooks/useTechniqueAnalysis";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { UserIcon } from "lucide-react";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const TechniqueAnalysisContent = () => {
   const {
@@ -24,6 +28,7 @@ export const TechniqueAnalysisContent = () => {
     saveAnalysis
   } = useTechniqueAnalysis();
 
+  const [streamlitUrl, setStreamlitUrl] = useState<string>("");
   const { user } = useAuth();
 
   return (
@@ -61,30 +66,63 @@ export const TechniqueAnalysisContent = () => {
               )}
             </div>
             
-            <div className="max-w-4xl mx-auto rounded-lg overflow-hidden border border-gray-800 shadow-xl bg-black/40 p-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <AnalysisForm
-                  uploadedVideo={uploadedVideo}
-                  setUploadedVideo={setUploadedVideo}
-                  question={question}
-                  setQuestion={setQuestion}
-                  analysis={analysis}
-                  setAnalysis={setAnalysis}
-                  isLoading={isLoading}
-                  isSaving={isSaving}
-                  handleSubmitForAnalysis={handleSubmitForAnalysis}
-                  handleReset={handleReset}
-                  saveAnalysis={saveAnalysis}
-                />
+            <div className="max-w-5xl mx-auto">
+              <Tabs defaultValue="gemini" className="mb-6">
+                <TabsList className="bg-black/30 border border-gray-800">
+                  <TabsTrigger value="gemini" className="data-[state=active]:bg-primary/20">Gemini Analysis</TabsTrigger>
+                  <TabsTrigger value="streamlit" className="data-[state=active]:bg-primary/20">Streamlit Analysis</TabsTrigger>
+                </TabsList>
                 
-                <AnalysisResults 
-                  isLoading={isLoading}
-                  analysis={analysis}
-                />
-              </div>
-            </div>
+                <TabsContent value="gemini">
+                  <div className="rounded-lg overflow-hidden border border-gray-800 shadow-xl bg-black/40 p-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <AnalysisForm
+                        uploadedVideo={uploadedVideo}
+                        setUploadedVideo={setUploadedVideo}
+                        question={question}
+                        setQuestion={setQuestion}
+                        analysis={analysis}
+                        setAnalysis={setAnalysis}
+                        isLoading={isLoading}
+                        isSaving={isSaving}
+                        handleSubmitForAnalysis={handleSubmitForAnalysis}
+                        handleReset={handleReset}
+                        saveAnalysis={saveAnalysis}
+                      />
+                      
+                      <AnalysisResults 
+                        isLoading={isLoading}
+                        analysis={analysis}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="streamlit">
+                  <div className="rounded-lg overflow-hidden border border-gray-800 shadow-xl bg-black/40 p-6">
+                    <div className="mb-4">
+                      <StreamlitConfig 
+                        streamlitUrl={streamlitUrl} 
+                        setStreamlitUrl={setStreamlitUrl} 
+                      />
+                    </div>
+                    
+                    {streamlitUrl ? (
+                      <StreamlitEmbed streamlitUrl={streamlitUrl} height="600px" />
+                    ) : (
+                      <div className="text-center py-12 border border-dashed border-gray-700 rounded-lg bg-black/20">
+                        <h3 className="text-white mb-2 text-lg">No Streamlit App Connected</h3>
+                        <p className="text-white/70 max-w-md mx-auto mb-4">
+                          Configure a connection to your Streamlit application using the form above.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
 
-            <AnalysisTips />
+              <AnalysisTips />
+            </div>
           </div>
         </main>
       </div>

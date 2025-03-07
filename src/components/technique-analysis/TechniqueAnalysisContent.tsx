@@ -1,11 +1,8 @@
 
 import { StreamlitEmbed } from "./StreamlitEmbed";
 import { LogoHeader } from "@/components/ui/logo-header";
-import { useAuth } from "@/contexts/AuthContext";
 
 export const TechniqueAnalysisContent = () => {
-  const { user } = useAuth();
-  
   // Hardcoded Streamlit URL
   const streamlitUrl = "https://cfvideoanalysis.streamlit.app/";
 
@@ -24,17 +21,14 @@ export const TechniqueAnalysisContent = () => {
         </div>
         
         <main className="relative z-10 w-full">
-          <div className="container mx-auto px-4 pt-20 pb-12">
-            <div className="text-center mb-8 md:mb-12">
-              <LogoHeader>Technique Analysis</LogoHeader>
-              <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-                Upload a video of your technique for expert AI analysis and feedback
-              </p>
+          <div className="container mx-auto px-4 pt-20">
+            <div className="text-center mb-8">
+              <LogoHeader>TECHNIQUE ANALYSIS</LogoHeader>
             </div>
             
             <div className="max-w-5xl mx-auto">
-              <div className="rounded-lg overflow-hidden border border-gray-800 shadow-xl bg-black/40 p-6">
-                <StreamlitEmbed streamlitUrl={streamlitUrl} height="700px" />
+              <div className="bg-black/30 rounded-lg overflow-hidden border border-gray-800 shadow-xl">
+                <StreamlitEmbed streamlitUrl={streamlitUrl} height="800px" />
               </div>
             </div>
           </div>

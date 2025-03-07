@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,28 +38,34 @@ export const SearchResults = ({
         </TableHeader>
         <TableBody>
           {results.map((exercise, index) => {
-            const isSelected = selectedExercises.some(ex => ex.name === exercise.name);
+            const isSelected = selectedExercises.some(ex => ex.id === exercise.id);
             return (
-              <TableRow key={index}>
+              <TableRow key={exercise.id || index}>
                 <TableCell className="font-medium">
                   <div className="flex flex-col gap-2">
                     <span className="text-primary font-semibold">
                       {sanitizeText(exercise.name)}
                     </span>
-                    {exercise.images?.[0] && (
+                    {exercise.images && exercise.images.length > 0 && (
                       <img
-                        src={`https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${exercise.images[0]}`}
+                        src={exercise.images[0]}
                         alt={exercise.name}
                         className="rounded-md w-48 h-auto object-cover"
                         loading="eager"
                         decoding="async"
                         crossOrigin="anonymous"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
                       />
                     )}
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground max-w-md">
-                  {exercise.instructions[0]}
+                  {exercise.instructions && exercise.instructions.length > 0
+                    ? exercise.instructions[0]
+                    : "No instructions available"}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center">

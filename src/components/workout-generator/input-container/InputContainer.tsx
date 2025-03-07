@@ -1,4 +1,3 @@
-
 import React from "react";
 import { DaysSelectionCard } from "../DaysSelectionCard";
 import { FitnessSection } from "../FitnessSection";
@@ -137,11 +136,9 @@ export function InputContainer(props: InputContainerProps) {
           selectedExercises={selectedExercises}
           onExerciseSelect={(exercise) => {
             // Toggle exercise selection
-            const isSelected = selectedExercises.some(e => e.id === exercise.id || e.name === exercise.name);
+            const isSelected = selectedExercises.some(e => e.id === exercise.id);
             if (isSelected) {
-              setSelectedExercises(selectedExercises.filter(e => 
-                (e.id && exercise.id) ? e.id !== exercise.id : e.name !== exercise.name
-              ));
+              setSelectedExercises(selectedExercises.filter(e => e.id !== exercise.id));
             } else {
               setSelectedExercises([...selectedExercises, exercise]);
             }

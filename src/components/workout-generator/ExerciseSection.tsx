@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { X, Dumbbell, ChevronDown, ChevronUp } from "lucide-react";
 import { ExerciseSearch } from "../ExerciseSearch";
@@ -28,7 +29,7 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
 
       <Button
         variant="outline"
-        className="w-full flex items-center justify-between h-[48px] bg-black text-white border-2 border-primary rounded-[20px] px-4 py-2"
+        className="w-full flex items-center justify-between h-[48px] bg-black/50 text-white border-2 border-primary rounded-[20px] px-4 py-2"
         onClick={() => setShowSearch(!showSearch)}
       >
         <span>Would you like to add specific exercises or equipment?</span>
@@ -50,9 +51,9 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
             <div className="bg-primary/10 rounded-[20px] p-4 text-sm animate-fade-in mt-4">
               <p className="font-semibold text-primary mb-2">Selected Exercises and Equipment:</p>
               <div className="flex flex-wrap gap-2">
-                {selectedExercises.map((exercise, index) => (
+                {selectedExercises.map((exercise) => (
                   <span 
-                    key={index} 
+                    key={exercise.id} 
                     className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-sm group"
                   >
                     {exercise.name}

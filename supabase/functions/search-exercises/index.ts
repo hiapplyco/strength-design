@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
@@ -61,8 +62,10 @@ serve(async (req) => {
 
     console.log('Found results:', results.length);
 
-    const formattedResults = results.map(exercise => ({
+    const formattedResults = results.map((exercise, index) => ({
+      id: exercise.id || `exercise-${index}`, // Ensure each exercise has an ID
       name: exercise.name,
+      level: exercise.level,
       type: exercise.category,
       muscle: exercise.primaryMuscles[0],
       equipment: exercise.equipment,

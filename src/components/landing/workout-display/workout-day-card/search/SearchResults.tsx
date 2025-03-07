@@ -13,7 +13,7 @@ export const SearchResults = ({ searchResults, onExerciseSelect }: SearchResults
       <div className="grid grid-cols-1 gap-4">
         {searchResults.map((exercise, i) => (
           <SearchResultCard 
-            key={i} 
+            key={exercise.id || i} 
             exercise={exercise} 
             onSelect={() => onExerciseSelect(exercise.name)}
           />
@@ -120,8 +120,9 @@ const SearchResultCard = ({ exercise, onSelect }: SearchResultCardProps) => {
                   className="h-full w-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.src = 'placeholder.svg';
+                    target.src = '/placeholder.svg';
                   }}
+                  crossOrigin="anonymous"
                 />
               </div>
             ))}

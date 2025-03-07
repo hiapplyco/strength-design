@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { UserIcon, BrainCircuitIcon, GaugeIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const TechniqueAnalysisContent = () => {
@@ -30,6 +30,21 @@ export const TechniqueAnalysisContent = () => {
 
   const [streamlitUrl, setStreamlitUrl] = useState<string>("");
   const { user } = useAuth();
+  
+  // Load saved Streamlit URL from localStorage on component mount
+  useEffect(() => {
+    const savedUrl = localStorage.getItem("streamlit-exercise-form-analyzer-url");
+    if (savedUrl) {
+      setStreamlitUrl(savedUrl);
+    }
+  }, []);
+  
+  // Save Streamlit URL to localStorage when it changes
+  useEffect(() => {
+    if (streamlitUrl) {
+      localStorage.setItem("streamlit-exercise-form-analyzer-url", streamlitUrl);
+    }
+  }, [streamlitUrl]);
 
   return (
     <div className="min-h-screen w-full">
@@ -112,13 +127,19 @@ export const TechniqueAnalysisContent = () => {
                     </div>
                     
                     {streamlitUrl ? (
-                      <StreamlitEmbed streamlitUrl={streamlitUrl} height="600px" />
+                      <StreamlitEmbed streamlitUrl={streamlitUrl} height="700px" />
                     ) : (
                       <div className="text-center py-12 border border-dashed border-gray-700 rounded-lg bg-black/20">
                         <h3 className="text-white mb-2 text-lg">No Exercise Form Analyzer Connected</h3>
                         <p className="text-white/70 max-w-md mx-auto mb-4">
                           Configure a connection to your Exercise Form Analyzer application using the form above.
                         </p>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => window.open("https://streamlit.io/cloud", "_blank")}
+                        >
+                          Learn More About Streamlit Cloud
+                        </Button>
                       </div>
                     )}
                   </div>

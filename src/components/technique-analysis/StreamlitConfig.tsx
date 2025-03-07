@@ -15,7 +15,13 @@ export const StreamlitConfig = ({ streamlitUrl, setStreamlitUrl }: StreamlitConf
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStreamlitUrl(inputUrl);
+    // Basic URL validation
+    if (inputUrl && !inputUrl.startsWith('http')) {
+      setInputUrl(`https://${inputUrl}`);
+      setStreamlitUrl(`https://${inputUrl}`);
+    } else {
+      setStreamlitUrl(inputUrl);
+    }
   };
 
   return (
@@ -30,13 +36,13 @@ export const StreamlitConfig = ({ streamlitUrl, setStreamlitUrl }: StreamlitConf
               <InfoIcon className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
               <div>
                 <p className="mb-2">
-                  This feature requires a deployed Streamlit application. Follow these steps:
+                  This feature embeds a Streamlit application. Follow these steps:
                 </p>
                 <ol className="list-decimal pl-5 space-y-1">
                   <li>Create a Streamlit app using the provided Python code</li>
                   <li>Set up Google API key and ElevenLabs API key in Streamlit secrets</li>
                   <li>Deploy your app on Streamlit Cloud (<a href="https://streamlit.io/cloud" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">streamlit.io/cloud</a>)</li>
-                  <li>Enter your deployed app's URL below</li>
+                  <li>Enter your deployed app's URL below (e.g., https://your-app.streamlit.app)</li>
                 </ol>
               </div>
             </div>
@@ -58,9 +64,21 @@ export const StreamlitConfig = ({ streamlitUrl, setStreamlitUrl }: StreamlitConf
                 Enter the URL of your deployed Exercise Form Analyzer Streamlit application
               </p>
             </div>
-            <Button type="submit" variant="secondary" size="sm">
-              Connect to Exercise Form Analyzer
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" variant="secondary" size="sm">
+                Connect to Exercise Form Analyzer
+              </Button>
+              {streamlitUrl && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.open(streamlitUrl, '_blank', 'noopener,noreferrer')}
+                >
+                  Open App in New Tab
+                </Button>
+              )}
+            </div>
           </form>
         </AccordionContent>
       </AccordionItem>

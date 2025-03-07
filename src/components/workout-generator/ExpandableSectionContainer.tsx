@@ -1,4 +1,3 @@
-
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploadSection } from "./FileUploadSection";
@@ -20,6 +19,7 @@ export interface ExpandableSectionContainerProps {
   isAnalyzing: boolean;
   handleFileSelect: (file: File) => Promise<void>;
   initialExpanded?: boolean;
+  renderCustomContent?: () => ReactNode;
 }
 
 export function ExpandableSectionContainer({
@@ -33,7 +33,8 @@ export function ExpandableSectionContainer({
   setContent,
   isAnalyzing,
   handleFileSelect,
-  initialExpanded = false
+  initialExpanded = false,
+  renderCustomContent
 }: ExpandableSectionContainerProps) {
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
   
@@ -46,7 +47,8 @@ export function ExpandableSectionContainer({
       <div 
         className={cn(
           "flex items-center gap-3 cursor-pointer p-3 rounded-md relative",
-          "hover:bg-black/30 transition-colors duration-200"
+          "bg-black/20 hover:bg-black/30 transition-colors duration-200",
+          "bg-gradient-to-r from-[#0e401a]/30 via-[#3b0f47]/30 to-[#4a0924]/30"
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -75,28 +77,34 @@ export function ExpandableSectionContainer({
             <div className="absolute inset-0 bg-black/10 rounded-md"></div>
             <div className="absolute inset-0 rounded-md p-[1px] -z-10 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70"></div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2 relative z-10">
-              <div className="md:col-span-3">
-                <Textarea
-                  placeholder={textAreaPlaceholder}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[100px] rounded-[20px] px-6 py-4 w-full text-black"
-                  borderStyle="multicolor"
-                />
+            {renderCustomContent ? (
+              <div className="relative z-10 pt-2">
+                {renderCustomContent()}
               </div>
-              <div className="md:col-span-1 min-w-[200px]">
-                <FileUploadSection
-                  title={fileUploadTitle}
-                  isAnalyzing={isAnalyzing}
-                  content={content}
-                  onFileSelect={handleFileSelect}
-                  analysisSteps={fileAnalysisSteps}
-                />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2 relative z-10">
+                <div className="md:col-span-3">
+                  <Textarea
+                    placeholder={textAreaPlaceholder}
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    className="min-h-[100px] rounded-[20px] px-6 py-4 w-full text-black"
+                    borderStyle="multicolor"
+                  />
+                </div>
+                <div className="md:col-span-1 min-w-[200px]">
+                  <FileUploadSection
+                    title={fileUploadTitle}
+                    isAnalyzing={isAnalyzing}
+                    content={content}
+                    onFileSelect={handleFileSelect}
+                    analysisSteps={fileAnalysisSteps}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            {content && (
+            {content && !renderCustomContent && (
               <div className="flex justify-end mt-2 relative z-10">
                 <Button
                   variant="ghost"

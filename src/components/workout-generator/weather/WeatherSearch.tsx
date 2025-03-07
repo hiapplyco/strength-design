@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { CloudSun, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { fetchWeatherData, searchLocations } from "./weather-utils";
 import { TooltipWrapper } from "../TooltipWrapper";
 import { LocationResultsDialog } from "./LocationResultsDialog";
@@ -80,30 +79,19 @@ export function WeatherSearch({
 
   return (
     <>
-      <Card className="bg-black/20 border-primary/20 shadow-sm hover:shadow-md transition-all duration-300">
-        <CardHeader className="flex flex-row items-center gap-2 pb-2">
-          <CloudSun className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg">Add Weather Conditions</h3>
-          {renderTooltip ? (
-            renderTooltip()
-          ) : (
-            <TooltipWrapper 
-              content="Add local weather conditions to optimize your workout for the current environment"
-            />
-          )}
-          {isSearching && (
-            <Loader2 className="h-4 w-4 text-primary animate-spin ml-auto" />
-          )}
-        </CardHeader>
-        <CardContent>
-          <SearchForm
-            searchQuery={searchQuery}
-            isSearching={isSearching}
-            searchError={searchError}
-            onSearch={handleSearch}
-          />
-        </CardContent>
-      </Card>
+      <div className="relative">
+        {isSearching && (
+          <div className="absolute right-2 top-2 z-10">
+            <Loader2 className="h-4 w-4 text-primary animate-spin" />
+          </div>
+        )}
+        <SearchForm
+          searchQuery={searchQuery}
+          isSearching={isSearching}
+          searchError={searchError}
+          onSearch={handleSearch}
+        />
+      </div>
       
       <LocationResultsDialog
         isOpen={isLocationsDialogOpen}

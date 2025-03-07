@@ -31,10 +31,7 @@ export const MainRoutes = memo(() => {
 
   return (
     <Routes>
-      <Route 
-        path="/" 
-        element={session ? <Navigate to="/workout-generator" replace /> : <Index />} 
-      />
+      <Route path="/" element={<Index />} />
       <Route path="/best-app-of-day" element={<BestAppOfDay />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route

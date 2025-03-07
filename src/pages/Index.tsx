@@ -1,17 +1,17 @@
 
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  BarChart,
   FileText,
   Video,
   MessageSquare,
   ArrowRight,
   Dumbbell,
+  BarChart,
+  Sparkles
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -20,46 +20,60 @@ const Index = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    if (session) {
-      navigate("/workout-generator", { replace: true });
-    }
-  }, [session, navigate]);
-
-  if (session) return null;
-
   const cards = [
     {
-      title: "Workout Generator",
+      title: "Generate Program",
       description: "Create personalized workout programs with AI assistance",
-      icon: <Dumbbell className="h-5 w-5 sm:h-6 sm:w-6" />,
+      icon: <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />,
       path: "/workout-generator",
+      requiresAuth: true
     },
     {
       title: "Document Editor",
       description: "Create and edit workout documents with ease",
       icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
       path: "/document-editor",
+      requiresAuth: true
     },
     {
-      title: "Video Analysis",
+      title: "Publish Program",
       description: "Record and analyze your workout videos",
       icon: <Video className="h-5 w-5 sm:h-6 sm:w-6" />,
       path: "/video-analysis",
+      requiresAuth: true
+    },
+    {
+      title: "Technique Analysis",
+      description: "Analyze your workout technique",
+      icon: <BarChart className="h-5 w-5 sm:h-6 sm:w-6" />,
+      path: "/technique-analysis",
+      requiresAuth: true
     },
     {
       title: "Program Chat",
       description: "Chat with AI about your workout program",
       icon: <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />,
       path: "/program-chat",
+      requiresAuth: true
     },
     {
-      title: "Generated Workouts",
+      title: "Previous Programs",
       description: "View your generated workout history",
-      icon: <BarChart className="h-5 w-5 sm:h-6 sm:w-6" />,
+      icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
       path: "/generated-workouts",
+      requiresAuth: true
     },
   ];
+
+  const handleCardClick = (path: string, requiresAuth: boolean) => {
+    if (requiresAuth && !session) {
+      // If auth is required but user is not logged in, show auth dialog
+      // This could be replaced with a toast or redirect to login
+      navigate("/");
+    } else {
+      navigate(path);
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -94,7 +108,7 @@ const Index = () => {
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {cards.map((card, index) => (
             <motion.div
               key={card.title}
@@ -115,7 +129,7 @@ const Index = () => {
                   <Button
                     variant="outline"
                     className="w-full text-sm sm:text-base py-1.5 sm:py-2"
-                    onClick={() => navigate(card.path)}
+                    onClick={() => handleCardClick(card.path, card.requiresAuth)}
                   >
                     Get Started
                     <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />

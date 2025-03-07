@@ -1,6 +1,6 @@
 
 import { NavLink } from "react-router-dom";
-import { FileText, Dumbbell, Video, MessageSquare, Home, Activity } from "lucide-react";
+import { FileText, Dumbbell, Video, MessageSquare, Home, Activity, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +28,7 @@ export function SidebarNavigation() {
     },
     {
       to: "/workout-generator",
-      icon: <Dumbbell className="h-5 w-5" />,
+      icon: <Sparkles className="h-5 w-5" />,
       text: "Generate Program",
       requiresAuth: true,
     },

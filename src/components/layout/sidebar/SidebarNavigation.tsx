@@ -1,3 +1,4 @@
+
 import { NavLink } from "react-router-dom";
 import { FileText, Dumbbell, Video, MessageSquare, Home, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -72,6 +73,7 @@ export function SidebarNavigation() {
               `flex items-center gap-2 ${isActive ? "text-accent" : "text-muted-foreground hover:text-accent"}`
             }
             onClick={(e) => item.requiresAuth && !session && handleAuthRequired(e)}
+            end
           >
             {item.icon}
             <span>{item.text}</span>

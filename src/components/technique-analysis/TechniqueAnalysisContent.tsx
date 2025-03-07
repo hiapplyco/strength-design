@@ -9,7 +9,7 @@ import { useTechniqueAnalysis } from "@/hooks/useTechniqueAnalysis";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { UserIcon } from "lucide-react";
+import { UserIcon, BrainCircuitIcon, GaugeIcon } from "lucide-react";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -69,8 +69,12 @@ export const TechniqueAnalysisContent = () => {
             <div className="max-w-5xl mx-auto">
               <Tabs defaultValue="gemini" className="mb-6">
                 <TabsList className="bg-black/30 border border-gray-800">
-                  <TabsTrigger value="gemini" className="data-[state=active]:bg-primary/20">Gemini Analysis</TabsTrigger>
-                  <TabsTrigger value="streamlit" className="data-[state=active]:bg-primary/20">Streamlit Analysis</TabsTrigger>
+                  <TabsTrigger value="gemini" className="data-[state=active]:bg-primary/20 flex items-center gap-2">
+                    <BrainCircuitIcon className="h-4 w-4" /> Gemini Analysis
+                  </TabsTrigger>
+                  <TabsTrigger value="streamlit" className="data-[state=active]:bg-primary/20 flex items-center gap-2">
+                    <GaugeIcon className="h-4 w-4" /> Exercise Form Analyzer
+                  </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="gemini">
@@ -111,9 +115,9 @@ export const TechniqueAnalysisContent = () => {
                       <StreamlitEmbed streamlitUrl={streamlitUrl} height="600px" />
                     ) : (
                       <div className="text-center py-12 border border-dashed border-gray-700 rounded-lg bg-black/20">
-                        <h3 className="text-white mb-2 text-lg">No Streamlit App Connected</h3>
+                        <h3 className="text-white mb-2 text-lg">No Exercise Form Analyzer Connected</h3>
                         <p className="text-white/70 max-w-md mx-auto mb-4">
-                          Configure a connection to your Streamlit application using the form above.
+                          Configure a connection to your Exercise Form Analyzer application using the form above.
                         </p>
                       </div>
                     )}

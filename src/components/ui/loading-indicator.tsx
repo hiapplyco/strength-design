@@ -1,22 +1,26 @@
+
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 
 interface LoadingIndicatorProps {
   className?: string;
   children?: React.ReactNode;
+  size?: "small" | "medium" | "large";
 }
 
-export function LoadingIndicator({ className, children }: LoadingIndicatorProps) {
+export function LoadingIndicator({ className, children, size = "medium" }: LoadingIndicatorProps) {
+  const sizeClasses = {
+    small: "h-3 w-3",
+    medium: "h-4 w-4",
+    large: "h-5 w-5"
+  };
+
   return (
-    <div className={cn("space-y-4", className)}>
-      <div className="flex items-center justify-center space-x-2">
-        <div className="h-4 w-4 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-        <div className="h-4 w-4 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-        <div className="h-4 w-4 animate-bounce rounded-full bg-primary" />
-      </div>
+    <div className={cn("flex items-center", className)}>
+      <Loader2 className={cn("text-primary animate-spin mr-2", sizeClasses[size])} />
       {children && (
-        <div className="text-center text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           {children}
         </div>
       )}

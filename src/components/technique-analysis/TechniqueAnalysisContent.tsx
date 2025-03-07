@@ -1,28 +1,13 @@
 
 import { StreamlitEmbed } from "./StreamlitEmbed";
-import { StreamlitConfig } from "./StreamlitConfig";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, useEffect } from "react";
 
 export const TechniqueAnalysisContent = () => {
-  const [streamlitUrl, setStreamlitUrl] = useState<string>("");
   const { user } = useAuth();
   
-  // Load saved Streamlit URL from localStorage on component mount
-  useEffect(() => {
-    const savedUrl = localStorage.getItem("streamlit-exercise-form-analyzer-url");
-    if (savedUrl) {
-      setStreamlitUrl(savedUrl);
-    }
-  }, []);
-  
-  // Save Streamlit URL to localStorage when it changes
-  useEffect(() => {
-    if (streamlitUrl) {
-      localStorage.setItem("streamlit-exercise-form-analyzer-url", streamlitUrl);
-    }
-  }, [streamlitUrl]);
+  // Hardcoded Streamlit URL
+  const streamlitUrl = "https://cfvideoanalysis.streamlit.app/";
 
   return (
     <div className="min-h-screen w-full">
@@ -49,23 +34,7 @@ export const TechniqueAnalysisContent = () => {
             
             <div className="max-w-5xl mx-auto">
               <div className="rounded-lg overflow-hidden border border-gray-800 shadow-xl bg-black/40 p-6">
-                <div className="mb-4">
-                  <StreamlitConfig 
-                    streamlitUrl={streamlitUrl} 
-                    setStreamlitUrl={setStreamlitUrl} 
-                  />
-                </div>
-                
-                {streamlitUrl ? (
-                  <StreamlitEmbed streamlitUrl={streamlitUrl} height="700px" />
-                ) : (
-                  <div className="text-center py-12 border border-dashed border-gray-700 rounded-lg bg-black/20">
-                    <h3 className="text-white mb-2 text-lg">No Exercise Form Analyzer Connected</h3>
-                    <p className="text-white/70 max-w-md mx-auto mb-4">
-                      Configure a connection to your Exercise Form Analyzer application using the form above.
-                    </p>
-                  </div>
-                )}
+                <StreamlitEmbed streamlitUrl={streamlitUrl} height="700px" />
               </div>
             </div>
           </div>

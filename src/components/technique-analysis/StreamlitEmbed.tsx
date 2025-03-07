@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLinkIcon, VideoIcon, InfoIcon } from "lucide-react";
-import { toast } from "sonner";
 
 interface StreamlitEmbedProps {
   streamlitUrl: string;
@@ -12,7 +11,6 @@ interface StreamlitEmbedProps {
 
 export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbedProps) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // Format the embed URL with proper query parameters
   const getEmbedUrl = () => {
@@ -47,10 +45,8 @@ export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbe
     if (!streamlitUrl) return;
     
     setIsLoading(true);
-    setError(null);
     
     // Use a timeout to simulate checking the URL status
-    // This avoids actual fetch which may cause CORS issues
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1500);
@@ -88,44 +84,30 @@ export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbe
           </div>
         ) : (
           <div className="h-full w-full">
-            {streamlitUrl ? (
-              <>
-                <iframe
-                  src={getEmbedUrl()}
-                  style={{ 
-                    width: '100%', 
-                    height: height, 
-                    border: 'none',
-                    borderRadius: '4px',
-                    backgroundColor: 'transparent'
-                  }}
-                  allow="camera;microphone"
-                  title="Exercise Form Analyzer"
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
-                />
-                <div className="mt-3 p-3 bg-orange-950/30 border border-orange-800/50 rounded-md">
-                  <div className="flex gap-2 text-white">
-                    <InfoIcon className="h-5 w-5 text-orange-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm">
-                        If you're seeing a connection error, please try opening the Streamlit app directly using the "Open Analyzer App" button above. 
-                        Embedded Streamlit apps may be limited by cross-origin restrictions.
-                      </p>
-                    </div>
-                  </div>
+            <iframe
+              src={getEmbedUrl()}
+              style={{ 
+                width: '100%', 
+                height: height, 
+                border: 'none',
+                borderRadius: '4px',
+                backgroundColor: 'transparent'
+              }}
+              allow="camera;microphone"
+              title="Exercise Form Analyzer"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
+            />
+            <div className="mt-3 p-3 bg-orange-950/30 border border-orange-800/50 rounded-md">
+              <div className="flex gap-2 text-white">
+                <InfoIcon className="h-5 w-5 text-orange-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm">
+                    If you're seeing a connection error, please try opening the Streamlit app directly using the "Open Analyzer App" button above. 
+                    Embedded Streamlit apps may be limited by cross-origin restrictions.
+                  </p>
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-400 mb-4">Please enter a valid Streamlit URL in the configuration section.</p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.open("https://streamlit.io/cloud", "_blank")}
-                >
-                  Learn About Streamlit Cloud
-                </Button>
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>

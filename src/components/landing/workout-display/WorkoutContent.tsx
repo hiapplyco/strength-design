@@ -17,7 +17,7 @@ interface WorkoutContentProps {
   resetWorkouts: () => void;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
-  onUpdate: (day: string, updates: Partial<WorkoutDay>) => void;
+  onUpdate: (day: string, updates: Partial<WorkoutDay | WorkoutMeta>) => void;
 }
 
 export const WorkoutContent = ({
@@ -55,10 +55,10 @@ export const WorkoutContent = ({
 
       if (data?.summary) {
         // Update the workout meta with the new summary
+        // Make sure we're passing a WorkoutMeta object
         onUpdate('_meta', { 
-          ...meta, 
           summary: data.summary 
-        });
+        } as Partial<WorkoutMeta>);
         
         setSummaryGenerated(true);
         toast({

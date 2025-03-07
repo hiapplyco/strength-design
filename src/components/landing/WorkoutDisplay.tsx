@@ -38,13 +38,13 @@ export function WorkoutDisplay({
       // Update meta information
       updatedWorkouts._meta = {
         ...(updatedWorkouts._meta as WorkoutMeta || {}),
-        ...updates
+        ...updates as Partial<WorkoutMeta>
       };
     } else if (isWorkoutDay(workouts[day])) {
       // Update workout day
       updatedWorkouts[day] = {
         ...(workouts[day] as WorkoutDay),
-        ...updates
+        ...updates as Partial<WorkoutDay>
       };
     } else {
       // Skip if not a valid day or _meta

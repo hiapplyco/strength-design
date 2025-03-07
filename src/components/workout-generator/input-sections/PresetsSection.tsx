@@ -69,10 +69,7 @@ export function PresetsSection({
   if (!visible) return null;
 
   return (
-    <div className="space-y-4 relative rounded-lg p-4 overflow-hidden">
-      <div className="absolute inset-0 p-[1px] bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40 rounded-lg"></div>
-      <div className="absolute inset-[1px] bg-black/30 rounded-[calc(0.5rem-1px)]"></div>
-      
+    <Card className="space-y-4 relative w-full">
       <button 
         onClick={() => setVisible(false)} 
         className="absolute top-2 right-2 text-red-500/70 hover:text-red-500 transition-colors z-10" 
@@ -81,7 +78,7 @@ export function PresetsSection({
         <X size={20} />
       </button>
 
-      <div className="text-center space-y-2 relative z-10">
+      <div className="text-center space-y-2 relative z-10 pt-4">
         <h3 className="text-lg font-semibold text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text">Starter Workouts</h3>
       </div>
 
@@ -160,6 +157,6 @@ export function PresetsSection({
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

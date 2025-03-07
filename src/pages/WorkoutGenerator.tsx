@@ -128,7 +128,6 @@ const WorkoutGenerator = () => {
                     setGeneratePrompt={setGeneratePrompt}
                     handleGenerateWorkout={handleGenerateWorkout}
                     isGenerating={isGenerating}
-                    setIsGenerating={() => {}}
                     showGenerateInput={showGenerateInput}
                     setShowGenerateInput={setShowGenerateInput}
                     numberOfDays={numberOfDays}

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { DaysSelectionCard } from "../DaysSelectionCard";
 import { FitnessSection } from "../FitnessSection";
 import { InjuriesSection } from "../InjuriesSection";
@@ -46,10 +46,11 @@ export function InputContainer(props: InputContainerProps) {
     injuries, setInjuries,
     selectedExercises, setSelectedExercises,
     prescribedExercises, setPrescribedExercises,
-    weatherData, setWeatherData,
-    isAnalyzingPrescribed, setIsAnalyzingPrescribed,
-    isAnalyzingInjuries, setIsAnalyzingInjuries,
+    weatherData, weatherPrompt,
+    isAnalyzingPrescribed, 
+    isAnalyzingInjuries,
     handleFileProcessing,
+    handleWeatherUpdate
   } = useWorkoutInputState();
 
   // Set up document parsing
@@ -67,7 +68,7 @@ export function InputContainer(props: InputContainerProps) {
   const onGenerate = async () => {
     await handleGenerateWorkout({
       prompt: props.generatePrompt,
-      weatherPrompt: weatherData?.forecast?.summary || "",
+      weatherPrompt: weatherPrompt || "",
       selectedExercises,
       fitnessLevel,
       prescribedExercises,
@@ -81,7 +82,7 @@ export function InputContainer(props: InputContainerProps) {
     setInjuries("");
     setSelectedExercises([]);
     setPrescribedExercises("");
-    setWeatherData(null);
+    handleWeatherUpdate(null, "");
   };
 
   // Handler for preset selection
@@ -98,11 +99,6 @@ export function InputContainer(props: InputContainerProps) {
 
   // Determine form validity
   const isFormValid = fitnessLevel.trim() !== "" || selectedExercises.length > 0 || prescribedExercises.trim() !== "";
-
-  // Handle weather update
-  const handleWeatherUpdate = (newWeatherData: any, weatherPrompt: string) => {
-    setWeatherData(newWeatherData);
-  };
 
   return (
     <motion.div 
@@ -141,9 +137,11 @@ export function InputContainer(props: InputContainerProps) {
           selectedExercises={selectedExercises}
           onExerciseSelect={(exercise) => {
             // Toggle exercise selection
-            const isSelected = selectedExercises.some(e => e.id === exercise.id);
+            const isSelected = selectedExercises.some(e => e.id === exercise.id || e.name === exercise.name);
             if (isSelected) {
-              setSelectedExercises(selectedExercises.filter(e => e.id !== exercise.id));
+              setSelectedExercises(selectedExercises.filter(e => 
+                (e.id && exercise.id) ? e.id !== exercise.id : e.name !== exercise.name
+              ));
             } else {
               setSelectedExercises([...selectedExercises, exercise]);
             }

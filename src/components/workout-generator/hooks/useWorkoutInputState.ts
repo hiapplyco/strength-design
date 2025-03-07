@@ -75,12 +75,9 @@ export function useWorkoutInputState() {
     injuries,
     setInjuries,
     weatherData,
-    setWeatherData,
     weatherPrompt,
     isAnalyzingPrescribed,
-    setIsAnalyzingPrescribed,
     isAnalyzingInjuries,
-    setIsAnalyzingInjuries,
     handleWeatherUpdate,
     handleFileProcessing,
     clearInputs

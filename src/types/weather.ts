@@ -17,5 +17,6 @@ export interface WeatherData {
     minTemps: number[];
     precipitationProb: number[];
     maxWindSpeed: number[];
+    summary?: string; // Add summary property
   } | null;
 }

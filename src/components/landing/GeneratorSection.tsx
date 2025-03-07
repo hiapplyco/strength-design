@@ -1,12 +1,9 @@
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { motion, useScroll } from "framer-motion";
 import { Separator } from "@/components/ui/separator";
 import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { InputDirections } from "./InputDirections";
 import { useEffect, useState } from "react";
-import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { HelpCircle } from "lucide-react";
 
 interface GeneratorSectionProps {
   generatePrompt: string;
@@ -32,9 +29,6 @@ export const GeneratorSection = ({
   setNumberOfDays
 }: GeneratorSectionProps) => {
   const [hasScrolled, setHasScrolled] = useState(false);
-  const {
-    scrollY
-  } = useScroll();
   
   useEffect(() => {
     const updateScroll = () => {
@@ -43,17 +37,6 @@ export const GeneratorSection = ({
     window.addEventListener('scroll', updateScroll);
     return () => window.removeEventListener('scroll', updateScroll);
   }, []);
-  
-  const renderTooltip = (content: string) => <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <HelpCircle className="h-4 w-4 text-white/60 hover:text-white/80 transition-colors" />
-        </TooltipTrigger>
-        <TooltipContent>
-          <p className="text-sm">{content}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>;
     
   return (
     <motion.div className={`flex flex-col items-center justify-start w-full px-2 sm:px-4 py-12 transition-all duration-300 ${hasScrolled ? 'bg-black/90' : 'bg-transparent'}`}>
@@ -80,7 +63,17 @@ export const GeneratorSection = ({
         </div>
 
         <div id="generate-workout" className="w-full max-w-3xl mx-auto">
-          <GenerateWorkoutInput generatePrompt={generatePrompt} setGeneratePrompt={setGeneratePrompt} handleGenerateWorkout={handleGenerateWorkout} isGenerating={isGenerating} setIsGenerating={setIsGenerating} showGenerateInput={showGenerateInput} setShowGenerateInput={setShowGenerateInput} numberOfDays={numberOfDays} setNumberOfDays={setNumberOfDays} />
+          <GenerateWorkoutInput 
+            generatePrompt={generatePrompt} 
+            setGeneratePrompt={setGeneratePrompt} 
+            handleGenerateWorkout={handleGenerateWorkout} 
+            isGenerating={isGenerating} 
+            setIsGenerating={setIsGenerating} 
+            showGenerateInput={showGenerateInput} 
+            setShowGenerateInput={setShowGenerateInput} 
+            numberOfDays={numberOfDays} 
+            setNumberOfDays={setNumberOfDays} 
+          />
         </div>
       </div>
       

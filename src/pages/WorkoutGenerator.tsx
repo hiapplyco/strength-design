@@ -93,7 +93,7 @@ const WorkoutGenerator = () => {
     <AnimatePresence mode="wait">
       {showContent && (
         <motion.div 
-          className="min-h-screen bg-black"
+          className="min-h-screen"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

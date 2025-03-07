@@ -1,5 +1,5 @@
 
-import { InputContainer } from "./workout-generator/InputContainer";
+import { InputContainer } from "./workout-generator/input-container";
 import type { Exercise } from "./exercise-search/types";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";

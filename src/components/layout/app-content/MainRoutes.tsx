@@ -13,8 +13,10 @@ import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import ProgramChat from "@/pages/ProgramChat";
 import TechniqueAnalysis from "@/pages/TechniqueAnalysis";
+import { memo } from "react";
 
-export const MainRoutes = () => {
+// Use memo to prevent unnecessary re-renders
+export const MainRoutes = memo(() => {
   const { session } = useAuth();
 
   return (
@@ -92,4 +94,4 @@ export const MainRoutes = () => {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-};
+});

@@ -45,11 +45,11 @@ export const useSubscriptionStatus = () => {
       };
     },
     enabled: !!session?.user,
-    // Only refetch on mount and window focus
-    staleTime: Infinity,
-    gcTime: Infinity, // Previously cacheTime
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+    // Use more reasonable caching values
+    staleTime: 1000 * 60 * 5,    // 5 minutes
+    gcTime: 1000 * 60 * 10,      // 10 minutes (previously cacheTime)
+    refetchOnWindowFocus: true,   // Refetch when focus returns to window
+    refetchOnMount: true,         // Refetch when component mounts
+    refetchOnReconnect: true,     // Refetch when network reconnects
   });
 };

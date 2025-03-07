@@ -26,15 +26,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session once
     const initializeAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
-        
-        if (data.session) {
-          setSession(data.session);
-        }
-        // Set loading to false even if no session
+        setSession(data.session);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching auth session:", error);
@@ -47,7 +43,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       console.log("Auth state change", event);
-      setSession(newSession);
+      
+      // Only update session if it's actually different to avoid unnecessary rerenders
+      if (JSON.stringify(newSession) !== JSON.stringify(session)) {
+        setSession(newSession);
+      }
       
       // Only show toast for explicit auth events
       if (event === 'SIGNED_IN') {

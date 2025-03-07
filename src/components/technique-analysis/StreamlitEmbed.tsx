@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLinkIcon, VideoIcon, MicIcon, ArrowRightIcon } from "lucide-react";
+import { ExternalLinkIcon, VideoIcon, InfoIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface StreamlitEmbedProps {
@@ -18,53 +18,44 @@ export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbe
   const getEmbedUrl = () => {
     if (!streamlitUrl) return '';
     
-    // Add the embed=true parameter to the URL
-    const url = new URL(streamlitUrl);
-    
-    // Ensure we don't duplicate parameters if already present
-    if (!url.searchParams.has('embed')) {
-      url.searchParams.set('embed', 'true');
+    try {
+      // Add the embed=true parameter to the URL
+      const url = new URL(streamlitUrl);
+      
+      // Ensure we don't duplicate parameters if already present
+      if (!url.searchParams.has('embed')) {
+        url.searchParams.set('embed', 'true');
+      }
+      
+      // Add embed options for better appearance
+      if (!url.searchParams.has('embed_options')) {
+        url.searchParams.append('embed_options', 'show_toolbar');
+        url.searchParams.append('embed_options', 'show_padding');
+      }
+      
+      return url.toString();
+    } catch (e) {
+      // If URL parsing fails, just append the parameters
+      if (streamlitUrl.includes('?')) {
+        return `${streamlitUrl}&embed=true&embed_options=show_toolbar&embed_options=show_padding`;
+      }
+      return `${streamlitUrl}?embed=true&embed_options=show_toolbar&embed_options=show_padding`;
     }
-    
-    // Add embed options for better appearance
-    if (!url.searchParams.has('embed_options')) {
-      url.searchParams.append('embed_options', 'show_toolbar');
-      url.searchParams.append('embed_options', 'show_padding');
-    }
-    
-    return url.toString();
   };
 
   useEffect(() => {
-    const checkStreamlitStatus = async () => {
-      if (!streamlitUrl) return;
-      
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        // Simple HEAD request to check if the Streamlit app is accessible
-        const response = await fetch(streamlitUrl, {
-          method: 'HEAD',
-          mode: 'no-cors'
-        });
-        
-        // Since we're using no-cors, we can't actually check status
-        // But if this doesn't throw, the app is likely reachable
-        setError(null);
-        
-        // Set loading to false after a short delay to allow the iframe to load
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1500);
-      } catch (err: any) {
-        console.error("Error connecting to Streamlit:", err);
-        setError("Could not connect to the Streamlit application. Please check the URL.");
-        setIsLoading(false);
-      }
-    };
+    if (!streamlitUrl) return;
     
-    checkStreamlitStatus();
+    setIsLoading(true);
+    setError(null);
+    
+    // Use a timeout to simulate checking the URL status
+    // This avoids actual fetch which may cause CORS issues
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
   }, [streamlitUrl]);
 
   const openStreamlitApp = () => {
@@ -95,32 +86,46 @@ export const StreamlitEmbed = ({ streamlitUrl, height = "600px" }: StreamlitEmbe
             <Skeleton className="w-full h-40 bg-gray-800/50" />
             <Skeleton className="w-3/4 h-8 bg-gray-800/50" />
           </div>
-        ) : error ? (
-          <div className="text-center py-8">
-            <p className="text-red-400 mb-4">{error}</p>
-            <Button onClick={openStreamlitApp}>
-              Try Opening Directly <ExternalLinkIcon className="ml-2 h-4 w-4" />
-            </Button>
-            <p className="mt-4 text-sm text-gray-400">
-              Note: You may need to open the Streamlit application in a separate browser window 
-              due to cross-origin restrictions.
-            </p>
-          </div>
         ) : (
           <div className="h-full w-full">
-            <iframe
-              src={getEmbedUrl()}
-              style={{ 
-                width: '100%', 
-                height: height, 
-                border: 'none',
-                borderRadius: '4px',
-                backgroundColor: 'transparent'
-              }}
-              allow="camera;microphone"
-              title="Exercise Form Analyzer"
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-            />
+            {streamlitUrl ? (
+              <>
+                <iframe
+                  src={getEmbedUrl()}
+                  style={{ 
+                    width: '100%', 
+                    height: height, 
+                    border: 'none',
+                    borderRadius: '4px',
+                    backgroundColor: 'transparent'
+                  }}
+                  allow="camera;microphone"
+                  title="Exercise Form Analyzer"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
+                />
+                <div className="mt-3 p-3 bg-orange-950/30 border border-orange-800/50 rounded-md">
+                  <div className="flex gap-2 text-white">
+                    <InfoIcon className="h-5 w-5 text-orange-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm">
+                        If you're seeing a connection error, please try opening the Streamlit app directly using the "Open Analyzer App" button above. 
+                        Embedded Streamlit apps may be limited by cross-origin restrictions.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-400 mb-4">Please enter a valid Streamlit URL in the configuration section.</p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.open("https://streamlit.io/cloud", "_blank")}
+                >
+                  Learn About Streamlit Cloud
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

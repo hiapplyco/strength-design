@@ -5,25 +5,50 @@
  
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 43 59% 55%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 43 57% 49%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 43 30% 20%;
-    --muted-foreground: 0 0% 80%;
-    --accent: 43 84% 36%;
-    --accent-foreground: 0 0% 100%;
+    /* Light mode variables */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 142.1 76.2% 36.3%;  /* Green */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 291.1 64.2% 42.2%; /* Purple */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 349.5 89.2% 60.2%;  /* Pink */
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 43 59% 55%;
-    --input: 43 59% 55%;
-    --ring: 43 59% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark mode variables */
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 142.1 70.2% 45.3%;  /* Green */
+    --primary-foreground: 0 0% 9.6%;
+    --secondary: 291.1 64.2% 42.2%; /* Purple */
+    --secondary-foreground: 0 0% 9.6%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 349.5 89.2% 60.2%;   /* Pink */
+    --accent-foreground: 0 0% 9.6%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 142.1 70.2% 45.3%;
     --radius: 0.5rem;
   }
 
@@ -32,30 +57,15 @@
   }
 
   body {
-    @apply bg-black text-white relative min-h-screen;
+    @apply bg-background text-foreground relative min-h-screen;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background-image: url('/lovable-uploads/b8cf27ec-e8f3-4aa6-9e7f-ad8e09916b1b.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
     opacity: 1;
-    transition: opacity 0.3s ease-in-out;
-  }
-
-  body::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: -1;
+    transition: opacity 0.3s ease-in-out, background-color 0.3s ease-in-out;
   }
 
   /* Base input styling */
   .base-input {
-    @apply bg-black/70 border rounded-md px-6 py-4 w-full focus:border-transparent focus:ring-1 focus:ring-transparent text-white h-12 relative border-transparent;
+    @apply bg-background/70 border rounded-md px-6 py-4 w-full focus:border-transparent focus:ring-1 focus:ring-transparent text-foreground h-12 relative border-transparent;
   }
 
   /* Apply base input styling to all form elements */
@@ -68,12 +78,12 @@
   
   /* Textarea styling */
   textarea {
-    @apply bg-white text-black rounded-md px-6 py-4 w-full placeholder:text-gray-500;
+    @apply bg-white text-black rounded-md px-6 py-4 w-full placeholder:text-gray-500 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400;
   }
 
   /* Jupyter-style collapsible sections */
   .collapsible-section {
-    @apply bg-black/70 shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-background/70 shadow-sm hover:shadow-md transition-shadow duration-200;
   }
 
   /* Jupyter-style section headers */
@@ -86,7 +96,7 @@
 
   /* Jupyter-style code cells */
   .code-cell {
-    @apply bg-black/70 rounded-md p-4 font-mono text-sm relative;
+    @apply bg-background/70 rounded-md p-4 font-mono text-sm relative;
     position: relative;
   }
   
@@ -107,7 +117,7 @@
 
   /* Jupyter-style output cells */
   .output-cell {
-    @apply bg-black/70 pl-4 py-2 mt-2;
+    @apply bg-background/70 pl-4 py-2 mt-2;
     border-left: 4px solid transparent;
     border-image: linear-gradient(to bottom, #4CAF50, #9C27B0, #FF1493) 1;
   }
@@ -129,7 +139,7 @@
 
   /* Consistent dropdown menu styling */
   [role="listbox"] {
-    @apply bg-black/70 mt-2 py-2 rounded-md relative overflow-hidden;
+    @apply bg-background/70 mt-2 py-2 rounded-md relative overflow-hidden;
   }
   
   [role="listbox"]::before {

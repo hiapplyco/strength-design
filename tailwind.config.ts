@@ -27,11 +27,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "transparent", // Changed from gold to transparent to use with gradients
+          DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "transparent", // Changed from gold to transparent
+          DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
@@ -43,7 +43,7 @@ export default {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "transparent", // Changed from dark gold to transparent
+          DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
@@ -55,9 +55,9 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         jupyter: {
-          cell: "rgba(0, 0, 0, 0.7)",
-          border: "transparent", // Changed from gold to transparent
-          hover: "rgba(0, 0, 0, 0.1)",
+          cell: "rgba(var(--background), 0.7)",
+          border: "hsl(var(--border))",
+          hover: "rgba(var(--primary), 0.1)",
         }
       },
       borderRadius: {
@@ -85,8 +85,6 @@ export default {
       },
       backgroundImage: {
         'primary-gradient': 'linear-gradient(to right, #4CAF50, #9C27B0, #FF1493)',
-        'button-gradient': 'linear-gradient(to right, #C4A052, #E5C88E)',
-        'selected-gradient': 'linear-gradient(to right, #B8860B, #DAA520)',
       }
     },
   },

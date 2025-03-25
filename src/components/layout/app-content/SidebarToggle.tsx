@@ -13,7 +13,10 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
   const { toggleSidebar, open, openMobile } = useSidebar();
   const isMobile = useIsMobile();
   
-  if (!isVisible) return null;
+  // Changed this condition to make the toggle visible on mobile regardless of session
+  const shouldShow = isVisible || isMobile;
+  
+  if (!shouldShow) return null;
 
   const isOpen = isMobile ? openMobile : open;
 
@@ -24,8 +27,8 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
       size="icon"
       className={cn(
         "absolute z-[60] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-        "text-[#C4A052] hover:bg-[#C4A052]/10 focus-visible:ring-2 focus-visible:ring-[#C4A052]/50",
-        "backdrop-blur-sm border border-[#C4A052]/30 rounded-lg",
+        "text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/50",
+        "backdrop-blur-sm border border-primary/30 rounded-lg",
         "size-11 hover:scale-105 active:scale-95",
         isMobile ? "top-6" : "top-8",
         isOpen ? "left-[15rem]" : "left-8"

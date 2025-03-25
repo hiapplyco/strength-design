@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ export const VideoSection = () => {
 
   return (
     <div className="relative w-full max-w-7xl mx-auto -mt-12 mb-24 px-4">
-      <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-black/30 to-black/10 backdrop-blur-sm border border-white/10">
+      <div className="relative rounded-xl overflow-hidden bg-card/30 backdrop-blur-sm border border-border">
         <div className="aspect-video relative">
           <video
             className="w-full h-full object-cover absolute inset-0"

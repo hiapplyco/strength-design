@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,16 +79,7 @@ const Index = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      {/* Background image */}
-      <div
-        className="fixed inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
-        }}
-      />
-
+    <div className="relative min-h-screen overflow-x-hidden bg-background">
       {/* Content */}
       <div className="relative z-10 container mx-auto px-3 sm:px-6 py-8 sm:py-12 max-w-7xl">
         {/* Welcome Section */}
@@ -103,7 +95,7 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg md:text-xl text-gray-200 max-w-3xl mx-auto px-2 sm:px-4"
+            className="text-base sm:text-lg md:text-xl text-foreground max-w-3xl mx-auto px-2 sm:px-4"
           >
             Your all-in-one platform for AI-powered workout programming and analysis
           </motion.p>
@@ -119,7 +111,7 @@ const Index = () => {
               transition={{ delay: 0.1 * (index + 1) }}
               className="w-full"
             >
-              <Card className="bg-black/20 border-primary/20 backdrop-blur-sm hover:bg-black/30 transition-all duration-300 h-full">
+              <Card className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-300 h-full border-primary/20">
                 <CardHeader className="p-3 sm:p-6">
                   <CardTitle className="flex items-center gap-2 sm:gap-3 text-primary text-base sm:text-xl">
                     {card.icon}
@@ -127,7 +119,7 @@ const Index = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-                  <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base">{card.description}</p>
+                  <p className="text-foreground/80 mb-4 sm:mb-6 text-sm sm:text-base">{card.description}</p>
                   <Button
                     variant="outline"
                     className="w-full text-sm sm:text-base py-1.5 sm:py-2"

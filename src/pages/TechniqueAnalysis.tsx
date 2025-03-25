@@ -1,8 +1,6 @@
 
 import { TechniqueAnalysisContent } from "@/components/technique-analysis/TechniqueAnalysisContent";
 
-const TechniqueAnalysis = () => {
+export default function TechniqueAnalysis() {
   return <TechniqueAnalysisContent />;
-};
-
-export default TechniqueAnalysis;
+}

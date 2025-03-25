@@ -93,24 +93,18 @@ const WorkoutGenerator = () => {
     <AnimatePresence mode="wait">
       {showContent && (
         <motion.div 
-          className="min-h-screen"
+          className="min-h-screen bg-background"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
           <motion.div 
-            className="relative bg-cover bg-center bg-fixed"
-            style={{
-              backgroundImage: 'url("/lovable-uploads/08e5da43-23c6-459a-bea3-16ae71e6ceb5.png")',
-            }}
+            className="relative"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-          >
-            {/* Background overlay */}
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-            
+          >            
             <div className="relative">
               <motion.div 
                 className="container mx-auto px-4 max-w-[1200px] pt-24 pb-12"

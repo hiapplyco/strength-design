@@ -16,7 +16,7 @@ export const VideoAnalysis = () => {
   };
 
   return (
-    <Card className="bg-black/50 backdrop-blur-sm border border-gray-800 max-w-5xl mx-auto">
+    <Card className="bg-card/50 backdrop-blur-sm border border-border max-w-5xl mx-auto">
       <RecordingSection
         onNarrate={handleNarrate}
         onFileSelect={setSelectedFile}

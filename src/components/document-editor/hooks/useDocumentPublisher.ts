@@ -25,14 +25,21 @@ export function useDocumentPublisher() {
       setIsPublishing(true);
       console.log('Publishing document with content:', content.substring(0, 100) + '...');
       
+      // Get the current user's ID for document ownership
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
+      
+      // Set base URL for shareable link
       const baseUrl = window.location.origin;
       
+      // Initial insert with temporary URL placeholder
       const { data, error } = await supabase
         .from('documents')
         .insert({
           content: content,
           title: 'Workout Document',
-          url: `${baseUrl}/shared-document/`
+          url: `${baseUrl}/shared-document/`, // Temporary URL to be updated
+          user_id: userId // Set document ownership
         })
         .select('id')
         .single();
@@ -53,8 +60,10 @@ export function useDocumentPublisher() {
         onSave(content);
       }
 
+      // Complete shareable link with document ID
       const shareLink = `${baseUrl}/shared-document/${data.id}`;
       
+      // Update the document with the final URL
       const { error: updateError } = await supabase
         .from('documents')
         .update({ url: shareLink })

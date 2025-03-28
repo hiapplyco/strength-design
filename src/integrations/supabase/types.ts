@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analyses: {
+        Row: {
+          analysis_text: string | null
+          created_at: string
+          feedback: string[] | null
+          id: string
+          raw_response: Json | null
+          score: number | null
+          updated_at: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          analysis_text?: string | null
+          created_at?: string
+          feedback?: string[] | null
+          id?: string
+          raw_response?: Json | null
+          score?: number | null
+          updated_at?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          analysis_text?: string | null
+          created_at?: string
+          feedback?: string[] | null
+          id?: string
+          raw_response?: Json | null
+          score?: number | null
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analyses_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           created_at: string
@@ -160,6 +204,7 @@ export type Database = {
           id: string
           title: string
           url: string | null
+          user_id: string | null
         }
         Insert: {
           content: string
@@ -167,6 +212,7 @@ export type Database = {
           id?: string
           title?: string
           url?: string | null
+          user_id?: string | null
         }
         Update: {
           content?: string
@@ -174,6 +220,7 @@ export type Database = {
           id?: string
           title?: string
           url?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -632,6 +679,51 @@ export type Database = {
           question?: string
           user_id?: string
           video_name?: string
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          created_at: string
+          description: string | null
+          exercise_type: string | null
+          failure_reason: string | null
+          id: string
+          status: string
+          storage_path: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          exercise_type?: string | null
+          failure_reason?: string | null
+          id?: string
+          status?: string
+          storage_path: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          exercise_type?: string | null
+          failure_reason?: string | null
+          id?: string
+          status?: string
+          storage_path?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
         }
         Relationships: []
       }

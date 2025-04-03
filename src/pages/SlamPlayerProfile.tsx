@@ -186,10 +186,17 @@ export default function SlamPlayerProfile() {
     imageSrc: "/lovable-uploads/87fa814a-1a62-45af-b6cc-70b57bfc5a1e.png"
   };
 
+  // URI's official photo from the gorhody.com website
+  const playerPhotoUrl = "https://gorhody.com/images/2024/9/26/websize-fuchs.png";
+
   return (
     <div className="looker-fullscreen">
       {playerData ? (
-        <PlayerDashboard playerData={playerData} newsData={newsData} />
+        <PlayerDashboard 
+          playerData={playerData} 
+          newsData={newsData}
+          playerPhotoUrl={playerPhotoUrl} 
+        />
       ) : (
         <div className="looker-empty-state">
           <h2>No Data Available</h2>

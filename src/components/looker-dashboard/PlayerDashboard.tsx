@@ -7,6 +7,7 @@ import { KpiRow } from "./KpiRow";
 import { TeamRankingPanel } from "./TeamRankingPanel";
 import { ActivityPanel } from "./ActivityPanel";
 import { Header } from "./Header";
+import { ProfileCard } from "./ProfileCard";
 
 interface NewsDataType {
   title: string;
@@ -18,9 +19,10 @@ interface NewsDataType {
 interface PlayerDashboardProps {
   playerData: any;
   newsData?: NewsDataType;
+  playerPhotoUrl?: string;
 }
 
-export function PlayerDashboard({ playerData, newsData }: PlayerDashboardProps) {
+export function PlayerDashboard({ playerData, newsData, playerPhotoUrl }: PlayerDashboardProps) {
   const dashboardData = playerData.dashboard_json || {};
   
   // Setup animations on load
@@ -44,6 +46,13 @@ export function PlayerDashboard({ playerData, newsData }: PlayerDashboardProps) 
       <KpiRow dashboardData={dashboardData} />
       
       <div className="looker-grid">
+        <ProfileCard 
+          playerName={playerData.player_name}
+          teamName={playerData.team_name}
+          sport={playerData.sport}
+          photoUrl={playerPhotoUrl}
+        />
+        
         {newsData && (
           <div className="looker-panel">
             <NewsPanel 

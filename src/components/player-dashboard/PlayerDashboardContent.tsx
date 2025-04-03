@@ -8,12 +8,21 @@ import { TrainingInsights } from "./TrainingInsights";
 import { RecentActivities } from "./RecentActivities";
 import { PlayerHeader } from "./PlayerHeader";
 import { ChevronUp, ChevronDown, TrendingUp, Users, Activity, BarChart } from "lucide-react";
+import { NewsCard } from "./NewsCard";
+
+interface NewsDataType {
+  title: string;
+  details: string;
+  highlights: string[];
+  imageSrc?: string;
+}
 
 interface PlayerDashboardContentProps {
   playerData: any;
+  newsData?: NewsDataType;
 }
 
-export function PlayerDashboardContent({ playerData }: PlayerDashboardContentProps) {
+export function PlayerDashboardContent({ playerData, newsData }: PlayerDashboardContentProps) {
   const dashboardData = playerData.dashboard_json || {};
   
   // Simple animation entry effect
@@ -120,6 +129,15 @@ export function PlayerDashboardContent({ playerData }: PlayerDashboardContentPro
           </CardContent>
         </Card>
       </div>
+
+      {newsData && (
+        <NewsCard 
+          title={newsData.title}
+          details={newsData.details}
+          highlights={newsData.highlights}
+          imageSrc={newsData.imageSrc}
+        />
+      )}
 
       <Tabs defaultValue="performance" className="animate-in opacity-0 transition-all duration-300 delay-400">
         <TabsList className="grid grid-cols-4 mb-8">

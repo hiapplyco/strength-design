@@ -15,6 +15,7 @@ export default function SlamPlayerProfile() {
     const fetchPlayerData = async () => {
       try {
         setIsLoading(true);
+        // Use the correct table name with explicit typing
         const { data, error } = await supabase
           .from("player_dashboards")
           .select("*")
@@ -34,7 +35,7 @@ export default function SlamPlayerProfile() {
             variant: "destructive",
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching player data:", error);
         toast({
           title: "Error",
@@ -71,7 +72,19 @@ export default function SlamPlayerProfile() {
         </div>
         
         {playerData ? (
-          <PlayerDashboardContent playerData={playerData} />
+          <PlayerDashboardContent 
+            playerData={playerData} 
+            newsData={{
+              title: "David Fuchs Enters Transfer Portal",
+              details: "David Fuchs, a sophomore forward, has entered the transfer portal. He averaged 7.4 points and 7.5 rebounds per game across 29 games this season.",
+              highlights: [
+                "Led the team with 218 total rebounds",
+                "Shot 65.9% on two-point field goals",
+                "Posted several double-doubles including 16 points and 8 rebounds against Fordham"
+              ],
+              imageSrc: "/lovable-uploads/87fa814a-1a62-45af-b6cc-70b57bfc5a1e.png"
+            }}
+          />
         ) : (
           <div className="text-center p-8">
             <h2 className="text-2xl font-bold">No Data Available</h2>

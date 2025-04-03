@@ -14,6 +14,7 @@ import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import ProgramChat from "@/pages/ProgramChat";
 import TechniqueAnalysis from "@/pages/TechniqueAnalysis";
 import SlamPlayerProfile from "@/pages/SlamPlayerProfile";
+import MoVAPage from "@/pages/MoVAPage";
 import { memo, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -101,6 +102,8 @@ export const MainRoutes = memo(() => {
       />
       {/* Make SlamPlayerProfile publicly accessible */}
       <Route path="/slam-player-profile-uri-davidfuchs" element={<SlamPlayerProfile />} />
+      {/* Add our new MoVA page route */}
+      <Route path="/slam-mova" element={<MoVAPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

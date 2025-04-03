@@ -1,14 +1,16 @@
-
 interface NewsPanelProps {
   title: string;
   details: string;
   highlights: string[];
   imageSrc?: string;
 }
-
-export function NewsPanel({ title, details, highlights, imageSrc }: NewsPanelProps) {
-  return (
-    <div className="looker-panel-content">
+export function NewsPanel({
+  title,
+  details,
+  highlights,
+  imageSrc
+}: NewsPanelProps) {
+  return <div className="looker-panel-content">
       <div className="looker-panel-header">
         <h2>Latest News</h2>
         <div className="looker-panel-actions">
@@ -30,19 +32,14 @@ export function NewsPanel({ title, details, highlights, imageSrc }: NewsPanelPro
           <div className="looker-news-highlights">
             <h4>Highlights:</h4>
             <ul>
-              {highlights.map((highlight, index) => (
-                <li key={index}>{highlight}</li>
-              ))}
+              {highlights.map((highlight, index) => <li key={index}>{highlight}</li>)}
             </ul>
           </div>
         </div>
         
-        {imageSrc && (
-          <div className="looker-news-image">
-            <img src={imageSrc} alt="News" />
-          </div>
-        )}
+        {imageSrc && <div className="looker-news-image">
+            
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 }

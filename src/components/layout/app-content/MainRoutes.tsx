@@ -13,6 +13,7 @@ import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import ProgramChat from "@/pages/ProgramChat";
 import TechniqueAnalysis from "@/pages/TechniqueAnalysis";
+import SlamPlayerProfile from "@/pages/SlamPlayerProfile";
 import { memo, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -23,7 +24,7 @@ export const MainRoutes = memo(() => {
   
   // Scroll to top on route change but preserve state for specific routes
   useEffect(() => {
-    const preserveStateRoutes = ['/technique-analysis'];
+    const preserveStateRoutes = ['/technique-analysis', '/slam-player-profile-uri-davidfuchs'];
     if (!preserveStateRoutes.includes(location.pathname)) {
       window.scrollTo(0, 0);
     }
@@ -95,6 +96,14 @@ export const MainRoutes = memo(() => {
         element={
           <ProtectedRoute>
             <ProgramChat />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/slam-player-profile-uri-davidfuchs"
+        element={
+          <ProtectedRoute>
+            <SlamPlayerProfile />
           </ProtectedRoute>
         }
       />

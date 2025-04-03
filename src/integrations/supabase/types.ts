@@ -202,6 +202,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          share_link: string | null
           title: string
           url: string | null
           user_id: string | null
@@ -210,6 +211,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          share_link?: string | null
           title?: string
           url?: string | null
           user_id?: string | null
@@ -218,6 +220,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          share_link?: string | null
           title?: string
           url?: string | null
           user_id?: string | null
@@ -376,6 +379,36 @@ export type Database = {
           page_number?: number
           section?: string
           subsection?: string
+        }
+        Relationships: []
+      }
+      player_dashboards: {
+        Row: {
+          created_at: string
+          dashboard_json: Json
+          id: string
+          player_name: string
+          sport: string | null
+          team_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dashboard_json: Json
+          id?: string
+          player_name: string
+          sport?: string | null
+          team_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dashboard_json?: Json
+          id?: string
+          player_name?: string
+          sport?: string | null
+          team_name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

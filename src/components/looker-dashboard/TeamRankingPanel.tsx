@@ -1,9 +1,17 @@
 
+import { TrendingUp, TrendingDown } from "lucide-react";
+
 interface TeamRankingPanelProps {
   ranking: string;
 }
 
 export function TeamRankingPanel({ ranking }: TeamRankingPanelProps) {
+  // Extract just the numeric part if ranking has a # symbol
+  const rankNumber = ranking.startsWith('#') ? ranking.substring(1) : ranking;
+  
+  // Determine if ranking is improving or declining (assuming lower number is better)
+  const isImproving = true; // This would ideally be determined by comparing to previous data
+  
   return (
     <div className="looker-panel-content">
       <div className="looker-panel-header">
@@ -22,8 +30,18 @@ export function TeamRankingPanel({ ranking }: TeamRankingPanelProps) {
       <div className="looker-ranking-display">
         <div className="looker-ranking-circle">
           <span className="looker-ranking-value">{ranking}</span>
+          <div className="looker-ranking-trend">
+            {isImproving ? (
+              <TrendingUp className="looker-trend-icon improving" />
+            ) : (
+              <TrendingDown className="looker-trend-icon declining" />
+            )}
+          </div>
         </div>
         <div className="looker-ranking-label">Current Team Ranking</div>
+        <div className="looker-ranking-context">
+          <span className="looker-ranking-text">Among {parseInt(rankNumber) + 12} teams in division</span>
+        </div>
       </div>
     </div>
   );

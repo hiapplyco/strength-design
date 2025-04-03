@@ -1,184 +1,465 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
-@layer base {
-  :root {
-    /* Light mode variables */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 142.1 76.2% 36.3%;  /* Green */
-    --primary-foreground: 0 0% 98%;
-    --secondary: 291.1 64.2% 42.2%; /* Purple */
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 349.5 89.2% 60.2%;  /* Pink */
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 142.1 76.2% 36.3%;
-    --radius: 0.5rem;
-  }
 
-  .dark {
-    /* Dark mode variables */
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 142.1 70.2% 45.3%;  /* Green */
-    --primary-foreground: 0 0% 9.6%;
-    --secondary: 291.1 64.2% 42.2%; /* Purple */
-    --secondary-foreground: 0 0% 9.6%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 349.5 89.2% 60.2%;   /* Pink */
-    --accent-foreground: 0 0% 9.6%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 142.1 70.2% 45.3%;
-    --radius: 0.5rem;
-  }
-
-  html {
-    @apply antialiased;
-  }
-
-  body {
-    @apply bg-background text-foreground relative min-h-screen;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    opacity: 1;
-    transition: opacity 0.3s ease-in-out, background-color 0.3s ease-in-out;
-  }
-
-  /* Base input styling */
-  .base-input {
-    @apply bg-background/70 border rounded-md px-6 py-4 w-full focus:border-transparent focus:ring-1 focus:ring-transparent text-foreground h-12 relative border-transparent;
-  }
-
-  /* Apply base input styling to all form elements */
-  input,
-  .collapsible-section button[type="button"],
-  .collapsible-section,
-  [role="combobox"] {
-    @apply base-input;
-  }
+/* Google Looker Dashboard Styles */
+.looker-dashboard {
+  --looker-primary: #4285F4;
+  --looker-secondary: #DB4437;
+  --looker-success: #0F9D58;
+  --looker-warning: #F4B400;
+  --looker-bg: #f8f9fa;
+  --looker-card: #ffffff;
+  --looker-border: #e0e0e0;
+  --looker-text: #202124;
+  --looker-text-secondary: #5f6368;
+  --looker-header-height: 64px;
   
-  /* Textarea styling */
-  textarea {
-    @apply bg-white text-black rounded-md px-6 py-4 w-full placeholder:text-gray-500 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400;
-  }
-
-  /* Jupyter-style collapsible sections */
-  .collapsible-section {
-    @apply bg-background/70 shadow-sm hover:shadow-md transition-shadow duration-200;
-  }
-
-  /* Jupyter-style section headers */
-  .section-header {
-    @apply text-lg font-medium flex items-center gap-2 mb-2;
-    background: linear-gradient(to right, #4CAF50, #9C27B0, #FF1493);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* Jupyter-style code cells */
-  .code-cell {
-    @apply bg-background/70 rounded-md p-4 font-mono text-sm relative;
-    position: relative;
-  }
-  
-  .code-cell::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: 0.375rem;
-    background: linear-gradient(to right, #4CAF50, #9C27B0, #FF1493);
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  /* Jupyter-style output cells */
-  .output-cell {
-    @apply bg-background/70 pl-4 py-2 mt-2;
-    border-left: 4px solid transparent;
-    border-image: linear-gradient(to bottom, #4CAF50, #9C27B0, #FF1493) 1;
-  }
-
-  /* Remove double borders from collapsible sections */
-  .collapsible-section button[type="button"] {
-    @apply border-none;
-  }
-
-  /* Custom dropdown styling */
-  .dropdown-trigger {
-    @apply h-12 text-xl font-normal flex items-center justify-between px-6;
-  }
-
-  /* Button styling */
-  .btn-standard {
-    @apply h-14 transform transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5;
-  }
-
-  /* Consistent dropdown menu styling */
-  [role="listbox"] {
-    @apply bg-background/70 mt-2 py-2 rounded-md relative overflow-hidden;
-  }
-  
-  [role="listbox"]::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: 0.375rem;
-    background: linear-gradient(to right, #4CAF50, #9C27B0, #FF1493);
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  /* Dropdown option styling */
-  [role="option"] {
-    @apply px-6 py-2 hover:bg-primary/10 cursor-pointer;
-  }
-
-  /* Gradient border utility class - now uses a better technique */
-  .gradient-border {
-    @apply relative border-transparent;
-  }
-  
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: 0.375rem;
-    background: linear-gradient(to right, #4CAF50, #9C27B0, #FF1493);
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
+  font-family: 'Google Sans', Roboto, Arial, sans-serif;
+  background-color: var(--looker-bg);
+  color: var(--looker-text);
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
+.looker-container {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.looker-header {
+  background-color: var(--looker-card);
+  border-bottom: 1px solid var(--looker-border);
+  height: var(--looker-header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.looker-branding {
+  display: flex;
+  align-items: center;
+}
+
+.looker-logo {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--looker-primary);
+  margin-right: 8px;
+}
+
+.looker-subtitle {
+  font-size: 14px;
+  color: var(--looker-text-secondary);
+}
+
+.looker-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.looker-title h1 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.looker-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.looker-button {
+  background-color: var(--looker-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.looker-button:hover {
+  background-color: #3b78e7;
+}
+
+.looker-button-sm {
+  background-color: transparent;
+  color: var(--looker-primary);
+  border: 1px solid var(--looker-border);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.looker-button-sm:hover {
+  background-color: rgba(66, 133, 244, 0.04);
+}
+
+.looker-icon-button {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--looker-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.looker-icon-button:hover {
+  background-color: rgba(95, 99, 104, 0.08);
+}
+
+.looker-time-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--looker-border);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--looker-text);
+  cursor: pointer;
+}
+
+.looker-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 16px 24px;
+}
+
+.looker-kpi {
+  background-color: var(--looker-card);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.looker-kpi-label {
+  font-size: 14px;
+  color: var(--looker-text-secondary);
+  margin-bottom: 8px;
+}
+
+.looker-kpi-value {
+  font-size: 28px;
+  font-weight: 500;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.looker-kpi-change {
+  font-size: 14px;
+}
+
+.looker-kpi-change.positive {
+  color: var(--looker-success);
+}
+
+.looker-kpi-change.negative {
+  color: var(--looker-secondary);
+}
+
+.looker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 16px;
+  padding: 16px 24px;
+}
+
+.looker-panel {
+  background-color: var(--looker-card);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.looker-panel-tall {
+  grid-row: span 2;
+}
+
+.panel-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.looker-panel-content {
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.looker-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.looker-panel-header h2 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  color: var(--looker-text);
+}
+
+.looker-panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.looker-chart {
+  flex: 1;
+  min-height: 300px;
+}
+
+.looker-table-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.looker-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.looker-table th {
+  text-align: left;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--looker-border);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--looker-text-secondary);
+}
+
+.looker-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--looker-border);
+  font-size: 13px;
+}
+
+.looker-table-value {
+  font-weight: 500;
+}
+
+.looker-table-change {
+  font-weight: 500;
+}
+
+.looker-table-change.improved {
+  color: var(--looker-success);
+}
+
+.looker-table-change.declined {
+  color: var(--looker-secondary);
+}
+
+.looker-news {
+  display: flex;
+  gap: 16px;
+}
+
+.looker-news-content {
+  flex: 1;
+}
+
+.looker-news-content h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.looker-news-content p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--looker-text);
+}
+
+.looker-news-highlights h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.looker-news-highlights ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.looker-news-highlights li {
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: var(--looker-text);
+}
+
+.looker-news-image {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.looker-news-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.looker-ranking-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.looker-ranking-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: var(--looker-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.looker-ranking-value {
+  font-size: 42px;
+  font-weight: 500;
+  color: white;
+}
+
+.looker-ranking-label {
+  font-size: 14px;
+  color: var(--looker-text-secondary);
+}
+
+.looker-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.looker-activity-item {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+
+.looker-activity-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--looker-warning);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.looker-activity-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 5px;
+  width: 2px;
+  height: calc(100% + 12px);
+  background-color: rgba(244, 180, 0, 0.3);
+}
+
+.looker-activity-content {
+  flex: 1;
+  padding-bottom: 12px;
+}
+
+.looker-activity-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.looker-activity-type {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.looker-activity-date {
+  font-size: 12px;
+  color: var(--looker-text-secondary);
+}
+
+.looker-activity-details {
+  font-size: 13px;
+  color: var(--looker-text);
+}
+
+.looker-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--looker-bg);
+}
+
+.looker-spinner {
+  border: 3px solid rgba(66, 133, 244, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid var(--looker-primary);
+  width: 30px;
+  height: 30px;
+  animation: looker-spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes looker-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.looker-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--looker-bg);
+}
+
+.looker-empty-state h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--looker-text);
+}
+
+.looker-empty-state p {
+  font-size: 16px;
+  color: var(--looker-text-secondary);
+}
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');

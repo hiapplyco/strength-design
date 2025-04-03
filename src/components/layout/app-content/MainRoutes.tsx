@@ -99,14 +99,8 @@ export const MainRoutes = memo(() => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/slam-player-profile-uri-davidfuchs"
-        element={
-          <ProtectedRoute>
-            <SlamPlayerProfile />
-          </ProtectedRoute>
-        }
-      />
+      {/* Make SlamPlayerProfile publicly accessible */}
+      <Route path="/slam-player-profile-uri-davidfuchs" element={<SlamPlayerProfile />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

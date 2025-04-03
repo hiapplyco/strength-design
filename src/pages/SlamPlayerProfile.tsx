@@ -10,6 +10,43 @@ export default function SlamPlayerProfile() {
   const [playerData, setPlayerData] = useState<any>(null);
   const { toast } = useToast();
 
+  // Add CSS to hide the sidebar and make the dashboard full-screen
+  useEffect(() => {
+    // Hide sidebar and any other app chrome elements
+    const hideAppChrome = () => {
+      // Create a style element to inject custom CSS
+      const style = document.createElement('style');
+      style.innerHTML = `
+        /* Hide sidebar, navbar and other app elements */
+        aside, nav, .sidebar-toggle { 
+          display: none !important; 
+        }
+        
+        /* Make the dashboard take full width */
+        main, .looker-container { 
+          width: 100% !important;
+          max-width: 100% !important;
+          padding-left: 0 !important;
+          margin-left: 0 !important;
+        }
+        
+        /* Remove any margins that might be causing spacing */
+        body, #root, main > div {
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        document.head.removeChild(style);
+      };
+    };
+    
+    const cleanup = hideAppChrome();
+    return cleanup;
+  }, []);
+
   useEffect(() => {
     const fetchPlayerData = async () => {
       try {
@@ -129,9 +166,13 @@ export default function SlamPlayerProfile() {
     fetchPlayerData();
   }, [toast]);
 
-  // Remove all app styling and show a completely standalone dashboard
+  // Display the dashboard fullscreen without any app styling
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="looker-fullscreen">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   const newsData = {
@@ -146,7 +187,7 @@ export default function SlamPlayerProfile() {
   };
 
   return (
-    <div className="looker-dashboard">
+    <div className="looker-fullscreen">
       {playerData ? (
         <PlayerDashboard playerData={playerData} newsData={newsData} />
       ) : (

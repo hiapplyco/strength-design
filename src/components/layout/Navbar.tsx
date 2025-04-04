@@ -10,7 +10,7 @@ export const Navbar = () => {
     { path: '/generated-workouts', icon: <FileText className="h-5 w-5" />, text: 'Previous Programs' },
     { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Publish Program' },
     { path: '/program-chat', icon: <MessageSquare className="h-5 w-5" />, text: 'Program Chat' },
-    { path: '/slam-mova', icon: <BarChart3 className="h-5 w-5" />, text: 'MoVA Platform' },
+    { path: '/slam-mova', icon: <BarChart3 className="h-5 w-5" />, text: 'MoVA Platform', highlight: true },
     { path: '/pricing', icon: <DollarSign className="h-5 w-5" />, text: 'Upgrade to Pro' },
   ];
 
@@ -42,7 +42,9 @@ export const Navbar = () => {
                 key={item.path}
                 asChild 
                 variant="ghost" 
-                className="text-accent hover:text-accent/80 transition-colors flex items-center gap-2"
+                className={`text-accent hover:text-accent/80 transition-colors flex items-center gap-2 ${
+                  item.highlight ? 'bg-primary/20 ring-1 ring-primary/30' : ''
+                }`}
               >
                 <Link to={item.path}>
                   {item.icon}

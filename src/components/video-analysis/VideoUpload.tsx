@@ -1,115 +1,121 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Upload, FileText, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import React, { useState } from 'react';
+import { Upload, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 interface VideoUploadProps {
   onFileSelect: (file: File | null) => void;
   selectedFile: File | null;
-  onFileUpload?: (file: File) => Promise<void>;
-  onUploadComplete?: (url: string) => void;
+  onFileUpload: (file: File) => Promise<string>;
+  onUploadComplete: (url: string) => void;
 }
 
-export const VideoUpload = ({ 
-  onFileSelect, 
-  selectedFile, 
+export const VideoUpload: React.FC<VideoUploadProps> = ({
+  onFileSelect,
+  selectedFile,
   onFileUpload,
-  onUploadComplete 
-}: VideoUploadProps) => {
-  const { toast } = useToast();
-  const [isUploading, setIsUploading] = useState(false);
-  
+  onUploadComplete,
+}) => {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadComplete, setUploadComplete] = useState(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     onFileSelect(file);
-    
-    if (file && onFileUpload) {
-      handleUpload(file);
-    }
+    setError(null);
+    setUploadComplete(false);
   };
-  
-  const handleUpload = async (file: File) => {
-    if (!onFileUpload) return;
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setError("Please select a video file first");
+      return;
+    }
+
+    setUploading(true);
+    setProgress(10);
     
-    setIsUploading(true);
     try {
-      await onFileUpload(file);
-      toast({
-        title: "Success",
-        description: "Video uploaded successfully. Ready for analysis.",
-      });
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 10, 90));
+      }, 500);
+      
+      // Upload the file
+      const url = await onFileUpload(selectedFile);
+      
+      clearInterval(progressInterval);
+      setProgress(100);
+      setUploadComplete(true);
+      onUploadComplete(url);
     } catch (error) {
-      console.error("Upload error:", error);
-      toast({
-        title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to upload video. Please try again.",
-        variant: "destructive",
-      });
+      setError(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setProgress(0);
     } finally {
-      setIsUploading(false);
+      setUploading(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center bg-black/30">
-        <Input
-          id="video"
+    <div className="w-full space-y-4">
+      <div className="flex items-center space-x-4">
+        <Button
+          variant="outline"
+          onClick={() => document.getElementById('file-upload')?.click()}
+          disabled={uploading}
+          className="flex-1"
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          {selectedFile ? 'Change Video' : 'Select Video'}
+        </Button>
+        
+        <Button 
+          onClick={handleUpload} 
+          disabled={!selectedFile || uploading || uploadComplete}
+          className="flex-1"
+        >
+          {uploading ? 'Uploading...' : uploadComplete ? 'Uploaded' : 'Upload Video'}
+        </Button>
+        
+        <input
+          id="file-upload"
           type="file"
           accept="video/*"
+          className="hidden"
           onChange={handleFileChange}
-          className="sr-only"
-          disabled={isUploading}
+          disabled={uploading}
         />
-        
-        <label
-          htmlFor="video"
-          className="flex flex-col items-center justify-center w-full h-full cursor-pointer"
-        >
-          {isUploading ? (
-            <div className="flex flex-col items-center gap-2">
-              <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
-              <p className="text-sm text-gray-400">Uploading video...</p>
-            </div>
-          ) : selectedFile ? (
-            <div className="flex flex-col items-center gap-2">
-              <FileText className="h-10 w-10 text-blue-500" />
-              <p className="text-sm text-gray-400">{selectedFile.name}</p>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="mt-2"
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onFileSelect(null);
-                }}
-              >
-                Change Video
-              </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <Upload className="h-10 w-10 text-gray-400" />
-              <p className="text-lg font-medium text-white">Upload Video Here</p>
-              <p className="text-sm text-gray-400">MP4, MOV, or WebM (max 100MB)</p>
-              <Button 
-                variant="default" 
-                size="lg"
-                className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('video')?.click();
-                }}
-              >
-                Upload Video
-              </Button>
-            </div>
-          )}
-        </label>
       </div>
+      
+      {selectedFile && (
+        <div className="text-sm">
+          <p>Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</p>
+        </div>
+      )}
+
+      {uploading && (
+        <div className="space-y-2">
+          <Progress value={progress} className="w-full" />
+          <p className="text-xs text-center">{progress}%</p>
+        </div>
+      )}
+
+      {uploadComplete && (
+        <div className="flex items-center text-green-500">
+          <CheckCircle className="h-4 w-4 mr-2" />
+          <span>Upload complete!</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center text-red-500">
+          <AlertTriangle className="h-4 w-4 mr-2" />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
 };

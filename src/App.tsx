@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AppContent } from "./components/layout/AppContent";
 import { AuthProvider } from "./contexts/AuthContext";

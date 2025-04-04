@@ -32,7 +32,7 @@ export default function MoVAPage() {
     setSelectedFile(file);
   };
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File): Promise<string> => {
     try {
       // Upload video to Supabase Storage
       const fileExt = file.name.split('.').pop();
@@ -114,7 +114,7 @@ export default function MoVAPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] text-[#1a237e] pb-20">
+    <div className="min-h-screen bg-background text-foreground pb-20">
       {/* Header Section */}
       <section className="bg-gradient-to-r from-[#1a237e] to-[#283593] py-16">
         <div className="container mx-auto px-4">

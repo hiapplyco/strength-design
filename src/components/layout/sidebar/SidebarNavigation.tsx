@@ -4,6 +4,7 @@ import { FileText, Dumbbell, Video, MessageSquare, Home, Activity, Sparkles } fr
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export function SidebarNavigation() {
   const { session } = useAuth();
@@ -70,7 +71,10 @@ export function SidebarNavigation() {
           <NavLink
             to={item.to}
             className={({ isActive }) =>
-              `flex items-center gap-2 ${isActive ? "text-accent" : "text-muted-foreground hover:text-accent"}`
+              cn(
+                "flex items-center gap-2 text-white/70 hover:text-white transition-colors duration-200",
+                isActive ? "text-white" : ""
+              )
             }
             onClick={(e) => item.requiresAuth && !session && handleAuthRequired(e)}
             end

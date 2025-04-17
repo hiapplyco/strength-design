@@ -97,12 +97,14 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * (index + 1) }}
+              className="h-full"
             >
               <Card 
                 className="bg-black/50 border border-green-500/30 backdrop-blur-sm 
                            hover:border-green-500/50 transition-all duration-300 
                            bg-gradient-to-br from-green-900/20 via-purple-900/20 to-pink-900/20 
-                           hover:from-green-900/30 hover:via-purple-900/30 hover:to-pink-900/30"
+                           hover:from-green-900/30 hover:via-purple-900/30 hover:to-pink-900/30
+                           h-full flex flex-col"
               >
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-white">
@@ -110,17 +112,19 @@ const Index = () => {
                     <span className="text-lg">{card.title}</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-white/70 mb-4 text-sm">{card.description}</p>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-black/50 border-green-500/30 text-white 
-                               hover:bg-green-500/10 hover:border-green-500/50"
-                    onClick={() => handleCardClick(card.path, card.requiresAuth)}
-                  >
-                    Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                <CardContent className="pt-0 flex flex-col flex-grow">
+                  <p className="text-white/70 mb-6 text-sm h-16">{card.description}</p>
+                  <div className="mt-auto">
+                    <Button
+                      variant="outline"
+                      className="w-full bg-black/50 border-green-500/30 text-white 
+                                hover:bg-green-500/10 hover:border-green-500/50"
+                      onClick={() => handleCardClick(card.path, card.requiresAuth)}
+                    >
+                      Get Started
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

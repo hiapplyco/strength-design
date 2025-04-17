@@ -18,7 +18,7 @@ export function WorkoutGeneratorHeader() {
     >
       <div className="flex items-center justify-center mb-6">
         <Dumbbell className="h-10 w-10 text-primary mr-3 animate-pulse" />
-        <LogoHeader>generate.workout</LogoHeader>
+        <LogoHeader className="text-white">generate.workout</LogoHeader>
       </div>
       
       <motion.p 
@@ -36,12 +36,12 @@ export function WorkoutGeneratorHeader() {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center cursor-help">
-                <Info className="h-4 w-4 mr-2" />
+                <Info className="h-4 w-4 mr-2 text-white" />
                 <span>Program generation typically takes about 30 seconds</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p className="max-w-xs">Our AI generates detailed, personalized workout plans based on your inputs. The process involves complex calculations to ensure optimal training balance.</p>
+              <p className="max-w-xs text-white">Our AI generates detailed, personalized workout plans based on your inputs. The process involves complex calculations to ensure optimal training balance.</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

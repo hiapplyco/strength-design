@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from "../ui/card";
 import { Dumbbell } from "lucide-react";
 import { Button } from "../ui/button";
 import type { DaysSelectionCardProps } from "./types";
+import { cn } from "@/lib/utils";
 
 export function DaysSelectionCard({ 
   numberOfDays, 
@@ -18,7 +19,7 @@ export function DaysSelectionCard({
       <CardHeader className="p-3 sm:p-4 relative z-10">
         <div className="flex items-center gap-2">
           <Dumbbell className="h-5 w-5 text-primary" />
-          <h3 className="text-lg">Training Days</h3>
+          <h3 className="text-lg text-white">Training Days</h3>
           {renderTooltip && renderTooltip()}
         </div>
       </CardHeader>
@@ -29,11 +30,12 @@ export function DaysSelectionCard({
               key={day}
               variant={numberOfDays === day ? "default" : "outline"}
               onClick={() => setNumberOfDays(day)}
-              className={`h-10 sm:h-12 w-full text-center relative ${
+              className={cn(
+                "h-10 sm:h-12 w-full text-center relative", 
                 numberOfDays === day 
-                  ? "text-white"
-                  : "bg-black/40 text-white border-0 hover:bg-black/60"
-              }`}
+                  ? "text-white" 
+                  : "bg-black/40 text-white/70 border-0 hover:bg-black/60 hover:text-white"
+              )}
               size="sm"
             >
               {numberOfDays === day && (

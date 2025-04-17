@@ -93,7 +93,7 @@ export function WorkoutGeneratorForm({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 bg-jupyter-cell/70 backdrop-blur-sm rounded-lg shadow-[0_0_15px_rgba(196,160,82,0.1)] p-8 border border-jupyter-border">
+    <div className="max-w-4xl mx-auto space-y-6 bg-black/20 backdrop-blur-sm rounded-lg shadow-[0_0_15px_rgba(196,160,82,0.1)] p-8 border border-green-500/30">
       {/* Header */}
       <header className="prose prose-lg mb-8">
         <h1 className="text-3xl font-bold text-white mb-4">Workout Program Generator</h1>

@@ -19,7 +19,7 @@ export function ActionButtons({
       <button
         onClick={onGenerate}
         disabled={isGenerating || !isValid}
-        className="relative w-full h-12 flex justify-center items-center text-white font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+        className="relative w-full h-12 flex justify-center items-center text-white dark:text-white light:text-white font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-80 -z-10"></div>
         {isGenerating ? (
@@ -41,7 +41,7 @@ export function ActionButtons({
       <button
         onClick={onClear}
         disabled={isGenerating}
-        className="w-full h-12 flex justify-center items-center bg-transparent text-white font-medium rounded-lg border border-red-500/50 hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-12 flex justify-center items-center bg-transparent dark:text-white light:text-gray-800 font-medium rounded-lg dark:border dark:border-red-500/50 light:border light:border-red-500 dark:hover:bg-red-500/10 light:hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <X className="h-4 w-4 mr-2" />
         Clear All

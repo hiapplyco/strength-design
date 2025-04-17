@@ -37,22 +37,22 @@ export function FitnessSection({
       <div 
         className={cn(
           "flex items-center gap-3 cursor-pointer p-3 rounded-md relative",
-          "bg-black/20 hover:bg-black/30 transition-colors duration-200",
+          "dark:bg-black/20 light:bg-gray-100 hover:bg-black/30 transition-colors duration-200",
           "bg-gradient-to-r from-emerald-500/30 via-primary/5 to-purple-500/30"
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-10 rounded-md"></div>
-        <Activity className="h-5 w-5 text-emerald-400" />
-        <h3 className="font-medium text-lg text-white">Your Fitness Level</h3>
+        <Activity className="h-5 w-5 dark:text-emerald-400 light:text-emerald-600" />
+        <h3 className="font-medium text-lg dark:text-white light:text-gray-800">Your Fitness Level</h3>
         {renderTooltip ? renderTooltip() : (
           <TooltipWrapper content="Select your fitness level to customize workout intensity" />
         )}
         <div className="ml-auto">
           {isExpanded ? (
-            <ChevronUp className="h-5 w-5 text-emerald-400" />
+            <ChevronUp className="h-5 w-5 dark:text-emerald-400 light:text-emerald-600" />
           ) : (
-            <ChevronDown className="h-5 w-5 text-emerald-400" />
+            <ChevronDown className="h-5 w-5 dark:text-emerald-400 light:text-emerald-600" />
           )}
         </div>
       </div>
@@ -66,7 +66,7 @@ export function FitnessSection({
             transition={{ duration: 0.3 }}
             className="overflow-hidden relative rounded-md p-4 pl-6"
           >
-            <div className="absolute inset-0 bg-black/10 rounded-md"></div>
+            <div className="absolute inset-0 dark:bg-black/10 light:bg-gray-100 rounded-md"></div>
             <div className="absolute inset-0 rounded-md p-[1px] -z-10 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-70"></div>
             
             <div className="relative z-10 pt-2">
@@ -77,12 +77,12 @@ export function FitnessSection({
                 <SelectTrigger className="w-full bg-white text-black rounded-[20px] border-none h-[50px]">
                   <SelectValue placeholder="Select your fitness level" />
                 </SelectTrigger>
-                <SelectContent className="bg-gray-900 border border-emerald-500/30 text-white">
+                <SelectContent className="dark:bg-gray-900 light:bg-white dark:border dark:border-emerald-500/30 light:border light:border-emerald-500/50 dark:text-white light:text-gray-800">
                   {fitnessLevels.map((level) => (
                     <SelectItem 
                       key={level.value} 
                       value={level.value}
-                      className="cursor-pointer hover:bg-gray-800"
+                      className="cursor-pointer dark:hover:bg-gray-800 light:hover:bg-gray-100"
                     >
                       {level.label}
                     </SelectItem>

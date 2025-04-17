@@ -14,12 +14,12 @@ export function DaysSelectionCard({
   const days = [1, 2, 3, 4, 5, 6, 7];
 
   return (
-    <Card className="bg-black/20 border-0 rounded-xl w-full overflow-hidden relative">
+    <Card className="dark:bg-black/20 light:bg-gray-100 border-0 rounded-xl w-full overflow-hidden relative">
       <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-primary/5 to-purple-500/10 rounded-xl" />
       <CardHeader className="p-3 sm:p-4 relative z-10">
         <div className="flex items-center gap-2">
-          <Dumbbell className="h-5 w-5 text-emerald-400" />
-          <h3 className="text-lg text-white font-medium">Training Days</h3>
+          <Dumbbell className="h-5 w-5 dark:text-emerald-400 light:text-emerald-600" />
+          <h3 className="text-lg dark:text-white light:text-gray-800 font-medium">Training Days</h3>
           {renderTooltip && renderTooltip()}
         </div>
       </CardHeader>
@@ -33,8 +33,8 @@ export function DaysSelectionCard({
               className={cn(
                 "h-10 sm:h-12 w-full text-center relative", 
                 numberOfDays === day 
-                  ? "text-white" 
-                  : "bg-black/40 text-white/70 border-0 hover:bg-black/60 hover:text-white"
+                  ? "dark:text-white light:text-white" 
+                  : "dark:bg-black/40 dark:text-white/70 dark:border-0 dark:hover:bg-black/60 dark:hover:text-white light:bg-white light:text-gray-700 light:border light:border-gray-300 light:hover:bg-gray-100"
               )}
               size="sm"
             >

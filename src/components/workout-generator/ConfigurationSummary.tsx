@@ -12,10 +12,10 @@ function ConfigSection({ title, content, capitalize = false, icon }: ConfigSecti
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2 mb-1">
-        {icon || <Check className="h-4 w-4 text-emerald-400" />}
-        <h4 className="font-semibold text-emerald-400 text-base">{title}</h4>
+        {icon || <Check className="h-4 w-4 dark:text-emerald-400 light:text-emerald-600" />}
+        <h4 className="font-semibold dark:text-emerald-400 light:text-emerald-600 text-base">{title}</h4>
       </div>
-      <p className={`text-sm text-white/80 pl-6 ${capitalize ? 'capitalize' : ''}`}>
+      <p className={`text-sm dark:text-white/80 light:text-gray-700 pl-6 ${capitalize ? 'capitalize' : ''}`}>
         {content}
       </p>
     </div>
@@ -71,12 +71,12 @@ export function ConfigurationSummary({
           const precipProb = forecast.precipitationProb[index];
           
           return (
-            <div key={index} className="text-sm pl-2 border-l border-emerald-500/30">
-              <div className="flex items-center gap-1 text-emerald-400 font-medium">
+            <div key={index} className="text-sm pl-2 border-l dark:border-emerald-500/30 light:border-emerald-500/70">
+              <div className="flex items-center gap-1 dark:text-emerald-400 light:text-emerald-600 font-medium">
                 <Calendar className="h-3 w-3" />
                 <span>{formattedDate} {index === 0 ? '(Today)' : ''}</span>
               </div>
-              <div className="pl-4 text-white/80">
+              <div className="pl-4 dark:text-white/80 light:text-gray-700">
                 <div>{description}</div>
                 <div>Temp: {minTemp}-{maxTemp}°C ({minTempF}-{maxTempF}°F)</div>
                 <div>Precipitation: {precipProb}%</div>
@@ -92,21 +92,21 @@ export function ConfigurationSummary({
                       prescribedExercises || injuries || weatherData;
 
   return (
-    <Card className="bg-black/30 border-emerald-500/30 shadow-md">
+    <Card className="dark:bg-black/30 light:bg-white/80 dark:border-emerald-500/30 light:border-emerald-500/50 shadow-md">
       <CardHeader className="py-2 px-4">
-        <CardTitle className="text-base text-emerald-400 font-medium tracking-wide flex items-center gap-2">
+        <CardTitle className="text-base dark:text-emerald-400 light:text-emerald-600 font-medium tracking-wide flex items-center gap-2">
           <Info className="h-4 w-4" />
           Your Configuration
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 py-2">
         {!hasAnyConfig ? (
-          <div className="text-center py-4 text-white/60">
+          <div className="text-center py-4 dark:text-white/60 light:text-gray-500">
             <p>No configuration settings yet.</p>
             <p className="text-sm mt-1">Use the options above to customize your workout.</p>
           </div>
         ) : (
-          <ScrollArea className={`h-[${maxHeight}] rounded-md border border-emerald-500/20 bg-black/40 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
+          <ScrollArea className={`h-[${maxHeight}] rounded-md border dark:border-emerald-500/20 light:border-emerald-500/30 dark:bg-black/40 light:bg-gray-50/50 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
             <div className="pr-2 pb-2">
               {numberOfDays > 0 && (
                 <ConfigSection 
@@ -119,58 +119,40 @@ export function ConfigurationSummary({
                 <ConfigSection 
                   title="Fitness Level"
                   content={fitnessLevel}
-                  capitalize
+                  capitalize={true}
                 />
               )}
-
+              
               {selectedExercises.length > 0 && (
-                <div className="mb-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Check className="h-4 w-4 text-emerald-400" />
-                    <h4 className="font-semibold text-emerald-400 text-base">Selected Exercises</h4>
-                  </div>
-                  <div className="pl-6 flex flex-wrap gap-2">
-                    {selectedExercises.map((exercise, index) => (
-                      <Badge key={index} variant="outline" className="bg-black/50 text-white border-emerald-500/30">
-                        {exercise.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                <ConfigSection 
+                  title="Selected Exercises/Equipment"
+                  content={selectedExercises.map(ex => ex.name).join(', ')}
+                />
               )}
-
+              
               {prescribedExercises && (
                 <ConfigSection 
-                  title="Prescribed Exercises"
+                  title="Your Goals"
                   content={prescribedExercises}
                 />
               )}
-
+              
               {injuries && (
                 <ConfigSection 
-                  title="Health Considerations"
+                  title="Injuries & Limitations"
                   content={injuries}
                 />
               )}
-
+              
               {weatherData && getWeatherDisplay() && (
-                <div className="mb-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <CloudSun className="h-4 w-4 text-yellow-400" />
-                    <h4 className="font-semibold text-emerald-400 text-base">Weather Conditions</h4>
-                  </div>
-                  <p className="text-sm text-white/80 pl-6">
-                    {getWeatherDisplay() || "Weather data available for workout optimization"}
-                  </p>
-                  
-                  {isWeatherDataObject(weatherData) && weatherData.forecast && (
-                    <div className="mt-1 pl-6">
-                      <div className="text-sm font-medium text-emerald-400 mb-1">Forecast for your workout days:</div>
-                      {getForecastDisplay()}
-                    </div>
-                  )}
-                </div>
+                <ConfigSection 
+                  title="Weather Conditions"
+                  content={getWeatherDisplay() || ''}
+                  icon={<CloudSun className="h-4 w-4 dark:text-emerald-400 light:text-emerald-600" />}
+                />
               )}
+              
+              {getForecastDisplay()}
             </div>
           </ScrollArea>
         )}

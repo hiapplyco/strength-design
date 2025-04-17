@@ -48,20 +48,20 @@ export function ExpandableSectionContainer({
       <div 
         className={cn(
           "flex items-center gap-3 cursor-pointer p-3 rounded-md relative",
-          "bg-black/20 hover:bg-black/30 transition-colors duration-200",
+          "dark:bg-black/20 light:bg-gray-100 dark:hover:bg-black/30 light:hover:bg-gray-200 transition-colors duration-200",
           "bg-gradient-to-r from-emerald-500/30 via-primary/5 to-purple-500/30"
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-10 rounded-md"></div>
         {icon}
-        <h3 className="font-medium text-lg text-white">{title}</h3>
+        <h3 className="font-medium text-lg dark:text-white light:text-gray-800">{title}</h3>
         <TooltipWrapper content={tooltipContent} />
         <div className="ml-auto">
           {isExpanded ? (
-            <ChevronUp className="h-5 w-5 text-emerald-400" />
+            <ChevronUp className="h-5 w-5 dark:text-emerald-400 light:text-emerald-600" />
           ) : (
-            <ChevronDown className="h-5 w-5 text-emerald-400" />
+            <ChevronDown className="h-5 w-5 dark:text-emerald-400 light:text-emerald-600" />
           )}
         </div>
       </div>
@@ -75,7 +75,7 @@ export function ExpandableSectionContainer({
             transition={{ duration: 0.3 }}
             className="overflow-hidden relative rounded-md p-4 pl-6"
           >
-            <div className="absolute inset-0 bg-black/10 rounded-md"></div>
+            <div className="absolute inset-0 dark:bg-black/10 light:bg-gray-100 rounded-md"></div>
             <div className="absolute inset-0 rounded-md p-[1px] -z-10 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-70"></div>
             
             {renderCustomContent ? (
@@ -111,7 +111,7 @@ export function ExpandableSectionContainer({
                   variant="ghost"
                   size="icon"
                   onClick={handleClear}
-                  className="hover:bg-red-500/10 text-white"
+                  className="dark:hover:bg-red-500/10 light:hover:bg-red-100 dark:text-white light:text-gray-800"
                 >
                   <X className="h-4 w-4" />
                 </Button>

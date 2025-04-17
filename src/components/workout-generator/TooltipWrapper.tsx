@@ -18,10 +18,10 @@ export function TooltipWrapper({ content, icon }: TooltipWrapperProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="cursor-help flex items-center">
-            {icon || <Info className="h-4 w-4 text-emerald-400" />}
+            {icon || <Info className="h-4 w-4 dark:text-emerald-400 light:text-emerald-600" />}
           </div>
         </TooltipTrigger>
-        <TooltipContent className="bg-gray-900/90 border border-emerald-500/30 text-white max-w-xs">
+        <TooltipContent className="max-w-xs">
           <p>{content}</p>
         </TooltipContent>
       </Tooltip>

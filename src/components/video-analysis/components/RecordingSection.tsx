@@ -2,7 +2,7 @@
 import VideoRecorder from "../VideoRecorder";
 import { VideoUpload } from "../VideoUpload";
 import { Teleprompter } from "../Teleprompter";
-import { useEffect } from "react";
+import { useVideoUpload } from "../hooks/useVideoUpload";
 
 interface RecordingSectionProps {
   onNarrate: () => void;
@@ -23,9 +23,27 @@ export const RecordingSection = ({
   setTeleprompterPosition,
   onVideoUploaded,
 }: RecordingSectionProps) => {
+  // Use the video upload hook to handle the upload process
+  const { uploadVideo } = useVideoUpload();
+
   const handleVideoUploaded = (url: string) => {
     if (onVideoUploaded) {
       onVideoUploaded(url);
+    }
+  };
+
+  // Create a function that satisfies the onFileUpload prop requirement
+  const handleFileUpload = async (file: File): Promise<string> => {
+    try {
+      const chunks: Blob[] = [file];
+      const mimeType = file.type;
+      await uploadVideo(chunks, mimeType);
+      // Return a placeholder URL since uploadVideo doesn't return the URL directly
+      // In a real implementation, this would return the actual URL
+      return URL.createObjectURL(file);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw error;
     }
   };
 
@@ -39,6 +57,8 @@ export const RecordingSection = ({
         <VideoUpload 
           onFileSelect={onFileSelect}
           selectedFile={selectedFile}
+          onFileUpload={handleFileUpload}
+          onUploadComplete={handleVideoUploaded}
         />
       </div>
       <div className="space-y-4">

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,7 +115,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full"
+          className="w-full border-green-500/30 bg-black/70 text-white"
         />
       </div>
       <div>
@@ -124,15 +125,19 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full"
+          className="w-full border-green-500/30 bg-black/70 text-white"
         />
         {view === 'sign_up' && (
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-white/60 mt-1">
             Password must be at least 6 characters long
           </p>
         )}
       </div>
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button 
+        type="submit" 
+        className="w-full bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] text-white" 
+        disabled={loading}
+      >
         {loading ? 'Loading...' : view === 'sign_up' ? 'Sign Up' : 'Sign In'}
       </Button>
     </form>

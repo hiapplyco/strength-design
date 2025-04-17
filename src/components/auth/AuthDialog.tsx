@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AuthErrorAlert } from "./AuthErrorAlert";
 import { AuthForm } from "./AuthForm";
@@ -15,9 +16,9 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-black/90 border border-green-500/30 backdrop-blur-sm shadow-xl">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-white text-xl">
             {view === "sign_up" ? "Create Account" : "Sign In"}
           </DialogTitle>
         </DialogHeader>
@@ -27,7 +28,7 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
           <Button
             variant="link"
             onClick={() => setView(view === "sign_up" ? "sign_in" : "sign_up")}
-            className="text-sm"
+            className="text-sm text-white/80 hover:text-white"
           >
             {view === "sign_up" 
               ? "Already have an account? Sign in" 

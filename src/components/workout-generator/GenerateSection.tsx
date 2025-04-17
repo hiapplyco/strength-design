@@ -30,12 +30,12 @@ export function GenerateSection({
   );
 
   return (
-    <Card className="bg-black/20 border border-primary/30 rounded-xl relative">
-      <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-pink-500/10 rounded-xl" />
+    <Card className="bg-black/20 border border-emerald-500/30 rounded-xl relative">
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-primary/5 to-purple-500/10 rounded-xl" />
       <CardHeader className="relative z-10 p-4">
         <div className="flex items-center gap-2">
-          <Send className="h-5 w-5 text-primary" />
-          <h3 className="font-oswald text-lg text-primary">Create Your Workout</h3>
+          <Send className="h-5 w-5 text-emerald-400" />
+          <h3 className="font-medium text-lg text-emerald-400">Create Your Workout</h3>
           {renderTooltip && renderTooltip()}
         </div>
       </CardHeader>

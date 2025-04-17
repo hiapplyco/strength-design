@@ -15,11 +15,11 @@ export function DaysSelectionCard({
 
   return (
     <Card className="bg-black/20 border-0 rounded-xl w-full overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-primary/5 to-pink-500/10 rounded-xl" />
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-primary/5 to-purple-500/10 rounded-xl" />
       <CardHeader className="p-3 sm:p-4 relative z-10">
         <div className="flex items-center gap-2">
-          <Dumbbell className="h-5 w-5 text-primary" />
-          <h3 className="text-lg text-white">Training Days</h3>
+          <Dumbbell className="h-5 w-5 text-emerald-400" />
+          <h3 className="text-lg text-white font-medium">Training Days</h3>
           {renderTooltip && renderTooltip()}
         </div>
       </CardHeader>
@@ -39,7 +39,7 @@ export function DaysSelectionCard({
               size="sm"
             >
               {numberOfDays === day && (
-                <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-90 hover:opacity-100 transition-opacity rounded-md"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-90 hover:opacity-100 transition-opacity rounded-md"></div>
               )}
               <span className="relative z-10">{day}</span>
             </Button>

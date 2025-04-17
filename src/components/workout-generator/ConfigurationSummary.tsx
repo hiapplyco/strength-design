@@ -12,8 +12,8 @@ function ConfigSection({ title, content, capitalize = false, icon }: ConfigSecti
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2 mb-1">
-        {icon || <Check className="h-4 w-4 text-primary" />}
-        <h4 className="font-semibold text-primary text-base">{title}</h4>
+        {icon || <Check className="h-4 w-4 text-emerald-400" />}
+        <h4 className="font-semibold text-emerald-400 text-base">{title}</h4>
       </div>
       <p className={`text-sm text-white/80 pl-6 ${capitalize ? 'capitalize' : ''}`}>
         {content}
@@ -71,8 +71,8 @@ export function ConfigurationSummary({
           const precipProb = forecast.precipitationProb[index];
           
           return (
-            <div key={index} className="text-sm pl-2 border-l border-primary/30">
-              <div className="flex items-center gap-1 text-primary font-medium">
+            <div key={index} className="text-sm pl-2 border-l border-emerald-500/30">
+              <div className="flex items-center gap-1 text-emerald-400 font-medium">
                 <Calendar className="h-3 w-3" />
                 <span>{formattedDate} {index === 0 ? '(Today)' : ''}</span>
               </div>
@@ -92,9 +92,9 @@ export function ConfigurationSummary({
                       prescribedExercises || injuries || weatherData;
 
   return (
-    <Card className="bg-black/30 border-primary/30 shadow-md">
+    <Card className="bg-black/30 border-emerald-500/30 shadow-md">
       <CardHeader className="py-2 px-4">
-        <CardTitle className="text-base text-primary font-oswald tracking-wide flex items-center gap-2">
+        <CardTitle className="text-base text-emerald-400 font-medium tracking-wide flex items-center gap-2">
           <Info className="h-4 w-4" />
           Your Configuration
         </CardTitle>
@@ -106,7 +106,7 @@ export function ConfigurationSummary({
             <p className="text-sm mt-1">Use the options above to customize your workout.</p>
           </div>
         ) : (
-          <ScrollArea className={`h-[${maxHeight}] rounded-md border border-primary/20 bg-black/40 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
+          <ScrollArea className={`h-[${maxHeight}] rounded-md border border-emerald-500/20 bg-black/40 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
             <div className="pr-2 pb-2">
               {numberOfDays > 0 && (
                 <ConfigSection 
@@ -126,12 +126,12 @@ export function ConfigurationSummary({
               {selectedExercises.length > 0 && (
                 <div className="mb-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <Check className="h-4 w-4 text-primary" />
-                    <h4 className="font-semibold text-primary text-base">Selected Exercises</h4>
+                    <Check className="h-4 w-4 text-emerald-400" />
+                    <h4 className="font-semibold text-emerald-400 text-base">Selected Exercises</h4>
                   </div>
                   <div className="pl-6 flex flex-wrap gap-2">
                     {selectedExercises.map((exercise, index) => (
-                      <Badge key={index} variant="outline" className="bg-black/50">
+                      <Badge key={index} variant="outline" className="bg-black/50 text-white border-emerald-500/30">
                         {exercise.name}
                       </Badge>
                     ))}
@@ -157,7 +157,7 @@ export function ConfigurationSummary({
                 <div className="mb-3">
                   <div className="flex items-center gap-2 mb-1">
                     <CloudSun className="h-4 w-4 text-yellow-400" />
-                    <h4 className="font-semibold text-primary text-base">Weather Conditions</h4>
+                    <h4 className="font-semibold text-emerald-400 text-base">Weather Conditions</h4>
                   </div>
                   <p className="text-sm text-white/80 pl-6">
                     {getWeatherDisplay() || "Weather data available for workout optimization"}
@@ -165,7 +165,7 @@ export function ConfigurationSummary({
                   
                   {isWeatherDataObject(weatherData) && weatherData.forecast && (
                     <div className="mt-1 pl-6">
-                      <div className="text-sm font-medium text-primary mb-1">Forecast for your workout days:</div>
+                      <div className="text-sm font-medium text-emerald-400 mb-1">Forecast for your workout days:</div>
                       {getForecastDisplay()}
                     </div>
                   )}

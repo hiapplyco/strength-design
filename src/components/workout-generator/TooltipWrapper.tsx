@@ -1,24 +1,27 @@
-import { HelpCircle } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+import { Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TooltipWrapperProps {
   content: string;
+  icon?: React.ReactNode;
 }
 
-export function TooltipWrapper({ content }: TooltipWrapperProps) {
+export function TooltipWrapper({ content, icon }: TooltipWrapperProps) {
   return (
-    <TooltipProvider delayDuration={100}>
+    <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button className="p-1 hover:bg-primary/10 rounded-full transition-colors">
-            <HelpCircle className="h-4 w-4 text-primary" />
-          </button>
+          <div className="cursor-help flex items-center">
+            {icon || <Info className="h-4 w-4 text-emerald-400" />}
+          </div>
         </TooltipTrigger>
-        <TooltipContent 
-          side="right" 
-          align="start" 
-          className="max-w-xs bg-primary text-primary-foreground p-2 text-sm"
-        >
+        <TooltipContent className="bg-gray-900/90 border border-emerald-500/30 text-white max-w-xs">
           <p>{content}</p>
         </TooltipContent>
       </Tooltip>

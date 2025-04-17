@@ -1,3 +1,4 @@
+
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploadSection } from "./FileUploadSection";
@@ -48,19 +49,19 @@ export function ExpandableSectionContainer({
         className={cn(
           "flex items-center gap-3 cursor-pointer p-3 rounded-md relative",
           "bg-black/20 hover:bg-black/30 transition-colors duration-200",
-          "bg-gradient-to-r from-[#0e401a]/30 via-[#3b0f47]/30 to-[#4a0924]/30"
+          "bg-gradient-to-r from-emerald-500/30 via-primary/5 to-purple-500/30"
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-10 rounded-md"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-10 rounded-md"></div>
         {icon}
-        <h3 className="font-oswald text-lg text-white">{title}</h3>
+        <h3 className="font-medium text-lg text-white">{title}</h3>
         <TooltipWrapper content={tooltipContent} />
         <div className="ml-auto">
           {isExpanded ? (
-            <ChevronUp className="h-5 w-5 text-primary" />
+            <ChevronUp className="h-5 w-5 text-emerald-400" />
           ) : (
-            <ChevronDown className="h-5 w-5 text-primary" />
+            <ChevronDown className="h-5 w-5 text-emerald-400" />
           )}
         </div>
       </div>
@@ -75,7 +76,7 @@ export function ExpandableSectionContainer({
             className="overflow-hidden relative rounded-md p-4 pl-6"
           >
             <div className="absolute inset-0 bg-black/10 rounded-md"></div>
-            <div className="absolute inset-0 rounded-md p-[1px] -z-10 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70"></div>
+            <div className="absolute inset-0 rounded-md p-[1px] -z-10 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-70"></div>
             
             {renderCustomContent ? (
               <div className="relative z-10 pt-2">
@@ -110,7 +111,7 @@ export function ExpandableSectionContainer({
                   variant="ghost"
                   size="icon"
                   onClick={handleClear}
-                  className="hover:bg-destructive/10"
+                  className="hover:bg-red-500/10 text-white"
                 >
                   <X className="h-4 w-4" />
                 </Button>

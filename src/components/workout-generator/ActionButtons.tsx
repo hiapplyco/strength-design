@@ -19,9 +19,9 @@ export function ActionButtons({
       <button
         onClick={onGenerate}
         disabled={isGenerating || !isValid}
-        className="relative w-full h-12 flex justify-center items-center bg-primary text-white font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+        className="relative w-full h-12 flex justify-center items-center text-white font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-70 -z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-80 -z-10"></div>
         {isGenerating ? (
           <span className="flex items-center">
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

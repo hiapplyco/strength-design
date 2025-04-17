@@ -1,4 +1,5 @@
 
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { LogoHeader } from "@/components/ui/logo-header";
 
@@ -71,7 +71,6 @@ const Index = () => {
 
   const handleCardClick = (path: string, requiresAuth: boolean) => {
     if (requiresAuth && !session) {
-      // Show auth dialog if authentication is required but user is not logged in
       setShowAuthDialog(true);
     } else {
       navigate(path);
@@ -79,54 +78,48 @@ const Index = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background">
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-3 sm:px-6 py-8 sm:py-12 max-w-7xl">
-        {/* Welcome Section */}
-        <div className="text-center mb-8 sm:mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4"
-          >
-            <LogoHeader>strength.design</LogoHeader>
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base sm:text-lg md:text-xl text-foreground max-w-3xl mx-auto px-2 sm:px-4"
-          >
-            Your all-in-one platform for AI-powered workout programming and analysis
-          </motion.p>
-        </div>
+    <div className="relative min-h-screen overflow-x-hidden bg-black">
+      <div className="absolute inset-0 bg-gradient-to-br from-green-900/50 via-purple-900/50 to-pink-900/50 opacity-50 pointer-events-none"></div>
+      
+      <div className="relative z-10 container mx-auto px-4 py-12 max-w-7xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <LogoHeader className="text-white">STRENGTH.DESIGN</LogoHeader>
+        </motion.div>
 
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {cards.map((card, index) => (
             <motion.div
               key={card.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * (index + 1) }}
-              className="w-full"
             >
-              <Card className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-300 h-full border-primary/20">
-                <CardHeader className="p-3 sm:p-6">
-                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-primary text-base sm:text-xl">
+              <Card 
+                className="bg-black/50 border border-green-500/30 backdrop-blur-sm 
+                           hover:border-green-500/50 transition-all duration-300 
+                           bg-gradient-to-br from-green-900/20 via-purple-900/20 to-pink-900/20 
+                           hover:from-green-900/30 hover:via-purple-900/30 hover:to-pink-900/30"
+              >
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-white">
                     {card.icon}
-                    {card.title}
+                    <span className="text-lg">{card.title}</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-                  <p className="text-foreground/80 mb-4 sm:mb-6 text-sm sm:text-base">{card.description}</p>
+                <CardContent className="pt-0">
+                  <p className="text-white/70 mb-4 text-sm">{card.description}</p>
                   <Button
                     variant="outline"
-                    className="w-full text-sm sm:text-base py-1.5 sm:py-2"
+                    className="w-full bg-black/50 border-green-500/30 text-white 
+                               hover:bg-green-500/10 hover:border-green-500/50"
                     onClick={() => handleCardClick(card.path, card.requiresAuth)}
                   >
                     Get Started
-                    <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>
               </Card>
@@ -134,14 +127,12 @@ const Index = () => {
           ))}
         </div>
       </div>
-      
-      {/* Auth Dialog */}
+
       <AuthDialog
         isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         onSuccess={() => {
           setShowAuthDialog(false);
-          // Navigate to the previously selected path after successful authentication
           const activePath = cards.find(card => card.requiresAuth)?.path || "/workout-generator";
           navigate(activePath);
         }}

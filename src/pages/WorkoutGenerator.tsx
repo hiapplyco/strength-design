@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
 import { triggerConfetti } from "@/utils/confetti";

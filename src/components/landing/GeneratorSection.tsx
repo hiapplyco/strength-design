@@ -11,9 +11,9 @@ export function GeneratorSection({
   setShowGenerateInput,
   numberOfDays,
   setNumberOfDays,
+  numberOfCycles,
+  setNumberOfCycles,
 }) {
-  const [numberOfCycles, setNumberOfCycles] = useState(1);
-  
   return (
     <div className="bg-background/90 backdrop-blur rounded-lg shadow-lg flex flex-col relative w-full">
       <div className="flex-1 flex flex-col w-full">

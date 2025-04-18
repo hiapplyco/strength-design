@@ -1,3 +1,4 @@
+
 interface WorkoutGenerationParams {
   numberOfCycles: number;
   numberOfDays: number;

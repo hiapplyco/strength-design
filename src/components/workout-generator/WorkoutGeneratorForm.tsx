@@ -1,3 +1,4 @@
+
 import React from "react";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
@@ -37,6 +38,7 @@ interface WorkoutGeneratorFormProps {
   // Training schedule props
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
+  numberOfCycles: number;
   
   // Form action props
   onGenerate: () => void;
@@ -73,6 +75,7 @@ export function WorkoutGeneratorForm({
   // Training schedule props
   numberOfDays,
   setNumberOfDays,
+  numberOfCycles,
   
   // Form action props
   onGenerate,
@@ -127,6 +130,7 @@ export function WorkoutGeneratorForm({
             weatherData={weatherData}
             onWeatherUpdate={onWeatherUpdate}
             renderTooltip={() => renderTooltip("Add your location to get weather-optimized workouts")}
+            numberOfDays={numberOfDays}
           />
         </section>
         
@@ -160,7 +164,7 @@ export function WorkoutGeneratorForm({
             prescribedExercises={prescribedExercises}
             injuries={injuries}
             numberOfDays={numberOfDays}
-            setNumberOfDays={setNumberOfDays}
+            numberOfCycles={numberOfCycles}
             weatherData={weatherData}
           />
         </section>

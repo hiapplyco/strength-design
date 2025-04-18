@@ -11,6 +11,7 @@ interface GenerateWorkoutParams {
   fitnessLevel: string;
   prescribedExercises: string;
   numberOfDays: number;
+  numberOfCycles: number;
   injuries?: string;
 }
 
@@ -38,7 +39,8 @@ export const useWorkoutGeneration = () => {
         fitnessLevel: String(params.fitnessLevel || "beginner"),
         prescribedExercises: String(params.prescribedExercises || ""),
         injuries: String(params.injuries || ""),
-        numberOfDays: Number(params.numberOfDays) || 7
+        numberOfDays: Number(params.numberOfDays) || 7,
+        numberOfCycles: Number(params.numberOfCycles) || 1
       };
 
       console.log('Inputs being sent to edge function:', sanitizedParams);
@@ -50,6 +52,7 @@ export const useWorkoutGeneration = () => {
         prescribed_exercises: sanitizedParams.prescribedExercises,
         injuries: sanitizedParams.injuries,
         number_of_days: sanitizedParams.numberOfDays,
+        number_of_cycles: sanitizedParams.numberOfCycles,
         session_duration_ms: 0,
         success: false
       });
@@ -64,7 +67,8 @@ export const useWorkoutGeneration = () => {
           prompt: sanitizedParams.prompt,
           fitnessLevel: sanitizedParams.fitnessLevel,
           prescribedExercises: sanitizedParams.prescribedExercises,
-          numberOfDays: sanitizedParams.numberOfDays
+          numberOfDays: sanitizedParams.numberOfDays,
+          numberOfCycles: sanitizedParams.numberOfCycles
         }
       });
 
@@ -72,13 +76,14 @@ export const useWorkoutGeneration = () => {
         console.error('Error generating workout title:', titleError);
       }
 
-      const workoutTitle = titleData?.title || `${sanitizedParams.numberOfDays}-Day Workout Plan`;
+      const workoutTitle = titleData?.title || `${sanitizedParams.numberOfCycles}-Cycle ${sanitizedParams.numberOfDays}-Day Workout Plan`;
 
       // Generate the workout
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           ...sanitizedParams,
-          numberOfDays: sanitizedParams.numberOfDays
+          numberOfDays: sanitizedParams.numberOfDays,
+          numberOfCycles: sanitizedParams.numberOfCycles
         }
       });
 
@@ -166,7 +171,8 @@ export const useWorkoutGeneration = () => {
 
   // Helper function to generate a summary based on the workout data
   const generateWorkoutSummary = (workoutData: WeeklyWorkouts, params: GenerateWorkoutParams): string => {
-    const dayCount = Object.keys(workoutData).length;
+    const cycleCount = params.numberOfCycles;
+    const dayCount = params.numberOfDays;
     const focusAreas = new Set<string>();
     
     // Extract workout focus areas from the data
@@ -182,7 +188,7 @@ export const useWorkoutGeneration = () => {
     
     const focusString = Array.from(focusAreas).join(', ');
     
-    return `This ${dayCount}-day ${params.fitnessLevel || ''} workout program focuses on ${focusString || 'overall fitness'} training.`;
+    return `This ${cycleCount}-cycle, ${dayCount}-day ${params.fitnessLevel || ''} workout program focuses on ${focusString || 'overall fitness'} training.`;
   };
 
   return {

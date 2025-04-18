@@ -3,6 +3,7 @@ import { InputContainer } from "./workout-generator/input-container";
 import type { Exercise } from "./exercise-search/types";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 interface GenerateWorkoutInputProps {
   generatePrompt: string;
@@ -25,6 +26,7 @@ interface GenerateWorkoutInputProps {
 
 export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {
   const { setShowGenerateInput, showGenerateInput } = props;
+  const [numberOfCycles, setNumberOfCycles] = useState(1);
 
   return (
     <AnimatePresence mode="wait">
@@ -53,7 +55,11 @@ export function GenerateWorkoutInput(props: GenerateWorkoutInputProps) {
             transition={{ duration: 0.3 }}
             className="w-full"
           >
-            <InputContainer {...props} />
+            <InputContainer 
+              {...props} 
+              numberOfCycles={numberOfCycles}
+              setNumberOfCycles={setNumberOfCycles}
+            />
           </motion.div>
         )}
       </div>

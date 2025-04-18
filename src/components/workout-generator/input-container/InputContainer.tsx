@@ -1,3 +1,4 @@
+
 import React from "react";
 import { ExerciseSection } from "../ExerciseSection";
 import { FitnessSection } from "../FitnessSection";
@@ -29,9 +30,20 @@ interface InputContainerProps {
   setNumberOfDays: (value: number) => void;
   numberOfCycles: number;
   setNumberOfCycles: (value: number) => void;
+  showGenerateInput?: boolean;
+  setShowGenerateInput?: (value: boolean) => void;
 }
 
-export function InputContainer(props: InputContainerProps) {
+export function InputContainer({
+  generatePrompt,
+  setGeneratePrompt,
+  handleGenerateWorkout,
+  isGenerating,
+  numberOfDays,
+  setNumberOfDays,
+  numberOfCycles,
+  setNumberOfCycles,
+}: InputContainerProps) {
   // State management for input values
   const {
     fitnessLevel, setFitnessLevel,
@@ -59,7 +71,7 @@ export function InputContainer(props: InputContainerProps) {
   // Generate workout handler
   const onGenerate = async () => {
     await handleGenerateWorkout({
-      prompt: props.generatePrompt,
+      prompt: generatePrompt,
       weatherPrompt: weatherPrompt || "",
       selectedExercises,
       fitnessLevel,
@@ -86,7 +98,7 @@ export function InputContainer(props: InputContainerProps) {
   }) => {
     setPrescribedExercises(preset.prescribedExercises);
     setFitnessLevel(preset.fitnessLevel);
-    props.setNumberOfDays(preset.numberOfDays);
+    setNumberOfDays(preset.numberOfDays);
   };
 
   // Determine form validity
@@ -106,10 +118,10 @@ export function InputContainer(props: InputContainerProps) {
 
       <div className="space-y-5 sm:space-y-6 pb-6 px-2">
         <WorkoutCycleSelectors
-          numberOfCycles={props.numberOfCycles}
-          setNumberOfCycles={props.setNumberOfCycles}
-          numberOfDays={props.numberOfDays}
-          setNumberOfDays={props.setNumberOfDays}
+          numberOfCycles={numberOfCycles}
+          setNumberOfCycles={setNumberOfCycles}
+          numberOfDays={numberOfDays}
+          setNumberOfDays={setNumberOfDays}
         />
         
         <FitnessSection 
@@ -150,7 +162,7 @@ export function InputContainer(props: InputContainerProps) {
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
           renderTooltip={() => null}
-          numberOfDays={props.numberOfDays}
+          numberOfDays={numberOfDays}
         />
       </div>
 
@@ -159,8 +171,8 @@ export function InputContainer(props: InputContainerProps) {
         onClear={onClear}
         isGenerating={isGenerating}
         isValid={isFormValid}
-        numberOfDays={props.numberOfDays}
-        numberOfCycles={props.numberOfCycles}
+        numberOfDays={numberOfDays}
+        numberOfCycles={numberOfCycles}
         selectedExercises={selectedExercises}
         fitnessLevel={fitnessLevel}
         prescribedExercises={prescribedExercises}

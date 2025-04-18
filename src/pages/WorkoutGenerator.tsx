@@ -12,6 +12,7 @@ import { WorkoutGeneratorLoading } from "@/components/workout-generator/WorkoutG
 import { containerVariants } from "@/components/workout-generator/animations";
 
 const DEFAULT_DAYS = 7;
+const DEFAULT_CYCLES = 1;
 const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
 const WorkoutGenerator = () => {
@@ -19,6 +20,7 @@ const WorkoutGenerator = () => {
   const [generatePrompt, setGeneratePrompt] = useState("");
   const [showGenerateInput, setShowGenerateInput] = useState(true);
   const [numberOfDays, setNumberOfDays] = useState(DEFAULT_DAYS);
+  const [numberOfCycles, setNumberOfCycles] = useState(DEFAULT_CYCLES);
   const [pageLoaded, setPageLoaded] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [showContent, setShowContent] = useState(false);
@@ -58,7 +60,8 @@ const WorkoutGenerator = () => {
       
       const data = await generateWorkout({
         ...params,
-        numberOfDays
+        numberOfDays,
+        numberOfCycles
       });
 
       if (data) {
@@ -126,6 +129,8 @@ const WorkoutGenerator = () => {
                     setShowGenerateInput={setShowGenerateInput}
                     numberOfDays={numberOfDays}
                     setNumberOfDays={setNumberOfDays}
+                    numberOfCycles={numberOfCycles}
+                    setNumberOfCycles={setNumberOfCycles}
                   />
                 </motion.div>
               

@@ -12,6 +12,7 @@ import type { WeatherData } from "@/types/weather";
 interface SectionsContainerProps {
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
+  numberOfCycles: number;
   fitnessLevel: string;
   setFitnessLevel: (value: string) => void;
   prescribedExercises: string;
@@ -33,6 +34,7 @@ interface SectionsContainerProps {
 export function SectionsContainer({
   numberOfDays,
   setNumberOfDays,
+  numberOfCycles,
   fitnessLevel,
   setFitnessLevel,
   prescribedExercises,
@@ -89,7 +91,7 @@ export function SectionsContainer({
         onClear={onClear}
         isValid={true}
         numberOfDays={numberOfDays}
-        setNumberOfDays={setNumberOfDays}
+        numberOfCycles={numberOfCycles}
         selectedExercises={selectedExercises}
         fitnessLevel={fitnessLevel}
         prescribedExercises={prescribedExercises}

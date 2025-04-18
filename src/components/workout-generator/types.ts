@@ -1,3 +1,4 @@
+
 import type { Exercise } from "../exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 

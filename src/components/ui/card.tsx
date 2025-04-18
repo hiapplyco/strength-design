@@ -2,25 +2,33 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
+import { useTheme } from "@/contexts/ThemeContext"
 
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "relative rounded-md bg-card text-card-foreground shadow-sm overflow-hidden",
-      className
-    )}
-    {...props}
-  >
-    <div className="absolute inset-0 rounded-md bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] -z-10 p-[1px] dark:opacity-100 light:opacity-40"></div>
-    <div className="absolute inset-[1px] rounded-[calc(0.375rem-1px)] bg-black/70 dark:block light:hidden -z-[5]"></div>
-    <div className="absolute inset-[1px] rounded-[calc(0.375rem-1px)] bg-white/90 dark:hidden light:block -z-[5]"></div>
-    {props.children}
-  </div>
-))
+>(({ className, ...props }, ref) => {
+  const { theme } = useTheme();
+  
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "relative rounded-md bg-card text-card-foreground shadow-sm overflow-hidden",
+        className
+      )}
+      {...props}
+    >
+      <div className="absolute inset-0 rounded-md bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] -z-10 p-[1px] dark:opacity-100 light:opacity-40"></div>
+      <div className={`absolute inset-[1px] rounded-[calc(0.375rem-1px)] ${
+        theme === 'light' 
+          ? 'bg-white/90' 
+          : 'bg-black/70'
+      } -z-[5]`}></div>
+      {props.children}
+    </div>
+  );
+});
 Card.displayName = "Card"
 
 const CardHeader = React.forwardRef<

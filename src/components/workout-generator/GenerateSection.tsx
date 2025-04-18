@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "../ui/card";
 import { ActionButtons } from "./ActionButtons";
 import { ConfigurationSummary } from "./ConfigurationSummary";
 import type { GenerateSectionProps } from "./types";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export function GenerateSection({ 
   onGenerate, 
@@ -20,6 +21,7 @@ export function GenerateSection({
   injuries = "",
   weatherData
 }: GenerateSectionProps) {
+  const { theme } = useTheme();
   const hasSelections = Boolean(
     selectedExercises.length > 0 || 
     fitnessLevel || 
@@ -30,7 +32,7 @@ export function GenerateSection({
   );
 
   return (
-    <Card>
+    <Card className={theme === 'light' ? 'border-gray-200 bg-white/80' : ''}>
       <CardHeader className="p-4">
         <div className="flex items-center gap-2">
           <Send className="h-5 w-5 text-primary" />

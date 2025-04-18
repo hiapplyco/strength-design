@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { JournalCalendar } from "./JournalCalendar";
+import { WidgetPalette } from "./widgets/WidgetPalette";
+import { WidgetType } from "./widgets/WidgetRegistry";
 
 export const JournalPage: React.FC = () => {
   const [page, setPage] = useState({
@@ -24,6 +26,10 @@ export const JournalPage: React.FC = () => {
     const journalData = JSON.stringify(page);
     localStorage.setItem(`journal_${page.id}`, journalData);
     console.log("Journal saved:", page);
+  };
+
+  const handleWidgetSelect = (widgetType: WidgetType) => {
+    console.log("Selected widget:", widgetType);
   };
 
   return (
@@ -48,7 +54,14 @@ export const JournalPage: React.FC = () => {
           </div>
         </div>
         
-        <JournalCalendar />
+        <div className="grid grid-cols-[300px,1fr] gap-4">
+          <div className="sticky top-4">
+            <WidgetPalette onWidgetSelect={handleWidgetSelect} />
+          </div>
+          <div>
+            <JournalCalendar />
+          </div>
+        </div>
       </div>
     </div>
   );

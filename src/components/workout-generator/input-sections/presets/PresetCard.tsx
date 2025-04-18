@@ -23,12 +23,12 @@ export function PresetCard({
   return (
     <Card className={cn(
       "p-6",
-      theme === 'light'
-        ? 'bg-white shadow-md border border-gray-200'
-        : 'bg-black/50 border-transparent'
+      theme === 'light' 
+        ? 'bg-white shadow-md' 
+        : 'bg-zinc-900'
     )}>
       <div className="space-y-4">
-        <h4 className="text-lg font-semibold bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text text-transparent text-center">
+        <h4 className="text-lg font-semibold text-primary">
           {category.replace(/_/g, ' ')}
         </h4>
         
@@ -40,7 +40,7 @@ export function PresetCard({
             "w-full",
             theme === 'light'
               ? 'bg-white border-gray-200 text-gray-900'
-              : 'bg-black/60 border-transparent text-white'
+              : 'bg-zinc-800 border-zinc-700 text-white'
           )}>
             <SelectValue placeholder="Select a workout" />
           </SelectTrigger>
@@ -48,7 +48,7 @@ export function PresetCard({
           <SelectContent className={cn(
             theme === 'light'
               ? 'bg-white border-gray-200'
-              : 'bg-black/95 border-transparent'
+              : 'bg-zinc-800 border-zinc-700'
           )}>
             {Object.entries(workouts).map(([name, description]) => (
               <TooltipProvider key={name}>
@@ -60,7 +60,7 @@ export function PresetCard({
                         "cursor-pointer",
                         theme === 'light'
                           ? 'text-gray-900 hover:bg-gray-50'
-                          : 'text-white hover:bg-white/10'
+                          : 'text-white hover:bg-zinc-700'
                       )}
                     >
                       {name.replace(/_/g, ' ')}
@@ -71,8 +71,8 @@ export function PresetCard({
                     className={cn(
                       "max-w-[300px] p-4",
                       theme === 'light'
-                        ? 'bg-white text-gray-900 border border-gray-200'
-                        : 'bg-black/90 text-white border-transparent'
+                        ? 'bg-white text-gray-900 border-gray-200'
+                        : 'bg-zinc-800 text-white border-zinc-700'
                     )}
                   >
                     <p>{description}</p>

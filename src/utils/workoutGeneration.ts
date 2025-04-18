@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Exercise } from "@/components/exercise-search/types";
 import type { WeatherData } from "@/types/weather";
@@ -29,10 +28,17 @@ const validateWorkoutDay = (
   dayNumber: number,
   params: WorkoutGenerationParams
 ) => {
+  // Basic structure validation
+  if (!day.description || !day.workout) {
+    throw new Error(`Day ${dayNumber} missing required fields`);
+  }
+
+  // Fitness level validation
   if (!day.description.toLowerCase().includes(params.fitnessLevel.toLowerCase())) {
     throw new Error(`Day ${dayNumber} missing fitness level context`);
   }
 
+  // Selected exercises validation
   if (params.selectedExercises?.length) {
     const includedExercises = params.selectedExercises.filter(e => 
       day.workout.toLowerCase().includes(e.name.toLowerCase())
@@ -42,9 +48,12 @@ const validateWorkoutDay = (
     }
   }
 
+  // Injury modifications validation
   if (params.injuries && !day.notes?.toLowerCase().includes(params.injuries.toLowerCase())) {
     throw new Error(`Day ${dayNumber} missing injury modifications`);
   }
+
+  return true;
 };
 
 export const generateWorkout = async (params: WorkoutGenerationParams): Promise<WeeklyWorkouts> => {

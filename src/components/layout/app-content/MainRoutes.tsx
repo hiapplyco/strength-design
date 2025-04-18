@@ -1,6 +1,6 @@
 
 import { Routes, Route } from "react-router-dom";
-import { LandingPage } from "@/pages/Index";
+import LandingPage from "@/pages/Index";
 import { MoVAPage as Dashboard } from "@/pages/MoVAPage";
 import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
 import JournalPage from "@/pages/JournalPage";

@@ -2,13 +2,8 @@
 import { useState } from "react";
 import { Calendar, dateFnsLocalizer, Event } from "react-big-calendar";
 import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
-import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
+import { format, parse, startOfWeek, getDay, addHours, startOfHour } from "date-fns";
 import enUS from "date-fns/locale/en-US";
-import addHours from "date-fns/addHours";
-import startOfHour from "date-fns/startOfHour";
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -28,11 +23,20 @@ const localizer = dateFnsLocalizer({
 const DnDCalendar = withDragAndDrop(Calendar);
 
 export const JournalCalendar = () => {
+  // Create a new date for today
+  const today = new Date();
+  
+  // Create dates for the sample event
+  const eventStart = new Date(today);
+  const eventEnd = new Date(today);
+  // Add 1 hour to the end time
+  eventEnd.setHours(eventEnd.getHours() + 1);
+  
   const [events, setEvents] = useState<Event[]>([
     {
       title: "Sample Event",
-      start: new Date(),
-      end: addHours(new Date(), 1),
+      start: eventStart,
+      end: eventEnd,
     },
   ]);
 

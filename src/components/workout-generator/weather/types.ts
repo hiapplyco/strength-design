@@ -1,5 +1,6 @@
 
 import { Dispatch, SetStateAction } from "react";
+import { WeatherData } from "@/types/weather";
 
 export interface LocationResult {
   name: string;
@@ -10,7 +11,7 @@ export interface LocationResult {
 }
 
 export interface WeatherSearchProps {
-  onWeatherUpdate: (weatherData: any | null, weatherPrompt: string) => void;
+  onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
   renderTooltip?: () => React.ReactNode;
   isSearching?: boolean;
   setIsSearching?: Dispatch<SetStateAction<boolean>>;

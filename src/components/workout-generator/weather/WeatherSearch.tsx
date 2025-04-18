@@ -6,9 +6,10 @@ import { TooltipWrapper } from "../TooltipWrapper";
 import { LocationResultsDialog } from "./LocationResultsDialog";
 import { SearchForm } from "./SearchForm";
 import type { LocationResult } from "./types";
+import type { WeatherData } from "@/types/weather";
 
 interface WeatherSearchProps {
-  onWeatherUpdate: (weatherData: any | null) => void;
+  onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
   renderTooltip?: () => React.ReactNode;
   numberOfDays?: number;
 }
@@ -64,7 +65,12 @@ export function WeatherSearch({
         numberOfDays
       );
       
-      onWeatherUpdate(weatherData);
+      // Generate a simple weather prompt based on the data
+      const weatherPrompt = `Consider the weather in ${location.name}: ${weatherData.temperature}°C, 
+        ${weatherData.weatherCode ? fetchWeatherData.getWeatherDescription(weatherData.weatherCode) : 'varied conditions'}, 
+        with humidity at ${weatherData.humidity}% and wind speed of ${weatherData.windSpeed} km/h.`;
+        
+      onWeatherUpdate(weatherData, weatherPrompt);
     } catch (error) {
       console.error('Weather fetch error:', error);
       setSearchError("Error fetching weather data. Please try again.");

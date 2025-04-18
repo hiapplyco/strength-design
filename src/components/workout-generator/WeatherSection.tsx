@@ -4,7 +4,6 @@ import { WeatherSearch } from "./weather/WeatherSearch";
 import { WeatherDisplay } from "./weather/WeatherDisplay";
 import { CloudSun, ChevronDown, ChevronUp } from "lucide-react";
 import type { WeatherData } from "@/types/weather";
-import { getWeatherDescription } from "./weather/weather-utils";
 import { TooltipWrapper } from "./TooltipWrapper";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";

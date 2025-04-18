@@ -29,22 +29,21 @@ export function SearchForm({ searchQuery = "", isSearching, searchError, onSearc
           placeholder="Enter city name..."
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="bg-black text-white placeholder:text-gray-400 w-full"
-          borderStyle="multicolor"
+          className="w-full"
         />
         {searchError && (
-          <p className="text-red-400 text-sm mt-1">{searchError}</p>
+          <p className="text-destructive text-sm mt-1">{searchError}</p>
         )}
       </div>
       <Button 
         type="submit" 
         variant="default" 
-        className="bg-primary hover:bg-primary/90 text-black font-medium"
+        className="font-medium"
         disabled={isSearching}
       >
         {isSearching ? (
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-r-transparent"></div>
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"></div>
             <span>Searching...</span>
           </div>
         ) : (

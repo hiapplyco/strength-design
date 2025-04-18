@@ -17,9 +17,11 @@ import { motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { LogoHeader } from "@/components/ui/logo-header";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const Index = () => {
   const { session } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -78,8 +80,13 @@ const Index = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-background opacity-50 pointer-events-none"></div>
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* Apply different gradient overlay based on theme */}
+      <div className={`absolute inset-0 ${
+        theme === 'light' 
+          ? 'bg-gradient-to-br from-primary/5 via-background to-secondary/10' 
+          : 'bg-gradient-to-br from-primary/10 via-primary/5 to-background'
+      } opacity-50 pointer-events-none`}></div>
       
       <div className="relative z-10 container mx-auto px-4 py-12 max-w-7xl">
         <motion.div

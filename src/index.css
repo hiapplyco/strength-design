@@ -36,16 +36,6 @@
     --radius: 0.5rem;
   }
 
-  .light {
-    color-scheme: light;
-    /* Additional light mode specific styles can be added here */
-    /* Optional: Add a sunset-inspired gradient background for light mode */
-    background: linear-gradient(135deg, 
-      hsla(30, 91%, 96%, 1) 0%, 
-      hsla(25, 90%, 88%, 0.6) 100%
-    );
-  }
-
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -77,13 +67,32 @@
     
     color-scheme: dark;
   }
+}
 
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    
-    color-scheme: light;
-  }
+/* Add CSS for both theme modes */
+.light {
+  color-scheme: light;
+}
+
+/* Apply the sunset gradient background to the entire body and html when in light mode */
+html.light, 
+body.light, 
+.light .min-h-screen {
+  background: linear-gradient(135deg, 
+    hsla(30, 91%, 96%, 1) 0%, 
+    hsla(25, 90%, 88%, 0.8) 100%);
+  background-attachment: fixed;
+}
+
+/* Let cards have a more subtle background in light mode */
+.light .bg-card\/50 {
+  background-color: hsla(30, 91%, 98%, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+/* Fix for pages/Index.tsx gradient overlay in light mode */
+.light .bg-gradient-to-br.from-primary\/10 {
+  opacity: 0.3;
 }
 
 /* Google Looker Dashboard Styles */

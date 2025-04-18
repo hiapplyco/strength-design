@@ -7,6 +7,7 @@ import type { WeatherData } from "@/types/weather";
 import { TooltipWrapper } from "./TooltipWrapper";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface WeatherSectionProps {
   weatherData: WeatherData | null;
@@ -22,6 +23,7 @@ export function WeatherSection({
   numberOfDays = 7
 }: WeatherSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { theme } = useTheme();
   
   const handleClearWeather = () => {
     onWeatherUpdate(null, "");
@@ -79,3 +81,4 @@ export function WeatherSection({
     </div>
   );
 }
+

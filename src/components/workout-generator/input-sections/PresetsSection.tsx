@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { WORKOUT_PROGRAMS, PRESET_CONFIGS } from '../constants/workoutPresets';
 import { useGeminiExerciseExtraction } from '../hooks/useGeminiExerciseExtraction';
 import { useTheme } from "@/contexts/ThemeContext";
-import type { Exercise } from "../../exercise-search/types";
+import type { Exercise } from "../exercise-search/types";
+import { cn } from "@/lib/utils";
 
-interface PresetsSectionProps {
+interface PresetsProps {
   onSelectPreset: (preset: {
     title: string;
     prescribedExercises: string;
@@ -25,7 +26,7 @@ export function PresetsSection({
   onSelectPreset,
   onExercisesExtracted,
   currentPrescribedExercises = ''
-}: PresetsSectionProps) {
+}: PresetsProps) {
   const [selectedWorkouts, setSelectedWorkouts] = useState<Record<string, string>>({});
   const [showPresets, setShowPresets] = useState(false);
   const [visible, setVisible] = useState(true);
@@ -126,24 +127,38 @@ export function PresetsSection({
                     value={selectedWorkouts[category] || ''} 
                     onValueChange={value => handleWorkoutSelect(category, value)}
                   >
-                    <SelectTrigger className={`w-full relative overflow-hidden ${
-                      theme === 'light' 
-                        ? 'bg-white/80 text-gray-800 border-gray-200' 
-                        : 'bg-black/60 text-white border-transparent'
-                    }`}>
+                    <SelectTrigger 
+                      className={cn(
+                        "w-full relative overflow-hidden",
+                        theme === 'light' 
+                          ? 'bg-white/80 text-gray-800 border-gray-200 placeholder:text-gray-500' 
+                          : 'bg-black/60 text-white border-transparent'
+                      )}
+                    >
                       <div className="absolute inset-0 p-[1px] bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40 rounded-md"></div>
                       <div className={`absolute inset-[1px] rounded-[calc(0.375rem-1px)] ${
                         theme === 'light' 
                           ? 'bg-white/90' 
                           : 'bg-black/70'
                       }`}></div>
-                      <SelectValue placeholder="Select a workout" className="relative z-10" />
+                      <SelectValue 
+                        placeholder="Select a workout" 
+                        className={cn(
+                          "relative z-10",
+                          theme === 'light' 
+                            ? 'text-gray-600' 
+                            : 'text-gray-300'
+                        )} 
+                      />
                     </SelectTrigger>
-                    <SelectContent className={`relative ${
-                      theme === 'light' 
-                        ? 'bg-white/95 border-gray-200' 
-                        : 'bg-black/95 border-transparent'
-                    }`}>
+                    <SelectContent 
+                      className={cn(
+                        "relative",
+                        theme === 'light' 
+                          ? 'bg-white/95 border-gray-200' 
+                          : 'bg-black/95 border-transparent'
+                      )}
+                    >
                       <div className="absolute inset-0 p-[1px] bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40 rounded-md"></div>
                       <div className={`absolute inset-[1px] rounded-[calc(0.375rem-1px)] ${
                         theme === 'light' 
@@ -154,19 +169,27 @@ export function PresetsSection({
                         <TooltipProvider key={name}>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <SelectItem value={name} className={`${
-                                theme === 'light' 
-                                  ? 'text-gray-800 hover:bg-gradient-to-r hover:from-[#4CAF50]/5 hover:via-[#9C27B0]/5 hover:to-[#FF1493]/5' 
-                                  : 'text-white hover:bg-gradient-to-r hover:from-[#4CAF50]/10 hover:via-[#9C27B0]/10 hover:to-[#FF1493]/10'
-                              } cursor-pointer relative z-10`}>
+                              <SelectItem 
+                                value={name} 
+                                className={cn(
+                                  "cursor-pointer relative z-10",
+                                  theme === 'light'
+                                    ? 'text-gray-800 hover:bg-gradient-to-r hover:from-[#4CAF50]/5 hover:via-[#9C27B0]/5 hover:to-[#FF1493]/5 placeholder:text-gray-600' 
+                                    : 'text-white hover:bg-gradient-to-r hover:from-[#4CAF50]/10 hover:via-[#9C27B0]/10 hover:to-[#FF1493]/10'
+                                )}
+                              >
                                 {name.replace(/_/g, ' ')}
                               </SelectItem>
                             </TooltipTrigger>
-                            <TooltipContent side="right" className={`max-w-[300px] p-3 border-transparent relative overflow-hidden ${
-                              theme === 'light' 
-                                ? 'bg-white/90 text-gray-800' 
-                                : 'bg-black/90 text-white'
-                            }`}>
+                            <TooltipContent 
+                              side="right" 
+                              className={cn(
+                                "max-w-[300px] p-3 border-transparent relative overflow-hidden",
+                                theme === 'light' 
+                                  ? 'bg-white/90 text-gray-800' 
+                                  : 'bg-black/90 text-white'
+                              )}
+                            >
                               <div className="absolute inset-0 p-[1px] bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40 rounded-md"></div>
                               <div className={`absolute inset-[1px] rounded-[calc(0.375rem-1px)] ${
                                 theme === 'light' 
@@ -184,29 +207,9 @@ export function PresetsSection({
               </Card>
             ))}
           </div>
-
-          {isExtracting && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className={`p-6 rounded-lg relative overflow-hidden ${
-                theme === 'light' 
-                  ? 'bg-white' 
-                  : 'bg-black'
-              }`}>
-                <div className="absolute inset-0 p-[1px] bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40 rounded-lg"></div>
-                <div className={`absolute inset-[1px] rounded-[calc(0.5rem-1px)] ${
-                  theme === 'light' 
-                    ? 'bg-white/95' 
-                    : 'bg-black/95'
-                }`}></div>
-                <div className="flex items-center space-x-3 relative z-10">
-                  <Loader2 className="h-6 w-6 animate-spin text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text" />
-                  <p className={theme === 'light' ? 'text-gray-800' : 'text-white'}>Analyzing workout and extracting exercises...</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </Card>
   );
 }
+

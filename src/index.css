@@ -4,35 +4,49 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Sunset-inspired palette for light mode */
+    --background: 35 91% 96%; /* Soft peach */
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%;
+    --card: 35 91% 96%; /* Matching background for a soft look */
     --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 35 91% 96%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 142.1 76.2% 36.3%;
+    --primary: 25 95% 53%; /* Warm orange, reminiscent of sunset */
     --primary-foreground: 355.7 100% 97.3%;
 
-    --secondary: 240 4.8% 95.9%;
+    --secondary: 25 90% 88%; /* Lighter orange shade */
     --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 240 4.8% 95.9%;
+    --muted: 30 85% 92%; /* Soft peach-orange */
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 240 4.8% 95.9%;
+    --accent: 25 90% 88%;
     --accent-foreground: 240 5.9% 10%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 142.1 76.2% 36.3%;
+    --border: 25 50% 85%;
+    --input: 25 50% 85%;
+    --ring: 25 95% 53%;
 
     --radius: 0.5rem;
+  }
+
+  .light {
+    color-scheme: light;
+    /* Additional light mode specific styles can be added here */
+  }
+
+  /* Optional: Add a sunset-inspired gradient background for light mode */
+  .light body {
+    background: linear-gradient(135deg, 
+      hsla(30, 91%, 96%, 1) 0%, 
+      hsla(25, 90%, 88%, 0.6) 100%
+    );
   }
 
   .dark {
@@ -536,4 +550,3 @@
 
 /* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
-

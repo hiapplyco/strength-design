@@ -77,7 +77,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
             )}
             <Button 
               onClick={onStopWebcam}
-              variant="destructiveSecondary"
+              variant="destructive" // Changed from "destructiveSecondary"
             >
               Stop Webcam
             </Button>

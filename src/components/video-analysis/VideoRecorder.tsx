@@ -30,7 +30,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({ onNarrate, onVideoUploade
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-black/50 backdrop-blur-sm p-6 rounded-lg border border-gray-800">
+    <div className="w-full max-w-xl mx-auto bg-card/50 backdrop-blur-sm p-6 rounded-lg border border-border">
       <VideoPreview videoRef={videoRef} />
       <VideoControls
         isWebcamOn={isWebcamOn}

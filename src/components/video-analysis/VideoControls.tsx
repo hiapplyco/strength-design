@@ -51,7 +51,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           <div className="flex items-center gap-2">
             <Button 
               onClick={onStartWebcam}
-              className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white flex items-center gap-2"
+              className="bg-primary hover:bg-primary/80 text-primary-foreground flex items-center gap-2"
             >
               <Camera className="w-4 h-4" />
               Start Webcam
@@ -63,7 +63,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
             {!recording ? (
               <Button 
                 onClick={onStartRecording}
-                className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+                className="bg-primary hover:bg-primary/80 text-primary-foreground"
               >
                 Start Recording
               </Button>
@@ -77,7 +77,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
             )}
             <Button 
               onClick={onStopWebcam}
-              variant="destructive" // Changed from "destructiveSecondary"
+              variant="destructive"
             >
               Stop Webcam
             </Button>
@@ -88,7 +88,7 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
           <Button 
             onClick={onUploadVideo} 
             disabled={uploading}
-            className="bg-[#B08D57] hover:bg-[#B08D57]/80 text-white"
+            className="bg-primary hover:bg-primary/80 text-primary-foreground"
           >
             {uploading ? "Uploading..." : "Upload Video"}
           </Button>

@@ -2,18 +2,11 @@
 import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { AppSidebar } from "@/components/layout/AppSidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoadingSpinner } from "./app-content/LoadingSpinner";
-import { SidebarToggle } from "./app-content/SidebarToggle";
 import { MainRoutes } from "./app-content/MainRoutes";
-import { SidebarOverlay } from "./app-content/SidebarOverlay";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useSidebar } from "@/components/ui/sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Create a client
@@ -28,9 +21,6 @@ const queryClient = new QueryClient({
 
 const MainContent = () => {
   const { session } = useAuth();
-  const { open, openMobile } = useSidebar();
-  const isMobile = useIsMobile();
-  const isOpen = isMobile ? openMobile : open;
   const [contentReady, setContentReady] = useState(false);
 
   useEffect(() => {
@@ -44,24 +34,16 @@ const MainContent = () => {
 
   return (
     <AnimatePresence mode="wait">
-      <div className="min-h-screen flex w-full bg-black relative">
-        <AppSidebar />
-        <SidebarOverlay />
-        <motion.main 
-          className={cn(
-            "flex-1 w-full relative transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-            isOpen ? "md:pl-64" : "pl-0"
-          )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: contentReady ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <SidebarToggle isVisible={!!session} />
-          <div className="relative min-h-screen">
-            <MainRoutes />
-          </div>
-        </motion.main>
-      </div>
+      <motion.main 
+        className="min-h-screen w-full bg-background text-foreground relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: contentReady ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="relative min-h-screen">
+          <MainRoutes />
+        </div>
+      </motion.main>
     </AnimatePresence>
   );
 };
@@ -91,11 +73,9 @@ export const AppContent = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        <Toaster />
-        <Sonner />
-        <MainContent />
-      </SidebarProvider>
+      <Toaster />
+      <Sonner />
+      <MainContent />
     </QueryClientProvider>
   );
 };

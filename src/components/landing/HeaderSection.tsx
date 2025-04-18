@@ -15,7 +15,7 @@ export const HeaderSection = () => {
   };
 
   return (
-    <header className="w-full py-12 relative backdrop-blur-sm">
+    <header className="w-full py-12 relative backdrop-blur-sm bg-background/80">
       <div className="container mx-auto px-4">
         {/* Logo container with flex centering */}
         <div className="flex justify-center items-center w-full">
@@ -32,7 +32,7 @@ export const HeaderSection = () => {
         <div className="mt-8 text-center">
           <Button
             onClick={() => setShowAuthDialog(true)}
-            className="bg-destructive text-white hover:bg-destructive/90 font-bold text-lg px-8 py-6 rounded-lg"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-lg px-8 py-6 rounded-lg"
           >
             Get Started - Sign Up Now
           </Button>

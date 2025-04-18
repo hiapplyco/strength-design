@@ -78,8 +78,8 @@ const Index = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-black">
-      <div className="absolute inset-0 bg-gradient-to-br from-green-900/50 via-purple-900/50 to-pink-900/50 opacity-50 pointer-events-none"></div>
+    <div className="relative min-h-screen overflow-x-hidden bg-background">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-background opacity-50 pointer-events-none"></div>
       
       <div className="relative z-10 container mx-auto px-4 py-12 max-w-7xl">
         <motion.div
@@ -87,7 +87,7 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <LogoHeader className="text-white">STRENGTH.DESIGN</LogoHeader>
+          <LogoHeader>STRENGTH.DESIGN</LogoHeader>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -100,25 +100,22 @@ const Index = () => {
               className="h-full"
             >
               <Card 
-                className="bg-black/50 border border-green-500/30 backdrop-blur-sm 
-                           hover:border-green-500/50 transition-all duration-300 
-                           bg-gradient-to-br from-green-900/20 via-purple-900/20 to-pink-900/20 
-                           hover:from-green-900/30 hover:via-purple-900/30 hover:to-pink-900/30
+                className="bg-card/50 border border-primary/30 backdrop-blur-sm 
+                           hover:border-primary/50 transition-all duration-300 
                            h-full flex flex-col"
               >
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white">
+                  <CardTitle className="flex items-center gap-3 text-foreground">
                     {card.icon}
                     <span className="text-lg">{card.title}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 flex flex-col flex-grow">
-                  <p className="text-white/70 mb-6 text-sm h-16">{card.description}</p>
+                  <p className="text-muted-foreground mb-6 text-sm h-16">{card.description}</p>
                   <div className="mt-auto">
                     <Button
                       variant="outline"
-                      className="w-full bg-black/50 border-green-500/30 text-white 
-                                hover:bg-green-500/10 hover:border-green-500/50"
+                      className="w-full border-primary/30 hover:bg-primary/10 hover:border-primary/50"
                       onClick={() => handleCardClick(card.path, card.requiresAuth)}
                     >
                       Get Started

@@ -1,12 +1,11 @@
-
 import React from "react";
-import { DaysSelectionCard } from "../DaysSelectionCard";
+import { ExerciseSection } from "../ExerciseSection";
 import { FitnessSection } from "../FitnessSection";
 import { InjuriesSection } from "../InjuriesSection";
-import { ExerciseSection } from "../ExerciseSection";
 import { PrescribedExercisesSection } from "../PrescribedExercisesSection";
 import { WeatherSection } from "../WeatherSection";
 import { GenerateSection } from "../GenerateSection";
+import { WorkoutCycleSelectors } from "../WorkoutCycleSelectors";
 import { useWorkoutInputState } from "../hooks/useWorkoutInputState";
 import type { Exercise } from "@/components/exercise-search/types";
 import { PresetsSection } from "../input-sections/PresetsSection";
@@ -28,18 +27,11 @@ interface InputContainerProps {
   isGenerating: boolean;
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
-  showGenerateInput?: boolean;
-  setShowGenerateInput?: (value: boolean) => void;
+  numberOfCycles: number;
+  setNumberOfCycles: (value: number) => void;
 }
 
 export function InputContainer(props: InputContainerProps) {
-  const { 
-    handleGenerateWorkout, 
-    isGenerating, 
-    numberOfDays, 
-    setNumberOfDays 
-  } = props;
-
   // State management for input values
   const {
     fitnessLevel, setFitnessLevel,
@@ -94,7 +86,7 @@ export function InputContainer(props: InputContainerProps) {
   }) => {
     setPrescribedExercises(preset.prescribedExercises);
     setFitnessLevel(preset.fitnessLevel);
-    setNumberOfDays(preset.numberOfDays);
+    props.setNumberOfDays(preset.numberOfDays);
   };
 
   // Determine form validity
@@ -107,17 +99,17 @@ export function InputContainer(props: InputContainerProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Presets Section */}
       <PresetsSection 
         onSelectPreset={handleSelectPreset}
         currentPrescribedExercises={prescribedExercises}
       />
 
-      {/* Main Form Sections */}
       <div className="space-y-5 sm:space-y-6 pb-6 px-2">
-        <DaysSelectionCard
-          numberOfDays={numberOfDays}
-          setNumberOfDays={setNumberOfDays}
+        <WorkoutCycleSelectors
+          numberOfCycles={props.numberOfCycles}
+          setNumberOfCycles={props.setNumberOfCycles}
+          numberOfDays={props.numberOfDays}
+          setNumberOfDays={props.setNumberOfDays}
         />
         
         <FitnessSection 
@@ -158,17 +150,17 @@ export function InputContainer(props: InputContainerProps) {
           weatherData={weatherData}
           onWeatherUpdate={handleWeatherUpdate}
           renderTooltip={() => null}
-          numberOfDays={numberOfDays}
+          numberOfDays={props.numberOfDays}
         />
       </div>
 
-      {/* Generate Button Section */}
       <GenerateSection
         onGenerate={onGenerate}
         onClear={onClear}
         isGenerating={isGenerating}
         isValid={isFormValid}
-        numberOfDays={numberOfDays}
+        numberOfDays={props.numberOfDays}
+        numberOfCycles={props.numberOfCycles}
         selectedExercises={selectedExercises}
         fitnessLevel={fitnessLevel}
         prescribedExercises={prescribedExercises}

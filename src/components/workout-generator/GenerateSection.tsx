@@ -14,7 +14,7 @@ export function GenerateSection({
   renderTooltip,
   isValid,
   numberOfDays = 0,
-  setNumberOfDays,
+  numberOfCycles = 1,
   selectedExercises = [],
   fitnessLevel = "",
   prescribedExercises = "",
@@ -28,6 +28,7 @@ export function GenerateSection({
     prescribedExercises || 
     injuries || 
     numberOfDays > 0 || 
+    numberOfCycles > 1 || 
     weatherData
   );
 
@@ -53,6 +54,7 @@ export function GenerateSection({
             <div className="mt-2">
               <ConfigurationSummary 
                 numberOfDays={numberOfDays}
+                numberOfCycles={numberOfCycles}
                 fitnessLevel={fitnessLevel}
                 selectedExercises={selectedExercises}
                 prescribedExercises={prescribedExercises}

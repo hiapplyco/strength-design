@@ -9,6 +9,7 @@ export interface ConfigSectionProps {
 
 export interface ConfigurationSummaryProps {
   numberOfDays: number;
+  numberOfCycles: number;
   fitnessLevel: string;
   selectedExercises: Exercise[];
   prescribedExercises: string;
@@ -23,7 +24,7 @@ export interface GenerateSectionProps {
   renderTooltip?: () => React.ReactNode;
   isValid: boolean;
   numberOfDays?: number;
-  setNumberOfDays?: (value: number) => void;
+  numberOfCycles?: number;
   selectedExercises?: Exercise[];
   fitnessLevel?: string;
   prescribedExercises?: string;

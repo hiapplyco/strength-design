@@ -1,4 +1,5 @@
 interface WorkoutGenerationParams {
+  numberOfCycles: number;
   numberOfDays: number;
   weatherPrompt?: string;
   selectedExercises?: Array<{ name: string; instructions: string[] }>;
@@ -8,6 +9,7 @@ interface WorkoutGenerationParams {
 }
 
 export const createWorkoutGenerationPrompt = ({
+  numberOfCycles,
   numberOfDays,
   weatherPrompt,
   selectedExercises,
@@ -16,37 +18,47 @@ export const createWorkoutGenerationPrompt = ({
   injuries
 }: WorkoutGenerationParams): string => {
   const exercisesPrompt = selectedExercises?.length 
-    ? `**Specific Exercises:** Include these specific exercises: ${selectedExercises.map(e => e.name).join(", ")}.` 
+    ? `**Specific Exercises:** Include these exercises across the program: ${selectedExercises.map(e => e.name).join(", ")}.` 
     : '';
-  
-  return `As an expert fitness coach, create a ${numberOfDays}-day workout program tailored to the following specifications:
 
-    ${weatherPrompt ? `**Weather Conditions:** ${weatherPrompt}` : ''}
+  return `As an elite fitness coach, design a ${numberOfCycles}-cycle training program with ${numberOfDays} days per cycle.
+
+    PROGRAM STRUCTURE:
+    - Total Cycles: ${numberOfCycles}
+    - Days per Cycle: ${numberOfDays}
+    - Total Training Days: ${numberOfCycles * numberOfDays}
+
+    PARAMETERS:
+    ${weatherPrompt ? `- Weather Adaptations: ${weatherPrompt}` : ''}
     ${exercisesPrompt}
-    ${fitnessLevel ? `**Fitness Level:** This program is for a ${fitnessLevel} level individual.` : ''}
-    ${prescribedExercises ? `**Prescribed Exercises/Modifications:** Include these: ${prescribedExercises}.` : ''}
-    ${injuries ? `**Health Considerations:** Please consider these conditions: ${injuries}.` : ''}
+    - Fitness Level: ${fitnessLevel}
+    ${prescribedExercises ? `- Required Exercises: ${prescribedExercises}` : ''}
+    ${injuries ? `- Injury Considerations: ${injuries}` : ''}
 
-    For each day, provide a detailed workout program in the following exact JSON format:
+    For each cycle and day, provide a detailed workout program in this exact JSON format:
     {
-      "dayX": {
-        "description": "Brief focus description for the day (e.g., strength, endurance, recovery).",
-        "warmup": "1. Dynamic stretching\\n2. Mobility work\\n3. Movement prep",
-        "workout": "1. Main movement pattern\\n2. Conditioning piece\\n3. Accessory work\\nInclude sets, reps, and rest periods.",
-        "strength": "Primary lift focus with sets/reps scheme.",
-        "notes": "Scaling options, movement tips, and safety considerations."
+      "cycle1": {
+        "day1": {
+          "description": "Focus description for this day",
+          "warmup": "1. Dynamic stretching\\n2. Mobility work\\n3. Movement prep",
+          "workout": "1. Main exercises\\n2. Conditioning\\n3. Accessory work",
+          "strength": "Primary strength focus",
+          "notes": "Scaling options and safety considerations"
+        }
+        // ... repeat for each day in the cycle
       }
+      // ... repeat for each cycle
     }
 
-    IMPORTANT FORMATTING RULES:
-    1. Use line breaks (\\n) to separate movements
-    2. Number each movement step
-    3. Include specific details for sets, reps, and rest periods
-    4. Format as valid JSON without markdown
-    5. Ensure proper exercise progression
-    6. Include clear movement standards
+    IMPORTANT RULES:
+    1. Create progressive overload across cycles
+    2. Vary focus areas across days within each cycle
+    3. Maintain exercise technique descriptions
+    4. Include specific sets, reps, and rest periods
+    5. Format as valid JSON without markdown
+    6. Use proper exercise progression
+    7. Include clear movement standards
 
-    Ensure the program is balanced, progressive, and aligned with the individual's fitness level and goals.
     Return ONLY the JSON object with no additional text or markdown.`;
 };
 

@@ -17,7 +17,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            "flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm relative z-10",
+            "flex h-12 w-full rounded-md border border-input bg-background px-4 py-2 text-base", 
+            "text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400", // Improved text and placeholder visibility
+            "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm relative z-10",
             isFileInput && "h-auto py-1 px-3 text-xs file:mr-2 file:py-1 file:px-2", // Smaller height for file inputs
             className
           )}

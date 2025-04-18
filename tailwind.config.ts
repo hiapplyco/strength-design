@@ -54,11 +54,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        jupyter: {
-          cell: "rgba(var(--background), 0.7)",
-          border: "hsl(var(--border))",
-          hover: "rgba(var(--primary), 0.1)",
-        }
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -83,9 +78,6 @@ export default {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-      backgroundImage: {
-        'primary-gradient': 'linear-gradient(to right, #4CAF50, #9C27B0, #FF1493)',
-      }
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],

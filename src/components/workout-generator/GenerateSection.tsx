@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Send, Check, X } from "lucide-react";
+import { Send } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { ActionButtons } from "./ActionButtons";
 import { ConfigurationSummary } from "./ConfigurationSummary";
@@ -30,16 +30,15 @@ export function GenerateSection({
   );
 
   return (
-    <Card className="dark:bg-black/20 light:bg-gray-100 border dark:border-emerald-500/30 light:border-emerald-500/50 rounded-xl relative">
-      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-primary/5 to-purple-500/10 rounded-xl" />
-      <CardHeader className="relative z-10 p-4">
+    <Card>
+      <CardHeader className="p-4">
         <div className="flex items-center gap-2">
-          <Send className="h-5 w-5 dark:text-emerald-400 light:text-emerald-600" />
-          <h3 className="font-medium text-lg dark:text-emerald-400 light:text-emerald-600">Create Your Workout</h3>
+          <Send className="h-5 w-5 text-primary" />
+          <h3 className="font-medium text-lg">Create Your Workout</h3>
           {renderTooltip && renderTooltip()}
         </div>
       </CardHeader>
-      <CardContent className="p-4 relative z-10">
+      <CardContent className="p-4">
         <div className="space-y-4">
           <ActionButtons
             onGenerate={onGenerate}

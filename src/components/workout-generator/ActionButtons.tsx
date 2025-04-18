@@ -1,5 +1,6 @@
 
 import { Check, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ActionButtonsProps {
   onGenerate: () => void;
@@ -16,12 +17,12 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   return (
     <div className="grid grid-cols-1 gap-3">
-      <button
+      <Button
         onClick={onGenerate}
         disabled={isGenerating || !isValid}
-        className="relative w-full h-12 flex justify-center items-center text-white dark:text-white light:text-white font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+        className="w-full h-12 relative"
+        variant="default"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-primary to-purple-500 opacity-80 -z-10"></div>
         {isGenerating ? (
           <span className="flex items-center">
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -36,16 +37,17 @@ export function ActionButtons({
             GENERATE
           </span>
         )}
-      </button>
+      </Button>
       
-      <button
+      <Button
         onClick={onClear}
         disabled={isGenerating}
-        className="w-full h-12 flex justify-center items-center bg-transparent dark:text-white light:text-gray-800 font-medium rounded-lg dark:border dark:border-red-500/50 light:border light:border-red-500 dark:hover:bg-red-500/10 light:hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-12"
+        variant="outline"
       >
         <X className="h-4 w-4 mr-2" />
         Clear All
-      </button>
+      </Button>
     </div>
   );
 }

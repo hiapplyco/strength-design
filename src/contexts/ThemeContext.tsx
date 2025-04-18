@@ -57,6 +57,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     // Save to localStorage
     localStorage.setItem("theme", theme);
+    
+    console.log("Theme changed to:", theme);
   }, [theme]);
 
   // Listen for system preference changes

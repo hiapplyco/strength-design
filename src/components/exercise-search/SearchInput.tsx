@@ -15,15 +15,15 @@ export const SearchInput = ({ value, onChange, onClear }: SearchInputProps) => {
         placeholder="Search for exercises or equipment..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-white text-black placeholder:text-gray-600 rounded-[20px] border border-gray-300 focus-visible:ring-primary pr-10"
+        className="w-full bg-background text-foreground placeholder:text-muted-foreground rounded-[20px] border border-input/50 focus-visible:ring-1 focus-visible:ring-ring pr-10 h-12"
       />
       {value && (
         <button
           onClick={onClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted/50 rounded-full transition-colors"
           aria-label="Clear search"
         >
-          <X className="h-4 w-4 text-gray-700" />
+          <X className="h-4 w-4 text-muted-foreground" />
         </button>
       )}
     </div>

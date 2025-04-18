@@ -14,7 +14,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           className={cn(
             "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm", 
-            "text-black dark:text-white", // Ensure text is visible in both modes
+            "text-gray-800 dark:text-white", // More visible dark text in light mode
             "placeholder:text-gray-500 dark:placeholder:text-gray-400", // Improved placeholder visibility
             "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "disabled:cursor-not-allowed disabled:opacity-50",
@@ -38,3 +38,4 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 Textarea.displayName = "Textarea"
 
 export { Textarea }
+

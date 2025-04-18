@@ -107,9 +107,10 @@ const Index = () => {
               className="h-full"
             >
               <Card 
-                className="bg-card/50 border border-primary/30 backdrop-blur-sm 
-                           hover:border-primary/50 transition-all duration-300 
-                           h-full flex flex-col"
+                className={`border backdrop-blur-sm transition-all duration-300 h-full flex flex-col
+                           ${theme === 'light' 
+                             ? 'bg-card/80 border-primary/20 hover:border-primary/40' 
+                             : 'bg-card/50 border-primary/30 hover:border-primary/50'}`}
               >
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-foreground">
@@ -122,7 +123,9 @@ const Index = () => {
                   <div className="mt-auto">
                     <Button
                       variant="outline"
-                      className="w-full border-primary/30 hover:bg-primary/10 hover:border-primary/50"
+                      className={`w-full ${theme === 'light' 
+                        ? 'border-primary/20 hover:bg-primary/10 hover:border-primary/40' 
+                        : 'border-primary/30 hover:bg-primary/10 hover:border-primary/50'}`}
                       onClick={() => handleCardClick(card.path, card.requiresAuth)}
                     >
                       Get Started

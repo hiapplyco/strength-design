@@ -39,10 +39,7 @@
   .light {
     color-scheme: light;
     /* Additional light mode specific styles can be added here */
-  }
-
-  /* Optional: Add a sunset-inspired gradient background for light mode */
-  .light body {
+    /* Optional: Add a sunset-inspired gradient background for light mode */
     background: linear-gradient(135deg, 
       hsla(30, 91%, 96%, 1) 0%, 
       hsla(25, 90%, 88%, 0.6) 100%

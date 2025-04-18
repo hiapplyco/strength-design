@@ -1,4 +1,3 @@
-
 interface WorkoutGenerationParams {
   numberOfCycles: number;
   numberOfDays: number;
@@ -27,7 +26,7 @@ export const createWorkoutGenerationPrompt = ({
     PROGRAM STRUCTURE:
     - Total Cycles: ${numberOfCycles}
     - Days per Cycle: ${numberOfDays}
-    - Total Training Days: ${numberOfCycles * numberOfDays}
+    - Total Training Days: ${numberOfCycles * ${numberOfDays}}
 
     PARAMETERS:
     ${weatherPrompt ? `- Weather Adaptations: ${weatherPrompt}` : ''}

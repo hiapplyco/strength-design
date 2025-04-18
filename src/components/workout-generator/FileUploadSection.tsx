@@ -4,6 +4,7 @@ import { FileAnalysisState } from "./FileAnalysisState";
 import { Upload, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface FileUploadSectionProps {
   title: string;
@@ -24,6 +25,8 @@ export function FileUploadSection({
   analysisSteps,
   className = ""
 }: FileUploadSectionProps) {
+  const { theme } = useTheme();
+  
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -32,38 +35,39 @@ export function FileUploadSection({
   };
 
   return (
-    <Card className={cn("bg-transparent border-0 shadow-none", className)}>
-      <CardHeader className="p-0 pb-1">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-xs font-medium text-white/80">{title}</CardTitle>
-          {isSuccess && <Check className="h-3 w-3 text-green-500" />}
+    <div className={cn("flex items-center gap-2", className)}>
+      {title && (
+        <span className="text-sm font-medium text-foreground/90">
+          {title} {isSuccess && <Check className="inline-block h-3 w-3 text-green-500" />}
+        </span>
+      )}
+      
+      {isAnalyzing ? (
+        <FileAnalysisState title={`Analyzing ${title}`} steps={analysisSteps} />
+      ) : (
+        <div className="flex items-center">
+          <input
+            type="file"
+            onChange={handleFileSelect}
+            accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
+            className="hidden"
+            id={`file-upload-${title}`}
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            className={cn(
+              "h-8 w-8",
+              theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-background hover:bg-accent'
+            )}
+          >
+            <label htmlFor={`file-upload-${title}`} className="cursor-pointer flex items-center justify-center">
+              <Upload className="h-4 w-4" />
+            </label>
+          </Button>
         </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {isAnalyzing ? (
-          <FileAnalysisState title={`Analyzing ${title}`} steps={analysisSteps} />
-        ) : (
-          <div className="flex items-center">
-            <input
-              type="file"
-              onChange={handleFileSelect}
-              accept=".pdf,.docx,.txt,.jpg,.jpeg,.png"
-              className="hidden"
-              id={`file-upload-${title}`}
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              asChild
-              className="h-8 w-8 bg-gradient-to-r from-[#4CAF50]/10 via-[#9C27B0]/10 to-[#FF1493]/10 hover:bg-gradient-to-r hover:from-[#4CAF50]/20 hover:via-[#9C27B0]/20 hover:to-[#FF1493]/20"
-            >
-              <label htmlFor={`file-upload-${title}`} className="cursor-pointer flex items-center justify-center">
-                <Upload className="h-4 w-4" />
-              </label>
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

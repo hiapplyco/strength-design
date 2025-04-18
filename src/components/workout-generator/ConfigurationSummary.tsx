@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -24,6 +23,7 @@ function ConfigSection({ title, content, capitalize = false, icon }: ConfigSecti
 
 export function ConfigurationSummary({
   numberOfDays,
+  numberOfCycles,
   fitnessLevel,
   selectedExercises,
   prescribedExercises,
@@ -108,12 +108,10 @@ export function ConfigurationSummary({
         ) : (
           <ScrollArea className={`h-[${maxHeight}] rounded-md border dark:border-emerald-500/20 light:border-emerald-500/30 dark:bg-black/40 light:bg-gray-50/50 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
             <div className="pr-2 pb-2">
-              {numberOfDays > 0 && (
-                <ConfigSection 
-                  title="Training Days"
-                  content={`${numberOfDays} day${numberOfDays > 1 ? 's' : ''} of training`}
-                />
-              )}
+              <ConfigSection 
+                title="Training Schedule"
+                content={`${numberOfCycles} ${numberOfCycles > 1 ? 'cycles' : 'cycle'} of ${numberOfDays} ${numberOfDays > 1 ? 'days' : 'day'} each`}
+              />
               
               {fitnessLevel && (
                 <ConfigSection 

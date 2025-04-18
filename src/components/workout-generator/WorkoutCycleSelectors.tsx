@@ -1,5 +1,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 interface WorkoutCycleSelectorsProps {
   numberOfCycles: number;
@@ -14,15 +16,20 @@ export function WorkoutCycleSelectors({
   numberOfDays,
   setNumberOfDays
 }: WorkoutCycleSelectorsProps) {
+  const { theme } = useTheme();
+  
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-      <div className="flex-1 space-y-2">
-        <label className="text-sm font-medium text-white/80">Number of Cycles</label>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground/90">Number of Cycles</label>
         <Select
           value={numberOfCycles.toString()}
           onValueChange={(value) => setNumberOfCycles(parseInt(value))}
         >
-          <SelectTrigger className="w-full bg-card/50">
+          <SelectTrigger className={cn(
+            "w-full",
+            theme === 'light' ? 'bg-white' : 'bg-background'
+          )}>
             <SelectValue placeholder="Select cycles" />
           </SelectTrigger>
           <SelectContent>
@@ -35,13 +42,16 @@ export function WorkoutCycleSelectors({
         </Select>
       </div>
 
-      <div className="flex-1 space-y-2">
-        <label className="text-sm font-medium text-white/80">Days per Cycle</label>
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground/90">Days per Cycle</label>
         <Select
           value={numberOfDays.toString()}
           onValueChange={(value) => setNumberOfDays(parseInt(value))}
         >
-          <SelectTrigger className="w-full bg-card/50">
+          <SelectTrigger className={cn(
+            "w-full",
+            theme === 'light' ? 'bg-white' : 'bg-background'
+          )}>
             <SelectValue placeholder="Select days" />
           </SelectTrigger>
           <SelectContent>

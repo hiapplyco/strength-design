@@ -60,7 +60,7 @@ export function WeatherSection({
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="rounded-md border border-border bg-card p-4">
+            <div className="rounded-md border-0 bg-card p-4">
               {weatherData ? (
                 <WeatherDisplay 
                   weatherData={weatherData} 
@@ -81,4 +81,3 @@ export function WeatherSection({
     </div>
   );
 }
-

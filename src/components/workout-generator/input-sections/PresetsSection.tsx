@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { WORKOUT_PROGRAMS, PRESET_CONFIGS } from '../constants/workoutPresets';
 import { useGeminiExerciseExtraction } from '../hooks/useGeminiExerciseExtraction';
 import { useTheme } from "@/contexts/ThemeContext";
-import type { Exercise } from "../exercise-search/types";
+import type { Exercise } from "@/components/exercise-search/types";
 import { cn } from "@/lib/utils";
 
 interface PresetsProps {

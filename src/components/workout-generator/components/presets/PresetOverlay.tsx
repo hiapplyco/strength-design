@@ -21,8 +21,8 @@ export function PresetOverlay({ isShown }: PresetOverlayProps) {
         }`}></div>
         <div className="flex items-center space-x-3 relative z-10">
           <Loader2 className="h-6 w-6 animate-spin text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text" />
-          <p className={theme === 'light' ? 'text-gray-800' : 'text-white'}>
-            Analyzing workout and extracting exercises...
+          <p className={`${theme === 'light' ? 'text-gray-800' : 'text-white'} text-base font-medium`}>
+            Creating your workout plan...
           </p>
         </div>
       </div>

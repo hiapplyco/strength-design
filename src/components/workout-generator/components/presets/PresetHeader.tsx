@@ -16,10 +16,13 @@ export function PresetHeader({ onClose }: PresetHeaderProps) {
         <X size={20} />
       </button>
 
-      <div className="text-center space-y-2 relative z-10">
-        <h3 className="text-lg font-semibold text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text">
+      <div className="text-center space-y-2 relative z-10 mb-4">
+        <h3 className="text-xl font-semibold text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text">
           Starter Workouts
         </h3>
+        <p className="text-sm text-muted-foreground">
+          Select a pre-designed workout to get started quickly
+        </p>
       </div>
     </>
   );

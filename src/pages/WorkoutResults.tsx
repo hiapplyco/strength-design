@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
@@ -21,6 +21,7 @@ const WorkoutResults = () => {
     // First try to get workouts from location state
     if (location.state?.workouts) {
       setWorkouts(location.state.workouts);
+      console.log("Loaded workout data from location state");
       return;
     }
     

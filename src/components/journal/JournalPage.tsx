@@ -7,6 +7,7 @@ import { Save } from "lucide-react";
 import { JournalCalendar } from "./JournalCalendar";
 import { WidgetPalette } from "./widgets/WidgetPalette";
 import { WidgetType } from "./widgets/WidgetRegistry";
+import { toast } from "@/components/ui/use-toast";
 
 export const JournalPage: React.FC = () => {
   const [page, setPage] = useState({
@@ -26,6 +27,11 @@ export const JournalPage: React.FC = () => {
     const journalData = JSON.stringify(page);
     localStorage.setItem(`journal_${page.id}`, journalData);
     console.log("Journal saved:", page);
+    toast({
+      title: "Journal Saved",
+      description: "Your journal page has been saved successfully.",
+      duration: 3000,
+    });
   };
 
   const handleWidgetSelect = (widgetType: WidgetType) => {

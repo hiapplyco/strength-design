@@ -7,7 +7,7 @@ import { Save } from "lucide-react";
 import { JournalCalendar } from "./JournalCalendar";
 import { WidgetPalette } from "./widgets/WidgetPalette";
 import { WidgetType } from "./widgets/WidgetRegistry";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 export const JournalPage: React.FC = () => {
   const [page, setPage] = useState({

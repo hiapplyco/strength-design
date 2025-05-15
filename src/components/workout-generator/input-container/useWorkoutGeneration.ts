@@ -11,6 +11,7 @@ interface UseWorkoutGenerationProps {
   prescribedExercises: string;
   injuries: string;
   numberOfDays: number;
+  numberOfCycles: number;
 }
 
 export function useWorkoutGeneration({
@@ -23,6 +24,7 @@ export function useWorkoutGeneration({
   prescribedExercises,
   injuries,
   numberOfDays,
+  numberOfCycles,
 }: UseWorkoutGenerationProps) {
   
   const handleSubmit = useCallback(() => {
@@ -32,6 +34,7 @@ export function useWorkoutGeneration({
     console.log('- Weather prompt:', weatherPrompt);
     console.log('- Fitness level:', fitnessLevel);
     console.log('- Number of days:', numberOfDays);
+    console.log('- Number of cycles:', numberOfCycles);
     console.log('- Prescribed exercises:', prescribedExercises ? 'provided' : 'none');
     console.log('- Injuries:', injuries ? 'provided' : 'none');
     
@@ -41,7 +44,9 @@ export function useWorkoutGeneration({
       selectedExercises,
       fitnessLevel,
       prescribedExercises,
-      injuries
+      injuries,
+      numberOfDays,
+      numberOfCycles
     }).finally(() => {
       setIsGenerating(false);
     });
@@ -55,6 +60,7 @@ export function useWorkoutGeneration({
     handleGenerateWorkout,
     setIsGenerating,
     numberOfDays,
+    numberOfCycles,
   ]);
 
   return { handleSubmit };

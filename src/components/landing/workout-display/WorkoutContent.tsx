@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { WorkoutDayCard } from "./WorkoutDayCard";
 import { WorkoutDisplayHeader } from "./WorkoutDisplayHeader";
-import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta } from "@/types/fitness";
-import { isWorkoutDay } from "@/types/fitness";
+import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta, WorkoutCycle } from "@/types/fitness";
+import { isWorkoutDay, isWorkoutCycle } from "@/types/fitness";
 import { formatAllWorkouts, formatWorkoutToMarkdown } from "@/utils/workout-formatting";
 import { filterWorkoutDays } from "@/utils/workout-helpers";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface WorkoutContentProps {
   workouts: WeeklyWorkouts;
   resetWorkouts: () => void;
   isExporting: boolean;
   setIsExporting: (value: boolean) => void;
-  onUpdate: (day: string, updates: Partial<WorkoutDay | WorkoutMeta>) => void;
+  onUpdate: (cycleKey: string, day: string, updates: Partial<WorkoutDay | WorkoutMeta>) => void;
 }
 
 export const WorkoutContent = ({
@@ -37,9 +38,22 @@ export const WorkoutContent = ({
   const meta = workouts._meta as WorkoutMeta | undefined;
   const workoutTitle = meta?.title || "Custom Workout Program";
   const workoutSummary = meta?.summary || "";
+  const numberOfCycles = meta?.inputs?.numberOfCycles || 1;
 
-  // Filter out non-workout day entries
-  const workoutDays = filterWorkoutDays(workouts);
+  // Find all cycle keys in the workouts
+  const cycleKeys = Object.keys(workouts).filter(key => 
+    key.startsWith('cycle') || (key !== '_meta' && isWorkoutCycle(workouts[key]))
+  );
+
+  // If no cycles found but we have workout days, treat it as a single unnamed cycle
+  const legacyWorkoutDays = cycleKeys.length === 0 
+    ? Object.entries(workouts)
+        .filter(([key, value]) => key !== '_meta' && isWorkoutDay(value))
+        .map(([key]) => key)
+    : [];
+
+  // Default to the first cycle or "legacy" for non-cycle data
+  const [activeTab, setActiveTab] = useState(cycleKeys.length > 0 ? cycleKeys[0] : 'legacy');
 
   const generateGeminiSummary = async () => {
     setIsGeneratingSummary(true);
@@ -56,7 +70,7 @@ export const WorkoutContent = ({
       if (data?.summary) {
         // Update the workout meta with the new summary
         // Make sure we're passing a WorkoutMeta object
-        onUpdate('_meta', { 
+        onUpdate('_meta', '_meta', { 
           summary: data.summary 
         } as Partial<WorkoutMeta>);
         
@@ -121,22 +135,69 @@ export const WorkoutContent = ({
         allWorkouts={workouts}
       />
 
-      <div className="grid gap-4 sm:gap-6 md:gap-8 mt-4 sm:mt-6 md:mt-8">
-        {Object.entries(workouts)
-          .filter(([key, value]) => key !== '_meta' && isWorkoutDay(value)) // Filter out the _meta entry and ensure it's a WorkoutDay
-          .map(([day, workout], index) => (
-            <WorkoutDayCard 
-              key={day} 
-              day={day} 
-              workout={workout as WorkoutDay}
-              index={index}
-              isExporting={isExporting}
-              setIsExporting={setIsExporting}
-              allWorkouts={workoutDays}
-              onUpdate={onUpdate}
-            />
-          ))}
-      </div>
+      {/* Cycle Tabs */}
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="mt-4 sm:mt-6"
+      >
+        {/* Only show tabs if we have multiple cycles */}
+        {(cycleKeys.length > 1 || (cycleKeys.length === 1 && legacyWorkoutDays.length > 0)) && (
+          <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 w-full mb-6">
+            {cycleKeys.map((cycleKey) => (
+              <TabsTrigger key={cycleKey} value={cycleKey} className="text-sm">
+                {cycleKey.charAt(0).toUpperCase() + cycleKey.slice(1)}
+              </TabsTrigger>
+            ))}
+            {legacyWorkoutDays.length > 0 && (
+              <TabsTrigger value="legacy" className="text-sm">
+                Legacy Workouts
+              </TabsTrigger>
+            )}
+          </TabsList>
+        )}
+
+        {/* Cycle Content */}
+        {cycleKeys.map((cycleKey) => (
+          <TabsContent key={cycleKey} value={cycleKey} className="space-y-6">
+            <div className="grid gap-4 sm:gap-6 md:gap-8">
+              {isWorkoutCycle(workouts[cycleKey]) && 
+               Object.entries(workouts[cycleKey] as WorkoutCycle).map(([day, workout], index) => (
+                <WorkoutDayCard 
+                  key={`${cycleKey}-${day}`} 
+                  day={day} 
+                  workout={workout as WorkoutDay}
+                  index={index}
+                  isExporting={isExporting}
+                  setIsExporting={setIsExporting}
+                  allWorkouts={(workouts[cycleKey] as WorkoutCycle)}
+                  onUpdate={(day, updates) => onUpdate(cycleKey, day, updates)}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        ))}
+        
+        {/* Legacy Content (if any) */}
+        {legacyWorkoutDays.length > 0 && (
+          <TabsContent value="legacy" className="space-y-6">
+            <div className="grid gap-4 sm:gap-6 md:gap-8">
+              {legacyWorkoutDays.map((day, index) => (
+                <WorkoutDayCard 
+                  key={day} 
+                  day={day} 
+                  workout={workouts[day] as WorkoutDay}
+                  index={index}
+                  isExporting={isExporting}
+                  setIsExporting={setIsExporting}
+                  allWorkouts={filterWorkoutDays(workouts)}
+                  onUpdate={(day, updates) => onUpdate('', day, updates)}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 };

@@ -176,19 +176,43 @@ export const useWorkoutGeneration = () => {
     const focusAreas = new Set<string>();
     
     // Extract workout focus areas from the data
-    Object.values(workoutData).forEach(day => {
-      const allText = [safelyGetWorkoutProperty(day, 'description'), safelyGetWorkoutProperty(day, 'strength'), safelyGetWorkoutProperty(day, 'workout')].join(' ').toLowerCase();
+    Object.entries(workoutData).forEach(([key, value]) => {
+      if (key === '_meta') return;
       
-      if (allText.includes('cardio') || allText.includes('endurance')) focusAreas.add('cardio');
-      if (allText.includes('strength') || allText.includes('weight')) focusAreas.add('strength');
-      if (allText.includes('hiit') || allText.includes('interval')) focusAreas.add('HIIT');
-      if (allText.includes('mobility') || allText.includes('flexibility')) focusAreas.add('mobility');
-      if (allText.includes('core') || allText.includes('abs')) focusAreas.add('core');
+      if (key.startsWith('cycle')) {
+        // Handle new format with cycles
+        Object.values(value).forEach(day => {
+          const allText = [
+            safelyGetWorkoutProperty(day, 'description'), 
+            safelyGetWorkoutProperty(day, 'strength'), 
+            safelyGetWorkoutProperty(day, 'workout')
+          ].join(' ').toLowerCase();
+          
+          extractFocusAreas(allText, focusAreas);
+        });
+      } else {
+        // Handle legacy format (direct days)
+        const allText = [
+          safelyGetWorkoutProperty(value, 'description'), 
+          safelyGetWorkoutProperty(value, 'strength'), 
+          safelyGetWorkoutProperty(value, 'workout')
+        ].join(' ').toLowerCase();
+        
+        extractFocusAreas(allText, focusAreas);
+      }
     });
     
     const focusString = Array.from(focusAreas).join(', ');
     
     return `This ${cycleCount}-cycle, ${dayCount}-day ${params.fitnessLevel || ''} workout program focuses on ${focusString || 'overall fitness'} training.`;
+  };
+  
+  const extractFocusAreas = (text: string, focusAreas: Set<string>) => {
+    if (text.includes('cardio') || text.includes('endurance')) focusAreas.add('cardio');
+    if (text.includes('strength') || text.includes('weight')) focusAreas.add('strength');
+    if (text.includes('hiit') || text.includes('interval')) focusAreas.add('HIIT');
+    if (text.includes('mobility') || text.includes('flexibility')) focusAreas.add('mobility');
+    if (text.includes('core') || text.includes('abs')) focusAreas.add('core');
   };
 
   return {

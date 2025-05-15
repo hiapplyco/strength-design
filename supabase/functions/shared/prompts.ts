@@ -1,6 +1,7 @@
 
 export interface WorkoutGenerationParams {
   numberOfDays: number;
+  numberOfCycles?: number;
   weatherPrompt?: string;
   selectedExercises?: Array<{ name: string; instructions: string[] }>;
   fitnessLevel: string;
@@ -10,6 +11,7 @@ export interface WorkoutGenerationParams {
 
 export const createWorkoutGenerationPrompt = ({
   numberOfDays,
+  numberOfCycles = 1,
   weatherPrompt,
   selectedExercises,
   fitnessLevel,
@@ -17,54 +19,48 @@ export const createWorkoutGenerationPrompt = ({
   injuries
 }: WorkoutGenerationParams): string => {
   const exerciseList = selectedExercises?.length 
-    ? `INCLUDED EXERCISES: ${selectedExercises.map(e => e.name).join(", ")}`
+    ? `**Specific Exercises:** Include these exercises across the program: ${selectedExercises.map(e => e.name).join(", ")}.` 
     : '';
 
-  const weatherConsideration = weatherPrompt
-    ? `WEATHER ADAPTATIONS: Account for ${weatherPrompt.toLowerCase()} conditions`
-    : '';
+  return `As an elite fitness coach, design a ${numberOfCycles}-cycle training program with ${numberOfDays} days per cycle.
 
-  const prescription = prescribedExercises
-    ? `REQUIRED MODIFICATIONS: Incorporate the following prescribed exercises/workouts:\n${prescribedExercises}`
-    : '';
+    PROGRAM STRUCTURE:
+    - Total Cycles: ${numberOfCycles}
+    - Days per Cycle: ${numberOfDays}
+    - Total Training Days: ${numberOfCycles * numberOfDays}
 
-  const injuryConsideration = injuries
-    ? `INJURY CONSIDERATIONS: Adapt for ${injuries}`
-    : '';
+    PARAMETERS:
+    ${weatherPrompt ? `- Weather Adaptations: ${weatherPrompt}` : ''}
+    ${exerciseList ? `- ${exerciseList}` : ''}
+    - Fitness Level: ${fitnessLevel}
+    ${prescribedExercises ? `- Required Exercises: ${prescribedExercises}` : ''}
+    ${injuries ? `- Injury Considerations: ${injuries}` : ''}
 
-  return `As an elite fitness coach, design a scientifically-grounded ${numberOfDays}-day training program.\n\n` +
-    `PROGRAM PARAMETERS:\n` +
-    `- Target fitness level: ${fitnessLevel}\n` +
-    `${weatherConsideration ? `- ${weatherConsideration}\n` : ''}` +
-    `${exerciseList ? `- ${exerciseList}\n` : ''}` +
-    `${prescription ? `- ${prescription}\n` : ''}` +
-    `${injuryConsideration ? `- ${injuryConsideration}\n` : ''}\n` +
-    `DAILY STRUCTURE REQUIREMENTS:\n` +
-    `1. Focus description: Scientific training stimulus and physiological adaptation\n` +
-    `2. Warmup: Progressive activation sequence\n` +
-    `3. Workout: Periodized prescription with sets/reps/tempo\n` +
-    `4. Strength component: Compound movement pattern focus\n` +
-    `5. Notes: Regeneration strategies or scaling options\n\n` +
-    `FORMAT SPECIFICATION:\n` +
-    `Generate valid JSON following this exact structure for ${numberOfDays} days:\n` +
-    `{\n` +
-    `  "day1": {\n` +
-    `    "description": "string",\n` +
-    `    "warmup": "string",\n` +
-    `    "workout": "string",\n` +
-    `    "strength": "string",\n` +
-    `    "notes": "string"\n` +
-    `  },\n` +
-    `  // ... Repeat for each day up to day${numberOfDays}\n` +
-    `}\n\n` +
-    `CRITICAL INSTRUCTIONS:\n` +
-    `- Generate exactly ${numberOfDays} days of workouts\n` +
-    `- Use double quotes for all strings\n` +
-    `- Maintain consistent JSON syntax\n` +
-    `- Avoid markdown formatting\n` +
-    `- Ensure proper escape characters\n` +
-    `- Include all 5 required sections per day\n` +
-    `- Prioritize exercise science principles`;
+    For each cycle and day, provide a detailed workout program in this exact JSON format:
+    {
+      "cycle1": {
+        "day1": {
+          "description": "Focus description for this day",
+          "warmup": "1. Dynamic stretching\\n2. Mobility work\\n3. Movement prep",
+          "workout": "1. Main exercises\\n2. Conditioning\\n3. Accessory work",
+          "strength": "Primary strength focus",
+          "notes": "Scaling options and safety considerations"
+        }
+        // ... repeat for each day in the cycle
+      }
+      // ... repeat for each cycle
+    }
+
+    IMPORTANT RULES:
+    1. Create progressive overload across cycles
+    2. Vary focus areas across days within each cycle
+    3. Maintain exercise technique descriptions
+    4. Include specific sets, reps, and rest periods
+    5. Format as valid JSON without markdown
+    6. Use proper exercise progression
+    7. Include clear movement standards
+
+    Return ONLY the JSON object with no additional text or markdown.`;
 };
 
 export const getGeminiConfig = () => ({

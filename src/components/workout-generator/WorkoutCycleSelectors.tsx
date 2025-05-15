@@ -40,6 +40,9 @@ export function WorkoutCycleSelectors({
             ))}
           </SelectContent>
         </Select>
+        <p className="text-xs text-muted-foreground">
+          Each cycle is a complete training block
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -62,6 +65,9 @@ export function WorkoutCycleSelectors({
             ))}
           </SelectContent>
         </Select>
+        <p className="text-xs text-muted-foreground">
+          Total workouts: {numberOfCycles * numberOfDays}
+        </p>
       </div>
     </div>
   );

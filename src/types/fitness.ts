@@ -1,3 +1,4 @@
+
 // Add, modify or inspect types here - don't delete existing types
 export interface WorkoutDay {
   description?: string;
@@ -14,6 +15,7 @@ export interface WorkoutMeta {
   summary?: string;
   inputs?: {
     numberOfDays: number;
+    numberOfCycles: number;
     fitnessLevel: string;
     weatherPrompt: string;
     prescribedExercises: string;
@@ -23,17 +25,33 @@ export interface WorkoutMeta {
   debug?: any;
 }
 
-// Fix the WeeklyWorkouts interface to properly handle the _meta property
+// Define a type for a workout cycle which contains days
+export interface WorkoutCycle {
+  [key: string]: WorkoutDay;
+}
+
+// Fix the WeeklyWorkouts interface to properly handle cycles
 export interface WeeklyWorkouts {
-  [key: string]: WorkoutDay | WorkoutMeta;
+  [key: string]: WorkoutCycle | WorkoutMeta | WorkoutDay; // Can be a cycle or the _meta object or legacy workout day
   _meta?: WorkoutMeta;
 }
 
 // Create a type guard to check if an entry is a WorkoutDay
-export function isWorkoutDay(value: WorkoutDay | WorkoutMeta): value is WorkoutDay {
+export function isWorkoutDay(value: WorkoutDay | WorkoutMeta | WorkoutCycle): value is WorkoutDay {
   return (value as WorkoutDay).workout !== undefined || 
          (value as WorkoutDay).warmup !== undefined || 
          (value as WorkoutDay).strength !== undefined;
+}
+
+// Create a type guard to check if an entry is a WorkoutCycle
+export function isWorkoutCycle(value: WorkoutDay | WorkoutMeta | WorkoutCycle): value is WorkoutCycle {
+  if (typeof value !== 'object' || value === null) return false;
+  
+  // Check if the object has at least one key that starts with "day"
+  const keys = Object.keys(value);
+  return keys.some(key => key.startsWith('day')) && 
+         !isWorkoutDay(value) && // Not a workout day itself
+         !('title' in value); // Not a meta object
 }
 
 // Explicitly exclude _meta from the string index type

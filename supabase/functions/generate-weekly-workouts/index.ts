@@ -27,6 +27,7 @@ serve(async (req) => {
     // Validate and process all input parameters
     const processedParams = {
       numberOfDays: Number(params.numberOfDays) || 7,
+      numberOfCycles: Number(params.numberOfCycles) || 1,
       fitnessLevel: String(params.fitnessLevel || 'beginner'),
       weatherPrompt: String(params.weatherPrompt || ''),
       prescribedExercises: String(params.prescribedExercises || ''),
@@ -37,6 +38,7 @@ serve(async (req) => {
     // Create the workout generation prompt using all parameters
     const fullPrompt = createWorkoutGenerationPrompt({
       numberOfDays: processedParams.numberOfDays,
+      numberOfCycles: processedParams.numberOfCycles,
       fitnessLevel: processedParams.fitnessLevel,
       weatherPrompt: processedParams.weatherPrompt,
       prescribedExercises: processedParams.prescribedExercises,
@@ -66,32 +68,44 @@ serve(async (req) => {
 
     const workoutData = JSON.parse(jsonMatch[0]);
     
-    // Validate the structure
-    const expectedDays = Array.from({ length: processedParams.numberOfDays }, (_, i) => `day${i + 1}`);
-    const missingDays = expectedDays.filter(day => !workoutData[day]);
+    // Validate the structure - now checking for cycles
+    const expectedCycles = Array.from({ length: processedParams.numberOfCycles }, (_, i) => `cycle${i + 1}`);
+    const missingCycles = expectedCycles.filter(cycle => !workoutData[cycle]);
     
-    if (missingDays.length > 0) {
-      throw new Error(`Missing workouts for days: ${missingDays.join(', ')}`);
+    if (missingCycles.length > 0) {
+      throw new Error(`Missing cycles: ${missingCycles.join(', ')}`);
     }
 
-    // Validate each day has required fields
-    Object.entries(workoutData).forEach(([day, workout]: [string, any]) => {
-      const requiredFields = ['description', 'warmup', 'workout', 'strength'];
-      const missingFields = requiredFields.filter(field => !workout[field]);
+    // Validate each day in each cycle
+    for (const cycle of expectedCycles) {
+      const cycleData = workoutData[cycle];
+      const expectedDays = Array.from({ length: processedParams.numberOfDays }, (_, i) => `day${i + 1}`);
+      const missingDays = expectedDays.filter(day => !cycleData[day]);
       
-      if (missingFields.length > 0) {
-        throw new Error(`Day ${day} is missing required fields: ${missingFields.join(', ')}`);
+      if (missingDays.length > 0) {
+        throw new Error(`Missing workouts for ${cycle}: days ${missingDays.join(', ')}`);
       }
-    });
+
+      // Validate each day has required fields
+      Object.entries(cycleData).forEach(([day, workout]: [string, any]) => {
+        const requiredFields = ['description', 'warmup', 'workout', 'strength'];
+        const missingFields = requiredFields.filter(field => !workout[field]);
+        
+        if (missingFields.length > 0) {
+          throw new Error(`${cycle} - ${day} is missing required fields: ${missingFields.join(', ')}`);
+        }
+      });
+    }
 
     console.log('Successfully validated workout data');
     
     // Add debug information to the response for transparency
     const responseData = {
       ...workoutData,
-      _debug: {
+      _meta: {
         inputsUsed: {
           numberOfDays: processedParams.numberOfDays,
+          numberOfCycles: processedParams.numberOfCycles,
           fitnessLevel: processedParams.fitnessLevel,
           weatherPrompt: processedParams.weatherPrompt ? 'provided' : 'none',
           prescribedExercises: processedParams.prescribedExercises ? 'provided' : 'none',

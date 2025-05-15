@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
@@ -24,22 +25,34 @@ const WorkoutResults = () => {
     }
     
     // If no workouts in state, try to get from localStorage
-    const storedData = localStorage.getItem(
-      session?.user?.id 
-        ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
-        : WORKOUT_STORAGE_KEY
-    );
+    const storageKey = session?.user?.id 
+      ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+      : WORKOUT_STORAGE_KEY;
+      
+    const storedData = localStorage.getItem(storageKey);
     
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
         setWorkouts(parsedData);
+        console.log("Loaded workout data from localStorage:", parsedData);
       } catch (error) {
         console.error("Error parsing stored workout data:", error);
+        toast({
+          title: "Error Loading Workout",
+          description: "Could not load your workout data. Redirecting to generator.",
+          variant: "destructive"
+        });
         navigate("/workout-generator");
       }
     } else {
       // If no workouts in state or localStorage, redirect to generator
+      console.log("No workout data found in localStorage or state, redirecting to generator");
+      toast({
+        title: "No Workouts Found",
+        description: "No workouts were found. Create a new workout.",
+        variant: "default"
+      });
       navigate("/workout-generator");
     }
   }, [location.state, navigate, session]);

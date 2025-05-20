@@ -6,6 +6,8 @@ import type { WeeklyWorkouts } from "@/types/fitness";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 
 const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
@@ -16,6 +18,7 @@ const WorkoutResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { theme } = useTheme();
 
   useEffect(() => {
     // First try to get workouts from location state
@@ -63,19 +66,28 @@ const WorkoutResults = () => {
   };
 
   if (!workouts) {
-    return <div className="min-h-screen bg-black flex items-center justify-center">
-      <p className="text-white text-xl">Loading workout data...</p>
-    </div>;
+    return (
+      <div className={cn("min-h-screen flex items-center justify-center", {
+        "bg-gradient-to-br from-background via-background to-secondary/10": theme === "light",
+        "bg-black": theme === "dark"
+      })}>
+        <p className="text-foreground text-xl">Loading workout data...</p>
+      </div>
+    );
   }
 
   return (
-    <WorkoutDisplay
-      workouts={workouts}
-      resetWorkouts={resetWorkouts}
-      isExporting={isExporting}
-      setIsExporting={setIsExporting}
-      isGenerating={isGenerating}
-    />
+    <div className={cn("min-h-screen", {
+      "bg-gradient-to-br from-background via-background to-secondary/10": theme === "light"
+    })}>
+      <WorkoutDisplay
+        workouts={workouts}
+        resetWorkouts={resetWorkouts}
+        isExporting={isExporting}
+        setIsExporting={setIsExporting}
+        isGenerating={isGenerating}
+      />
+    </div>
   );
 };
 

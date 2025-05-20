@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { GeneratorSection } from "@/components/landing/GeneratorSection";
 import { triggerConfetti } from "@/utils/confetti";
@@ -9,6 +10,8 @@ import { WorkoutGeneratorHeader } from "@/components/workout-generator/WorkoutGe
 import { DebugInfoDisplay } from "@/components/workout-generator/DebugInfoDisplay";
 import { WorkoutGeneratorLoading } from "@/components/workout-generator/WorkoutGeneratorLoading";
 import { containerVariants } from "@/components/workout-generator/animations";
+import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const DEFAULT_DAYS = 7;
 const DEFAULT_CYCLES = 1;
@@ -28,6 +31,7 @@ const WorkoutGenerator = () => {
   const { isGenerating, generateWorkout, debugInfo } = useWorkoutGeneration();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { theme } = useTheme();
 
   useEffect(() => {
     // Mark page as loaded for animations
@@ -95,7 +99,9 @@ const WorkoutGenerator = () => {
     <AnimatePresence mode="wait">
       {showContent && (
         <motion.div 
-          className="min-h-screen bg-background"
+          className={cn("min-h-screen bg-background", {
+            "bg-gradient-to-br from-background via-background to-secondary/10": theme === "light"
+          })}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

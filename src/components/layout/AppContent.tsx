@@ -8,6 +8,10 @@ import { LoadingSpinner } from "./app-content/LoadingSpinner";
 import { MainRoutes } from "./app-content/MainRoutes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "./AppSidebar";
+import { SidebarOverlay } from "./app-content/SidebarOverlay";
+import { SidebarToggle } from "./app-content/SidebarToggle";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -41,6 +45,8 @@ const MainContent = () => {
         transition={{ duration: 0.3 }}
       >
         <div className="relative min-h-screen">
+          <SidebarOverlay />
+          <SidebarToggle isVisible={true} />
           <MainRoutes />
         </div>
       </motion.main>
@@ -73,9 +79,16 @@ export const AppContent = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster />
-      <Sonner />
-      <MainContent />
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <div className="flex-1">
+            <Toaster />
+            <Sonner />
+            <MainContent />
+          </div>
+        </div>
+      </SidebarProvider>
     </QueryClientProvider>
   );
 };

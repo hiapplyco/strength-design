@@ -15,6 +15,7 @@ export type WeeklyWorkouts = Record<string, WorkoutDay>;
 export interface WorkoutGenerationParams {
   prompt: string;
   numberOfDays: number;
+  numberOfCycles: number;
   weatherPrompt?: string;
   selectedExercises: Exercise[];
   fitnessLevel: string;

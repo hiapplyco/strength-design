@@ -25,7 +25,7 @@ serve(async (req) => {
     const prompt = `
       Please modify this workout according to this request: "${modificationPrompt}"
 
-      Current workout for ${dayToModify}:
+      Current workout for ${dayToModify || "today"}:
       ${JSON.stringify(currentWorkout, null, 2)}
 
       Guidelines:
@@ -33,9 +33,10 @@ serve(async (req) => {
       2. Make changes that align with the modification request
       3. Consider the overall weekly workout plan context
       4. Maintain realistic and safe exercise modifications
-      5. Return only the modified workout object in valid JSON format
+      5. Return only JSON with no markdown code blocks or extra text
+      6. Include all fields from the original workout (warmup, workout, notes, strength)
 
-      Return ONLY the modified JSON for the workout, with no additional text, code blocks, or explanations.
+      Your response should be valid JSON only, with no additional text.
     `;
 
     const result = await model.generateContent(prompt);
@@ -46,14 +47,29 @@ serve(async (req) => {
 
     // Try to parse the response as JSON
     try {
-      const modifiedWorkout = JSON.parse(text);
+      // Remove any markdown code block indicators if present
+      let cleanedText = text.replace(/```json|```/g, '').trim();
+      
+      const modifiedWorkout = JSON.parse(cleanedText);
       
       return new Response(JSON.stringify(modifiedWorkout), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } catch (parseError) {
       console.error('Error parsing AI response:', parseError);
-      throw new Error('Invalid response format from AI');
+      
+      // Return a formatted error that can be handled by the client
+      return new Response(
+        JSON.stringify({
+          error: "Failed to parse AI response",
+          message: "The AI returned an invalid format. Please try again with a clearer modification request.",
+          details: parseError.message
+        }),
+        {
+          status: 422,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
   } catch (error) {

@@ -6,6 +6,7 @@ import type { WorkoutDay } from "@/types/fitness";
 import { RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { modifyWorkout } from "@/utils/workout";
 
 export interface WorkoutModifierProps {
   warmup: string;
@@ -46,55 +47,34 @@ export function WorkoutModifier({
     setIsModifying(true);
 
     try {
-      const currentWorkout = {
-        warmup,
-        workout,
-        notes,
-        strength,
-      };
-
-      console.log('Sending modification request:', {
-        dayToModify: day,
-        currentWorkout,
+      const result = await modifyWorkout(
+        day || "Current Day",
         modificationPrompt,
-        allWorkouts,
+        allWorkouts
+      );
+
+      onUpdate({
+        warmup: result.warmup,
+        workout: result.workout,
+        notes: result.notes,
+        strength: result.strength
       });
-
-      const { data, error } = await supabase.functions.invoke('workout-modifier', {
-        body: {
-          dayToModify: day,
-          currentWorkout,
-          modificationPrompt,
-          allWorkouts,
-        },
+      
+      toast({
+        title: "Workout Modified",
+        description: "Your workout has been updated successfully.",
       });
-
-      if (error) throw error;
-
-      if (data) {
-        console.log('Modification response:', data);
-        onUpdate({
-          warmup: data.warmup,
-          workout: data.workout,
-          notes: data.notes,
-          strength: data.strength
-        });
-        
-        toast({
-          title: "Workout Modified",
-          description: "Your workout has been updated successfully.",
-        });
-      }
+      
+      onClose();
     } catch (error) {
       console.error('Error modifying workout:', error);
       toast({
         title: "Error",
-        description: "Failed to modify workout. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to modify workout. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsModifying(false);
-      onClose();
     }
   };
 

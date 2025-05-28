@@ -13,7 +13,6 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
   const { toggleSidebar, open, openMobile } = useSidebar();
   const isMobile = useIsMobile();
   
-  // Make the toggle visible always
   const shouldShow = true;
   
   if (!shouldShow) return null;
@@ -31,7 +30,10 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
         "backdrop-blur-sm border border-primary/30 rounded-lg",
         "size-11 hover:scale-105 active:scale-95",
         isMobile ? "top-6" : "top-8",
-        isOpen ? "left-[15rem]" : "left-8"
+        // Adjust positioning based on sidebar state and mobile/desktop
+        isMobile 
+          ? (isOpen ? "left-[15rem]" : "left-4")
+          : (isOpen ? "left-[17rem]" : "left-4")
       )}
       aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       aria-expanded={isOpen}

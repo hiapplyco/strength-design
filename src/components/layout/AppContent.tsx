@@ -39,7 +39,7 @@ const MainContent = () => {
   return (
     <AnimatePresence mode="wait">
       <motion.main 
-        className="min-h-screen w-full bg-background text-foreground relative"
+        className="flex-1 min-h-screen bg-background text-foreground relative transition-all duration-300"
         initial={{ opacity: 0 }}
         animate={{ opacity: contentReady ? 1 : 0 }}
         transition={{ duration: 0.3 }}
@@ -82,11 +82,9 @@ export const AppContent = () => {
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
-          <div className="flex-1">
-            <Toaster />
-            <Sonner />
-            <MainContent />
-          </div>
+          <MainContent />
+          <Toaster />
+          <Sonner />
         </div>
       </SidebarProvider>
     </QueryClientProvider>

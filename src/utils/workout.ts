@@ -1,11 +1,12 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { sanitizeText, cleanJsonText } from "@/utils/text";
+import type { WorkoutDay } from "@/types/fitness";
 
 export const modifyWorkout = async (
   title: string,
   modificationPrompt: string,
-  allWorkouts: Record<string, { warmup: string; workout: string; notes?: string; strength?: string; }> | undefined
+  allWorkouts: Record<string, WorkoutDay> | undefined
 ) => {
   const currentWorkout = {
     warmup: sanitizeText(allWorkouts?.[title]?.warmup || ''),

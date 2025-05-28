@@ -6,64 +6,47 @@ import { UserPlus, Weight, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-
 export const EmailSignup = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user } = useAuth();
-
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
       navigate("/");
       toast({
         title: "Logged out successfully",
-        description: "You have been logged out of your account",
+        description: "You have been logged out of your account"
       });
     } catch (error: any) {
       toast({
         title: "Error logging out",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   if (user) {
-    return (
-      <div className="flex flex-col items-center gap-2">
+    return <div className="flex flex-col items-center gap-2">
         <Weight className="h-8 w-8 text-accent animate-bounce" />
-        <Button 
-          onClick={handleLogout}
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-accent"
-        >
+        <Button onClick={handleLogout} variant="ghost" size="icon" className="text-muted-foreground hover:text-accent">
           <LogOut className="h-6 w-6" />
         </Button>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <UserPlus className="h-8 w-8 text-accent animate-bounce" />
-      <Button
-        onClick={() => setShowAuthDialog(true)}
-        variant="ghost"
-        className="text-muted-foreground hover:text-accent"
-      >
+  return <div className="flex flex-col items-center gap-2">
+      
+      <Button onClick={() => setShowAuthDialog(true)} variant="ghost" className="text-muted-foreground hover:text-accent">
         Sign up
       </Button>
-      <AuthDialog
-        isOpen={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
-        onSuccess={() => {
-          setShowAuthDialog(false);
-          navigate("/workout-generator");
-        }}
-      />
-    </div>
-  );
+      <AuthDialog isOpen={showAuthDialog} onOpenChange={setShowAuthDialog} onSuccess={() => {
+      setShowAuthDialog(false);
+      navigate("/workout-generator");
+    }} />
+    </div>;
 };

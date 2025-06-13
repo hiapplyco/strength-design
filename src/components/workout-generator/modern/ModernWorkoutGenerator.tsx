@@ -56,14 +56,14 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
-      <div className="flex h-screen w-full">
+      <div className="flex min-h-screen w-full">
         {/* Main Chat Area - Full width with proper flex */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 border-b border-border/50 bg-background/95 backdrop-blur"
+            className="p-6 border-b border-border/50 bg-background/95 backdrop-blur flex-shrink-0"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -86,8 +86,8 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Chat Container - Full width */}
-          <div className="flex-1 w-full min-w-0">
+          {/* Chat Container - Takes remaining space */}
+          <div className="flex-1 w-full min-w-0 min-h-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -101,7 +101,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
           </div>
 
           {/* Generate Button Section */}
-          <div className="p-6 pt-4 border-t border-border/50 bg-background/95 backdrop-blur w-full">
+          <div className="p-6 pt-4 border-t border-border/50 bg-background/95 backdrop-blur w-full flex-shrink-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

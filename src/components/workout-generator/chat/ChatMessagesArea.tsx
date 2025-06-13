@@ -32,8 +32,8 @@ export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
   }, [messages]);
 
   return (
-    <div className="flex-1 w-full overflow-hidden">
-      <ScrollArea className="h-full w-full">
+    <div className="flex-1 w-full min-h-0">
+      <ScrollArea className="h-full w-full max-h-[calc(100vh-280px)]">
         <div className="w-full px-6 py-6">
           <div className="w-full space-y-4">
             <AnimatePresence>

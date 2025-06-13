@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { useSmartChat } from '@/hooks/useSmartChat';

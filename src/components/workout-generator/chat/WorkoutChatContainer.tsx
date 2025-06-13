@@ -8,10 +8,12 @@ import { ChatInput } from './ChatInput';
 
 interface WorkoutChatContainerProps {
   isGenerating: boolean;
+  onMessagesUpdate?: (messages: any[]) => void;
 }
 
 export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
-  isGenerating
+  isGenerating,
+  onMessagesUpdate
 }) => {
   const { config, clearConfig, getConfigSummary } = useWorkoutConfig();
   const { messages, isLoading, sendMessage, clearChat, initializeChat } = useSmartChat();
@@ -19,6 +21,13 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   useEffect(() => {
     initializeChat();
   }, [initializeChat]);
+
+  // Pass messages to parent whenever they change
+  useEffect(() => {
+    if (onMessagesUpdate) {
+      onMessagesUpdate(messages);
+    }
+  }, [messages, onMessagesUpdate]);
 
   const handleSendMessage = async (message: string) => {
     if (message.startsWith('/')) {

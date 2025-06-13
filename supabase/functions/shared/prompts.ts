@@ -7,6 +7,7 @@ export interface WorkoutGenerationParams {
   fitnessLevel: string;
   prescribedExercises?: string;
   injuries?: string;
+  chatHistory?: Array<{ role: string; content: string; timestamp: Date }>;
 }
 
 export const createWorkoutGenerationPrompt = ({
@@ -16,15 +17,27 @@ export const createWorkoutGenerationPrompt = ({
   selectedExercises,
   fitnessLevel,
   prescribedExercises,
-  injuries
+  injuries,
+  chatHistory = []
 }: WorkoutGenerationParams): string => {
   const exerciseList = selectedExercises?.length 
     ? `**Specific Exercises:** Include these exercises across the program: ${selectedExercises.map(e => e.name).join(", ")}.` 
     : '';
 
+  // Format chat history for context
+  const chatContext = chatHistory.length > 0 
+    ? `**CONVERSATIONAL CONTEXT:**
+Based on our previous conversation, here are the key details discussed:
+${chatHistory.map(msg => `${msg.role.toUpperCase()}: ${msg.content}`).join('\n')}
+
+Please use this conversational context to create a workout that aligns with the preferences, goals, and specific requirements discussed in the chat.
+
+` 
+    : '';
+
   return `As an elite fitness coach, design a ${numberOfCycles}-cycle training program with ${numberOfDays} days per cycle.
 
-    PROGRAM STRUCTURE:
+    ${chatContext}PROGRAM STRUCTURE:
     - Total Cycles: ${numberOfCycles}
     - Days per Cycle: ${numberOfDays}
     - Total Training Days: ${numberOfCycles * numberOfDays}
@@ -59,6 +72,7 @@ export const createWorkoutGenerationPrompt = ({
     5. Format as valid JSON without markdown
     6. Use proper exercise progression
     7. Include clear movement standards
+    8. Incorporate insights and preferences from the chat conversation
 
     Return ONLY the JSON object with no additional text or markdown.`;
 };

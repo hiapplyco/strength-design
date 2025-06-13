@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { WorkoutConfigProvider } from '@/contexts/WorkoutConfigContext';
 import { ModernWorkoutSidebar } from './ModernWorkoutSidebar';
 import { WorkoutChatContainer } from '../chat/WorkoutChatContainer';
@@ -18,6 +18,11 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [showSidebar, setShowSidebar] = useState(true);
+  const chatMessagesRef = useRef<any[]>([]);
+
+  const handleChatMessagesUpdate = (messages: any[]) => {
+    chatMessagesRef.current = messages;
+  };
 
   const handleGenerate = async () => {
     try {
@@ -30,6 +35,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
         numberOfDays: config.numberOfDays,
         numberOfCycles: config.numberOfCycles,
         injuries: config.injuries || undefined,
+        chatHistory: chatMessagesRef.current,
       });
 
       if (data) {
@@ -93,6 +99,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
             >
               <WorkoutChatContainer 
                 isGenerating={isGenerating}
+                onMessagesUpdate={handleChatMessagesUpdate}
               />
             </motion.div>
           </div>

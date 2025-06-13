@@ -1,10 +1,17 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import type { Exercise } from "@/components/exercise-search/types";
 import { safelyGetWorkoutProperty } from "@/utils/workout-helpers";
+
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  configUpdates?: Record<string, any>;
+}
 
 interface GenerateWorkoutParams {
   prompt: string;
@@ -15,6 +22,7 @@ interface GenerateWorkoutParams {
   numberOfCycles: number;
   injuries?: string;
   selectedExercises?: Exercise[];
+  chatHistory?: ChatMessage[];
 }
 
 export const useWorkoutGeneration = () => {
@@ -43,7 +51,8 @@ export const useWorkoutGeneration = () => {
         injuries: String(params.injuries || ""),
         numberOfDays: Number(params.numberOfDays) || 7,
         numberOfCycles: Number(params.numberOfCycles) || 1,
-        selectedExercises: params.selectedExercises || []
+        selectedExercises: params.selectedExercises || [],
+        chatHistory: params.chatHistory || []
       };
 
       console.log('Inputs being sent to edge function:', sanitizedParams);
@@ -81,7 +90,7 @@ export const useWorkoutGeneration = () => {
 
       const workoutTitle = titleData?.title || `${sanitizedParams.numberOfCycles}-Cycle ${sanitizedParams.numberOfDays}-Day Workout Plan`;
 
-      // Generate the workout - include all required parameters
+      // Generate the workout - include all required parameters including chat history
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
           prompt: sanitizedParams.prompt,
@@ -91,7 +100,8 @@ export const useWorkoutGeneration = () => {
           injuries: sanitizedParams.injuries,
           numberOfDays: sanitizedParams.numberOfDays,
           numberOfCycles: sanitizedParams.numberOfCycles,
-          selectedExercises: sanitizedParams.selectedExercises
+          selectedExercises: sanitizedParams.selectedExercises,
+          chatHistory: sanitizedParams.chatHistory
         }
       });
 

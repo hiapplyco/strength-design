@@ -32,17 +32,19 @@ serve(async (req) => {
       weatherPrompt: String(params.weatherPrompt || ''),
       prescribedExercises: String(params.prescribedExercises || ''),
       injuries: String(params.injuries || ''),
-      prompt: String(params.prompt || '')
+      prompt: String(params.prompt || ''),
+      chatHistory: params.chatHistory || []
     };
 
-    // Create the workout generation prompt using all parameters
+    // Create the workout generation prompt using all parameters including chat history
     const fullPrompt = createWorkoutGenerationPrompt({
       numberOfDays: processedParams.numberOfDays,
       numberOfCycles: processedParams.numberOfCycles,
       fitnessLevel: processedParams.fitnessLevel,
       weatherPrompt: processedParams.weatherPrompt,
       prescribedExercises: processedParams.prescribedExercises,
-      injuries: processedParams.injuries
+      injuries: processedParams.injuries,
+      chatHistory: processedParams.chatHistory
     });
     
     console.log('Sending prompt to Gemini:', fullPrompt);
@@ -110,7 +112,8 @@ serve(async (req) => {
           weatherPrompt: processedParams.weatherPrompt ? 'provided' : 'none',
           prescribedExercises: processedParams.prescribedExercises ? 'provided' : 'none',
           injuries: processedParams.injuries ? 'provided' : 'none',
-          additionalPrompt: processedParams.prompt ? 'provided' : 'none'
+          additionalPrompt: processedParams.prompt ? 'provided' : 'none',
+          chatHistoryLength: processedParams.chatHistory.length
         },
         promptLength: fullPrompt.length,
         responseLength: responseText.length,

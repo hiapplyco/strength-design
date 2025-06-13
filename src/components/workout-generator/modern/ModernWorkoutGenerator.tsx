@@ -91,7 +91,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="h-full max-w-4xl mx-auto"
+              className="h-full"
             >
               <WorkoutChatContainer 
                 isGenerating={isGenerating}

@@ -48,10 +48,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
   };
 
   const isFormComplete = () => {
-    return config.fitnessLevel && (
-      config.prescribedExercises || 
-      config.selectedExercises.length > 0
-    );
+    return Boolean(config.fitnessLevel);
   };
 
   return (
@@ -119,7 +116,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
               
               {!isFormComplete() && (
                 <p className="text-xs text-muted-foreground text-center mt-2">
-                  Chat with the AI to set up your fitness level and goals first
+                  Set your fitness level to get started, or chat with AI for a more personalized workout
                 </p>
               )}
             </motion.div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -176,7 +177,7 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
       
       <CardContent className="flex-1 flex flex-col p-0">
         <ScrollArea className="flex-1 p-6">
-          <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="space-y-4">
             <AnimatePresence>
               {messages.map((message) => (
                 <motion.div
@@ -231,7 +232,7 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
         </ScrollArea>
         
         <div className="border-t border-border/50 p-6">
-          <div className="flex gap-3 max-w-3xl mx-auto">
+          <div className="flex gap-3 w-full">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -244,7 +245,7 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
               onClick={handleSendMessage} 
               disabled={!input.trim() || isLoading || isGenerating}
               size="icon"
-              className="h-10 w-10"
+              className="h-10 w-10 flex-shrink-0"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

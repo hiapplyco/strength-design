@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -118,13 +117,14 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   };
 
   return (
-    <Card className="h-full flex flex-col bg-background/95 backdrop-blur border-border/50 shadow-lg">
-      <CardHeader className="pb-3 border-b border-border/50">
+    <div className="h-full flex flex-col bg-background/95 backdrop-blur border border-border/50 rounded-lg shadow-lg overflow-hidden">
+      {/* Header */}
+      <div className="p-4 border-b border-border/50 bg-background/95 backdrop-blur">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <div className="flex items-center gap-2">
             <Bot className="h-5 w-5 text-primary" />
-            AI Workout Coach
-          </CardTitle>
+            <h2 className="text-lg font-semibold">AI Workout Coach</h2>
+          </div>
           <div className="flex items-center gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -173,9 +173,10 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
             </AlertDialog>
           </div>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent className="flex-1 flex flex-col p-0">
+      {/* Messages Area */}
+      <div className="flex-1 flex flex-col min-h-0">
         <ScrollArea className="flex-1 p-6">
           <div className="space-y-4">
             <AnimatePresence>
@@ -231,7 +232,8 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
           </div>
         </ScrollArea>
         
-        <div className="border-t border-border/50 p-6">
+        {/* Input Section */}
+        <div className="p-6 border-t border-border/50 bg-background/95 backdrop-blur">
           <div className="flex gap-3 w-full">
             <Input
               value={input}
@@ -255,7 +257,7 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
             </Button>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

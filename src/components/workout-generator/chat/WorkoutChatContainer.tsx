@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { useSmartChat } from '@/hooks/useSmartChat';
@@ -21,13 +20,11 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   }, [initializeChat]);
 
   const handleSendMessage = async (message: string) => {
-    // Handle special commands
     if (message.startsWith('/')) {
       handleCommand(message);
       return;
     }
 
-    // Check for end chat keywords
     if (message.toLowerCase().includes('end chat') || 
         message.toLowerCase().includes('finish chat') ||
         message.toLowerCase().includes('complete chat') ||
@@ -64,7 +61,6 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
     const summary = getConfigSummary();
     const endMessage = `Great! I've helped you configure your workout. Here's what we've set up:\n\n${summary}\n\nYou can now generate your workout or continue chatting if you need any adjustments!`;
     
-    // Add the summary message to chat
     const summaryMsg = {
       id: Date.now().toString(),
       role: 'assistant' as const,
@@ -72,7 +68,6 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
       timestamp: new Date()
     };
     
-    // This would need to be added to the useSmartChat hook to support adding messages directly
     sendMessage('Please provide a summary of our conversation and the workout configuration we\'ve created.');
   };
 
@@ -82,7 +77,7 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-background/95 backdrop-blur border border-border/50 rounded-lg shadow-lg overflow-hidden">
+    <div className="h-full w-full flex flex-col">
       <ChatHeader 
         onEndChat={handleEndChat}
         onClearAll={handleClearAll}

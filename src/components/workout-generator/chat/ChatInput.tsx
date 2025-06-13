@@ -34,14 +34,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="w-full border-t border-border/50 bg-background/95 backdrop-blur">
-      <div className="w-full px-6 py-4">
+      <div className="w-full p-4">
         <div className="w-full flex items-center gap-3">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask me anything about your workout preferences..."
-            className="flex-1 w-full text-base"
+            className="w-full text-base"
             disabled={isLoading || isGenerating}
           />
           <Button 

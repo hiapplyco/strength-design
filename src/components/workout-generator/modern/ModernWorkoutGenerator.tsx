@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { WorkoutConfigProvider } from '@/contexts/WorkoutConfigContext';
 import { ModernWorkoutSidebar } from './ModernWorkoutSidebar';
@@ -55,9 +56,9 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
-      <div className="flex h-screen">
-        {/* Main Chat Area */}
-        <div className={`flex-1 flex flex-col transition-all duration-300 ${showSidebar ? 'mr-96' : 'mr-0'}`}>
+      <div className="flex h-screen w-full">
+        {/* Main Chat Area - Full width with proper flex */}
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -85,13 +86,13 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Chat Container */}
-          <div className="flex-1 p-6 pb-0">
+          {/* Chat Container - Full width */}
+          <div className="flex-1 w-full min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="h-full"
+              className="h-full w-full"
             >
               <WorkoutChatContainer 
                 isGenerating={isGenerating}
@@ -100,12 +101,12 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
           </div>
 
           {/* Generate Button Section */}
-          <div className="p-6 pt-4 border-t border-border/50 bg-background/95 backdrop-blur">
+          <div className="p-6 pt-4 border-t border-border/50 bg-background/95 backdrop-blur w-full">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="max-w-4xl mx-auto"
+              className="w-full"
             >
               <Button 
                 onClick={handleGenerate}
@@ -125,18 +126,18 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Sidebar */}
-        <motion.div
-          initial={{ x: 400, opacity: 0 }}
-          animate={{ 
-            x: showSidebar ? 0 : 400, 
-            opacity: showSidebar ? 1 : 0 
-          }}
-          transition={{ type: "spring", damping: 20, stiffness: 100 }}
-          className="fixed right-0 top-0 h-full w-96 bg-background border-l border-border/50 shadow-xl z-10"
-        >
-          <ModernWorkoutSidebar />
-        </motion.div>
+        {/* Right Sidebar - Fixed positioning when visible */}
+        {showSidebar && (
+          <motion.div
+            initial={{ x: 400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 400, opacity: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 100 }}
+            className="w-96 bg-background border-l border-border/50 shadow-xl flex-shrink-0"
+          >
+            <ModernWorkoutSidebar />
+          </motion.div>
+        )}
       </div>
     </div>
   );

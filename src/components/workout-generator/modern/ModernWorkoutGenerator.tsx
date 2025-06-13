@@ -10,7 +10,7 @@ import { triggerConfetti } from '@/utils/confetti';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { PanelRight, MessageSquare, Sparkles } from 'lucide-react';
+import { PanelRight, MessageSquare, Sparkles, Zap } from 'lucide-react';
 
 const ModernWorkoutGeneratorContent: React.FC = () => {
   const { config } = useWorkoutConfig();
@@ -47,6 +47,13 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
     }
   };
 
+  const isFormComplete = () => {
+    return config.fitnessLevel && (
+      config.prescribedExercises || 
+      config.selectedExercises.length > 0
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
       <div className="flex h-screen">
@@ -80,7 +87,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
           </motion.div>
 
           {/* Chat Container */}
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-6 pb-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -88,9 +95,33 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
               className="h-full max-w-4xl mx-auto"
             >
               <WorkoutChatContainer 
-                onGenerate={handleGenerate}
                 isGenerating={isGenerating}
               />
+            </motion.div>
+          </div>
+
+          {/* Generate Button Section */}
+          <div className="p-6 pt-4 border-t border-border/50 bg-background/95 backdrop-blur">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="max-w-4xl mx-auto"
+            >
+              <Button 
+                onClick={handleGenerate}
+                disabled={isGenerating || !isFormComplete()}
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 h-12"
+              >
+                <Zap className="h-5 w-5 mr-2" />
+                {isGenerating ? 'Generating Your Workout...' : 'Generate My Workout'}
+              </Button>
+              
+              {!isFormComplete() && (
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Chat with the AI to set up your fitness level and goals first
+                </p>
+              )}
             </motion.div>
           </div>
         </div>

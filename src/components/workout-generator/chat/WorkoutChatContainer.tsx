@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,12 +20,10 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface WorkoutChatContainerProps {
-  onGenerate: () => void;
   isGenerating: boolean;
 }
 
 export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
-  onGenerate,
   isGenerating
 }) => {
   const [input, setInput] = useState('');
@@ -73,7 +70,6 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   const handleCommand = (command: string) => {
     switch (command.toLowerCase()) {
       case '/generate':
-        onGenerate();
         break;
       case '/clear':
       case '/reset':
@@ -118,13 +114,6 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
       e.preventDefault();
       handleSendMessage();
     }
-  };
-
-  const isFormComplete = () => {
-    return config.fitnessLevel && (
-      config.prescribedExercises || 
-      config.selectedExercises.length > 0
-    );
   };
 
   return (
@@ -241,7 +230,7 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
           </div>
         </ScrollArea>
         
-        <div className="border-t border-border/50 p-6 space-y-4">
+        <div className="border-t border-border/50 p-6">
           <div className="flex gap-3 max-w-3xl mx-auto">
             <Input
               value={input}
@@ -263,23 +252,6 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
                 <Send className="h-4 w-4" />
               )}
             </Button>
-          </div>
-          
-          <div className="max-w-3xl mx-auto">
-            <Button 
-              onClick={onGenerate}
-              disabled={isGenerating || !isFormComplete()}
-              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 h-12"
-            >
-              <Zap className="h-5 w-5 mr-2" />
-              {isGenerating ? 'Generating Your Workout...' : 'Generate My Workout'}
-            </Button>
-            
-            {!isFormComplete() && (
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Chat with me to set up your fitness level and goals first
-              </p>
-            )}
           </div>
         </div>
       </CardContent>

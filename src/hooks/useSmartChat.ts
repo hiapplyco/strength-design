@@ -55,13 +55,30 @@ export const useSmartChat = () => {
       if (response.configUpdates && Object.keys(response.configUpdates).length > 0) {
         updateConfig(response.configUpdates);
         
-        // Show feedback about what was updated
-        const updatedFields = Object.keys(response.configUpdates).join(', ');
+        // Show feedback about what was updated with enhanced styling
+        const updatedFields = Object.keys(response.configUpdates);
+        const fieldNames = updatedFields.map(field => {
+          switch(field) {
+            case 'fitnessLevel': return 'Fitness Level';
+            case 'prescribedExercises': return 'Goals';
+            case 'selectedExercises': return 'Equipment';
+            case 'numberOfDays': return 'Training Days';
+            case 'numberOfCycles': return 'Cycles';
+            case 'injuries': return 'Limitations';
+            default: return field;
+          }
+        }).join(', ');
+
         toast({
-          title: "Configuration Updated",
-          description: `Updated: ${updatedFields}`,
-          duration: 3000,
+          title: "✨ Configuration Updated",
+          description: `Updated: ${fieldNames}`,
+          duration: 4000,
         });
+
+        // Trigger visual update in sidebar
+        window.dispatchEvent(new CustomEvent('configUpdated', { 
+          detail: { updatedFields }
+        }));
       }
 
       const assistantMsg: ChatMessage = {
@@ -105,18 +122,23 @@ export const useSmartChat = () => {
       const welcomeMsg: ChatMessage = {
         id: '1',
         role: 'assistant',
-        content: "Hi! I'm your personal fitness coach. I'll help you create the perfect workout plan. Let's start with the basics - what's your current fitness level and what are your main goals?",
+        content: "Hi! I'm your personal fitness coach. I'll help you create the perfect workout plan by updating your configuration on the right. Let's start - what's your current fitness level and what are your main goals?",
         timestamp: new Date()
       };
       setMessages([welcomeMsg]);
     }
   }, [messages.length]);
 
+  const addMessage = useCallback((message: ChatMessage) => {
+    setMessages(prev => [...prev, message]);
+  }, []);
+
   return {
     messages,
     isLoading,
     sendMessage,
     clearChat,
-    initializeChat
+    initializeChat,
+    addMessage
   };
 };

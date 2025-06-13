@@ -53,6 +53,7 @@
     "@tiptap/extension-paragraph": "^2.2.4",
     "@tiptap/extension-text": "^2.2.4",
     "@tiptap/extension-text-align": "^2.2.4",
+    "@tiptap/pm": "^2.14.0",
     "@tiptap/react": "^2.2.4",
     "@tiptap/starter-kit": "^2.2.4",
     "@types/uuid": "^10.0.0",

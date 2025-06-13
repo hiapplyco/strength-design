@@ -34,27 +34,29 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="p-6 border-t border-border/50 bg-background/95 backdrop-blur">
-      <div className="flex gap-3 w-full">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Ask me anything about your workout preferences..."
-          className="flex-1 text-base"
-          disabled={isLoading || isGenerating}
-        />
-        <Button 
-          onClick={handleSendMessage} 
-          disabled={!input.trim() || isLoading || isGenerating}
-          size="icon"
-          className="h-10 w-10 flex-shrink-0"
-        >
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
-        </Button>
+      <div className="mx-auto max-w-4xl">
+        <div className="flex gap-3 w-full">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Ask me anything about your workout preferences..."
+            className="flex-1 text-base"
+            disabled={isLoading || isGenerating}
+          />
+          <Button 
+            onClick={handleSendMessage} 
+            disabled={!input.trim() || isLoading || isGenerating}
+            size="icon"
+            className="h-10 w-10 flex-shrink-0"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

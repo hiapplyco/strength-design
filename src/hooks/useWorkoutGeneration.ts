@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { WeeklyWorkouts } from "@/types/fitness";
+import type { Exercise } from "@/components/exercise-search/types";
 import { safelyGetWorkoutProperty } from "@/utils/workout-helpers";
 
 interface GenerateWorkoutParams {
@@ -13,6 +13,7 @@ interface GenerateWorkoutParams {
   numberOfDays: number;
   numberOfCycles: number;
   injuries?: string;
+  selectedExercises?: Exercise[];
 }
 
 export const useWorkoutGeneration = () => {
@@ -40,7 +41,8 @@ export const useWorkoutGeneration = () => {
         prescribedExercises: String(params.prescribedExercises || ""),
         injuries: String(params.injuries || ""),
         numberOfDays: Number(params.numberOfDays) || 7,
-        numberOfCycles: Number(params.numberOfCycles) || 1
+        numberOfCycles: Number(params.numberOfCycles) || 1,
+        selectedExercises: params.selectedExercises || []
       };
 
       console.log('Inputs being sent to edge function:', sanitizedParams);

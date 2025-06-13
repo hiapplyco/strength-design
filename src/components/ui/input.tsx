@@ -13,7 +13,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const isFileInput = type === "file";
     
     return (
-      <div className="relative rounded-md">
+      <div className="relative rounded-md w-full">
         <input
           type={type}
           className={cn(

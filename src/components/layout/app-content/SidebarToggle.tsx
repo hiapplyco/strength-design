@@ -29,11 +29,12 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
         "text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/50",
         "backdrop-blur-sm border border-primary/30 rounded-lg",
         "size-11 hover:scale-105 active:scale-95",
-        isMobile ? "top-6" : "top-8",
-        // Adjust positioning based on sidebar state and mobile/desktop
+        // Adjusted positioning to avoid title overlap
+        isMobile ? "top-4" : "top-4",
+        // Move further left when sidebar is closed to avoid title overlap
         isMobile 
-          ? (isOpen ? "left-[15rem]" : "left-4")
-          : (isOpen ? "left-[17rem]" : "left-4")
+          ? (isOpen ? "left-[15rem]" : "left-2")
+          : (isOpen ? "left-[17rem]" : "left-2")
       )}
       aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       aria-expanded={isOpen}

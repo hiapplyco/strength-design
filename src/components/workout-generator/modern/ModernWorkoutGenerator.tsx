@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { WorkoutConfigProvider } from '@/contexts/WorkoutConfigContext';
 import { ModernWorkoutSidebar } from './ModernWorkoutSidebar';

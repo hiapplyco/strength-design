@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -80,12 +81,17 @@ export const useWorkoutGeneration = () => {
 
       const workoutTitle = titleData?.title || `${sanitizedParams.numberOfCycles}-Cycle ${sanitizedParams.numberOfDays}-Day Workout Plan`;
 
-      // Generate the workout
+      // Generate the workout - include all required parameters
       const { data, error } = await supabase.functions.invoke('generate-weekly-workouts', {
         body: {
-          ...sanitizedParams,
+          prompt: sanitizedParams.prompt,
+          weatherPrompt: sanitizedParams.weatherPrompt,
+          fitnessLevel: sanitizedParams.fitnessLevel,
+          prescribedExercises: sanitizedParams.prescribedExercises,
+          injuries: sanitizedParams.injuries,
           numberOfDays: sanitizedParams.numberOfDays,
-          numberOfCycles: sanitizedParams.numberOfCycles
+          numberOfCycles: sanitizedParams.numberOfCycles,
+          selectedExercises: sanitizedParams.selectedExercises
         }
       });
 

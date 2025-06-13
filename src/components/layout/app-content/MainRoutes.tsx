@@ -7,6 +7,7 @@ import JournalPage from "@/pages/JournalPage";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
 import WorkoutResults from "@/pages/WorkoutResults";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
+import DocumentEditor from "@/pages/DocumentEditor";
 
 export const MainRoutes = () => {
   return (
@@ -19,6 +20,7 @@ export const MainRoutes = () => {
         <Route path="/workout-generator" element={<WorkoutGenerator />} />
         <Route path="/workout-results" element={<WorkoutResults />} />
         <Route path="/generated-workouts" element={<GeneratedWorkouts />} />
+        <Route path="/document-editor" element={<DocumentEditor />} />
       </Routes>
     </>
   );

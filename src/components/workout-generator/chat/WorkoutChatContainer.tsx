@@ -82,13 +82,13 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-background/95 backdrop-blur border border-border/50 rounded-lg shadow-lg overflow-hidden">
+    <div className="h-full w-full flex flex-col bg-background/95 backdrop-blur border border-border/50 rounded-lg shadow-lg overflow-hidden">
       <ChatHeader 
         onEndChat={handleEndChat}
         onClearAll={handleClearAll}
       />
       
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 w-full flex flex-col min-h-0">
         <ChatMessagesArea 
           messages={messages}
           isLoading={isLoading}

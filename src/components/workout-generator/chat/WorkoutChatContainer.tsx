@@ -1,23 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Zap, Loader2, MessageSquareOff, RotateCcw } from 'lucide-react';
+import React, { useEffect } from 'react';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { useSmartChat } from '@/hooks/useSmartChat';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ChatHeader } from './ChatHeader';
+import { ChatMessagesArea } from './ChatMessagesArea';
+import { ChatInput } from './ChatInput';
 
 interface WorkoutChatContainerProps {
   isGenerating: boolean;
@@ -26,29 +13,14 @@ interface WorkoutChatContainerProps {
 export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   isGenerating
 }) => {
-  const [input, setInput] = useState('');
   const { config, clearConfig, getConfigSummary } = useWorkoutConfig();
   const { messages, isLoading, sendMessage, clearChat, initializeChat } = useSmartChat();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   useEffect(() => {
     initializeChat();
   }, [initializeChat]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-
-    const message = input.trim();
-    setInput('');
-
+  const handleSendMessage = async (message: string) => {
     // Handle special commands
     if (message.startsWith('/')) {
       handleCommand(message);
@@ -109,154 +81,24 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
     clearChat();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   return (
     <div className="h-full flex flex-col bg-background/95 backdrop-blur border border-border/50 rounded-lg shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="p-4 border-b border-border/50 bg-background/95 backdrop-blur">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Bot className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">AI Workout Coach</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <MessageSquareOff className="h-4 w-4" />
-                  End Chat
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>End Chat Session</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you satisfied with your workout configuration? I can provide a summary of what we've set up together.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Continue Chatting</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleEndChat}>
-                    Yes, End Chat
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <RotateCcw className="h-4 w-4" />
-                  Reset
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Reset Everything</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will clear both the chat conversation and all workout configuration. Are you sure?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleClearAll}>
-                    Yes, Reset All
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
-      </div>
+      <ChatHeader 
+        onEndChat={handleEndChat}
+        onClearAll={handleClearAll}
+      />
       
-      {/* Messages Area */}
       <div className="flex-1 flex flex-col min-h-0">
-        <ScrollArea className="flex-1 p-6">
-          <div className="space-y-4">
-            <AnimatePresence>
-              {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-[80%] rounded-lg p-4 ${
-                    message.role === 'user' 
-                      ? 'bg-primary text-primary-foreground ml-12' 
-                      : 'bg-muted text-muted-foreground mr-12'
-                  }`}>
-                    <div className="flex items-start gap-3">
-                      {message.role === 'assistant' && <Bot className="h-5 w-5 mt-0.5 flex-shrink-0" />}
-                      {message.role === 'user' && <User className="h-5 w-5 mt-0.5 flex-shrink-0" />}
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
-                    </div>
-                    {message.configUpdates && Object.keys(message.configUpdates).length > 0 && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="mt-3 text-xs bg-primary/20 text-primary-foreground px-2 py-1 rounded-full flex items-center gap-1"
-                      >
-                        <Zap className="h-3 w-3" />
-                        Configuration updated
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {isLoading && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-start"
-              >
-                <div className="bg-muted text-muted-foreground rounded-lg p-4 max-w-[80%] mr-12">
-                  <div className="flex items-center gap-3">
-                    <Bot className="h-5 w-5" />
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">AI is thinking...</span>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
+        <ChatMessagesArea 
+          messages={messages}
+          isLoading={isLoading}
+        />
         
-        {/* Input Section */}
-        <div className="p-6 border-t border-border/50 bg-background/95 backdrop-blur">
-          <div className="flex gap-3 w-full">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me anything about your workout preferences..."
-              className="flex-1 text-base"
-              disabled={isLoading || isGenerating}
-            />
-            <Button 
-              onClick={handleSendMessage} 
-              disabled={!input.trim() || isLoading || isGenerating}
-              size="icon"
-              className="h-10 w-10 flex-shrink-0"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
+        <ChatInput 
+          onSendMessage={handleSendMessage}
+          isLoading={isLoading}
+          isGenerating={isGenerating}
+        />
       </div>
     </div>
   );

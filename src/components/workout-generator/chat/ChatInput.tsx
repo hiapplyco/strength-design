@@ -34,8 +34,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="border-t border-border/50 bg-background/95 backdrop-blur">
-      <div className="flex justify-center px-6 py-6">
-        <div className="w-full max-w-4xl flex gap-3">
+      <div className="px-6 py-6">
+        <div className="flex gap-3 max-w-4xl mx-auto">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}

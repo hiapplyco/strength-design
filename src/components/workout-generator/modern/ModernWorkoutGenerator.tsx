@@ -55,10 +55,10 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/5">
-      <div className="flex min-h-screen w-full">
+    <div className="h-screen bg-gradient-to-br from-background via-background to-secondary/5">
+      <div className="flex h-full w-full">
         {/* Main Chat Area - Full width with proper flex */}
-        <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        <div className="flex-1 flex flex-col min-w-0 h-full">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -133,7 +133,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 400, opacity: 0 }}
             transition={{ type: "spring", damping: 20, stiffness: 100 }}
-            className="w-96 bg-background border-l border-border/50 shadow-xl flex-shrink-0"
+            className="w-96 bg-background border-l border-border/50 shadow-xl flex-shrink-0 h-full"
           >
             <ModernWorkoutSidebar />
           </motion.div>

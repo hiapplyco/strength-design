@@ -28,7 +28,7 @@ export function DocumentSection({
         </p>
       </div>
       
-      <div className="flex-1 bg-white rounded-lg overflow-hidden">
+      <div className="flex-1 bg-white rounded-lg overflow-hidden min-h-0">
         <Editor 
           content={content}
           onSave={handleSave}

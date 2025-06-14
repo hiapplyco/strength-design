@@ -29,8 +29,8 @@ export function VideoSection({
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4">
-      <Card className="flex-shrink-0 p-4 bg-background border-primary">
+    <div className="h-full flex flex-col">
+      <Card className="flex-shrink-0 p-4 bg-background border-primary mb-4">
         <div className="mb-4">
           <h2 className="text-xl font-bold text-foreground mb-2">Record Your Video</h2>
           <p className="text-sm text-foreground/70">
@@ -72,12 +72,14 @@ export function VideoSection({
         </div>
       </Card>
 
-      <div className="flex-1 overflow-hidden">
-        <RecordingInterface
-          workoutScript={workoutScript}
-          teleprompterPosition={teleprompterPosition}
-          setTeleprompterPosition={setTeleprompterPosition}
-        />
+      <div className="flex-1 overflow-hidden min-h-0">
+        <div className="h-full">
+          <RecordingInterface
+            workoutScript={workoutScript}
+            teleprompterPosition={teleprompterPosition}
+            setTeleprompterPosition={setTeleprompterPosition}
+          />
+        </div>
       </div>
     </div>
   );

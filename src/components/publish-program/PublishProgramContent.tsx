@@ -47,7 +47,7 @@ export function PublishProgramContent({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col py-4">
       <Tabs defaultValue="document" className="h-full flex flex-col">
         <TabsList className="grid w-full grid-cols-2 mb-4 flex-shrink-0">
           <TabsTrigger value="document">Edit Document</TabsTrigger>
@@ -76,16 +76,16 @@ export function PublishProgramContent({
             />
           </TabsContent>
         </div>
+        
+        <div className="flex-shrink-0 mt-4">
+          <PublishActions
+            shareableLink={currentShareableLink}
+            content={workoutScript || initialContent}
+            onPublish={() => handlePublish(workoutScript || initialContent)}
+            isPublishing={isPublishing}
+          />
+        </div>
       </Tabs>
-
-      <div className="flex-shrink-0 mt-4">
-        <PublishActions
-          shareableLink={currentShareableLink}
-          content={workoutScript || initialContent}
-          onPublish={() => handlePublish(workoutScript || initialContent)}
-          isPublishing={isPublishing}
-        />
-      </div>
     </div>
   );
 }

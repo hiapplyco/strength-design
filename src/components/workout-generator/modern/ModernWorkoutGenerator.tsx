@@ -69,8 +69,8 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
             className="p-6 border-b border-border/50 bg-background/95 backdrop-blur flex-shrink-0"
           >
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+              <div className="text-center flex-1">
+                <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2">
                   <Sparkles className="h-8 w-8 text-primary" />
                   AI Workout Generator
                 </h1>
@@ -81,7 +81,7 @@ const ModernWorkoutGeneratorContent: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowSidebar(!showSidebar)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 ml-4"
               >
                 <PanelRight className={`h-4 w-4 transition-transform ${showSidebar ? 'rotate-180' : ''}`} />
                 {showSidebar ? 'Hide Config' : 'Show Config'}

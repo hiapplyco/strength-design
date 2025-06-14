@@ -1,8 +1,16 @@
 
 export interface Exercise {
-  id: string; // Changed from optional to required
+  id: string;
   name: string;
-  level: string;
-  instructions: string[];
+  level?: string;
+  equipment?: string;
+  instructions?: string[];
   images?: string[];
+  type?: string;
+  muscle?: string;
+  difficulty?: string;
+  mechanic?: string;
+  force?: string;
+  primaryMuscles?: string[];
+  secondaryMuscles?: string[];
 }

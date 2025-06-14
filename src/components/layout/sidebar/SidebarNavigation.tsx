@@ -1,7 +1,8 @@
+
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Calendar, Settings, Users, Book } from "lucide-react";
+import { Home, Calendar, Settings, Users, Book, Sparkles } from "lucide-react";
 
 interface NavItemProps {
   to: string;
@@ -34,6 +35,11 @@ export const SidebarNavigation = () => {
         to="/"
         icon={<Home className="h-5 w-5" />}
         label="Home"
+      />
+      <NavItem
+        to="/workout-generator"
+        icon={<Sparkles className="h-5 w-5" />}
+        label="Workout Generator"
       />
       <NavItem
         to="/calendar"

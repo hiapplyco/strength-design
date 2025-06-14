@@ -1,7 +1,18 @@
 
 import { VideoUploadSection } from "./VideoUploadSection";
 import { QuestionInput } from "./QuestionInput";
+import { AnalysisOptionsForm } from "./AnalysisOptionsForm";
 import { ActionButtons } from "./ActionButtons";
+import { useState } from "react";
+
+interface AnalysisOptions {
+  analysisType?: 'technique' | 'form' | 'performance' | 'beginner' | 'injury-prevention';
+  customFrameRate?: number;
+  startOffset?: string;
+  endOffset?: string;
+  useTimestamps?: boolean;
+  customSystemPrompt?: string;
+}
 
 interface AnalysisFormProps {
   uploadedVideo: File | null;
@@ -12,7 +23,7 @@ interface AnalysisFormProps {
   setAnalysis: (analysis: string | null) => void;
   isLoading: boolean;
   isSaving: boolean;
-  handleSubmitForAnalysis: () => void;
+  handleSubmitForAnalysis: (options?: AnalysisOptions) => void;
   handleReset: () => void;
   saveAnalysis: () => void;
 }
@@ -30,6 +41,15 @@ export const AnalysisForm = ({
   handleReset,
   saveAnalysis
 }: AnalysisFormProps) => {
+  const [analysisOptions, setAnalysisOptions] = useState<AnalysisOptions>({
+    analysisType: 'technique',
+    useTimestamps: true
+  });
+
+  const handleAnalysisSubmit = () => {
+    handleSubmitForAnalysis(analysisOptions);
+  };
+
   return (
     <div className="space-y-6">
       <VideoUploadSection 
@@ -43,8 +63,13 @@ export const AnalysisForm = ({
         setQuestion={setQuestion} 
       />
       
+      <AnalysisOptionsForm
+        options={analysisOptions}
+        onOptionsChange={setAnalysisOptions}
+      />
+      
       <ActionButtons 
-        handleSubmitForAnalysis={handleSubmitForAnalysis}
+        handleSubmitForAnalysis={handleAnalysisSubmit}
         handleReset={handleReset}
         saveAnalysis={saveAnalysis}
         isLoading={isLoading}

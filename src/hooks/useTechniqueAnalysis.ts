@@ -4,12 +4,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface AnalysisOptions {
+  analysisType?: 'technique' | 'form' | 'performance' | 'beginner' | 'injury-prevention';
+  customFrameRate?: number;
+  startOffset?: string;
+  endOffset?: string;
+  useTimestamps?: boolean;
+  customSystemPrompt?: string;
+}
+
 export const useTechniqueAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
   const [question, setQuestion] = useState("");
   const [analysis, setAnalysis] = useState<string | null>(null);
+  const [analysisMetadata, setAnalysisMetadata] = useState<any>(null);
   const { user } = useAuth();
 
   // Reset form
@@ -17,10 +27,11 @@ export const useTechniqueAnalysis = () => {
     setUploadedVideo(null);
     setQuestion("");
     setAnalysis(null);
+    setAnalysisMetadata(null);
   };
 
-  // Submit for analysis
-  const handleSubmitForAnalysis = async () => {
+  // Enhanced submit for analysis with options
+  const handleSubmitForAnalysis = async (options: AnalysisOptions = {}) => {
     if (!uploadedVideo) {
       toast.error("Please upload a video first");
       return;
@@ -33,16 +44,38 @@ export const useTechniqueAnalysis = () => {
 
     setIsLoading(true);
     setAnalysis(null);
+    setAnalysisMetadata(null);
 
     try {
-      // Create form data
+      // Create enhanced form data with analysis options
       const formData = new FormData();
       formData.append('video', uploadedVideo);
       formData.append('query', question);
-
-      console.log("Calling bjj-analyzer function...");
       
-      // Call the Supabase Edge Function
+      // Add analysis options
+      if (options.analysisType) {
+        formData.append('analysisType', options.analysisType);
+      }
+      if (options.customFrameRate) {
+        formData.append('frameRate', options.customFrameRate.toString());
+      }
+      if (options.startOffset) {
+        formData.append('startOffset', options.startOffset);
+      }
+      if (options.endOffset) {
+        formData.append('endOffset', options.endOffset);
+      }
+      if (options.useTimestamps !== undefined) {
+        formData.append('useTimestamps', options.useTimestamps.toString());
+      }
+      if (options.customSystemPrompt) {
+        formData.append('systemPrompt', options.customSystemPrompt);
+      }
+
+      console.log("Calling enhanced bjj-analyzer function...");
+      console.log("Analysis options:", options);
+      
+      // Call the enhanced Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('bjj-analyzer', {
         body: formData,
         headers: {
@@ -54,23 +87,24 @@ export const useTechniqueAnalysis = () => {
         throw new Error(error.message || "Analysis failed");
       }
 
-      console.log("Analysis result:", data);
+      console.log("Enhanced analysis result:", data);
       
       if (data && data.analysis) {
         setAnalysis(data.analysis);
-        toast.success("Analysis complete!");
+        setAnalysisMetadata(data.metadata || null);
+        toast.success("Enhanced analysis complete!");
       } else {
         throw new Error("No analysis data returned");
       }
     } catch (error: any) {
-      console.error("Error during analysis:", error);
+      console.error("Error during enhanced analysis:", error);
       toast.error(error?.message || "Failed to analyze video. Please try again later.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Save analysis to user account
+  // Save analysis to user account with metadata
   const saveAnalysis = async () => {
     if (!user) {
       toast.error("You must be logged in to save analyses");
@@ -89,7 +123,8 @@ export const useTechniqueAnalysis = () => {
         user_id: user.id,
         question,
         analysis,
-        video_name: uploadedVideo.name
+        video_name: uploadedVideo.name,
+        metadata: analysisMetadata ? JSON.stringify(analysisMetadata) : null
       });
 
       if (error) {
@@ -114,6 +149,7 @@ export const useTechniqueAnalysis = () => {
     setQuestion,
     analysis,
     setAnalysis,
+    analysisMetadata,
     handleReset,
     handleSubmitForAnalysis,
     saveAnalysis

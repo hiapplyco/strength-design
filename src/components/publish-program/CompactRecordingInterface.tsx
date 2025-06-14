@@ -24,18 +24,17 @@ export function CompactRecordingInterface({
     if (!isScrolling) return;
 
     const interval = setInterval(() => {
-      setTeleprompterPosition((prev) => {
-        const newPosition = prev + scrollSpeed;
-        if (newPosition >= 100) {
-          setIsScrolling(false);
-          return 100;
-        }
-        return newPosition;
-      });
+      const newPosition = teleprompterPosition + scrollSpeed;
+      if (newPosition >= 100) {
+        setIsScrolling(false);
+        setTeleprompterPosition(100);
+      } else {
+        setTeleprompterPosition(newPosition);
+      }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isScrolling, scrollSpeed, setTeleprompterPosition]);
+  }, [isScrolling, scrollSpeed, teleprompterPosition, setTeleprompterPosition]);
 
   const handleToggleScroll = () => {
     setIsScrolling(!isScrolling);

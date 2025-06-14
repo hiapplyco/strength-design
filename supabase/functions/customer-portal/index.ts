@@ -8,14 +8,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const PRICE_IDS = {
-  unlimited: "price_1QjidsC3HTLX6YIcMQZNNZjb",
-  personalized: "price_1QjiebC3HTLX6YIcokWaSnIW"
-};
-
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
-  console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
+  console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
 };
 
 serve(async (req) => {
@@ -28,21 +23,19 @@ serve(async (req) => {
 
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
     if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is not set');
-    logStep("Stripe key verified");
-
-    // Create Supabase client using service role for database operations
-    const supabaseService = createClient(
+    
+    // Create Supabase client
+    const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { persistSession: false } }
     );
 
-    // Get user from auth header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) throw new Error('No authorization header')
 
     const token = authHeader.replace('Bearer ', '')
-    const { data: { user }, error: userError } = await supabaseService.auth.getUser(token)
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
     
     if (userError || !user?.email) {
       throw new Error('Authentication failed')
@@ -52,64 +45,31 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' })
 
-    // Get customer by email
+    // Find customer
     const customers = await stripe.customers.list({
       email: user.email,
       limit: 1
     })
 
     if (customers.data.length === 0) {
-      logStep("No Stripe customer found");
-      return new Response(
-        JSON.stringify({ 
-          subscribed: false,
-          subscriptionType: null,
-          subscriptionEnd: null 
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
-      )
+      throw new Error('No Stripe customer found for this user')
     }
 
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    // Check for active subscriptions
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: 'active',
-      limit: 10
-    })
-
-    let subscriptionType = null;
-    let subscriptionEnd = null;
+    const origin = req.headers.get('origin') || 'http://localhost:3000';
     
-    if (subscriptions.data.length > 0) {
-      const subscription = subscriptions.data[0];
-      const priceId = subscription.items.data[0].price.id;
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      
-      if (priceId === PRICE_IDS.unlimited) {
-        subscriptionType = 'unlimited';
-      } else if (priceId === PRICE_IDS.personalized) {
-        subscriptionType = 'personalized';
-      }
-      
-      logStep("Active subscription found", { priceId, subscriptionType, subscriptionEnd });
-    } else {
-      logStep("No active subscription found");
-    }
+    // Create customer portal session
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${origin}/pricing`,
+    });
 
-    const isSubscribed = subscriptionType !== null;
+    logStep("Customer portal session created", { sessionId: portalSession.id });
 
     return new Response(
-      JSON.stringify({ 
-        subscribed: isSubscribed,
-        subscriptionType,
-        subscriptionEnd
-      }),
+      JSON.stringify({ url: portalSession.url }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

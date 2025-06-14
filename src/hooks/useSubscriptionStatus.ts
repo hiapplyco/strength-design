@@ -7,6 +7,8 @@ interface SubscriptionStatus {
   isTrialing: boolean;
   trialEndsAt: Date | null;
   isSubscribed: boolean;
+  subscriptionType: 'unlimited' | 'personalized' | null;
+  subscriptionEnd: Date | null;
   status: 'trialing' | 'active' | 'past_due' | 'canceled' | 'incomplete' | null;
 }
 
@@ -20,36 +22,53 @@ export const useSubscriptionStatus = () => {
         throw new Error('No user session found');
       }
 
-      // Get subscription status from our database
-      const { data: subscription, error: subscriptionError } = await supabase
-        .from('subscriptions')
-        .select('*, prices(unit_amount, currency, interval)')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
+      try {
+        console.log('Checking subscription status...');
+        
+        const { data, error } = await supabase.functions.invoke('check-subscription', {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
-      if (subscriptionError) {
-        console.error('Error fetching subscription from database:', subscriptionError);
-        throw subscriptionError;
+        if (error) {
+          console.error('Error calling check-subscription function:', error);
+          throw error;
+        }
+
+        console.log('Subscription status response:', data);
+
+        const isSubscribed = data?.subscribed || false;
+        const subscriptionType = data?.subscriptionType || null;
+        const subscriptionEnd = data?.subscriptionEnd ? new Date(data.subscriptionEnd) : null;
+
+        return {
+          isTrialing: false, // We're not using trials currently
+          trialEndsAt: null,
+          isSubscribed,
+          subscriptionType,
+          subscriptionEnd,
+          status: isSubscribed ? 'active' : null
+        };
+      } catch (error) {
+        console.error('Error checking subscription status:', error);
+        
+        // Fallback to allowing access if there's an error
+        return {
+          isTrialing: false,
+          trialEndsAt: null,
+          isSubscribed: true,
+          subscriptionType: null,
+          subscriptionEnd: null,
+          status: 'active'
+        };
       }
-
-      // Default to giving access
-      const isSubscribed = true;
-      const isTrialing = false;
-      const validStatus: SubscriptionStatus['status'] = 'active';
-
-      return {
-        isTrialing,
-        trialEndsAt: null,
-        isSubscribed,
-        status: validStatus
-      };
     },
     enabled: !!session?.user,
-    // Use more reasonable caching values
     staleTime: 1000 * 60 * 5,    // 5 minutes
-    gcTime: 1000 * 60 * 10,      // 10 minutes (previously cacheTime)
-    refetchOnWindowFocus: true,   // Refetch when focus returns to window
-    refetchOnMount: true,         // Refetch when component mounts
-    refetchOnReconnect: true,     // Refetch when network reconnects
+    gcTime: 1000 * 60 * 10,      // 10 minutes
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 };

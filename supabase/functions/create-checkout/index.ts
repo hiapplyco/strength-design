@@ -8,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const PRICE_ID = "price_1QjidsC3HTLX6YIcMQZNNZjb"; // Standard Package $24.99/mo
+const PRICE_ID = "price_1QjidsC3HTLX6YIcMQZNNZjb"; // Pro Program $24.99/mo
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
   apiVersion: '2023-10-16',
@@ -67,8 +67,8 @@ serve(async (req) => {
       customer: customer.id,
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       mode: 'subscription',
-      success_url: `${req.headers.get('origin')}/dashboard`,
-      cancel_url: `${req.headers.get('origin')}/pricing`,
+      success_url: `${req.headers.get('origin')}/checkout-success`,
+      cancel_url: `${req.headers.get('origin')}/checkout-cancel`,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
       payment_method_types: ['card'],

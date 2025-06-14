@@ -29,10 +29,17 @@ export function PublishProgramContent({
     generateMonologue,
     isPublishing,
     currentShareableLink,
-    publishDocument
+    publishDocument,
+    autoRegenEnabled,
+    setAutoRegenEnabled,
+    selectedVoiceId,
+    setSelectedVoiceId,
+    generateVoiceNarration,
+    handleContentChange
   } = usePublishProgram(initialContent, shareableLink);
 
-  const handleContentChange = (content: string) => {
+  const handleDocumentContentChange = (content: string) => {
+    handleContentChange(content);
     onContentChange(content);
   };
 
@@ -61,7 +68,7 @@ export function PublishProgramContent({
             <TabsContent value="document" className="h-full m-0">
               <DocumentSection
                 content={workoutScript || initialContent}
-                onContentChange={handleContentChange}
+                onContentChange={handleDocumentContentChange}
               />
             </TabsContent>
             
@@ -74,6 +81,12 @@ export function PublishProgramContent({
                 onFileSelect={setSelectedFile}
                 selectedFile={selectedFile}
                 isGenerating={isGenerating}
+                autoRegenEnabled={autoRegenEnabled}
+                onAutoRegenChange={setAutoRegenEnabled}
+                selectedVoiceId={selectedVoiceId}
+                onVoiceChange={setSelectedVoiceId}
+                shareableLink={currentShareableLink}
+                onGenerateVoiceNarration={generateVoiceNarration}
               />
             </TabsContent>
           </div>

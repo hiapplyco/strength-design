@@ -1,9 +1,10 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Configuration constants
-const ELEVENLABS_API_ENDPOINT = "https://api.elevenlabs.io/v1/text-to-speech/TX3LPaxmHKxFdv7VOQHJ";
-const ELEVENLABS_MODEL = "eleven_monolingual_v1";
-const CHUNK_SIZE = 32768; // 32KB chunks for base64 processing
+// Configuration constants with fallback to default voice
+const DEFAULT_VOICE_ID = "TX3LPaxmHKxFdv7VOQHJ";
+const DEFAULT_MODEL = "eleven_multilingual_v2";
+const CHUNK_SIZE = 32768;
 
 // CORS headers for cross-origin requests
 const CORS_HEADERS = {
@@ -13,9 +14,6 @@ const CORS_HEADERS = {
 
 /**
  * Process ArrayBuffer to base64 in chunks to prevent memory issues
- * @param buffer - The audio ArrayBuffer to convert
- * @param chunkSize - Size of chunks to process at once
- * @returns Base64 encoded string
  */
 function bufferToBase64(buffer: ArrayBuffer, chunkSize = CHUNK_SIZE): string {
   const uint8Array = new Uint8Array(buffer);
@@ -31,9 +29,6 @@ function bufferToBase64(buffer: ArrayBuffer, chunkSize = CHUNK_SIZE): string {
 
 /**
  * Create a JSON response with appropriate headers
- * @param data - The data to send
- * @param status - HTTP status code
- * @returns Response object
  */
 function jsonResponse(data: any, status = 200): Response {
   return new Response(
@@ -50,8 +45,6 @@ function jsonResponse(data: any, status = 200): Response {
 
 /**
  * The main handler function for the edge function
- * @param req - The incoming request
- * @returns Response with audio data or error
  */
 async function handleTtsRequest(req: Request): Promise<Response> {
   // Handle CORS preflight requests
@@ -60,9 +53,9 @@ async function handleTtsRequest(req: Request): Promise<Response> {
   }
   
   try {
-    // Extract and validate text from request
-    const { text } = await req.json();
-    console.log('Received text for speech synthesis:', text);
+    // Extract and validate request data
+    const { text, voice_id, model_id } = await req.json();
+    console.log('Received TTS request:', { text_length: text?.length, voice_id, model_id });
     
     if (!text?.trim()) {
       return jsonResponse({ error: 'Text is required' }, 400);
@@ -74,19 +67,28 @@ async function handleTtsRequest(req: Request): Promise<Response> {
       return jsonResponse({ error: 'ElevenLabs API key not configured' }, 500);
     }
     
-    // Configure voice settings
+    // Use provided voice_id or fall back to default
+    const voiceId = voice_id || DEFAULT_VOICE_ID;
+    const modelId = model_id || DEFAULT_MODEL;
+    
+    // Build the API endpoint URL
+    const endpoint = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+    
+    // Configure voice settings and request payload
     const ttsPayload = {
       text,
-      model_id: ELEVENLABS_MODEL,
+      model_id: modelId,
       voice_settings: {
         stability: 0.5,
-        similarity_boost: 0.5
+        similarity_boost: 0.75,
+        style: 0.5,
+        use_speaker_boost: true
       }
     };
     
     // Make request to ElevenLabs API
-    console.log('Making request to ElevenLabs API...');
-    const response = await fetch(ELEVENLABS_API_ENDPOINT, {
+    console.log('Making request to ElevenLabs API with voice:', voiceId);
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -96,13 +98,25 @@ async function handleTtsRequest(req: Request): Promise<Response> {
       body: JSON.stringify(ttsPayload)
     });
     
-    // Handle API errors
+    // Handle API errors with more detailed error reporting
     if (!response.ok) {
       const errorData = await response.text();
       console.error('ElevenLabs API error:', errorData);
+      
+      // Try to parse error for better user feedback
+      let errorMessage = 'Failed to generate speech';
+      try {
+        const errorJson = JSON.parse(errorData);
+        errorMessage = errorJson.detail?.message || errorJson.message || errorMessage;
+      } catch {
+        // If parsing fails, use the raw error
+        errorMessage = errorData || errorMessage;
+      }
+      
       return jsonResponse({ 
-        error: 'Failed to generate speech', 
-        details: errorData
+        error: errorMessage,
+        voice_id: voiceId,
+        status: response.status
       }, response.status);
     }
     
@@ -111,7 +125,11 @@ async function handleTtsRequest(req: Request): Promise<Response> {
     const audioBuffer = await response.arrayBuffer();
     const base64Audio = bufferToBase64(audioBuffer);
     
-    return jsonResponse({ audioContent: base64Audio });
+    return jsonResponse({ 
+      audioContent: base64Audio,
+      voice_id: voiceId,
+      model_id: modelId
+    });
     
   } catch (error) {
     console.error('Error in text-to-speech function:', error);

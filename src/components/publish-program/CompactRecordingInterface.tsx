@@ -24,7 +24,7 @@ export function CompactRecordingInterface({
     if (!isScrolling) return;
 
     const interval = setInterval(() => {
-      setTeleprompterPosition((prev: number) => {
+      setTeleprompterPosition((prev) => {
         const newPosition = prev + scrollSpeed;
         if (newPosition >= 100) {
           setIsScrolling(false);
@@ -47,11 +47,11 @@ export function CompactRecordingInterface({
   };
 
   return (
-    <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-3">
       {/* Video Recording Side */}
-      <Card className="h-full p-4 bg-background/50 border-primary/50 flex flex-col">
-        <div className="flex-shrink-0 mb-4">
-          <h3 className="text-lg font-semibold text-foreground mb-2">Video Recording</h3>
+      <Card className="h-full p-3 bg-background/50 border-primary/50 flex flex-col">
+        <div className="flex-shrink-0 mb-3">
+          <h3 className="text-base font-semibold text-foreground mb-2">Video Recording</h3>
         </div>
         <div className="flex-1 min-h-0">
           <VideoRecorder />
@@ -59,34 +59,34 @@ export function CompactRecordingInterface({
       </Card>
 
       {/* Teleprompter Side */}
-      <Card className="h-full p-4 bg-background/50 border-primary/50 flex flex-col">
-        <div className="flex-shrink-0 mb-4">
+      <Card className="h-full p-3 bg-background/50 border-primary/50 flex flex-col">
+        <div className="flex-shrink-0 mb-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-foreground">Teleprompter</h3>
+            <h3 className="text-base font-semibold text-foreground">Teleprompter</h3>
             <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleToggleScroll}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 text-xs"
               >
-                {isScrolling ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {isScrolling ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                 {isScrolling ? "Pause" : "Start"}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleReset}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 text-xs"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-3 h-3" />
                 Reset
               </Button>
             </div>
           </div>
           
           <div className="mt-2 flex items-center gap-2">
-            <span className="text-sm text-foreground/70">Speed:</span>
+            <span className="text-xs text-foreground/70">Speed:</span>
             <input
               type="range"
               min="0.5"
@@ -96,15 +96,15 @@ export function CompactRecordingInterface({
               onChange={(e) => setScrollSpeed(Number(e.target.value))}
               className="flex-1 h-2 bg-background rounded-lg appearance-none cursor-pointer"
             />
-            <span className="text-sm text-foreground/70 w-8">{scrollSpeed}x</span>
+            <span className="text-xs text-foreground/70 w-8">{scrollSpeed}x</span>
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 mt-4">
+        <div className="flex-1 min-h-0 mt-3">
           <ScrollArea className="h-full">
             <div className="pr-4">
               <div 
-                className="text-lg leading-relaxed text-foreground"
+                className="text-sm leading-relaxed text-foreground"
                 style={{
                   transform: `translateY(-${teleprompterPosition}%)`,
                   transition: 'transform 0.1s linear'
@@ -112,12 +112,12 @@ export function CompactRecordingInterface({
               >
                 {workoutScript ? (
                   workoutScript.split('\n').map((line, index) => (
-                    <p key={index} className="mb-4 leading-relaxed">
+                    <p key={index} className="mb-3 leading-relaxed">
                       {line || '\u00A0'}
                     </p>
                   ))
                 ) : (
-                  <p className="text-foreground/50 italic">
+                  <p className="text-foreground/50 italic text-sm">
                     Generate a script to see it here for recording...
                   </p>
                 )}

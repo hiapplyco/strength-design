@@ -19,7 +19,14 @@ export const useSubscriptionStatus = () => {
     queryKey: ['subscription-status', session?.user?.id],
     queryFn: async (): Promise<SubscriptionStatus> => {
       if (!session?.user) {
-        throw new Error('No user session found');
+        return {
+          isTrialing: false,
+          trialEndsAt: null,
+          isSubscribed: false,
+          subscriptionType: null,
+          subscriptionEnd: null,
+          status: null
+        };
       }
 
       try {
@@ -33,7 +40,6 @@ export const useSubscriptionStatus = () => {
 
         if (error) {
           console.error('Error calling check-subscription function:', error);
-          // SECURITY FIX: Deny access on error instead of allowing
           return {
             isTrialing: false,
             trialEndsAt: null,
@@ -51,7 +57,7 @@ export const useSubscriptionStatus = () => {
         const subscriptionEnd = data?.subscriptionEnd ? new Date(data.subscriptionEnd) : null;
 
         return {
-          isTrialing: false, // We're not using trials currently
+          isTrialing: false,
           trialEndsAt: null,
           isSubscribed,
           subscriptionType,
@@ -61,7 +67,6 @@ export const useSubscriptionStatus = () => {
       } catch (error) {
         console.error('Error checking subscription status:', error);
         
-        // SECURITY FIX: Deny access on error - no fallback to allowing access
         return {
           isTrialing: false,
           trialEndsAt: null,
@@ -73,8 +78,8 @@ export const useSubscriptionStatus = () => {
       }
     },
     enabled: !!session?.user,
-    staleTime: 1000 * 60 * 5,    // 5 minutes
-    gcTime: 1000 * 60 * 10,      // 10 minutes
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,

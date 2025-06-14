@@ -7,7 +7,6 @@ export const useAuthErrorHandler = () => {
   const handleAuthError = (error: any, context: string) => {
     console.error(`Auth error in ${context}:`, error);
     
-    // SECURITY FIX: Don't expose internal error details to users
     const sanitizedMessage = getSanitizedErrorMessage(error);
     
     toast({
@@ -18,7 +17,6 @@ export const useAuthErrorHandler = () => {
   };
 
   const getSanitizedErrorMessage = (error: any): string => {
-    // SECURITY FIX: Only return safe, user-friendly messages
     if (typeof error?.message === 'string') {
       const message = error.message.toLowerCase();
       
@@ -39,7 +37,6 @@ export const useAuthErrorHandler = () => {
       }
     }
     
-    // Generic fallback message - never expose internal errors
     return 'An error occurred. Please try again.';
   };
 

@@ -21,7 +21,6 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
   const { toast } = useToast();
   const { handleAuthError } = useAuthErrorHandler();
 
-  // SECURITY FIX: Enhanced password validation
   const validatePassword = (password: string): boolean => {
     return (
       password.length >= 12 &&
@@ -32,10 +31,9 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
     );
   };
 
-  // SECURITY FIX: Email validation
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) && email.length <= 254; // RFC 5321 limit
+    return emailRegex.test(email) && email.length <= 254;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +41,6 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
     setIsLoading(true);
 
     try {
-      // SECURITY FIX: Input validation
       if (!validateEmail(email)) {
         toast({
           title: "Invalid Email",
@@ -54,7 +51,6 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
       }
 
       if (view === "sign_up") {
-        // SECURITY FIX: Validate password strength for sign up
         if (!validatePassword(password)) {
           toast({
             title: "Weak Password",
@@ -65,7 +61,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
         }
 
         const { error } = await supabase.auth.signUp({
-          email: email.trim().toLowerCase(), // SECURITY FIX: Normalize email
+          email: email.trim().toLowerCase(),
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
@@ -82,7 +78,6 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           onSuccess();
         }
       } else {
-        // SECURITY FIX: Basic password length check for sign in
         if (password.length < 6) {
           toast({
             title: "Invalid Password",
@@ -93,7 +88,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
         }
 
         const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(), // SECURITY FIX: Normalize email
+          email: email.trim().toLowerCase(),
           password,
         });
 

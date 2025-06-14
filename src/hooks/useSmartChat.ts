@@ -1,8 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
+import { useGeminiFileUpload } from "./useGeminiFileUpload";
 
 interface ChatMessage {
   id: string;
@@ -26,6 +26,8 @@ export const useSmartChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { config, updateConfig } = useWorkoutConfig();
   const { toast } = useToast();
+
+  const { uploadAndProcessFile } = useGeminiFileUpload({ addMessage: (msg: ChatMessage) => setMessages(prev => [...prev, msg]) });
 
   const sendMessage = useCallback(async (userMessage: string) => {
     const userMsg: ChatMessage = {
@@ -51,12 +53,22 @@ export const useSmartChat = () => {
 
       const response: ChatResponse = data;
       
-      // Apply any configuration updates
-      if (response.configUpdates && Object.keys(response.configUpdates).length > 0) {
-        updateConfig(response.configUpdates);
+      if (
+        response.configUpdates &&
+        (response.configUpdates.goals || response.configUpdates.prescribedExercises)
+      ) {
+        const configUpdates: any = { ...response.configUpdates };
         
-        // Show feedback about what was updated with enhanced styling
-        const updatedFields = Object.keys(response.configUpdates);
+        if ('goals' in configUpdates && !configUpdates.prescribedExercises) {
+          configUpdates.prescribedExercises = Array.isArray(configUpdates.goals)
+            ? configUpdates.goals.join(", ")
+            : configUpdates.goals;
+          delete configUpdates.goals;
+        }
+
+        updateConfig(configUpdates);
+
+        const updatedFields = Object.keys(configUpdates);
         const fieldNames = updatedFields.map(field => {
           switch(field) {
             case 'fitnessLevel': return 'Fitness Level';
@@ -75,10 +87,12 @@ export const useSmartChat = () => {
           duration: 4000,
         });
 
-        // Trigger visual update in sidebar
         window.dispatchEvent(new CustomEvent('configUpdated', { 
           detail: { updatedFields }
         }));
+      } else if (response.configUpdates && Object.keys(response.configUpdates).length > 0) {
+        
+        updateConfig(response.configUpdates);
       }
 
       const assistantMsg: ChatMessage = {
@@ -133,12 +147,17 @@ export const useSmartChat = () => {
     setMessages(prev => [...prev, message]);
   }, []);
 
+  const handleFileUpload = async (file: File) => {
+    await uploadAndProcessFile(file);
+  };
+
   return {
     messages,
     isLoading,
     sendMessage,
     clearChat,
     initializeChat,
-    addMessage
+    addMessage,
+    handleFileUpload,
   };
 };

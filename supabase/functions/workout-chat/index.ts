@@ -24,11 +24,12 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+    // --- Enhanced SYSTEM PROMPT to explicitly extract fitness goals for prescribedExercises ---
     const systemPrompt = `You are an expert fitness coach and workout configuration assistant. Your job is to help users create personalized workout programs through conversation.
 
 CURRENT CONFIGURATION:
 - Fitness Level: ${currentConfig.fitnessLevel || 'Not set'}
-- Goals: ${currentConfig.prescribedExercises || 'Not set'}
+- Goals: ${currentConfig.prescribedExercises || currentConfig.goals || 'Not set'}
 - Equipment: ${currentConfig.selectedExercises?.map(e => e.name).join(', ') || 'Not set'}
 - Injuries/Limitations: ${currentConfig.injuries || 'Not set'}
 - Schedule: ${currentConfig.numberOfCycles} cycle(s) of ${currentConfig.numberOfDays} days
@@ -43,7 +44,9 @@ You must respond with a JSON object containing:
   "message": "Your conversational response to the user",
   "configUpdates": {
     // Only include fields that should be updated based on the conversation
-    // Available fields: fitnessLevel, prescribedExercises, injuries, numberOfDays, numberOfCycles
+    // Available fields: fitnessLevel, prescribedExercises, injuries, numberOfDays, numberOfCycles, selectedExercises
+    // If the user mentions their main goals, always propagate to 'prescribedExercises'
+    // If you extract goals as a list or array, join them as a comma-separated string for 'prescribedExercises'
   },
   "suggestions": {
     "nextQuestions": ["What should I ask next?"],
@@ -52,14 +55,12 @@ You must respond with a JSON object containing:
 }
 
 GUIDELINES:
-1. Ask one focused question at a time to avoid overwhelming the user
-2. Be conversational and encouraging
-3. Extract specific information that can update the configuration
-4. Provide helpful suggestions and guidance
-5. If the user mentions equipment, suggest they search for it in the form
-6. Guide them progressively through all necessary fields
-7. Be specific about fitness levels (beginner: 0-6 months, intermediate: 6+ months, etc.)
-8. When they mention goals, be specific and actionable
+1. Whenever the user mentions their fitness or training goals, always set/update the 'prescribedExercises' field.
+2. If you extract goals in an array, join as a comma-separated string and set as prescribedExercises.
+3. Be conversational and encouraging, ask one focused question at a time.
+4. Provide helpful suggestions and guidance, use specific fitness terminology.
+5. If the user uploads a file, summarize and extract any exercise programs or notes as configuration updates.
+6. Always use the config fields exactly as described above (do not invent keys).
 
 USER MESSAGE: ${message}`;
 

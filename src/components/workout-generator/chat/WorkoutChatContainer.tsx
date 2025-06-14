@@ -16,13 +16,12 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   onMessagesUpdate
 }) => {
   const { config, clearConfig, getConfigSummary } = useWorkoutConfig();
-  const { messages, isLoading, sendMessage, clearChat, initializeChat } = useSmartChat();
+  const { messages, isLoading, sendMessage, clearChat, initializeChat, handleFileUpload } = useSmartChat();
 
   useEffect(() => {
     initializeChat();
   }, [initializeChat]);
 
-  // Pass messages to parent whenever they change
   useEffect(() => {
     if (onMessagesUpdate) {
       onMessagesUpdate(messages);
@@ -70,14 +69,12 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
   const handleEndChat = () => {
     const summary = getConfigSummary();
     const endMessage = `Great! I've helped you configure your workout. Here's what we've set up:\n\n${summary}\n\nYou can now generate your workout or continue chatting if you need any adjustments!`;
-    
     const summaryMsg = {
       id: Date.now().toString(),
       role: 'assistant' as const,
       content: endMessage,
       timestamp: new Date()
     };
-    
     sendMessage('Please provide a summary of our conversation and the workout configuration we\'ve created.');
   };
 
@@ -92,17 +89,16 @@ export const WorkoutChatContainer: React.FC<WorkoutChatContainerProps> = ({
         onEndChat={handleEndChat}
         onClearAll={handleClearAll}
       />
-      
       <div className="flex-1 w-full flex flex-col min-h-0">
         <ChatMessagesArea 
           messages={messages}
           isLoading={isLoading}
         />
-        
         <ChatInput 
           onSendMessage={handleSendMessage}
           isLoading={isLoading}
           isGenerating={isGenerating}
+          onFileUpload={handleFileUpload}
         />
       </div>
     </div>

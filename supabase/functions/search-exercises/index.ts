@@ -47,37 +47,49 @@ serve(async (req) => {
 
     const exercises: Exercise[] = await response.json();
     
+    // Improved search logic - more flexible matching
+    const searchTerm = query.toLowerCase().trim();
+    
     const results = exercises.filter(exercise => {
-      const searchTerms = [
-        exercise.name,
-        exercise.category,
-        ...exercise.primaryMuscles,
-        ...exercise.secondaryMuscles,
-        exercise.equipment,
-        exercise.level
-      ].map(term => term?.toLowerCase());
+      // Create an array of all searchable text
+      const searchableFields = [
+        exercise.name?.toLowerCase() || '',
+        exercise.category?.toLowerCase() || '',
+        exercise.equipment?.toLowerCase() || '',
+        exercise.level?.toLowerCase() || '',
+        exercise.force?.toLowerCase() || '',
+        exercise.mechanic?.toLowerCase() || '',
+        ...(exercise.primaryMuscles?.map(m => m.toLowerCase()) || []),
+        ...(exercise.secondaryMuscles?.map(m => m.toLowerCase()) || [])
+      ];
 
-      return searchTerms.some(term => term?.includes(query.toLowerCase()));
+      // Check if any field contains the search term
+      return searchableFields.some(field => 
+        field && field.includes(searchTerm)
+      );
     });
 
-    console.log('Found results:', results.length);
+    // Limit results to first 20 for performance
+    const limitedResults = results.slice(0, 20);
 
-    const formattedResults = results.map((exercise, index) => ({
+    console.log('Found results:', limitedResults.length);
+
+    const formattedResults = limitedResults.map((exercise, index) => ({
       id: exercise.id || `exercise-${index}`, // Ensure each exercise has an ID
       name: exercise.name,
       level: exercise.level,
       type: exercise.category,
-      muscle: exercise.primaryMuscles[0],
+      muscle: exercise.primaryMuscles?.[0] || 'Unknown',
       equipment: exercise.equipment,
       difficulty: exercise.level,
       mechanic: exercise.mechanic,
       force: exercise.force,
-      instructions: exercise.instructions,
-      primaryMuscles: exercise.primaryMuscles,
-      secondaryMuscles: exercise.secondaryMuscles,
-      images: exercise.images.map(image => 
+      instructions: exercise.instructions || [],
+      primaryMuscles: exercise.primaryMuscles || [],
+      secondaryMuscles: exercise.secondaryMuscles || [],
+      images: exercise.images?.map(image => 
         `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${image}`
-      )
+      ) || []
     }));
 
     return new Response(

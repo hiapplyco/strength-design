@@ -24,7 +24,15 @@ export const SearchResults = ({
   onExerciseSelect,
   sanitizeText 
 }: SearchResultsProps) => {
-  if (results.length === 0) return null;
+  console.log('SearchResults received:', results.length, 'exercises');
+  
+  if (results.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>No exercises found. Try different search terms.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border bg-card max-h-[60vh] overflow-y-auto">
@@ -32,7 +40,7 @@ export const SearchResults = ({
         <TableHeader>
           <TableRow>
             <TableHead>Exercise</TableHead>
-            <TableHead>Instructions</TableHead>
+            <TableHead>Details</TableHead>
             <TableHead className="w-[100px] text-center">Select</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,22 +58,37 @@ export const SearchResults = ({
                       <img
                         src={exercise.images[0]}
                         alt={exercise.name}
-                        className="rounded-md w-48 h-auto object-cover"
-                        loading="eager"
-                        decoding="async"
-                        crossOrigin="anonymous"
+                        className="rounded-md w-32 h-24 object-cover"
+                        loading="lazy"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder.svg';
+                          target.style.display = 'none';
                         }}
                       />
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground max-w-md">
-                  {exercise.instructions && exercise.instructions.length > 0
-                    ? exercise.instructions[0]
-                    : "No instructions available"}
+                <TableCell className="text-sm text-muted-foreground">
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-1">
+                      {exercise.level && (
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                          {exercise.level}
+                        </span>
+                      )}
+                      {exercise.equipment && (
+                        <span className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-1 text-xs font-medium">
+                          {exercise.equipment}
+                        </span>
+                      )}
+                    </div>
+                    {exercise.instructions && exercise.instructions.length > 0 && (
+                      <p className="text-xs leading-relaxed max-w-md">
+                        {exercise.instructions[0].substring(0, 150)}
+                        {exercise.instructions[0].length > 150 ? '...' : ''}
+                      </p>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center">
@@ -74,11 +97,11 @@ export const SearchResults = ({
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
                       className={cn(
-                        "w-24 transition-colors duration-200",
+                        "w-20 transition-colors duration-200",
                         isSelected ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "hover:bg-primary/10"
                       )}
                     >
-                      {isSelected ? "Selected" : "Select"}
+                      {isSelected ? "Added" : "Add"}
                     </Button>
                   </div>
                 </TableCell>

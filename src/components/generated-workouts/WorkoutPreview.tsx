@@ -7,27 +7,46 @@ interface WorkoutPreviewProps {
   workout: WorkoutDay;
 }
 
+interface SectionPreviewProps {
+  title: string;
+  content: string | null | undefined;
+}
+
+const SectionPreview = ({ title, content }: SectionPreviewProps) => {
+  if (!content) return null;
+  
+  const truncatedContent = content.length > 80 ? content.substring(0, 80) + '...' : content;
+  
+  return (
+    <div className="mt-2">
+      <h4 className="text-white/90 text-xs font-semibold">{title}</h4>
+      <p className="text-white/70 text-xs pl-2 whitespace-pre-line font-light">
+        {truncatedContent}
+      </p>
+    </div>
+  )
+};
+
 export const WorkoutPreview = ({ day, workout }: WorkoutPreviewProps) => {
+  const description = safelyGetWorkoutProperty(workout, 'description');
+  const warmup = safelyGetWorkoutProperty(workout, 'warmup');
+  const strength = safelyGetWorkoutProperty(workout, 'strength');
+  const workoutContent = safelyGetWorkoutProperty(workout, 'workout');
+
   return (
     <div>
       <h3 className="text-sm font-semibold text-primary mb-1">
         {day} Preview
       </h3>
-      {safelyGetWorkoutProperty(workout, 'description') && (
-        <p className="text-white/80 text-xs italic mb-1">
-          {(safelyGetWorkoutProperty(workout, 'description') || '').substring(0, 120)}
-          {(safelyGetWorkoutProperty(workout, 'description') || '').length > 120 ? '...' : ''}
+      {description && (
+        <p className="text-white/80 text-xs italic mb-2">
+          {description.substring(0, 120)}
+          {description.length > 120 ? '...' : ''}
         </p>
       )}
-      {safelyGetWorkoutProperty(workout, 'strength') && (
-        <div className="mt-1">
-          <span className="text-white/90 text-xs font-semibold">Strength:</span>
-          <p className="text-white/70 text-xs pl-2">
-            {(safelyGetWorkoutProperty(workout, 'strength') || '').substring(0, 100)}
-            {(safelyGetWorkoutProperty(workout, 'strength') || '').length > 100 ? '...' : ''}
-          </p>
-        </div>
-      )}
+      <SectionPreview title="Warmup" content={warmup} />
+      <SectionPreview title="Strength" content={strength} />
+      <SectionPreview title="Workout" content={workoutContent} />
     </div>
   );
 };

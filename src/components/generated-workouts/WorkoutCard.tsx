@@ -1,5 +1,6 @@
+
 import { formatDistanceToNow } from "date-fns";
-import { ArrowRight, Calendar, ClipboardList, Dumbbell } from "lucide-react";
+import { ArrowRight, Calendar, ClipboardList, Dumbbell, Heart, Share2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,8 @@ import { WorkoutData, WorkoutDay } from "@/types/fitness";
 import { Database } from "@/integrations/supabase/types";
 import { WorkoutPreview } from "./WorkoutPreview";
 import { safelyGetWorkoutProperty, isWorkoutDay } from "@/utils/workout-helpers";
+import { useToast } from "@/hooks/use-toast";
+import React from "react";
 
 type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
 
@@ -17,10 +20,20 @@ interface WorkoutCardProps {
 }
 
 export const WorkoutCard = ({ workout, onClick }: WorkoutCardProps) => {
+  const { toast } = useToast();
   const workoutData = workout.workout_data as unknown as WorkoutData;
   const firstDay = getFirstDayPreview(workoutData);
   const totalExercises = countExercises(workoutData);
-  const totalDays = workoutData ? Object.entries(workoutData).filter(([key, value]) => isWorkoutDay(value)).length : 0;
+  const totalDays = workoutData ? Object.entries(workoutData).filter(([, value]) => isWorkoutDay(value)).length : 0;
+  
+  const handleActionClick = (e: React.MouseEvent, action: string) => {
+    e.stopPropagation();
+    toast({
+      title: `${action} clicked`,
+      description: "This feature is not yet implemented.",
+      duration: 3000,
+    });
+  };
   
   return (
     <Card 
@@ -29,17 +42,34 @@ export const WorkoutCard = ({ workout, onClick }: WorkoutCardProps) => {
       onClick={() => onClick(workout)}
     >
       <CardHeader className="px-6 pt-6 pb-2">
-        <CardTitle className="text-white flex items-start gap-2">
-          <Dumbbell className="h-5 w-5 text-primary mt-1" />
-          <span className="flex-1">{workout.title || "Generated Workout"}</span>
-        </CardTitle>
-        
-        <div className="flex flex-wrap gap-2 mt-2">
-          {workout.tags && workout.tags.length > 0 && workout.tags.slice(0, 3).map((tag, index) => (
-            <Badge key={index} variant="secondary">
-              {tag}
-            </Badge>
-          ))}
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            <CardTitle className="text-white flex items-start gap-2 mb-2">
+              <Dumbbell className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+              <span className="flex-1">{workout.title || "Generated Workout"}</span>
+            </CardTitle>
+            <div className="flex flex-wrap gap-2">
+              {workout.tags && workout.tags.length > 0 && workout.tags.slice(0, 3).map((tag, index) => (
+                <Badge key={index} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-pink-500 hover:bg-pink-500/10" onClick={(e) => handleActionClick(e, 'Favorite')}>
+              <span className="sr-only">Favorite</span>
+              <Heart className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-sky-500 hover:bg-sky-500/10" onClick={(e) => handleActionClick(e, 'Share')}>
+              <span className="sr-only">Share</span>
+              <Share2 className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10" onClick={(e) => handleActionClick(e, 'Duplicate')}>
+              <span className="sr-only">Duplicate</span>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       

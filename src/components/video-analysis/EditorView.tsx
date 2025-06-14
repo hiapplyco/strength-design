@@ -29,6 +29,8 @@ export function EditorView({
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>("TX3LPaxmHKxFdv7VOQHJ");
+  const [autoRegenEnabled, setAutoRegenEnabled] = useState(false);
   const { isSharing, sharedLink, shareContent } = useSharedContent();
 
   const generateNarration = async (voiceId: string) => {
@@ -114,6 +116,10 @@ export function EditorView({
         isGenerating={isGenerating}
         audioUrl={audioUrl}
         onGenerateNarration={generateNarration}
+        selectedVoiceId={selectedVoiceId}
+        onVoiceChange={setSelectedVoiceId}
+        autoRegenEnabled={autoRegenEnabled}
+        onAutoRegenChange={setAutoRegenEnabled}
       />
     </div>
   );

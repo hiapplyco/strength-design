@@ -23,7 +23,7 @@ interface VideoSectionProps {
   selectedVoiceId: string;
   onVoiceChange: (voiceId: string) => void;
   shareableLink?: string;
-  onGenerateVoiceNarration: (voiceId: string) => Promise<void>;
+  onGenerateVoiceNarration?: (voiceId: string) => Promise<string | undefined>;
 }
 
 export function VideoSection({
@@ -53,8 +53,12 @@ export function VideoSection({
 
   const handleGenerateNarration = async (voiceId: string) => {
     try {
-      const url = await onGenerateVoiceNarration(voiceId);
-      setAudioUrl(url);
+      if (onGenerateVoiceNarration) {
+        const url = await onGenerateVoiceNarration(voiceId);
+        if (url) {
+          setAudioUrl(url);
+        }
+      }
     } catch (error) {
       console.error('Failed to generate narration:', error);
     }
@@ -129,7 +133,6 @@ export function VideoSection({
                   id="auto-regen"
                   checked={autoRegenEnabled}
                   onCheckedChange={onAutoRegenChange}
-                  size="sm"
                 />
               </div>
               {isGenerating && (

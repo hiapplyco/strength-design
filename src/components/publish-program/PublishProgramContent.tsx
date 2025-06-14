@@ -53,6 +53,12 @@ export function PublishProgramContent({
     await publishDocument(content);
   };
 
+  const handleGenerateVoiceNarration = async (voiceId: string) => {
+    if (workoutScript) {
+      return await generateVoiceNarration(workoutScript, voiceId);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col gap-4">
       {/* Condensed Tabs */}
@@ -86,7 +92,7 @@ export function PublishProgramContent({
                 selectedVoiceId={selectedVoiceId}
                 onVoiceChange={setSelectedVoiceId}
                 shareableLink={currentShareableLink}
-                onGenerateVoiceNarration={generateVoiceNarration}
+                onGenerateVoiceNarration={handleGenerateVoiceNarration}
               />
             </TabsContent>
           </div>

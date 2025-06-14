@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useVoiceCloning, VoiceProfile } from "../hooks/useVoiceCloning";
 import { Upload, Mic, Play } from "lucide-react";
 
@@ -34,11 +34,11 @@ export const VoiceCloningDialog = ({
     loadAvailableVoices,
   } = useVoiceCloning();
 
-  useState(() => {
+  useEffect(() => {
     if (open) {
       loadAvailableVoices();
     }
-  }, [open]);
+  }, [open, loadAvailableVoices]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

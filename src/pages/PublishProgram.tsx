@@ -37,11 +37,11 @@ export default function PublishProgram() {
   };
 
   return (
-    <div className="h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Fixed Header */}
       <div className="flex-shrink-0 bg-card/20 backdrop-blur-sm border-b border-border/50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between max-w-6xl mx-auto">
+        <div className="container mx-auto px-4 py-2">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
             <div className="flex items-center gap-4">
               <Button 
                 onClick={handleBack}
@@ -51,26 +51,28 @@ export default function PublishProgram() {
               >
                 <ArrowLeft className="w-4 h-4" /> Back
               </Button>
-              <LogoHeader className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-0">
+              <LogoHeader className="text-base sm:text-lg md:text-xl lg:text-2xl mb-0">
                 publish.program
               </LogoHeader>
             </div>
-            <p className="text-sm text-foreground/70 hidden md:block">
+            <p className="text-xs text-foreground/70 hidden md:block">
               Edit and publish your workout program
             </p>
           </div>
         </div>
       </div>
       
-      {/* Main Content Area */}
-      <div className="flex-1 min-h-0 container mx-auto px-4">
-        <div className="max-w-6xl mx-auto h-full py-4">
-          <PublishProgramContent 
-            initialContent={content}
-            documentId={documentId}
-            shareableLink={shareableLink}
-            onContentChange={handleContentChange}
-          />
+      {/* Main Content Area - Scrollable */}
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full container mx-auto px-4 py-4">
+          <div className="max-w-7xl mx-auto h-full">
+            <PublishProgramContent 
+              initialContent={content}
+              documentId={documentId}
+              shareableLink={shareableLink}
+              onContentChange={handleContentChange}
+            />
+          </div>
         </div>
       </div>
     </div>

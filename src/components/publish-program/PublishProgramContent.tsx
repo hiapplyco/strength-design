@@ -47,17 +47,17 @@ export function PublishProgramContent({
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Tab Navigation */}
-      <div className="flex-shrink-0 mb-4">
+    <div className="h-full flex flex-col gap-4">
+      {/* Condensed Tabs */}
+      <div className="flex-shrink-0">
         <Tabs defaultValue="document" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="document">Edit Document</TabsTrigger>
-            <TabsTrigger value="video">Record Video</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 h-10">
+            <TabsTrigger value="document" className="text-sm">Edit Document</TabsTrigger>
+            <TabsTrigger value="video" className="text-sm">Record Video</TabsTrigger>
           </TabsList>
           
-          {/* Tab Content Container */}
-          <div className="mt-4 h-[calc(100vh-280px)]">
+          {/* Tab Content - Takes remaining height */}
+          <div className="mt-3 h-[calc(100vh-220px)]">
             <TabsContent value="document" className="h-full m-0">
               <DocumentSection
                 content={workoutScript || initialContent}
@@ -80,7 +80,7 @@ export function PublishProgramContent({
         </Tabs>
       </div>
       
-      {/* Fixed Publish Actions */}
+      {/* Fixed Publish Actions at Bottom */}
       <div className="flex-shrink-0 mt-auto">
         <PublishActions
           shareableLink={currentShareableLink}

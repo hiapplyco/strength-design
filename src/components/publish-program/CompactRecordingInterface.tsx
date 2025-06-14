@@ -24,7 +24,7 @@ export function CompactRecordingInterface({
     if (!isScrolling) return;
 
     const interval = setInterval(() => {
-      setTeleprompterPosition(prev => {
+      setTeleprompterPosition((prev: number) => {
         const newPosition = prev + scrollSpeed;
         if (newPosition >= 100) {
           setIsScrolling(false);

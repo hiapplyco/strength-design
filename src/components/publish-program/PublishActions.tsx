@@ -36,15 +36,15 @@ export function PublishActions({
   };
 
   return (
-    <Card className="p-4 bg-card/80 backdrop-blur-sm border-primary/50">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className={`w-3 h-3 rounded-full ${shareableLink ? 'bg-green-500' : 'bg-gray-400'}`} />
+    <Card className="p-3 bg-card/80 backdrop-blur-sm border-primary/50">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${shareableLink ? 'bg-green-500' : 'bg-gray-400'}`} />
           <div>
-            <h3 className="text-lg font-bold text-foreground">
+            <h3 className="text-base font-bold text-foreground">
               {shareableLink ? 'Program Published' : 'Publish Your Program'}
             </h3>
-            <p className="text-sm text-foreground/70">
+            <p className="text-xs text-foreground/70">
               {shareableLink 
                 ? 'Your program is live and ready to share' 
                 : 'Share your workout program with the world'
@@ -60,19 +60,19 @@ export function PublishActions({
                 variant="outline"
                 size="sm"
                 onClick={handleCopyLink}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 text-xs"
               >
-                <Copy className="w-4 h-4" />
-                Copy Link
+                <Copy className="w-3 h-3" />
+                Copy
               </Button>
               
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleOpenLink}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 text-xs"
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-3 h-3" />
                 View
               </Button>
             </>
@@ -80,9 +80,10 @@ export function PublishActions({
             <Button
               onClick={onPublish}
               disabled={isPublishing || !content.trim()}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2"
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-2 text-xs"
             >
-              <Share2 className="w-4 h-4" />
+              <Share2 className="w-3 h-3" />
               {isPublishing ? "Publishing..." : "Publish Program"}
             </Button>
           )}
@@ -90,9 +91,9 @@ export function PublishActions({
       </div>
 
       {shareableLink && (
-        <div className="mt-4 p-3 bg-background/50 rounded-lg border border-border/50">
-          <div className="flex items-center gap-2 text-sm">
-            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+        <div className="mt-3 p-2 bg-background/50 rounded-lg border border-border/50">
+          <div className="flex items-center gap-2 text-xs">
+            <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
             <span className="font-mono text-foreground/80 truncate flex-1">
               {shareableLink}
             </span>

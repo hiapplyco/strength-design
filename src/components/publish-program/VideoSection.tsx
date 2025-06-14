@@ -29,17 +29,17 @@ export function VideoSection({
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header Card */}
-      <div className="flex-shrink-0 mb-4">
-        <Card className="p-4 bg-background/50 border-primary/50">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="h-full flex flex-col gap-3">
+      {/* Condensed Header */}
+      <div className="flex-shrink-0">
+        <Card className="p-3 bg-background/50 border-primary/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
-                <Video className="w-5 h-5" />
+              <h2 className="text-lg font-bold text-foreground mb-1 flex items-center gap-2">
+                <Video className="w-4 h-4" />
                 Record Your Video
               </h2>
-              <p className="text-sm text-foreground/70">
+              <p className="text-xs text-foreground/70">
                 Use the teleprompter to read your script while recording.
               </p>
             </div>
@@ -49,9 +49,9 @@ export function VideoSection({
                 onClick={onNarrate}
                 disabled={isGenerating || !workoutScript}
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs"
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-3 h-3" />
                 {isGenerating ? "Generating..." : "Generate Script"}
               </Button>
               
@@ -67,8 +67,9 @@ export function VideoSection({
                   variant="outline"
                   size="sm"
                   onClick={() => document.getElementById('video-upload')?.click()}
+                  className="text-xs"
                 >
-                  <Upload className="w-4 h-4 mr-2" />
+                  <Upload className="w-3 h-3 mr-1" />
                   Upload
                 </Button>
               </div>
@@ -76,8 +77,8 @@ export function VideoSection({
           </div>
           
           {selectedFile && (
-            <div className="mt-3 p-2 bg-background/70 rounded-md border border-border/50">
-              <span className="text-sm text-foreground/70">
+            <div className="mt-2 p-2 bg-background/70 rounded-md border border-border/50">
+              <span className="text-xs text-foreground/70">
                 Selected: {selectedFile.name}
               </span>
             </div>
@@ -85,8 +86,8 @@ export function VideoSection({
         </Card>
       </div>
 
-      {/* Recording Interface */}
-      <div className="flex-1 min-h-0">
+      {/* Recording Interface - Takes remaining height */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         <CompactRecordingInterface
           workoutScript={workoutScript}
           teleprompterPosition={teleprompterPosition}

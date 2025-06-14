@@ -29,7 +29,7 @@ export function DocumentSection({
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none min-h-full p-4 focus:outline-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-em:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-li:text-foreground',
+        class: 'prose prose-sm max-w-none min-h-full p-4 focus:outline-none prose-headings:text-black prose-p:text-black prose-strong:text-black prose-em:text-black prose-ul:text-black prose-ol:text-black prose-li:text-black text-black',
       },
     },
     onUpdate: ({ editor }) => {
@@ -179,10 +179,10 @@ export function DocumentSection({
       <div className="flex-1 min-h-0 bg-background/30">
         <ScrollArea className="h-full">
           <div className="p-4">
-            <div className="bg-background border border-border/50 rounded-lg p-4 shadow-sm">
+            <div className="bg-white border border-border/50 rounded-lg p-4 shadow-sm">
               <EditorContent 
                 editor={editor}
-                className="min-h-[300px] focus-within:ring-2 focus-within:ring-primary/20 rounded"
+                className="min-h-[300px] focus-within:ring-2 focus-within:ring-primary/20 rounded bg-white"
               />
             </div>
           </div>

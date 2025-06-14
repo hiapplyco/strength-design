@@ -33,7 +33,13 @@ const cleanContentForTeleprompter = (content: string): string => {
   // Get plain text content
   let cleanText = tempDiv.textContent || tempDiv.innerText || content;
   
-  // Remove common markdown patterns and clean up
+  // Remove CSS styles completely
+  cleanText = cleanText.replace(/<style[\s\S]*?<\/style>/gi, '');
+  cleanText = cleanText.replace(/body\s*\{[^}]*\}/gi, '');
+  cleanText = cleanText.replace(/ul\s*\{[^}]*\}/gi, '');
+  cleanText = cleanText.replace(/[a-zA-Z-]+\s*:\s*[^;]+;/g, '');
+  
+  // Remove common markdown and HTML patterns
   cleanText = cleanText
     .replace(/#{1,6}\s+/g, '') // Remove markdown headers
     .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
@@ -41,20 +47,43 @@ const cleanContentForTeleprompter = (content: string): string => {
     .replace(/`(.*?)`/g, '$1') // Remove inline code
     .replace(/```[\s\S]*?```/g, '') // Remove code blocks
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
-    .replace(/^\s*[-*+]\s+/gm, '• ') // Convert bullet points to bullets
-    .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered lists
-    .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
-    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
     .replace(/<!DOCTYPE.*?>/gi, '') // Remove DOCTYPE
     .replace(/<html.*?>|<\/html>/gi, '') // Remove html tags
     .replace(/<head.*?>[\s\S]*?<\/head>/gi, '') // Remove head section
     .replace(/<body.*?>|<\/body>/gi, '') // Remove body tags
     .replace(/<script.*?>[\s\S]*?<\/script>/gi, '') // Remove scripts
     .replace(/<style.*?>[\s\S]*?<\/style>/gi, '') // Remove styles
+    .replace(/font-family:\s*[^;]+;?/gi, '') // Remove font-family declarations
+    .replace(/list-style-type:\s*[^;]+;?/gi, '') // Remove list-style declarations
+    .replace(/margin-left:\s*[^;]+;?/gi, '') // Remove margin declarations
+    
+  // Clean up day sections and add proper formatting
+  cleanText = cleanText
+    .replace(/Day\s+(\d+)/gi, '\n\nDay $1\n') // Add line breaks around days
+    .replace(/🎯\s*Focus/gi, '\n\nFocus:') // Format focus sections
+    .replace(/🏃‍♂️\s*Warmup/gi, '\n\nWarmup:') // Format warmup sections
+    .replace(/🏋️‍♂️\s*Workout/gi, '\n\nWorkout:') // Format workout sections
+    .replace(/💪\s*Strength/gi, '\n\nStrength Focus:') // Format strength sections
+    .replace(/📝\s*Notes/gi, '\n\nNotes:') // Format notes sections
+    
+  // Add line breaks for better readability
+  cleanText = cleanText
+    .replace(/(\d+)\s+minutes/g, '$1 minutes\n') // Break after time durations
+    .replace(/(\d+)\s+sets/g, '\n$1 sets') // Break before sets
+    .replace(/(\d+)\s+reps/g, '$1 reps\n') // Break after reps
+    .replace(/Cool-down:/g, '\nCool-down:') // Break before cool-down
+    .replace(/Adjust/g, '\nAdjust') // Break before adjustment notes
+    .replace(/Focus\s+on/g, '\nFocus on') // Break before focus instructions
+    
+  // Clean up excessive whitespace but preserve intentional breaks
+  cleanText = cleanText
+    .replace(/\n{4,}/g, '\n\n\n') // Limit to max 3 consecutive newlines
+    .replace(/\s{3,}/g, ' ') // Replace multiple spaces with single space
+    .replace(/^\s+|\s+$/g, '') // Trim leading/trailing whitespace
     .trim();
   
-  // Split into paragraphs and clean each one
-  const paragraphs = cleanText.split('\n\n').filter(p => p.trim().length > 0);
+  // Split into paragraphs and ensure proper spacing
+  const paragraphs = cleanText.split(/\n\s*\n/).filter(p => p.trim().length > 0);
   
   return paragraphs.map(paragraph => {
     // Clean up each paragraph
@@ -196,19 +225,19 @@ export function CompactRecordingInterface({
         {/* Teleprompter Content */}
         <div className="flex-1 min-h-0 mt-3 bg-black rounded-lg overflow-hidden">
           <ScrollArea className="h-full">
-            <div className="p-4">
+            <div className="p-6">
               <div 
                 className="text-white leading-relaxed"
                 style={{
                   fontSize: `${fontSize}px`,
-                  lineHeight: '1.6',
+                  lineHeight: '1.8',
                   transform: `translateY(-${teleprompterPosition}%)`,
                   transition: 'transform 0.1s linear'
                 }}
               >
                 {cleanedScript ? (
                   cleanedScript.split('\n\n').map((paragraph, index) => (
-                    <p key={index} className="mb-6">
+                    <p key={index} className="mb-8">
                       {paragraph || '\u00A0'}
                     </p>
                   ))

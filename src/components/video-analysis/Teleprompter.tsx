@@ -14,6 +14,32 @@ interface WordSpan {
   isSpoken: boolean;
 }
 
+// Function to clean HTML/markdown from script for teleprompter display
+const cleanScriptForTeleprompter = (script: string): string => {
+  // Create a temporary div to strip HTML tags
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = script;
+  
+  // Get plain text content
+  let cleanText = tempDiv.textContent || tempDiv.innerText || script;
+  
+  // Remove common markdown patterns
+  cleanText = cleanText
+    .replace(/#{1,6}\s+/g, '') // Remove markdown headers
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+    .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+    .replace(/`(.*?)`/g, '$1') // Remove inline code
+    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
+    .replace(/^\s*[-*+]\s+/gm, '') // Remove bullet points
+    .replace(/^\s*\d+\.\s+/gm, '') // Remove numbered lists
+    .replace(/\n{3,}/g, '\n\n') // Replace multiple newlines with double newlines
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .trim();
+  
+  return cleanText;
+};
+
 export const Teleprompter = ({ script, position, setPosition }: TeleprompterProps) => {
   const { toast } = useToast();
   const [speed, setSpeed] = useState(0.25); // Start with slower default speed
@@ -30,9 +56,12 @@ export const Teleprompter = ({ script, position, setPosition }: TeleprompterProp
   const timerRef = useRef<number>();
   const lastScrollPosition = useRef(0);
 
-  // Initialize words from script
+  // Clean script for display
+  const cleanScript = cleanScriptForTeleprompter(script);
+
+  // Initialize words from cleaned script
   useEffect(() => {
-    const wordArray = script.split(/\s+/).map(word => ({
+    const wordArray = cleanScript.split(/\s+/).map(word => ({
       word,
       isSpoken: false
     }));
@@ -41,7 +70,7 @@ export const Teleprompter = ({ script, position, setPosition }: TeleprompterProp
     if (scrollRef.current) {
       scrollRef.current.scrollTo(0, 0);
     }
-  }, [script]);
+  }, [cleanScript]);
 
   useEffect(() => {
     if (playing && scrollRef.current) {

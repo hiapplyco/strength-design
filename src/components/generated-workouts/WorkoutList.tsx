@@ -1,45 +1,19 @@
 
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { WorkoutCard } from "./WorkoutCard";
 import { Database } from "@/integrations/supabase/types";
-import { WorkoutData, WorkoutDay, isWorkoutDay } from "@/types/fitness";
+import { WorkoutData, isWorkoutDay } from "@/types/fitness";
 import { safelyGetWorkoutProperty } from "@/utils/workout-helpers";
+import { Info } from "lucide-react";
 
 type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
 
-export const WorkoutList = () => {
-  const [workouts, setWorkouts] = useState<GeneratedWorkout[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-  const navigate = useNavigate();
+interface WorkoutListProps {
+  workouts: GeneratedWorkout[];
+}
 
-  useEffect(() => {
-    const fetchWorkouts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('generated_workouts')
-          .select('*')
-          .order('generated_at', { ascending: false });
-          
-        if (error) throw error;
-        setWorkouts(data || []);
-      } catch (error) {
-        console.error('Error fetching workouts:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load workouts. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchWorkouts();
-  }, [toast]);
+export const WorkoutList = ({ workouts }: WorkoutListProps) => {
+  const navigate = useNavigate();
 
   const handleWorkoutClick = (workout: GeneratedWorkout) => {
     const workoutData = workout.workout_data as unknown as WorkoutData;
@@ -93,12 +67,18 @@ export const WorkoutList = () => {
     });
   };
 
-  if (isLoading) {
-    return <p className="text-white text-center">Loading your workouts...</p>;
+  if (workouts.length === 0) {
+    return (
+      <div className="text-center py-16 text-muted-foreground bg-card border border-border rounded-lg flex flex-col items-center justify-center animate-fade-in">
+        <Info className="h-12 w-12 mb-4" />
+        <h3 className="text-xl font-semibold text-foreground">No Workouts Found</h3>
+        <p>Try adjusting your search or filter criteria.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-fade-in">
       {workouts.map(workout => (
         <WorkoutCard 
           key={workout.id} 

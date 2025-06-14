@@ -99,7 +99,7 @@ export function CompactRecordingInterface({
   setTeleprompterPosition
 }: CompactRecordingInterfaceProps) {
   const [isScrolling, setIsScrolling] = useState(false);
-  const [scrollSpeed, setScrollSpeed] = useState(1);
+  const [scrollSpeed, setScrollSpeed] = useState(0.1);
   const [fontSize, setFontSize] = useState(24);
   const [cleanedScript, setCleanedScript] = useState('');
 
@@ -188,14 +188,14 @@ export function CompactRecordingInterface({
               <span className="text-xs text-foreground/70">Speed:</span>
               <input
                 type="range"
-                min="0.5"
-                max="3"
-                step="0.5"
+                min="0.05"
+                max="0.5"
+                step="0.05"
                 value={scrollSpeed}
                 onChange={(e) => setScrollSpeed(Number(e.target.value))}
                 className="flex-1 h-2 bg-background rounded-lg appearance-none cursor-pointer"
               />
-              <span className="text-xs text-foreground/70 w-8">{scrollSpeed}x</span>
+              <span className="text-xs text-foreground/70 w-12">{Math.round(scrollSpeed * 100)}%</span>
             </div>
             
             {/* Font Size Control */}

@@ -9,7 +9,14 @@ const corsHeaders = {
 }
 
 const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  // SECURITY FIX: Sanitize logs - don't log sensitive data
+  const sanitizedDetails = details ? {
+    ...details,
+    email: details.email ? '***@***.***' : undefined,
+    customerId: details.customerId ? 'cus_***' : undefined
+  } : undefined;
+  
+  const detailsStr = sanitizedDetails ? ` - ${JSON.stringify(sanitizedDetails)}` : '';
   console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
 };
 
@@ -21,8 +28,18 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // SECURITY FIX: Validate environment variables
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-    if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is not set');
+    if (!stripeKey) {
+      logStep("ERROR: Missing Stripe secret key");
+      return new Response(
+        JSON.stringify({ error: 'Service configuration error' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        }
+      );
+    }
     
     // Create Supabase client
     const supabaseClient = createClient(
@@ -31,17 +48,60 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // SECURITY FIX: Validate auth header
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) throw new Error('No authorization header')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      logStep("ERROR: Invalid authorization header");
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        }
+      );
+    }
 
     const token = authHeader.replace('Bearer ', '')
+    
+    // SECURITY FIX: Validate token format
+    if (!token || token.length < 10) {
+      logStep("ERROR: Invalid token format");
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        }
+      );
+    }
+
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
     
     if (userError || !user?.email) {
-      throw new Error('Authentication failed')
+      logStep("ERROR: Authentication failed", { error: userError?.message });
+      return new Response(
+        JSON.stringify({ error: 'Authentication failed' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        }
+      );
     }
 
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { userId: user.id });
+
+    // SECURITY FIX: Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      logStep("ERROR: Invalid email format");
+      return new Response(
+        JSON.stringify({ error: 'Invalid user data' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' })
 
@@ -52,21 +112,36 @@ serve(async (req) => {
     })
 
     if (customers.data.length === 0) {
-      throw new Error('No Stripe customer found for this user')
+      logStep("ERROR: No Stripe customer found");
+      return new Response(
+        JSON.stringify({ error: 'No subscription found for this account' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 404,
+        }
+      );
     }
 
     const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
+    logStep("Found Stripe customer");
 
-    const origin = req.headers.get('origin') || 'http://localhost:3000';
+    // SECURITY FIX: Validate origin header
+    const origin = req.headers.get('origin');
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://strength-design.lovableproject.com',
+      // Add your production domain here
+    ];
+    
+    const returnUrl = allowedOrigins.includes(origin || '') ? `${origin}/pricing` : 'https://strength-design.lovableproject.com/pricing';
     
     // Create customer portal session
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${origin}/pricing`,
+      return_url: returnUrl,
     });
 
-    logStep("Customer portal session created", { sessionId: portalSession.id });
+    logStep("Customer portal session created");
 
     return new Response(
       JSON.stringify({ url: portalSession.url }),
@@ -78,10 +153,11 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR", { message: errorMessage });
+    logStep("ERROR", { message: 'Unexpected error occurred' });
     
+    // SECURITY FIX: Don't expose internal error details
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Service temporarily unavailable' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,

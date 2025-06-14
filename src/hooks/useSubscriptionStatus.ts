@@ -33,7 +33,15 @@ export const useSubscriptionStatus = () => {
 
         if (error) {
           console.error('Error calling check-subscription function:', error);
-          throw error;
+          // SECURITY FIX: Deny access on error instead of allowing
+          return {
+            isTrialing: false,
+            trialEndsAt: null,
+            isSubscribed: false,
+            subscriptionType: null,
+            subscriptionEnd: null,
+            status: null
+          };
         }
 
         console.log('Subscription status response:', data);
@@ -53,14 +61,14 @@ export const useSubscriptionStatus = () => {
       } catch (error) {
         console.error('Error checking subscription status:', error);
         
-        // Fallback to allowing access if there's an error
+        // SECURITY FIX: Deny access on error - no fallback to allowing access
         return {
           isTrialing: false,
           trialEndsAt: null,
-          isSubscribed: true,
+          isSubscribed: false,
           subscriptionType: null,
           subscriptionEnd: null,
-          status: 'active'
+          status: null
         };
       }
     },

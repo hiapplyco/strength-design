@@ -14,7 +14,14 @@ const PRICE_IDS = {
 };
 
 const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  // SECURITY FIX: Sanitize logs - don't log sensitive user data
+  const sanitizedDetails = details ? {
+    ...details,
+    email: details.email ? '***@***.***' : undefined,
+    customerId: details.customerId ? 'cus_***' : undefined
+  } : undefined;
+  
+  const detailsStr = sanitizedDetails ? ` - ${JSON.stringify(sanitizedDetails)}` : '';
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
@@ -26,9 +33,18 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // SECURITY FIX: Validate environment variables
     const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-    if (!stripeKey) throw new Error('STRIPE_SECRET_KEY is not set');
-    logStep("Stripe key verified");
+    if (!stripeKey) {
+      logStep("ERROR: Missing Stripe secret key");
+      return new Response(
+        JSON.stringify({ error: 'Service configuration error' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500,
+        }
+      );
+    }
 
     // Create Supabase client using service role for database operations
     const supabaseService = createClient(
@@ -37,22 +53,64 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Get user from auth header
+    // SECURITY FIX: Validate auth header
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) throw new Error('No authorization header')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      logStep("ERROR: Invalid authorization header");
+      return new Response(
+        JSON.stringify({ error: 'Authentication required' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        }
+      );
+    }
 
     const token = authHeader.replace('Bearer ', '')
+    
+    // SECURITY FIX: Validate token format
+    if (!token || token.length < 10) {
+      logStep("ERROR: Invalid token format");
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        }
+      );
+    }
+
     const { data: { user }, error: userError } = await supabaseService.auth.getUser(token)
     
     if (userError || !user?.email) {
-      throw new Error('Authentication failed')
+      logStep("ERROR: Authentication failed", { error: userError?.message });
+      return new Response(
+        JSON.stringify({ error: 'Authentication failed' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        }
+      );
     }
 
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { userId: user.id });
 
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' })
 
-    // Get customer by email
+    // SECURITY FIX: Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      logStep("ERROR: Invalid email format");
+      return new Response(
+        JSON.stringify({ error: 'Invalid user data' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      );
+    }
+
+    // Find customer by email
     const customers = await stripe.customers.list({
       email: user.email,
       limit: 1
@@ -74,7 +132,7 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
+    logStep("Found Stripe customer");
 
     // Check for active subscriptions
     const subscriptions = await stripe.subscriptions.list({
@@ -91,13 +149,16 @@ serve(async (req) => {
       const priceId = subscription.items.data[0].price.id;
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       
+      // SECURITY FIX: Validate price ID against known values
       if (priceId === PRICE_IDS.unlimited) {
         subscriptionType = 'unlimited';
       } else if (priceId === PRICE_IDS.personalized) {
         subscriptionType = 'personalized';
+      } else {
+        logStep("WARNING: Unknown price ID detected", { priceId });
       }
       
-      logStep("Active subscription found", { priceId, subscriptionType, subscriptionEnd });
+      logStep("Active subscription found", { subscriptionType });
     } else {
       logStep("No active subscription found");
     }
@@ -118,10 +179,11 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR", { message: errorMessage });
+    logStep("ERROR", { message: 'Unexpected error occurred' });
     
+    // SECURITY FIX: Don't expose internal error details
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: 'Service temporarily unavailable' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,

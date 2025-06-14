@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PasswordValidation } from "./PasswordValidation";
+import { useAuthErrorHandler } from "@/hooks/useAuthErrorHandler";
 
 interface AuthFormProps {
   view: "sign_up" | "sign_in";
@@ -18,7 +19,9 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPasswordValidation, setShowPasswordValidation] = useState(false);
   const { toast } = useToast();
+  const { handleAuthError } = useAuthErrorHandler();
 
+  // SECURITY FIX: Enhanced password validation
   const validatePassword = (password: string): boolean => {
     return (
       password.length >= 12 &&
@@ -29,13 +32,29 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
     );
   };
 
+  // SECURITY FIX: Email validation
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && email.length <= 254; // RFC 5321 limit
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      // SECURITY FIX: Input validation
+      if (!validateEmail(email)) {
+        toast({
+          title: "Invalid Email",
+          description: "Please enter a valid email address.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (view === "sign_up") {
-        // Validate password strength for sign up
+        // SECURITY FIX: Validate password strength for sign up
         if (!validatePassword(password)) {
           toast({
             title: "Weak Password",
@@ -46,7 +65,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
         }
 
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.trim().toLowerCase(), // SECURITY FIX: Normalize email
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
@@ -54,19 +73,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
         });
 
         if (error) {
-          if (error.message.includes("already registered")) {
-            toast({
-              title: "Account exists",
-              description: "This email is already registered. Please try signing in instead.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Sign up failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+          handleAuthError(error, 'signUp');
         } else {
           toast({
             title: "Check your email",
@@ -75,25 +82,23 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           onSuccess();
         }
       } else {
+        // SECURITY FIX: Basic password length check for sign in
+        if (password.length < 6) {
+          toast({
+            title: "Invalid Password",
+            description: "Password is too short.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim().toLowerCase(), // SECURITY FIX: Normalize email
           password,
         });
 
         if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Sign in failed",
-              description: "Invalid email or password. Please check your credentials and try again.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Sign in failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+          handleAuthError(error, 'signIn');
         } else {
           toast({
             title: "Welcome back!",
@@ -103,11 +108,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
         }
       }
     } catch (error) {
-      toast({
-        title: "An error occurred",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      handleAuthError(error, view);
     } finally {
       setIsLoading(false);
     }
@@ -123,6 +124,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          maxLength={254}
           className="bg-black/20 border-green-500/30 text-white placeholder:text-white/60"
           placeholder="Enter your email"
         />
@@ -137,6 +139,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           onChange={(e) => setPassword(e.target.value)}
           onFocus={() => setShowPasswordValidation(view === "sign_up")}
           required
+          maxLength={128}
           className="bg-black/20 border-green-500/30 text-white placeholder:text-white/60"
           placeholder="Enter your password"
         />
@@ -150,7 +153,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
 
       <Button 
         type="submit" 
-        disabled={isLoading}
+        disabled={isLoading || (view === "sign_up" && !validatePassword(password)) || !validateEmail(email)}
         className="w-full bg-green-600 hover:bg-green-700 text-white"
       >
         {isLoading ? "Loading..." : view === "sign_up" ? "Sign Up" : "Sign In"}

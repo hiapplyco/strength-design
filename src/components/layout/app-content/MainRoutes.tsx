@@ -9,6 +9,7 @@ import WorkoutResults from "@/pages/WorkoutResults";
 import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
 import DocumentEditor from "@/pages/DocumentEditor";
 import PublishProgram from "@/pages/PublishProgram";
+import TechniqueAnalysis from "@/pages/TechniqueAnalysis";
 import Pricing from "@/pages/Pricing";
 import CheckoutSuccess from "@/pages/CheckoutSuccess";
 import CheckoutCancel from "@/pages/CheckoutCancel";
@@ -26,6 +27,7 @@ export const MainRoutes = () => {
         <Route path="/generated-workouts" element={<GeneratedWorkouts />} />
         <Route path="/document-editor" element={<DocumentEditor />} />
         <Route path="/publish-program" element={<PublishProgram />} />
+        <Route path="/technique-analysis" element={<TechniqueAnalysis />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
         <Route path="/checkout-cancel" element={<CheckoutCancel />} />

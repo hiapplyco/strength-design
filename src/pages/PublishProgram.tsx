@@ -38,28 +38,33 @@ export default function PublishProgram() {
 
   return (
     <div className="h-screen bg-background flex flex-col">
-      {/* Header - Fixed */}
-      <div className="flex-shrink-0 container mx-auto pt-6 px-4">
-        <div className="max-w-6xl mx-auto bg-card/40 backdrop-blur-sm rounded-xl p-4">
-          <Button 
-            onClick={handleBack}
-            variant="ghost" 
-            className="flex items-center gap-2 text-foreground hover:text-primary mb-3"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Generator
-          </Button>
-          <div className="text-center mb-3">
-            <LogoHeader>publish.program</LogoHeader>
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 bg-card/20 backdrop-blur-sm border-b border-border/50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between max-w-6xl mx-auto">
+            <div className="flex items-center gap-4">
+              <Button 
+                onClick={handleBack}
+                variant="ghost" 
+                size="sm"
+                className="flex items-center gap-2 text-foreground hover:text-primary"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </Button>
+              <LogoHeader className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-0">
+                publish.program
+              </LogoHeader>
+            </div>
+            <p className="text-sm text-foreground/70 hidden md:block">
+              Edit and publish your workout program
+            </p>
           </div>
-          <p className="text-base text-foreground/80 text-center">
-            Edit your workout program and record your video content. Publish to share with your audience!
-          </p>
         </div>
       </div>
       
-      {/* Main Content - Flexible with proper overflow */}
-      <div className="flex-1 min-h-0 container mx-auto px-4 pb-4">
-        <div className="max-w-6xl mx-auto h-full">
+      {/* Main Content Area */}
+      <div className="flex-1 min-h-0 container mx-auto px-4">
+        <div className="max-w-6xl mx-auto h-full py-4">
           <PublishProgramContent 
             initialContent={content}
             documentId={documentId}

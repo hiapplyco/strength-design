@@ -37,8 +37,8 @@ export default function PublishProgram() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
+    <div className="h-screen bg-background flex flex-col">
+      {/* Header - Fixed */}
       <div className="flex-shrink-0 container mx-auto pt-6 px-4">
         <div className="max-w-6xl mx-auto bg-card/40 backdrop-blur-sm rounded-xl p-4">
           <Button 
@@ -57,8 +57,8 @@ export default function PublishProgram() {
         </div>
       </div>
       
-      {/* Main Content - Scrollable */}
-      <div className="flex-1 container mx-auto px-4 pb-4 overflow-hidden">
+      {/* Main Content - Flexible with proper overflow */}
+      <div className="flex-1 min-h-0 container mx-auto px-4 pb-4">
         <div className="max-w-6xl mx-auto h-full">
           <PublishProgramContent 
             initialContent={content}

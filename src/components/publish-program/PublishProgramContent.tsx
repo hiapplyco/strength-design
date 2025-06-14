@@ -47,20 +47,18 @@ export function PublishProgramContent({
   };
 
   return (
-    <div className="h-full flex flex-col py-4">
+    <div className="h-full flex flex-col pt-4">
       <Tabs defaultValue="document" className="h-full flex flex-col">
         <TabsList className="grid w-full grid-cols-2 mb-4 flex-shrink-0">
           <TabsTrigger value="document">Edit Document</TabsTrigger>
           <TabsTrigger value="video">Record Video</TabsTrigger>
         </TabsList>
         
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0">
           <TabsContent value="document" className="h-full m-0">
             <DocumentSection
               content={workoutScript || initialContent}
               onContentChange={handleContentChange}
-              onPublish={handlePublish}
-              isPublishing={isPublishing}
             />
           </TabsContent>
           

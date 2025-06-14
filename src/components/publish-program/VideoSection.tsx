@@ -72,14 +72,12 @@ export function VideoSection({
         </div>
       </Card>
 
-      <div className="flex-1 overflow-hidden min-h-0">
-        <div className="h-full">
-          <RecordingInterface
-            workoutScript={workoutScript}
-            teleprompterPosition={teleprompterPosition}
-            setTeleprompterPosition={setTeleprompterPosition}
-          />
-        </div>
+      <div className="flex-1 min-h-0">
+        <RecordingInterface
+          workoutScript={workoutScript}
+          teleprompterPosition={teleprompterPosition}
+          setTeleprompterPosition={setTeleprompterPosition}
+        />
       </div>
     </div>
   );

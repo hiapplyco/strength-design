@@ -5,15 +5,11 @@ import { Card } from "@/components/ui/card";
 interface DocumentSectionProps {
   content: string;
   onContentChange: (content: string) => void;
-  onPublish: (content: string) => void;
-  isPublishing: boolean;
 }
 
 export function DocumentSection({
   content,
-  onContentChange,
-  onPublish,
-  isPublishing
+  onContentChange
 }: DocumentSectionProps) {
   const handleSave = (newContent: string) => {
     onContentChange(newContent);

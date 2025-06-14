@@ -36,12 +36,12 @@ export function PublishActions({
   };
 
   return (
-    <Card className="mt-8 p-6 bg-card/50 border-primary">
-      <div className="flex flex-col gap-4">
+    <Card className="p-4 bg-card/50 border-primary">
+      <div className="flex flex-col gap-3">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-bold text-foreground">Publish Your Program</h3>
-            <p className="text-foreground/70">
+            <h3 className="text-lg font-bold text-foreground">Publish Your Program</h3>
+            <p className="text-sm text-foreground/70">
               Share your workout program with the world
             </p>
           </div>
@@ -56,15 +56,15 @@ export function PublishActions({
         </div>
 
         {shareableLink && (
-          <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg border">
-            <div className="flex-1">
-              <p className="text-sm text-foreground/70 mb-1">Shareable Link:</p>
-              <p className="text-sm font-mono text-foreground break-all">
+          <div className="flex items-center gap-4 p-3 bg-background/50 rounded-lg border">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-foreground/70 mb-1">Shareable Link:</p>
+              <p className="text-sm font-mono text-foreground truncate">
                 {shareableLink}
               </p>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               <Button
                 variant="outline"
                 size="sm"

@@ -20,15 +20,15 @@ export function DocumentSection({
   };
 
   return (
-    <Card className="w-full p-6 bg-background border-primary">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Edit Your Program</h2>
-        <p className="text-foreground/70">
+    <Card className="h-full p-4 bg-background border-primary flex flex-col">
+      <div className="flex-shrink-0 mb-4">
+        <h2 className="text-xl font-bold text-foreground mb-2">Edit Your Program</h2>
+        <p className="text-sm text-foreground/70">
           Customize your workout program content. Use the rich text editor to format your program perfectly.
         </p>
       </div>
       
-      <div className="bg-white rounded-lg">
+      <div className="flex-1 bg-white rounded-lg overflow-hidden">
         <Editor 
           content={content}
           onSave={handleSave}

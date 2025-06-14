@@ -37,24 +37,26 @@ export default function PublishProgram() {
   };
 
   return (
-    <div className="relative min-h-screen bg-background">
-      <div className="relative z-10 container mx-auto pt-32 pb-24 px-4">
-        <div className="max-w-6xl mx-auto bg-card/40 backdrop-blur-sm rounded-xl p-8 mb-12">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 container mx-auto pt-20 px-4">
+        <div className="max-w-6xl mx-auto bg-card/40 backdrop-blur-sm rounded-xl p-6 mb-6">
           <Button 
             onClick={handleBack}
             variant="ghost" 
-            className="flex items-center gap-2 text-foreground hover:text-primary mb-6"
+            className="flex items-center gap-2 text-foreground hover:text-primary mb-4"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Generator
           </Button>
-          <div className="text-center mb-6">
+          <div className="text-center mb-4">
             <LogoHeader>publish.program</LogoHeader>
           </div>
-          <p className="text-xl text-foreground/80 text-center mb-8">
+          <p className="text-lg text-foreground/80 text-center">
             Edit your workout program and record your video content. Publish to share with your audience!
           </p>
         </div>
-        
+      </div>
+      
+      <div className="flex-1 container mx-auto px-4 pb-4 overflow-hidden">
         <PublishProgramContent 
           initialContent={content}
           documentId={documentId}

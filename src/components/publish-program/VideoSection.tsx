@@ -29,16 +29,16 @@ export function VideoSection({
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6 bg-background border-primary">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Record Your Video</h2>
-          <p className="text-foreground/70">
+    <div className="h-full flex flex-col space-y-4">
+      <Card className="flex-shrink-0 p-4 bg-background border-primary">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-foreground mb-2">Record Your Video</h2>
+          <p className="text-sm text-foreground/70">
             Use the teleprompter to read your script while recording your video content.
           </p>
         </div>
         
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-4 flex-wrap">
           <Button
             onClick={onNarrate}
             disabled={isGenerating || !workoutScript}
@@ -72,11 +72,13 @@ export function VideoSection({
         </div>
       </Card>
 
-      <RecordingInterface
-        workoutScript={workoutScript}
-        teleprompterPosition={teleprompterPosition}
-        setTeleprompterPosition={setTeleprompterPosition}
-      />
+      <div className="flex-1 overflow-hidden">
+        <RecordingInterface
+          workoutScript={workoutScript}
+          teleprompterPosition={teleprompterPosition}
+          setTeleprompterPosition={setTeleprompterPosition}
+        />
+      </div>
     </div>
   );
 }

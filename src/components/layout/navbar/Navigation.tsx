@@ -1,9 +1,10 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Dumbbell, 
   FileText, 
-  Video, 
+  Upload, 
   DollarSign,
   MessageSquare
 } from "lucide-react";
@@ -24,7 +25,7 @@ export const Navigation = ({ isMobile, onMobileMenuClose }: NavigationProps) => 
   const navItems = [
     { path: '/workout-generator', icon: <Dumbbell className="h-4 w-4" />, text: 'Generate Program' },
     { path: '/generated-workouts', icon: <FileText className="h-4 w-4" />, text: 'Previous Programs' },
-    { path: '/video-analysis', icon: <Video className="h-4 w-4" />, text: 'Publish Program' },
+    { path: '/publish-program', icon: <Upload className="h-4 w-4" />, text: 'Publish Program' },
     { path: '/program-chat', icon: <MessageSquare className="h-4 w-4" />, text: 'Program Chat' },
     { path: '/pricing', icon: <DollarSign className="h-4 w-4" />, text: 'Upgrade to Pro' },
   ];

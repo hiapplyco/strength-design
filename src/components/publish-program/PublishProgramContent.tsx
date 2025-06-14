@@ -47,41 +47,45 @@ export function PublishProgramContent({
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <Tabs defaultValue="document" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+    <div className="h-full flex flex-col">
+      <Tabs defaultValue="document" className="h-full flex flex-col">
+        <TabsList className="grid w-full grid-cols-2 mb-4 flex-shrink-0">
           <TabsTrigger value="document">Edit Document</TabsTrigger>
           <TabsTrigger value="video">Record Video</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="document" className="space-y-6">
-          <DocumentSection
-            content={workoutScript || initialContent}
-            onContentChange={handleContentChange}
-            onPublish={handlePublish}
-            isPublishing={isPublishing}
-          />
-        </TabsContent>
-        
-        <TabsContent value="video" className="space-y-6">
-          <VideoSection
-            workoutScript={workoutScript || initialContent}
-            teleprompterPosition={teleprompterPosition}
-            setTeleprompterPosition={setTeleprompterPosition}
-            onNarrate={handleNarrate}
-            onFileSelect={setSelectedFile}
-            selectedFile={selectedFile}
-            isGenerating={isGenerating}
-          />
-        </TabsContent>
+        <div className="flex-1 overflow-hidden">
+          <TabsContent value="document" className="h-full m-0">
+            <DocumentSection
+              content={workoutScript || initialContent}
+              onContentChange={handleContentChange}
+              onPublish={handlePublish}
+              isPublishing={isPublishing}
+            />
+          </TabsContent>
+          
+          <TabsContent value="video" className="h-full m-0">
+            <VideoSection
+              workoutScript={workoutScript || initialContent}
+              teleprompterPosition={teleprompterPosition}
+              setTeleprompterPosition={setTeleprompterPosition}
+              onNarrate={handleNarrate}
+              onFileSelect={setSelectedFile}
+              selectedFile={selectedFile}
+              isGenerating={isGenerating}
+            />
+          </TabsContent>
+        </div>
       </Tabs>
 
-      <PublishActions
-        shareableLink={currentShareableLink}
-        content={workoutScript || initialContent}
-        onPublish={() => handlePublish(workoutScript || initialContent)}
-        isPublishing={isPublishing}
-      />
+      <div className="flex-shrink-0 mt-4">
+        <PublishActions
+          shareableLink={currentShareableLink}
+          content={workoutScript || initialContent}
+          onPublish={() => handlePublish(workoutScript || initialContent)}
+          isPublishing={isPublishing}
+        />
+      </div>
     </div>
   );
 }

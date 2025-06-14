@@ -2,7 +2,7 @@
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "@/pages/Index";
 import Dashboard from "@/pages/MoVAPage";
-import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
+import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import JournalPage from "@/pages/JournalPage";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
 import WorkoutResults from "@/pages/WorkoutResults";
@@ -13,6 +13,7 @@ import TechniqueAnalysis from "@/pages/TechniqueAnalysis";
 import Pricing from "@/pages/Pricing";
 import CheckoutSuccess from "@/pages/CheckoutSuccess";
 import CheckoutCancel from "@/pages/CheckoutCancel";
+import ProgramChat from "@/pages/ProgramChat";
 
 export const MainRoutes = () => {
   return (
@@ -20,7 +21,7 @@ export const MainRoutes = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/video-analysis" element={<VideoAnalysis />} />
+        <Route path="/video-analysis" element={<VideoAnalysisPage />} />
         <Route path="/journal" element={<JournalPage />} />
         <Route path="/workout-generator" element={<WorkoutGenerator />} />
         <Route path="/workout-results" element={<WorkoutResults />} />
@@ -28,6 +29,7 @@ export const MainRoutes = () => {
         <Route path="/document-editor" element={<DocumentEditor />} />
         <Route path="/publish-program" element={<PublishProgram />} />
         <Route path="/technique-analysis" element={<TechniqueAnalysis />} />
+        <Route path="/program-chat" element={<ProgramChat />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
         <Route path="/checkout-cancel" element={<CheckoutCancel />} />

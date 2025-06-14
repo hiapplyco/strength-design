@@ -2,7 +2,18 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Calendar, Settings, Users, Book, Sparkles } from "lucide-react";
+import {
+  Home,
+  Sparkles,
+  History,
+  Book,
+  BarChart3,
+  MessageSquare,
+  FileText,
+  Video,
+  Search,
+  CreditCard,
+} from "lucide-react";
 
 interface NavItemProps {
   to: string;
@@ -31,35 +42,51 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label }) => {
 export const SidebarNavigation = () => {
   return (
     <nav className="space-y-1 px-2">
-      <NavItem
-        to="/"
-        icon={<Home className="h-5 w-5" />}
-        label="Home"
-      />
+      <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
       <NavItem
         to="/workout-generator"
         icon={<Sparkles className="h-5 w-5" />}
         label="Workout Generator"
       />
       <NavItem
-        to="/calendar"
-        icon={<Calendar className="h-5 w-5" />}
-        label="Calendar"
-      />
-      <NavItem
-        to="/settings"
-        icon={<Settings className="h-5 w-5" />}
-        label="Settings"
-      />
-      <NavItem
-        to="/community"
-        icon={<Users className="h-5 w-5" />}
-        label="Community"
+        to="/generated-workouts"
+        icon={<History className="h-5 w-5" />}
+        label="Previous Programs"
       />
       <NavItem
         to="/journal"
         icon={<Book className="h-5 w-5" />}
         label="Journal"
+      />
+      <NavItem
+        to="/dashboard"
+        icon={<BarChart3 className="h-5 w-5" />}
+        label="Dashboard"
+      />
+      <NavItem
+        to="/program-chat"
+        icon={<MessageSquare className="h-5 w-5" />}
+        label="Program Chat"
+      />
+      <NavItem
+        to="/document-editor"
+        icon={<FileText className="h-5 w-5" />}
+        label="Document Editor"
+      />
+      <NavItem
+        to="/video-analysis"
+        icon={<Video className="h-5 w-5" />}
+        label="Publish Program"
+      />
+      <NavItem
+        to="/technique-analysis"
+        icon={<Search className="h-5 w-5" />}
+        label="Technique Analysis"
+      />
+      <NavItem
+        to="/pricing"
+        icon={<CreditCard className="h-5 w-5" />}
+        label="Pricing"
       />
     </nav>
   );

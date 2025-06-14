@@ -51,9 +51,10 @@ export const WorkoutDisplayHeader = ({
         return;
       }
 
-      navigate('/document-editor', { 
+      navigate('/publish-program', { 
         state: { 
-          content: JSON.stringify(data)
+          content: JSON.stringify(data),
+          workoutScript: data?.content || JSON.stringify(workoutsForDocument)
         } 
       });
     } catch (error) {

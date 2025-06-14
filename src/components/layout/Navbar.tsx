@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Home, FileText, Dumbbell, Video, DollarSign, MessageSquare, BarChart3 } from "lucide-react";
+import { Home, FileText, Dumbbell, Video, DollarSign, MessageSquare, BarChart3, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "./navbar/MobileMenu";
 
@@ -8,7 +8,8 @@ export const Navbar = () => {
   const navItems = [
     { path: '/workout-generator', icon: <Dumbbell className="h-5 w-5" />, text: 'Generate Program' },
     { path: '/generated-workouts', icon: <FileText className="h-5 w-5" />, text: 'Previous Programs' },
-    { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Publish Program' },
+    { path: '/publish-program', icon: <Upload className="h-5 w-5" />, text: 'Publish Program' },
+    { path: '/video-analysis', icon: <Video className="h-5 w-5" />, text: 'Video Tools' },
     { path: '/program-chat', icon: <MessageSquare className="h-5 w-5" />, text: 'Program Chat' },
     { path: '/slam-mova', icon: <BarChart3 className="h-5 w-5" />, text: 'MoVA Platform', highlight: true },
     { path: '/pricing', icon: <DollarSign className="h-5 w-5" />, text: 'Upgrade to Pro' },

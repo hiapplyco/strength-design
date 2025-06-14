@@ -1,4 +1,3 @@
-
 import { formatDistanceToNow } from "date-fns";
 import { ArrowRight, Calendar, ClipboardList, Dumbbell, Heart, Share2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -11,15 +10,19 @@ import { WorkoutPreview } from "./WorkoutPreview";
 import { safelyGetWorkoutProperty, isWorkoutDay } from "@/utils/workout-helpers";
 import { useToast } from "@/hooks/use-toast";
 import React from "react";
+import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
 
 interface WorkoutCardProps {
   workout: GeneratedWorkout;
   onClick: (workout: GeneratedWorkout) => void;
+  isSelected: boolean;
+  onToggleSelection: (workoutId: string) => void;
 }
 
-export const WorkoutCard = ({ workout, onClick }: WorkoutCardProps) => {
+export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection }: WorkoutCardProps) => {
   const { toast } = useToast();
   const workoutData = workout.workout_data as unknown as WorkoutData;
   const firstDay = getFirstDayPreview(workoutData);
@@ -38,9 +41,27 @@ export const WorkoutCard = ({ workout, onClick }: WorkoutCardProps) => {
   return (
     <Card 
       key={workout.id} 
-      className="transition-all hover:shadow-lg hover:border-primary/40 cursor-pointer overflow-hidden group flex flex-col"
+      className={cn(
+        "transition-all hover:shadow-lg hover:border-primary/40 cursor-pointer overflow-hidden group flex flex-col",
+        isSelected && "ring-2 ring-primary border-primary/60"
+      )}
       onClick={() => onClick(workout)}
     >
+      <div 
+        className="absolute top-3 left-3 z-10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => onToggleSelection(workout.id)}
+          className={cn(
+            "h-5 w-5 rounded-sm transition-all",
+            "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+            "data-[state=unchecked]:bg-background/80"
+          )}
+          aria-label={`Select workout ${workout.title}`}
+        />
+      </div>
       <CardHeader className="px-6 pt-6 pb-2">
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">

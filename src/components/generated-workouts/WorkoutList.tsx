@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { WorkoutCard } from "./WorkoutCard";
 import { Database } from "@/integrations/supabase/types";
@@ -10,9 +9,11 @@ type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'
 
 interface WorkoutListProps {
   workouts: GeneratedWorkout[];
+  selectedWorkouts: string[];
+  onToggleSelection: (workoutId: string) => void;
 }
 
-export const WorkoutList = ({ workouts }: WorkoutListProps) => {
+export const WorkoutList = ({ workouts, selectedWorkouts, onToggleSelection }: WorkoutListProps) => {
   const navigate = useNavigate();
 
   const handleWorkoutClick = (workout: GeneratedWorkout) => {
@@ -83,7 +84,9 @@ export const WorkoutList = ({ workouts }: WorkoutListProps) => {
         <WorkoutCard 
           key={workout.id} 
           workout={workout} 
-          onClick={handleWorkoutClick} 
+          onClick={handleWorkoutClick}
+          isSelected={selectedWorkouts.includes(workout.id)}
+          onToggleSelection={onToggleSelection}
         />
       ))}
     </div>

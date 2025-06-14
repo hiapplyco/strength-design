@@ -6,6 +6,7 @@ import { WorkoutFilters } from "@/components/generated-workouts/WorkoutFilters";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
+import { BulkActionsBar } from "@/components/generated-workouts/BulkActionsBar";
 
 type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
 
@@ -17,6 +18,7 @@ const GeneratedWorkouts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("generated_at_desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedWorkouts, setSelectedWorkouts] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -78,6 +80,45 @@ const GeneratedWorkouts = () => {
     });
   }, [workouts, searchTerm, sortBy, selectedTags]);
 
+  const toggleWorkoutSelection = (workoutId: string) => {
+    setSelectedWorkouts(prev => 
+      prev.includes(workoutId)
+        ? prev.filter(id => id !== workoutId)
+        : [...prev, workoutId]
+    );
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedWorkouts.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from('generated_workouts')
+        .delete()
+        .in('id', selectedWorkouts);
+
+      if (error) throw error;
+
+      setWorkouts(currentWorkouts => 
+        currentWorkouts.filter(w => !selectedWorkouts.includes(w.id))
+      );
+      
+      toast({
+        title: "Success",
+        description: `${selectedWorkouts.length} workout(s) deleted successfully.`,
+      });
+
+      setSelectedWorkouts([]);
+    } catch (error) {
+      console.error('Error deleting workouts:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete workouts. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="min-h-screen">
@@ -95,10 +136,21 @@ const GeneratedWorkouts = () => {
           {isLoading ? (
             <p className="text-white text-center mt-8">Loading your workouts...</p>
           ) : (
-            <WorkoutList workouts={filteredAndSortedWorkouts} />
+            <WorkoutList
+              workouts={filteredAndSortedWorkouts}
+              selectedWorkouts={selectedWorkouts}
+              onToggleSelection={toggleWorkoutSelection}
+            />
           )}
         </div>
       </div>
+      {selectedWorkouts.length > 0 && (
+        <BulkActionsBar
+          selectedCount={selectedWorkouts.length}
+          onDelete={handleDeleteSelected}
+          onClearSelection={() => setSelectedWorkouts([])}
+        />
+      )}
     </div>
   );
 };

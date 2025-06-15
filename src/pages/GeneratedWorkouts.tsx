@@ -1,25 +1,35 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { useToast } from "@/hooks/use-toast";
+import { Database } from "@/integrations/supabase/types";
+import { PageHeader } from "@/components/generated-workouts/PageHeader";
+import { WorkoutFilters } from "@/components/generated-workouts/WorkoutFilters";
+import { WorkoutList } from "@/components/generated-workouts/WorkoutList";
+import { BulkActionsBar } from "@/components/generated-workouts/BulkActionsBar";
+
+type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
 
 export default function GeneratedWorkouts() {
-  const [workouts, setWorkouts] = useState([]);
+  const [workouts, setWorkouts] = useState<GeneratedWorkout[]>([]);
+  const [filteredWorkouts, setFilteredWorkouts] = useState<GeneratedWorkout[]>([]);
+  const [selectedWorkouts, setSelectedWorkouts] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("generated_at_desc");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchWorkouts = async () => {
       if (!user) return;
 
       try {
+        setIsLoading(true);
         const { data, error } = await supabase
           .from("generated_workouts")
           .select("*")
@@ -28,61 +38,262 @@ export default function GeneratedWorkouts() {
 
         if (error) {
           console.error("Error fetching workouts:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load your workouts. Please try again.",
+            variant: "destructive",
+          });
           return;
         }
 
-        setWorkouts(data);
+        setWorkouts(data || []);
       } catch (error) {
         console.error("Error fetching workouts:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load your workouts. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchWorkouts();
-  }, [user]);
+  }, [user, toast]);
 
-  const filteredWorkouts = workouts.filter((workout) =>
-    workout.title.toLowerCase().includes(searchTerm.toLowerCase())
+  // Get all unique tags from workouts
+  const allTags = Array.from(
+    new Set(
+      workouts
+        .flatMap(workout => workout.tags || [])
+        .filter(Boolean)
+    )
   );
 
-  return (
-    <StandardPageLayout
-      header={
-        <div className="py-6 text-center">
-          <h1 className="text-3xl font-bold text-primary">Your Generated Workouts</h1>
-          <p className="text-lg text-foreground/80 max-w-3xl mx-auto mt-2">
-            Access all of your previously generated programs.
-          </p>
-        </div>
+  // Filter and sort workouts
+  useEffect(() => {
+    let filtered = [...workouts];
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(workout =>
+        workout.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workout.summary?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply favorites filter
+    if (showOnlyFavorites) {
+      filtered = filtered.filter(workout => workout.is_favorite);
+    }
+
+    // Apply tags filter
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(workout =>
+        workout.tags?.some(tag => selectedTags.includes(tag))
+      );
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "generated_at_asc":
+          return new Date(a.generated_at || 0).getTime() - new Date(b.generated_at || 0).getTime();
+        case "generated_at_desc":
+          return new Date(b.generated_at || 0).getTime() - new Date(a.generated_at || 0).getTime();
+        case "title_asc":
+          return (a.title || "").localeCompare(b.title || "");
+        case "title_desc":
+          return (b.title || "").localeCompare(a.title || "");
+        default:
+          return 0;
       }
-    >
-      <div className="flex-1 flex flex-col h-full">
-        <div className="mb-4">
-          <Input
-            type="text"
-            placeholder="Search workouts..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full max-w-md mx-auto"
-          />
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-            {filteredWorkouts.map((workout) => (
-              <Card key={workout.id} className="bg-card/95 backdrop-blur">
-                <CardContent className="p-4">
-                  <h2 className="text-lg font-semibold mb-2">{workout.title}</h2>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {workout.summary}
-                  </p>
-                  <Link to="/document-editor" state={{ content: JSON.stringify(workout.workout_data, null, 2) }}>
-                    <Button className="w-full">View Workout</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+    });
+
+    setFilteredWorkouts(filtered);
+  }, [workouts, searchTerm, sortBy, selectedTags, showOnlyFavorites]);
+
+  const handleToggleSelection = (workoutId: string) => {
+    setSelectedWorkouts(prev => 
+      prev.includes(workoutId) 
+        ? prev.filter(id => id !== workoutId)
+        : [...prev, workoutId]
+    );
+  };
+
+  const handleToggleFavorite = async (workoutId: string) => {
+    try {
+      const workout = workouts.find(w => w.id === workoutId);
+      if (!workout) return;
+
+      const { error } = await supabase
+        .from("generated_workouts")
+        .update({ is_favorite: !workout.is_favorite })
+        .eq("id", workoutId);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update favorite status.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setWorkouts(prev => 
+        prev.map(w => 
+          w.id === workoutId 
+            ? { ...w, is_favorite: !w.is_favorite }
+            : w
+        )
+      );
+
+      toast({
+        title: workout.is_favorite ? "Removed from favorites" : "Added to favorites",
+        description: workout.is_favorite 
+          ? "Workout removed from your favorites." 
+          : "Workout added to your favorites.",
+      });
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDuplicate = async (workoutId: string) => {
+    try {
+      const workout = workouts.find(w => w.id === workoutId);
+      if (!workout) return;
+
+      const { data, error } = await supabase
+        .from("generated_workouts")
+        .insert({
+          user_id: user?.id,
+          title: `${workout.title} (Copy)`,
+          summary: workout.summary,
+          workout_data: workout.workout_data,
+          tags: workout.tags,
+          target_muscle_groups: workout.target_muscle_groups,
+          equipment_needed: workout.equipment_needed,
+          estimated_duration_minutes: workout.estimated_duration_minutes,
+          difficulty_level: workout.difficulty_level,
+          is_favorite: false
+        })
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to duplicate workout.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setWorkouts(prev => [data, ...prev]);
+      toast({
+        title: "Workout duplicated",
+        description: "A copy of the workout has been created.",
+      });
+    } catch (error) {
+      console.error("Error duplicating workout:", error);
+      toast({
+        title: "Error",
+        description: "Failed to duplicate workout.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      const { error } = await supabase
+        .from("generated_workouts")
+        .delete()
+        .in("id", selectedWorkouts);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete selected workouts.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setWorkouts(prev => prev.filter(w => !selectedWorkouts.includes(w.id)));
+      setSelectedWorkouts([]);
+      toast({
+        title: "Workouts deleted",
+        description: `${selectedWorkouts.length} workout(s) have been deleted.`,
+      });
+    } catch (error) {
+      console.error("Error deleting workouts:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete selected workouts.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedWorkouts([]);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-black p-8">
+        <div className="max-w-7xl mx-auto">
+          <PageHeader />
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="text-white/60 mt-4">Loading your workouts...</p>
           </div>
-        </ScrollArea>
+        </div>
       </div>
-    </StandardPageLayout>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-black via-purple-950 to-black p-8">
+      <div className="max-w-7xl mx-auto">
+        <PageHeader />
+        
+        <WorkoutFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          allTags={allTags}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
+          showOnlyFavorites={showOnlyFavorites}
+          setShowOnlyFavorites={setShowOnlyFavorites}
+        />
+
+        <WorkoutList
+          workouts={filteredWorkouts}
+          selectedWorkouts={selectedWorkouts}
+          onToggleSelection={handleToggleSelection}
+          onToggleFavorite={handleToggleFavorite}
+          onDuplicate={handleDuplicate}
+        />
+
+        {selectedWorkouts.length > 0 && (
+          <BulkActionsBar
+            selectedCount={selectedWorkouts.length}
+            onDelete={handleDeleteSelected}
+            onClearSelection={handleClearSelection}
+          />
+        )}
+      </div>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer, Event } from "react-big-calendar";
 import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
 import { format, parse, startOfWeek, getDay, addDays, startOfDay } from "date-fns";
@@ -27,8 +28,13 @@ const DnDCalendar = withDragAndDrop(Calendar);
 
 type JournalEntry = Database['public']['Tables']['journal_entries']['Row'];
 
-interface CalendarEvent extends Event {
+interface CalendarEvent {
   id?: string | number;
+  title?: React.ReactNode;
+  start?: Date;
+  end?: Date;
+  allDay?: boolean;
+  resource?: any;
   type: 'workout' | 'journal';
   sessionId?: string;
   entryId?: string;

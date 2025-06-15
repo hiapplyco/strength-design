@@ -20,7 +20,7 @@ export function AppSidebar() {
       ref={sidebarRef}
       className={cn(
         "h-screen w-64 bg-background border-r border-border flex flex-col fixed top-0 left-0 z-40",
-        "transform transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        "transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
         !isVisible && "-translate-x-full"
       )}
       style={{

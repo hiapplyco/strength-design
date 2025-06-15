@@ -20,13 +20,14 @@ export function StandardPageLayout({ header, children, footer, className }: Stan
   const isMobile = useIsMobile();
   
   const isVisible = isMobile ? openMobile : open;
-  const sidebarOffset = isVisible && !isMobile ? "ml-64" : "ml-0";
 
   return (
     <div
       className={cn(
-        "flex flex-col min-h-screen h-screen w-full bg-background overflow-hidden transition-all duration-300",
-        sidebarOffset,
+        "flex flex-col min-h-screen h-screen w-full bg-background overflow-hidden",
+        "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        // Apply margin-left only on desktop when sidebar is open
+        !isMobile && isVisible ? "ml-64" : "ml-0",
         className
       )}
     >

@@ -85,11 +85,7 @@ const Index = () => {
   };
 
   return (
-    <div className={cn(
-      "relative min-h-screen overflow-x-hidden transition-all duration-300",
-      // Adjust padding based on sidebar state
-      isMobile ? "pl-0" : (isOpen ? "pl-0" : "pl-0")
-    )}>
+    <div className="relative min-h-screen overflow-x-hidden">
       {/* Apply different gradient overlay based on theme */}
       <div className={`absolute inset-0 ${
         theme === 'light' 
@@ -97,11 +93,7 @@ const Index = () => {
           : 'bg-gradient-to-br from-primary/10 via-primary/5 to-background'
       } opacity-50 pointer-events-none`}></div>
       
-      <div className={cn(
-        "relative z-10 container mx-auto px-4 py-12 max-w-7xl transition-all duration-300",
-        // Add extra left padding when sidebar is open on desktop
-        !isMobile && isOpen ? "ml-8" : ""
-      )}>
+      <div className="relative z-10 container mx-auto px-4 py-12 max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

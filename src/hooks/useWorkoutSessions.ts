@@ -5,11 +5,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
 
 type WorkoutSession = Database['public']['Tables']['workout_sessions']['Row'];
+type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
+export type WorkoutSessionWithGeneratedWorkout = WorkoutSession & {
+  generated_workouts: GeneratedWorkout | null;
+};
 type WorkoutSessionInsert = Database['public']['Tables']['workout_sessions']['Insert'];
 type WorkoutSessionUpdate = Database['public']['Tables']['workout_sessions']['Update'];
 
 export const useWorkoutSessions = () => {
-  const [sessions, setSessions] = useState<WorkoutSession[]>([]);
+  const [sessions, setSessions] = useState<WorkoutSessionWithGeneratedWorkout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -37,12 +41,15 @@ export const useWorkoutSessions = () => {
     }
   };
 
-  const createSession = async (session: WorkoutSessionInsert): Promise<WorkoutSession | null> => {
+  const createSession = async (session: WorkoutSessionInsert): Promise<WorkoutSessionWithGeneratedWorkout | null> => {
     try {
       const { data, error } = await supabase
         .from('workout_sessions')
         .insert(session)
-        .select()
+        .select(`
+          *,
+          generated_workouts:generated_workout_id(*)
+        `)
         .single();
 
       if (error) throw error;

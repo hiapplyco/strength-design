@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, CalendarDays, BookOpen, Target, Brain } from "lucide-react";
+import { Calendar as CalendarIcon, CalendarDays, BookOpen, Target, Brain } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
 import { SmartJournalCalendar } from "./SmartJournalCalendar";
 import { WorkoutScheduler } from "./WorkoutScheduler";
 import { SmartJournalEntry } from "./SmartJournalEntry";
@@ -47,7 +48,7 @@ export const JournalPage = () => {
               Schedule
             </TabsTrigger>
             <TabsTrigger value="widgets" className="gap-2">
-              <Calendar className="h-4 w-4" />
+              <CalendarIcon className="h-4 w-4" />
               Widgets
             </TabsTrigger>
           </TabsList>

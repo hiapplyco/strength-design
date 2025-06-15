@@ -1,14 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer, Event } from "react-big-calendar";
 import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
 import { format, parse, startOfWeek, getDay, addDays, startOfDay } from "date-fns";
 import enUS from "date-fns/locale/en-US";
-import { useWorkoutSessions } from "@/hooks/useWorkoutSessions";
+import { useWorkoutSessions, WorkoutSessionWithGeneratedWorkout } from "@/hooks/useWorkoutSessions";
 import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { Database } from "@/integrations/supabase/types";
-import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Dumbbell, Heart, Zap } from "lucide-react";
+import { Dumbbell, Heart } from "lucide-react";
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -27,15 +25,15 @@ const localizer = dateFnsLocalizer({
 
 const DnDCalendar = withDragAndDrop(Calendar);
 
-type WorkoutSession = Database['public']['Tables']['workout_sessions']['Row'];
 type JournalEntry = Database['public']['Tables']['journal_entries']['Row'];
 
 interface CalendarEvent extends Event {
+  id?: string | number;
   type: 'workout' | 'journal';
   sessionId?: string;
   entryId?: string;
   status?: string;
-  data?: WorkoutSession | JournalEntry;
+  data?: WorkoutSessionWithGeneratedWorkout | JournalEntry;
 }
 
 export const SmartJournalCalendar = () => {
@@ -46,16 +44,15 @@ export const SmartJournalCalendar = () => {
   useEffect(() => {
     const calendarEvents: CalendarEvent[] = [];
 
-    // Add workout sessions as events
     sessions.forEach(session => {
-      const startDate = new Date(session.scheduled_date);
-      const endDate = addDays(startDate, 0);
-      endDate.setHours(startDate.getHours() + 1); // Default 1 hour duration
+      const startOfDayDate = startOfDay(new Date(session.scheduled_date + 'T00:00:00'));
+      const endDate = new Date(startOfDayDate);
+      endDate.setHours(startOfDayDate.getHours() + 1);
 
       calendarEvents.push({
         id: session.id,
         title: `Workout: ${session.generated_workouts?.title || 'Training Session'}`,
-        start: startDate,
+        start: startOfDayDate,
         end: endDate,
         type: 'workout',
         sessionId: session.id,
@@ -69,17 +66,17 @@ export const SmartJournalCalendar = () => {
       });
     });
 
-    // Add journal entries as events
     entries.forEach(entry => {
-      const startDate = new Date(entry.date);
-      const endDate = new Date(entry.date);
-      endDate.setHours(23, 59); // End of day
+      const startOfDayDate = startOfDay(new Date(entry.date + 'T00:00:00'));
+      const endDate = new Date(startOfDayDate);
+      endDate.setHours(23, 59, 59);
 
       calendarEvents.push({
         id: entry.id,
         title: entry.title || 'Journal Entry',
-        start: startDate,
+        start: startOfDayDate,
         end: endDate,
+        allDay: true,
         type: 'journal',
         entryId: entry.id,
         data: entry,
@@ -93,30 +90,21 @@ export const SmartJournalCalendar = () => {
     setEvents(calendarEvents);
   }, [sessions, entries]);
 
-  const onEventResize: withDragAndDropProps['onEventResize'] = async (data) => {
-    const { start, end, event } = data;
-    
+  const onEventResize: withDragAndDropProps['onEventResize'] = async ({ event, start, end }) => {
     if (event.type === 'workout' && event.sessionId) {
-      // Update workout session timing
       const newDate = format(new Date(start), 'yyyy-MM-dd');
       await updateSession(event.sessionId, { scheduled_date: newDate });
     }
 
     setEvents(currentEvents => {
-      return currentEvents.map(evt => {
-        if (evt.id === event.id) {
-          return { ...evt, start: new Date(start), end: new Date(end) };
-        }
-        return evt;
-      });
+      return currentEvents.map(evt =>
+        evt.id === event.id ? { ...evt, start: new Date(start), end: new Date(end) } : evt
+      );
     });
   };
 
-  const onEventDrop: withDragAndDropProps['onEventDrop'] = async (data) => {
-    const { start, event } = data;
-    
+  const onEventDrop: withDragAndDropProps['onEventDrop'] = async ({ event, start }) => {
     if (event.type === 'workout' && event.sessionId) {
-      // Update workout session date
       const newDate = format(new Date(start), 'yyyy-MM-dd');
       await updateSession(event.sessionId, { scheduled_date: newDate });
     }
@@ -124,7 +112,8 @@ export const SmartJournalCalendar = () => {
     setEvents(currentEvents => {
       return currentEvents.map(evt => {
         if (evt.id === event.id) {
-          return { ...evt, start: new Date(start), end: new Date(start) };
+          const duration = evt.end && evt.start ? evt.end.getTime() - evt.start.getTime() : 3600 * 1000;
+          return { ...evt, start: new Date(start), end: new Date(new Date(start).getTime() + duration) };
         }
         return evt;
       });
@@ -182,7 +171,7 @@ export const SmartJournalCalendar = () => {
     return (
       <div className="flex items-center text-xs">
         {getIcon()}
-        <span className="truncate">{event.title}</span>
+        <span className="truncate">{String(event.title)}</span>
       </div>
     );
   };

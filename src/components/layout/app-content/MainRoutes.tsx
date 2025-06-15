@@ -1,7 +1,7 @@
 
 import { Routes, Route } from "react-router-dom";
 import LandingPage from "@/pages/Index";
-import Dashboard from "@/pages/MoVAPage";
+import FormAnalysisPage from "@/pages/FormAnalysisPage";
 import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import JournalPage from "@/pages/JournalPage";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
@@ -20,7 +20,7 @@ export const MainRoutes = () => {
     <>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/form-analysis" element={<FormAnalysisPage />} />
         <Route path="/video-analysis" element={<VideoAnalysisPage />} />
         <Route path="/journal" element={<JournalPage />} />
         <Route path="/workout-generator" element={<WorkoutGenerator />} />

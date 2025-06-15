@@ -7,7 +7,7 @@ import {
   Sparkles,
   History,
   Book,
-  BarChart3,
+  Dumbbell,
   MessageSquare,
   FileText,
   Video,
@@ -59,9 +59,9 @@ export const SidebarNavigation = () => {
         label="Journal"
       />
       <NavItem
-        to="/dashboard"
-        icon={<BarChart3 className="h-5 w-5" />}
-        label="Dashboard"
+        to="/form-analysis"
+        icon={<Dumbbell className="h-5 w-5" />}
+        label="Form Analysis"
       />
       <NavItem
         to="/program-chat"

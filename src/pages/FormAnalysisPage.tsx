@@ -6,20 +6,16 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Video, 
-  BarChart3, 
-  Upload, 
   Play,
   FileText,
   Loader2
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { VideoUpload } from "@/components/video-analysis/VideoUpload";
 import { supabase } from "@/integrations/supabase/client";
 
-export default function MoVAPage() {
+export default function FormAnalysisPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [analysisQuestion, setAnalysisQuestion] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -74,9 +70,10 @@ export default function MoVAPage() {
     }
 
     setIsAnalyzing(true);
+    setAnalysisResults(null);
     try {
       // Call the Supabase Edge Function for analysis
-      const { data, error } = await supabase.functions.invoke('baseball-video-analysis', {
+      const { data, error } = await supabase.functions.invoke('form-video-analysis', {
         body: {
           videoUrl,
           question: analysisQuestion
@@ -89,7 +86,7 @@ export default function MoVAPage() {
       setActiveTab("results");
       toast({
         title: "Analysis Complete",
-        description: "Your baseball video has been analyzed!",
+        description: "Your video has been analyzed!",
       });
     } catch (error) {
       console.error("Analysis error:", error);
@@ -103,20 +100,10 @@ export default function MoVAPage() {
     }
   };
 
-  // Helper function to render metrics with color-coding
-  const renderMetricValue = (value: number) => {
-    let color = "text-gray-500";
-    if (value >= 80) color = "text-green-500";
-    else if (value >= 50) color = "text-yellow-500";
-    else color = "text-red-500";
-    
-    return <span className={`text-xl font-bold ${color}`}>{value}%</span>;
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground pb-20">
       {/* Header Section */}
-      <section className="bg-gradient-to-r from-[#1a237e] to-[#283593] py-16">
+      <section className="bg-gradient-to-r from-primary to-primary/80 py-16">
         <div className="container mx-auto px-4">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -125,10 +112,10 @@ export default function MoVAPage() {
             className="max-w-4xl mx-auto text-center"
           >
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              MoVA - Motion Video Analysis
+              Form Analysis Dashboard
             </h1>
             <p className="text-xl text-white/80 mb-4">
-              Advanced baseball motion analysis powered by AI
+              Analyze your lifting form with AI-powered feedback
             </p>
           </motion.div>
         </div>
@@ -146,7 +133,7 @@ export default function MoVAPage() {
 
               <TabsContent value="upload">
                 <Card className="p-6">
-                  <h2 className="text-2xl font-bold mb-6">Upload Baseball Video</h2>
+                  <h2 className="text-2xl font-bold mb-6">Upload Your Video</h2>
                   
                   <div className="space-y-6">
                     <div>
@@ -172,7 +159,7 @@ export default function MoVAPage() {
                     <div>
                       <h3 className="text-lg font-medium mb-2">2. What would you like to analyze?</h3>
                       <Textarea
-                        placeholder="Example: Analyze the pitcher's mechanics, focus on arm angle and torso rotation."
+                        placeholder="Example: Analyze my squat form. Check for depth and back angle."
                         value={analysisQuestion}
                         onChange={(e) => setAnalysisQuestion(e.target.value)}
                         className="h-32"
@@ -184,7 +171,7 @@ export default function MoVAPage() {
                         onClick={analyzeVideo} 
                         disabled={!videoUrl || !analysisQuestion || isAnalyzing}
                         size="lg"
-                        className="bg-[#1a237e] hover:bg-[#283593]"
+                        className="bg-primary hover:bg-primary/90"
                       >
                         {isAnalyzing ? (
                           <>
@@ -210,7 +197,7 @@ export default function MoVAPage() {
                     <Card className="p-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h3 className="text-lg font-bold mb-4">Video Analysis</h3>
+                          <h3 className="text-lg font-bold mb-4">Your Video</h3>
                           <video 
                             src={videoUrl || ''} 
                             controls 
@@ -218,35 +205,13 @@ export default function MoVAPage() {
                           />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold mb-4">Summary</h3>
+                          <h3 className="text-lg font-bold mb-4">AI Analysis</h3>
                           <ScrollArea className="h-[300px] rounded border p-4">
-                            <div className="space-y-4">
-                              <div>
-                                <h4 className="font-medium">Visual Description</h4>
-                                <p className="text-gray-700">{analysisResults.visual_description || "No description available"}</p>
-                              </div>
-                              <div>
-                                <h4 className="font-medium">Power Score</h4>
-                                <div className="text-2xl font-bold">{analysisResults.power_score_est || 0}<span className="text-lg text-gray-500">/200</span></div>
-                              </div>
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                              <p>{analysisResults.analysis}</p>
                             </div>
                           </ScrollArea>
                         </div>
-                      </div>
-                    </Card>
-
-                    {/* Metrics */}
-                    <Card className="p-6">
-                      <h3 className="text-xl font-bold mb-4">Performance Metrics</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                        {analysisResults.metrics && Object.entries(analysisResults.metrics).map(([name, metric]: [string, any]) => (
-                          <Card key={name} className="p-4 border-t-4" style={{ borderTopColor: metric.percentile_est >= 80 ? '#4caf50' : metric.percentile_est >= 50 ? '#ffb300' : '#f44336' }}>
-                            <h4 className="font-bold text-lg">{name}</h4>
-                            <div className="mt-2">{renderMetricValue(metric.percentile_est)}</div>
-                            <p className="text-sm text-gray-600 mt-1">{metric.value_desc}</p>
-                            <p className="text-xs font-medium mt-2">Status: {metric.status}</p>
-                          </Card>
-                        ))}
                       </div>
                     </Card>
 
@@ -256,10 +221,10 @@ export default function MoVAPage() {
                       <Card className="p-6">
                         <h3 className="text-xl font-bold mb-4">Strengths</h3>
                         <ul className="space-y-2">
-                          {analysisResults.strengths_feedback?.map((strength: string, i: number) => (
-                            <li key={i} className="flex">
-                              <span className="text-green-500 mr-2">✓</span>
-                              {strength}
+                          {analysisResults.strengths?.map((strength: string, i: number) => (
+                            <li key={i} className="flex items-start">
+                              <span className="text-green-500 mr-2 mt-1">✓</span>
+                              <span>{strength}</span>
                             </li>
                           ))}
                         </ul>
@@ -269,10 +234,10 @@ export default function MoVAPage() {
                       <Card className="p-6">
                         <h3 className="text-xl font-bold mb-4">Areas to Improve</h3>
                         <ul className="space-y-2">
-                          {analysisResults.weaknesses_feedback?.map((weakness: string, i: number) => (
-                            <li key={i} className="flex">
-                              <span className="text-amber-500 mr-2">⚠</span>
-                              {weakness}
+                          {analysisResults.areas_for_improvement?.map((weakness: string, i: number) => (
+                            <li key={i} className="flex items-start">
+                              <span className="text-amber-500 mr-2 mt-1">⚠</span>
+                              <span>{weakness}</span>
                             </li>
                           ))}
                         </ul>
@@ -280,49 +245,21 @@ export default function MoVAPage() {
                     </div>
 
                     {/* Recommendations and Injury Risk */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Recommendations */}
-                      <Card className="p-6">
-                        <h3 className="text-xl font-bold mb-4">Training Recommendations</h3>
-                        <ul className="space-y-2">
-                          {analysisResults.overall_recommendations?.map((rec: string, i: number) => (
-                            <li key={i} className="flex">
-                              <span className="text-blue-500 mr-2">►</span>
-                              {rec}
-                            </li>
-                          ))}
-                        </ul>
-                      </Card>
-
-                      {/* Injury Risk */}
-                      <Card className="p-6">
-                        <h3 className="text-xl font-bold mb-4">Injury Risk Assessment</h3>
-                        {analysisResults.injury_risk_est && (
-                          <div className="space-y-4">
-                            {Object.entries(analysisResults.injury_risk_est).map(([area, risk]: [string, any]) => (
-                              <div key={area} className="flex items-center">
-                                <div className="w-24 font-medium">{area}:</div>
-                                <div className="flex-1 bg-gray-200 rounded-full h-6">
-                                  <div 
-                                    className={`h-6 rounded-full flex items-center justify-center text-xs font-medium text-white ${
-                                      risk === 'High' ? 'bg-red-500 w-full' : 
-                                      risk === 'Moderate' ? 'bg-yellow-500 w-2/3' : 
-                                      'bg-green-500 w-1/3'
-                                    }`}
-                                  >
-                                    {risk}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </Card>
-                    </div>
+                    <Card className="p-6">
+                      <h3 className="text-xl font-bold mb-4">Training Recommendations</h3>
+                      <ul className="space-y-2">
+                        {analysisResults.recommendations?.map((rec: string, i: number) => (
+                          <li key={i} className="flex items-start">
+                            <span className="text-blue-500 mr-2 mt-1">►</span>
+                            <span>{rec}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
 
                     {/* Export Button */}
                     <div className="text-center">
-                      <Button className="bg-[#1a237e] hover:bg-[#283593]" disabled>
+                      <Button className="bg-primary hover:bg-primary/90" disabled>
                         <FileText className="mr-2 h-4 w-4" />
                         Export Report (Coming Soon)
                       </Button>

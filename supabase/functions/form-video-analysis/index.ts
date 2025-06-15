@@ -64,17 +64,24 @@ serve(async (req) => {
     // Sanitize inputs
     const sanitizedQuestion = question.trim().substring(0, 1000)
     
-    console.log('Processing baseball video analysis for user:', user.id)
+    console.log('Processing form video analysis for user:', user.id)
     console.log('Video URL:', videoUrl)
     console.log('Question:', sanitizedQuestion)
 
     // TODO: Implement actual video analysis logic here
     // For now, return a placeholder response
-    const analysis = `Baseball video analysis for: "${sanitizedQuestion}"\n\nVideo processed successfully. Analysis results would be displayed here.`
+    const analysis = `This is a placeholder analysis for your question: "${sanitizedQuestion}". In a real scenario, this would contain a detailed breakdown of your form, including comments on posture, movement patterns, and efficiency.`;
+    const strengths = ["Good starting position", "Consistent speed during the lift"];
+    const areas_for_improvement = ["Slight rounding of the lower back at the bottom of the movement", "Knees collapsing inward during ascent"];
+    const recommendations = ["Engage your core more actively throughout the movement.", "Focus on driving your knees out.", "Consider reducing weight to focus on form."];
+
 
     return new Response(
       JSON.stringify({ 
         analysis,
+        strengths,
+        areas_for_improvement,
+        recommendations,
         videoUrl,
         question: sanitizedQuestion,
         userId: user.id
@@ -85,7 +92,7 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Baseball video analysis error:', error)
+    console.error('Form video analysis error:', error)
     
     return new Response(
       JSON.stringify({ error: 'An error occurred processing your request' }),
@@ -96,3 +103,4 @@ serve(async (req) => {
     )
   }
 })
+

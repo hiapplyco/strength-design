@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { WorkoutCard } from "./WorkoutCard";
 import { Database } from "@/integrations/supabase/types";
@@ -11,9 +12,10 @@ interface WorkoutListProps {
   workouts: GeneratedWorkout[];
   selectedWorkouts: string[];
   onToggleSelection: (workoutId: string) => void;
+  onToggleFavorite: (workoutId:string) => void;
 }
 
-export const WorkoutList = ({ workouts, selectedWorkouts, onToggleSelection }: WorkoutListProps) => {
+export const WorkoutList = ({ workouts, selectedWorkouts, onToggleSelection, onToggleFavorite }: WorkoutListProps) => {
   const navigate = useNavigate();
 
   const handleWorkoutClick = (workout: GeneratedWorkout) => {
@@ -87,6 +89,7 @@ export const WorkoutList = ({ workouts, selectedWorkouts, onToggleSelection }: W
           onClick={handleWorkoutClick}
           isSelected={selectedWorkouts.includes(workout.id)}
           onToggleSelection={onToggleSelection}
+          onToggleFavorite={onToggleFavorite}
         />
       ))}
     </div>

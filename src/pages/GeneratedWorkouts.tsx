@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { PageHeader } from "@/components/generated-workouts/PageHeader";
 import { WorkoutList } from "@/components/generated-workouts/WorkoutList";
@@ -19,6 +18,7 @@ const GeneratedWorkouts = () => {
   const [sortBy, setSortBy] = useState("generated_at_desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedWorkouts, setSelectedWorkouts] = useState<string[]>([]);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -60,8 +60,9 @@ const GeneratedWorkouts = () => {
       const titleMatch = workout.title?.toLowerCase().includes(searchTermLower) ?? false;
       const summaryMatch = workout.summary?.toLowerCase().includes(searchTermLower) ?? false;
       const tagsMatch = selectedTags.length === 0 || selectedTags.every(tag => workout.tags?.includes(tag));
+      const favoritesMatch = !showOnlyFavorites || workout.is_favorite;
       
-      return (titleMatch || summaryMatch) && tagsMatch;
+      return (titleMatch || summaryMatch) && tagsMatch && favoritesMatch;
     });
 
     return filtered.sort((a, b) => {
@@ -78,7 +79,7 @@ const GeneratedWorkouts = () => {
           return 0;
       }
     });
-  }, [workouts, searchTerm, sortBy, selectedTags]);
+  }, [workouts, searchTerm, sortBy, selectedTags, showOnlyFavorites]);
 
   const toggleWorkoutSelection = (workoutId: string) => {
     setSelectedWorkouts(prev => 
@@ -86,6 +87,42 @@ const GeneratedWorkouts = () => {
         ? prev.filter(id => id !== workoutId)
         : [...prev, workoutId]
     );
+  };
+
+  const handleToggleFavorite = async (workoutId: string) => {
+    const workout = workouts.find(w => w.id === workoutId);
+    if (!workout) return;
+
+    const newIsFavorite = !workout.is_favorite;
+
+    try {
+      const { error } = await supabase
+        .from('generated_workouts')
+        .update({ is_favorite: newIsFavorite })
+        .eq('id', workoutId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setWorkouts(currentWorkouts =>
+        currentWorkouts.map(w =>
+          w.id === workoutId ? { ...w, is_favorite: newIsFavorite } : w
+        )
+      );
+
+      toast({
+        title: newIsFavorite ? "Added to Favorites" : "Removed from Favorites",
+        description: `"${workout.title || 'Workout'}" has been updated.`,
+      });
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update favorite status. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteSelected = async () => {
@@ -132,6 +169,8 @@ const GeneratedWorkouts = () => {
             allTags={allTags}
             selectedTags={selectedTags}
             setSelectedTags={setSelectedTags}
+            showOnlyFavorites={showOnlyFavorites}
+            setShowOnlyFavorites={setShowOnlyFavorites}
           />
           {isLoading ? (
             <p className="text-white text-center mt-8">Loading your workouts...</p>
@@ -140,6 +179,7 @@ const GeneratedWorkouts = () => {
               workouts={filteredAndSortedWorkouts}
               selectedWorkouts={selectedWorkouts}
               onToggleSelection={toggleWorkoutSelection}
+              onToggleFavorite={handleToggleFavorite}
             />
           )}
         </div>

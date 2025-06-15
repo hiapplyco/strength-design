@@ -276,6 +276,7 @@ export type Database = {
         Row: {
           generated_at: string | null
           id: string
+          is_favorite: boolean
           summary: string | null
           tags: string[] | null
           title: string | null
@@ -285,6 +286,7 @@ export type Database = {
         Insert: {
           generated_at?: string | null
           id?: string
+          is_favorite?: boolean
           summary?: string | null
           tags?: string[] | null
           title?: string | null
@@ -294,6 +296,7 @@ export type Database = {
         Update: {
           generated_at?: string | null
           id?: string
+          is_favorite?: boolean
           summary?: string | null
           tags?: string[] | null
           title?: string | null

@@ -1,5 +1,6 @@
+
 import { formatDistanceToNow } from "date-fns";
-import { ArrowRight, Calendar, ClipboardList, Dumbbell, Heart, Share2, Copy } from "lucide-react";
+import { ArrowRight, Calendar, ClipboardList, Dumbbell, Star, Share2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,19 +21,34 @@ interface WorkoutCardProps {
   onClick: (workout: GeneratedWorkout) => void;
   isSelected: boolean;
   onToggleSelection: (workoutId: string) => void;
+  onToggleFavorite: (workoutId: string) => void;
 }
 
-export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection }: WorkoutCardProps) => {
+export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, onToggleFavorite }: WorkoutCardProps) => {
   const { toast } = useToast();
   const workoutData = workout.workout_data as unknown as WorkoutData;
   const firstDay = getFirstDayPreview(workoutData);
   const totalExercises = countExercises(workoutData);
   const totalDays = workoutData ? Object.entries(workoutData).filter(([, value]) => isWorkoutDay(value)).length : 0;
   
-  const handleActionClick = (e: React.MouseEvent, action: string) => {
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleFavorite(workout.id);
+  };
+  
+  const handleShareClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast({
-      title: `${action} clicked`,
+      title: "Share clicked",
+      description: "This feature is not yet implemented.",
+      duration: 3000,
+    });
+  };
+
+  const handleDuplicateClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast({
+      title: "Duplicate clicked",
       description: "This feature is not yet implemented.",
       duration: 3000,
     });
@@ -78,15 +94,23 @@ export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection }:
             </div>
           </div>
           <div className="flex items-center">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-pink-500 hover:bg-pink-500/10" onClick={(e) => handleActionClick(e, 'Favorite')}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className={cn(
+                "h-8 w-8 text-muted-foreground hover:bg-yellow-500/10",
+                workout.is_favorite ? "text-yellow-400 hover:text-yellow-500" : "hover:text-yellow-500"
+              )} 
+              onClick={handleFavoriteClick}
+            >
               <span className="sr-only">Favorite</span>
-              <Heart className="h-4 w-4" />
+              <Star className={cn("h-4 w-4", workout.is_favorite && "fill-current")} />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-sky-500 hover:bg-sky-500/10" onClick={(e) => handleActionClick(e, 'Share')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-sky-500 hover:bg-sky-500/10" onClick={handleShareClick}>
               <span className="sr-only">Share</span>
               <Share2 className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10" onClick={(e) => handleActionClick(e, 'Duplicate')}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10" onClick={handleDuplicateClick}>
               <span className="sr-only">Duplicate</span>
               <Copy className="h-4 w-4" />
             </Button>

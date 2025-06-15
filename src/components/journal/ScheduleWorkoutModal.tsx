@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -113,9 +112,8 @@ export const ScheduleWorkoutModal = ({ open, onOpenChange }: ScheduleWorkoutModa
             className="w-full"
             onClick={handleSchedule}
             disabled={!selectedWorkout || !selectedDate || submitting}
-            loading={submitting}
           >
-            Schedule Workout
+            {submitting ? "Scheduling..." : "Schedule Workout"}
           </Button>
         </DialogFooter>
       </DialogContent>

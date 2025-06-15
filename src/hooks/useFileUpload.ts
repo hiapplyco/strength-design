@@ -22,18 +22,18 @@ export const useFileUpload = () => {
     try {
       setIsLoading(true);
       const fileName = `${crypto.randomUUID()}-${file.name}`;
-      const filePath = `chat-files/${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
 
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('documents')
+        .from('chat_uploads')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       // Get the public URL
       const { data: urlData } = supabase.storage
-        .from('documents')
+        .from('chat_uploads')
         .getPublicUrl(filePath);
 
       if (!urlData || !urlData.publicUrl) {
@@ -61,7 +61,7 @@ export const useFileUpload = () => {
       // Process with Gemini
       const { data: geminiData, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { 
-          message: `Please analyze this file: ${file.name}`,
+          message: `Please summarize this file: ${file.name}. After summarizing, ask what I would like to do.`,
           fileUrl: urlData.publicUrl
         }
       });

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +19,7 @@ export const useMessageHandling = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -42,7 +42,7 @@ export const useMessageHandling = () => {
         variant: "destructive",
       });
     }
-  };
+  }, [user, toast]);
 
   const handleSendMessage = async (message: string) => {
     if (!user) {
@@ -74,11 +74,17 @@ export const useMessageHandling = () => {
       // Update local state immediately with the new message
       setMessages(prev => [...prev, messageData]);
 
+      const history = messages.map(msg => [
+        { role: 'user', parts: [{ text: msg.message }] },
+        ...(msg.response ? [{ role: 'model', parts: [{ text: msg.response }] }] : [])
+      ]).flat();
+
       // Then, get the AI response
       const { data, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
         body: { 
           message,
-          messageId: messageData.id // Pass the message ID to the function
+          messageId: messageData.id,
+          history: history,
         }
       });
 

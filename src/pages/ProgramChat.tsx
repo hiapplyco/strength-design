@@ -1,19 +1,18 @@
 
 import { ChatContainer } from "@/components/chat/ChatContainer";
-import { LogoHeader } from "@/components/ui/logo-header";
 
 export default function ProgramChat() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="container mx-auto px-4 pt-24 pb-8 relative">
-        <div className="text-center mb-16">
-          <LogoHeader>program.chat</LogoHeader>
-          <p className="text-xl text-foreground/80 max-w-3xl mx-auto">
-            Your personal coach for building your own gym. Chat about the CrossFit Affiliate Playbook or upload your own training materials to get expert guidance and answers to all your questions.
-          </p>
-        </div>
+    <div className="h-screen bg-background flex flex-col">
+      <header className="py-6 px-4 container mx-auto text-center flex-shrink-0">
+        <h1 className="text-3xl font-bold text-primary">program.chat</h1>
+        <p className="text-lg text-foreground/80 max-w-3xl mx-auto mt-2">
+          Your personal coach. Chat about fitness, nutrition, or upload training materials for expert guidance.
+        </p>
+      </header>
+      <main className="flex-grow container mx-auto px-4 pb-4 min-h-0">
         <ChatContainer />
-      </div>
+      </main>
     </div>
   );
 }

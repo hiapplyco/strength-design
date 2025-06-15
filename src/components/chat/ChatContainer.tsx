@@ -20,11 +20,11 @@ export const ChatContainer = () => {
 
   useEffect(() => {
     fetchMessages();
-  }, []);
+  }, [fetchMessages]);
 
   return (
-    <Card className="w-full max-w-4xl mx-auto overflow-hidden border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex flex-col h-[80vh]">
+    <Card className="h-full w-full max-w-4xl mx-auto overflow-hidden border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex flex-col h-full">
         <ChatSubscriptionManager onMessageUpdate={fetchMessages} />
         <ChatHeader onNewChat={startNewChat} onDeleteChat={deleteAllMessages} />
         <ChatMessages messages={messages} />

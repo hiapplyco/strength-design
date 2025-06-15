@@ -68,13 +68,13 @@ export const JournalPage = () => {
           </TabsContent>
 
           <TabsContent value="journal" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              <div className="lg:col-span-2">
                 <Card>
                   <CardHeader>
                     <CardTitle>Select Date</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex justify-center">
                     <Calendar
                       mode="single"
                       selected={selectedDate}
@@ -84,7 +84,7 @@ export const JournalPage = () => {
                   </CardContent>
                 </Card>
               </div>
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <SmartJournalEntry selectedDate={selectedDate} />
               </div>
             </div>

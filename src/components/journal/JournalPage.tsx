@@ -17,43 +17,45 @@ export const JournalPage = () => {
     console.log("Selected widget:", widgetType);
   };
 
+  console.log("JournalPage is rendering"); // Debug log
+
   return (
-    <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-primary">AI Workout Journal</h1>
-            <p className="text-muted-foreground mt-1">
-              Track your fitness journey with intelligent insights and planning
-            </p>
-          </div>
-          <Button variant="outline" className="gap-2">
-            <Brain className="h-4 w-4" />
-            Get AI Insights
-          </Button>
+    <div className="w-full h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-primary">AI Workout Journal</h1>
+          <p className="text-muted-foreground mt-1">
+            Track your fitness journey with intelligent insights and planning
+          </p>
         </div>
+        <Button variant="outline" className="gap-2">
+          <Brain className="h-4 w-4" />
+          Get AI Insights
+        </Button>
+      </div>
 
-        <Tabs defaultValue="calendar" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="calendar" className="gap-2">
-              <CalendarDays className="h-4 w-4" />
-              Calendar
-            </TabsTrigger>
-            <TabsTrigger value="journal" className="gap-2">
-              <BookOpen className="h-4 w-4" />
-              Journal
-            </TabsTrigger>
-            <TabsTrigger value="schedule" className="gap-2">
-              <Target className="h-4 w-4" />
-              Schedule
-            </TabsTrigger>
-            <TabsTrigger value="widgets" className="gap-2">
-              <CalendarIcon className="h-4 w-4" />
-              Widgets
-            </TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="calendar" className="w-full flex-1 flex flex-col">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsTrigger value="calendar" className="gap-2">
+            <CalendarDays className="h-4 w-4" />
+            Calendar
+          </TabsTrigger>
+          <TabsTrigger value="journal" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            Journal
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="gap-2">
+            <Target className="h-4 w-4" />
+            Schedule
+          </TabsTrigger>
+          <TabsTrigger value="widgets" className="gap-2">
+            <CalendarIcon className="h-4 w-4" />
+            Widgets
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="calendar" className="space-y-4">
+        <div className="flex-1 overflow-auto">
+          <TabsContent value="calendar" className="space-y-4 mt-0">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -67,7 +69,7 @@ export const JournalPage = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="journal" className="space-y-4">
+          <TabsContent value="journal" className="space-y-4 mt-0">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
               <div className="lg:col-span-2">
                 <Card>
@@ -90,7 +92,7 @@ export const JournalPage = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="schedule" className="space-y-4">
+          <TabsContent value="schedule" className="space-y-4 mt-0">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <WorkoutScheduler />
               <Card>
@@ -106,7 +108,7 @@ export const JournalPage = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="widgets" className="space-y-4">
+          <TabsContent value="widgets" className="space-y-4 mt-0">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1">
                 <WidgetPalette onWidgetSelect={handleWidgetSelect} />
@@ -125,8 +127,8 @@ export const JournalPage = () => {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
-      </div>
+        </div>
+      </Tabs>
     </div>
   );
 };

@@ -54,15 +54,13 @@ export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, o
     <Card 
       key={workout.id} 
       className={cn(
-        "transition-all hover:shadow-lg hover:border-primary/40 cursor-pointer overflow-hidden group flex flex-col",
+        "transition-all hover:shadow-lg hover:border-primary/40 cursor-pointer overflow-hidden group flex flex-col relative",
         isSelected && "ring-2 ring-primary border-primary/60"
       )}
       onClick={() => onClick(workout)}
     >
-      <div 
-        className="absolute top-3 left-3 z-10"
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Top Row: Checkbox and Action Icons */}
+      <div className="absolute top-4 left-4 z-10" onClick={(e) => e.stopPropagation()}>
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => onToggleSelection(workout.id)}
@@ -74,43 +72,43 @@ export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, o
           aria-label={`Select workout ${workout.title}`}
         />
       </div>
-      <CardHeader className="px-6 pt-6 pb-2">
-        <div className="flex justify-between items-start gap-4">
-          <div className="flex-1">
-            <CardTitle className="text-white flex items-start gap-2 mb-2">
-              <Dumbbell className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-              <span className="flex-1">{workout.title || "Generated Workout"}</span>
-            </CardTitle>
+
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className={cn(
+            "h-8 w-8 text-muted-foreground hover:bg-yellow-500/10",
+            workout.is_favorite ? "text-yellow-400 hover:text-yellow-500" : "hover:text-yellow-500"
+          )} 
+          onClick={handleFavoriteClick}
+        >
+          <Star className={cn("h-4 w-4", workout.is_favorite && "fill-current")} />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-sky-500 hover:bg-sky-500/10" onClick={handleShareClick}>
+          <Share2 className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10" onClick={handleDuplicateClick}>
+          <Copy className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <CardHeader className="px-6 pt-16 pb-4">
+        <div className="space-y-4">
+          <CardTitle className="text-white flex items-start gap-3 text-xl leading-relaxed">
+            <Dumbbell className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+            <span className="flex-1 font-medium">{workout.title || "Generated Workout"}</span>
+          </CardTitle>
+          
+          {workout.tags && workout.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {workout.tags && workout.tags.length > 0 && workout.tags.slice(0, 3).map((tag, index) => (
+              {workout.tags.slice(0, 3).map((tag, index) => (
                 <Badge key={index} variant="secondary">
                   {tag}
                 </Badge>
               ))}
             </div>
-          </div>
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className={cn(
-                "h-8 w-8 text-muted-foreground hover:bg-yellow-500/10",
-                workout.is_favorite ? "text-yellow-400 hover:text-yellow-500" : "hover:text-yellow-500"
-              )} 
-              onClick={handleFavoriteClick}
-            >
-              <span className="sr-only">Favorite</span>
-              <Star className={cn("h-4 w-4", workout.is_favorite && "fill-current")} />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-sky-500 hover:bg-sky-500/10" onClick={handleShareClick}>
-              <span className="sr-only">Share</span>
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10" onClick={handleDuplicateClick}>
-              <span className="sr-only">Duplicate</span>
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
+          )}
         </div>
       </CardHeader>
       

@@ -50,7 +50,6 @@ export const useSubscription = () => {
           subscriptionType: type,
           priceId: price.id
         },
-        // Pass the access token for authentication
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
@@ -83,11 +82,22 @@ export const useSubscription = () => {
         return;
       }
 
-      console.log('Redirecting to Stripe checkout:', data.url);
+      // ADDITION: Extra URL validity check before redirecting
+      if (typeof data.url !== 'string' || !data.url.startsWith("https://checkout.stripe.com")) {
+        console.error('Invalid Stripe checkout URL received:', data.url);
+        toast({
+          title: "Checkout Error",
+          description: "Received an invalid checkout URL from Stripe. Please try again later or contact support.",
+          variant: "destructive",
+        });
+        setLoadingStates(prev => ({ ...prev, [type]: false }));
+        return;
+      }
 
-      // Open in new tab for Stripe (recommended) or redirect current tab
-      window.location.href = data.url;
-      // Alternative: window.open(data.url, '_blank');
+      console.log('Redirecting to Stripe checkout (new tab):', data.url);
+
+      // Open Stripe checkout in a new tab (recommended by Stripe)
+      window.open(data.url, '_blank');
 
     } catch (error: any) {
       console.error('Error creating checkout session:', error);

@@ -108,10 +108,25 @@ export class WorkoutGenerationService {
 
     // Only increment usage for non-subscribed users
     if (!isSubscribed) {
+      // First get the current count
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('free_workouts_used')
+        .eq('id', session.user.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current workout usage:', fetchError);
+        return;
+      }
+
+      const currentUsage = profile?.free_workouts_used || 0;
+
+      // Then update with incremented value
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          free_workouts_used: supabase.sql`free_workouts_used + 1`
+          free_workouts_used: currentUsage + 1
         })
         .eq('id', session.user.id);
 

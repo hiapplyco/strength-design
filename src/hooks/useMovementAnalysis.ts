@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface AnalysisOptions {
-  analysisType?: 'technique' | 'form' | 'performance' | 'beginner' | 'injury-prevention';
+  analysisType?: 'weightlifting' | 'martial-arts' | 'general' | 'injury-prevention';
   customFrameRate?: number;
   startOffset?: string;
   endOffset?: string;
@@ -13,7 +12,7 @@ interface AnalysisOptions {
   customSystemPrompt?: string;
 }
 
-export const useTechniqueAnalysis = () => {
+export const useMovementAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState<File | null>(null);
@@ -119,12 +118,12 @@ export const useTechniqueAnalysis = () => {
     setIsSaving(true);
 
     try {
-      const { error } = await supabase.from("technique_analyses").insert({
+      const { error } = await supabase.from("movement_analyses").insert({
         user_id: user.id,
         question,
         analysis,
         video_name: uploadedVideo.name,
-        metadata: analysisMetadata ? JSON.stringify(analysisMetadata) : null
+        metadata: analysisMetadata || null
       });
 
       if (error) {

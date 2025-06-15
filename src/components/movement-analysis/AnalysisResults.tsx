@@ -1,4 +1,3 @@
-
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 
 interface AnalysisResultsProps {

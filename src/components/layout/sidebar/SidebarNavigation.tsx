@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -11,7 +10,6 @@ import {
   MessageSquare,
   FileText,
   Video,
-  Search,
   CreditCard,
 } from "lucide-react";
 
@@ -59,9 +57,9 @@ export const SidebarNavigation = () => {
         label="Journal"
       />
       <NavItem
-        to="/form-analysis"
+        to="/movement-analysis"
         icon={<Dumbbell className="h-5 w-5" />}
-        label="Form Analysis"
+        label="Movement Analysis"
       />
       <NavItem
         to="/program-chat"
@@ -77,11 +75,6 @@ export const SidebarNavigation = () => {
         to="/video-analysis"
         icon={<Video className="h-5 w-5" />}
         label="Publish Program"
-      />
-      <NavItem
-        to="/technique-analysis"
-        icon={<Search className="h-5 w-5" />}
-        label="Technique Analysis"
       />
       <NavItem
         to="/pricing"

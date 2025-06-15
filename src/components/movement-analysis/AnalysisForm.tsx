@@ -1,4 +1,3 @@
-
 import { VideoUploadSection } from "./VideoUploadSection";
 import { QuestionInput } from "./QuestionInput";
 import { AnalysisOptionsForm } from "./AnalysisOptionsForm";
@@ -6,7 +5,7 @@ import { ActionButtons } from "./ActionButtons";
 import { useState } from "react";
 
 interface AnalysisOptions {
-  analysisType?: 'technique' | 'form' | 'performance' | 'beginner' | 'injury-prevention';
+  analysisType?: 'weightlifting' | 'martial-arts' | 'general' | 'injury-prevention';
   customFrameRate?: number;
   startOffset?: string;
   endOffset?: string;
@@ -42,7 +41,7 @@ export const AnalysisForm = ({
   saveAnalysis
 }: AnalysisFormProps) => {
   const [analysisOptions, setAnalysisOptions] = useState<AnalysisOptions>({
-    analysisType: 'technique',
+    analysisType: 'general',
     useTimestamps: true
   });
 

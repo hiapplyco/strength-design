@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -10,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, Settings } from "lucide-react";
 
 interface AnalysisOptions {
-  analysisType?: 'technique' | 'form' | 'performance' | 'beginner' | 'injury-prevention';
+  analysisType?: 'weightlifting' | 'martial-arts' | 'general' | 'injury-prevention';
   customFrameRate?: number;
   startOffset?: string;
   endOffset?: string;
@@ -34,11 +33,10 @@ export const AnalysisOptionsForm = ({ options, onOptionsChange }: AnalysisOption
   };
 
   const analysisTypes = [
-    { value: 'technique', label: 'Technique Analysis', description: 'General technique breakdown and improvement advice' },
-    { value: 'form', label: 'Form & Alignment', description: 'Focus on body positioning and movement mechanics' },
-    { value: 'performance', label: 'Performance Optimization', description: 'Competitive performance and efficiency analysis' },
-    { value: 'beginner', label: 'Beginner Friendly', description: 'Patient, foundational skill development' },
-    { value: 'injury-prevention', label: 'Injury Prevention', description: 'Safety-focused movement assessment' }
+    { value: 'general', label: 'General Movement', description: 'Overall feedback on any movement or exercise' },
+    { value: 'weightlifting', label: 'Weightlifting Form', description: 'Detailed analysis for squats, deadlifts, etc.' },
+    { value: 'martial-arts', label: 'Martial Arts Technique', description: 'Critique for strikes, blocks, and forms' },
+    { value: 'injury-prevention', label: 'Injury Prevention', description: 'Safety-focused assessment of movement patterns' }
   ];
 
   return (
@@ -56,7 +54,7 @@ export const AnalysisOptionsForm = ({ options, onOptionsChange }: AnalysisOption
           {/* Analysis Type Selection */}
           <div className="space-y-2">
             <Label htmlFor="analysisType" className="text-white">Analysis Focus</Label>
-            <Select value={options.analysisType || 'technique'} onValueChange={(value) => updateOption('analysisType', value)}>
+            <Select value={options.analysisType || 'general'} onValueChange={(value) => updateOption('analysisType', value)}>
               <SelectTrigger className="bg-black/30 border-gray-700 text-white">
                 <SelectValue placeholder="Choose analysis type" />
               </SelectTrigger>

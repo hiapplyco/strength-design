@@ -440,6 +440,36 @@ export type Database = {
         }
         Relationships: []
       }
+      movement_analyses: {
+        Row: {
+          analysis: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          question: string
+          user_id: string
+          video_name: string
+        }
+        Insert: {
+          analysis: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          question: string
+          user_id: string
+          video_name: string
+        }
+        Update: {
+          analysis?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          question?: string
+          user_id?: string
+          video_name?: string
+        }
+        Relationships: []
+      }
       photos: {
         Row: {
           created_at: string
@@ -807,33 +837,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      technique_analyses: {
-        Row: {
-          analysis: string
-          created_at: string
-          id: string
-          question: string
-          user_id: string
-          video_name: string
-        }
-        Insert: {
-          analysis: string
-          created_at?: string
-          id?: string
-          question: string
-          user_id: string
-          video_name: string
-        }
-        Update: {
-          analysis?: string
-          created_at?: string
-          id?: string
-          question?: string
-          user_id?: string
-          video_name?: string
-        }
-        Relationships: []
       }
       videos: {
         Row: {

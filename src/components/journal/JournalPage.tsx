@@ -3,140 +3,161 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar as CalendarIcon, CalendarDays, BookOpen, Target, Brain } from "lucide-react";
+import { BookOpen, Target } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { SmartJournalCalendar } from "./SmartJournalCalendar";
-import { WorkoutScheduler } from "./WorkoutScheduler";
 import { SmartJournalEntry } from "./SmartJournalEntry";
-import { WidgetPalette } from "./widgets/WidgetPalette";
+import { WorkoutScheduler } from "./WorkoutScheduler";
+import { useWorkoutSessions } from "@/hooks/useWorkoutSessions";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const JournalPage = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const { sessions, isLoading } = useWorkoutSessions();
 
-  const handleWidgetSelect = (widgetType: string) => {
-    console.log("Selected widget:", widgetType);
-  };
-
-  console.log("JournalPage is rendering"); // Debug log
+  // Get only the next 3 scheduled sessions, sorted by date ascending
+  const upcomingSessions = sessions
+    .filter(
+      (session) =>
+        session.status === "scheduled" &&
+        (!session.scheduled_date || new Date(session.scheduled_date) >= new Date())
+    )
+    .sort((a, b) =>
+      (a.scheduled_date || "").localeCompare(b.scheduled_date || "")
+    )
+    .slice(0, 3);
 
   return (
-    <div className="w-full max-w-full min-h-0 flex flex-col overflow-hidden">
-      <div className="flex-shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 px-1">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary truncate">AI Workout Journal</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Track your fitness journey with intelligent insights and planning
-          </p>
-        </div>
-        <div className="flex-shrink-0">
-          <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto">
-            <Brain className="h-4 w-4" />
-            <span className="hidden sm:inline">Get AI Insights</span>
-            <span className="sm:hidden">AI Insights</span>
-          </Button>
-        </div>
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-8 overflow-x-hidden pb-10">
+      {/* Header */}
+      <div className="mb-2">
+        <h1 className="text-3xl sm:text-4xl font-bold text-primary">
+          AI Workout Journal
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-1">
+          Log your fitness journey, moods, and workouts with intelligent tools to help you grow.
+        </p>
       </div>
 
-      <Tabs defaultValue="calendar" className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className="flex-shrink-0 mb-4">
-          <TabsList className="grid w-full grid-cols-4 h-auto">
-            <TabsTrigger value="calendar" className="gap-1 sm:gap-2 px-2 sm:px-3 py-2">
-              <CalendarDays className="h-4 w-4 flex-shrink-0" />
-              <span className="text-xs sm:text-sm truncate">Calendar</span>
+      {/* Tabs */}
+      <Tabs defaultValue="journal" className="flex-1 flex flex-col">
+        <div className="mb-4">
+          <TabsList className="flex w-full gap-2 py-0">
+            <TabsTrigger value="journal" className="gap-2 px-3 py-2 flex-1 text-base">
+              <BookOpen className="h-5 w-5" />
+              <span>Journal</span>
             </TabsTrigger>
-            <TabsTrigger value="journal" className="gap-1 sm:gap-2 px-2 sm:px-3 py-2">
-              <BookOpen className="h-4 w-4 flex-shrink-0" />
-              <span className="text-xs sm:text-sm truncate">Journal</span>
-            </TabsTrigger>
-            <TabsTrigger value="schedule" className="gap-1 sm:gap-2 px-2 sm:px-3 py-2">
-              <Target className="h-4 w-4 flex-shrink-0" />
-              <span className="text-xs sm:text-sm truncate">Schedule</span>
-            </TabsTrigger>
-            <TabsTrigger value="widgets" className="gap-1 sm:gap-2 px-2 sm:px-3 py-2">
-              <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-              <span className="text-xs sm:text-sm truncate">Widgets</span>
+            <TabsTrigger value="schedule" className="gap-2 px-3 py-2 flex-1 text-base">
+              <Target className="h-5 w-5" />
+              <span>Schedule</span>
             </TabsTrigger>
           </TabsList>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-auto">
-          <TabsContent value="calendar" className="mt-0 h-full">
-            <Card className="h-full">
-              <CardHeader className="flex-shrink-0">
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <CalendarDays className="h-5 w-5" />
-                  Smart Calendar View
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 p-4">
-                <SmartJournalCalendar />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="journal" className="mt-0 h-full">
-            <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 h-full">
-              <div className="xl:col-span-2 order-2 xl:order-1">
-                <Card className="h-full">
-                  <CardHeader className="flex-shrink-0">
-                    <CardTitle className="text-lg">Select Date</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex justify-center p-4">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(date) => date && setSelectedDate(date)}
-                      className="rounded-md border w-full max-w-sm"
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="xl:col-span-3 order-1 xl:order-2">
-                <SmartJournalEntry selectedDate={selectedDate} />
-              </div>
+        {/* JOURNAL TAB */}
+        <TabsContent value="journal" className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Date Picker and Info/Instructions */}
+            <div className="md:col-span-1 order-1 flex flex-col gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Select Date</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    className="rounded-md border w-full max-w-sm mx-auto"
+                  />
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">How to Use Your Journal</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="pl-4 text-sm text-muted-foreground list-disc space-y-1">
+                    <li>Pick a date to log your entry or update previous records.</li>
+                    <li>Reflect on your day, workouts, and feelings.</li>
+                    <li>Rate your mood, energy, sleep, and stress for better insights.</li>
+                    <li>Come back daily for a more complete journey!</li>
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="schedule" className="mt-0 h-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
-              <div className="flex flex-col">
-                <WorkoutScheduler />
-              </div>
-              <div className="flex flex-col">
-                <Card className="flex-1">
-                  <CardHeader className="flex-shrink-0">
-                    <CardTitle className="text-lg">Upcoming Sessions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-1 p-4">
-                    <p className="text-muted-foreground text-sm sm:text-base">
-                      Your scheduled workouts will appear here with AI-powered recommendations.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+            {/* Journal Entry Form Section */}
+            <div className="md:col-span-2 order-2 flex flex-col">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Daily Journal Entry
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SmartJournalEntry selectedDate={selectedDate} />
+                </CardContent>
+              </Card>
             </div>
-          </TabsContent>
+          </div>
+        </TabsContent>
 
-          <TabsContent value="widgets" className="mt-0 h-full">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-full">
-              <div className="lg:col-span-1 order-2 lg:order-1">
-                <WidgetPalette onWidgetSelect={handleWidgetSelect} />
-              </div>
-              <div className="lg:col-span-2 order-1 lg:order-2">
-                <Card className="h-full">
-                  <CardHeader className="flex-shrink-0">
-                    <CardTitle className="text-lg">Widget Canvas</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-1 p-4">
-                    <p className="text-muted-foreground text-sm sm:text-base">
-                      Drag widgets here to customize your journal experience.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+        {/* SCHEDULE TAB */}
+        <TabsContent value="schedule" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Schedule a new workout */}
+            <div className="order-1 flex flex-col gap-4">
+              <WorkoutScheduler />
             </div>
-          </TabsContent>
-        </div>
+            {/* Upcoming Sessions Summary */}
+            <div className="order-2 flex flex-col gap-4">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-lg">Upcoming Scheduled Sessions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="text-sm text-muted-foreground">Loading...</div>
+                  ) : upcomingSessions.length === 0 ? (
+                    <div className="text-sm text-muted-foreground">
+                      No upcoming sessions scheduled. Add a workout to get started!
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-60 pr-3 w-full">
+                      <ul className="space-y-4">
+                        {upcomingSessions.map((session) => (
+                          <li key={session.id} className="border-l-4 border-primary pl-3">
+                            <div className="font-semibold text-base text-primary">
+                              {session.generated_workouts?.title || "Workout"}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Scheduled for{" "}
+                              <span className="font-medium">
+                                {session.scheduled_date
+                                  ? new Date(session.scheduled_date).toLocaleDateString(undefined, {
+                                      weekday: "short",
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                    })
+                                  : "—"}
+                              </span>
+                            </div>
+                            {session.generated_workouts?.summary && (
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {session.generated_workouts.summary.slice(0, 60) + "..."}
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </ScrollArea>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );

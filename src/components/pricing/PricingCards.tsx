@@ -8,16 +8,15 @@ export function PricingCards() {
   return (
     <div className="flex flex-col md:flex-row gap-8 items-center justify-center w-full">
       {/* Free Plan Card */}
-      <div className="max-w-xs w-full bg-card border rounded-xl shadow-sm p-8 flex flex-col items-center">
-        <h3 className="text-lg font-semibold text-primary mb-2">Free Plan</h3>
-        <p className="text-foreground/80 mb-4 text-center">
-          Try out the app and generate up to
-          <span className="font-bold text-primary"> 3 workouts for free.</span>
+      <div className="max-w-sm w-full bg-card border rounded-xl shadow-md p-8 flex flex-col items-center text-center">
+        <h3 className="text-2xl font-bold text-primary mb-2">Your Journey Starts Here</h3>
+        <p className="text-foreground/80 mb-4 min-h-[40px]">
+          Begin your transformation with our core features. See what's possible when your training is powered by AI.
         </p>
-        <div className="text-3xl font-bold text-green-700 mb-3">FREE</div>
-        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-3">first 3 workouts</div>
+        <div className="text-4xl font-extrabold text-green-700 mb-2">FREE</div>
+        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-3">For your first 3 workouts</div>
         {/* Usage Tally */}
-        <div className="mb-4 w-full">
+        <div className="mb-4 w-full min-h-[20px]">
           {isLoading || !workoutUsage ? (
             <span className="text-sm text-muted-foreground">Checking usage...</span>
           ) : (
@@ -27,27 +26,29 @@ export function PricingCards() {
             </span>
           )}
         </div>
-        <ul className="mb-6 text-sm text-foreground/80 text-left">
-          <li>✔️ Access workout generator (limit: 3)</li>
-          <li>✔️ Try out all standard features</li>
-          <li>✔️ No credit card required</li>
+        <ul className="mb-6 text-sm text-foreground/80 text-left space-y-2">
+          <li>✔️ AI-Powered Workout Generator (3 uses)</li>
+          <li>✔️ Discover your potential, on us</li>
+          <li>✔️ No commitment, all motivation</li>
         </ul>
       </div>
       {/* Pro Plan Card */}
-      <div className="max-w-xs w-full bg-card border-2 border-primary shadow-lg rounded-xl p-8 flex flex-col items-center scale-105">
-        <h3 className="text-lg font-semibold text-primary mb-2">Pro Plan</h3>
-        <p className="text-foreground/80 mb-4 text-center">
-          Unlimited workout generations, advanced features, and AI support.
+      <div className="relative max-w-sm w-full bg-card border-2 border-primary shadow-xl rounded-xl p-8 flex flex-col items-center scale-105 text-center">
+        <div className="absolute top-0 -translate-y-1/2 bg-primary text-primary-foreground px-4 py-1 text-sm font-bold rounded-full">
+          Most Popular
+        </div>
+        <h3 className="text-2xl font-bold text-primary mb-2">Unleash Your Potential</h3>
+        <p className="text-foreground/80 mb-4 min-h-[40px]">
+          Commit to your growth with unlimited access, exclusive features, and direct support from the team that built this for you.
         </p>
-        <div className="text-3xl font-bold text-purple-700 mb-3">$24.99</div>
+        <div className="text-4xl font-extrabold text-purple-700 mb-2">$24.99</div>
         <div className="text-xs uppercase tracking-wider text-muted-foreground mb-4">per month</div>
-        <ul className="mb-6 text-sm text-foreground/80 text-left">
-          <li>✔️ Unlimited workout generation</li>
-          <li>✔️ Priority access to new features</li>
-          <li>✔️ Support the development of the app!</li>
+        <ul className="mb-6 text-sm text-foreground/80 text-left space-y-2">
+          <li>✔️ <strong>Unlimited</strong> AI workout generation</li>
+          <li>✔️ Access to <strong>all</strong> advanced features</li>
+          <li>✔️ Directly support our mission & development</li>
         </ul>
       </div>
     </div>
   );
 }
-

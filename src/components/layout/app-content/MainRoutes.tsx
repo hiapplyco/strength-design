@@ -1,7 +1,6 @@
 
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "@/pages/Index";
-import VideoAnalysisPage from "@/pages/VideoAnalysis";
 import JournalPage from "@/pages/JournalPage";
 import WorkoutGenerator from "@/pages/WorkoutGenerator";
 import WorkoutResults from "@/pages/WorkoutResults";
@@ -19,7 +18,8 @@ export const MainRoutes = () => {
     <>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/video-analysis" element={<VideoAnalysisPage />} />
+        {/* Redirect old video-analysis route to publish-program */}
+        <Route path="/video-analysis" element={<Navigate to="/publish-program" replace />} />
         <Route path="/journal" element={<JournalPage />} />
         <Route path="/workout-generator" element={<WorkoutGenerator />} />
         <Route path="/workout-results" element={<WorkoutResults />} />

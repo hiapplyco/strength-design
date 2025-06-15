@@ -48,16 +48,16 @@ const Index = () => {
     },
     {
       title: "Publish Program",
-      description: "Record and analyze your workout videos",
+      description: "Record and publish your workout videos",
       icon: <Video className="h-5 w-5 sm:h-6 sm:w-6" />,
-      path: "/video-analysis",
+      path: "/publish-program",
       requiresAuth: true
     },
     {
       title: "Technique Analysis",
       description: "Analyze your workout technique",
       icon: <BarChart className="h-5 w-5 sm:h-6 sm:w-6" />,
-      path: "/technique-analysis",
+      path: "/movement-analysis",
       requiresAuth: true
     },
     {

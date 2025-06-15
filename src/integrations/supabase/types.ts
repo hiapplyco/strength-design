@@ -9,6 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_insights: {
+        Row: {
+          action_required: boolean | null
+          confidence_score: number | null
+          content: string
+          created_at: string
+          id: string
+          insight_type: string
+          is_read: boolean | null
+          metadata: Json | null
+          related_journal_entry_id: string | null
+          related_workout_session_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          action_required?: boolean | null
+          confidence_score?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          insight_type: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          related_journal_entry_id?: string | null
+          related_workout_session_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          action_required?: boolean | null
+          confidence_score?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          insight_type?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          related_journal_entry_id?: string | null
+          related_workout_session_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_related_journal_entry_id_fkey"
+            columns: ["related_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_insights_related_workout_session_id_fkey"
+            columns: ["related_workout_session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analyses: {
         Row: {
           analysis_text: string | null
@@ -274,34 +334,91 @@ export type Database = {
       }
       generated_workouts: {
         Row: {
+          difficulty_level: number | null
+          equipment_needed: string[] | null
+          estimated_duration_minutes: number | null
           generated_at: string | null
           id: string
           is_favorite: boolean
+          scheduled_date: string | null
           summary: string | null
           tags: string[] | null
+          target_muscle_groups: string[] | null
           title: string | null
           user_id: string | null
           workout_data: Json
         }
         Insert: {
+          difficulty_level?: number | null
+          equipment_needed?: string[] | null
+          estimated_duration_minutes?: number | null
           generated_at?: string | null
           id?: string
           is_favorite?: boolean
+          scheduled_date?: string | null
           summary?: string | null
           tags?: string[] | null
+          target_muscle_groups?: string[] | null
           title?: string | null
           user_id?: string | null
           workout_data: Json
         }
         Update: {
+          difficulty_level?: number | null
+          equipment_needed?: string[] | null
+          estimated_duration_minutes?: number | null
           generated_at?: string | null
           id?: string
           is_favorite?: boolean
+          scheduled_date?: string | null
           summary?: string | null
           tags?: string[] | null
+          target_muscle_groups?: string[] | null
           title?: string | null
           user_id?: string | null
           workout_data?: Json
+        }
+        Relationships: []
+      }
+      journal_entries: {
+        Row: {
+          content: string | null
+          created_at: string
+          date: string
+          energy_level: number | null
+          id: string
+          mood_rating: number | null
+          sleep_quality: number | null
+          stress_level: number | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          date: string
+          energy_level?: number | null
+          id?: string
+          mood_rating?: number | null
+          sleep_quality?: number | null
+          stress_level?: number | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          date?: string
+          energy_level?: number | null
+          id?: string
+          mood_rating?: number | null
+          sleep_quality?: number | null
+          stress_level?: number | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -932,6 +1049,122 @@ export type Database = {
             columns: ["workout_id"]
             isOneToOne: false
             referencedRelation: "workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_metrics: {
+        Row: {
+          created_at: string
+          difficulty_rating: number | null
+          exercise_name: string
+          form_rating: number | null
+          id: string
+          notes: string | null
+          reps_completed: number | null
+          rest_time_seconds: number | null
+          sets_completed: number | null
+          weight_used: number | null
+          workout_session_id: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty_rating?: number | null
+          exercise_name: string
+          form_rating?: number | null
+          id?: string
+          notes?: string | null
+          reps_completed?: number | null
+          rest_time_seconds?: number | null
+          sets_completed?: number | null
+          weight_used?: number | null
+          workout_session_id: string
+        }
+        Update: {
+          created_at?: string
+          difficulty_rating?: number | null
+          exercise_name?: string
+          form_rating?: number | null
+          id?: string
+          notes?: string | null
+          reps_completed?: number | null
+          rest_time_seconds?: number | null
+          sets_completed?: number | null
+          weight_used?: number | null
+          workout_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_metrics_workout_session_id_fkey"
+            columns: ["workout_session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_sessions: {
+        Row: {
+          actual_duration_minutes: number | null
+          completed_date: string | null
+          created_at: string
+          generated_workout_id: string | null
+          id: string
+          journal_entry_id: string | null
+          modifications_made: string | null
+          notes: string | null
+          perceived_exertion: number | null
+          satisfaction_rating: number | null
+          scheduled_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_duration_minutes?: number | null
+          completed_date?: string | null
+          created_at?: string
+          generated_workout_id?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          modifications_made?: string | null
+          notes?: string | null
+          perceived_exertion?: number | null
+          satisfaction_rating?: number | null
+          scheduled_date: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_duration_minutes?: number | null
+          completed_date?: string | null
+          created_at?: string
+          generated_workout_id?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          modifications_made?: string | null
+          notes?: string | null
+          perceived_exertion?: number | null
+          satisfaction_rating?: number | null
+          scheduled_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_sessions_generated_workout_id_fkey"
+            columns: ["generated_workout_id"]
+            isOneToOne: false
+            referencedRelation: "generated_workouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_sessions_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]

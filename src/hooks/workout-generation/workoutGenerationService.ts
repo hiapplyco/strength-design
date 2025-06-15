@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import type { GenerateWorkoutParams, WorkoutGenerationResult } from "./types";
@@ -14,6 +13,9 @@ export class WorkoutGenerationService {
       if (!session) {
         throw new Error("You must be logged in to generate workouts");
       }
+
+      // Check workout usage limits before proceeding
+      await this.checkWorkoutLimits(session);
 
       // Sanitize and validate inputs
       const sanitizedParams = this.sanitizeParams(params);
@@ -32,6 +34,9 @@ export class WorkoutGenerationService {
       if (!workoutData) {
         return null;
       }
+
+      // Increment workout usage for non-subscribed users
+      await this.incrementWorkoutUsage(session);
 
       // Generate summary and save workout
       const workoutSummary = generateWorkoutSummary(workoutData, sanitizedParams);
@@ -54,6 +59,66 @@ export class WorkoutGenerationService {
     } catch (error: any) {
       console.error('Error generating workout:', error);
       throw error;
+    }
+  }
+
+  private async checkWorkoutLimits(session: any) {
+    // Check subscription status
+    const { data: subscriptionData } = await supabase.functions.invoke('check-subscription', {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    const isSubscribed = subscriptionData?.subscribed || false;
+
+    // If user is subscribed, they can generate unlimited workouts
+    if (isSubscribed) {
+      return;
+    }
+
+    // Check free workout usage
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('free_workouts_used')
+      .eq('id', session.user.id)
+      .single();
+
+    if (error) {
+      console.error('Error checking workout usage:', error);
+      throw new Error('Failed to check workout usage limits');
+    }
+
+    const freeWorkoutsUsed = profile?.free_workouts_used || 0;
+
+    if (freeWorkoutsUsed >= 3) {
+      throw new Error('WORKOUT_LIMIT_EXCEEDED');
+    }
+  }
+
+  private async incrementWorkoutUsage(session: any) {
+    // Check subscription status again
+    const { data: subscriptionData } = await supabase.functions.invoke('check-subscription', {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    const isSubscribed = subscriptionData?.subscribed || false;
+
+    // Only increment usage for non-subscribed users
+    if (!isSubscribed) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          free_workouts_used: supabase.sql`free_workouts_used + 1`
+        })
+        .eq('id', session.user.id);
+
+      if (error) {
+        console.error('Error incrementing workout usage:', error);
+        // Don't throw here as the workout was already generated
+      }
     }
   }
 

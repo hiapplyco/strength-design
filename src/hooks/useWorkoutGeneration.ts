@@ -8,6 +8,7 @@ import { WorkoutGenerationService } from "./workout-generation/workoutGeneration
 export const useWorkoutGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
   const { toast } = useToast();
   
   const workoutService = new WorkoutGenerationService();
@@ -29,6 +30,18 @@ export const useWorkoutGeneration = () => {
       return result;
     } catch (error: any) {
       console.error('Error generating workout:', error);
+      
+      // Handle workout limit exceeded error
+      if (error.message === 'WORKOUT_LIMIT_EXCEEDED') {
+        setShowPaywall(true);
+        toast({
+          title: "Workout Limit Reached",
+          description: "You've used all 3 free workouts. Upgrade to Pro for unlimited access!",
+          variant: "destructive",
+        });
+        return null;
+      }
+      
       toast({
         title: "Error",
         description: error.message || "Failed to generate workout. Please try again.",
@@ -43,6 +56,8 @@ export const useWorkoutGeneration = () => {
   return {
     isGenerating,
     generateWorkout,
-    debugInfo
+    debugInfo,
+    showPaywall,
+    setShowPaywall
   };
 };

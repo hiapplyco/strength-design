@@ -5,9 +5,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useCustomerPortal } from "@/hooks/useCustomerPortal";
+import { useWorkoutUsage } from "@/hooks/useWorkoutUsage";
 import { format } from "date-fns";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Zap, Crown, Check } from "lucide-react";
 
 const Pricing = () => {
   const { session } = useAuth();
@@ -15,6 +18,7 @@ const Pricing = () => {
   const { data: subscriptionStatus, isLoading: subscriptionLoading, refetch } = useSubscriptionStatus();
   const { handleSubscription, loadingStates } = useSubscription();
   const { openCustomerPortal, loading: portalLoading } = useCustomerPortal();
+  const { workoutUsage } = useWorkoutUsage();
 
   // Refetch subscription status when page loads
   useEffect(() => {
@@ -42,20 +46,53 @@ const Pricing = () => {
           <p className="text-xl text-foreground/80 max-w-3xl mx-auto">
             {isCurrentlySubscribed 
               ? "Manage your subscription or upgrade to access all premium features."
-              : "Start with our professional program to unlock unlimited access to our premium features."
+              : "Get 3 free workouts, then upgrade to Pro for unlimited access to premium features."
             }
           </p>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Free Plan */}
           <div className="border rounded-lg p-8 shadow-lg bg-card/20 backdrop-blur-sm">
             <h2 className="text-2xl font-bold mb-4 text-foreground">Free Access</h2>
             <p className="text-3xl font-bold mb-6 text-foreground">$0<span className="text-sm font-normal">/forever</span></p>
+            
+            {/* Workout Usage Display for Free Users */}
+            {!isCurrentlySubscribed && workoutUsage && (
+              <div className="mb-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium text-blue-900 dark:text-blue-100">Your Progress</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-blue-700 dark:text-blue-300">
+                    {workoutUsage.free_workouts_used} of 3 workouts used
+                  </span>
+                  <Badge variant={workoutUsage.free_workouts_remaining > 0 ? "default" : "destructive"}>
+                    {workoutUsage.free_workouts_remaining} remaining
+                  </Badge>
+                </div>
+              </div>
+            )}
+
             <ul className="space-y-4 mb-8 text-foreground/80">
-              <li>✓ Basic workout generation</li>
-              <li>✓ Limited exercise library</li>
-              <li>✓ Community support</li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>3 free workout generations</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Basic exercise library</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Community support</span>
+              </li>
+              <li className="text-gray-500">✗ Advanced customization</li>
+              <li className="text-gray-500">✗ Progress tracking</li>
+              <li className="text-gray-500">✗ Priority support</li>
             </ul>
+            
             <button 
               className="w-full py-2 px-4 bg-secondary text-secondary-foreground rounded hover:bg-secondary/90 disabled:opacity-50"
               disabled={true}
@@ -64,20 +101,45 @@ const Pricing = () => {
             </button>
           </div>
 
-          <div className="relative border rounded-lg p-8 shadow-lg bg-primary/5 border-primary backdrop-blur-sm">
-            <div className="absolute -top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm">
+          {/* Pro Plan */}
+          <div className="relative border rounded-lg p-8 shadow-lg bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-200 dark:border-amber-800 backdrop-blur-sm">
+            <div className="absolute -top-4 right-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">
               {isCurrentlySubscribed && subscriptionType === 'personalized' ? 'Current Plan' : 'Most Popular'}
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-foreground">Pro Program</h2>
-            <p className="text-3xl font-bold mb-6 text-foreground">$24.99<span className="text-sm font-normal">/month</span></p>
+            <div className="flex items-center gap-2 mb-4">
+              <Crown className="h-6 w-6 text-amber-600" />
+              <h2 className="text-2xl font-bold text-foreground">Pro Program</h2>
+            </div>
+            <p className="text-3xl font-bold mb-6 text-foreground">$25<span className="text-sm font-normal">/month</span></p>
             <ul className="space-y-4 mb-8 text-foreground/80">
-              <li>✓ Unlimited workout generation</li>
-              <li>✓ Full exercise library</li>
-              <li>✓ Progress tracking</li>
-              <li>✓ Advanced analytics</li>
-              <li>✓ Priority support</li>
-              <li>✓ Video analysis tools</li>
-              <li>✓ Document editor</li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span className="font-medium">Unlimited workout generation</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Full exercise library</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Progress tracking & analytics</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Advanced customization</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Priority support</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Video analysis tools</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Check className="h-5 w-5 text-green-500" />
+                <span>Document editor access</span>
+              </li>
             </ul>
             
             {isCurrentlySubscribed && subscriptionType === 'personalized' ? (
@@ -90,12 +152,21 @@ const Pricing = () => {
               </Button>
             ) : (
               <Button 
-                className="w-full py-2 px-4 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50"
+                className="w-full py-2 px-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-medium disabled:opacity-50"
                 onClick={() => handleSubscription('personalized')}
                 disabled={loadingStates.personalized}
               >
-                {loadingStates.personalized ? 'Loading...' : 
-                 isCurrentlySubscribed ? 'Upgrade Plan' : 'Subscribe Now'}
+                {loadingStates.personalized ? (
+                  <>
+                    <Zap className="h-4 w-4 mr-2 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <Crown className="h-4 w-4 mr-2" />
+                    {isCurrentlySubscribed ? 'Upgrade Plan' : 'Upgrade to Pro'}
+                  </>
+                )}
               </Button>
             )}
           </div>
@@ -108,7 +179,7 @@ const Pricing = () => {
                 🎉 You're subscribed!
               </h3>
               <p className="text-green-700 dark:text-green-300 mb-4">
-                You have full access to all premium features.
+                You have unlimited access to all premium features.
               </p>
               <Button 
                 variant="outline"

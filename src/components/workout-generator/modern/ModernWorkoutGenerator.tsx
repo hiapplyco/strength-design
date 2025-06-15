@@ -1,156 +1,136 @@
 
-import React, { useState, useRef } from 'react';
-import { WorkoutConfigProvider } from '@/contexts/WorkoutConfigContext';
-import { ModernWorkoutSidebar } from './ModernWorkoutSidebar';
-import { WorkoutChatContainer } from '../chat/WorkoutChatContainer';
-import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
-import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
-import { useNavigate } from 'react-router-dom';
-import { triggerConfetti } from '@/utils/confetti';
-import { useAuth } from '@/contexts/AuthContext';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { PanelRight, MessageSquare, Sparkles, Zap } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
+import { useNavigate } from "react-router-dom";
+import { WorkoutGeneratorForm } from "../WorkoutGeneratorForm";
+import { WorkoutUsageDisplay } from "../WorkoutUsageDisplay";
+import { PaywallDialog } from "../PaywallDialog";
+import { useWorkoutGeneration as useWorkoutGenerationHook } from "../hooks/useWorkoutGeneration";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWorkoutUsage } from "@/hooks/useWorkoutUsage";
+import type { WeeklyWorkouts } from "@/types/fitness";
 
-const ModernWorkoutGeneratorContent: React.FC = () => {
-  const { config } = useWorkoutConfig();
-  const { isGenerating, generateWorkout } = useWorkoutGeneration();
+const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
+
+export const ModernWorkoutGenerator = () => {
+  const [numberOfDays, setNumberOfDays] = useState(7);
+  const [numberOfCycles, setNumberOfCycles] = useState(1);
+  const [generatePrompt, setGeneratePrompt] = useState("");
+  
   const navigate = useNavigate();
   const { session } = useAuth();
-  const [showSidebar, setShowSidebar] = useState(true);
-  const chatMessagesRef = useRef<any[]>([]);
+  const { workoutUsage } = useWorkoutUsage();
+  const { isGenerating, generateWorkout, showPaywall, setShowPaywall } = useWorkoutGeneration();
 
-  const handleChatMessagesUpdate = (messages: any[]) => {
-    chatMessagesRef.current = messages;
-  };
+  const {
+    weatherData,
+    weatherPrompt,
+    selectedExercises,
+    fitnessLevel,
+    prescribedExercises,
+    injuries,
+    isAnalyzingPrescribed,
+    isAnalyzingInjuries,
+    handleWeatherUpdate,
+    handleExerciseSelect,
+    handlePrescribedFileSelect,
+    handleInjuriesFileSelect,
+    handleClear,
+    setFitnessLevel,
+    setPrescribedExercises,
+    setInjuries
+  } = useWorkoutGenerationHook({
+    handleGenerateWorkout: () => Promise.resolve(),
+    setIsGenerating: () => {},
+    setGeneratePrompt
+  });
 
-  const handleGenerate = async () => {
-    try {
-      const data = await generateWorkout({
-        prompt: '',
-        weatherPrompt: config.weatherPrompt || '',
-        selectedExercises: config.selectedExercises,
-        fitnessLevel: config.fitnessLevel,
-        prescribedExercises: config.prescribedExercises,
-        numberOfDays: config.numberOfDays,
-        numberOfCycles: config.numberOfCycles,
-        injuries: config.injuries || undefined,
-        chatHistory: chatMessagesRef.current,
-      });
+  const handleGenerateWorkout = async () => {
+    // Check if user can generate workout
+    if (!workoutUsage?.can_generate_workout) {
+      setShowPaywall(true);
+      return;
+    }
 
-      if (data) {
-        triggerConfetti();
-        
-        const storageKey = session?.user?.id 
-          ? `strength_design_current_workout_${session.user.id}` 
-          : 'strength_design_current_workout';
-          
-        localStorage.setItem(storageKey, JSON.stringify(data));
-        navigate("/workout-results", { state: { workouts: data } });
-      }
-    } catch (error) {
-      console.error("Error generating workout:", error);
+    const prompts = {
+      exercises: selectedExercises.length > 0 
+        ? ` Include these exercises in the program: ${selectedExercises.map(e => e.name).join(", ")}. Instructions for reference: ${selectedExercises.map(e => e.instructions[0]).join(" ")}` 
+        : "",
+      fitness: fitnessLevel ? ` Consider this fitness profile: ${fitnessLevel}.` : "",
+      prescribed: prescribedExercises ? ` Please incorporate these prescribed exercises/restrictions: ${prescribedExercises}.` : "",
+      injuries: injuries ? ` Please consider these health conditions/injuries: ${injuries}.` : ""
+    };
+    
+    const fullPrompt = `${weatherPrompt}${prompts.exercises}${prompts.fitness}${prompts.prescribed}${prompts.injuries}`;
+    
+    const result = await generateWorkout({
+      prompt: fullPrompt,
+      weatherPrompt,
+      selectedExercises,
+      fitnessLevel,
+      prescribedExercises,
+      injuries,
+      numberOfDays,
+      numberOfCycles
+    });
+
+    if (result) {
+      // Store workout data for the results page
+      const storageKey = session?.user?.id 
+        ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+        : WORKOUT_STORAGE_KEY;
+      localStorage.setItem(storageKey, JSON.stringify(result));
+      
+      // Navigate to results page
+      navigate("/workout-results", { state: { workouts: result } });
     }
   };
 
-  const isFormComplete = () => {
-    return Boolean(config.fitnessLevel);
-  };
+  const isValid = Boolean(fitnessLevel && numberOfDays > 0);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-background via-background to-secondary/5">
-      <div className="flex h-full w-full">
-        {/* Main Chat Area - Full width with proper flex */}
-        <div className="flex-1 flex flex-col min-w-0 h-full">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-6 border-b border-border/50 bg-background/95 backdrop-blur flex-shrink-0"
-          >
-            <div className="flex items-center justify-between">
-              <div className="text-center flex-1">
-                <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2">
-                  <Sparkles className="h-8 w-8 text-primary" />
-                  AI-Driven Program Builder
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Chat with our AI to create your perfect workout plan
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowSidebar(!showSidebar)}
-                className="flex items-center gap-2 ml-4"
-              >
-                <PanelRight className={`h-4 w-4 transition-transform ${showSidebar ? 'rotate-180' : ''}`} />
-                {showSidebar ? 'Hide Config' : 'Show Config'}
-              </Button>
-            </div>
-          </motion.div>
+    <div className="container mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        {/* Usage Display */}
+        <WorkoutUsageDisplay />
 
-          {/* Chat Container - Takes remaining space */}
-          <div className="flex-1 w-full min-w-0 min-h-0">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="h-full w-full"
-            >
-              <WorkoutChatContainer 
-                isGenerating={isGenerating}
-                onMessagesUpdate={handleChatMessagesUpdate}
-              />
-            </motion.div>
-          </div>
+        {/* Workout Generator Form */}
+        <WorkoutGeneratorForm
+          weatherData={weatherData}
+          onWeatherUpdate={handleWeatherUpdate}
+          selectedExercises={selectedExercises}
+          onExerciseSelect={handleExerciseSelect}
+          fitnessLevel={fitnessLevel}
+          setFitnessLevel={setFitnessLevel}
+          prescribedExercises={prescribedExercises}
+          setPrescribedExercises={setPrescribedExercises}
+          isAnalyzingPrescribed={isAnalyzingPrescribed}
+          handlePrescribedFileSelect={handlePrescribedFileSelect}
+          injuries={injuries}
+          setInjuries={setInjuries}
+          isAnalyzingInjuries={isAnalyzingInjuries}
+          handleInjuriesFileSelect={handleInjuriesFileSelect}
+          numberOfDays={numberOfDays}
+          setNumberOfDays={setNumberOfDays}
+          numberOfCycles={numberOfCycles}
+          onGenerate={handleGenerateWorkout}
+          onClear={handleClear}
+          isGenerating={isGenerating}
+          isValid={isValid}
+        />
 
-          {/* Generate Button Section */}
-          <div className="p-6 pt-4 border-t border-border/50 bg-background/95 backdrop-blur w-full flex-shrink-0">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="w-full"
-            >
-              <Button 
-                onClick={handleGenerate}
-                disabled={isGenerating || !isFormComplete()}
-                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 h-12"
-              >
-                <Zap className="h-5 w-5 mr-2" />
-                {isGenerating ? 'Generating Your Workout...' : 'Generate My Workout'}
-              </Button>
-              
-              {!isFormComplete() && (
-                <p className="text-xs text-muted-foreground text-center mt-2">
-                  Set your fitness level to get started, or chat with AI for a more personalized workout
-                </p>
-              )}
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Right Sidebar - Fixed positioning when visible */}
-        {showSidebar && (
-          <motion.div
-            initial={{ x: 400, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 400, opacity: 0 }}
-            transition={{ type: "spring", damping: 20, stiffness: 100 }}
-            className="w-96 bg-background border-l border-border/50 shadow-xl flex-shrink-0 h-full"
-          >
-            <ModernWorkoutSidebar />
-          </motion.div>
-        )}
-      </div>
+        {/* Paywall Dialog */}
+        <PaywallDialog 
+          open={showPaywall} 
+          onOpenChange={setShowPaywall} 
+        />
+      </motion.div>
     </div>
-  );
-};
-
-export const ModernWorkoutGenerator: React.FC = () => {
-  return (
-    <WorkoutConfigProvider>
-      <ModernWorkoutGeneratorContent />
-    </WorkoutConfigProvider>
   );
 };

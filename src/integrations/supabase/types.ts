@@ -669,6 +669,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          free_workouts_used: number
           id: string
           tier: string | null
           trial_end_date: string | null
@@ -676,6 +677,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          free_workouts_used?: number
           id: string
           tier?: string | null
           trial_end_date?: string | null
@@ -683,6 +685,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          free_workouts_used?: number
           id?: string
           tier?: string | null
           trial_end_date?: string | null

@@ -10,15 +10,15 @@ const CheckoutCancel = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center">
       <div className="text-center max-w-md mx-auto px-4">
-        <XCircle className="h-16 w-16 text-red-500 mx-auto mb-6" />
-        <LogoHeader>Payment Cancelled</LogoHeader>
+        <XCircle className="h-16 w-16 text-yellow-500 mx-auto mb-6" />
+        <LogoHeader>Checkout Cancelled</LogoHeader>
         
         <div className="space-y-4 text-foreground/80">
           <p className="text-lg">
-            Your payment was cancelled. No charges were made.
+            It looks like you cancelled the checkout process. No worries, no charge was made!
           </p>
           <p>
-            You can try again anytime or contact us if you need assistance.
+            Your next breakthrough is just a click away. When you're ready, we're here.
           </p>
         </div>
 
@@ -27,7 +27,7 @@ const CheckoutCancel = () => {
             onClick={() => navigate('/pricing')}
             className="flex-1"
           >
-            Try Again
+            View Pricing Plans
           </Button>
           <Button 
             variant="outline"

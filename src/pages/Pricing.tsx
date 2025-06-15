@@ -1,11 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscription } from "@/hooks/useSubscription";
 import { PricingCards } from "@/components/pricing/PricingCards";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 
 export default function Pricing() {
@@ -44,28 +43,16 @@ export default function Pricing() {
             </p>
           </div>
         ) : (
-          <PricingCards />
+          <PricingCards 
+            onSubscribeClick={handleSubscribe}
+            isSubscribing={loadingStates.personalized}
+          />
         )}
 
-        {!session ? (
+        {!session && (
           <p className="text-center mt-6 text-foreground/80">
             <Link to="/sign-in" className="text-primary hover:underline">Sign in</Link> to view subscription options.
           </p>
-        ) : !isSubscribed && (
-          <Button
-            onClick={handleSubscribe}
-            disabled={loadingStates.personalized}
-            className="mt-8"
-          >
-            {loadingStates.personalized ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Subscribing...
-              </>
-            ) : (
-              "Subscribe Now"
-            )}
-          </Button>
         )}
       </div>
     </StandardPageLayout>

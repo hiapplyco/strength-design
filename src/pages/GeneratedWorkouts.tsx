@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +24,7 @@ export default function GeneratedWorkouts() {
           .from("generated_workouts")
           .select("*")
           .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
+          .order("generated_at", { ascending: false });
 
         if (error) {
           console.error("Error fetching workouts:", error);

@@ -13,9 +13,10 @@ interface WorkoutListProps {
   selectedWorkouts: string[];
   onToggleSelection: (workoutId: string) => void;
   onToggleFavorite: (workoutId:string) => void;
+  onDuplicate: (workoutId: string) => void;
 }
 
-export const WorkoutList = ({ workouts, selectedWorkouts, onToggleSelection, onToggleFavorite }: WorkoutListProps) => {
+export const WorkoutList = ({ workouts, selectedWorkouts, onToggleSelection, onToggleFavorite, onDuplicate }: WorkoutListProps) => {
   const navigate = useNavigate();
 
   const handleWorkoutClick = (workout: GeneratedWorkout) => {
@@ -90,6 +91,7 @@ export const WorkoutList = ({ workouts, selectedWorkouts, onToggleSelection, onT
           isSelected={selectedWorkouts.includes(workout.id)}
           onToggleSelection={onToggleSelection}
           onToggleFavorite={onToggleFavorite}
+          onDuplicate={onDuplicate}
         />
       ))}
     </div>

@@ -125,6 +125,47 @@ const GeneratedWorkouts = () => {
     }
   };
 
+  const handleDuplicateWorkout = async (workoutId: string) => {
+    const workoutToDuplicate = workouts.find(w => w.id === workoutId);
+    if (!workoutToDuplicate) {
+      toast({ title: "Error", description: "Workout not found.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const { data: newWorkout, error } = await supabase
+        .from('generated_workouts')
+        .insert({
+          title: `Copy of ${workoutToDuplicate.title || 'Generated Workout'}`,
+          summary: workoutToDuplicate.summary,
+          tags: workoutToDuplicate.tags,
+          workout_data: workoutToDuplicate.workout_data,
+          user_id: workoutToDuplicate.user_id,
+          is_favorite: false,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (newWorkout) {
+        setWorkouts(currentWorkouts => [newWorkout, ...currentWorkouts]);
+      }
+
+      toast({
+        title: "Workout Duplicated",
+        description: `A copy of "${workoutToDuplicate.title || 'Generated Workout'}" has been created.`,
+      });
+    } catch (error) {
+      console.error('Error duplicating workout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to duplicate workout. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteSelected = async () => {
     if (selectedWorkouts.length === 0) return;
 
@@ -180,6 +221,7 @@ const GeneratedWorkouts = () => {
               selectedWorkouts={selectedWorkouts}
               onToggleSelection={toggleWorkoutSelection}
               onToggleFavorite={handleToggleFavorite}
+              onDuplicate={handleDuplicateWorkout}
             />
           )}
         </div>

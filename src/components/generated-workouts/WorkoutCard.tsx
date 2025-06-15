@@ -1,4 +1,3 @@
-
 import { formatDistanceToNow } from "date-fns";
 import { ArrowRight, Calendar, ClipboardList, Dumbbell, Star, Share2, Copy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -22,9 +21,10 @@ interface WorkoutCardProps {
   isSelected: boolean;
   onToggleSelection: (workoutId: string) => void;
   onToggleFavorite: (workoutId: string) => void;
+  onDuplicate: (workoutId: string) => void;
 }
 
-export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, onToggleFavorite }: WorkoutCardProps) => {
+export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, onToggleFavorite, onDuplicate }: WorkoutCardProps) => {
   const { toast } = useToast();
   const workoutData = workout.workout_data as unknown as WorkoutData;
   const firstDay = getFirstDayPreview(workoutData);
@@ -47,11 +47,7 @@ export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, o
 
   const handleDuplicateClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    toast({
-      title: "Duplicate clicked",
-      description: "This feature is not yet implemented.",
-      duration: 3000,
-    });
+    onDuplicate(workout.id);
   };
   
   return (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,6 +5,7 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { useSubscription } from "@/hooks/useSubscription";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { spacing, width, text, layout } from "@/utils/responsive";
 
 export default function Pricing() {
   const { session } = useAuth();
@@ -21,18 +21,18 @@ export default function Pricing() {
     await handleSubscription('personalized');
   };
 
+  const header = (
+    <div className={`${spacing.section} text-center ${spacing.container}`}>
+      <h1 className={`${text.title} font-bold text-primary`}>Upgrade to Pro</h1>
+      <p className={`${text.subtitle} text-foreground/80 ${width.content} mt-2`}>
+        Unlock unlimited workout generation and advanced tools.
+      </p>
+    </div>
+  );
+
   return (
-    <StandardPageLayout
-      header={
-        <div className="py-6 text-center">
-          <h1 className="text-3xl font-bold text-primary">Upgrade to Pro</h1>
-          <p className="text-lg text-foreground/80 max-w-3xl mx-auto mt-2">
-            Unlock unlimited workout generation and advanced tools.
-          </p>
-        </div>
-      }
-    >
-      <div className="flex flex-col items-center justify-center flex-1 min-h-0">
+    <StandardPageLayout header={header} className={spacing.container}>
+      <div className={`${width.full} ${layout.center} flex-1 min-h-0`}>
         {isSubscribed ? (
           <div className="text-center">
             <h2 className="text-2xl font-semibold text-green-500 mb-4">
@@ -43,14 +43,16 @@ export default function Pricing() {
             </p>
           </div>
         ) : (
-          <PricingCards 
-            onSubscribeClick={handleSubscribe}
-            isSubscribing={loadingStates.personalized}
-          />
+          <div className={`${width.full} ${layout.noOverflow}`}>
+            <PricingCards 
+              onSubscribeClick={handleSubscription}
+              isSubscribing={loadingStates.personalized}
+            />
+          </div>
         )}
 
         {!session && (
-          <p className="text-center mt-6 text-foreground/80">
+          <p className={`text-center mt-6 text-foreground/80 ${spacing.container}`}>
             <Link to="/sign-in" className="text-primary hover:underline">Sign in</Link> to view subscription options.
           </p>
         )}

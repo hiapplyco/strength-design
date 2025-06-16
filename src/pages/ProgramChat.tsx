@@ -1,18 +1,23 @@
 
 import { ChatContainer } from "@/components/chat/ChatContainer";
+import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { spacing, width, text, layout } from "@/utils/responsive";
 
 export default function ProgramChat() {
-  return (
-    <div className="h-screen bg-background flex flex-col">
-      <header className="py-6 px-4 container mx-auto text-center flex-shrink-0">
-        <h1 className="text-3xl font-bold text-primary">program.chat</h1>
-        <p className="text-lg text-foreground/80 max-w-3xl mx-auto mt-2">
-          Your personal coach. Chat about fitness, nutrition, or upload training materials for expert guidance.
-        </p>
-      </header>
-      <main className="flex-grow container mx-auto px-4 pb-4 min-h-0">
-        <ChatContainer />
-      </main>
+  const header = (
+    <div className={`${spacing.section} ${spacing.container} text-center ${layout.noOverflow}`}>
+      <h1 className={`${text.title} font-bold text-primary`}>program.chat</h1>
+      <p className={`${text.subtitle} text-foreground/80 ${width.content} mt-2`}>
+        Your personal coach. Chat about fitness, nutrition, or upload training materials for expert guidance.
+      </p>
     </div>
+  );
+
+  return (
+    <StandardPageLayout header={header} className="h-screen">
+      <div className={`${width.full} ${layout.noOverflow} flex-1 min-h-0 ${spacing.container}`}>
+        <ChatContainer />
+      </div>
+    </StandardPageLayout>
   );
 }

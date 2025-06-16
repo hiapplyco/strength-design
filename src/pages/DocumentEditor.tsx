@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { spacing, width, text, touch, layout } from "@/utils/responsive";
 
 export default function DocumentEditor() {
   const [content, setContent] = useState('');
@@ -27,28 +28,31 @@ export default function DocumentEditor() {
     navigate('/workout-generator');
   };
 
+  const header = (
+    <div className={`${width.narrow} text-center ${spacing.section}`}>
+      <LogoHeader className={text.title}>program.edit</LogoHeader>
+    </div>
+  );
+
   return (
-    <StandardPageLayout
-      header={
-        <div className="text-center mb-6">
-          <LogoHeader>program.edit</LogoHeader>
+    <StandardPageLayout header={header} className={spacing.container}>
+      <div className={`${width.content} ${spacing.section} ${layout.stack} ${spacing.gap}`}>
+        <div className={`bg-card/40 backdrop-blur-sm ${touch.rounded} ${spacing.card}`}>
+          <Button 
+            onClick={handleBack}
+            variant="ghost" 
+            className={`${layout.center} ${spacing.gap} text-foreground hover:text-primary mb-4`}
+          >
+            <ArrowLeft className={touch.icon} /> Back to Generator
+          </Button>
+          <p className={`${text.subtitle} text-foreground/80 text-center`}>
+            Customize your workout program in the editor below. When you're ready, publish your workout and record a video to inspire others!
+          </p>
         </div>
-      }
-    >
-      <div className="max-w-3xl mx-auto bg-card/40 backdrop-blur-sm rounded-xl p-8 mb-12 mt-6">
-        <Button 
-          onClick={handleBack}
-          variant="ghost" 
-          className="flex items-center gap-2 text-foreground hover:text-primary mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Generator
-        </Button>
-        <p className="text-xl text-foreground/80 text-center">
-          Customize your workout program in the editor below. When you're ready, publish your workout and record a video to inspire others!
-        </p>
-      </div>
-      <div className="max-w-4xl mx-auto">
-        <Editor content={content} onSave={handleSave} />
+        
+        <div className={`${width.full} ${layout.noOverflow}`}>
+          <Editor content={content} onSave={handleSave} />
+        </div>
       </div>
     </StandardPageLayout>
   );

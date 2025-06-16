@@ -1,20 +1,20 @@
+
 import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { spacing, width, text } from "@/utils/responsive";
 
 const VideoAnalysisPage = () => {
   return (
-    <StandardPageLayout
-      header={
-        <div className="text-center mb-8">
-          <LogoHeader>publish.program</LogoHeader>
-          <p className="text-lg md:text-xl text-foreground/80 max-w-2xl mx-auto">
-            Create professional video content for your training programs. Our AI-powered teleprompter helps you deliver clear instructions.
-          </p>
-        </div>
-      }
-    >
-      <div className="flex flex-1 w-full max-w-3xl mx-auto flex-col">
+    <StandardPageLayout className={spacing.container}>
+      <div className={`${width.narrow} ${spacing.section} text-center`}>
+        <LogoHeader className={text.title}>publish.program</LogoHeader>
+        <p className={`${text.subtitle} text-foreground/80 mt-2`}>
+          Create professional video content for your training programs. Our AI-powered teleprompter helps you deliver clear instructions.
+        </p>
+      </div>
+      
+      <div className={`${width.content} ${layout.noOverflow}`}>
         <VideoAnalysis />
       </div>
     </StandardPageLayout>

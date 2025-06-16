@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkoutSessions } from "@/hooks/useWorkoutSessions";
@@ -10,43 +11,35 @@ import { spacing, width, layout } from "@/utils/responsive";
 
 export default function GeneratedWorkouts() {
   const { session } = useAuth();
-  const { workoutSessions, isLoading, deleteWorkoutSession } = useWorkoutSessions(session?.user?.id);
+  const { sessions: workoutSessions, isLoading } = useWorkoutSessions();
   const [selectedWorkouts, setSelectedWorkouts] = useState<string[]>([]);
-  const [filters, setFilters] = useState({
-    search: "",
-    fitnessLevel: "",
-    goals: "",
-    dateRange: ""
-  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("generated_at_desc");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
-  const filteredWorkouts = workoutSessions?.filter(workout => {
-    const searchRegex = new RegExp(filters.search, 'i');
-    const matchesSearch = searchRegex.test(workout.name);
+  // Extract all unique tags from workouts
+  const allTags = Array.from(new Set(
+    workoutSessions?.flatMap(session => 
+      session.generated_workouts?.tags || []
+    ) || []
+  ));
 
-    const matchesFitnessLevel = !filters.fitnessLevel || workout.fitnessLevel === filters.fitnessLevel;
-    const matchesGoals = !filters.goals || workout.goals === filters.goals;
+  const filteredWorkouts = workoutSessions?.filter(session => {
+    const workout = session.generated_workouts;
+    if (!workout) return false;
 
-    const matchesDateRange = !filters.dateRange || (
-      filters.dateRange === '7' && isWithinLast7Days(workout.created_at) ||
-      filters.dateRange === '30' && isWithinLast30Days(workout.created_at)
-    );
+    const searchRegex = new RegExp(searchTerm, 'i');
+    const matchesSearch = searchRegex.test(workout.title || '') || 
+                         searchRegex.test(workout.summary || '');
 
-    return matchesSearch && matchesFitnessLevel && matchesGoals && matchesDateRange;
+    const matchesTags = selectedTags.length === 0 || 
+                       selectedTags.some(tag => workout.tags?.includes(tag));
+
+    const matchesFavorites = !showOnlyFavorites || workout.is_favorite;
+
+    return matchesSearch && matchesTags && matchesFavorites;
   }) || [];
-
-  function isWithinLast7Days(dateString: string): boolean {
-    const date = new Date(dateString);
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    return date >= sevenDaysAgo;
-  }
-
-  function isWithinLast30Days(dateString: string): boolean {
-    const date = new Date(dateString);
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return date >= thirtyDaysAgo;
-  }
 
   const handleWorkoutSelect = (workoutId: string) => {
     setSelectedWorkouts(prev => {
@@ -58,13 +51,20 @@ export default function GeneratedWorkouts() {
     });
   };
 
+  const handleToggleFavorite = async (workoutId: string) => {
+    // TODO: Implement favorite toggle functionality
+    console.log('Toggle favorite for workout:', workoutId);
+  };
+
+  const handleDuplicate = async (workoutId: string) => {
+    // TODO: Implement duplicate functionality
+    console.log('Duplicate workout:', workoutId);
+  };
+
   const handleBulkDelete = async () => {
     if (selectedWorkouts.length === 0) return;
-
-    for (const workoutId of selectedWorkouts) {
-      await deleteWorkoutSession(workoutId);
-    }
-
+    // TODO: Implement bulk delete functionality
+    console.log('Delete workouts:', selectedWorkouts);
     setSelectedWorkouts([]);
   };
 
@@ -77,8 +77,15 @@ export default function GeneratedWorkouts() {
         />
         
         <WorkoutFilters 
-          filters={filters}
-          onFiltersChange={setFilters}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          allTags={allTags}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
+          showOnlyFavorites={showOnlyFavorites}
+          setShowOnlyFavorites={setShowOnlyFavorites}
         />
         
         {selectedWorkouts.length > 0 && (
@@ -91,11 +98,11 @@ export default function GeneratedWorkouts() {
         
         <div className={`${width.full} ${layout.noOverflow}`}>
           <WorkoutList
-            workouts={filteredWorkouts}
-            isLoading={isLoading}
+            workouts={filteredWorkouts.map(session => session.generated_workouts!)}
             selectedWorkouts={selectedWorkouts}
-            onWorkoutSelect={handleWorkoutSelect}
-            onWorkoutDelete={deleteWorkoutSession}
+            onToggleSelection={handleWorkoutSelect}
+            onToggleFavorite={handleToggleFavorite}
+            onDuplicate={handleDuplicate}
           />
         </div>
       </div>

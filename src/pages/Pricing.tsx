@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,10 +17,6 @@ export default function Pricing() {
   useEffect(() => {
     setIsSubscribed(subscriptionStatus?.isSubscribed || false);
   }, [subscriptionStatus]);
-
-  const handleSubscribe = async () => {
-    await handleSubscription('personalized');
-  };
 
   const header = (
     <div className={`${spacing.section} text-center ${spacing.container}`}>

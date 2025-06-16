@@ -2,7 +2,7 @@
 import { VideoAnalysis } from "@/components/video-analysis/VideoAnalysis";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
-import { spacing, width, text } from "@/utils/responsive";
+import { spacing, width, text, layout } from "@/utils/responsive";
 
 const VideoAnalysisPage = () => {
   return (

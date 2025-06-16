@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Share2, Copy, ExternalLink, Sparkles } from "lucide-react";
+import { Share2, Copy, ExternalLink, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface TikTokPublishActionsProps {
@@ -23,8 +23,8 @@ export function TikTokPublishActions({
     if (shareableLink) {
       navigator.clipboard.writeText(shareableLink);
       toast({
-        title: "✨ Copied!",
-        description: "Link copied to clipboard",
+        title: "Success",
+        description: "Link copied to clipboard!",
       });
     }
   };
@@ -36,68 +36,71 @@ export function TikTokPublishActions({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      {shareableLink ? (
-        <Card className="p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 border-green-500/30 rounded-2xl">
-          <div className="flex flex-col gap-3">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">
-                🎉 Published!
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Your program is live and ready to share
-              </p>
-            </div>
-            
-            <div className="flex gap-2">
+    <Card className="p-2 sm:p-3 bg-card/80 backdrop-blur-sm border-primary/50 w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 w-full min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${shareableLink ? 'bg-green-500' : 'bg-gray-400'}`} />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm sm:text-base font-bold text-foreground truncate">
+              {shareableLink ? 'Program Published' : 'Publish Your Program'}
+            </h3>
+            <p className="text-xs text-foreground/70 truncate">
+              {shareableLink 
+                ? 'Your program is live and ready to share' 
+                : 'Share your workout program with the world'
+              }
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          {shareableLink ? (
+            <>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handleCopyLink}
-                className="flex-1 rounded-full"
+                className="flex items-center gap-1 text-xs rounded-full h-7 sm:h-8 min-w-0"
               >
-                <Copy className="w-4 h-4 mr-2" />
-                Copy Link
+                <Copy className="w-3 h-3 flex-shrink-0" />
+                <span className="hidden sm:inline">Copy</span>
               </Button>
               
               <Button
+                variant="outline"
+                size="sm"
                 onClick={handleOpenLink}
-                className="flex-1 rounded-full bg-primary hover:bg-primary/90"
+                className="flex items-center gap-1 text-xs rounded-full h-7 sm:h-8 min-w-0"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                View Live
+                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                <span className="hidden sm:inline">View</span>
               </Button>
-            </div>
-            
-            {/* Shareable link display */}
-            <div className="p-2 bg-background/50 rounded-xl border border-border/30">
-              <span className="font-mono text-xs text-muted-foreground truncate block">
-                {shareableLink}
-              </span>
-            </div>
-          </div>
-        </Card>
-      ) : (
-        <Button
-          onClick={onPublish}
-          disabled={isPublishing || !content.trim()}
-          className="w-full h-12 rounded-2xl bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-white font-semibold text-lg"
-        >
-          {isPublishing ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              Publishing...
-            </div>
+            </>
           ) : (
-            <div className="flex items-center gap-2">
-              <Share2 className="w-5 h-5" />
-              Publish Program
-            </div>
+            <Button
+              onClick={onPublish}
+              disabled={isPublishing || !content.trim()}
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-1 sm:gap-2 text-xs rounded-full h-7 sm:h-8 min-w-0"
+            >
+              <Share2 className="w-3 h-3 flex-shrink-0" />
+              <span className="hidden sm:inline">{isPublishing ? "Publishing..." : "Publish Program"}</span>
+              <span className="sm:hidden">{isPublishing ? "..." : "Publish"}</span>
+            </Button>
           )}
-        </Button>
+        </div>
+      </div>
+
+      {shareableLink && (
+        <div className="mt-2 sm:mt-3 p-2 bg-background/50 rounded-lg border border-border/50 w-full min-w-0 overflow-hidden">
+          <div className="flex items-center gap-2 text-xs w-full min-w-0">
+            <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
+            <span className="font-mono text-foreground/80 truncate flex-1 min-w-0">
+              {shareableLink}
+            </span>
+          </div>
+        </div>
       )}
-    </div>
+    </Card>
   );
 }

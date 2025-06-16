@@ -38,22 +38,22 @@ export default function PublishProgram() {
   };
 
   const header = (
-    <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3">
-      <div className="flex items-center justify-between max-w-screen-xl mx-auto">
-        <div className="flex items-center gap-3">
+    <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50 px-2 sm:px-4 py-2 sm:py-3">
+      <div className="flex items-center justify-between w-full max-w-none">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <Button 
             onClick={handleBack}
             variant="ghost" 
             size="sm"
-            className="h-9 w-9 p-0 rounded-full bg-background/50 hover:bg-background/80"
+            className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-full bg-background/50 hover:bg-background/80 flex-shrink-0"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
-          <LogoHeader className="text-lg font-bold mb-0">
+          <LogoHeader className="text-base sm:text-lg font-bold mb-0 truncate min-w-0">
             publish.program
           </LogoHeader>
         </div>
-        <p className="text-xs text-muted-foreground hidden sm:block">
+        <p className="text-xs text-muted-foreground hidden sm:block flex-shrink-0">
           Create & Share
         </p>
       </div>
@@ -61,15 +61,13 @@ export default function PublishProgram() {
   );
 
   return (
-    <StandardPageLayout header={header} className="h-screen overflow-hidden">
-      <div className="h-full flex flex-col">
-        <TikTokStylePublishContent 
-          initialContent={content}
-          documentId={documentId}
-          shareableLink={shareableLink}
-          onContentChange={handleContentChange}
-        />
-      </div>
+    <StandardPageLayout header={header}>
+      <TikTokStylePublishContent 
+        initialContent={content}
+        documentId={documentId}
+        shareableLink={shareableLink}
+        onContentChange={handleContentChange}
+      />
     </StandardPageLayout>
   );
 }

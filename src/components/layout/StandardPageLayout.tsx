@@ -32,8 +32,8 @@ export function StandardPageLayout({ header, children, footer, className }: Stan
       )}
     >
       {header && <header className="flex-shrink-0 bg-background">{header}</header>}
-      <main className="flex-1 flex-grow min-h-0 overflow-auto bg-background">
-        <div className="container mx-auto px-4 h-full flex flex-col justify-center">
+      <main className="flex-1 flex-grow min-h-0 overflow-auto bg-background w-full max-w-none">
+        <div className="w-full h-full flex flex-col px-2 sm:px-4">
           {children}
         </div>
       </main>

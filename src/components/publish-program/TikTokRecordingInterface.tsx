@@ -53,19 +53,19 @@ export function TikTokRecordingInterface({
   };
 
   return (
-    <div className="h-full flex flex-col lg:grid lg:grid-cols-2 gap-3">
+    <div className="h-full w-full flex flex-col xl:grid xl:grid-cols-2 gap-2 sm:gap-3 overflow-hidden">
       {/* Video Recording Side */}
-      <Card className="h-full min-h-[300px] lg:min-h-0 p-4 bg-background/50 border-border/50 rounded-2xl flex flex-col">
-        <div className="flex-shrink-0 mb-3">
-          <h3 className="text-base font-semibold text-foreground mb-2 text-center">📹 Record</h3>
+      <Card className="h-full min-h-[250px] xl:min-h-0 p-2 sm:p-4 bg-background/50 border-border/50 rounded-xl sm:rounded-2xl flex flex-col w-full overflow-hidden">
+        <div className="flex-shrink-0 mb-2 sm:mb-3">
+          <h3 className="text-sm sm:text-base font-semibold text-foreground mb-1 sm:mb-2 text-center">📹 Record</h3>
         </div>
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 w-full overflow-hidden">
           <VideoRecorder />
         </div>
       </Card>
 
       {/* Teleprompter Side */}
-      <Card className="h-full min-h-[300px] lg:min-h-0 p-4 bg-background/50 border-border/50 rounded-2xl flex flex-col">
+      <Card className="h-full min-h-[250px] xl:min-h-0 p-2 sm:p-4 bg-background/50 border-border/50 rounded-xl sm:rounded-2xl flex flex-col w-full overflow-hidden">
         <TikTokTeleprompterControls
           isScrolling={isScrolling}
           scrollSpeed={scrollSpeed}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { TikTokStylePublishContent } from "@/components/publish-program/TikTokStylePublishContent";
+import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 
 export default function PublishProgram() {
   const [content, setContent] = useState('');
@@ -36,32 +37,32 @@ export default function PublishProgram() {
     navigate('/workout-generator');
   };
 
-  return (
-    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* TikTok-style sticky header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 safe-area-top">
-        <div className="flex items-center justify-between max-w-screen-xl mx-auto">
-          <div className="flex items-center gap-3">
-            <Button 
-              onClick={handleBack}
-              variant="ghost" 
-              size="sm"
-              className="h-9 w-9 p-0 rounded-full bg-background/50 hover:bg-background/80"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <LogoHeader className="text-lg font-bold mb-0">
-              publish.program
-            </LogoHeader>
-          </div>
-          <p className="text-xs text-muted-foreground hidden sm:block">
-            Create & Share
-          </p>
+  const header = (
+    <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3">
+      <div className="flex items-center justify-between max-w-screen-xl mx-auto">
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={handleBack}
+            variant="ghost" 
+            size="sm"
+            className="h-9 w-9 p-0 rounded-full bg-background/50 hover:bg-background/80"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <LogoHeader className="text-lg font-bold mb-0">
+            publish.program
+          </LogoHeader>
         </div>
+        <p className="text-xs text-muted-foreground hidden sm:block">
+          Create & Share
+        </p>
       </div>
-      
-      {/* Main content area - takes full remaining viewport */}
-      <div className="flex-1 min-h-0">
+    </div>
+  );
+
+  return (
+    <StandardPageLayout header={header} className="h-screen overflow-hidden">
+      <div className="h-full flex flex-col">
         <TikTokStylePublishContent 
           initialContent={content}
           documentId={documentId}
@@ -69,6 +70,6 @@ export default function PublishProgram() {
           onContentChange={handleContentChange}
         />
       </div>
-    </div>
+    </StandardPageLayout>
   );
 }

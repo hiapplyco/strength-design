@@ -82,39 +82,41 @@ export function TikTokStylePublishContent({
               <span className="hidden sm:inline">Record</span>
             </TabsTrigger>
           </TabsList>
-          
-          {/* Content areas with proper viewport handling */}
-          <div className="mt-4 h-[calc(100vh-200px)] overflow-hidden">
-            <TabsContent value="document" className="h-full m-0">
-              <TikTokDocumentSection
-                content={workoutScript || initialContent}
-                onContentChange={handleDocumentContentChange}
-              />
-            </TabsContent>
-            
-            <TabsContent value="video" className="h-full m-0">
-              <TikTokVideoSection
-                workoutScript={workoutScript || initialContent}
-                teleprompterPosition={teleprompterPosition}
-                setTeleprompterPosition={setTeleprompterPosition}
-                onNarrate={handleNarrate}
-                onFileSelect={setSelectedFile}
-                selectedFile={selectedFile}
-                isGenerating={isGenerating}
-                autoRegenEnabled={autoRegenEnabled}
-                onAutoRegenChange={setAutoRegenEnabled}
-                selectedVoiceId={selectedVoiceId}
-                onVoiceChange={setSelectedVoiceId}
-                shareableLink={currentShareableLink}
-                onGenerateVoiceNarration={handleGenerateVoiceNarration}
-              />
-            </TabsContent>
-          </div>
         </Tabs>
       </div>
       
-      {/* Fixed publish actions at bottom - TikTok style */}
-      <div className="flex-shrink-0 px-4 py-3 bg-background/95 backdrop-blur-sm border-t border-border/30 safe-area-bottom">
+      {/* Content areas with proper height calculation */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+          <TabsContent value="document" className="h-full m-0 p-4">
+            <TikTokDocumentSection
+              content={workoutScript || initialContent}
+              onContentChange={handleDocumentContentChange}
+            />
+          </TabsContent>
+          
+          <TabsContent value="video" className="h-full m-0 p-4">
+            <TikTokVideoSection
+              workoutScript={workoutScript || initialContent}
+              teleprompterPosition={teleprompterPosition}
+              setTeleprompterPosition={setTeleprompterPosition}
+              onNarrate={handleNarrate}
+              onFileSelect={setSelectedFile}
+              selectedFile={selectedFile}
+              isGenerating={isGenerating}
+              autoRegenEnabled={autoRegenEnabled}
+              onAutoRegenChange={setAutoRegenEnabled}
+              selectedVoiceId={selectedVoiceId}
+              onVoiceChange={setSelectedVoiceId}
+              shareableLink={currentShareableLink}
+              onGenerateVoiceNarration={handleGenerateVoiceNarration}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+      
+      {/* Fixed publish actions at bottom */}
+      <div className="flex-shrink-0 px-4 py-3 bg-background/95 backdrop-blur-sm border-t border-border/30">
         <TikTokPublishActions
           shareableLink={currentShareableLink}
           content={workoutScript || initialContent}

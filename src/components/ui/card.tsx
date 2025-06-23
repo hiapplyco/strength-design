@@ -1,34 +1,42 @@
 
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
-import { useTheme } from "@/contexts/ThemeContext"
+import { variants } from "@/lib/design-tokens"
+import { cva, type VariantProps } from "class-variance-authority"
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const { theme } = useTheme();
-  
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "relative rounded-md bg-card text-card-foreground shadow-sm overflow-hidden",
-        className
-      )}
-      {...props}
-    >
-      <div className="absolute inset-0 rounded-md bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] -z-10 p-[1px] dark:opacity-100 light:opacity-40"></div>
-      <div className={`absolute inset-[1px] rounded-[calc(0.375rem-1px)] ${
-        theme === 'light' 
-          ? 'bg-white/90' 
-          : 'bg-black/70'
-      } -z-[5]`}></div>
-      {props.children}
-    </div>
-  );
-});
+const cardVariants = cva(
+  "relative overflow-hidden",
+  {
+    variants: {
+      variant: {
+        default: variants.card.default,
+        ghost: variants.card.ghost,
+        elevated: variants.card.elevated,
+        interactive: variants.card.interactive,
+        flat: variants.card.flat,
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface CardProps 
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof cardVariants> {}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(cardVariants({ variant }), className)}
+        {...props}
+      />
+    );
+  }
+);
 Card.displayName = "Card"
 
 const CardHeader = React.forwardRef<

@@ -75,11 +75,6 @@ export const EnhancedWeatherSearchResults: React.FC<EnhancedWeatherSearchResults
                   {location.country}
                   {location.admin1 && `, ${location.admin1}`}
                 </div>
-                {location.timezone && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {location.timezone}
-                  </div>
-                )}
               </div>
             </div>
           </Button>

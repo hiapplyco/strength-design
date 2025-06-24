@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Volume2, Headphones, Waveform, CheckCircle } from 'lucide-react';
+import { Mic, Volume2, Headphones, Radio, CheckCircle } from 'lucide-react';
 
 const voiceMessages = [
   { icon: Mic, text: "Processing your script..." },
   { icon: Volume2, text: "Generating voice..." },
   { icon: Headphones, text: "Optimizing audio quality..." },
-  { icon: Waveform, text: "Finalizing narration..." },
+  { icon: Radio, text: "Finalizing narration..." },
   { icon: CheckCircle, text: "Almost ready..." }
 ];
 

@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
 import { useNavigate } from "react-router-dom";
 import { WorkoutGeneratorForm } from "../WorkoutGeneratorForm";
 import { WorkoutUsageDisplay } from "../WorkoutUsageDisplay";
 import { PaywallDialog } from "../PaywallDialog";
+import { WorkoutGeneratorLoading } from "../WorkoutGeneratorLoading";
 import { useWorkoutGeneration as useWorkoutGenerationHook } from "../hooks/useWorkoutGeneration";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkoutUsage } from "@/hooks/useWorkoutUsage";
@@ -91,47 +92,63 @@ export const ModernWorkoutGenerator = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-6"
-      >
-        {/* Usage Display */}
-        <WorkoutUsageDisplay />
+      <AnimatePresence mode="wait">
+        {isGenerating ? (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3 }}
+          >
+            <WorkoutGeneratorLoading fullScreen={false} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="form"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            {/* Usage Display */}
+            <WorkoutUsageDisplay />
 
-        {/* Workout Generator Form */}
-        <WorkoutGeneratorForm
-          weatherData={weatherData}
-          onWeatherUpdate={handleWeatherUpdate}
-          selectedExercises={selectedExercises}
-          onExerciseSelect={handleExerciseSelect}
-          fitnessLevel={fitnessLevel}
-          setFitnessLevel={setFitnessLevel}
-          prescribedExercises={prescribedExercises}
-          setPrescribedExercises={setPrescribedExercises}
-          isAnalyzingPrescribed={isAnalyzingPrescribed}
-          handlePrescribedFileSelect={handlePrescribedFileSelect}
-          injuries={injuries}
-          setInjuries={setInjuries}
-          isAnalyzingInjuries={isAnalyzingInjuries}
-          handleInjuriesFileSelect={handleInjuriesFileSelect}
-          numberOfDays={numberOfDays}
-          setNumberOfDays={setNumberOfDays}
-          numberOfCycles={numberOfCycles}
-          setNumberOfCycles={setNumberOfCycles}
-          onGenerate={handleGenerateWorkout}
-          onClear={handleClear}
-          isGenerating={isGenerating}
-          isValid={isValid}
-        />
+            {/* Workout Generator Form */}
+            <WorkoutGeneratorForm
+              weatherData={weatherData}
+              onWeatherUpdate={handleWeatherUpdate}
+              selectedExercises={selectedExercises}
+              onExerciseSelect={handleExerciseSelect}
+              fitnessLevel={fitnessLevel}
+              setFitnessLevel={setFitnessLevel}
+              prescribedExercises={prescribedExercises}
+              setPrescribedExercises={setPrescribedExercises}
+              isAnalyzingPrescribed={isAnalyzingPrescribed}
+              handlePrescribedFileSelect={handlePrescribedFileSelect}
+              injuries={injuries}
+              setInjuries={setInjuries}
+              isAnalyzingInjuries={isAnalyzingInjuries}
+              handleInjuriesFileSelect={handleInjuriesFileSelect}
+              numberOfDays={numberOfDays}
+              setNumberOfDays={setNumberOfDays}
+              numberOfCycles={numberOfCycles}
+              setNumberOfCycles={setNumberOfCycles}
+              onGenerate={handleGenerateWorkout}
+              onClear={handleClear}
+              isGenerating={isGenerating}
+              isValid={isValid}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Paywall Dialog */}
-        <PaywallDialog 
-          open={showPaywall} 
-          onOpenChange={setShowPaywall} 
-        />
-      </motion.div>
+      {/* Paywall Dialog */}
+      <PaywallDialog 
+        open={showPaywall} 
+        onOpenChange={setShowPaywall} 
+      />
     </div>
   );
 };

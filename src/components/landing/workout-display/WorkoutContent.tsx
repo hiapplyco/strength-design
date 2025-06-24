@@ -68,8 +68,6 @@ export const WorkoutContent = ({
       if (error) throw error;
 
       if (data?.summary) {
-        // Update the workout meta with the new summary
-        // Make sure we're passing a WorkoutMeta object
         onUpdate('_meta', '_meta', { 
           summary: data.summary 
         } as Partial<WorkoutMeta>);
@@ -93,34 +91,39 @@ export const WorkoutContent = ({
   };
 
   return (
-    <div className="bg-background p-3 sm:p-4 md:p-6 rounded-lg overflow-hidden">
-      {/* Title Section */}
-      <div className="text-center mb-6">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-oswald text-primary tracking-tight">
-          {workoutTitle}
-        </h1>
+    <div className="bg-gradient-to-br from-background via-background to-muted/20 p-4 sm:p-6 md:p-8 rounded-xl shadow-2xl border border-border/20 overflow-hidden">
+      {/* Enhanced Title Section */}
+      <div className="text-center mb-8 sm:mb-12 space-y-6">
+        <div className="space-y-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-oswald font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary to-primary/80 tracking-tight leading-none">
+            {workoutTitle}
+          </h1>
+          <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary/60 mx-auto rounded-full"></div>
+        </div>
         
-        <div className="mt-4 relative">
+        <div className="mt-6 relative">
           {workoutSummary ? (
-            <p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
-              {workoutSummary}
-            </p>
+            <div className="bg-card/60 backdrop-blur-sm rounded-lg p-6 border border-border/30 max-w-4xl mx-auto">
+              <p className="text-base sm:text-lg text-foreground/90 leading-relaxed font-medium">
+                {workoutSummary}
+              </p>
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-2">
+            <div className="flex flex-col items-center justify-center gap-4">
               {isGeneratingSummary ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <p className="text-sm">Generating Gemini summary...</p>
+                <div className="flex items-center gap-3 bg-card/60 backdrop-blur-sm rounded-lg p-4 border border-border/30">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <p className="text-sm font-medium">Generating AI summary...</p>
                 </div>
               ) : (
                 <Button 
                   onClick={generateGeminiSummary} 
                   variant="outline" 
-                  size="sm" 
-                  className="flex items-center gap-1"
+                  size="lg" 
+                  className="flex items-center gap-2 bg-card/60 backdrop-blur-sm hover:bg-card/80 border-primary/30 hover:border-primary/60 transition-all duration-200 px-6 py-3"
                 >
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Generate Gemini Summary
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Generate AI Summary
                 </Button>
               )}
             </div>
@@ -135,64 +138,75 @@ export const WorkoutContent = ({
         allWorkouts={workouts}
       />
 
-      {/* Cycle Tabs */}
+      {/* Enhanced Cycle Tabs */}
       <Tabs 
         value={activeTab} 
         onValueChange={setActiveTab}
-        className="mt-4 sm:mt-6"
+        className="mt-8 sm:mt-12"
       >
-        {/* Only show tabs if we have multiple cycles */}
+        {/* Enhanced Tab List */}
         {(cycleKeys.length > 1 || (cycleKeys.length === 1 && legacyWorkoutDays.length > 0)) && (
-          <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 w-full mb-6">
-            {cycleKeys.map((cycleKey) => (
-              <TabsTrigger key={cycleKey} value={cycleKey} className="text-sm">
-                {cycleKey.charAt(0).toUpperCase() + cycleKey.slice(1)}
-              </TabsTrigger>
-            ))}
-            {legacyWorkoutDays.length > 0 && (
-              <TabsTrigger value="legacy" className="text-sm">
-                Legacy Workouts
-              </TabsTrigger>
-            )}
-          </TabsList>
+          <div className="mb-8">
+            <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 w-full h-auto p-1 bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl">
+              {cycleKeys.map((cycleKey) => (
+                <TabsTrigger 
+                  key={cycleKey} 
+                  value={cycleKey} 
+                  className="text-sm sm:text-base font-medium py-3 px-4 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-200"
+                >
+                  {cycleKey.charAt(0).toUpperCase() + cycleKey.slice(1)}
+                </TabsTrigger>
+              ))}
+              {legacyWorkoutDays.length > 0 && (
+                <TabsTrigger 
+                  value="legacy" 
+                  className="text-sm sm:text-base font-medium py-3 px-4 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-200"
+                >
+                  Legacy Workouts
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
         )}
 
-        {/* Cycle Content */}
+        {/* Enhanced Cycle Content */}
         {cycleKeys.map((cycleKey) => (
-          <TabsContent key={cycleKey} value={cycleKey} className="space-y-6">
-            <div className="grid gap-4 sm:gap-6 md:gap-8">
+          <TabsContent key={cycleKey} value={cycleKey} className="space-y-8 sm:space-y-12">
+            <div className="grid gap-6 sm:gap-8 md:gap-10">
               {isWorkoutCycle(workouts[cycleKey]) && 
                Object.entries(workouts[cycleKey] as WorkoutCycle).map(([day, workout], index) => (
-                <WorkoutDayCard 
-                  key={`${cycleKey}-${day}`} 
-                  day={day} 
-                  workout={workout as WorkoutDay}
-                  index={index}
-                  isExporting={isExporting}
-                  setIsExporting={setIsExporting}
-                  allWorkouts={(workouts[cycleKey] as WorkoutCycle)}
-                  onUpdate={(day, updates) => onUpdate(cycleKey, day, updates)}
-                />
+                <div key={`${cycleKey}-${day}`} className="relative">
+                  <WorkoutDayCard 
+                    day={day} 
+                    workout={workout as WorkoutDay}
+                    index={index}
+                    isExporting={isExporting}
+                    setIsExporting={setIsExporting}
+                    allWorkouts={(workouts[cycleKey] as WorkoutCycle)}
+                    onUpdate={(day, updates) => onUpdate(cycleKey, day, updates)}
+                  />
+                </div>
               ))}
             </div>
           </TabsContent>
         ))}
         
-        {/* Legacy Content (if any) */}
+        {/* Enhanced Legacy Content */}
         {legacyWorkoutDays.length > 0 && (
-          <TabsContent value="legacy" className="space-y-6">
-            <div className="grid gap-4 sm:gap-6 md:gap-8">
+          <TabsContent value="legacy" className="space-y-8 sm:space-y-12">
+            <div className="grid gap-6 sm:gap-8 md:gap-10">
               {legacyWorkoutDays.map((day, index) => (
-                <WorkoutDayCard 
-                  key={day} 
-                  day={day} 
-                  workout={workouts[day] as WorkoutDay}
-                  index={index}
-                  isExporting={isExporting}
-                  setIsExporting={setIsExporting}
-                  allWorkouts={filterWorkoutDays(workouts)}
-                  onUpdate={(day, updates) => onUpdate('', day, updates)}
-                />
+                <div key={day} className="relative">
+                  <WorkoutDayCard 
+                    day={day} 
+                    workout={workouts[day] as WorkoutDay}
+                    index={index}
+                    isExporting={isExporting}
+                    setIsExporting={setIsExporting}
+                    allWorkouts={filterWorkoutDays(workouts)}
+                    onUpdate={(day, updates) => onUpdate('', day, updates)}
+                  />
+                </div>
               ))}
             </div>
           </TabsContent>

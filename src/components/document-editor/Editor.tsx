@@ -1,3 +1,4 @@
+
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
@@ -6,6 +7,7 @@ import { generateShareUrl } from './editorUtils';
 import { useDocumentPublisher } from './hooks/useDocumentPublisher';
 import { DocumentEditorContent } from './EditorContent';
 import { supabase } from '@/integrations/supabase/client';
+import { isWorkoutDay, isWorkoutCycle, WeeklyWorkouts, WorkoutDay, WorkoutCycle } from '@/types/fitness';
 
 interface EditorProps {
   content?: string;
@@ -42,6 +44,83 @@ export function Editor({ content = '', onSave }: EditorProps) {
     }
   }, [shareableLink]);
 
+  const formatWorkoutData = useCallback((workoutData: WeeklyWorkouts) => {
+    let formattedContent = '<h1>Weekly Workout Plan</h1>\n\n';
+    
+    // Process all entries in the workout data
+    Object.entries(workoutData)
+      .filter(([key]) => key !== '_meta')
+      .forEach(([key, value]) => {
+        if (isWorkoutCycle(value)) {
+          // Handle cycle structure
+          const cycleTitle = key.charAt(0).toUpperCase() + key.slice(1);
+          formattedContent += `<h2>${cycleTitle}</h2>\n\n`;
+          
+          // Process all days within this cycle
+          Object.entries(value as WorkoutCycle)
+            .filter(([dayKey, dayValue]) => isWorkoutDay(dayValue))
+            .forEach(([dayKey, dayValue]) => {
+              const workoutDay = dayValue as WorkoutDay;
+              const formattedDay = dayKey.replace(/day(\d+)/, 'Day $1');
+              
+              formattedContent += `<h3>${formattedDay}</h3>\n`;
+              
+              if (workoutDay.description) {
+                formattedContent += `<p><strong>Focus:</strong> ${workoutDay.description}</p>\n`;
+              }
+              
+              if (workoutDay.strength) {
+                formattedContent += `<h4>Strength</h4>\n<p>${workoutDay.strength}</p>\n`;
+              }
+              
+              if (workoutDay.warmup) {
+                formattedContent += `<h4>Warmup</h4>\n<p>${workoutDay.warmup}</p>\n`;
+              }
+              
+              if (workoutDay.workout) {
+                formattedContent += `<h4>Workout</h4>\n<p>${workoutDay.workout}</p>\n`;
+              }
+              
+              if (workoutDay.notes) {
+                formattedContent += `<h4>Notes</h4>\n<p>${workoutDay.notes}</p>\n`;
+              }
+              
+              formattedContent += '<hr/>\n\n';
+            });
+        } else if (isWorkoutDay(value)) {
+          // Handle legacy single days (no cycle structure)
+          const workoutDay = value as WorkoutDay;
+          const formattedDay = key.replace(/day(\d+)/, 'Day $1');
+          
+          formattedContent += `<h2>${formattedDay}</h2>\n`;
+          
+          if (workoutDay.description) {
+            formattedContent += `<p><strong>Focus:</strong> ${workoutDay.description}</p>\n`;
+          }
+          
+          if (workoutDay.strength) {
+            formattedContent += `<h3>Strength</h3>\n<p>${workoutDay.strength}</p>\n`;
+          }
+          
+          if (workoutDay.warmup) {
+            formattedContent += `<h3>Warmup</h3>\n<p>${workoutDay.warmup}</p>\n`;
+          }
+          
+          if (workoutDay.workout) {
+            formattedContent += `<h3>Workout</h3>\n<p>${workoutDay.workout}</p>\n`;
+          }
+          
+          if (workoutDay.notes) {
+            formattedContent += `<h3>Notes</h3>\n<p>${workoutDay.notes}</p>\n`;
+          }
+          
+          formattedContent += '<hr/>\n\n';
+        }
+      });
+    
+    return formattedContent;
+  }, []);
+
   const setEditorContent = useCallback(() => {
     if (editor && content) {
       try {
@@ -60,37 +139,8 @@ export function Editor({ content = '', onSave }: EditorProps) {
           console.log('Setting cleaned Gemini content:', cleanContent);
           editor.commands.setContent(cleanContent);
         } else {
-          // Format the workout data into a readable document
-          let formattedContent = '<h1>Weekly Workout Plan</h1>\n\n';
-          
-          Object.entries(parsedContent).forEach(([day, data]: [string, any]) => {
-            // Format day header (e.g., "day1" to "Day 1")
-            const formattedDay = day.replace(/day(\d+)/, 'Day $1');
-            formattedContent += `<h2>${formattedDay}</h2>\n`;
-            
-            if (data.description) {
-              formattedContent += `<p><strong>Focus:</strong> ${data.description}</p>\n`;
-            }
-            
-            if (data.strength) {
-              formattedContent += `<h3>Strength</h3>\n<p>${data.strength}</p>\n`;
-            }
-            
-            if (data.warmup) {
-              formattedContent += `<h3>Warmup</h3>\n<p>${data.warmup}</p>\n`;
-            }
-            
-            if (data.workout) {
-              formattedContent += `<h3>Workout</h3>\n<p>${data.workout}</p>\n`;
-            }
-            
-            if (data.notes) {
-              formattedContent += `<h3>Notes</h3>\n<p>${data.notes}</p>\n`;
-            }
-            
-            formattedContent += '<hr/>\n\n';
-          });
-          
+          // Format the workout data into a readable document with ALL cycles and days
+          const formattedContent = formatWorkoutData(parsedContent);
           console.log('Setting formatted content:', formattedContent);
           editor.commands.setContent(formattedContent);
         }
@@ -100,7 +150,7 @@ export function Editor({ content = '', onSave }: EditorProps) {
         editor.commands.setContent(content);
       }
     }
-  }, [editor, content]);
+  }, [editor, content, formatWorkoutData]);
 
   useEffect(() => {
     setEditorContent();

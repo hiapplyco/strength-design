@@ -16,14 +16,8 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
   onExerciseSelect
 }) => {
   const handleExerciseSelect = (exercise: Exercise) => {
-    const isSelected = selectedExercises.some(e => e.id === exercise.id);
-    if (isSelected) {
-      // Remove exercise - this will be handled by the parent component
-      onExerciseSelect(exercise);
-    } else {
-      // Add exercise - this will be handled by the parent component
-      onExerciseSelect(exercise);
-    }
+    // This will toggle the exercise - add if not selected, remove if selected
+    onExerciseSelect(exercise);
   };
 
   return (
@@ -48,7 +42,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
                 <Badge 
                   key={exercise.id}
                   variant="secondary"
-                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
                   onClick={() => handleExerciseSelect(exercise)}
                 >
                   {exercise.name} ×

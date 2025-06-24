@@ -1,9 +1,8 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Dumbbell } from "lucide-react";
 import type { Exercise } from "./exercise-search/types";
-import { useExerciseSearch } from "./exercise-search/useExerciseSearch";
-import { SearchDialog } from "./exercise-search/SearchDialog";
+import { EnhancedSearchDialog } from "./exercise-search/EnhancedSearchDialog";
 import { Button } from "./ui/button";
 import { Search } from "lucide-react";
 
@@ -14,17 +13,17 @@ interface ExerciseSearchProps {
 
 export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: ExerciseSearchProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { searchQuery, setSearchQuery, searchResults, setSearchResults, isLoading } = useExerciseSearch();
 
-  const handleExerciseSelect = (exercise: Exercise) => {
+  const handleExercisesSelect = (exercises: Exercise[]) => {
     if (onExerciseSelect) {
-      onExerciseSelect(exercise);
+      // Add each new exercise that isn't already selected
+      exercises.forEach(exercise => {
+        const isAlreadySelected = selectedExercises.some(e => e.id === exercise.id);
+        if (!isAlreadySelected) {
+          onExerciseSelect(exercise);
+        }
+      });
     }
-    setIsSearchOpen(false);
-  };
-
-  const sanitizeText = (text: string) => {
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   };
 
   return (
@@ -36,24 +35,18 @@ export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: Exe
       
       <Button 
         variant="outline" 
-        className="w-full flex items-center justify-between h-[48px] bg-primary/10 hover:bg-primary/20 text-foreground border-2 border-primary/30 hover:border-primary/50 rounded-[20px] px-4 py-2 transition-all duration-200"
+        className="w-full flex items-center justify-between h-[48px] bg-background hover:bg-muted text-foreground border-2 border-border hover:border-primary/50 rounded-lg px-4 py-2 transition-all duration-200"
         onClick={() => setIsSearchOpen(true)}
       >
         <span className="text-muted-foreground">Search exercises & equipment...</span>
         <Search className="h-4 w-4 text-muted-foreground" />
       </Button>
 
-      <SearchDialog
+      <EnhancedSearchDialog
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onClearSearch={() => setSearchQuery("")}
-        searchResults={searchResults}
+        onExercisesSelect={handleExercisesSelect}
         selectedExercises={selectedExercises}
-        onExerciseSelect={handleExerciseSelect}
-        sanitizeText={sanitizeText}
-        isLoading={isLoading}
       />
     </div>
   );

@@ -5,7 +5,6 @@ import { AppContent } from "./components/layout/AppContent";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { FloatingThemeToggle } from "./components/ui/floating-theme-toggle";
-import { Toaster } from "./components/ui/sonner";
 import "./index.css";
 
 function App() {

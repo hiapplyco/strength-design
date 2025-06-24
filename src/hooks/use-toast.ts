@@ -1,13 +1,37 @@
 
 import { useSmartToast } from "./useSmartToast";
 
-// Re-export the smart toast hook as the main toast interface
-export const useToast = useSmartToast;
+// Main hook that provides all smart toast functionality
+export const useToast = () => {
+  const smartToast = useSmartToast();
+  
+  // Return both the smart toast functions and a legacy toast function for backward compatibility
+  return {
+    // Smart toast functions
+    ...smartToast,
+    // Legacy toast function for backward compatibility
+    toast: smartToast.success,
+    // Empty toasts array for components that might still reference it
+    toasts: []
+  };
+};
 
-// For backward compatibility, also export the toast functions directly
+// Direct toast functions for convenient access
 export const toast = {
-  success: (message: string) => useSmartToast().success(message),
-  error: (error: any, context?: string) => useSmartToast().error(error, context),
-  info: (message: string) => useSmartToast().info(message),
-  warning: (message: string) => useSmartToast().warning(message),
+  success: (message: string) => {
+    const { success } = useSmartToast();
+    return success(message);
+  },
+  error: (error: any, context?: string) => {
+    const { error: errorFn } = useSmartToast();
+    return errorFn(error, context);
+  },
+  info: (message: string) => {
+    const { info } = useSmartToast();
+    return info(message);
+  },
+  warning: (message: string) => {
+    const { warning } = useSmartToast();
+    return warning(message);
+  },
 };

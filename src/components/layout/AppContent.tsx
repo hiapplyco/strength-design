@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useAuth } from "@/contexts/AuthContext";
@@ -83,7 +82,6 @@ export const AppContent = () => {
         <div className="flex min-h-screen w-full overflow-hidden">
           <AppSidebar />
           <MainContent />
-          <Toaster />
           <Sonner />
         </div>
       </SidebarProvider>

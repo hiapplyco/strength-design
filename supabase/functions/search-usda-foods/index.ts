@@ -92,19 +92,15 @@ serve(async (req) => {
       )
     }
 
-    // Get API key from Supabase secrets
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
     const usdaApiKey = Deno.env.get('USDA_API_KEY')
     if (!usdaApiKey) {
       throw new Error('USDA API key not configured')
     }
 
-    // Search USDA foods
-    const response = await fetch('https://api.nal.usda.gov/fdc/v1/foods/search', {
+    // Search USDA foods - API key should be a query parameter
+    const searchUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${usdaApiKey}`
+    
+    const response = await fetch(searchUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -114,12 +110,14 @@ serve(async (req) => {
         pageSize,
         dataType: ['Branded', 'Foundation', 'SR Legacy'],
         sortBy: 'score',
-        sortOrder: 'desc',
-        api_key: usdaApiKey
+        sortOrder: 'desc'
       })
     })
 
     if (!response.ok) {
+      console.error(`USDA API Error: ${response.status} ${response.statusText}`)
+      const errorText = await response.text()
+      console.error('Error response:', errorText)
       throw new Error(`USDA API Error: ${response.status}`)
     }
 
@@ -129,6 +127,8 @@ serve(async (req) => {
     const normalizedFoods = (data.foods || []).map((food: USDAFood) => 
       normalizeUSDAFood(food)
     )
+
+    console.log(`Found ${normalizedFoods.length} foods for query: ${query}`)
 
     return new Response(
       JSON.stringify({ foods: normalizedFoods }),

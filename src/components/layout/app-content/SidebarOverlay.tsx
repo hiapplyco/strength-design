@@ -16,7 +16,7 @@ export const SidebarOverlay = () => {
   return (
     <div
       onClick={handleClose}
-      className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
+      className="fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 lg:hidden"
     />
   );
 };

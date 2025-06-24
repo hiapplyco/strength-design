@@ -2,11 +2,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { GenerateSection } from "../GenerateSection";
-import { useWorkoutInputState } from "../hooks/useWorkoutInputState";
-import { useGeminiExerciseExtraction } from "../hooks/useGeminiExerciseExtraction";
-import { useFileHandlers } from "./FileHandlers";
 import { useExerciseSelection } from "./hooks/useExerciseSelection";
 import { useWorkoutFormHandlers } from "./hooks/useWorkoutFormHandlers";
+import { useInputContainerState } from "./hooks/useInputContainerState";
 import { InputSections } from "./components/InputSections";
 import { PresetsSection } from "../input-sections/PresetsSection";
 import type { Exercise } from "@/components/exercise-search/types";
@@ -41,32 +39,22 @@ export function InputContainer({
   numberOfCycles,
   setNumberOfCycles,
 }: InputContainerProps) {
-  // State management for input values
+  // All state management
   const {
     fitnessLevel, setFitnessLevel,
     injuries, setInjuries,
     selectedExercises, setSelectedExercises,
     prescribedExercises, setPrescribedExercises,
     weatherData, weatherPrompt,
-    isAnalyzingPrescribed, 
+    isAnalyzingPrescribed,
     isAnalyzingInjuries,
-    handleFileProcessing,
-    handleWeatherUpdate
-  } = useWorkoutInputState();
-
-  // Set up document parsing
-  const { parseDocument } = useGeminiExerciseExtraction();
-
-  // Set up file handlers
-  const fileHandlingProps = {
-    handleFileProcessing,
-    parseDocument
-  };
-  
-  const { handlePrescribedFileSelect, handleInjuriesFileSelect } = useFileHandlers(fileHandlingProps);
+    handleWeatherUpdate,
+    handlePrescribedFileSelect,
+    handleInjuriesFileSelect,
+  } = useInputContainerState();
 
   // Exercise selection handlers
-  const { handleExerciseSelection, handleBulkExerciseSelection } = useExerciseSelection({
+  const { handleExerciseSelection } = useExerciseSelection({
     selectedExercises,
     setSelectedExercises,
   });

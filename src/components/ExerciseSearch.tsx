@@ -36,7 +36,7 @@ export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: Exe
       
       <Button 
         variant="outline" 
-        className="w-full flex items-center justify-between h-[48px] bg-black/50 text-white border-2 border-primary/20 rounded-[20px] px-4 py-2"
+        className="w-full flex items-center justify-between h-[48px] bg-primary/10 hover:bg-primary/20 text-foreground border-2 border-primary/30 hover:border-primary/50 rounded-[20px] px-4 py-2 transition-all duration-200"
         onClick={() => setIsSearchOpen(true)}
       >
         <span className="text-muted-foreground">Search exercises & equipment...</span>

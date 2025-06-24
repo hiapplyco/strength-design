@@ -74,7 +74,7 @@ export function StandardPageLayout({
   // Build header content
   const headerContent = header || (title || showBack || rightAction) ? (
     <div className={cn(
-      "border-b",
+      "border-b bg-background",
       noPadding ? "" : spacing.section.default
     )}>
       <div className={cn(
@@ -124,7 +124,7 @@ export function StandardPageLayout({
     <motion.div
       {...animations.pageIn}
       className={cn(
-        "flex flex-col min-h-screen h-screen w-full bg-background overflow-hidden",
+        "flex flex-col min-h-screen w-full bg-background",
         "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
         // Apply margin-left only on desktop when sidebar is open
         !isMobile && isVisible ? "ml-64" : "ml-0",
@@ -132,20 +132,18 @@ export function StandardPageLayout({
       )}
     >
       {headerContent && (
-        <header className="flex-shrink-0 bg-background">
+        <header className="flex-shrink-0">
           {headerContent}
         </header>
       )}
       
-      <main className="flex-1 flex-grow min-h-0 overflow-auto bg-background w-full">
-        <div className={cn(
-          "w-full h-full flex flex-col mx-auto",
-          maxWidth !== "full" && `max-w-${maxWidth}`,
-          !noPadding && spacing.section.default,
-          contentClassName
-        )}>
-          {children}
-        </div>
+      <main className={cn(
+        "flex-1 w-full overflow-auto",
+        maxWidth !== "full" && !noPadding && `max-w-${maxWidth} mx-auto`,
+        !noPadding && spacing.section.default,
+        contentClassName
+      )}>
+        {children}
       </main>
       
       {footer && (

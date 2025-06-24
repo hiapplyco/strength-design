@@ -332,6 +332,57 @@ export type Database = {
         }
         Relationships: []
       }
+      food_items: {
+        Row: {
+          brand: string | null
+          calories_per_serving: number
+          carbs_per_serving: number
+          created_at: string
+          fat_per_serving: number
+          fiber_per_serving: number | null
+          id: string
+          name: string
+          protein_per_serving: number
+          serving_size: string
+          serving_unit: string
+          sodium_per_serving: number | null
+          sugar_per_serving: number | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          calories_per_serving: number
+          carbs_per_serving?: number
+          created_at?: string
+          fat_per_serving?: number
+          fiber_per_serving?: number | null
+          id?: string
+          name: string
+          protein_per_serving?: number
+          serving_size: string
+          serving_unit: string
+          sodium_per_serving?: number | null
+          sugar_per_serving?: number | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          calories_per_serving?: number
+          carbs_per_serving?: number
+          created_at?: string
+          fat_per_serving?: number
+          fiber_per_serving?: number | null
+          id?: string
+          name?: string
+          protein_per_serving?: number
+          serving_size?: string
+          serving_unit?: string
+          sodium_per_serving?: number | null
+          sugar_per_serving?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       generated_workouts: {
         Row: {
           difficulty_level: number | null
@@ -440,6 +491,51 @@ export type Database = {
         }
         Relationships: []
       }
+      meal_entries: {
+        Row: {
+          amount: number
+          created_at: string
+          food_item_id: string
+          id: string
+          meal_group: string
+          nutrition_log_id: string
+          serving_multiplier: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          food_item_id: string
+          id?: string
+          meal_group?: string
+          nutrition_log_id: string
+          serving_multiplier?: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          food_item_id?: string
+          id?: string
+          meal_group?: string
+          nutrition_log_id?: string
+          serving_multiplier?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_entries_food_item_id_fkey"
+            columns: ["food_item_id"]
+            isOneToOne: false
+            referencedRelation: "food_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_entries_nutrition_log_id_fkey"
+            columns: ["nutrition_log_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movement_analyses: {
         Row: {
           analysis: string
@@ -467,6 +563,81 @@ export type Database = {
           question?: string
           user_id?: string
           video_name?: string
+        }
+        Relationships: []
+      }
+      nutrition_logs: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          updated_at: string
+          user_id: string
+          water_consumed_ml: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          water_consumed_ml?: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          water_consumed_ml?: number
+        }
+        Relationships: []
+      }
+      nutrition_targets: {
+        Row: {
+          carbs_ratio: number | null
+          created_at: string
+          daily_calories: number
+          daily_carbs: number
+          daily_fat: number
+          daily_protein: number
+          daily_water_ml: number
+          fat_ratio: number | null
+          id: string
+          macro_method: string
+          protein_ratio: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          carbs_ratio?: number | null
+          created_at?: string
+          daily_calories?: number
+          daily_carbs?: number
+          daily_fat?: number
+          daily_protein?: number
+          daily_water_ml?: number
+          fat_ratio?: number | null
+          id?: string
+          macro_method?: string
+          protein_ratio?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          carbs_ratio?: number | null
+          created_at?: string
+          daily_calories?: number
+          daily_carbs?: number
+          daily_fat?: number
+          daily_protein?: number
+          daily_water_ml?: number
+          fat_ratio?: number | null
+          id?: string
+          macro_method?: string
+          protein_ratio?: number | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

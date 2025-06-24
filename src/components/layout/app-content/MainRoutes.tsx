@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
@@ -17,6 +16,7 @@ const CheckoutSuccess = lazy(() => import("@/pages/CheckoutSuccess"));
 const CheckoutCancel = lazy(() => import("@/pages/CheckoutCancel"));
 const ProgramChat = lazy(() => import("@/pages/ProgramChat"));
 const DesignSystemPlayground = lazy(() => import("@/pages/DesignSystemPlayground"));
+const NutritionDiary = lazy(() => import("@/pages/NutritionDiary"));
 
 // Route loading component
 const RouteLoader = () => (
@@ -39,6 +39,7 @@ export const MainRoutes = () => {
         <Route path="/document-editor" element={<DocumentEditor />} />
         <Route path="/publish-program" element={<PublishProgram />} />
         <Route path="/movement-analysis" element={<MovementAnalysisPage />} />
+        <Route path="/nutrition-diary" element={<NutritionDiary />} />
         <Route path="/program-chat" element={<ProgramChat />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />

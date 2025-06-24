@@ -15,6 +15,7 @@ import {
   LogIn,
   LogOut,
   Crown,
+  Apple,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -111,6 +112,12 @@ export const SidebarNavigation = () => {
           to="/journal"
           icon={<Book className="h-5 w-5" />}
           label="Journal"
+          isPro={true}
+        />
+        <NavItem
+          to="/nutrition-diary"
+          icon={<Apple className="h-5 w-5" />}
+          label="Nutrition Diary"
           isPro={true}
         />
         <NavItem

@@ -1,213 +1,175 @@
-
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  FileText,
-  Video,
-  MessageSquare,
-  ArrowRight,
-  BarChart,
-  Sparkles
-} from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { AuthDialog } from "@/components/auth/AuthDialog";
-import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
-import { SectionContainer } from "@/components/layout/SectionContainer";
 import { 
-  animations, 
-  spacing, 
-  typography, 
-  sizes, 
-  colors, 
-  transitions,
-  responsive 
-} from "@/lib/design-tokens";
-import { cn } from "@/lib/utils";
+  Dumbbell, 
+  MessageSquare, 
+  BarChart3, 
+  ArrowRight, 
+  Sparkles, 
+  Star,
+  Book,
+  Video,
+  Crown,
+  Apple
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { width, spacing, text, layout, touch } from "@/utils/responsive";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
-const Index = () => {
-  const { session } = useAuth();
+export default function Index() {
   const navigate = useNavigate();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const { user } = useAuth();
 
-  const cards = [
-    {
-      title: "Generate Program",
-      description: "Create personalized workout programs with AI assistance",
-      icon: Sparkles,
-      path: "/workout-generator",
-      requiresAuth: true,
-      gradient: colors.gradients.sunset
-    },
-    {
-      title: "Document Editor",
-      description: "Create and edit workout documents with ease",
-      icon: FileText,
-      path: "/document-editor",
-      requiresAuth: true,
-      gradient: colors.gradients.success
-    },
-    {
-      title: "Publish Program",
-      description: "Record and publish your workout videos",
-      icon: Video,
-      path: "/publish-program",
-      requiresAuth: true,
-      gradient: colors.gradients.energy
-    },
-    {
-      title: "Technique Analysis",
-      description: "Analyze your workout technique",
-      icon: BarChart,
-      path: "/movement-analysis",
-      requiresAuth: true,
-      gradient: colors.gradients.premium
-    },
-    {
-      title: "Program Chat",
-      description: "Chat with AI about your workout program",
-      icon: MessageSquare,
-      path: "/program-chat",
-      requiresAuth: true,
-      gradient: colors.gradients.border
-    },
-    {
-      title: "Previous Programs",
-      description: "View your generated workout history",
-      icon: FileText,
-      path: "/generated-workouts",
-      requiresAuth: true,
-      gradient: colors.gradients.sunset
-    },
-  ];
-
-  const handleCardClick = (path: string, requiresAuth: boolean) => {
-    if (requiresAuth && !session) {
-      setShowAuthDialog(true);
+  const handleAuth = () => {
+    if (user) {
+      navigate("/workout-generator");
     } else {
-      navigate(path);
+      setShowAuthDialog(true);
     }
   };
 
-  return (
-    <StandardPageLayout
-      maxWidth="7xl"
-      className="bg-gradient-to-br from-primary/5 via-background to-secondary/10"
-    >
-      <div className={spacing.section.default}>
-        <motion.div
-          {...animations.fadeIn}
-          className={cn("text-center", spacing.margin.section)}
-        >
-          <h1 className={cn(
-            typography.display.h1,
-            "bg-gradient-to-r",
-            colors.gradients.sunset,
-            "bg-clip-text text-transparent"
-          )}>
-            STRENGTH.DESIGN
-          </h1>
-          <p className={cn(
-            typography.responsive.subtitle,
-            "mt-4 max-w-2xl mx-auto"
-          )}>
-            Your AI-powered fitness companion for personalized workout programs
-          </p>
-        </motion.div>
+  const header = (
+    <div className={`${spacing.section} ${spacing.container} text-center ${layout.noOverflow}`}>
+      <h1 className={`${text.title} font-bold text-primary`}>strength.design</h1>
+      <p className={`${text.subtitle} text-foreground/80 ${width.content} mt-2`}>
+        AI-powered tools to build dynamic workout programs, track your progress, and share your knowledge with the world.
+      </p>
+      
+      <div className={`${layout.center} ${spacing.gap} ${spacing.section}`}>
+        <Button size="lg" onClick={handleAuth}>
+          {user ? "Go to Generator" : "Sign Up & Get Started"}
+          <ArrowRight className={touch.icon} />
+        </Button>
+        <Button variant="link" asChild>
+          <Link to="/design-system">Design System</Link>
+        </Button>
+      </div>
+    </div>
+  );
 
-        <SectionContainer>
-          <div className={cn(
-            "grid",
-            responsive.grid[3],
-            spacing.gap.lg
-          )}>
-            {cards.map((card, index) => (
-              <motion.div
-                key={card.title}
-                {...animations.slideUp}
-                transition={{ delay: 0.1 * (index + 1) }}
-                className="h-full"
-              >
-                <Card 
-                  variant="interactive"
-                  className={cn(
-                    "h-full flex flex-col group",
-                    transitions.default,
-                    "hover:shadow-lg"
-                  )}
-                >
-                  <CardHeader className={spacing.component.md}>
-                    <div className={cn(
-                      "flex items-center",
-                      spacing.gap.sm,
-                      spacing.margin.element
-                    )}>
-                      <div className={cn(
-                        sizes.touch.iconButton,
-                        "rounded-lg",
-                        "bg-gradient-to-r",
-                        card.gradient,
-                        "flex items-center justify-center",
-                        transitions.transform,
-                        "group-hover:scale-110"
-                      )}>
-                        <card.icon className={cn(
-                          sizes.icon.responsive.md,
-                          "text-white"
-                        )} />
-                      </div>
-                      <CardTitle className={typography.responsive.title}>
-                        {card.title}
-                      </CardTitle>
-                    </div>
-                    <CardDescription className={typography.body.default}>
-                      {card.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className={cn(
-                    spacing.component.md,
-                    "pt-0 flex flex-col flex-grow"
-                  )}>
-                    <div className="mt-auto">
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full",
-                          transitions.colors,
-                          "group-hover:border-primary group-hover:text-primary"
-                        )}
-                        onClick={() => handleCardClick(card.path, card.requiresAuth)}
-                      >
-                        Get Started
-                        <ArrowRight className={cn(
-                          sizes.icon.sm,
-                          "ml-2",
-                          transitions.transform,
-                          "group-hover:translate-x-1"
-                        )} />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+  return (
+    <StandardPageLayout header={header} className="h-screen">
+      <div className={`${width.full} ${layout.noOverflow} flex-1 min-h-0 ${spacing.container}`}>
+        {/* Features Teaser */}
+        <div className={`${spacing.section} text-center`}>
+          <h2 className={`${text.h2} font-semibold text-primary mb-4`}>
+            Unlock Your Potential with AI-Powered Fitness Tools
+          </h2>
+          <p className={`${text.body} text-foreground/80 ${width.content} mx-auto`}>
+            Explore our suite of tools designed to revolutionize your fitness journey. From AI-powered workout generation to in-depth movement analysis, we provide the resources you need to achieve your goals.
+          </p>
+        </div>
+
+        {/* Features Cards */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <Card className="bg-card/40 backdrop-blur-sm border-border/50 hover:bg-card/60 transition-all duration-300 group cursor-pointer" onClick={() => navigate('/workout-generator')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                <Dumbbell className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground">AI Workout Generator</h3>
+              <p className="text-foreground/80">Generate personalized workouts based on your goals, fitness level, and available equipment.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/40 backdrop-blur-sm border-border/50 hover:bg-card/60 transition-all duration-300 group cursor-pointer" onClick={() => navigate('/nutrition-diary')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                <Apple className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground flex items-center justify-center gap-2">
+                Nutrition Diary
+                <Crown className="h-4 w-4 text-amber-500" />
+              </h3>
+              <p className="text-foreground/80">Track your daily nutrition with real-time macro calculations and comprehensive food database.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/40 backdrop-blur-sm border-border/50 hover:bg-card/60 transition-all duration-300 group cursor-pointer" onClick={() => navigate('/program-chat')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                <MessageSquare className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground flex items-center justify-center gap-2">
+                Program Chat
+                <Crown className="h-4 w-4 text-amber-500" />
+              </h3>
+              <p className="text-foreground/80">Chat with an AI coach about fitness, nutrition, and training strategies.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/40 backdrop-blur-sm border-border/50 hover:bg-card/60 transition-all duration-300 group cursor-pointer" onClick={() => navigate('/movement-analysis')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                <BarChart3 className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground flex items-center justify-center gap-2">
+                Movement Analysis
+                <Crown className="h-4 w-4 text-amber-500" />
+              </h3>
+              <p className="text-foreground/80">Advanced video analysis for technique improvement and injury prevention.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/40 backdrop-blur-sm border-border/50 hover:bg-card/60 transition-all duration-300 group cursor-pointer" onClick={() => navigate('/journal')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                <Book className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground flex items-center justify-center gap-2">
+                Smart Journal
+                <Crown className="h-4 w-4 text-amber-500" />
+              </h3>
+              <p className="text-foreground/80">Track your progress with intelligent insights and personalized recommendations.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/40 backdrop-blur-sm border-border/50 hover:bg-card/60 transition-all duration-300 group cursor-pointer" onClick={() => navigate('/publish-program')}>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                <Video className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-foreground flex items-center justify-center gap-2">
+                Publish Program
+                <Crown className="h-4 w-4 text-amber-500" />
+              </h3>
+              <p className="text-foreground/80">Create and share professional workout videos with AI-generated scripts.</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Testimonials Section */}
+        <div className={`${spacing.section} text-center`}>
+          <h2 className={`${text.h2} font-semibold text-primary mb-4`}>
+            Hear From Our Users
+          </h2>
+          <p className={`${text.body} text-foreground/80 ${width.content} mx-auto`}>
+            Don't just take our word for it. See how Strength.Design is helping people around the world achieve their fitness goals.
+          </p>
+        </div>
+
+        {/* Testimonials Carousel (Placeholder) */}
+        <div className="relative">
+          {/* Placeholder for Testimonials Carousel */}
+          <div className="h-48 bg-muted rounded-lg flex items-center justify-center text-foreground/50">
+            Testimonials Carousel Coming Soon
           </div>
-        </SectionContainer>
+          {/* You can add navigation buttons or indicators here */}
+        </div>
       </div>
 
-      <AuthDialog
-        isOpen={showAuthDialog}
-        onOpenChange={setShowAuthDialog}
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onOpenChange={setShowAuthDialog} 
         onSuccess={() => {
           setShowAuthDialog(false);
-          const activePath = cards.find(card => card.requiresAuth)?.path || "/workout-generator";
-          navigate(activePath);
-        }}
+          navigate("/workout-generator");
+        }} 
       />
     </StandardPageLayout>
   );
-};
-
-export default Index;
+}

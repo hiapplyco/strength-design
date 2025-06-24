@@ -287,6 +287,47 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_entries: {
+        Row: {
+          calories_burned: number
+          created_at: string
+          duration_minutes: number
+          exercise_name: string
+          id: string
+          meal_group: string
+          nutrition_log_id: string
+          workout_data: Json | null
+        }
+        Insert: {
+          calories_burned?: number
+          created_at?: string
+          duration_minutes?: number
+          exercise_name: string
+          id?: string
+          meal_group?: string
+          nutrition_log_id: string
+          workout_data?: Json | null
+        }
+        Update: {
+          calories_burned?: number
+          created_at?: string
+          duration_minutes?: number
+          exercise_name?: string
+          id?: string
+          meal_group?: string
+          nutrition_log_id?: string
+          workout_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_entries_nutrition_log_id_fkey"
+            columns: ["nutrition_log_id"]
+            isOneToOne: false
+            referencedRelation: "nutrition_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exercises: {
         Row: {
           category: string | null

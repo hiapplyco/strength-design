@@ -4,59 +4,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import type { NormalizedFood } from '@/services/usdaApi';
 
-interface AddMealEntryParams {
-  foodId?: string;
-  usdaFood?: NormalizedFood;
+interface AddExerciseEntryParams {
+  exerciseName: string;
+  durationMinutes: number;
+  caloriesBurned: number;
   mealGroup: string;
   date: Date;
-  amount: number;
-  servingMultiplier: number;
+  workoutData?: any;
 }
 
-export const useAddMealEntry = () => {
+export const useAddExerciseEntry = () => {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const mutation = useMutation({
-    mutationFn: async (params: AddMealEntryParams) => {
+    mutationFn: async (params: AddExerciseEntryParams) => {
       if (!session?.user) throw new Error('Not authenticated');
 
-      const { foodId, usdaFood, mealGroup, date, amount, servingMultiplier } = params;
+      const { exerciseName, durationMinutes, caloriesBurned, mealGroup, date, workoutData } = params;
       const dateString = format(date, 'yyyy-MM-dd');
-
-      let finalFoodId = foodId;
-
-      // If it's a USDA food, save it to our food_items table first
-      if (usdaFood && !foodId) {
-        const { data: savedFood, error: saveError } = await supabase
-          .from('food_items')
-          .insert({
-            name: usdaFood.name,
-            brand: usdaFood.brand,
-            serving_size: usdaFood.serving_size.toString(),
-            serving_unit: usdaFood.serving_unit,
-            calories_per_serving: usdaFood.calories_per_serving,
-            protein_per_serving: usdaFood.protein_per_serving,
-            carbs_per_serving: usdaFood.carbs_per_serving,
-            fat_per_serving: usdaFood.fat_per_serving,
-            fiber_per_serving: usdaFood.fiber_per_serving || 0,
-          })
-          .select()
-          .single();
-
-        if (saveError) {
-          console.error('Error saving USDA food:', saveError);
-          throw saveError;
-        }
-        finalFoodId = savedFood.id;
-      }
-
-      if (!finalFoodId) {
-        throw new Error('No food ID provided');
-      }
 
       // Get or create nutrition log for the date
       let { data: log, error: logError } = await supabase
@@ -84,15 +52,16 @@ export const useAddMealEntry = () => {
         throw logError;
       }
 
-      // Add meal entry
+      // Add exercise entry
       const { data, error } = await supabase
-        .from('meal_entries')
+        .from('exercise_entries')
         .insert({
           nutrition_log_id: log.id,
-          food_item_id: finalFoodId,
+          exercise_name: exerciseName,
+          duration_minutes: durationMinutes,
+          calories_burned: caloriesBurned,
           meal_group: mealGroup,
-          amount: amount,
-          serving_multiplier: servingMultiplier
+          workout_data: workoutData
         })
         .select()
         .single();
@@ -104,24 +73,25 @@ export const useAddMealEntry = () => {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['nutrition-log'] });
       queryClient.invalidateQueries({ queryKey: ['meal-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['exercise-entries'] });
       
       toast({
         title: "Success",
-        description: "Food added to diary successfully!",
+        description: "Exercise added to diary successfully!",
       });
     },
     onError: (error: any) => {
-      console.error('Error adding meal entry:', error);
+      console.error('Error adding exercise:', error);
       toast({
         title: "Error",
-        description: "Failed to add food to diary. Please try again.",
+        description: "Failed to add exercise to diary. Please try again.",
         variant: "destructive",
       });
     }
   });
 
   return {
-    addMealEntry: mutation.mutateAsync,
+    addExerciseEntry: mutation.mutateAsync,
     isLoading: mutation.isPending
   };
 };

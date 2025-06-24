@@ -7,10 +7,8 @@ import type { WeatherData } from "@/types/weather";
 import { TooltipWrapper } from "./TooltipWrapper";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "@/contexts/ThemeContext";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { sizes, spacing, typography, transitions, animations } from "@/lib/design-tokens";
+import { spacing, transitions, animations } from "@/lib/design-tokens";
 
 interface WeatherSectionProps {
   weatherData: WeatherData | null;
@@ -26,7 +24,6 @@ export function WeatherSection({
   numberOfDays = 7
 }: WeatherSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { theme } = useTheme();
   
   const handleClearWeather = () => {
     onWeatherUpdate(null, "");
@@ -34,30 +31,25 @@ export function WeatherSection({
 
   return (
     <div className={spacing.gap.md}>
-      <Button
-        variant="ghost"
-        size="lg"
+      <div 
         className={cn(
-          "w-full justify-start",
-          spacing.component.sm,
-          transitions.default,
-          "hover:bg-accent"
+          "flex items-center gap-3 cursor-pointer p-4 rounded-md",
+          "bg-card hover:bg-card/80 transition-colors duration-200",
+          "border border-border/50"
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <CloudSun className={cn(sizes.icon.md, "text-primary")} />
-        <span className={cn(typography.display.h6, "flex-1 text-left")}>
-          Add Weather Conditions
-        </span>
+        <CloudSun className="h-5 w-5 text-primary flex-shrink-0" />
+        <h3 className="font-medium text-lg flex-1">Add Weather Conditions</h3>
         {renderTooltip ? renderTooltip() : <TooltipWrapper content="Add local weather conditions to optimize your workout for the current environment" />}
         <div className="ml-auto">
           {isExpanded ? (
-            <ChevronUp className={cn(sizes.icon.md, "text-muted-foreground")} />
+            <ChevronUp className="h-5 w-5 text-muted-foreground" />
           ) : (
-            <ChevronDown className={cn(sizes.icon.md, "text-muted-foreground")} />
+            <ChevronDown className="h-5 w-5 text-muted-foreground" />
           )}
         </div>
-      </Button>
+      </div>
 
       <AnimatePresence>
         {isExpanded && (
@@ -68,7 +60,7 @@ export function WeatherSection({
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <Card variant="flat" className={spacing.component.md}>
+            <Card variant="flat" className={cn(spacing.component.md, "ml-8")}>
               {weatherData ? (
                 <WeatherDisplay 
                   weatherData={weatherData} 

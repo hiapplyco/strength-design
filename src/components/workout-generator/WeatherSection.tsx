@@ -1,6 +1,6 @@
 
 import React from "react";
-import { WeatherSearch } from "./weather/WeatherSearch";
+import { LiveWeatherSearch } from "./weather/LiveWeatherSearch";
 import { WeatherDisplay } from "./weather/WeatherDisplay";
 import { CloudSun } from "lucide-react";
 import type { WeatherData } from "@/types/weather";
@@ -32,9 +32,8 @@ export function WeatherSection({
           numberOfDays={numberOfDays}
         />
       ) : (
-        <WeatherSearch 
+        <LiveWeatherSearch 
           onWeatherUpdate={onWeatherUpdate}
-          renderTooltip={renderTooltip}
           numberOfDays={numberOfDays}
         />
       )}

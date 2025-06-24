@@ -1,12 +1,11 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Clock, ChevronRight } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Dumbbell, ArrowLeft } from 'lucide-react';
 import type { WeeklyWorkouts } from '@/types/fitness';
-import { format } from 'date-fns';
+import { isWorkoutCycle, isWorkoutDay } from '@/types/fitness';
 
 interface WorkoutPreviewProps {
   generatedWorkout: WeeklyWorkouts | null;
@@ -16,100 +15,149 @@ interface WorkoutPreviewProps {
   onGoToGenerator: () => void;
 }
 
-export function WorkoutPreview({
+export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   generatedWorkout,
   onReplaceWorkouts,
   isReplacing,
   existingWorkoutCount,
   onGoToGenerator,
-}: WorkoutPreviewProps) {
-  const getWorkoutDayExerciseCount = (workoutData: any): number => {
-    if (!workoutData) return 0;
-    
-    // Check if it's a WorkoutDay with exercises array
-    if (workoutData.exercises && Array.isArray(workoutData.exercises)) {
-      return workoutData.exercises.length;
-    }
-    
-    // Check if it's a string description
-    if (typeof workoutData === 'string') {
-      return 1; // Assume 1 exercise for string descriptions
-    }
-    
-    return 0;
-  };
-
+}) => {
   if (!generatedWorkout) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground mb-4">No workout generated yet.</p>
-        <Button 
-          onClick={onGoToGenerator}
-          variant="outline"
-        >
-          Go to Generator
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-12"
+      >
+        <Dumbbell className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">No Workout Generated Yet</h3>
+        <p className="text-muted-foreground mb-6">
+          Generate a workout first to see your personalized plan here.
+        </p>
+        <Button onClick={onGoToGenerator} variant="outline" className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Generator
         </Button>
-      </div>
+      </motion.div>
     );
   }
 
-  const workoutDays = Object.keys(generatedWorkout).filter(key => key !== '_meta');
+  // Count total workout days
+  const totalWorkouts = Object.entries(generatedWorkout)
+    .filter(([key]) => key !== '_meta')
+    .reduce((count, [key, value]) => {
+      if (isWorkoutCycle(value)) {
+        return count + Object.keys(value).length;
+      }
+      return count + 1;
+    }, 0);
+
+  // Get workout title from meta or generate one
+  const workoutTitle = generatedWorkout._meta?.title || 'Your Custom Workout Plan';
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Workout Plan Overview</h3>
-      <p className="text-muted-foreground">{generatedWorkout._meta?.summary}</p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-6"
+    >
+      {/* Header */}
+      <Card className="bg-gradient-to-r from-green-500/10 to-green-600/10 border-green-500/20">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
+            <CardTitle className="text-xl">{workoutTitle}</CardTitle>
+          </div>
+          <CardDescription>
+            {totalWorkouts} workout sessions ready to schedule
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4">
+            <Button 
+              onClick={onReplaceWorkouts}
+              disabled={isReplacing}
+              className="gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              {existingWorkoutCount > 0 ? 'Replace & Schedule' : 'Schedule Workouts'}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={onGoToGenerator}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Generate New
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-      <Separator />
-
-      <h4 className="text-md font-semibold">Weekly Schedule</h4>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {workoutDays.map((day, index) => {
-          const workoutData = generatedWorkout[day];
-          const exerciseCount = getWorkoutDayExerciseCount(workoutData);
-          
-          return (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle>{day.replace(/day(\d+)/, 'Day $1')}</CardTitle>
-                <CardDescription>
-                  {format(new Date(), 'MMMM dd, yyyy')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  {exerciseCount} Exercise{exerciseCount !== 1 ? 's' : ''}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Workout Preview */}
+      <div className="grid gap-4">
+        {Object.entries(generatedWorkout)
+          .filter(([key]) => key !== '_meta')
+          .map(([key, value], index) => {
+            if (isWorkoutCycle(value)) {
+              return (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg capitalize">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-3">
+                        {Object.entries(value)
+                          .filter(([dayKey, dayValue]) => isWorkoutDay(dayValue))
+                          .map(([dayKey, dayValue]) => (
+                            <div key={dayKey} className="p-3 bg-muted/50 rounded-lg">
+                              <h4 className="font-medium mb-2 capitalize">
+                                {dayKey.replace(/day(\d+)/, 'Day $1')}
+                              </h4>
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {(dayValue as any).description || (dayValue as any).workout?.substring(0, 100) + '...'}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            } else if (isWorkoutDay(value)) {
+              return (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg capitalize">
+                        {key.replace(/day(\d+)/, 'Day $1')}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {(value as any).description || (value as any).workout?.substring(0, 150) + '...'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            }
+            return null;
+          })}
       </div>
-
-      <Separator />
-
-      <div className="flex justify-between items-center">
-        <div>
-          <Badge variant="secondary">
-            <Clock className="mr-2 h-4 w-4" />
-            AI Powered
-          </Badge>
-        </div>
-        <Button
-          onClick={onReplaceWorkouts}
-          disabled={isReplacing}
-        >
-          {isReplacing ? (
-            <>
-              Processing...
-            </>
-          ) : (
-            <>
-              Replace Workouts <ChevronRight className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
+    </motion.div>
   );
-}
+};

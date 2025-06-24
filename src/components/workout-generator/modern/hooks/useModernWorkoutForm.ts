@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
 import { useWorkoutReplacement } from '@/hooks/useWorkoutReplacement';
 import type { WeeklyWorkouts } from '@/types/fitness';
@@ -41,8 +41,13 @@ export function useModernWorkoutForm() {
       });
       
       if (workout) {
+        console.log('Generated workout:', workout);
         setGeneratedWorkout(workout);
-        setSelectedTab('preview');
+        
+        // Auto-switch to preview tab after successful generation
+        setTimeout(() => {
+          setSelectedTab('preview');
+        }, 500); // Small delay for smooth transition
       }
     } catch (error) {
       console.error('Error generating workout:', error);
@@ -73,6 +78,13 @@ export function useModernWorkoutForm() {
   const handleCancel = () => {
     setIsDialogOpen(false);
   };
+
+  // Auto-switch back to generator tab when starting a new generation
+  useEffect(() => {
+    if (isGenerating && selectedTab !== 'generator') {
+      setSelectedTab('generator');
+    }
+  }, [isGenerating, selectedTab]);
 
   return {
     // State

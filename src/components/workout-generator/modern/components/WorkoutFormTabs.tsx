@@ -68,6 +68,7 @@ export function WorkoutFormTabs({
         <TabsTrigger 
           value="generator" 
           className="flex items-center gap-2 data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400 data-[state=active]:border-green-500/30"
+          disabled={isGenerating}
         >
           <Dumbbell className="h-4 w-4" />
           Workout Generator
@@ -75,6 +76,7 @@ export function WorkoutFormTabs({
         <TabsTrigger 
           value="preview" 
           className="flex items-center gap-2 data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400 data-[state=active]:border-green-500/30"
+          disabled={isGenerating || !generatedWorkout}
         >
           <Calendar className="h-4 w-4" />
           Preview & Schedule
@@ -87,6 +89,7 @@ export function WorkoutFormTabs({
           setNumberOfDays={setNumberOfDays}
           numberOfCycles={numberOfCycles}
           setNumberOfCycles={setNumberOfCycles}
+          isGenerating={isGenerating}
         />
         
         <GenerateWorkoutButton

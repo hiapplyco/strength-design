@@ -913,6 +913,7 @@ export type Database = {
           generated_workouts: Json | null
           id: string
           injuries: string | null
+          number_of_cycles: number | null
           number_of_days: number | null
           prescribed_exercises: string | null
           selected_exercises: Json | null
@@ -928,6 +929,7 @@ export type Database = {
           generated_workouts?: Json | null
           id?: string
           injuries?: string | null
+          number_of_cycles?: number | null
           number_of_days?: number | null
           prescribed_exercises?: string | null
           selected_exercises?: Json | null
@@ -943,6 +945,7 @@ export type Database = {
           generated_workouts?: Json | null
           id?: string
           injuries?: string | null
+          number_of_cycles?: number | null
           number_of_days?: number | null
           prescribed_exercises?: string | null
           selected_exercises?: Json | null

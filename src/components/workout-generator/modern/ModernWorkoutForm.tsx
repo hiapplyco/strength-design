@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { WorkoutReplacementDialog } from '../WorkoutReplacementDialog';
 import { WorkoutFormTabs } from './components/WorkoutFormTabs';
+import { WorkoutGenerationOverlay } from './WorkoutGenerationOverlay';
 import { useModernWorkoutForm } from './hooks/useModernWorkoutForm';
 import type { WeeklyWorkouts } from '@/types/fitness';
 
@@ -41,7 +42,7 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto relative">
       <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3 mb-2">
@@ -82,6 +83,9 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
         onConfirmReplace={handleConfirmReplaceWithClose}
         onCancel={handleCancel}
       />
+
+      {/* Workout Generation Overlay */}
+      <WorkoutGenerationOverlay isVisible={isGenerating} />
     </div>
   );
 };

@@ -9,7 +9,7 @@ import { Calendar, Dumbbell, Target, Clock, ChevronRight } from 'lucide-react';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
 import { useWorkoutReplacement } from '@/hooks/useWorkoutReplacement';
 import { WorkoutReplacementDialog } from '../WorkoutReplacementDialog';
-import type { WeeklyWorkouts } from '@/types/fitness';
+import type { WeeklyWorkouts, WorkoutDay } from '@/types/fitness';
 import { format } from 'date-fns';
 
 interface ModernWorkoutFormProps {
@@ -60,6 +60,22 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
     setIsDialogOpen(false);
   };
 
+  const getWorkoutDayExerciseCount = (workoutData: any): number => {
+    if (!workoutData) return 0;
+    
+    // Check if it's a WorkoutDay with exercises array
+    if (workoutData.exercises && Array.isArray(workoutData.exercises)) {
+      return workoutData.exercises.length;
+    }
+    
+    // Check if it's a string description
+    if (typeof workoutData === 'string') {
+      return 1; // Assume 1 exercise for string descriptions
+    }
+    
+    return 0;
+  };
+
   const renderWorkoutDetails = () => {
     if (!generatedWorkout) {
       return (
@@ -83,21 +99,26 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
 
         <h4 className="text-md font-semibold">Weekly Schedule</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {workoutDays.map((day, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle>{day.replace(/day(\d+)/, 'Day $1')}</CardTitle>
-                <CardDescription>
-                  {format(new Date(), 'MMMM dd, yyyy')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  {generatedWorkout[day]?.exercises?.length || 0} Exercises
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+          {workoutDays.map((day, index) => {
+            const workoutData = generatedWorkout[day];
+            const exerciseCount = getWorkoutDayExerciseCount(workoutData);
+            
+            return (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle>{day.replace(/day(\d+)/, 'Day $1')}</CardTitle>
+                  <CardDescription>
+                    {format(new Date(), 'MMMM dd, yyyy')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {exerciseCount} Exercise{exerciseCount !== 1 ? 's' : ''}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     );

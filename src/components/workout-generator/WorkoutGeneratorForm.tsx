@@ -110,6 +110,14 @@ export function WorkoutGeneratorForm({
           <WorkoutPresets onSelectPreset={handlePresetSelect} />
         </section>
 
+        {/* Fitness Level Section - moved here */}
+        <section className="jupyter-cell">
+          <FitnessLevelSection
+            fitnessLevel={fitnessLevel}
+            setFitnessLevel={setFitnessLevel}
+          />
+        </section>
+
         {/* Goals and Injuries Section */}
         <section className="jupyter-cell">
           <GoalsAndInjuriesSection
@@ -140,14 +148,6 @@ export function WorkoutGeneratorForm({
             selectedExercises={selectedExercises}
             onExerciseSelect={onExerciseSelect}
             renderTooltip={() => renderTooltip("Select specific exercises and equipment you have access to")}
-          />
-        </section>
-
-        {/* Fitness Level Section */}
-        <section className="jupyter-cell">
-          <FitnessLevelSection
-            fitnessLevel={fitnessLevel}
-            setFitnessLevel={setFitnessLevel}
           />
         </section>
 

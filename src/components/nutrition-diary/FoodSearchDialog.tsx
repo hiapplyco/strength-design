@@ -4,9 +4,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search } from 'lucide-react';
-import { useFoodItems } from '@/hooks/useFoodItems';
+import { Badge } from '@/components/ui/badge';
+import { Search, Database, Globe } from 'lucide-react';
+import { useEnhancedFoodSearch } from '@/hooks/useEnhancedFoodSearch';
 import { FoodDetailsDialog } from './FoodDetailsDialog';
+import type { NormalizedFood } from '@/services/usdaApi';
 
 interface FoodSearchDialogProps {
   isOpen: boolean;
@@ -17,10 +19,10 @@ interface FoodSearchDialogProps {
 
 export const FoodSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: FoodSearchDialogProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFood, setSelectedFood] = useState<any>(null);
-  const { foodItems, isLoading } = useFoodItems(searchQuery);
+  const [selectedFood, setSelectedFood] = useState<NormalizedFood | null>(null);
+  const { foods, isLoading, hasUSDAError, localCount, usdaCount } = useEnhancedFoodSearch(searchQuery);
 
-  const handleFoodSelect = (food: any) => {
+  const handleFoodSelect = (food: NormalizedFood) => {
     setSelectedFood(food);
   };
 
@@ -52,12 +54,29 @@ export const FoodSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: Food
                 className="pl-10"
               />
             </div>
+
+            {/* Search Results Summary */}
+            {searchQuery && (
+              <div className="flex gap-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Database className="h-3 w-3" />
+                  Local: {localCount}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  USDA: {usdaCount}
+                </span>
+                {hasUSDAError && (
+                  <span className="text-orange-500">(USDA search unavailable)</span>
+                )}
+              </div>
+            )}
             
             <Tabs defaultValue="all">
               <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="favorites" disabled>Favorites</TabsTrigger>
-                <TabsTrigger value="custom" disabled>Custom</TabsTrigger>
+                <TabsTrigger value="all">All Results</TabsTrigger>
+                <TabsTrigger value="local">Local Database</TabsTrigger>
+                <TabsTrigger value="usda">USDA Database</TabsTrigger>
               </TabsList>
               
               <TabsContent value="all" className="space-y-2 mt-4">
@@ -67,20 +86,38 @@ export const FoodSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: Food
                       <div key={i} className="h-16 bg-muted rounded animate-pulse"></div>
                     ))}
                   </div>
-                ) : foodItems.length > 0 ? (
+                ) : foods.length > 0 ? (
                   <div className="space-y-2">
-                    {foodItems.map((food: any) => (
+                    {foods.map((food) => (
                       <Button
                         key={food.id}
                         variant="ghost"
                         onClick={() => handleFoodSelect(food)}
                         className="w-full justify-start h-auto p-4"
                       >
-                        <div className="text-left">
-                          <div className="font-medium">{food.name}</div>
+                        <div className="text-left w-full">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{food.name}</span>
+                            <Badge 
+                              variant={food.data_source === 'usda' ? 'default' : 'secondary'}
+                              className="text-xs"
+                            >
+                              {food.data_source === 'usda' ? (
+                                <>
+                                  <Globe className="h-3 w-3 mr-1" />
+                                  USDA
+                                </>
+                              ) : (
+                                <>
+                                  <Database className="h-3 w-3 mr-1" />
+                                  Local
+                                </>
+                              )}
+                            </Badge>
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             {food.brand && `${food.brand} • `}
-                            {food.calories_per_serving} kcal per {food.serving_size}{food.serving_unit}
+                            {Math.round(food.calories_per_serving)} kcal per {food.serving_size}{food.serving_unit}
                           </div>
                         </div>
                       </Button>
@@ -92,7 +129,65 @@ export const FoodSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: Food
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    Start typing to search for foods
+                    Start typing to search for foods from local database and USDA
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="local" className="space-y-2 mt-4">
+                {foods.filter(f => f.data_source === 'local').length > 0 ? (
+                  <div className="space-y-2">
+                    {foods.filter(f => f.data_source === 'local').map((food) => (
+                      <Button
+                        key={food.id}
+                        variant="ghost"
+                        onClick={() => handleFoodSelect(food)}
+                        className="w-full justify-start h-auto p-4"
+                      >
+                        <div className="text-left">
+                          <div className="font-medium">{food.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {food.brand && `${food.brand} • `}
+                            {Math.round(food.calories_per_serving)} kcal per {food.serving_size}{food.serving_unit}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No local foods found
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="usda" className="space-y-2 mt-4">
+                {foods.filter(f => f.data_source === 'usda').length > 0 ? (
+                  <div className="space-y-2">
+                    {foods.filter(f => f.data_source === 'usda').map((food) => (
+                      <Button
+                        key={food.id}
+                        variant="ghost"
+                        onClick={() => handleFoodSelect(food)}
+                        className="w-full justify-start h-auto p-4"
+                      >
+                        <div className="text-left">
+                          <div className="font-medium">{food.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {food.brand && `${food.brand} • `}
+                            {Math.round(food.calories_per_serving)} kcal per {food.serving_size}{food.serving_unit}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                ) : hasUSDAError ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    USDA search is currently unavailable
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No USDA foods found
                   </div>
                 )}
               </TabsContent>

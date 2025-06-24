@@ -1,16 +1,18 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Database, Globe } from 'lucide-react';
 import { MacroDonutChart } from './MacroDonutChart';
 import { useAddMealEntry } from '@/hooks/useAddMealEntry';
+import type { NormalizedFood } from '@/services/usdaApi';
 
 interface FoodDetailsDialogProps {
-  food: any;
+  food: NormalizedFood;
   mealGroup: string;
   date: Date;
   onBack: () => void;
@@ -18,27 +20,38 @@ interface FoodDetailsDialogProps {
 }
 
 export const FoodDetailsDialog = ({ food, mealGroup, date, onBack, onClose }: FoodDetailsDialogProps) => {
-  const [amount, setAmount] = useState('100');
+  const [amount, setAmount] = useState(food.serving_size.toString());
   const [servingSize, setServingSize] = useState('1');
   const { addMealEntry, isLoading } = useAddMealEntry();
 
   // Calculate nutritional values based on amount
-  const multiplier = (parseFloat(amount) || 0) / parseFloat(food.serving_size);
+  const multiplier = (parseFloat(amount) || 0) / food.serving_size;
   const calories = food.calories_per_serving * multiplier;
   const protein = food.protein_per_serving * multiplier;
   const carbs = food.carbs_per_serving * multiplier;
   const fat = food.fat_per_serving * multiplier;
-  const fiber = (food.fiber_per_serving || 0) * multiplier;
+  const fiber = food.fiber_per_serving * multiplier;
 
   const handleAddToDiary = async () => {
     try {
-      await addMealEntry({
-        foodId: food.id,
-        mealGroup,
-        date,
-        amount: parseFloat(amount),
-        servingMultiplier: multiplier
-      });
+      // For USDA foods, we need to save them to our local database first
+      if (food.data_source === 'usda') {
+        await addMealEntry({
+          usdaFood: food,
+          mealGroup,
+          date,
+          amount: parseFloat(amount),
+          servingMultiplier: multiplier
+        });
+      } else {
+        await addMealEntry({
+          foodId: food.id,
+          mealGroup,
+          date,
+          amount: parseFloat(amount),
+          servingMultiplier: multiplier
+        });
+      }
       onClose();
     } catch (error) {
       console.error('Error adding food to diary:', error);
@@ -53,8 +66,26 @@ export const FoodDetailsDialog = ({ food, mealGroup, date, onBack, onClose }: Fo
             <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8">
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <DialogTitle>{food.name}</DialogTitle>
+            <div className="flex items-center gap-2">
+              <DialogTitle>{food.name}</DialogTitle>
+              <Badge variant={food.data_source === 'usda' ? 'default' : 'secondary'}>
+                {food.data_source === 'usda' ? (
+                  <>
+                    <Globe className="h-3 w-3 mr-1" />
+                    USDA
+                  </>
+                ) : (
+                  <>
+                    <Database className="h-3 w-3 mr-1" />
+                    Local
+                  </>
+                )}
+              </Badge>
+            </div>
           </div>
+          {food.brand && (
+            <p className="text-sm text-muted-foreground">{food.brand}</p>
+          )}
         </DialogHeader>
         
         <div className="space-y-6">

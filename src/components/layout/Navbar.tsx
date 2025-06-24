@@ -1,10 +1,38 @@
 
 import { Link } from "react-router-dom";
-import { Home, FileText, Dumbbell, Video, DollarSign, MessageSquare, BarChart3, Upload } from "lucide-react";
+import { Home, FileText, Dumbbell, Video, DollarSign, MessageSquare, BarChart3, Upload, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "./navbar/MobileMenu";
+import { useState } from "react";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const Navbar = () => {
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/");
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error logging out",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   const navItems = [
     { path: '/workout-generator', icon: <Dumbbell className="h-5 w-5" />, text: 'Generate Program' },
     { path: '/generated-workouts', icon: <FileText className="h-5 w-5" />, text: 'Previous Programs' },
@@ -55,11 +83,45 @@ export const Navbar = () => {
             ))}
           </div>
 
-          <div className="flex-shrink-0">
-            <MobileMenu />
+          <div className="flex items-center gap-4">
+            {/* Auth Button for Desktop */}
+            <div className="hidden md:block">
+              {user ? (
+                <Button 
+                  onClick={handleLogout}
+                  variant="ghost"
+                  className="text-accent hover:text-accent/80 flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => setShowAuthDialog(true)}
+                  variant="ghost"
+                  className="text-accent hover:text-accent/80 flex items-center gap-2"
+                >
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Button>
+              )}
+            </div>
+            
+            <div className="flex-shrink-0">
+              <MobileMenu />
+            </div>
           </div>
         </div>
       </div>
+      
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onOpenChange={setShowAuthDialog} 
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          navigate("/workout-generator");
+        }} 
+      />
     </nav>
   );
 };

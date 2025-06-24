@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -11,7 +12,15 @@ import {
   FileText,
   Video,
   CreditCard,
+  LogIn,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface NavItemProps {
   to: string;
@@ -38,6 +47,28 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label }) => {
 };
 
 export const SidebarNavigation = () => {
+  const { user } = useAuth();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate("/");
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error logging out",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <nav className="space-y-1 px-2">
       <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
@@ -80,6 +111,38 @@ export const SidebarNavigation = () => {
         to="/pricing"
         icon={<CreditCard className="h-5 w-5" />}
         label="Pricing"
+      />
+      
+      {/* Auth Section */}
+      <div className="pt-4 border-t border-border">
+        {user ? (
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            className="w-full justify-start text-muted-foreground hover:text-secondary-foreground hover:bg-secondary"
+          >
+            <LogOut className="h-5 w-5 mr-2" />
+            Sign Out
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setShowAuthDialog(true)}
+            variant="ghost"
+            className="w-full justify-start text-muted-foreground hover:text-secondary-foreground hover:bg-secondary"
+          >
+            <LogIn className="h-5 w-5 mr-2" />
+            Sign In
+          </Button>
+        )}
+      </div>
+
+      <AuthDialog 
+        isOpen={showAuthDialog} 
+        onOpenChange={setShowAuthDialog} 
+        onSuccess={() => {
+          setShowAuthDialog(false);
+          navigate("/workout-generator");
+        }} 
       />
     </nav>
   );

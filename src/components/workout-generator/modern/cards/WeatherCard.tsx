@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CloudSun, MessageSquare, X } from 'lucide-react';
-import { WeatherSearch } from '../../weather/WeatherSearch';
+import { EnhancedWeatherSearch } from '../../weather/EnhancedWeatherSearch';
 import { WeatherDisplay } from '../../weather/WeatherDisplay';
 import type { WeatherData } from '@/types/weather';
 
@@ -58,7 +58,7 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({
             </div>
           </div>
         ) : (
-          <WeatherSearch 
+          <EnhancedWeatherSearch 
             onWeatherUpdate={onWeatherUpdate}
             numberOfDays={numberOfDays}
           />

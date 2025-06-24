@@ -32,6 +32,8 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
   const handleGenerateExercises = async () => {
     if (!fitnessLevel) return;
 
+    console.log('Generating exercises with params:', { fitnessLevel, duration, goals });
+
     const prompt = `Generate a quick ${duration}-minute workout for someone with ${fitnessLevel} fitness level. Focus on: ${goals || 'general fitness'}. Include exercises with estimated calories burned.`;
 
     const result = await generateWorkout({
@@ -44,6 +46,8 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
       numberOfCycles: 1
     });
 
+    console.log('Workout generation result:', result);
+
     if (result) {
       setGeneratedWorkout(result);
       setShowWorkout(true);
@@ -51,6 +55,7 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
   };
 
   const handleSelectExercise = (exercise: any) => {
+    console.log('Selected exercise:', exercise);
     setSelectedExercise(exercise);
     // Estimate calories based on exercise type and duration
     const estimatedCalories = estimateCalories(exercise.name, parseInt(duration));
@@ -87,6 +92,7 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
   };
 
   const workoutExercises = generatedWorkout ? extractExercisesFromWorkout(generatedWorkout) : [];
+  console.log('Workout exercises for display:', workoutExercises);
 
   if (showWorkout && generatedWorkout) {
     return (

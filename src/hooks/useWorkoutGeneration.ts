@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useSmartToast } from "./useSmartToast";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import type { GenerateWorkoutParams } from "./workout-generation/types";
 import { WorkoutGenerationService } from "./workout-generation/workoutGenerationService";
@@ -9,7 +9,7 @@ export const useWorkoutGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [showPaywall, setShowPaywall] = useState(false);
-  const { toast } = useToast();
+  const { error, loading, success } = useSmartToast();
   
   const workoutService = new WorkoutGenerationService();
 
@@ -17,8 +17,16 @@ export const useWorkoutGeneration = () => {
     setIsGenerating(true);
     setDebugInfo(null);
 
+    // Create a promise for the loading toast
+    const generationPromise = workoutService.generateWorkout(params);
+
     try {
-      const result = await workoutService.generateWorkout(params);
+      // Use the loading toast with promise handling
+      const result = await loading(generationPromise, {
+        loading: "Generating your personalized workout...",
+        success: "Workout generated successfully!",
+        error: "Failed to generate workout"
+      });
       
       // Extract debug info if present
       if (result && result._debug) {
@@ -28,24 +36,33 @@ export const useWorkoutGeneration = () => {
       }
 
       return result;
-    } catch (error: any) {
-      console.error('Error generating workout:', error);
+    } catch (generationError: any) {
+      console.error('Error generating workout:', generationError);
       
       // Handle workout limit exceeded error
-      if (error.message === 'WORKOUT_LIMIT_EXCEEDED') {
+      if (generationError.message === 'WORKOUT_LIMIT_EXCEEDED') {
         setShowPaywall(true);
-        toast({
-          title: "Workout Limit Reached",
-          description: "You've used all 3 free workouts. Upgrade to Pro for unlimited access!",
-          variant: "destructive",
+        error(generationError, "Workout Generation", {
+          duration: 8000,
+          action: {
+            label: "Upgrade",
+            onClick: () => {
+              window.location.href = "/pricing";
+            }
+          }
         });
         return null;
       }
       
-      toast({
-        title: "Error",
-        description: error.message || "Failed to generate workout. Please try again.",
-        variant: "destructive",
+      // Let the smart toast system handle other errors
+      error(generationError, "Workout Generation", {
+        action: {
+          label: "Try Again",
+          onClick: () => {
+            // Retry logic would be handled by parent component
+            console.log("Retry workout generation");
+          }
+        }
       });
       return null;
     } finally {

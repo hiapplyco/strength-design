@@ -1,24 +1,28 @@
-
-import { useToast } from "@/hooks/use-toast";
+import { useSmartToast } from "./useSmartToast";
 
 export const useAuthErrorHandler = () => {
-  const { toast } = useToast();
+  const { error } = useSmartToast();
 
-  const handleAuthError = (error: any, context: string) => {
-    console.error(`Auth error in ${context}:`, error);
+  const handleAuthError = (authError: any, context: string) => {
+    console.error(`Auth error in ${context}:`, authError);
     
-    const sanitizedMessage = getSanitizedErrorMessage(error);
-    
-    toast({
-      title: "Authentication Error",
-      description: sanitizedMessage,
-      variant: "destructive",
+    // The smart toast will automatically classify and handle auth errors appropriately
+    error(authError, `Authentication - ${context}`, {
+      action: {
+        label: "Sign In",
+        onClick: () => {
+          // Redirect to sign in or open auth dialog
+          window.location.href = "/";
+        }
+      }
     });
   };
 
-  const getSanitizedErrorMessage = (error: any): string => {
-    if (typeof error?.message === 'string') {
-      const message = error.message.toLowerCase();
+  const getSanitizedErrorMessage = (authError: any): string => {
+    // This is now handled by the smart toast classification system
+    // Keeping for backward compatibility
+    if (typeof authError?.message === 'string') {
+      const message = authError.message.toLowerCase();
       
       if (message.includes('invalid login credentials') || message.includes('invalid email')) {
         return 'Invalid email or password. Please check your credentials.';
@@ -40,5 +44,5 @@ export const useAuthErrorHandler = () => {
     return 'An error occurred. Please try again.';
   };
 
-  return { handleAuthError };
+  return { handleAuthError, getSanitizedErrorMessage };
 };

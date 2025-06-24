@@ -68,7 +68,7 @@ export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
         <span className="text-sm font-medium">Weather Location</span>
       </div>
       
-      <div className="relative">
+      <div className="space-y-1">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -85,9 +85,9 @@ export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
           )}
         </div>
 
-        {/* Live search results */}
+        {/* Live search results - now positioned in normal flow */}
         {shouldShowResults && (
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border-2 border-border rounded-lg shadow-lg max-h-64 overflow-y-auto">
+          <div className="bg-background border-2 border-border rounded-lg shadow-lg max-h-64 overflow-y-auto">
             {locations.length === 0 && !isLoading ? (
               <div className="p-4 text-center text-muted-foreground">
                 <MapPin className="h-6 w-6 mx-auto mb-2 opacity-50" />

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,13 @@ import type { WeatherData } from '@/types/weather';
 interface LiveWeatherSearchProps {
   onWeatherUpdate: (weatherData: WeatherData | null, weatherPrompt: string) => void;
   numberOfDays?: number;
+  onSearchStateChange?: (searching: boolean) => void;
 }
 
 export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
   onWeatherUpdate,
-  numberOfDays = 7
+  numberOfDays = 7,
+  onSearchStateChange
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
@@ -40,6 +42,7 @@ export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
         
       onWeatherUpdate(weatherData, weatherPrompt);
       setSearchQuery(''); // Clear search after selection
+      onSearchStateChange?.(false); // Notify parent that search is done
     } catch (error) {
       console.error('Weather fetch error:', error);
     } finally {
@@ -48,6 +51,15 @@ export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
   };
 
   const shouldShowResults = searchQuery.length >= 2 && !isLoadingWeather;
+
+  // Notify parent when search state changes
+  useEffect(() => {
+    onSearchStateChange?.(shouldShowResults);
+  }, [shouldShowResults, onSearchStateChange]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   return (
     <div className="space-y-3">
@@ -62,7 +74,7 @@ export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
           <Input
             placeholder="Search for weather location..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleInputChange}
             className="pl-10 h-[48px] bg-background border-2 border-border hover:border-primary/50 rounded-lg transition-all duration-200"
             disabled={isLoadingWeather}
           />

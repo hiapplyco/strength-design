@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { LiveWeatherSearch } from "./weather/LiveWeatherSearch";
 import { WeatherDisplay } from "./weather/WeatherDisplay";
 import { CloudSun } from "lucide-react";
@@ -19,9 +19,27 @@ export function WeatherSection({
   renderTooltip,
   numberOfDays = 7
 }: WeatherSectionProps) {
+  const [isSearching, setIsSearching] = useState(false);
+  const [shouldExpand, setShouldExpand] = useState(false);
+
   const handleClearWeather = () => {
     onWeatherUpdate(null, "");
+    setShouldExpand(false);
   };
+
+  const handleSearchStateChange = (searching: boolean) => {
+    setIsSearching(searching);
+    if (searching) {
+      setShouldExpand(true);
+    }
+  };
+
+  // Auto-expand when weather data is loaded
+  useEffect(() => {
+    if (weatherData) {
+      setShouldExpand(true);
+    }
+  }, [weatherData]);
 
   const renderCustomContent = () => (
     <>
@@ -35,6 +53,7 @@ export function WeatherSection({
         <LiveWeatherSearch 
           onWeatherUpdate={onWeatherUpdate}
           numberOfDays={numberOfDays}
+          onSearchStateChange={handleSearchStateChange}
         />
       )}
     </>
@@ -52,7 +71,7 @@ export function WeatherSection({
       setContent={() => {}} // No-op since we handle weather differently
       isAnalyzing={false}
       handleFileSelect={async () => {}} // No-op for weather
-      initialExpanded={false}
+      initialExpanded={shouldExpand}
       renderCustomContent={renderCustomContent}
     />
   );

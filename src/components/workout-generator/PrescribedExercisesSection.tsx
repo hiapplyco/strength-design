@@ -1,32 +1,57 @@
 
-import { Dumbbell } from "lucide-react";
+import React from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { Target } from "lucide-react";
+import { FileUploadSection } from "./FileUploadSection";
 import { ExpandableSectionContainer } from "./ExpandableSectionContainer";
 
-export interface PrescribedExercisesSectionProps {
+interface PrescribedExercisesSectionProps {
   prescribedExercises: string;
   setPrescribedExercises: (value: string) => void;
   isAnalyzingPrescribed: boolean;
   handlePrescribedFileSelect: (file: File) => Promise<void>;
+  renderTooltip?: () => React.ReactNode;
 }
 
-export function PrescribedExercisesSection({
-  prescribedExercises,
-  setPrescribedExercises,
-  isAnalyzingPrescribed,
-  handlePrescribedFileSelect
+export function PrescribedExercisesSection({ 
+  prescribedExercises, 
+  setPrescribedExercises, 
+  isAnalyzingPrescribed, 
+  handlePrescribedFileSelect,
+  renderTooltip 
 }: PrescribedExercisesSectionProps) {
   return (
     <ExpandableSectionContainer
-      icon={<Dumbbell className="h-5 w-5 text-primary" />}
-      title="What are your Goals?"
-      tooltipContent="Share your fitness goals and specific exercises you'd like to include in your workout program."
-      textAreaPlaceholder="List any specific exercises you need to include"
-      fileUploadTitle="Upload Exercise Program"
-      fileAnalysisSteps={["Processing file", "Extracting exercises", "Analyzing content"]}
-      content={prescribedExercises}
-      setContent={setPrescribedExercises}
-      isAnalyzing={isAnalyzingPrescribed}
-      handleFileSelect={handlePrescribedFileSelect}
-    />
+      icon={Target}
+      title="Prescribed Exercises & Goals"
+      renderTooltip={renderTooltip}
+      fileUploadSection={
+        <FileUploadSection
+          title="Workout Plans"
+          isAnalyzing={isAnalyzingPrescribed}
+          isSuccess={false}
+          content=""
+          onFileSelect={handlePrescribedFileSelect}
+          analysisSteps={[
+            "Reading workout document...",
+            "Extracting exercise information...",
+            "Identifying goals and targets...",
+            "Processing training plan..."
+          ]}
+        />
+      }
+    >
+      <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Enter any specific exercises prescribed by your trainer, physical therapist, or that you want to focus on.
+        </p>
+        <Textarea
+          placeholder="e.g., 3x10 squats, planks for core stability, rotator cuff exercises..."
+          value={prescribedExercises}
+          onChange={(e) => setPrescribedExercises(e.target.value)}
+          className="min-h-[100px] resize-none"
+        />
+      </div>
+    </ExpandableSectionContainer>
   );
 }

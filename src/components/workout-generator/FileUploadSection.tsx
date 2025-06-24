@@ -3,6 +3,7 @@ import { FileAnalysisState } from "./FileAnalysisState";
 import { Upload, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CameraCapture } from "@/components/camera/CameraCapture";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 import { sizes, spacing, typography, colors } from "@/lib/design-tokens";
@@ -53,7 +54,7 @@ export function FileUploadSection({
       {isAnalyzing ? (
         <FileAnalysisState title={`Analyzing ${title}`} steps={analysisSteps} />
       ) : (
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <input
             type="file"
             onChange={handleFileSelect}
@@ -77,6 +78,11 @@ export function FileUploadSection({
               <Upload className={sizes.icon.sm} />
             </label>
           </Button>
+          
+          <CameraCapture
+            onPhotoCapture={onFileSelect}
+            title={`Capture ${title}`}
+          />
         </div>
       )}
     </div>

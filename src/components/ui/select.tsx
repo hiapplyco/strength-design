@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
@@ -21,6 +22,7 @@ const SelectTrigger = React.forwardRef<
       "text-sm ring-offset-background",
       "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
       "disabled:cursor-not-allowed disabled:opacity-50",
+      "pointer-events-auto", // Ensure select triggers are always clickable
       "[&>span]:line-clamp-1",
       className
     )}
@@ -80,6 +82,7 @@ const SelectContent = React.forwardRef<
         "relative z-50 min-w-[8rem] overflow-hidden rounded-md border shadow-md",
         "bg-popover text-popover-foreground",
         "animate-in fade-in-0 zoom-in-95",
+        "pointer-events-auto", // Ensure dropdown content is interactive
         position === "popper" &&
           "translate-y-1",
         className
@@ -123,6 +126,7 @@ const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "pointer-events-auto", // Ensure select items are clickable
       className
     )}
     {...props}

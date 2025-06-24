@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -41,7 +40,8 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
       selectedExercises: [],
       fitnessLevel,
       prescribedExercises: goals,
-      numberOfDays: 1
+      numberOfDays: 1,
+      numberOfCycles: 1
     });
 
     if (result) {

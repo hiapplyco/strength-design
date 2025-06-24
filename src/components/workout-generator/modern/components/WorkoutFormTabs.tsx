@@ -4,6 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Dumbbell } from 'lucide-react';
 import { ModernInputContainer } from './ModernInputContainer';
 import { WorkoutPreview } from './WorkoutPreview';
+import { GenerateWorkoutButton } from '../GenerateWorkoutButton';
+import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import type { Exercise } from '@/components/exercise-search/types';
 
@@ -34,6 +36,10 @@ interface WorkoutFormTabsProps {
 export function WorkoutFormTabs({
   selectedTab,
   onTabChange,
+  generatePrompt,
+  setGeneratePrompt,
+  handleGenerateWorkout,
+  isGenerating,
   numberOfDays,
   setNumberOfDays,
   numberOfCycles,
@@ -43,6 +49,19 @@ export function WorkoutFormTabs({
   isReplacing,
   existingWorkoutCount,
 }: WorkoutFormTabsProps) {
+  const { config } = useWorkoutConfig();
+
+  const handleGenerate = async () => {
+    await handleGenerateWorkout({
+      prompt: generatePrompt,
+      weatherPrompt: config.weatherPrompt,
+      selectedExercises: config.selectedExercises,
+      fitnessLevel: config.fitnessLevel,
+      prescribedExercises: config.prescribedExercises,
+      injuries: config.injuries,
+    });
+  };
+
   return (
     <Tabs defaultValue="generator" className="space-y-6" value={selectedTab} onValueChange={onTabChange}>
       <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 h-11">
@@ -68,6 +87,11 @@ export function WorkoutFormTabs({
           setNumberOfDays={setNumberOfDays}
           numberOfCycles={numberOfCycles}
           setNumberOfCycles={setNumberOfCycles}
+        />
+        
+        <GenerateWorkoutButton
+          onGenerate={handleGenerate}
+          isGenerating={isGenerating}
         />
       </TabsContent>
       

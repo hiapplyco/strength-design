@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
+import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { useInputContainerState } from '../../input-container/hooks/useInputContainerState';
 import { useExerciseSelection } from '../../input-container/hooks/useExerciseSelection';
 import { ModernFitnessLevelCard } from '../cards/ModernFitnessLevelCard';
@@ -9,6 +10,8 @@ import { ModernInjuriesCard } from '../cards/ModernInjuriesCard';
 import { ModernTrainingScheduleCard } from '../cards/ModernTrainingScheduleCard';
 import { ModernEquipmentCard } from '../cards/ModernEquipmentCard';
 import { ModernWeatherCard } from '../cards/ModernWeatherCard';
+import { ConfigProgressBar } from './ConfigProgressBar';
+import { ConfigurationSummary } from '../../ConfigurationSummary';
 import type { Exercise } from '@/components/exercise-search/types';
 
 interface ModernInputContainerProps {
@@ -24,30 +27,18 @@ export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
   numberOfCycles,
   setNumberOfCycles
 }) => {
-  // Expanded state for each card
-  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
-    fitness: false,
-    goals: false,
-    injuries: false,
-    schedule: false,
-    equipment: false,
-    weather: false,
-  });
+  const { config, updateConfig, expandedCards, setExpandedCards } = useWorkoutConfig();
 
-  // All state management
+  // Get legacy hooks for compatibility during transition
   const {
-    fitnessLevel, setFitnessLevel,
-    injuries, setInjuries,
-    selectedExercises, setSelectedExercises,
-    prescribedExercises, setPrescribedExercises,
     weatherData, weatherPrompt,
     handleWeatherUpdate,
   } = useInputContainerState();
 
   // Exercise selection handlers
   const { handleExerciseSelection } = useExerciseSelection({
-    selectedExercises,
-    setSelectedExercises,
+    selectedExercises: config.selectedExercises,
+    setSelectedExercises: (exercises: Exercise[]) => updateConfig({ selectedExercises: exercises }),
   });
 
   const toggleCard = (cardName: string) => {
@@ -57,6 +48,11 @@ export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
     }));
   };
 
+  // Update config when numberOfDays or numberOfCycles change
+  React.useEffect(() => {
+    updateConfig({ numberOfDays, numberOfCycles });
+  }, [numberOfDays, numberOfCycles, updateConfig]);
+
   return (
     <motion.div 
       className="space-y-4 w-full"
@@ -64,27 +60,9 @@ export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <ModernFitnessLevelCard
-        fitnessLevel={fitnessLevel}
-        onFitnessLevelChange={setFitnessLevel}
-        isExpanded={expandedCards.fitness}
-        onToggle={() => toggleCard('fitness')}
-      />
+      <ConfigProgressBar />
 
-      <ModernGoalsCard
-        prescribedExercises={prescribedExercises}
-        onPrescribedExercisesChange={setPrescribedExercises}
-        isExpanded={expandedCards.goals}
-        onToggle={() => toggleCard('goals')}
-      />
-
-      <ModernInjuriesCard
-        injuries={injuries}
-        onInjuriesChange={setInjuries}
-        isExpanded={expandedCards.injuries}
-        onToggle={() => toggleCard('injuries')}
-      />
-
+      {/* Training Schedule - First and auto-expanded */}
       <ModernTrainingScheduleCard
         numberOfDays={numberOfDays}
         numberOfCycles={numberOfCycles}
@@ -94,19 +72,55 @@ export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
         onToggle={() => toggleCard('schedule')}
       />
 
+      <ModernFitnessLevelCard
+        fitnessLevel={config.fitnessLevel}
+        onFitnessLevelChange={(value) => updateConfig({ fitnessLevel: value })}
+        isExpanded={expandedCards.fitness}
+        onToggle={() => toggleCard('fitness')}
+      />
+
+      <ModernGoalsCard
+        prescribedExercises={config.prescribedExercises}
+        onPrescribedExercisesChange={(value) => updateConfig({ prescribedExercises: value })}
+        isExpanded={expandedCards.goals}
+        onToggle={() => toggleCard('goals')}
+      />
+
+      <ModernInjuriesCard
+        injuries={config.injuries}
+        onInjuriesChange={(value) => updateConfig({ injuries: value })}
+        isExpanded={expandedCards.injuries}
+        onToggle={() => toggleCard('injuries')}
+      />
+
       <ModernEquipmentCard
-        selectedExercises={selectedExercises}
+        selectedExercises={config.selectedExercises}
         onExerciseSelect={handleExerciseSelection}
         isExpanded={expandedCards.equipment}
         onToggle={() => toggleCard('equipment')}
       />
 
       <ModernWeatherCard
-        weatherData={weatherData}
-        onWeatherUpdate={handleWeatherUpdate}
+        weatherData={weatherData || config.weatherData}
+        onWeatherUpdate={(data, prompt) => {
+          handleWeatherUpdate(data, prompt);
+          updateConfig({ weatherData: data, weatherPrompt: prompt });
+        }}
         numberOfDays={numberOfDays}
         isExpanded={expandedCards.weather}
         onToggle={() => toggleCard('weather')}
+      />
+
+      {/* Configuration Summary */}
+      <ConfigurationSummary
+        numberOfDays={numberOfDays}
+        numberOfCycles={numberOfCycles}
+        fitnessLevel={config.fitnessLevel}
+        selectedExercises={config.selectedExercises}
+        prescribedExercises={config.prescribedExercises}
+        injuries={config.injuries}
+        weatherData={weatherData || config.weatherData}
+        maxHeight="30vh"
       />
     </motion.div>
   );

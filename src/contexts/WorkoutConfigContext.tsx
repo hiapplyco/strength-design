@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { Exercise } from '@/components/exercise-search/types';
 import type { WeatherData } from '@/types/weather';
 
@@ -26,6 +26,8 @@ interface WorkoutConfigContextType {
   clearConfig: () => void;
   getConfigSummary: () => string;
   getConfigCompleteness: () => ConfigCompleteness;
+  expandedCards: Record<string, boolean>;
+  setExpandedCards: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
 const defaultConfig: WorkoutConfig = {
@@ -39,10 +41,61 @@ const defaultConfig: WorkoutConfig = {
   weatherPrompt: ''
 };
 
+const defaultExpandedCards = {
+  schedule: true, // Auto-expand training schedule
+  fitness: false,
+  goals: false,
+  injuries: false,
+  equipment: false,
+  weather: false,
+};
+
+const STORAGE_KEY = 'workout-config';
+const EXPANDED_CARDS_KEY = 'workout-expanded-cards';
+
 const WorkoutConfigContext = createContext<WorkoutConfigContextType | undefined>(undefined);
 
 export const WorkoutConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [config, setConfig] = useState<WorkoutConfig>(defaultConfig);
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(defaultExpandedCards);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedConfig = localStorage.getItem(STORAGE_KEY);
+      const savedExpandedCards = localStorage.getItem(EXPANDED_CARDS_KEY);
+      
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+        setConfig(prev => ({ ...prev, ...parsedConfig }));
+      }
+      
+      if (savedExpandedCards) {
+        const parsedExpandedCards = JSON.parse(savedExpandedCards);
+        setExpandedCards(prev => ({ ...prev, ...parsedExpandedCards }));
+      }
+    } catch (error) {
+      console.error('Error loading config from localStorage:', error);
+    }
+  }, []);
+
+  // Save to localStorage whenever config changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+    } catch (error) {
+      console.error('Error saving config to localStorage:', error);
+    }
+  }, [config]);
+
+  // Save expanded cards state
+  useEffect(() => {
+    try {
+      localStorage.setItem(EXPANDED_CARDS_KEY, JSON.stringify(expandedCards));
+    } catch (error) {
+      console.error('Error saving expanded cards to localStorage:', error);
+    }
+  }, [expandedCards]);
 
   const updateConfig = useCallback((updates: Partial<WorkoutConfig>) => {
     setConfig(prev => ({ ...prev, ...updates }));
@@ -50,6 +103,7 @@ export const WorkoutConfigProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const clearConfig = useCallback(() => {
     setConfig(defaultConfig);
+    localStorage.removeItem(STORAGE_KEY);
   }, []);
 
   const getConfigCompleteness = useCallback((): ConfigCompleteness => {
@@ -100,7 +154,15 @@ export const WorkoutConfigProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [config]);
 
   return (
-    <WorkoutConfigContext.Provider value={{ config, updateConfig, clearConfig, getConfigSummary, getConfigCompleteness }}>
+    <WorkoutConfigContext.Provider value={{ 
+      config, 
+      updateConfig, 
+      clearConfig, 
+      getConfigSummary, 
+      getConfigCompleteness,
+      expandedCards,
+      setExpandedCards 
+    }}>
       {children}
     </WorkoutConfigContext.Provider>
   );

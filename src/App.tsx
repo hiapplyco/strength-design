@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AppContent } from "./components/layout/AppContent";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -8,24 +8,8 @@ import { FloatingThemeToggle } from "./components/ui/floating-theme-toggle";
 import "./index.css";
 
 function App() {
-  const [appReady, setAppReady] = useState(false);
-
-  useEffect(() => {
-    // Small delay to ensure CSS is fully loaded
-    const timer = setTimeout(() => {
-      setAppReady(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div className="min-h-screen text-foreground">
-      {!appReady && (
-        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      )}
       <ThemeProvider>
         <AuthProvider>
           <Router>

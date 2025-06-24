@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthDialog } from "@/components/auth/AuthDialog";
@@ -47,17 +46,23 @@ export const AuthRequiredWrapper: React.FC<AuthRequiredWrapperProps> = ({
   featureName,
   description
 }) => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
 
+  // Don't show anything while loading to prevent flicker
+  if (isLoading) {
+    return null;
+  }
+
+  // If user is authenticated, show the content
   if (user) {
     return <>{children}</>;
   }
 
+  // Show auth required UI for unauthenticated users
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl mx-auto">
-        {/* Main Value Proposition Card */}
         <Card className="bg-card/95 backdrop-blur-sm border-2 border-primary/20 shadow-xl">
           <CardContent className={cn(spacing.component.xl, "text-center")}>
             {/* Header */}
@@ -86,8 +91,8 @@ export const AuthRequiredWrapper: React.FC<AuthRequiredWrapperProps> = ({
               </p>
             </div>
 
+            {/* Free and Pro features sections remain the same */}
             <div className="grid md:grid-cols-2 gap-8 mb-8">
-              {/* Free Tier Value */}
               <Card className="border-2 border-green-200 bg-green-50/50">
                 <CardContent className={spacing.component.lg}>
                   <div className="flex items-center justify-center gap-2 mb-4">
@@ -117,7 +122,6 @@ export const AuthRequiredWrapper: React.FC<AuthRequiredWrapperProps> = ({
                 </CardContent>
               </Card>
 
-              {/* Pro Tier Value */}
               <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50">
                 <CardContent className={spacing.component.lg}>
                   <div className="flex items-center justify-center gap-2 mb-4">

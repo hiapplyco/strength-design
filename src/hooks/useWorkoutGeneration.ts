@@ -17,17 +17,15 @@ export const useWorkoutGeneration = () => {
     setIsGenerating(true);
     setDebugInfo(null);
 
-    // Create a promise for the loading toast
-    const generationPromise = workoutService.generateWorkout(params);
-
     try {
-      // Use the loading toast with promise handling
-      const result = await loading(generationPromise, {
-        loading: "Generating your personalized workout...",
-        success: "Workout generated successfully!",
-        error: "Failed to generate workout"
-      });
+      // Call the service directly and handle the result
+      const result = await workoutService.generateWorkout(params);
       
+      if (!result) {
+        error(new Error("No workout data received"), "Workout Generation");
+        return null;
+      }
+
       // Extract debug info if present and result is an object
       if (result && typeof result === 'object' && '_debug' in result) {
         setDebugInfo((result as any)._debug);
@@ -35,7 +33,10 @@ export const useWorkoutGeneration = () => {
         delete (result as any)._debug;
       }
 
-      return result as WeeklyWorkouts;
+      // Show success message
+      success("Workout generated successfully!");
+      
+      return result;
     } catch (generationError: any) {
       console.error('Error generating workout:', generationError);
       

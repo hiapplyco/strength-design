@@ -119,6 +119,7 @@ export const ModernWorkoutGenerator = () => {
           numberOfDays={numberOfDays}
           setNumberOfDays={setNumberOfDays}
           numberOfCycles={numberOfCycles}
+          setNumberOfCycles={setNumberOfCycles}
           onGenerate={handleGenerateWorkout}
           onClear={handleClear}
           isGenerating={isGenerating}

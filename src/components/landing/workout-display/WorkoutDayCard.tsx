@@ -41,7 +41,7 @@ export const WorkoutDayCard = ({
   };
 
   return (
-    <div className="w-full bg-card/70 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mx-auto max-w-[95%] sm:max-w-full border border-border/20 hover:border-primary/20 overflow-hidden">
+    <div className="w-full bg-card rounded-xl border border-border/30 hover:border-primary/20 transition-all duration-300 mx-auto max-w-[95%] sm:max-w-full overflow-hidden">
       <WorkoutHeader
         title={`Day ${index + 1}`}
         isExporting={isExporting}
@@ -69,8 +69,8 @@ export const WorkoutDayCard = ({
       />
       
       <div className="p-6 sm:p-8 space-y-8">
-        {/* Enhanced Search Section */}
-        <div className="bg-gradient-to-r from-slate-500/5 to-slate-500/10 rounded-lg p-4 border border-border/10">
+        {/* Clean Search Section */}
+        <div className="bg-muted/30 rounded-lg p-4 border border-border/20">
           <SearchSection
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -83,16 +83,11 @@ export const WorkoutDayCard = ({
           />
         </div>
         
-        {/* Enhanced Workout Content Sections */}
-        <div className="relative">
-          {/* Background decoration */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/2 to-transparent rounded-lg -z-10"></div>
-          
-          <WorkoutContentSection
-            workout={workout}
-            onExerciseSelect={handleExerciseSelect}
-          />
-        </div>
+        {/* Clean Workout Content Sections */}
+        <WorkoutContentSection
+          workout={workout}
+          onExerciseSelect={handleExerciseSelect}
+        />
       </div>
     </div>
   );

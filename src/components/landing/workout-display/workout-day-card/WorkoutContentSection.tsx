@@ -17,7 +17,7 @@ export const WorkoutContentSection = ({
   onExerciseSelect 
 }: WorkoutContentSectionProps) => {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <SectionWithTitle 
         title="Description" 
         content={workout.description}
@@ -87,27 +87,27 @@ const SectionWithTitle = ({ title, content, onExerciseSelect, icon: Icon, varian
 
   const variantStyles = {
     primary: {
-      header: "bg-gradient-to-r from-primary/10 to-primary/5 border-l-4 border-primary",
+      header: "bg-primary/5 border-l-4 border-primary/60",
       icon: "text-primary",
       title: "text-primary"
     },
     warmup: {
-      header: "bg-gradient-to-r from-orange-500/10 to-orange-500/5 border-l-4 border-orange-500",
+      header: "bg-orange-500/5 border-l-4 border-orange-500/60",
       icon: "text-orange-500",
       title: "text-orange-600"
     },
     workout: {
-      header: "bg-gradient-to-r from-blue-500/10 to-blue-500/5 border-l-4 border-blue-500",
+      header: "bg-blue-500/5 border-l-4 border-blue-500/60",
       icon: "text-blue-500",
       title: "text-blue-600"
     },
     strength: {
-      header: "bg-gradient-to-r from-purple-500/10 to-purple-500/5 border-l-4 border-purple-500",
+      header: "bg-purple-500/5 border-l-4 border-purple-500/60",
       icon: "text-purple-500",
       title: "text-purple-600"
     },
     notes: {
-      header: "bg-gradient-to-r from-green-500/10 to-green-500/5 border-l-4 border-green-500",
+      header: "bg-green-500/5 border-l-4 border-green-500/60",
       icon: "text-green-500",
       title: "text-green-600"
     }
@@ -116,11 +116,11 @@ const SectionWithTitle = ({ title, content, onExerciseSelect, icon: Icon, varian
   const styles = variantStyles[variant];
 
   return (
-    <div className="relative">
-      {/* Enhanced Header */}
-      <div className={`${styles.header} rounded-lg p-4 mb-4 backdrop-blur-sm border border-border/20`}>
+    <div className="space-y-3">
+      {/* Clean Header */}
+      <div className={`${styles.header} rounded-lg p-4`}>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-background/50 border border-border/30">
+          <div className="p-2 rounded-lg bg-background/80">
             <Icon className={`h-5 w-5 ${styles.icon}`} />
           </div>
           <h3 className={`text-xl font-bold ${styles.title} tracking-tight`}>
@@ -129,8 +129,8 @@ const SectionWithTitle = ({ title, content, onExerciseSelect, icon: Icon, varian
         </div>
       </div>
 
-      {/* Enhanced Content Card */}
-      <div className="bg-card/60 backdrop-blur-sm rounded-lg border border-border/20 p-6 shadow-sm hover:shadow-md transition-all duration-200">
+      {/* Clean Content */}
+      <div className="bg-card/50 rounded-lg p-6 border border-border/10">
         {renderTextWithClickableExercises(content, onExerciseSelect)}
       </div>
     </div>
@@ -144,11 +144,11 @@ interface ExerciseListSectionProps {
 
 const ExerciseListSection = ({ exercises, onExerciseSelect }: ExerciseListSectionProps) => {
   return (
-    <div className="relative">
-      {/* Enhanced Header */}
-      <div className="bg-gradient-to-r from-indigo-500/10 to-indigo-500/5 border-l-4 border-indigo-500 rounded-lg p-4 mb-4 backdrop-blur-sm border border-border/20">
+    <div className="space-y-3">
+      {/* Clean Header */}
+      <div className="bg-indigo-500/5 border-l-4 border-indigo-500/60 rounded-lg p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-background/50 border border-border/30">
+          <div className="p-2 rounded-lg bg-background/80">
             <Dumbbell className="h-5 w-5 text-indigo-500" />
           </div>
           <h3 className="text-xl font-bold text-indigo-600 tracking-tight">
@@ -157,28 +157,28 @@ const ExerciseListSection = ({ exercises, onExerciseSelect }: ExerciseListSectio
         </div>
       </div>
 
-      {/* Enhanced Exercise Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Clean Exercise Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {exercises.map((exercise, i) => (
           <div
             key={i}
-            className="group bg-card/60 backdrop-blur-sm border border-border/20 rounded-lg p-5 hover:border-primary/30 hover:shadow-md transition-all duration-200 cursor-pointer"
+            className="group bg-card border border-border/20 rounded-lg p-4 hover:border-primary/40 transition-all duration-200 cursor-pointer"
             onClick={() => onExerciseSelect(exercise.name)}
           >
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <h4 className="font-semibold text-foreground text-lg mb-1 group-hover:text-primary transition-colors">
+                <h4 className="font-semibold text-foreground text-base mb-1 group-hover:text-primary transition-colors">
                   {exercise.name}
                 </h4>
                 {exercise.sets && exercise.reps && (
-                  <div className="inline-flex items-center gap-2 bg-muted/50 rounded-full px-3 py-1">
+                  <div className="inline-flex items-center gap-2 bg-muted/40 rounded-full px-3 py-1">
                     <span className="text-sm font-medium text-muted-foreground">
                       {exercise.sets} × {exercise.reps}
                     </span>
                   </div>
                 )}
               </div>
-              <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <div className="p-1.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                 <Dumbbell className="h-4 w-4 text-primary" />
               </div>
             </div>
@@ -195,11 +195,11 @@ interface ExerciseImagesSectionProps {
 
 const ExerciseImagesSection = ({ images }: ExerciseImagesSectionProps) => {
   return (
-    <div className="relative">
-      {/* Enhanced Header */}
-      <div className="bg-gradient-to-r from-pink-500/10 to-pink-500/5 border-l-4 border-pink-500 rounded-lg p-4 mb-4 backdrop-blur-sm border border-border/20">
+    <div className="space-y-3">
+      {/* Clean Header */}
+      <div className="bg-pink-500/5 border-l-4 border-pink-500/60 rounded-lg p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-background/50 border border-border/30">
+          <div className="p-2 rounded-lg bg-background/80">
             <Image className="h-5 w-5 text-pink-500" />
           </div>
           <h3 className="text-xl font-bold text-pink-600 tracking-tight">
@@ -208,10 +208,10 @@ const ExerciseImagesSection = ({ images }: ExerciseImagesSectionProps) => {
         </div>
       </div>
 
-      {/* Enhanced Image Grid */}
-      <div className="bg-card/60 backdrop-blur-sm rounded-lg border border-border/20 p-6">
+      {/* Clean Image Grid */}
+      <div className="bg-card/50 rounded-lg border border-border/10 p-4">
         <ScrollArea className="h-[350px] rounded-lg">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {images.map((image, i) => (
               <div key={i} className="relative group">
                 <AspectRatio ratio={1}>
@@ -219,14 +219,14 @@ const ExerciseImagesSection = ({ images }: ExerciseImagesSectionProps) => {
                     <img
                       src={image}
                       alt={`Exercise ${i + 1}`}
-                      className="rounded-lg object-cover w-full h-full border border-border/20 group-hover:border-primary/30 transition-all duration-200 shadow-sm group-hover:shadow-md"
+                      className="rounded-lg object-cover w-full h-full border border-border/20 group-hover:border-primary/40 transition-all duration-200"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = 'placeholder.svg';
                       }}
                     />
                   ) : (
-                    <div className="flex items-center justify-center w-full h-full bg-muted/50 rounded-lg border border-border/20 group-hover:border-primary/30 transition-colors">
+                    <div className="flex items-center justify-center w-full h-full bg-muted/30 rounded-lg border border-border/20 group-hover:border-primary/40 transition-colors">
                       <Image className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                   )}

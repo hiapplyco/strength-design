@@ -7,6 +7,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { zIndex } from "@/lib/design-tokens";
 
 export function AppSidebar() {
   const { open, openMobile } = useSidebar();
@@ -19,7 +20,7 @@ export function AppSidebar() {
     <aside 
       ref={sidebarRef}
       className={cn(
-        "h-screen w-64 bg-background border-r border-border flex flex-col fixed top-0 left-0 z-50",
+        `h-screen w-64 bg-background border-r border-border flex flex-col fixed top-0 left-0 ${zIndex.sidebar}`,
         "transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
         "shadow-lg",
         !isVisible && "-translate-x-full"

@@ -1,3 +1,4 @@
+
 import { type ClassValue } from "clsx";
 
 /**
@@ -262,17 +263,55 @@ export const transitions = {
 } as const;
 
 // ===== Z-INDEX SCALE =====
+/**
+ * Z-Index Hierarchy Documentation
+ * 
+ * Layer Structure (from bottom to top):
+ * 
+ * BACKGROUND LAYER (-10 to 0):
+ * - behind: Elements that should appear behind content (decorative backgrounds)
+ * - base: Default content layer
+ * 
+ * CONTENT LAYER (10 to 30):
+ * - content: Interactive content elements (dropdowns, tooltips)
+ * - elevated: Content that needs to appear above other content
+ * - floating: Floating action buttons, badges
+ * 
+ * UI LAYER (30 to 50):
+ * - sticky: Sticky headers, navigation
+ * - fixed: Fixed position elements (navbar, footer)
+ * - overlay: Modal/dialog overlays and backdrops
+ * - sidebar: Sidebar navigation panel
+ * - modal: Modal dialogs, sheets, drawers
+ * 
+ * INTERACTION LAYER (50 to 70):
+ * - popover: Popovers, dropdowns, tooltips that appear above modals
+ * - sidebarToggle: Sidebar toggle button (above sidebar)
+ * - notification: Toast notifications, alerts
+ * - critical: Critical system messages, loading screens
+ */
 export const zIndex = {
+  // Background elements (-10 to 0)
   behind: "-z-10",
   base: "z-0",
-  dropdown: "z-10",
-  sticky: "z-20",
-  fixed: "z-30",
-  modalBackdrop: "z-40",
-  modal: "z-50",
-  popover: "z-50",
-  tooltip: "z-50",
-  notification: "z-60",
+  
+  // Content elements (10 to 30)
+  content: "z-10",              // Dropdowns, tooltips
+  elevated: "z-20",             // Cards that lift on hover
+  floating: "z-30",             // Floating action buttons
+  
+  // UI layer (30 to 50)
+  sticky: "z-30",               // Sticky headers
+  fixed: "z-30",                // Fixed navbar, footer
+  overlay: "z-40",              // Modal backdrops, overlays
+  sidebar: "z-45",              // Sidebar panel
+  modal: "z-50",                // Modals, dialogs, sheets
+  
+  // Interaction layer (50 to 70)
+  popover: "z-50",              // Popovers, select dropdowns
+  sidebarToggle: "z-55",        // Sidebar toggle (above sidebar)
+  notification: "z-60",         // Toast notifications
+  critical: "z-70",             // Critical system overlays
 } as const;
 
 // ===== RESPONSIVE UTILITIES =====
@@ -361,6 +400,10 @@ export const variants = {
     outline: "text-foreground",
   }
 } as const;
+
+// ===== Z-INDEX TYPE HELPERS =====
+export type ZIndexKey = keyof typeof zIndex;
+export type ZIndexValue = typeof zIndex[ZIndexKey];
 
 // ===== EXPORT TYPE HELPERS =====
 export type ColorKey = keyof typeof colors;

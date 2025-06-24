@@ -1,6 +1,7 @@
 
 import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { zIndex } from "@/lib/design-tokens";
 
 export const SidebarOverlay = () => {
   const { openMobile, setOpenMobile, setOpen } = useSidebar();
@@ -16,7 +17,7 @@ export const SidebarOverlay = () => {
   return (
     <div
       onClick={handleClose}
-      className="fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 lg:hidden"
+      className={`fixed inset-0 ${zIndex.overlay} bg-black/50 transition-opacity duration-300 lg:hidden`}
     />
   );
 };

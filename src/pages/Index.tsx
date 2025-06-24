@@ -1,3 +1,4 @@
+
 import { 
   Dumbbell, 
   MessageSquare, 
@@ -13,6 +14,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 import { width, spacing, text, layout, touch } from "@/utils/responsive";
 import { AuthDialog } from "@/components/auth/AuthDialog";

@@ -3,49 +3,15 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PlayerDashboard } from "@/components/looker-dashboard/PlayerDashboard";
-import { LoadingSpinner } from "@/components/looker-dashboard/LoadingSpinner";
+import { LoadingState } from "@/components/ui/loading-states/LoadingState";
+import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { typography, spacing } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function SlamPlayerProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [playerData, setPlayerData] = useState<any>(null);
   const { toast } = useToast();
-
-  // Add CSS to hide the sidebar and make the dashboard full-screen
-  useEffect(() => {
-    // Hide sidebar and any other app chrome elements
-    const hideAppChrome = () => {
-      // Create a style element to inject custom CSS
-      const style = document.createElement('style');
-      style.innerHTML = `
-        /* Hide sidebar, navbar and other app elements */
-        aside, nav, .sidebar-toggle { 
-          display: none !important; 
-        }
-        
-        /* Make the dashboard take full width */
-        main, .looker-container { 
-          width: 100% !important;
-          max-width: 100% !important;
-          padding-left: 0 !important;
-          margin-left: 0 !important;
-        }
-        
-        /* Remove any margins that might be causing spacing */
-        body, #root, main > div {
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-      `;
-      document.head.appendChild(style);
-      
-      return () => {
-        document.head.removeChild(style);
-      };
-    };
-    
-    const cleanup = hideAppChrome();
-    return cleanup;
-  }, []);
 
   useEffect(() => {
     const fetchPlayerData = async () => {
@@ -166,15 +132,6 @@ export default function SlamPlayerProfile() {
     fetchPlayerData();
   }, [toast]);
 
-  // Display the dashboard fullscreen without any app styling
-  if (isLoading) {
-    return (
-      <div className="looker-fullscreen">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   const newsData = {
     title: "David Fuchs Enters Transfer Portal",
     details: "David Fuchs, a sophomore forward, has entered the transfer portal. He averaged 7.4 points and 7.5 rebounds per game across 29 games this season.",
@@ -189,20 +146,58 @@ export default function SlamPlayerProfile() {
   // URI's official photo from the gorhody.com website
   const playerPhotoUrl = "https://gorhody.com/images/2024/9/26/websize-fuchs.png";
 
-  return (
-    <div className="looker-fullscreen">
-      {playerData ? (
-        <PlayerDashboard 
-          playerData={playerData} 
-          newsData={newsData}
-          playerPhotoUrl={playerPhotoUrl} 
-        />
-      ) : (
-        <div className="looker-empty-state">
-          <h2>No Data Available</h2>
-          <p>Could not find dashboard data for this player.</p>
+  // Display loading state within the StandardPageLayout
+  if (isLoading) {
+    return (
+      <StandardPageLayout
+        maxWidth="full"
+        noPadding={true}
+        className="bg-[#f8f9fa]"
+      >
+        <div className="flex items-center justify-center h-full">
+          <LoadingState 
+            variant="spinner" 
+            size="lg"
+            message="Loading player dashboard..."
+            className="py-20"
+          />
         </div>
-      )}
-    </div>
+      </StandardPageLayout>
+    );
+  }
+
+  // Display empty state if no data
+  if (!playerData) {
+    return (
+      <StandardPageLayout
+        title="Player Profile"
+        maxWidth="full"
+        noPadding={true}
+        className="bg-[#f8f9fa]"
+      >
+        <div className="flex flex-col items-center justify-center h-full py-20">
+          <h2 className={cn(typography.display.h4, "mb-4")}>No Data Available</h2>
+          <p className={cn(typography.body.large, "text-muted-foreground")}>
+            Could not find dashboard data for this player.
+          </p>
+        </div>
+      </StandardPageLayout>
+    );
+  }
+
+  // Display the dashboard with StandardPageLayout wrapper
+  // Note: The looker-dashboard class is retained to apply Google Looker styling to the dashboard content
+  return (
+    <StandardPageLayout
+      maxWidth="full"
+      noPadding={true}
+      className="bg-[#f8f9fa] looker-dashboard"
+    >
+      <PlayerDashboard 
+        playerData={playerData} 
+        newsData={newsData}
+        playerPhotoUrl={playerPhotoUrl} 
+      />
+    </StandardPageLayout>
   );
 }

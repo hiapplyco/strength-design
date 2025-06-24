@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { LoadingState } from "@/components/ui/loading-states/LoadingState";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { FileX, Home } from "lucide-react";
+import { typography } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 export default function SharedDocument() {
   const [document, setDocument] = useState<{ content: string; title?: string } | null>(null);
@@ -46,43 +52,59 @@ export default function SharedDocument() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <StandardPageLayout maxWidth="4xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <LoadingState 
+            variant="spinner" 
+            message="Loading document..." 
+            size="lg"
+          />
+        </div>
+      </StandardPageLayout>
     );
   }
 
   if (!document) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card className="p-6 text-center">
-          <h1 className="text-2xl font-bold mb-4">Document Not Found</h1>
-          <p className="text-muted-foreground mb-6">
-            The document you're looking for doesn't exist or has been removed.
-          </p>
-          <Button asChild>
-            <a href="/" className="inline-block">
-              Go to Homepage
-            </a>
-          </Button>
+      <StandardPageLayout 
+        title="Document Not Found"
+        maxWidth="4xl"
+      >
+        <Card variant="ghost" className="mt-8">
+          <EmptyState
+            icon={FileX}
+            title="Document Not Found"
+            description="The document you're looking for doesn't exist or has been removed."
+            size="lg"
+            action={
+              <Button asChild>
+                <a href="/" className="inline-flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Go to Homepage
+                </a>
+              </Button>
+            }
+          />
         </Card>
-      </div>
+      </StandardPageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <Card className="max-w-4xl mx-auto p-6 bg-background">
-          {document.title && (
-            <h1 className="text-3xl font-bold mb-6">{document.title}</h1>
+    <StandardPageLayout
+      title={document.title || "Shared Document"}
+      maxWidth="4xl"
+      showBack
+    >
+      <Card variant="elevated" className="p-8">
+        <div 
+          className={cn(
+            "prose prose-invert max-w-none",
+            typography.body.default
           )}
-          <div 
-            className="prose prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: document.content }}
-          />
-        </Card>
-      </div>
-    </div>
+          dangerouslySetInnerHTML={{ __html: document.content }}
+        />
+      </Card>
+    </StandardPageLayout>
   );
 }

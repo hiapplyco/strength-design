@@ -4,7 +4,12 @@ import { GenerateWorkoutInput } from "@/components/GenerateWorkoutInput";
 import { useToast } from "@/hooks/use-toast";
 import { WorkoutDisplay } from "@/components/landing/WorkoutDisplay";
 import { AuthDialog } from "@/components/auth/AuthDialog";
-import { Loader2 } from "lucide-react";
+import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { LoadingState } from "@/components/ui/loading-states/LoadingState";
+import { Card } from "@/components/ui/card";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { animations, spacing } from "@/lib/design-tokens";
+import { motion } from "framer-motion";
 
 interface WorkoutDay {
   description: string;
@@ -118,39 +123,69 @@ export default function BestAppOfDay() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-24">
-      <GenerateWorkoutInput
-        generatePrompt={generatePrompt}
-        setGeneratePrompt={setGeneratePrompt}
-        handleGenerateWorkout={handleGenerateWorkout}
-        isGenerating={isGenerating}
-        setIsGenerating={setIsGenerating}
-        showGenerateInput={showGenerateInput}
-        setShowGenerateInput={setShowGenerateInput}
-        numberOfDays={7}
-        setNumberOfDays={() => {}}
-      />
-      {workouts && (
-        <WorkoutDisplay
-          workouts={workouts}
-          resetWorkouts={resetWorkouts}
-          isExporting={isExporting}
-          setIsExporting={setIsExporting}
-        />
-      )}
+    <StandardPageLayout
+      title="Best App of the Day"
+      description="Generate your personalized weekly workout plan with AI"
+      maxWidth="5xl"
+    >
+      <div className={`space-y-8`}>
+        {/* Workout Generation Section */}
+        <SectionContainer
+          variant={workouts ? "ghost" : "default"}
+          spacing="lg"
+        >
+          <GenerateWorkoutInput
+            generatePrompt={generatePrompt}
+            setGeneratePrompt={setGeneratePrompt}
+            handleGenerateWorkout={handleGenerateWorkout}
+            isGenerating={isGenerating}
+            setIsGenerating={setIsGenerating}
+            showGenerateInput={showGenerateInput}
+            setShowGenerateInput={setShowGenerateInput}
+            numberOfDays={7}
+            setNumberOfDays={() => {}}
+          />
+        </SectionContainer>
+
+        {/* Workouts Display Section */}
+        {workouts && (
+          <motion.div {...animations.slideUp}>
+            <SectionContainer spacing="lg">
+              <WorkoutDisplay
+                workouts={workouts}
+                resetWorkouts={resetWorkouts}
+                isExporting={isExporting}
+                setIsExporting={setIsExporting}
+              />
+            </SectionContainer>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Auth Dialog */}
       <AuthDialog 
         isOpen={showAuthDialog}
         onOpenChange={setShowAuthDialog}
         onSuccess={handleAuthSuccess}
       />
+
+      {/* Loading State Overlay */}
       {isGenerating && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-lg font-medium">Generating your workout plan...</p>
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+        >
+          <Card variant="elevated" className={spacing.component.xl}>
+            <LoadingState
+              variant="dots"
+              size="lg"
+              message="Generating your personalized workout plan..."
+            />
+          </Card>
+        </motion.div>
       )}
-    </div>
+    </StandardPageLayout>
   );
 }

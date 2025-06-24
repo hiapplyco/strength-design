@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { WorkoutGenerating } from '@/components/ui/loading-states';
-import { StandardPageLayout } from '@/components/ui/standard-page-layout';
+import { StandardPageLayout } from '@/components/layout/StandardPageLayout';
 import { cn } from '@/lib/utils';
 import { 
   colors, 
@@ -188,7 +189,7 @@ export default function DesignSystemPlayground() {
               <Badge variant="outline">Outline</Badge>
               <Badge variant="destructive">Destructive</Badge>
               <Badge variant="success">Success</Badge>
-              <Badge variant="warning">Warning</Badge>
+              <Badge variant="default">Warning</Badge>
             </div>
           </CardContent>
         </Card>

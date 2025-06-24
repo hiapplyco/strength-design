@@ -18,6 +18,10 @@ export default function Pricing() {
     setIsSubscribed(subscriptionStatus?.isSubscribed || false);
   }, [subscriptionStatus]);
 
+  const handleSubscriptionClick = () => {
+    handleSubscription("personalized");
+  };
+
   const header = (
     <div className={`${spacing.section} text-center ${spacing.container}`}>
       <h1 className={`${text.title} font-bold text-primary`}>Upgrade to Pro</h1>
@@ -42,7 +46,7 @@ export default function Pricing() {
         ) : (
           <div className={`${width.full} ${layout.noOverflow}`}>
             <PricingCards 
-              onSubscribeClick={handleSubscription}
+              onSubscribeClick={handleSubscriptionClick}
               isSubscribing={loadingStates.personalized}
             />
           </div>

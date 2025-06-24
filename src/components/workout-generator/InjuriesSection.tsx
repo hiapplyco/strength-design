@@ -22,7 +22,7 @@ export function InjuriesSection({
 }: InjuriesSectionProps) {
   return (
     <ExpandableSectionContainer
-      icon={AlertCircle}
+      icon={<AlertCircle className="h-5 w-5" />}
       title="Injuries & Limitations"
       renderTooltip={renderTooltip}
       fileUploadSection={

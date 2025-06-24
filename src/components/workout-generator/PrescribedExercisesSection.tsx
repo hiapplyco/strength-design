@@ -22,7 +22,7 @@ export function PrescribedExercisesSection({
 }: PrescribedExercisesSectionProps) {
   return (
     <ExpandableSectionContainer
-      icon={Target}
+      icon={<Target className="h-5 w-5" />}
       title="Prescribed Exercises & Goals"
       renderTooltip={renderTooltip}
       fileUploadSection={

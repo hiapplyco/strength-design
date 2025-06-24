@@ -25,7 +25,7 @@ export function TestimonialCard({ name, role, testimonial, imagePath, fallbackIn
         <div className="flex flex-col items-center space-y-2 mt-auto">
           <Avatar className="w-16 h-16">
             <AvatarImage 
-              src={`https://images.unsplash.com/${imagePath}?w=150&h=150&fit=crop&crop=face`}
+              src={imagePath}
               alt={name}
             />
             <AvatarFallback className="bg-primary/10 text-primary font-semibold">

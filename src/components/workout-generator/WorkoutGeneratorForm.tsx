@@ -1,9 +1,9 @@
-
 import React from "react";
 import { WorkoutPresets } from "./WorkoutPresets";
 import { WeatherSection } from "./WeatherSection";
 import { ExerciseSection } from "./ExerciseSection";
 import { FitnessLevelSection } from "./FitnessLevelSection";
+import { TrainingScheduleSection } from "./TrainingScheduleSection";
 import { GoalsAndInjuriesSection } from "./GoalsAndInjuriesSection";
 import { GenerateSection } from "./GenerateSection";
 import { TooltipWrapper } from "./TooltipWrapper";
@@ -39,6 +39,7 @@ interface WorkoutGeneratorFormProps {
   numberOfDays: number;
   setNumberOfDays: (value: number) => void;
   numberOfCycles: number;
+  setNumberOfCycles: (value: number) => void;
   
   // Form action props
   onGenerate: () => void;
@@ -76,6 +77,7 @@ export function WorkoutGeneratorForm({
   numberOfDays,
   setNumberOfDays,
   numberOfCycles,
+  setNumberOfCycles,
   
   // Form action props
   onGenerate,
@@ -110,11 +112,21 @@ export function WorkoutGeneratorForm({
           <WorkoutPresets onSelectPreset={handlePresetSelect} />
         </section>
 
-        {/* Fitness Level Section - moved here */}
+        {/* Fitness Level Section */}
         <section className="jupyter-cell">
           <FitnessLevelSection
             fitnessLevel={fitnessLevel}
             setFitnessLevel={setFitnessLevel}
+          />
+        </section>
+
+        {/* Training Schedule Section - NEW */}
+        <section className="jupyter-cell">
+          <TrainingScheduleSection
+            numberOfDays={numberOfDays}
+            setNumberOfDays={setNumberOfDays}
+            numberOfCycles={numberOfCycles}
+            setNumberOfCycles={setNumberOfCycles}
           />
         </section>
 

@@ -1,209 +1,155 @@
-
-import React, { useState, useEffect } from 'react';
-import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
-import { FitnessLevelCard } from './cards/FitnessLevelCard';
-import { GoalsCard } from './cards/GoalsCard';
-import { TrainingScheduleCard } from './cards/TrainingScheduleCard';
-import { EquipmentCard } from './cards/EquipmentCard';
-import { InjuriesCard } from './cards/InjuriesCard';
-import { WeatherCard } from './cards/WeatherCard';
-import { GenerateWorkoutButton } from './GenerateWorkoutButton';
-import { WorkoutGenerationOverlay } from './WorkoutGenerationOverlay';
-import { WorkoutReplacementDialog } from '../../WorkoutReplacementDialog';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Calendar, Dumbbell, Target, Clock, ChevronRight } from 'lucide-react';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
+import { useWorkoutSessions } from '@/hooks/useWorkoutSessions';
 import { useWorkoutReplacement } from '@/hooks/useWorkoutReplacement';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import type { Exercise } from '@/components/exercise-search/types';
-import type { WeatherData } from '@/types/weather';
+import { WorkoutReplacementDialog } from '../WorkoutReplacementDialog';
 import type { WeeklyWorkouts } from '@/types/fitness';
+import { format } from 'date-fns';
 
-const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
+interface ModernWorkoutFormProps {
+  onClose: () => void;
+}
 
-export const ModernWorkoutForm: React.FC = () => {
-  const { config, updateConfig } = useWorkoutConfig();
-  const [recentlyUpdated, setRecentlyUpdated] = useState<string[]>([]);
-  const [showReplacementDialog, setShowReplacementDialog] = useState(false);
-  const [pendingWorkout, setPendingWorkout] = useState<WeeklyWorkouts | null>(null);
-  
-  const { generateWorkout, isGenerating } = useWorkoutGeneration();
-  const { replaceWorkouts, isReplacing, getScheduledWorkoutCount } = useWorkoutReplacement();
-  const navigate = useNavigate();
-  const { session } = useAuth();
+export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose }) => {
+  const [selectedTab, setSelectedTab] = useState('details');
+  const { generatedWorkout, isLoading, generateWorkout } = useWorkoutGeneration();
+  const { getScheduledWorkoutCount } = useWorkoutReplacement();
+  const { replaceWorkouts, isReplacing } = useWorkoutReplacement();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleExerciseSelect = (exercise: Exercise) => {
-    const isSelected = config.selectedExercises.some(e => e.id === exercise.id);
-    if (isSelected) {
-      updateConfig({
-        selectedExercises: config.selectedExercises.filter(e => e.id !== exercise.id)
-      });
-    } else {
-      updateConfig({
-        selectedExercises: [...config.selectedExercises, exercise]
-      });
-    }
+  const existingWorkoutCount = getScheduledWorkoutCount();
+
+  const handleGenerateWorkout = async () => {
+    await generateWorkout();
   };
 
-  const handleWeatherUpdate = (weatherData: WeatherData | null, weatherPrompt: string) => {
-    updateConfig({ weatherData, weatherPrompt });
-    markFieldUpdated('weather');
-  };
-
-  const markFieldUpdated = (fieldName: string) => {
-    setRecentlyUpdated(prev => [...prev, fieldName]);
-  };
-
-  const handleFitnessLevelChange = (value: string) => {
-    updateConfig({ fitnessLevel: value });
-    markFieldUpdated('fitnessLevel');
-  };
-
-  const handlePrescribedExercisesChange = (value: string) => {
-    updateConfig({ prescribedExercises: value });
-    markFieldUpdated('prescribedExercises');
-  };
-
-  const handleNumberOfDaysChange = (value: number) => {
-    updateConfig({ numberOfDays: value });
-    markFieldUpdated('schedule');
-  };
-
-  const handleNumberOfCyclesChange = (value: number) => {
-    updateConfig({ numberOfCycles: value });
-    markFieldUpdated('schedule');
-  };
-
-  const handleInjuriesChange = (value: string) => {
-    updateConfig({ injuries: value });
-    markFieldUpdated('injuries');
-  };
-
-  const handleConfirmReplacement = async () => {
-    if (!pendingWorkout) return;
-    
-    const success = await replaceWorkouts(pendingWorkout);
-    if (success) {
-      setShowReplacementDialog(false);
-      setPendingWorkout(null);
-      navigate('/journal');
-    }
-  };
-
-  const handleGenerate = async () => {
-    try {
-      const result = await generateWorkout({
-        prompt: config.prescribedExercises || 'Create a comprehensive workout program',
-        weatherPrompt: config.weatherPrompt || '',
-        selectedExercises: config.selectedExercises,
-        fitnessLevel: config.fitnessLevel,
-        prescribedExercises: config.prescribedExercises,
-        injuries: config.injuries || undefined,
-        numberOfDays: config.numberOfDays,
-        numberOfCycles: config.numberOfCycles
-      });
-
-      if (result) {
-        // Store the workout data in localStorage
-        const storageKey = session?.user?.id 
-          ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
-          : WORKOUT_STORAGE_KEY;
-        
-        localStorage.setItem(storageKey, JSON.stringify(result));
-        
-        // Check if user has existing scheduled workouts
-        const scheduledCount = getScheduledWorkoutCount();
-        
-        if (scheduledCount > 0) {
-          // Show replacement dialog
-          setPendingWorkout(result);
-          setShowReplacementDialog(true);
-        } else {
-          // Navigate directly to results
-          navigate('/workout-results', { 
-            state: { 
-              workouts: result,
-              isNewWorkout: true 
-            } 
-          });
-        }
+  const handleConfirmReplace = async () => {
+    if (generatedWorkout) {
+      const success = await replaceWorkouts(generatedWorkout);
+      if (success) {
+        setIsDialogOpen(false);
+        onClose();
       }
-    } catch (error) {
-      console.error('Failed to generate workout:', error);
     }
   };
 
-  // Track when fields are updated to show visual feedback
-  useEffect(() => {
-    const timer = setTimeout(() => setRecentlyUpdated([]), 3000);
-    return () => clearTimeout(timer);
-  }, [recentlyUpdated]);
+  const handleCancel = () => {
+    setIsDialogOpen(false);
+  };
+
+  const renderWorkoutDetails = () => {
+    if (!generatedWorkout) {
+      return <p className="text-muted-foreground">No workout details available.</p>;
+    }
+
+    const workoutDays = Object.keys(generatedWorkout).filter(key => key !== '_meta');
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Workout Plan Overview</h3>
+        <p className="text-muted-foreground">{generatedWorkout._meta?.summary}</p>
+
+        <Separator />
+
+        <h4 className="text-md font-semibold">Weekly Schedule</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {workoutDays.map((day, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <CardTitle>{day.replace(/day(\d+)/, 'Day $1')}</CardTitle>
+                <CardDescription>
+                  {format(new Date(), 'MMMM dd, yyyy')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  {generatedWorkout[day]?.exercises?.length} Exercises
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-6 relative">
-      {/* Loading overlay during generation */}
-      <WorkoutGenerationOverlay isVisible={isGenerating || isReplacing} />
+    <div className="w-full">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">AI Workout Generator</CardTitle>
+          <CardDescription>
+            Customize your workout plan with AI-powered suggestions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Tabs defaultValue="details" className="space-y-4" value={selectedTab} onValueChange={setSelectedTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="details" className="flex items-center gap-2">
+                <Dumbbell className="h-4 w-4" />
+                Workout Details
+              </TabsTrigger>
+              <TabsTrigger value="schedule" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Schedule Preview
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="details" className="space-y-2">
+              {renderWorkoutDetails()}
+            </TabsContent>
+            <TabsContent value="schedule">
+              <p className="text-muted-foreground">
+                A visual representation of your workout schedule will be displayed here.
+              </p>
+            </TabsContent>
+          </Tabs>
 
-      {/* Form content - disabled during generation */}
-      <div className={isGenerating || isReplacing ? 'pointer-events-none opacity-50' : ''}>
-        <FitnessLevelCard
-          fitnessLevel={config.fitnessLevel}
-          onFitnessLevelChange={handleFitnessLevelChange}
-        />
+          <Separator />
 
-        <GoalsCard
-          prescribedExercises={config.prescribedExercises}
-          onPrescribedExercisesChange={handlePrescribedExercisesChange}
-        />
+          <div className="flex justify-between items-center">
+            <div>
+              <Badge variant="secondary">
+                <Clock className="mr-2 h-4 w-4" />
+                AI Powered
+              </Badge>
+            </div>
+            <Button
+              onClick={() => {
+                if (existingWorkoutCount > 0) {
+                  setIsDialogOpen(true);
+                } else {
+                  handleConfirmReplace();
+                }
+              }}
+              disabled={isLoading || isReplacing}
+            >
+              {isLoading || isReplacing ? (
+                <>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  Replace Workouts <ChevronRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TrainingScheduleCard
-          numberOfDays={config.numberOfDays}
-          numberOfCycles={config.numberOfCycles}
-          onNumberOfDaysChange={handleNumberOfDaysChange}
-          onNumberOfCyclesChange={handleNumberOfCyclesChange}
-        />
-
-        <EquipmentCard
-          selectedExercises={config.selectedExercises}
-          onExerciseSelect={handleExerciseSelect}
-        />
-
-        <WeatherCard
-          weatherData={config.weatherData}
-          onWeatherUpdate={handleWeatherUpdate}
-          numberOfDays={config.numberOfDays}
-        />
-
-        <InjuriesCard
-          injuries={config.injuries}
-          onInjuriesChange={handleInjuriesChange}
-        />
-
-        <GenerateWorkoutButton
-          onGenerate={handleGenerate}
-          isGenerating={isGenerating || isReplacing}
-        />
-      </div>
-
-      {/* Workout Replacement Dialog */}
       <WorkoutReplacementDialog
-        open={showReplacementDialog}
-        onOpenChange={setShowReplacementDialog}
-        newWorkout={pendingWorkout || {} as WeeklyWorkouts}
-        existingWorkoutCount={getScheduledWorkoutCount()}
-        onConfirmReplace={handleConfirmReplacement}
-        onCancel={() => {
-          setShowReplacementDialog(false);
-          // Navigate to results without replacing
-          if (pendingWorkout) {
-            navigate('/workout-results', { 
-              state: { 
-                workouts: pendingWorkout,
-                isNewWorkout: true 
-              } 
-            });
-          }
-          setPendingWorkout(null);
-        }}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        newWorkout={generatedWorkout || {}} as WeeklyWorkouts
+        existingWorkoutCount={existingWorkoutCount}
+        onConfirmReplace={handleConfirmReplace}
+        onCancel={handleCancel}
       />
     </div>
   );

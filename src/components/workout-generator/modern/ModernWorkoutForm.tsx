@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Calendar, Dumbbell, Target, Clock, ChevronRight } from 'lucide-react';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
-import { useWorkoutSessions } from '@/hooks/useWorkoutSessions';
 import { useWorkoutReplacement } from '@/hooks/useWorkoutReplacement';
 import { WorkoutReplacementDialog } from '../WorkoutReplacementDialog';
 import type { WeeklyWorkouts } from '@/types/fitness';
@@ -18,15 +18,32 @@ interface ModernWorkoutFormProps {
 
 export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose }) => {
   const [selectedTab, setSelectedTab] = useState('details');
-  const { generatedWorkout, isLoading, generateWorkout } = useWorkoutGeneration();
-  const { getScheduledWorkoutCount } = useWorkoutReplacement();
-  const { replaceWorkouts, isReplacing } = useWorkoutReplacement();
+  const [generatedWorkout, setGeneratedWorkout] = useState<WeeklyWorkouts | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { generateWorkout } = useWorkoutGeneration();
+  const { getScheduledWorkoutCount, replaceWorkouts, isReplacing } = useWorkoutReplacement();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const existingWorkoutCount = getScheduledWorkoutCount();
 
   const handleGenerateWorkout = async () => {
-    await generateWorkout();
+    setIsLoading(true);
+    try {
+      const workout = await generateWorkout({
+        numberOfDays: 5,
+        numberOfCycles: 1,
+        fitnessLevel: 'intermediate',
+        weatherPrompt: '',
+        prescribedExercises: '',
+        injuries: '',
+        prompt: 'Generate a balanced workout plan'
+      });
+      setGeneratedWorkout(workout);
+    } catch (error) {
+      console.error('Error generating workout:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleConfirmReplace = async () => {
@@ -45,7 +62,14 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
 
   const renderWorkoutDetails = () => {
     if (!generatedWorkout) {
-      return <p className="text-muted-foreground">No workout details available.</p>;
+      return (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground mb-4">No workout generated yet.</p>
+          <Button onClick={handleGenerateWorkout} disabled={isLoading}>
+            {isLoading ? 'Generating...' : 'Generate Workout'}
+          </Button>
+        </div>
+      );
     }
 
     const workoutDays = Object.keys(generatedWorkout).filter(key => key !== '_meta');
@@ -69,7 +93,7 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  {generatedWorkout[day]?.exercises?.length} Exercises
+                  {generatedWorkout[day]?.exercises?.length || 0} Exercises
                 </p>
               </CardContent>
             </Card>
@@ -127,7 +151,7 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
                   handleConfirmReplace();
                 }
               }}
-              disabled={isLoading || isReplacing}
+              disabled={isLoading || isReplacing || !generatedWorkout}
             >
               {isLoading || isReplacing ? (
                 <>
@@ -146,7 +170,7 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
       <WorkoutReplacementDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        newWorkout={generatedWorkout || {}} as WeeklyWorkouts
+        newWorkout={generatedWorkout || {} as WeeklyWorkouts}
         existingWorkoutCount={existingWorkoutCount}
         onConfirmReplace={handleConfirmReplace}
         onCancel={handleCancel}

@@ -7,6 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { TestimonialCard } from "./TestimonialCard";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const testimonials = [
   {
@@ -41,7 +42,7 @@ const testimonials = [
 
 export function TestimonialsCarousel() {
   return (
-    <div className="relative">
+    <div className="relative max-w-7xl mx-auto">
       <Carousel
         opts={{
           align: "start",
@@ -49,20 +50,37 @@ export function TestimonialsCarousel() {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-2 md:-ml-4">
+        <CarouselContent className="-ml-4 md:-ml-6">
           {testimonials.map((testimonial, index) => (
-            <CarouselItem key={index} className="pl-2 md:pl-4 basis-full md:basis-1/2">
+            <CarouselItem key={index} className="pl-4 md:pl-6 basis-full md:basis-1/2 lg:basis-1/3">
               <TestimonialCard {...testimonial} />
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
+        
+        {/* Enhanced navigation buttons */}
+        <CarouselPrevious className="hidden md:flex -left-6 bg-card/80 backdrop-blur-sm border-primary/20 hover:bg-primary hover:text-white transition-all duration-300 shadow-lg">
+          <ChevronLeft className="h-5 w-5" />
+        </CarouselPrevious>
+        <CarouselNext className="hidden md:flex -right-6 bg-card/80 backdrop-blur-sm border-primary/20 hover:bg-primary hover:text-white transition-all duration-300 shadow-lg">
+          <ChevronRight className="h-5 w-5" />
+        </CarouselNext>
       </Carousel>
       
-      {/* Mobile swipe indicator */}
-      <div className="flex justify-center mt-4 md:hidden">
-        <p className="text-xs text-muted-foreground">Swipe to see more testimonials</p>
+      {/* Enhanced mobile indicator */}
+      <div className="flex flex-col items-center mt-8 md:hidden space-y-3">
+        <div className="flex gap-2">
+          {testimonials.map((_, index) => (
+            <div key={index} className="w-2 h-2 rounded-full bg-primary/30"></div>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+          <div className="flex gap-1">
+            <ChevronLeft className="w-4 h-4 text-primary/60" />
+            <ChevronRight className="w-4 h-4 text-primary/60" />
+          </div>
+          <p className="text-xs text-primary font-medium">Swipe to explore</p>
+        </div>
       </div>
     </div>
   );

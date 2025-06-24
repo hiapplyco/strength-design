@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { Search } from "lucide-react";
 
 interface ExerciseSearchProps {
-  onExerciseSelect?: (exercise: Exercise) => void;
+  onExerciseSelect?: (exercise: Exercise, action?: 'add' | 'remove') => void;
   selectedExercises?: Exercise[];
 }
 
@@ -17,10 +17,10 @@ export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: Exe
   const handleExercisesSelect = (exercises: Exercise[]) => {
     console.log('Exercises selected from search:', exercises);
     if (onExerciseSelect) {
-      // Add each exercise individually
+      // Add each exercise individually with explicit 'add' action
       exercises.forEach(exercise => {
-        console.log('Adding exercise:', exercise.name);
-        onExerciseSelect(exercise);
+        console.log('Adding exercise with add action:', exercise.name);
+        onExerciseSelect(exercise, 'add');
       });
     }
   };

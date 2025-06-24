@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
+import { VoiceGeneratingLoading } from "@/components/publish-program/VoiceGeneratingLoading";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Settings, Mic2 } from "lucide-react";
@@ -61,80 +61,79 @@ export const VoiceGenerationDialog = ({
           Configure voice settings and generate narration
         </DialogDescription>
         
-        <div className="space-y-4">
-          {/* Auto-Regeneration Toggle */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Auto-Regenerate Script</Label>
-              <p className="text-xs text-muted-foreground">
-                Automatically update narration when content changes
-              </p>
-            </div>
-            <Switch
-              checked={autoRegenEnabled}
-              onCheckedChange={onAutoRegenChange}
-            />
+        {isGenerating ? (
+          <div className="py-8">
+            <VoiceGeneratingLoading fullScreen={false} />
           </div>
-
-          {/* Voice Selection */}
-          <div className="space-y-2">
-            <Label>Select Voice</Label>
-            <div className="grid grid-cols-2 gap-2">
-              {quickVoices.map((voice) => (
-                <Button
-                  key={voice.id}
-                  variant={selectedVoiceId === voice.id ? "default" : "outline"}
-                  onClick={() => onVoiceChange(voice.id)}
-                  className="text-xs"
-                >
-                  {voice.name}
-                </Button>
-              ))}
+        ) : (
+          <div className="space-y-4">
+            {/* Auto-Regeneration Toggle */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Auto-Regenerate Script</Label>
+                <p className="text-xs text-muted-foreground">
+                  Automatically update narration when content changes
+                </p>
+              </div>
+              <Switch
+                checked={autoRegenEnabled}
+                onCheckedChange={onAutoRegenChange}
+              />
             </div>
-            
-            <Button
-              variant="outline"
-              onClick={() => setShowVoiceCloning(true)}
-              className="w-full text-xs"
-            >
-              <Settings className="h-3 w-3 mr-1" />
-              More Voices & Clone Voice
-            </Button>
-          </div>
 
-          {/* Generate Button */}
-          <Button
-            onClick={() => onGenerateNarration(selectedVoiceId)}
-            disabled={isGenerating}
-            className="w-full"
-          >
-            {isGenerating ? (
-              <>
-                <LoadingSpinner />
-                <span className="ml-2">Generating...</span>
-              </>
-            ) : (
-              'Generate Narration'
-            )}
-          </Button>
-          
-          {/* Audio Preview & Download */}
-          {audioUrl && !isGenerating && (
+            {/* Voice Selection */}
             <div className="space-y-2">
-              <audio controls className="w-full">
-                <source src={audioUrl} type="audio/mpeg" />
-                Your browser does not support the audio element.
-              </audio>
+              <Label>Select Voice</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {quickVoices.map((voice) => (
+                  <Button
+                    key={voice.id}
+                    variant={selectedVoiceId === voice.id ? "default" : "outline"}
+                    onClick={() => onVoiceChange(voice.id)}
+                    className="text-xs"
+                  >
+                    {voice.name}
+                  </Button>
+                ))}
+              </div>
+              
               <Button
                 variant="outline"
-                onClick={handleDownload}
-                className="w-full"
+                onClick={() => setShowVoiceCloning(true)}
+                className="w-full text-xs"
               >
-                Download Audio
+                <Settings className="h-3 w-3 mr-1" />
+                More Voices & Clone Voice
               </Button>
             </div>
-          )}
-        </div>
+
+            {/* Generate Button */}
+            <Button
+              onClick={() => onGenerateNarration(selectedVoiceId)}
+              disabled={isGenerating}
+              className="w-full"
+            >
+              Generate Narration
+            </Button>
+            
+            {/* Audio Preview & Download */}
+            {audioUrl && !isGenerating && (
+              <div className="space-y-2">
+                <audio controls className="w-full">
+                  <source src={audioUrl} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+                <Button
+                  variant="outline"
+                  onClick={handleDownload}
+                  className="w-full"
+                >
+                  Download Audio
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

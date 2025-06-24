@@ -1,14 +1,14 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Dumbbell, Zap } from 'lucide-react';
+import { ArrowLeft, Dumbbell } from 'lucide-react';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
 import { useAddExerciseEntry } from '@/hooks/useAddExerciseEntry';
-import { Card } from '@/components/ui/card';
+import { ExerciseGenerationForm } from './exercise-search/ExerciseGenerationForm';
+import { WorkoutDisplay } from './exercise-search/WorkoutDisplay';
+import { ExerciseSelectionForm } from './exercise-search/ExerciseSelectionForm';
+import { estimateCalories, extractExercisesFromWorkout } from './exercise-search/calorieEstimation';
 
 interface ExerciseSearchDialogProps {
   isOpen: boolean;
@@ -86,56 +86,6 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
     setCustomCalories('');
   };
 
-  const estimateCalories = (exerciseName: string, minutes: number): number => {
-    // Simple calorie estimation based on exercise type
-    const caloriesPerMinute: { [key: string]: number } = {
-      'running': 10,
-      'cycling': 8,
-      'swimming': 9,
-      'walking': 4,
-      'yoga': 3,
-      'weightlifting': 6,
-      'cardio': 8,
-      'strength': 6,
-      'hiit': 12,
-      'default': 5
-    };
-
-    const exerciseType = Object.keys(caloriesPerMinute).find(type => 
-      exerciseName.toLowerCase().includes(type)
-    ) || 'default';
-
-    return caloriesPerMinute[exerciseType] * minutes;
-  };
-
-  const extractExercisesFromWorkout = (workout: any) => {
-    const exercises: any[] = [];
-    
-    if (workout.days && workout.days.length > 0) {
-      const day = workout.days[0];
-      
-      // Extract from warmup
-      if (day.warmup) {
-        const warmupExercises = day.warmup.match(/\d+\.\s*([^:\n]+)/g) || [];
-        warmupExercises.forEach((exercise: string) => {
-          const name = exercise.replace(/\d+\.\s*/, '').trim();
-          exercises.push({ name, type: 'warmup', description: name });
-        });
-      }
-
-      // Extract from main workout
-      if (day.workout) {
-        const workoutExercises = day.workout.match(/\d+\.\s*([^:\n]+)/g) || [];
-        workoutExercises.forEach((exercise: string) => {
-          const name = exercise.replace(/\d+\.\s*/, '').trim();
-          exercises.push({ name, type: 'main', description: name });
-        });
-      }
-    }
-
-    return exercises;
-  };
-
   const workoutExercises = generatedWorkout ? extractExercisesFromWorkout(generatedWorkout) : [];
 
   if (showWorkout && generatedWorkout) {
@@ -156,74 +106,21 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
 
           <div className="space-y-4">
             {selectedExercise ? (
-              <div className="space-y-4">
-                <Card className="p-4">
-                  <h3 className="font-semibold">{selectedExercise.name}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedExercise.description}</p>
-                </Card>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="duration">Duration (minutes)</Label>
-                    <Input
-                      id="duration"
-                      type="number"
-                      value={duration}
-                      onChange={(e) => setDuration(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="calories">Calories Burned</Label>
-                    <Input
-                      id="calories"
-                      type="number"
-                      value={customCalories}
-                      onChange={(e) => setCustomCalories(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={handleAddExercise}
-                    disabled={isAdding}
-                    className="flex-1"
-                  >
-                    {isAdding ? 'Adding...' : 'ADD TO DIARY'}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setSelectedExercise(null)}
-                  >
-                    Back
-                  </Button>
-                </div>
-              </div>
+              <ExerciseSelectionForm
+                selectedExercise={selectedExercise}
+                duration={duration}
+                setDuration={setDuration}
+                customCalories={customCalories}
+                setCustomCalories={setCustomCalories}
+                onAddExercise={handleAddExercise}
+                onBack={() => setSelectedExercise(null)}
+                isAdding={isAdding}
+              />
             ) : (
-              <div className="space-y-4">
-                <h3 className="font-semibold">Generated Exercises</h3>
-                <div className="grid gap-2 max-h-60 overflow-y-auto">
-                  {workoutExercises.map((exercise, index) => (
-                    <Card 
-                      key={index}
-                      className="p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => handleSelectExercise(exercise)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="font-medium">{exercise.name}</span>
-                          <span className="text-sm text-muted-foreground ml-2">
-                            ({exercise.type})
-                          </span>
-                        </div>
-                        <Zap className="h-4 w-4 text-orange-500" />
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
+              <WorkoutDisplay
+                exercises={workoutExercises}
+                onSelectExercise={handleSelectExercise}
+              />
             )}
           </div>
         </DialogContent>
@@ -241,54 +138,16 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="fitness-level">Fitness Level</Label>
-            <Select value={fitnessLevel} onValueChange={setFitnessLevel}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select fitness level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="advanced">Advanced</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="duration">Duration (minutes)</Label>
-            <Input
-              id="duration"
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              className="mt-1"
-              min="5"
-              max="120"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="goals">Goals/Focus (optional)</Label>
-            <Textarea
-              id="goals"
-              value={goals}
-              onChange={(e) => setGoals(e.target.value)}
-              placeholder="e.g., cardio, strength, flexibility, weight loss..."
-              className="mt-1"
-              rows={2}
-            />
-          </div>
-
-          <Button 
-            onClick={handleGenerateExercises}
-            disabled={isGenerating || !fitnessLevel}
-            className="w-full"
-          >
-            {isGenerating ? 'Generating...' : 'Generate Exercises'}
-          </Button>
-        </div>
+        <ExerciseGenerationForm
+          fitnessLevel={fitnessLevel}
+          setFitnessLevel={setFitnessLevel}
+          duration={duration}
+          setDuration={setDuration}
+          goals={goals}
+          setGoals={setGoals}
+          onGenerate={handleGenerateExercises}
+          isGenerating={isGenerating}
+        />
       </DialogContent>
     </Dialog>
   );

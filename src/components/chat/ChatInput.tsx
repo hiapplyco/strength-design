@@ -6,6 +6,8 @@ import { Send } from "lucide-react";
 import { FileUpload } from "@/components/chat/FileUpload";
 import { FileUploadAnimation } from "@/components/chat/FileUploadAnimation";
 import { AnimatePresence } from "framer-motion";
+import { spacing } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -30,7 +32,7 @@ export const ChatInput = ({ onSendMessage, onFileSelect, isLoading }: ChatInputP
   };
 
   return (
-    <div className="border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="border-t border-border bg-background">
       <AnimatePresence>
         {(isLoading || uploadingFile) && (
           <div className="p-2 flex justify-center">
@@ -42,8 +44,8 @@ export const ChatInput = ({ onSendMessage, onFileSelect, isLoading }: ChatInputP
         )}
       </AnimatePresence>
 
-      <form onSubmit={handleSubmit} className="p-4">
-        <div className="flex items-center gap-2">
+      <form onSubmit={handleSubmit} className={spacing.component.md}>
+        <div className="flex items-center gap-3">
           <FileUpload onFileSelect={handleFileSelection} />
           <Input
             value={message}
@@ -52,7 +54,7 @@ export const ChatInput = ({ onSendMessage, onFileSelect, isLoading }: ChatInputP
             className="flex-1"
             disabled={isLoading}
           />
-          <Button type="submit" size="icon" disabled={isLoading}>
+          <Button type="submit" size="icon" disabled={isLoading || !message.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>

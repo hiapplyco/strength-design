@@ -24,34 +24,19 @@ export function PrescribedExercisesSection({
     <ExpandableSectionContainer
       icon={<Target className="h-5 w-5" />}
       title="Prescribed Exercises & Goals"
-      renderTooltip={renderTooltip}
-      fileUploadSection={
-        <FileUploadSection
-          title="Workout Plans"
-          isAnalyzing={isAnalyzingPrescribed}
-          isSuccess={false}
-          content=""
-          onFileSelect={handlePrescribedFileSelect}
-          analysisSteps={[
-            "Reading workout document...",
-            "Extracting exercise information...",
-            "Identifying goals and targets...",
-            "Processing training plan..."
-          ]}
-        />
-      }
-    >
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Enter any specific exercises prescribed by your trainer, physical therapist, or that you want to focus on.
-        </p>
-        <Textarea
-          placeholder="e.g., 3x10 squats, planks for core stability, rotator cuff exercises..."
-          value={prescribedExercises}
-          onChange={(e) => setPrescribedExercises(e.target.value)}
-          className="min-h-[100px] resize-none"
-        />
-      </div>
-    </ExpandableSectionContainer>
+      tooltipContent="Enter any specific exercises prescribed by your trainer, physical therapist, or that you want to focus on."
+      textAreaPlaceholder="e.g., 3x10 squats, planks for core stability, rotator cuff exercises..."
+      fileUploadTitle="Workout Plans"
+      fileAnalysisSteps={[
+        "Reading workout document...",
+        "Extracting exercise information...",
+        "Identifying goals and targets...",
+        "Processing training plan..."
+      ]}
+      content={prescribedExercises}
+      setContent={setPrescribedExercises}
+      isAnalyzing={isAnalyzingPrescribed}
+      handleFileSelect={handlePrescribedFileSelect}
+    />
   );
 }

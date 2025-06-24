@@ -45,7 +45,7 @@ export const ModernWorkoutForm: React.FC = () => {
       <motion.div
         animate={isUpdated ? { scale: [1, 1.02, 1], borderColor: ['rgb(var(--border))', 'rgb(var(--primary))', 'rgb(var(--border))'] } : {}}
         transition={{ duration: 0.5 }}
-        className={className}
+        className={`relative z-10 ${className}`}
       >
         {children}
       </motion.div>
@@ -53,10 +53,10 @@ export const ModernWorkoutForm: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative z-10">
       {/* Fitness Level */}
       <CardWithIndicator fieldName="fitnessLevel">
-        <Card className={config.fitnessLevel ? 'border-primary/20 bg-primary/5' : ''}>
+        <Card className={`relative z-20 ${config.fitnessLevel ? 'border-primary/20 bg-primary/5' : ''}`}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <User className="h-4 w-4 text-primary" />
@@ -64,15 +64,15 @@ export const ModernWorkoutForm: React.FC = () => {
               {config.fitnessLevel && <MessageSquare className="h-3 w-3 text-primary opacity-60" />}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative z-20">
             <Select
               value={config.fitnessLevel}
               onValueChange={(value) => updateConfig({ fitnessLevel: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="relative z-30">
                 <SelectValue placeholder="Select your fitness level" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="relative z-50 bg-popover border shadow-lg">
                 <SelectItem value="beginner">Beginner (0-6 months)</SelectItem>
                 <SelectItem value="intermediate">Intermediate (6+ months)</SelectItem>
                 <SelectItem value="advanced">Advanced (2+ years)</SelectItem>
@@ -85,7 +85,7 @@ export const ModernWorkoutForm: React.FC = () => {
 
       {/* Goals */}
       <CardWithIndicator fieldName="prescribedExercises">
-        <Card className={config.prescribedExercises ? 'border-primary/20 bg-primary/5' : ''}>
+        <Card className={`relative z-20 ${config.prescribedExercises ? 'border-primary/20 bg-primary/5' : ''}`}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Target className="h-4 w-4 text-primary" />
@@ -93,12 +93,12 @@ export const ModernWorkoutForm: React.FC = () => {
               {config.prescribedExercises && <MessageSquare className="h-3 w-3 text-primary opacity-60" />}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative z-20">
             <Textarea
               placeholder="Describe your fitness goals, preferred workout style, or any specific requirements..."
               value={config.prescribedExercises}
               onChange={(e) => updateConfig({ prescribedExercises: e.target.value })}
-              className="min-h-[100px] resize-none"
+              className="min-h-[100px] resize-none relative z-30"
             />
           </CardContent>
         </Card>
@@ -106,7 +106,7 @@ export const ModernWorkoutForm: React.FC = () => {
 
       {/* Schedule */}
       <CardWithIndicator fieldName="schedule">
-        <Card className={(config.numberOfDays !== 7 || config.numberOfCycles !== 1) ? 'border-primary/20 bg-primary/5' : ''}>
+        <Card className={`relative z-20 ${(config.numberOfDays !== 7 || config.numberOfCycles !== 1) ? 'border-primary/20 bg-primary/5' : ''}`}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Calendar className="h-4 w-4 text-primary" />
@@ -114,7 +114,7 @@ export const ModernWorkoutForm: React.FC = () => {
               {(config.numberOfDays !== 7 || config.numberOfCycles !== 1) && <MessageSquare className="h-3 w-3 text-primary opacity-60" />}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 relative z-20">
             <div>
               <label className="text-sm font-medium mb-2 block">
                 Days per cycle: {config.numberOfDays}
@@ -125,7 +125,7 @@ export const ModernWorkoutForm: React.FC = () => {
                 min={1}
                 max={7}
                 step={1}
-                className="w-full"
+                className="w-full relative z-30"
               />
             </div>
             <div>
@@ -138,7 +138,7 @@ export const ModernWorkoutForm: React.FC = () => {
                 min={1}
                 max={4}
                 step={1}
-                className="w-full"
+                className="w-full relative z-30"
               />
             </div>
           </CardContent>
@@ -147,7 +147,7 @@ export const ModernWorkoutForm: React.FC = () => {
 
       {/* Equipment & Exercises */}
       <CardWithIndicator fieldName="selectedExercises">
-        <Card className={config.selectedExercises.length > 0 ? 'border-primary/20 bg-primary/5' : ''}>
+        <Card className={`relative z-20 ${config.selectedExercises.length > 0 ? 'border-primary/20 bg-primary/5' : ''}`}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Dumbbell className="h-4 w-4 text-primary" />
@@ -155,11 +155,13 @@ export const ModernWorkoutForm: React.FC = () => {
               {config.selectedExercises.length > 0 && <MessageSquare className="h-3 w-3 text-primary opacity-60" />}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <ExerciseSearch 
-              onExerciseSelect={handleExerciseSelect}
-              selectedExercises={config.selectedExercises}
-            />
+          <CardContent className="space-y-4 relative z-20">
+            <div className="relative z-30">
+              <ExerciseSearch 
+                onExerciseSelect={handleExerciseSelect}
+                selectedExercises={config.selectedExercises}
+              />
+            </div>
             {config.selectedExercises.length > 0 && (
               <div>
                 <label className="text-sm font-medium mb-2 block">Selected Equipment:</label>
@@ -168,7 +170,7 @@ export const ModernWorkoutForm: React.FC = () => {
                     <Badge 
                       key={exercise.id}
                       variant="secondary"
-                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                      className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground relative z-30"
                       onClick={() => handleExerciseSelect(exercise)}
                     >
                       {exercise.name} ×
@@ -183,7 +185,7 @@ export const ModernWorkoutForm: React.FC = () => {
 
       {/* Injuries & Limitations */}
       <CardWithIndicator fieldName="injuries">
-        <Card className={config.injuries ? 'border-primary/20 bg-primary/5' : ''}>
+        <Card className={`relative z-20 ${config.injuries ? 'border-primary/20 bg-primary/5' : ''}`}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <AlertTriangle className="h-4 w-4 text-primary" />
@@ -191,12 +193,12 @@ export const ModernWorkoutForm: React.FC = () => {
               {config.injuries && <MessageSquare className="h-3 w-3 text-primary opacity-60" />}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative z-20">
             <Textarea
               placeholder="Any injuries, physical limitations, or exercises to avoid..."
               value={config.injuries}
               onChange={(e) => updateConfig({ injuries: e.target.value })}
-              className="min-h-[80px] resize-none"
+              className="min-h-[80px] resize-none relative z-30"
             />
           </CardContent>
         </Card>

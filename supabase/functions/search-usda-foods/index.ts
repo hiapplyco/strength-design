@@ -85,7 +85,7 @@ serve(async (req) => {
   try {
     const { query, pageSize = 25 } = await req.json()
     
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       return new Response(
         JSON.stringify({ foods: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -94,34 +94,57 @@ serve(async (req) => {
 
     const usdaApiKey = Deno.env.get('USDA_API_KEY')
     if (!usdaApiKey) {
-      throw new Error('USDA API key not configured')
+      console.error('USDA API key not configured')
+      return new Response(
+        JSON.stringify({ error: 'USDA API key not configured', foods: [] }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
     }
 
-    // Search USDA foods - API key should be a query parameter
-    const searchUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${usdaApiKey}`
+    console.log(`Searching USDA for: ${query}`)
+
+    // Updated API endpoint and request format
+    const searchUrl = `https://api.nal.usda.gov/fdc/v1/foods/search`
     
+    const requestBody = {
+      query,
+      pageSize,
+      dataType: ['Branded', 'Foundation', 'SR Legacy'],
+      sortBy: 'dataType.keyword',
+      sortOrder: 'asc'
+    };
+
+    console.log('Request body:', JSON.stringify(requestBody));
+
     const response = await fetch(searchUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Api-Key': usdaApiKey,
       },
-      body: JSON.stringify({
-        query,
-        pageSize,
-        dataType: ['Branded', 'Foundation', 'SR Legacy'],
-        sortBy: 'score',
-        sortOrder: 'desc'
-      })
+      body: JSON.stringify(requestBody)
     })
 
     if (!response.ok) {
       console.error(`USDA API Error: ${response.status} ${response.statusText}`)
       const errorText = await response.text()
       console.error('Error response:', errorText)
-      throw new Error(`USDA API Error: ${response.status}`)
+      
+      return new Response(
+        JSON.stringify({ 
+          error: `USDA API Error: ${response.status}`, 
+          foods: [],
+          details: errorText
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
+        }
+      )
     }
 
     const data = await response.json()
+    console.log(`Raw USDA response:`, JSON.stringify(data, null, 2))
     
     // Normalize the foods
     const normalizedFoods = (data.foods || []).map((food: USDAFood) => 

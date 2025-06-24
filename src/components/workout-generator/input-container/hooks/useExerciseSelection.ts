@@ -48,11 +48,9 @@ export function useExerciseSelection({
     
     console.log('InputContainer: Adding', newExercises.length, 'new exercises');
     if (newExercises.length > 0) {
-      setSelectedExercises(prev => {
-        const updated = [...prev, ...newExercises];
-        console.log('InputContainer: Updated exercise count:', updated.length);
-        return updated;
-      });
+      const updated = [...selectedExercises, ...newExercises];
+      console.log('InputContainer: Updated exercise count:', updated.length);
+      setSelectedExercises(updated);
     }
   }, [selectedExercises, setSelectedExercises]);
 

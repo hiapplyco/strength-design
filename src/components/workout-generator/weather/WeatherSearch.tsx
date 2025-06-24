@@ -1,12 +1,13 @@
 
 import React, { useState } from "react";
-import { Loader2 } from "lucide-react";
 import { fetchWeatherData, searchLocations, getWeatherDescription } from "./weather-utils";
-import { TooltipWrapper } from "../TooltipWrapper";
 import { LocationResultsDialog } from "./LocationResultsDialog";
 import { SearchForm } from "./SearchForm";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import type { LocationResult, WeatherSearchProps } from "./types";
 import type { WeatherData } from "@/types/weather";
+import { cn } from "@/lib/utils";
+import { zIndex } from "@/lib/design-tokens";
 
 export function WeatherSearch({ 
   onWeatherUpdate, 
@@ -81,8 +82,8 @@ export function WeatherSearch({
     <>
       <div className="relative">
         {isSearching && (
-          <div className="absolute right-2 top-2 z-10">
-            <Loader2 className="h-4 w-4 text-primary animate-spin" />
+          <div className={cn("absolute right-2 top-2", zIndex.dropdown)}>
+            <LoadingIndicator size="small" variant="primary" />
           </div>
         )}
         <SearchForm

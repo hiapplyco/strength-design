@@ -8,6 +8,9 @@ import { TooltipWrapper } from "./TooltipWrapper";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { sizes, spacing, typography, transitions, animations } from "@/lib/design-tokens";
 
 interface WeatherSectionProps {
   weatherData: WeatherData | null;
@@ -30,37 +33,42 @@ export function WeatherSection({
   };
 
   return (
-    <div className="space-y-4">
-      <button
+    <div className={spacing.gap.md}>
+      <Button
+        variant="ghost"
+        size="lg"
         className={cn(
-          "flex items-center gap-3 w-full p-3 rounded-md",
-          "bg-background/50 hover:bg-accent transition-colors duration-200",
-          "border border-border"
+          "w-full justify-start",
+          spacing.component.sm,
+          transitions.default,
+          "hover:bg-accent"
         )}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <CloudSun className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-medium">Add Weather Conditions</h3>
+        <CloudSun className={cn(sizes.icon.md, "text-primary")} />
+        <span className={cn(typography.display.h6, "flex-1 text-left")}>
+          Add Weather Conditions
+        </span>
         {renderTooltip ? renderTooltip() : <TooltipWrapper content="Add local weather conditions to optimize your workout for the current environment" />}
         <div className="ml-auto">
           {isExpanded ? (
-            <ChevronUp className="h-5 w-5 text-muted-foreground" />
+            <ChevronUp className={cn(sizes.icon.md, "text-muted-foreground")} />
           ) : (
-            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+            <ChevronDown className={cn(sizes.icon.md, "text-muted-foreground")} />
           )}
         </div>
-      </button>
+      </Button>
 
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            initial={animations.slideUp.initial}
+            animate={animations.slideUp.animate}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="rounded-md border-0 bg-card p-4">
+            <Card variant="flat" className={spacing.component.md}>
               {weatherData ? (
                 <WeatherDisplay 
                   weatherData={weatherData} 
@@ -74,7 +82,7 @@ export function WeatherSection({
                   numberOfDays={numberOfDays}
                 />
               )}
-            </div>
+            </Card>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,25 +1,36 @@
 
-import { Loader2 } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { WorkoutGenerating } from "@/components/ui/loading-states";
+import { cn } from "@/lib/utils";
+import { zIndex, radius, shadows, spacing } from "@/lib/design-tokens";
 
-export function LoadingOverlay() {
-  const { theme } = useTheme();
-  
+interface LoadingOverlayProps {
+  className?: string;
+  message?: string;
+}
+
+export function LoadingOverlay({ className, message }: LoadingOverlayProps) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className={`p-6 rounded-lg relative overflow-hidden ${
-        theme === 'light' ? 'bg-white' : 'bg-black'
-      }`}>
-        <div className="absolute inset-0 p-[1px] bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40 rounded-lg"></div>
-        <div className={`absolute inset-[1px] rounded-[calc(0.5rem-1px)] ${
-          theme === 'light' ? 'bg-white/95' : 'bg-black/95'
-        }`}></div>
-        <div className="flex items-center space-x-3 relative z-10">
-          <Loader2 className="h-6 w-6 animate-spin text-transparent bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] bg-clip-text" />
-          <p className={theme === 'light' ? 'text-gray-800' : 'text-white'}>
-            Analyzing workout and extracting exercises...
+    <div 
+      className={cn(
+        "fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center",
+        zIndex.modal,
+        className
+      )}
+    >
+      <div 
+        className={cn(
+          "bg-background border border-border",
+          spacing.component.xl,
+          radius["2xl"],
+          shadows["2xl"]
+        )}
+      >
+        <WorkoutGenerating />
+        {message && (
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            {message}
           </p>
-        </div>
+        )}
       </div>
     </div>
   );

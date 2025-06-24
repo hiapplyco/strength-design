@@ -1,6 +1,8 @@
 
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
-import { Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { spacing, typography, radius, shadows } from "@/lib/design-tokens";
 
 interface FileAnalysisStateProps {
   title: string;
@@ -9,9 +11,19 @@ interface FileAnalysisStateProps {
 
 export function FileAnalysisState({ title, steps }: FileAnalysisStateProps) {
   return (
-    <div className="bg-white/10 backdrop-blur-sm px-3 py-2 rounded-md shadow-sm mx-auto flex items-center gap-2">
-      <Loader2 className="h-4 w-4 text-amber-500 animate-spin" />
-      <span className="text-xs text-amber-500 font-medium">{title}</span>
-    </div>
+    <Badge 
+      variant="secondary"
+      className={cn(
+        "bg-warning/10 text-warning border-warning/20",
+        spacing.component.sm,
+        radius.md,
+        shadows.sm,
+        "backdrop-blur-sm flex items-center gap-2"
+      )}
+    >
+      <LoadingIndicator size="small" variant="default" className="text-warning">
+        <span className={cn(typography.caption, "font-medium")}>{title}</span>
+      </LoadingIndicator>
+    </Badge>
   );
 }

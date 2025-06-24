@@ -1,13 +1,16 @@
 
 import { WorkoutDaySkeleton } from "./WorkoutDaySkeleton";
+import { cn } from "@/lib/utils";
+import { spacing } from "@/lib/design-tokens";
 
 interface WorkoutLoadingStateProps {
   count: number;
+  className?: string;
 }
 
-export const WorkoutLoadingState = ({ count }: WorkoutLoadingStateProps) => {
+export const WorkoutLoadingState = ({ count, className }: WorkoutLoadingStateProps) => {
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className={cn(spacing.gap.responsive.lg, className)}>
       {Array.from({ length: count }).map((_, index) => (
         <WorkoutDaySkeleton key={index} />
       ))}

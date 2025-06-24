@@ -6,15 +6,16 @@ import { ScrollArea } from "../ui/scroll-area";
 import { getWeatherDescription } from "./weather/weather-utils";
 import type { ConfigurationSummaryProps, ConfigSectionProps } from "./types";
 import type { WeatherData } from "@/types/weather";
+import { colors, typography, spacing } from "@/lib/design-tokens";
 
 function ConfigSection({ title, content, capitalize = false, icon }: ConfigSectionProps & { icon?: React.ReactNode }) {
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2 mb-1">
-        {icon || <Check className="h-4 w-4 dark:text-emerald-400 light:text-emerald-600" />}
-        <h4 className="font-semibold dark:text-emerald-400 light:text-emerald-600 text-base">{title}</h4>
+        {icon || <Check className="h-4 w-4 text-success" />}
+        <h4 className="font-semibold text-success text-base">{title}</h4>
       </div>
-      <p className={`text-sm dark:text-white/80 light:text-gray-700 pl-6 ${capitalize ? 'capitalize' : ''}`}>
+      <p className={`text-sm text-muted-foreground pl-6 ${capitalize ? 'capitalize' : ''}`}>
         {content}
       </p>
     </div>
@@ -71,12 +72,12 @@ export function ConfigurationSummary({
           const precipProb = forecast.precipitationProb[index];
           
           return (
-            <div key={index} className="text-sm pl-2 border-l dark:border-emerald-500/30 light:border-emerald-500/70">
-              <div className="flex items-center gap-1 dark:text-emerald-400 light:text-emerald-600 font-medium">
+            <div key={index} className="text-sm pl-2 border-l border-success/30">
+              <div className="flex items-center gap-1 text-success font-medium">
                 <Calendar className="h-3 w-3" />
                 <span>{formattedDate} {index === 0 ? '(Today)' : ''}</span>
               </div>
-              <div className="pl-4 dark:text-white/80 light:text-gray-700">
+              <div className="pl-4 text-muted-foreground">
                 <div>{description}</div>
                 <div>Temp: {minTemp}-{maxTemp}°C ({minTempF}-{maxTempF}°F)</div>
                 <div>Precipitation: {precipProb}%</div>
@@ -92,21 +93,21 @@ export function ConfigurationSummary({
                       prescribedExercises || injuries || weatherData;
 
   return (
-    <Card className="dark:bg-black/30 light:bg-white/80 dark:border-emerald-500/30 light:border-emerald-500/50 shadow-md">
+    <Card className="bg-card/50 backdrop-blur-sm border-success/30 shadow-md">
       <CardHeader className="py-2 px-4">
-        <CardTitle className="text-base dark:text-emerald-400 light:text-emerald-600 font-medium tracking-wide flex items-center gap-2">
+        <CardTitle className="text-base text-success font-medium tracking-wide flex items-center gap-2">
           <Info className="h-4 w-4" />
           Your Configuration
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 py-2">
         {!hasAnyConfig ? (
-          <div className="text-center py-4 dark:text-white/60 light:text-gray-500">
+          <div className="text-center py-4 text-muted-foreground">
             <p>No configuration settings yet.</p>
             <p className="text-sm mt-1">Use the options above to customize your workout.</p>
           </div>
         ) : (
-          <ScrollArea className={`h-[${maxHeight}] rounded-md border dark:border-emerald-500/20 light:border-emerald-500/30 dark:bg-black/40 light:bg-gray-50/50 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
+          <ScrollArea className={`h-[${maxHeight}] rounded-md border border-success/20 bg-muted/20 p-3 pr-6 overflow-hidden`} style={{ maxHeight: maxHeight }}>
             <div className="pr-2 pb-2">
               <ConfigSection 
                 title="Training Schedule"
@@ -146,7 +147,7 @@ export function ConfigurationSummary({
                 <ConfigSection 
                   title="Weather Conditions"
                   content={getWeatherDisplay() || ''}
-                  icon={<CloudSun className="h-4 w-4 dark:text-emerald-400 light:text-emerald-600" />}
+                  icon={<CloudSun className="h-4 w-4 text-success" />}
                 />
               )}
               

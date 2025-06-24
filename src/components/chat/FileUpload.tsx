@@ -3,12 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { sizes, spacing } from "@/lib/design-tokens";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
+  className?: string;
+  id?: string;
 }
 
-export const FileUpload = ({ onFileSelect }: FileUploadProps) => {
+export const FileUpload = ({ onFileSelect, className, id = "file-upload" }: FileUploadProps) => {
   const { toast } = useToast();
   const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
   const ALLOWED_TYPES = [
@@ -45,23 +49,23 @@ export const FileUpload = ({ onFileSelect }: FileUploadProps) => {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center", spacing.gap.xs, className)}>
       <Input
         type="file"
         onChange={handleFileChange}
         accept=".pdf,.jpg,.jpeg,.png,.webp,.txt"
         className="hidden"
-        id="file-upload"
+        id={id}
         borderStyle="multicolor"
       />
       <Button
         variant="outline"
         size="icon"
-        className="h-8 w-8"
+        className={sizes.touch.iconButton}
         asChild
       >
-        <label htmlFor="file-upload" className="cursor-pointer">
-          <Upload className="h-4 w-4" />
+        <label htmlFor={id} className="cursor-pointer">
+          <Upload className={sizes.icon.sm} />
         </label>
       </Button>
     </div>

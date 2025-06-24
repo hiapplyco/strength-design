@@ -1,10 +1,11 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileAnalysisState } from "./FileAnalysisState";
 import { Upload, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { sizes, spacing, typography, colors } from "@/lib/design-tokens";
 
 interface FileUploadSectionProps {
   title: string;
@@ -35,11 +36,18 @@ export function FileUploadSection({
   };
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center", spacing.gap.xs, className)}>
       {title && (
-        <span className="text-sm font-medium text-foreground/90">
-          {title} {isSuccess && <Check className="inline-block h-3 w-3 text-green-500" />}
-        </span>
+        <div className="flex items-center gap-1">
+          <span className={cn(typography.label, "text-foreground/90")}>
+            {title}
+          </span>
+          {isSuccess && (
+            <Badge variant="success" className="h-5 px-1.5">
+              <Check className={sizes.icon.xs} />
+            </Badge>
+          )}
+        </div>
       )}
       
       {isAnalyzing ? (
@@ -58,12 +66,15 @@ export function FileUploadSection({
             size="icon"
             asChild
             className={cn(
-              "h-8 w-8",
-              theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-background hover:bg-accent'
+              sizes.touch.iconButton,
+              "transition-colors"
             )}
           >
-            <label htmlFor={`file-upload-${title}`} className="cursor-pointer flex items-center justify-center">
-              <Upload className="h-4 w-4" />
+            <label 
+              htmlFor={`file-upload-${title}`} 
+              className="cursor-pointer flex items-center justify-center"
+            >
+              <Upload className={sizes.icon.sm} />
             </label>
           </Button>
         </div>

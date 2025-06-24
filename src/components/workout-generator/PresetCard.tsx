@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
 
 interface PresetCardProps {
@@ -21,14 +20,12 @@ export function PresetCard({
   level,
   days
 }: PresetCardProps) {
-  const { theme } = useTheme();
-  
   return (
     <Card
+      variant="interactive"
       onClick={onClick}
       className={cn(
-        "relative p-6 cursor-pointer transform transition-all duration-200 hover:scale-[1.02]",
-        theme === 'light' ? 'bg-white/80' : 'bg-black/50',
+        "p-6 cursor-pointer",
         isSelected && 'ring-2 ring-primary ring-offset-2'
       )}
     >

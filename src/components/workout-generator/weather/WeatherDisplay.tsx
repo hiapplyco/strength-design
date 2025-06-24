@@ -3,7 +3,11 @@ import { X, CloudSun, Droplets, Wind, ThermometerSun, Calendar } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { getWeatherDescription } from "./weather-utils";
 import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import type { WeatherData } from "@/types/weather";
+import { cn } from "@/lib/utils";
+import { sizes, spacing, typography, radius } from "@/lib/design-tokens";
 
 interface WeatherDisplayProps {
   weatherData: WeatherData;
@@ -44,14 +48,14 @@ export function WeatherDisplay({ weatherData, onClear, numberOfDays = 1 }: Weath
     
     return (
       <>
-        <Separator className="my-3" />
-        <div className="mb-2">
-          <h4 className="text-sm font-medium flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
+        <Separator className={spacing.margin.element} />
+        <div className={spacing.margin.text}>
+          <h4 className={cn(typography.label, "flex items-center gap-2")}>
+            <Calendar className={sizes.icon.xs} />
             Forecast for Workout Days
           </h4>
         </div>
-        <div className="space-y-3">
+        <div className={spacing.gap.sm}>
           {Array.from({ length: forecastDays }).map((_, index) => {
             const i = index + 1;
             if (i >= weatherData.forecast?.dates.length) return null;
@@ -65,20 +69,24 @@ export function WeatherDisplay({ weatherData, onClear, numberOfDays = 1 }: Weath
             const minTempF = Math.round((weatherData.forecast.minTemps[i] * 9/5) + 32);
             
             return (
-              <div key={i} className="bg-muted/50 rounded p-2">
+              <Card 
+                key={i} 
+                variant="ghost" 
+                className={cn(spacing.component.xs, "bg-muted/50")}
+              >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-xs">{formattedDate}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {weatherData.forecast.precipitationProb[i]}% precipitation
-                  </span>
+                  <span className={cn(typography.caption, "font-medium")}>{formattedDate}</span>
+                  <Badge variant="secondary" className="text-xs px-2 py-0">
+                    {weatherData.forecast.precipitationProb[i]}% rain
+                  </Badge>
                 </div>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="text-sm">{description}</span>
-                  <span className="text-xs">
+                  <span className={typography.body.small}>{description}</span>
+                  <span className={typography.caption}>
                     {minTemp}-{maxTemp}°C ({minTempF}-{maxTempF}°F)
                   </span>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -87,60 +95,66 @@ export function WeatherDisplay({ weatherData, onClear, numberOfDays = 1 }: Weath
   };
 
   return (
-    <div className="space-y-4">
+    <div className={spacing.gap.md}>
       <div className="flex justify-between items-start">
-        <h4 className="font-medium text-lg">{weatherData.location}</h4>
+        <h4 className={typography.display.h6}>{weatherData.location}</h4>
         <Button 
           variant="ghost" 
-          size="sm" 
+          size="icon"
           onClick={onClear} 
-          className="h-8 w-8 p-0"
+          className={sizes.touch.iconButton}
         >
-          <X className="h-4 w-4" />
+          <X className={sizes.icon.sm} />
           <span className="sr-only">Clear weather data</span>
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-center gap-2">
-          <ThermometerSun className="h-4 w-4 text-primary" />
+      <div className={cn("grid grid-cols-2", spacing.gap.md)}>
+        <div className={cn("flex items-center", spacing.gap.xs)}>
+          <ThermometerSun className={cn(sizes.icon.sm, "text-primary")} />
           <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">Temperature</span>
-            <span className="text-base font-medium">
+            <span className={typography.caption}>Temperature</span>
+            <span className={cn(typography.body.default, "font-medium")}>
               {formatTemp(weatherData.temperature)} / {getTempF(weatherData.temperature)}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <ThermometerSun className="h-4 w-4 text-primary" />
+        <div className={cn("flex items-center", spacing.gap.xs)}>
+          <ThermometerSun className={cn(sizes.icon.sm, "text-primary")} />
           <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">Feels like</span>
-            <span className="text-base font-medium">
+            <span className={typography.caption}>Feels like</span>
+            <span className={cn(typography.body.default, "font-medium")}>
               {formatTemp(weatherData.apparentTemperature)}
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Droplets className="h-4 w-4 text-primary" />
+        <div className={cn("flex items-center", spacing.gap.xs)}>
+          <Droplets className={cn(sizes.icon.sm, "text-primary")} />
           <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">Humidity</span>
-            <span className="text-base font-medium">{formatValue(weatherData.humidity, '%')}</span>
+            <span className={typography.caption}>Humidity</span>
+            <span className={cn(typography.body.default, "font-medium")}>
+              {formatValue(weatherData.humidity, '%')}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Wind className="h-4 w-4 text-primary" />
+        <div className={cn("flex items-center", spacing.gap.xs)}>
+          <Wind className={cn(sizes.icon.sm, "text-primary")} />
           <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">Wind Speed</span>
-            <span className="text-base font-medium">{formatValue(weatherData.windSpeed, 'km/h')}</span>
+            <span className={typography.caption}>Wind Speed</span>
+            <span className={cn(typography.body.default, "font-medium")}>
+              {formatValue(weatherData.windSpeed, 'km/h')}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <CloudSun className="h-4 w-4 text-primary" />
+      <div className={cn("flex items-center", spacing.gap.xs)}>
+        <CloudSun className={cn(sizes.icon.sm, "text-primary")} />
         <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground">Conditions</span>
-          <span className="text-base font-medium">{weatherDescription}</span>
+          <span className={typography.caption}>Conditions</span>
+          <span className={cn(typography.body.default, "font-medium")}>
+            {weatherDescription}
+          </span>
         </div>
       </div>
       

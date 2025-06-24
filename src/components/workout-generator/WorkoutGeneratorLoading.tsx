@@ -1,12 +1,25 @@
 
-import { LoadingIndicator } from "@/components/ui/loading-indicator";
+import { WorkoutGenerating } from "@/components/ui/loading-states";
+import { cn } from "@/lib/utils";
 
-export function WorkoutGeneratorLoading() {
+interface WorkoutGeneratorLoadingProps {
+  className?: string;
+  fullScreen?: boolean;
+}
+
+export function WorkoutGeneratorLoading({ 
+  className,
+  fullScreen = true 
+}: WorkoutGeneratorLoadingProps) {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <LoadingIndicator>
-        <span className="text-white/80">Loading workout generator...</span>
-      </LoadingIndicator>
+    <div 
+      className={cn(
+        "flex items-center justify-center",
+        fullScreen && "min-h-screen bg-background",
+        className
+      )}
+    >
+      <WorkoutGenerating />
     </div>
   );
 }

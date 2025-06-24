@@ -1,43 +1,66 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import { LoadingIndicator } from '@/components/ui/loading-indicator';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { animations, sizes, spacing, typography, radius } from '@/lib/design-tokens';
 
 interface FileUploadAnimationProps {
   isLoading: boolean;
   fileName: string;
+  className?: string;
 }
 
-export const FileUploadAnimation = ({ isLoading, fileName }: FileUploadAnimationProps) => {
+export const FileUploadAnimation = ({ isLoading, fileName, className }: FileUploadAnimationProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={animations.slideUp.initial}
+      animate={animations.slideUp.animate}
       exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-      className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg max-w-xs"
+      transition={animations.slideUp.transition}
+      className={cn("max-w-xs", className)}
     >
-      {isLoading ? (
-        <>
-          <Loader2 className="h-5 w-5 text-primary animate-spin" />
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-primary">Uploading</span>
-            <span className="text-xs text-primary/70 truncate">{fileName}</span>
-          </div>
-        </>
-      ) : (
-        <motion.div 
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          className="flex items-center gap-3"
-        >
-          <CheckCircle2 className="h-5 w-5 text-green-500" />
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-green-500">Upload Complete</span>
-            <span className="text-xs text-green-500/70 truncate">{fileName}</span>
-          </div>
-        </motion.div>
-      )}
+      <Card 
+        variant="ghost"
+        className={cn(
+          "flex items-center",
+          spacing.gap.sm,
+          spacing.component.sm,
+          "bg-primary/10"
+        )}
+      >
+        {isLoading ? (
+          <>
+            <LoadingIndicator size="medium" variant="primary" />
+            <div className="flex flex-col">
+              <span className={cn(typography.label, "text-primary")}>
+                Uploading
+              </span>
+              <span className={cn(typography.caption, "text-primary/70 truncate")}>
+                {fileName}
+              </span>
+            </div>
+          </>
+        ) : (
+          <motion.div 
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className={cn("flex items-center", spacing.gap.sm)}
+          >
+            <CheckCircle2 className={cn(sizes.icon.md, "text-success")} />
+            <div className="flex flex-col">
+              <span className={cn(typography.label, "text-success")}>
+                Upload Complete
+              </span>
+              <span className={cn(typography.caption, "text-success/70 truncate")}>
+                {fileName}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </Card>
     </motion.div>
   );
 };

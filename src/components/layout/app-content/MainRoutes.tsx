@@ -1,21 +1,33 @@
 
 import { Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "@/pages/Index";
-import JournalPage from "@/pages/JournalPage";
-import WorkoutGenerator from "@/pages/WorkoutGenerator";
-import WorkoutResults from "@/pages/WorkoutResults";
-import GeneratedWorkouts from "@/pages/GeneratedWorkouts";
-import DocumentEditor from "@/pages/DocumentEditor";
-import PublishProgram from "@/pages/PublishProgram";
-import MovementAnalysisPage from "@/pages/MovementAnalysisPage";
-import Pricing from "@/pages/Pricing";
-import CheckoutSuccess from "@/pages/CheckoutSuccess";
-import CheckoutCancel from "@/pages/CheckoutCancel";
-import ProgramChat from "@/pages/ProgramChat";
+import { Suspense, lazy } from "react";
+import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
+
+// Lazy load all route components
+const LandingPage = lazy(() => import("@/pages/Index"));
+const JournalPage = lazy(() => import("@/pages/JournalPage"));
+const WorkoutGenerator = lazy(() => import("@/pages/WorkoutGenerator"));
+const WorkoutResults = lazy(() => import("@/pages/WorkoutResults"));
+const GeneratedWorkouts = lazy(() => import("@/pages/GeneratedWorkouts"));
+const DocumentEditor = lazy(() => import("@/pages/DocumentEditor"));
+const PublishProgram = lazy(() => import("@/pages/PublishProgram"));
+const MovementAnalysisPage = lazy(() => import("@/pages/MovementAnalysisPage"));
+const Pricing = lazy(() => import("@/pages/Pricing"));
+const CheckoutSuccess = lazy(() => import("@/pages/CheckoutSuccess"));
+const CheckoutCancel = lazy(() => import("@/pages/CheckoutCancel"));
+const ProgramChat = lazy(() => import("@/pages/ProgramChat"));
+const DesignSystemPlayground = lazy(() => import("@/pages/DesignSystemPlayground"));
+
+// Route loading component
+const RouteLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <LoadingSpinner />
+  </div>
+);
 
 export const MainRoutes = () => {
   return (
-    <>
+    <Suspense fallback={<RouteLoader />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         {/* Redirect old video-analysis route to publish-program */}
@@ -31,7 +43,8 @@ export const MainRoutes = () => {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
         <Route path="/checkout-cancel" element={<CheckoutCancel />} />
+        <Route path="/design-system" element={<DesignSystemPlayground />} />
       </Routes>
-    </>
+    </Suspense>
   );
 };

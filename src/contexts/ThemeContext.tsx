@@ -20,22 +20,28 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Check if user has a theme preference in localStorage or prefer-color-scheme
-  const getInitialTheme = (): Theme => {
-    if (typeof window !== "undefined") {
-      const storedTheme = localStorage.getItem("theme") as Theme | null;
-      
-      if (storedTheme) {
-        return storedTheme;
+  // Initialize with dark theme as default, then check for stored preference
+  const [theme, setThemeState] = useState<Theme>("dark");
+
+  // Check for stored theme preference on mount
+  useEffect(() => {
+    const getInitialTheme = (): Theme => {
+      if (typeof window !== "undefined") {
+        const storedTheme = localStorage.getItem("theme") as Theme | null;
+        
+        if (storedTheme) {
+          return storedTheme;
+        }
+        
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       }
       
-      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
-    
-    return "dark"; // Default to dark theme
-  };
+      return "dark"; // Default to dark theme
+    };
 
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+    const initialTheme = getInitialTheme();
+    setThemeState(initialTheme);
+  }, []);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);

@@ -16,10 +16,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { exportToCalendar } from "@/utils/calendar";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import type { WeeklyWorkouts, WorkoutDay, WorkoutCycle } from "@/types/fitness";
 import { isWorkoutDay, isWorkoutCycle } from "@/types/fitness";
 
@@ -33,6 +35,7 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
   const [startDate, setStartDate] = useState<Date>();
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
+  const { session } = useAuth();
 
   const prepareWorkoutEvents = () => {
     const events: Array<{
@@ -41,6 +44,7 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
       workout: string;
       notes: string;
       dayOffset: number;
+      workoutData: WorkoutDay;
     }> = [];
 
     let dayOffset = 0;
@@ -49,7 +53,6 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
       .filter(([key]) => key !== '_meta')
       .forEach(([key, value]) => {
         if (isWorkoutCycle(value)) {
-          // Handle cycle structure
           const cycleTitle = key.charAt(0).toUpperCase() + key.slice(1);
           
           Object.entries(value as WorkoutCycle)
@@ -63,11 +66,11 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
                 warmup: workoutDay.warmup || '',
                 workout: workoutDay.workout || '',
                 notes: workoutDay.notes || '',
-                dayOffset: dayOffset++
+                dayOffset: dayOffset++,
+                workoutData: workoutDay
               });
             });
         } else if (isWorkoutDay(value)) {
-          // Handle legacy single days
           const workoutDay = value as WorkoutDay;
           const formattedDay = key.replace(/day(\d+)/, 'Day $1');
           
@@ -76,12 +79,57 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
             warmup: workoutDay.warmup || '',
             workout: workoutDay.workout || '',
             notes: workoutDay.notes || '',
-            dayOffset: dayOffset++
+            dayOffset: dayOffset++,
+            workoutData: workoutDay
           });
         }
       });
 
     return events;
+  };
+
+  const saveWorkoutSessions = async (startDate: Date, events: ReturnType<typeof prepareWorkoutEvents>) => {
+    if (!session?.user?.id) return;
+
+    try {
+      // First, create a generated_workouts entry
+      const { data: generatedWorkout, error: workoutError } = await supabase
+        .from('generated_workouts')
+        .insert({
+          user_id: session.user.id,
+          workout_data: workouts,
+          title: workouts._meta?.title || 'Exported Workout Plan',
+          summary: workouts._meta?.summary || '',
+          tags: ['exported']
+        })
+        .select()
+        .single();
+
+      if (workoutError) throw workoutError;
+
+      // Create workout sessions for each day
+      const workoutSessions = events.map(event => {
+        const scheduledDate = addDays(startDate, event.dayOffset);
+        return {
+          user_id: session.user.id,
+          generated_workout_id: generatedWorkout.id,
+          scheduled_date: format(scheduledDate, 'yyyy-MM-dd'),
+          status: 'scheduled' as const,
+          notes: `${event.title}\n\nWarmup: ${event.warmup}\n\nWorkout: ${event.workout}\n\nNotes: ${event.notes}`
+        };
+      });
+
+      const { error: sessionsError } = await supabase
+        .from('workout_sessions')
+        .insert(workoutSessions);
+
+      if (sessionsError) throw sessionsError;
+
+      return true;
+    } catch (error) {
+      console.error('Error saving workout sessions:', error);
+      throw error;
+    }
   };
 
   const handleExport = async () => {
@@ -98,18 +146,21 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
       setIsExporting(true);
       const events = prepareWorkoutEvents();
       
-      // Adjust events based on selected start date
-      const adjustedEvents = events.map(event => ({
+      // Save to database first
+      await saveWorkoutSessions(startDate, events);
+      
+      // Then export to calendar
+      const calendarEvents = events.map(event => ({
         ...event,
-        dayOffset: event.dayOffset + Math.floor((startDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        dayOffset: event.dayOffset
       }));
 
-      await exportToCalendar(adjustedEvents, toast);
+      await exportToCalendar(calendarEvents, toast);
       onOpenChange(false);
       
       toast({
         title: "Success",
-        description: `Your workout plan has been exported starting ${format(startDate, 'PPP')}`,
+        description: `Your workout plan has been exported and saved to your schedule starting ${format(startDate, 'PPP')}`,
       });
     } catch (error) {
       console.error('Error exporting calendar:', error);
@@ -131,10 +182,10 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" />
-            Export to Calendar
+            Export & Schedule Workouts
           </DialogTitle>
           <DialogDescription>
-            Export your {workoutCount} workout{workoutCount !== 1 ? 's' : ''} to your calendar. 
+            Export your {workoutCount} workout{workoutCount !== 1 ? 's' : ''} to your calendar and save them to your fitness journal. 
             Choose when you'd like to start your workout plan.
           </DialogDescription>
         </DialogHeader>
@@ -182,7 +233,7 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
             ) : (
               <>
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                Export {workoutCount} Workout{workoutCount !== 1 ? 's' : ''}
+                Export & Schedule {workoutCount} Workout{workoutCount !== 1 ? 's' : ''}
               </>
             )}
           </Button>

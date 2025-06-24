@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer, Event } from "react-big-calendar";
 import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
-import { format, parse, startOfWeek, getDay, addDays, startOfDay } from "date-fns";
+import { format, parse, startOfWeek, getDay, startOfDay } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import { useWorkoutSessions, WorkoutSessionWithGeneratedWorkout } from "@/hooks/useWorkoutSessions";
 import { useJournalEntries } from "@/hooks/useJournalEntries";
 import { Database } from "@/integrations/supabase/types";
 import { Dumbbell, Heart } from "lucide-react";
+import { DailyWorkoutDetailModal } from "./DailyWorkoutDetailModal";
 
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -46,6 +47,8 @@ export const SmartJournalCalendar = () => {
   const { sessions, updateSession } = useWorkoutSessions();
   const { entries } = useJournalEntries();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedWorkoutSession, setSelectedWorkoutSession] = useState<WorkoutSessionWithGeneratedWorkout | undefined>();
 
   useEffect(() => {
     const calendarEvents: CalendarEvent[] = [];
@@ -57,7 +60,7 @@ export const SmartJournalCalendar = () => {
 
       calendarEvents.push({
         id: session.id,
-        title: `Workout: ${session.generated_workouts?.title || 'Training Session'}`,
+        title: `${session.generated_workouts?.title || 'Training Session'}`,
         start: startOfDayDate,
         end: endDate,
         type: 'workout',
@@ -126,6 +129,25 @@ export const SmartJournalCalendar = () => {
     });
   };
 
+  const onSelectEvent = (event: CalendarEvent) => {
+    if (event.type === 'workout' && event.data) {
+      setSelectedWorkoutSession(event.data as WorkoutSessionWithGeneratedWorkout);
+      setSelectedDate(event.start || new Date());
+    } else if (event.type === 'journal') {
+      setSelectedDate(event.start || new Date());
+      setSelectedWorkoutSession(undefined);
+    }
+  };
+
+  const onSelectSlot = ({ start }: { start: Date }) => {
+    const workoutSession = sessions.find(session => 
+      format(new Date(session.scheduled_date), 'yyyy-MM-dd') === format(start, 'yyyy-MM-dd')
+    );
+    
+    setSelectedDate(start);
+    setSelectedWorkoutSession(workoutSession);
+  };
+
   const eventStyleGetter = (event: CalendarEvent) => {
     let backgroundColor = '#3174ad';
     let borderColor = '#3174ad';
@@ -161,7 +183,8 @@ export const SmartJournalCalendar = () => {
         border: `2px solid ${borderColor}`,
         borderRadius: '6px',
         fontSize: '12px',
-        padding: '2px 6px'
+        padding: '2px 6px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }
     };
   };
@@ -169,13 +192,13 @@ export const SmartJournalCalendar = () => {
   const CustomEvent = ({ event }: { event: CalendarEvent }) => {
     const getIcon = () => {
       if (event.type === 'workout') {
-        return <Dumbbell className="h-3 w-3 mr-1" />;
+        return <Dumbbell className="h-3 w-3 mr-1 flex-shrink-0" />;
       }
-      return <Heart className="h-3 w-3 mr-1" />;
+      return <Heart className="h-3 w-3 mr-1 flex-shrink-0" />;
     };
 
     return (
-      <div className="flex items-center text-xs">
+      <div className="flex items-center text-xs overflow-hidden">
         {getIcon()}
         <span className="truncate">{String(event.title)}</span>
       </div>
@@ -183,42 +206,140 @@ export const SmartJournalCalendar = () => {
   };
 
   return (
-    <div className="h-[600px] bg-background rounded-lg border">
-      <div className="p-4 border-b">
-        <h3 className="text-lg font-semibold mb-2">Smart Workout Calendar</h3>
-        <div className="flex gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded"></div>
-            <span>Scheduled Workouts</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded"></div>
-            <span>Completed</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-purple-500 rounded"></div>
-            <span>Journal Entries</span>
+    <>
+      <div className="h-[600px] bg-background rounded-lg border shadow-sm">
+        <div className="p-4 border-b bg-card">
+          <h3 className="text-lg font-semibold mb-2">Fitness Calendar</h3>
+          <div className="flex gap-4 text-sm flex-wrap">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded"></div>
+              <span>Scheduled Workouts</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded"></div>
+              <span>Completed</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-purple-500 rounded"></div>
+              <span>Journal Entries</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-orange-500 rounded"></div>
+              <span>In Progress</span>
+            </div>
           </div>
         </div>
+        <div className="p-4" style={{ height: 'calc(100% - 120px)' }}>
+          <DnDCalendar
+            defaultView="week"
+            events={events}
+            localizer={localizer}
+            onEventDrop={onEventDrop}
+            onEventResize={onEventResize}
+            onSelectEvent={onSelectEvent}
+            onSelectSlot={onSelectSlot}
+            selectable
+            resizable
+            eventPropGetter={eventStyleGetter}
+            components={{
+              event: CustomEvent
+            }}
+            style={{ height: "100%" }}
+            views={['month', 'week', 'day']}
+            step={60}
+            showMultiDayTimes
+            dayLayoutAlgorithm="no-overlap"
+            className="rbc-calendar-custom"
+          />
+        </div>
       </div>
-      <div className="p-4" style={{ height: 'calc(100% - 120px)' }}>
-        <DnDCalendar
-          defaultView="week"
-          events={events}
-          localizer={localizer}
-          onEventDrop={onEventDrop}
-          onEventResize={onEventResize}
-          resizable
-          eventPropGetter={eventStyleGetter}
-          components={{
-            event: CustomEvent
+
+      {selectedDate && (
+        <DailyWorkoutDetailModal
+          open={!!selectedDate}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedDate(null);
+              setSelectedWorkoutSession(undefined);
+            }
           }}
-          style={{ height: "100%" }}
-          views={['month', 'week', 'day']}
-          step={60}
-          showMultiDayTimes
+          date={selectedDate}
+          workoutSession={selectedWorkoutSession}
         />
-      </div>
-    </div>
+      )}
+
+      <style jsx global>{`
+        .rbc-calendar-custom {
+          font-family: inherit;
+        }
+        
+        .rbc-calendar-custom .rbc-time-view .rbc-time-gutter,
+        .rbc-calendar-custom .rbc-time-view .rbc-time-content {
+          border-color: hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-time-view .rbc-timeslot-group {
+          border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-day-slot .rbc-time-slot {
+          border-top: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-month-view,
+        .rbc-calendar-custom .rbc-time-header {
+          border-color: hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-header {
+          border-bottom: 1px solid hsl(var(--border));
+          background-color: hsl(var(--muted));
+          color: hsl(var(--foreground));
+          padding: 8px 4px;
+          font-weight: 500;
+          font-size: 14px;
+        }
+        
+        .rbc-calendar-custom .rbc-today {
+          background-color: hsl(var(--accent));
+        }
+        
+        .rbc-calendar-custom .rbc-off-range-bg {
+          background-color: hsl(var(--muted) / 0.3);
+        }
+        
+        .rbc-calendar-custom .rbc-date-cell {
+          padding: 8px 4px;
+          text-align: right;
+          color: hsl(var(--foreground));
+        }
+        
+        .rbc-calendar-custom .rbc-date-cell.rbc-off-range {
+          color: hsl(var(--muted-foreground));
+        }
+        
+        .rbc-calendar-custom .rbc-time-header-content {
+          border-left: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-time-content > * + * > * {
+          border-left: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-event {
+          border: none !important;
+          border-radius: 6px;
+          font-size: 12px;
+          padding: 2px 6px;
+          font-weight: 500;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .rbc-calendar-custom .rbc-event:focus {
+          outline: 2px solid hsl(var(--ring));
+          outline-offset: 2px;
+        }
+      `}</style>
+    </>
   );
 };

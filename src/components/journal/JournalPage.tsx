@@ -1,109 +1,168 @@
 
-import React, { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Target } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import { SmartJournalEntry } from "./SmartJournalEntry";
-import { ScheduleCalendar } from "./ScheduleCalendar";
-import { ScheduleAddWorkoutButton } from "./ScheduleAddWorkoutButton";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SmartJournalCalendar } from './SmartJournalCalendar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Plus, Calendar, BookOpen, TrendingUp } from 'lucide-react';
+import { useJournalEntries } from '@/hooks/useJournalEntries';
+import { useWorkoutSessions } from '@/hooks/useWorkoutSessions';
+import { format } from 'date-fns';
 
-export const JournalPage = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+export const JournalPage: React.FC = () => {
+  const { entries } = useJournalEntries();
+  const { sessions } = useWorkoutSessions();
+
+  const recentEntries = entries.slice(0, 5);
+  const upcomingWorkouts = sessions
+    .filter(session => session.status === 'scheduled')
+    .slice(0, 3);
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-8 overflow-x-hidden pb-10">
-      <div className="mb-2">
-        <h1 className="text-3xl sm:text-4xl font-bold text-primary">
-          AI Workout Journal
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground mt-1">
-          Log your fitness journey, moods, and workouts with intelligent tools to help you grow.
-        </p>
-      </div>
-      <Tabs defaultValue="journal" className="flex-1 flex flex-col">
-        <div className="mb-4">
-          <TabsList className="flex w-full gap-2 py-0">
-            <TabsTrigger value="journal" className="gap-2 px-3 py-2 flex-1 text-base">
-              <BookOpen className="h-5 w-5" />
-              <span>Journal</span>
-            </TabsTrigger>
-            <TabsTrigger value="schedule" className="gap-2 px-3 py-2 flex-1 text-base">
-              <Target className="h-5 w-5" />
-              <span>Schedule</span>
-            </TabsTrigger>
-          </TabsList>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Fitness Journal</h1>
+          <p className="text-muted-foreground">
+            Track your workouts, nutrition, and daily reflections
+          </p>
         </div>
+      </div>
 
-        {/* JOURNAL */}
-        <TabsContent value="journal" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Date and Info */}
-            <div className="md:col-span-1 order-1 flex flex-col gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Select Date</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
-                    className="rounded-md border w-full max-w-sm mx-auto"
-                  />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Getting the Most from Your Journal</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="pl-4 text-sm text-muted-foreground list-disc space-y-1">
-                    <li>Pick a date to log your entry or update previous records.</li>
-                    <li>Reflect on your day, workouts, and feelings.</li>
-                    <li>Rate your mood, energy, sleep, and stress for better insights.</li>
-                    <li>Journal entries help us recommend optimal workout times and intensity!</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-            {/* Journal Entry */}
-            <div className="md:col-span-2 order-2 flex flex-col">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
-                    Daily Journal Entry
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SmartJournalEntry selectedDate={selectedDate} />
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </TabsContent>
+      <Tabs defaultValue="calendar" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="calendar" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Calendar View
+          </TabsTrigger>
+          <TabsTrigger value="entries" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Recent Entries
+          </TabsTrigger>
+          <TabsTrigger value="insights" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Insights
+          </TabsTrigger>
+        </TabsList>
 
-        {/* SCHEDULE */}
-        <TabsContent value="schedule" className="mt-0 relative">
-          <div className="flex flex-col gap-6 w-full">
+        <TabsContent value="calendar" className="space-y-6">
+          <SmartJournalCalendar />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Your Workout Schedule
-                </CardTitle>
+                <CardTitle className="text-lg">Upcoming Workouts</CardTitle>
+                <CardDescription>Your scheduled training sessions</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col gap-4">
-                  <ScheduleCalendar />
+                {upcomingWorkouts.length > 0 ? (
+                  <div className="space-y-3">
+                    {upcomingWorkouts.map((session) => (
+                      <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">
+                            {session.generated_workouts?.title || 'Training Session'}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {format(new Date(session.scheduled_date), 'MMM dd, yyyy')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    No upcoming workouts scheduled
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Quick Stats</CardTitle>
+                <CardDescription>Your recent activity</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Workouts This Week</span>
+                    <span className="font-medium">
+                      {sessions.filter(s => s.status === 'completed').length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Journal Entries</span>
+                    <span className="font-medium">{entries.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Scheduled Sessions</span>
+                    <span className="font-medium">
+                      {sessions.filter(s => s.status === 'scheduled').length}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-            {/* Floating Add Workout Button */}
-            <ScheduleAddWorkoutButton />
-            {/* Optionally add a quick stats strip here in future */}
           </div>
+        </TabsContent>
+
+        <TabsContent value="entries" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Journal Entries</CardTitle>
+              <CardDescription>Your latest reflections and thoughts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentEntries.length > 0 ? (
+                <div className="space-y-4">
+                  {recentEntries.map((entry) => (
+                    <div key={entry.id} className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium">{entry.title || 'Untitled'}</h3>
+                        <span className="text-sm text-muted-foreground">
+                          {format(new Date(entry.date), 'MMM dd')}
+                        </span>
+                      </div>
+                      {entry.content && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {entry.content}
+                        </p>
+                      )}
+                      <div className="flex gap-4 text-xs text-muted-foreground">
+                        {entry.mood_rating && <span>Mood: {entry.mood_rating}/10</span>}
+                        {entry.energy_level && <span>Energy: {entry.energy_level}/10</span>}
+                        {entry.sleep_quality && <span>Sleep: {entry.sleep_quality}/10</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No journal entries yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Click on a date in the calendar to start journaling
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="insights" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Coming Soon</CardTitle>
+              <CardDescription>AI-powered insights based on your fitness journey</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center py-8">
+              <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                Advanced analytics and personalized insights will be available soon
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

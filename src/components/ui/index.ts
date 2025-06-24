@@ -1,4 +1,3 @@
-
 // Base components
 export * from "./accordion";
 export * from "./alert";
@@ -9,6 +8,7 @@ export * from "./badge";
 export * from "./button";
 export * from "./calendar";
 export * from "./card";
+export * from "./carousel";
 export * from "./checkbox";
 export * from "./collapsible";
 export * from "./command";

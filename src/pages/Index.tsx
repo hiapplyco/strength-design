@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { UpgradeCTASection } from "@/components/landing/UpgradeCTASection";
-import { TestimonialsPlaceholder } from "@/components/landing/TestimonialsPlaceholder";
+import { TestimonialsCarousel } from "@/components/landing/TestimonialsCarousel";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -46,12 +46,12 @@ export default function Index() {
           <h2 className={`text-xl md:text-2xl font-semibold text-primary mb-4`}>
             Hear From Our Users
           </h2>
-          <p className={`${text.subtitle} text-foreground/80 ${width.content} mx-auto`}>
+          <p className={`${text.subtitle} text-foreground/80 ${width.content} mx-auto mb-8`}>
             Don't just take our word for it. See how Strength.Design is helping people around the world achieve their fitness goals.
           </p>
         </div>
 
-        <TestimonialsPlaceholder />
+        <TestimonialsCarousel />
       </div>
 
       <AuthDialog 

@@ -52,7 +52,7 @@ export function TestimonialsCarousel() {
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {testimonials.map((testimonial, index) => (
-            <CarouselItem key={index} className={`pl-2 md:pl-4 ${responsive.grid.cols2.replace('grid', 'basis-full md:basis-1/2')}`}>
+            <CarouselItem key={index} className="pl-2 md:pl-4 basis-full md:basis-1/2">
               <TestimonialCard {...testimonial} />
             </CarouselItem>
           ))}

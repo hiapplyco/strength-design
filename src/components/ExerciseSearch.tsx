@@ -8,16 +8,22 @@ import { Search } from "lucide-react";
 
 interface ExerciseSearchProps {
   onExerciseSelect?: (exercise: Exercise, action?: 'add' | 'remove') => void;
+  onExercisesSelect?: (exercises: Exercise[]) => void;
   selectedExercises?: Exercise[];
 }
 
-export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: ExerciseSearchProps) {
+export function ExerciseSearch({ onExerciseSelect, onExercisesSelect, selectedExercises = [] }: ExerciseSearchProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleExercisesSelect = (exercises: Exercise[]) => {
-    console.log('Exercises selected from search:', exercises);
-    if (onExerciseSelect) {
-      // Add each exercise individually with explicit 'add' action
+    console.log('Exercises selected from search (bulk):', exercises.length, 'exercises');
+    
+    // Use the new bulk handler if available, otherwise fall back to individual calls
+    if (onExercisesSelect) {
+      console.log('Using bulk exercise selection handler');
+      onExercisesSelect(exercises);
+    } else if (onExerciseSelect) {
+      console.log('Falling back to individual exercise selection calls');
       exercises.forEach(exercise => {
         console.log('Adding exercise with add action:', exercise.name);
         onExerciseSelect(exercise, 'add');

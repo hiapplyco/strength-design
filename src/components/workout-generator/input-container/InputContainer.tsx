@@ -127,6 +127,25 @@ export function InputContainer({
     }
   };
 
+  // NEW: Handle bulk exercise selection
+  const handleBulkExerciseSelection = (exercises: Exercise[]) => {
+    console.log('InputContainer handleBulkExerciseSelection:', exercises.length, 'exercises');
+    
+    // Filter out exercises that are already selected to avoid duplicates
+    const newExercises = exercises.filter(exercise => 
+      !selectedExercises.some(selected => selected.id === exercise.id)
+    );
+    
+    console.log('InputContainer: Adding', newExercises.length, 'new exercises');
+    if (newExercises.length > 0) {
+      setSelectedExercises(prev => {
+        const updated = [...prev, ...newExercises];
+        console.log('InputContainer: Updated exercise count:', updated.length);
+        return updated;
+      });
+    }
+  };
+
   // Determine form validity
   const isFormValid = fitnessLevel.trim() !== "" || selectedExercises.length > 0 || prescribedExercises.trim() !== "";
 

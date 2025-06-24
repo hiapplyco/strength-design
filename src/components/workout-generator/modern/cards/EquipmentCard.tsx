@@ -16,8 +16,17 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
   onExerciseSelect
 }) => {
   const handleExerciseSelect = (exercise: Exercise) => {
+    console.log('EquipmentCard: Individual exercise selection:', exercise.name);
     // This will toggle the exercise - add if not selected, remove if selected
     onExerciseSelect(exercise);
+  };
+
+  const handleExercisesSelect = (exercises: Exercise[]) => {
+    console.log('EquipmentCard: Bulk exercise selection:', exercises.length, 'exercises');
+    exercises.forEach(exercise => {
+      console.log('EquipmentCard: Adding exercise:', exercise.name);
+      onExerciseSelect(exercise);
+    });
   };
 
   return (
@@ -32,6 +41,7 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
       <CardContent className="space-y-4">
         <ExerciseSearch 
           onExerciseSelect={handleExerciseSelect}
+          onExercisesSelect={handleExercisesSelect}
           selectedExercises={selectedExercises}
         />
         {selectedExercises.length > 0 && (

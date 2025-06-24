@@ -30,6 +30,15 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
     onExerciseSelect(exercise, 'add');
   };
 
+  // NEW: Handle bulk exercise selection from the search
+  const handleExercisesSelect = (exercises: Exercise[]) => {
+    console.log('ExerciseSection: Bulk adding exercises:', exercises.length, 'exercises');
+    exercises.forEach(exercise => {
+      console.log('ExerciseSection: Adding exercise:', exercise.name);
+      onExerciseSelect(exercise, 'add');
+    });
+  };
+
   // Handle exercise removal from the selected list
   const handleExerciseRemove = (exercise: Exercise) => {
     console.log('ExerciseSection: Removing exercise:', exercise.name);
@@ -41,6 +50,7 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
     <>
       <ExerciseSearch 
         onExerciseSelect={handleExerciseSelect}
+        onExercisesSelect={handleExercisesSelect}
         selectedExercises={selectedExercises}
       />
 

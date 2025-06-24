@@ -1,10 +1,11 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { USDAApiService, type NormalizedFood } from '@/services/usdaApi';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export const useEnhancedFoodSearch = (searchQuery: string, enableUSDA: boolean = true) => {
-  const debouncedQuery = useDebounce(searchQuery, 500);
+  const debouncedQuery = useDebounce(searchQuery, 300); // Reduced from 500ms to 300ms
 
   // Local food search
   const { data: localFoods = [], isLoading: isLoadingLocal } = useQuery({
@@ -40,11 +41,11 @@ export const useEnhancedFoodSearch = (searchQuery: string, enableUSDA: boolean =
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // USDA food search
+  // USDA food search - now starts at 2 characters instead of 3
   const { data: usdaFoods = [], isLoading: isLoadingUSDA, error: usdaError } = useQuery({
     queryKey: ['usda-food-search', debouncedQuery],
     queryFn: async () => {
-      if (!debouncedQuery || debouncedQuery.length < 3) return [];
+      if (!debouncedQuery || debouncedQuery.length < 2) return []; // Reduced from 3 to 2
 
       try {
         // Get USDA API key from Supabase secrets
@@ -63,7 +64,7 @@ export const useEnhancedFoodSearch = (searchQuery: string, enableUSDA: boolean =
         return [];
       }
     },
-    enabled: enableUSDA && debouncedQuery.length >= 3,
+    enabled: enableUSDA && debouncedQuery.length >= 2, // Changed from 3 to 2
     staleTime: 1000 * 60 * 10, // 10 minutes for USDA data
     retry: 1, // Only retry once on failure
   });

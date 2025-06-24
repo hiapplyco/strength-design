@@ -7,6 +7,7 @@ interface LegacyToastOptions {
   description?: string;
   variant?: "default" | "destructive";
   duration?: number;
+  className?: string; // Add className for backward compatibility
 }
 
 // Main hook that provides all smart toast functionality with backward compatibility

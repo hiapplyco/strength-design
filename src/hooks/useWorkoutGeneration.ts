@@ -28,14 +28,14 @@ export const useWorkoutGeneration = () => {
         error: "Failed to generate workout"
       });
       
-      // Extract debug info if present
-      if (result && result._debug) {
-        setDebugInfo(result._debug);
-        console.log('Debug info from workout generation:', result._debug);
-        delete result._debug;
+      // Extract debug info if present and result is an object
+      if (result && typeof result === 'object' && '_debug' in result) {
+        setDebugInfo((result as any)._debug);
+        console.log('Debug info from workout generation:', (result as any)._debug);
+        delete (result as any)._debug;
       }
 
-      return result;
+      return result as WeeklyWorkouts;
     } catch (generationError: any) {
       console.error('Error generating workout:', generationError);
       

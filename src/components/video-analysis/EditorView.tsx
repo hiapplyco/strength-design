@@ -1,6 +1,6 @@
 
 import { Editor } from "@/components/document-editor/Editor";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useSharedContent } from "./hooks/useSharedContent";
@@ -32,6 +32,7 @@ export function EditorView({
   const [selectedVoiceId, setSelectedVoiceId] = useState<string>("TX3LPaxmHKxFdv7VOQHJ");
   const [autoRegenEnabled, setAutoRegenEnabled] = useState(false);
   const { isSharing, sharedLink, shareContent } = useSharedContent();
+  const { toast } = useToast();
 
   const generateNarration = async (voiceId: string) => {
     if (!workoutScript) {

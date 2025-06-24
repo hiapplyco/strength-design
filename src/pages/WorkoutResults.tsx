@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { WeeklyWorkouts } from "@/types/fitness";
 import { useWorkoutGeneration } from "@/hooks/useWorkoutGeneration";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useMotivationalMessages } from "@/hooks/useMotivationalMessages";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 import { LoadingState } from "@/components/ui/loading-states/LoadingState";
@@ -23,6 +23,7 @@ const WorkoutResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { session } = useAuth();
+  const { toast } = useToast();
   const { onWorkoutComplete } = useMotivationalMessages();
 
   useEffect(() => {
@@ -78,7 +79,7 @@ const WorkoutResults = () => {
     };
     
     loadWorkouts();
-  }, [location.state, navigate, session, onWorkoutComplete]);
+  }, [location.state, navigate, session, onWorkoutComplete, toast]);
 
   const resetWorkouts = () => {
     navigate("/workout-generator");

@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 import { LoadingState } from "@/components/ui/loading-states/LoadingState";
 import { EmptyState } from "@/components/ui/EmptyState";

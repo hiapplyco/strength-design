@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -57,7 +58,11 @@ export function SidebarProvider({
   );
 
   const toggleSidebar = React.useCallback(() => {
-    return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
+    if (isMobile) {
+      setOpenMobile((prev) => !prev);
+    } else {
+      setOpen((prev) => !prev);
+    }
   }, [isMobile, setOpen, setOpenMobile]);
 
   React.useEffect(() => {

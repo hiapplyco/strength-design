@@ -79,7 +79,7 @@ export const AppContent = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={true}>
         <div className="flex min-h-screen w-full">
           <AppSidebar />
           <MainContent />

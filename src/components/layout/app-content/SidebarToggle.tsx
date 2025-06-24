@@ -4,7 +4,6 @@ import { Menu } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { zIndex } from "@/lib/design-tokens";
 
 interface SidebarToggleProps {
   isVisible: boolean;
@@ -14,9 +13,7 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
   const { toggleSidebar, open, openMobile } = useSidebar();
   const isMobile = useIsMobile();
   
-  const shouldShow = true;
-  
-  if (!shouldShow) return null;
+  if (!isVisible) return null;
 
   const isOpen = isMobile ? openMobile : open;
 
@@ -26,16 +23,14 @@ export const SidebarToggle = ({ isVisible }: SidebarToggleProps) => {
       variant="ghost"
       size="icon"
       className={cn(
-        `fixed ${zIndex.sidebarToggle} transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]`,
+        "fixed z-[60] transition-all duration-300 ease-in-out",
         "text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/50",
         "backdrop-blur-sm border border-primary/30 rounded-lg",
         "size-11 hover:scale-105 active:scale-95",
-        // Adjusted positioning to avoid content overlap
-        isMobile ? "top-4" : "top-4",
-        // Moved significantly further left when sidebar is closed
-        isMobile 
-          ? (isOpen ? "left-[15rem]" : "left-1")
-          : (isOpen ? "left-[17rem]" : "left-1")
+        "top-4",
+        isOpen 
+          ? (isMobile ? "left-[17rem]" : "left-[17rem]")
+          : "left-4"
       )}
       aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       aria-expanded={isOpen}

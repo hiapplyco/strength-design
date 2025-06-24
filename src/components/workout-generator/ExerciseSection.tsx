@@ -14,7 +14,7 @@ interface ExerciseSectionProps {
 export function ExerciseSection({ selectedExercises, onExerciseSelect, renderTooltip }: ExerciseSectionProps) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
-  // Combined content for displaying selected exercises
+  // Combined content for displaying selected exercises - show all selected exercises
   const selectedExercisesContent = selectedExercises.length > 0 
     ? selectedExercises.map(ex => ex.name).join(", ")
     : "";
@@ -38,7 +38,7 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
           <div className="flex flex-wrap gap-2">
             {selectedExercises.map((exercise) => (
               <span 
-                key={exercise.id} 
+                key={`${exercise.id}-${exercise.name}`}
                 className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-sm group"
               >
                 {exercise.name}
@@ -51,6 +51,9 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
                 </button>
               </span>
             ))}
+          </div>
+          <div className="mt-2 text-xs text-primary/70">
+            {selectedExercises.length} exercise{selectedExercises.length !== 1 ? 's' : ''} selected
           </div>
         </div>
       )}

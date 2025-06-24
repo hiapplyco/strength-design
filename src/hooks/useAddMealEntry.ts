@@ -29,7 +29,8 @@ export const useAddMealEntry = () => {
         const { data: existingFood, error: searchError } = await supabase
           .from('food_items')
           .select('id')
-          .eq('usda_fdc_id', usdaFood.usda_fdc_id)
+          .eq('name', usdaFood.name)
+          .eq('brand', usdaFood.brand || '')
           .single();
 
         if (searchError && searchError.code !== 'PGRST116') {
@@ -50,9 +51,8 @@ export const useAddMealEntry = () => {
               carbs_per_serving: usdaFood.carbs_per_serving,
               fat_per_serving: usdaFood.fat_per_serving,
               fiber_per_serving: usdaFood.fiber_per_serving,
-              serving_size: usdaFood.serving_size,
-              serving_unit: usdaFood.serving_unit,
-              usda_fdc_id: usdaFood.usda_fdc_id
+              serving_size: usdaFood.serving_size.toString(),
+              serving_unit: usdaFood.serving_unit
             })
             .select()
             .single();
@@ -95,8 +95,8 @@ export const useAddMealEntry = () => {
       const { data, error: mealError } = await supabase
         .from('meal_entries')
         .insert({
-          nutrition_log_id: nutritionLog.id,
-          food_item_id: parseInt(finalFoodId),
+          nutrition_log_id: nutritionLog.id.toString(),
+          food_item_id: finalFoodId,
           meal_group: mealGroup,
           amount,
           serving_multiplier: servingMultiplier

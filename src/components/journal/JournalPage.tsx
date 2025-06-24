@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SmartJournalCalendar } from './SmartJournalCalendar';
+import { InsightsTab } from './insights/InsightsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Plus, Calendar, BookOpen, TrendingUp } from 'lucide-react';
@@ -24,7 +25,7 @@ export const JournalPage: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Fitness Journal</h1>
           <p className="text-muted-foreground">
-            Track your workouts, nutrition, and daily reflections
+            Track your workouts, nutrition, and daily reflections with AI-powered insights
           </p>
         </div>
       </div>
@@ -41,7 +42,7 @@ export const JournalPage: React.FC = () => {
           </TabsTrigger>
           <TabsTrigger value="insights" className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Insights
+            AI Insights
           </TabsTrigger>
         </TabsList>
 
@@ -151,18 +152,7 @@ export const JournalPage: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Coming Soon</CardTitle>
-              <CardDescription>AI-powered insights based on your fitness journey</CardDescription>
-            </CardHeader>
-            <CardContent className="text-center py-8">
-              <TrendingUp className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                Advanced analytics and personalized insights will be available soon
-              </p>
-            </CardContent>
-          </Card>
+          <InsightsTab />
         </TabsContent>
       </Tabs>
     </div>

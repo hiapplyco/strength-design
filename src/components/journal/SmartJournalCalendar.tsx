@@ -268,7 +268,7 @@ export const SmartJournalCalendar = () => {
         />
       )}
 
-      <style jsx global>{`
+      <style>{`
         .rbc-calendar-custom {
           font-family: inherit;
         }
@@ -338,6 +338,22 @@ export const SmartJournalCalendar = () => {
         .rbc-calendar-custom .rbc-event:focus {
           outline: 2px solid hsl(var(--ring));
           outline-offset: 2px;
+        }
+        
+        .rbc-calendar-custom .rbc-month-row {
+          border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-date-cell {
+          border-right: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-month-view .rbc-row {
+          border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-calendar-custom .rbc-day-bg {
+          border-right: 1px solid hsl(var(--border));
         }
       `}</style>
     </>

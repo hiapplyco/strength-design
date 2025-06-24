@@ -97,7 +97,7 @@ export const CalendarExportDialog = ({ open, onOpenChange, workouts }: CalendarE
         .from('generated_workouts')
         .insert({
           user_id: session.user.id,
-          workout_data: workouts,
+          workout_data: workouts as any, // Cast to any to bypass the Json type issue
           title: workouts._meta?.title || 'Exported Workout Plan',
           summary: workouts._meta?.summary || '',
           tags: ['exported']

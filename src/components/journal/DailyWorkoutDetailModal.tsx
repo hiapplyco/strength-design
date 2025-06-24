@@ -22,6 +22,7 @@ import { MealAccordion } from "@/components/nutrition-diary/MealAccordion";
 import { useNutritionData } from "@/hooks/useNutritionData";
 import { format } from "date-fns";
 import { Dumbbell, Heart, Apple, Droplets } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import type { WorkoutSessionWithGeneratedWorkout } from "@/hooks/useWorkoutSessions";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -43,6 +44,7 @@ export const DailyWorkoutDetailModal = ({
   const { createEntry, updateEntry, entries } = useJournalEntries();
   const { updateSession, completeSession } = useWorkoutSessions();
   const { nutritionLog, targets } = useNutritionData(date);
+  const { session } = useAuth();
   
   const [journalTitle, setJournalTitle] = useState('');
   const [journalContent, setJournalContent] = useState('');
@@ -69,7 +71,10 @@ export const DailyWorkoutDetailModal = ({
   }, [existingEntry]);
 
   const handleSaveJournal = async () => {
+    if (!session?.user?.id) return;
+
     const journalData = {
+      user_id: session.user.id,
       date: format(date, 'yyyy-MM-dd'),
       title: journalTitle,
       content: journalContent,

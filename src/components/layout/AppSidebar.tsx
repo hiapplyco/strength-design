@@ -19,7 +19,7 @@ export function AppSidebar() {
     <aside 
       ref={sidebarRef}
       className={cn(
-        "h-screen bg-background border-r border-border flex flex-col flex-shrink-0",
+        "min-h-screen bg-background border-r border-border flex flex-col flex-shrink-0",
         "transition-all duration-300 ease-in-out",
         // On mobile: overlay with fixed positioning and transform
         isMobile ? [

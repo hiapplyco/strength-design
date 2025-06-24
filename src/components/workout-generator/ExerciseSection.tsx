@@ -7,7 +7,7 @@ import { ExpandableSectionContainer } from "./ExpandableSectionContainer";
 
 interface ExerciseSectionProps {
   selectedExercises: Exercise[];
-  onExerciseSelect: (exercise: Exercise) => void;
+  onExerciseSelect: (exercise: Exercise, action?: 'add' | 'remove') => void;
   renderTooltip: () => React.ReactNode;
 }
 
@@ -24,28 +24,16 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
     return;
   };
 
-  // Handle exercise selection - this should add exercises, not toggle them in the search
+  // Handle exercise selection from the search - always add
   const handleExerciseSelect = (exercise: Exercise) => {
-    console.log('Exercise selected:', exercise);
-    console.log('Current selected exercises:', selectedExercises);
-    
-    // Check if exercise is already selected
-    const isAlreadySelected = selectedExercises.some(e => e.id === exercise.id);
-    console.log('Is already selected:', isAlreadySelected);
-    
-    if (!isAlreadySelected) {
-      // Add the exercise
-      onExerciseSelect(exercise);
-      console.log('Added exercise:', exercise.name);
-    } else {
-      console.log('Exercise already selected, not adding again');
-    }
+    console.log('ExerciseSection: Adding exercise from search:', exercise.name);
+    onExerciseSelect(exercise, 'add');
   };
 
-  // Handle exercise removal
+  // Handle exercise removal from the selected list
   const handleExerciseRemove = (exercise: Exercise) => {
-    console.log('Removing exercise:', exercise);
-    onExerciseSelect(exercise); // This should toggle/remove the exercise
+    console.log('ExerciseSection: Removing exercise:', exercise.name);
+    onExerciseSelect(exercise, 'remove');
   };
 
   // Custom content renderer for the exercise section

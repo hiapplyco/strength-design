@@ -101,6 +101,32 @@ export function InputContainer({
     setNumberOfDays(preset.numberOfDays);
   };
 
+  // Enhanced exercise selection handler that properly handles add vs remove
+  const handleExerciseSelection = (exercise: Exercise, action?: 'add' | 'remove') => {
+    console.log('InputContainer handleExerciseSelection:', exercise.name, 'action:', action);
+    
+    const isSelected = selectedExercises.some(e => e.id === exercise.id);
+    
+    if (action === 'add' && !isSelected) {
+      // Always add if explicitly told to add and not already selected
+      console.log('Adding exercise to selection:', exercise.name);
+      setSelectedExercises([...selectedExercises, exercise]);
+    } else if (action === 'remove' && isSelected) {
+      // Always remove if explicitly told to remove and currently selected
+      console.log('Removing exercise from selection:', exercise.name);
+      setSelectedExercises(selectedExercises.filter(e => e.id !== exercise.id));
+    } else if (!action) {
+      // Toggle behavior when no action specified (for backwards compatibility)
+      if (isSelected) {
+        console.log('Toggling off exercise:', exercise.name);
+        setSelectedExercises(selectedExercises.filter(e => e.id !== exercise.id));
+      } else {
+        console.log('Toggling on exercise:', exercise.name);
+        setSelectedExercises([...selectedExercises, exercise]);
+      }
+    }
+  };
+
   // Determine form validity
   const isFormValid = fitnessLevel.trim() !== "" || selectedExercises.length > 0 || prescribedExercises.trim() !== "";
 
@@ -139,15 +165,7 @@ export function InputContainer({
         
         <ExerciseSection 
           selectedExercises={selectedExercises}
-          onExerciseSelect={(exercise) => {
-            // Toggle exercise selection
-            const isSelected = selectedExercises.some(e => e.id === exercise.id);
-            if (isSelected) {
-              setSelectedExercises(selectedExercises.filter(e => e.id !== exercise.id));
-            } else {
-              setSelectedExercises([...selectedExercises, exercise]);
-            }
-          }}
+          onExerciseSelect={handleExerciseSelection}
           renderTooltip={() => null}
         />
         

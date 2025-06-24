@@ -1,8 +1,6 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "@/components/ui/sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -55,11 +53,7 @@ export function StandardPageLayout({
   maxWidth = "7xl",
   noPadding = false
 }: StandardPageLayoutProps) {
-  const { open, openMobile } = useSidebar();
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
-  
-  const isVisible = isMobile ? openMobile : open;
   
   const handleBack = () => {
     if (onBack) {
@@ -78,11 +72,11 @@ export function StandardPageLayout({
       noPadding ? "" : spacing.section.default
     )}>
       <div className={cn(
-        "mx-auto",
+        "mx-auto w-full",
         maxWidth !== "full" && `max-w-${maxWidth}`
       )}>
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-4 flex-1 min-w-0">
             {showBack && (
               <Button
                 variant="ghost"
@@ -124,10 +118,8 @@ export function StandardPageLayout({
     <motion.div
       {...animations.pageIn}
       className={cn(
-        "flex flex-col min-h-screen w-full bg-background",
+        "flex flex-col min-h-screen w-full bg-background min-w-0 overflow-hidden",
         "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-        // Apply margin-left only on desktop when sidebar is open
-        !isMobile && isVisible ? "ml-64" : "ml-0",
         className
       )}
     >
@@ -138,7 +130,7 @@ export function StandardPageLayout({
       )}
       
       <main className={cn(
-        "flex-1 w-full overflow-auto",
+        "flex-1 w-full overflow-auto min-w-0",
         maxWidth !== "full" && !noPadding && `max-w-${maxWidth} mx-auto`,
         !noPadding && spacing.section.default,
         contentClassName

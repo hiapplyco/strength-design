@@ -39,12 +39,12 @@ const MainContent = () => {
   return (
     <AnimatePresence mode="wait">
       <motion.main 
-        className="flex-1 min-h-screen bg-background text-foreground relative transition-all duration-300"
+        className="flex-1 min-h-screen bg-background text-foreground relative transition-all duration-300 min-w-0 overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: contentReady ? 1 : 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="relative min-h-screen">
+        <div className="relative min-h-screen w-full">
           <SidebarOverlay />
           <SidebarToggle isVisible={true} />
           <MainRoutes />
@@ -80,7 +80,7 @@ export const AppContent = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-screen w-full">
+        <div className="flex min-h-screen w-full overflow-hidden">
           <AppSidebar />
           <MainContent />
           <Toaster />

@@ -51,14 +51,15 @@ export function useModernWorkoutForm() {
     }
   };
 
-  const handleConfirmReplace = async () => {
+  const handleConfirmReplace = async (): Promise<boolean> => {
     if (generatedWorkout) {
       const success = await replaceWorkouts(generatedWorkout);
       if (success) {
         setIsDialogOpen(false);
-        // Note: onClose would need to be passed from parent component
+        return true;
       }
     }
+    return false;
   };
 
   const handleReplaceWorkouts = () => {

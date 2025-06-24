@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { WorkoutReplacementDialog } from '../WorkoutReplacementDialog';
 import { WorkoutFormTabs } from './components/WorkoutFormTabs';
 import { useModernWorkoutForm } from './hooks/useModernWorkoutForm';
+import type { WeeklyWorkouts } from '@/types/fitness';
 
 interface ModernWorkoutFormProps {
   onClose: () => void;
@@ -34,7 +35,7 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
   // Update handleConfirmReplace to include onClose
   const handleConfirmReplaceWithClose = async () => {
     const result = await handleConfirmReplace();
-    if (result !== false) { // If not explicitly false, consider it success
+    if (result) { // Now properly comparing boolean to boolean
       onClose();
     }
   };

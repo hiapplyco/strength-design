@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import { TargetsCarousel } from './TargetsCarousel';
 import { WaterTracker } from './WaterTracker';
 import { MealAccordion } from './MealAccordion';
-import { useNutritionData } from '../hooks/useNutritionData';
+import { useNutritionData } from '@/hooks/useNutritionData';
 import { format, addDays, subDays } from 'date-fns';
 
 export const NutritionDiaryContent = () => {

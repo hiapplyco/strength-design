@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
-import { useFoodItems } from '../hooks/useFoodItems';
+import { useFoodItems } from '@/hooks/useFoodItems';
 import { FoodDetailsDialog } from './FoodDetailsDialog';
 
 interface FoodSearchDialogProps {

@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Droplets, Plus, Minus } from 'lucide-react';
-import { useUpdateWater } from '../hooks/useUpdateWater';
+import { useUpdateWater } from '@/hooks/useUpdateWater';
 
 interface WaterTrackerProps {
   consumed: number;

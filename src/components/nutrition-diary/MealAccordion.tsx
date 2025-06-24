@@ -6,7 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, Plus, Apple, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FoodSearchDialog } from './FoodSearchDialog';
-import { useMealEntries } from '../hooks/useMealEntries';
+import { useMealEntries } from '@/hooks/useMealEntries';
 
 interface MealAccordionProps {
   mealGroup: string;

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { MacroDonutChart } from './MacroDonutChart';
-import { useAddMealEntry } from '../hooks/useAddMealEntry';
+import { useAddMealEntry } from '@/hooks/useAddMealEntry';
 
 interface FoodDetailsDialogProps {
   food: any;

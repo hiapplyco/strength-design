@@ -1,3 +1,4 @@
+
 import { 
   Dumbbell, 
   MessageSquare, 
@@ -56,10 +57,10 @@ export default function Index() {
       <div className={`${width.full} ${layout.noOverflow} flex-1 min-h-0 ${spacing.container}`}>
         {/* Features Teaser */}
         <div className={`${spacing.section} text-center`}>
-          <h2 className={`${text.h2} font-semibold text-primary mb-4`}>
+          <h2 className={`text-xl md:text-2xl font-semibold text-primary mb-4`}>
             Unlock Your Potential with AI-Powered Fitness Tools
           </h2>
-          <p className={`${text.body} text-foreground/80 ${width.content} mx-auto`}>
+          <p className={`${text.subtitle} text-foreground/80 ${width.content} mx-auto`}>
             Explore our suite of tools designed to revolutionize your fitness journey. From AI-powered workout generation to in-depth movement analysis, we provide the resources you need to achieve your goals.
           </p>
         </div>
@@ -144,10 +145,10 @@ export default function Index() {
 
         {/* Testimonials Section */}
         <div className={`${spacing.section} text-center`}>
-          <h2 className={`${text.h2} font-semibold text-primary mb-4`}>
+          <h2 className={`text-xl md:text-2xl font-semibold text-primary mb-4`}>
             Hear From Our Users
           </h2>
-          <p className={`${text.body} text-foreground/80 ${width.content} mx-auto`}>
+          <p className={`${text.subtitle} text-foreground/80 ${width.content} mx-auto`}>
             Don't just take our word for it. See how Strength.Design is helping people around the world achieve their fitness goals.
           </p>
         </div>

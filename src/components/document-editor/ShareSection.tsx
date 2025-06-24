@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Facebook, Twitter, Linkedin, Link2, Copy, Mic } from "lucide-react";
 import { copyToClipboard } from "./editorUtils";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ export function ShareSection({ shareableLink, handleShare, content }: ShareSecti
   const [showVoiceDialog, setShowVoiceDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const { toast } = useToast();
 
   if (!shareableLink) return null;
 
@@ -26,7 +27,6 @@ export function ShareSection({ shareableLink, handleShare, content }: ShareSecti
     toast({
       title: success ? "Copied!" : "Failed to copy",
       description: success ? "Link copied to clipboard" : "Please copy the link manually",
-      duration: 2000,
     });
   };
 

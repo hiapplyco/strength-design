@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Camera, Mic, Link2 } from 'lucide-react';
 import { StyledHeaderButton } from '@/components/workout/header/StyledHeaderButton';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface VideoControlsProps {
   isWebcamOn: boolean;
@@ -34,13 +34,12 @@ export const VideoControls: React.FC<VideoControlsProps> = ({
   onNarrate,
   extraControls,
 }) => {
+  const { success } = useToast();
+
   const handleCopyLink = () => {
     if (publicUrl) {
       navigator.clipboard.writeText(publicUrl);
-      toast({
-        title: "Success",
-        description: "Link copied to clipboard!",
-      });
+      success("Link copied to clipboard!");
     }
   };
 

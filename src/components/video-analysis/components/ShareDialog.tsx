@@ -1,7 +1,7 @@
 
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Share2 } from "lucide-react";
 
 interface ShareDialogProps {
@@ -12,6 +12,8 @@ interface ShareDialogProps {
 }
 
 export const ShareDialog = ({ isSharing, sharedLink, onShare, workoutScript }: ShareDialogProps) => {
+  const { toast } = useToast();
+
   const handleShare = async () => {
     if (!workoutScript) {
       toast({

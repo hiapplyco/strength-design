@@ -9,7 +9,9 @@ import { Calendar, Dumbbell, Target, Clock, ChevronRight } from 'lucide-react';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
 import { useWorkoutReplacement } from '@/hooks/useWorkoutReplacement';
 import { WorkoutReplacementDialog } from '../WorkoutReplacementDialog';
-import type { WeeklyWorkouts, WorkoutDay } from '@/types/fitness';
+import { InputContainer } from '../input-container';
+import type { WeeklyWorkouts } from '@/types/fitness';
+import type { Exercise } from '@/components/exercise-search/types';
 import { format } from 'date-fns';
 
 interface ModernWorkoutFormProps {
@@ -17,32 +19,48 @@ interface ModernWorkoutFormProps {
 }
 
 export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose }) => {
-  const [selectedTab, setSelectedTab] = useState('details');
+  const [selectedTab, setSelectedTab] = useState('generator');
   const [generatedWorkout, setGeneratedWorkout] = useState<WeeklyWorkouts | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [numberOfDays, setNumberOfDays] = useState(5);
+  const [numberOfCycles, setNumberOfCycles] = useState(1);
+  const [generatePrompt, setGeneratePrompt] = useState('');
+  
   const { generateWorkout } = useWorkoutGeneration();
   const { getScheduledWorkoutCount, replaceWorkouts, isReplacing } = useWorkoutReplacement();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const existingWorkoutCount = getScheduledWorkoutCount();
 
-  const handleGenerateWorkout = async () => {
-    setIsLoading(true);
+  const handleGenerateWorkout = async (params: {
+    prompt: string;
+    weatherPrompt: string;
+    selectedExercises: Exercise[];
+    fitnessLevel: string;
+    prescribedExercises: string;
+    injuries?: string;
+  }) => {
+    setIsGenerating(true);
     try {
       const workout = await generateWorkout({
-        numberOfDays: 5,
-        numberOfCycles: 1,
-        fitnessLevel: 'intermediate',
-        weatherPrompt: '',
-        prescribedExercises: '',
-        injuries: '',
-        prompt: 'Generate a balanced workout plan'
+        numberOfDays,
+        numberOfCycles,
+        fitnessLevel: params.fitnessLevel,
+        weatherPrompt: params.weatherPrompt,
+        prescribedExercises: params.prescribedExercises,
+        injuries: params.injuries,
+        prompt: params.prompt,
+        selectedExercises: params.selectedExercises
       });
-      setGeneratedWorkout(workout);
+      
+      if (workout) {
+        setGeneratedWorkout(workout);
+        setSelectedTab('preview');
+      }
     } catch (error) {
       console.error('Error generating workout:', error);
     } finally {
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   };
 
@@ -76,13 +94,16 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
     return 0;
   };
 
-  const renderWorkoutDetails = () => {
+  const renderWorkoutPreview = () => {
     if (!generatedWorkout) {
       return (
         <div className="text-center py-8">
           <p className="text-muted-foreground mb-4">No workout generated yet.</p>
-          <Button onClick={handleGenerateWorkout} disabled={isLoading}>
-            {isLoading ? 'Generating...' : 'Generate Workout'}
+          <Button 
+            onClick={() => setSelectedTab('generator')}
+            variant="outline"
+          >
+            Go to Generator
           </Button>
         </div>
       );
@@ -120,6 +141,37 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
             );
           })}
         </div>
+
+        <Separator />
+
+        <div className="flex justify-between items-center">
+          <div>
+            <Badge variant="secondary">
+              <Clock className="mr-2 h-4 w-4" />
+              AI Powered
+            </Badge>
+          </div>
+          <Button
+            onClick={() => {
+              if (existingWorkoutCount > 0) {
+                setIsDialogOpen(true);
+              } else {
+                handleConfirmReplace();
+              }
+            }}
+            disabled={isGenerating || isReplacing}
+          >
+            {isGenerating || isReplacing ? (
+              <>
+                Processing...
+              </>
+            ) : (
+              <>
+                Replace Workouts <ChevronRight className="ml-2 h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     );
   };
@@ -134,57 +186,35 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Tabs defaultValue="details" className="space-y-4" value={selectedTab} onValueChange={setSelectedTab}>
+          <Tabs defaultValue="generator" className="space-y-4" value={selectedTab} onValueChange={setSelectedTab}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="details" className="flex items-center gap-2">
+              <TabsTrigger value="generator" className="flex items-center gap-2">
                 <Dumbbell className="h-4 w-4" />
-                Workout Details
+                Workout Generator
               </TabsTrigger>
-              <TabsTrigger value="schedule" className="flex items-center gap-2">
+              <TabsTrigger value="preview" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Schedule Preview
+                Preview & Schedule
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="details" className="space-y-2">
-              {renderWorkoutDetails()}
+            
+            <TabsContent value="generator" className="space-y-2">
+              <InputContainer
+                generatePrompt={generatePrompt}
+                setGeneratePrompt={setGeneratePrompt}
+                handleGenerateWorkout={handleGenerateWorkout}
+                isGenerating={isGenerating}
+                numberOfDays={numberOfDays}
+                setNumberOfDays={setNumberOfDays}
+                numberOfCycles={numberOfCycles}
+                setNumberOfCycles={setNumberOfCycles}
+              />
             </TabsContent>
-            <TabsContent value="schedule">
-              <p className="text-muted-foreground">
-                A visual representation of your workout schedule will be displayed here.
-              </p>
+            
+            <TabsContent value="preview">
+              {renderWorkoutPreview()}
             </TabsContent>
           </Tabs>
-
-          <Separator />
-
-          <div className="flex justify-between items-center">
-            <div>
-              <Badge variant="secondary">
-                <Clock className="mr-2 h-4 w-4" />
-                AI Powered
-              </Badge>
-            </div>
-            <Button
-              onClick={() => {
-                if (existingWorkoutCount > 0) {
-                  setIsDialogOpen(true);
-                } else {
-                  handleConfirmReplace();
-                }
-              }}
-              disabled={isLoading || isReplacing || !generatedWorkout}
-            >
-              {isLoading || isReplacing ? (
-                <>
-                  Generating...
-                </>
-              ) : (
-                <>
-                  Replace Workouts <ChevronRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
         </CardContent>
       </Card>
 

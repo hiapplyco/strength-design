@@ -1,11 +1,9 @@
 
 import { useState } from "react";
-import { X, Dumbbell, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Dumbbell } from "lucide-react";
 import { ExerciseSearch } from "../ExerciseSearch";
 import type { Exercise } from "../exercise-search/types";
 import { ExpandableSectionContainer } from "./ExpandableSectionContainer";
-import { Button } from "../ui/button";
-import { Skeleton } from "../ui/skeleton";
 
 interface ExerciseSectionProps {
   selectedExercises: Exercise[];
@@ -62,7 +60,7 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
   return (
     <ExpandableSectionContainer
       icon={<Dumbbell className="h-5 w-5 text-primary" />}
-      title="Search Exercises & Equipment"
+      title="Search exercises & equipment"
       tooltipContent="Search and select specific exercises or equipment you want to include in your workout"
       textAreaPlaceholder=""
       fileUploadTitle="Upload Exercise List"

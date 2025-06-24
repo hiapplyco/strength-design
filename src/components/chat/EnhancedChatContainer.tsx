@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Database, TrendingUp, Calendar, Heart, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
-import { spacing, width, shadows, radius } from "@/lib/design-tokens";
+import { spacing, typography, variants } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 export const EnhancedChatContainer = () => {
@@ -36,7 +36,7 @@ export const EnhancedChatContainer = () => {
       variant="flat" 
       className={cn(
         "h-full w-full max-w-4xl mx-auto overflow-hidden",
-        "flex flex-col"
+        "flex flex-col bg-card"
       )}
     >
       <ChatSubscriptionManager onMessageUpdate={fetchMessages} />
@@ -45,14 +45,14 @@ export const EnhancedChatContainer = () => {
       <div className={cn(
         "border-b border-border",
         spacing.component.md,
-        "bg-background"
+        "bg-card"
       )}>
         {/* Main Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-primary" />
-              <h1 className="text-lg font-semibold text-foreground">AI Personal Coach</h1>
+              <h1 className={cn(typography.display.h5, "text-foreground")}>AI Personal Coach</h1>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export const EnhancedChatContainer = () => {
           )}
         </div>
         
-        <p className="text-xs text-muted-foreground">
+        <p className={cn(typography.caption, "text-muted-foreground")}>
           Your AI coach has access to your complete fitness journey - workouts, nutrition, wellness data, and progress trends for personalized advice.
         </p>
       </div>

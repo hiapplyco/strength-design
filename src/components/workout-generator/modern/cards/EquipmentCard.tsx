@@ -36,13 +36,15 @@ export const EquipmentCard: React.FC<EquipmentCardProps> = ({
         />
         {selectedExercises.length > 0 && (
           <div>
-            <label className="text-sm font-medium mb-2 block">Selected Equipment:</label>
-            <div className="flex flex-wrap gap-2">
+            <label className="text-sm font-medium mb-2 block">
+              Selected Equipment ({selectedExercises.length}):
+            </label>
+            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
               {selectedExercises.map((exercise) => (
                 <Badge 
                   key={exercise.id}
                   variant="secondary"
-                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors text-xs"
                   onClick={() => handleExerciseSelect(exercise)}
                 >
                   {exercise.name} ×

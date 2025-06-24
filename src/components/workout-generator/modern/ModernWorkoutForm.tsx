@@ -6,7 +6,9 @@ import { GoalsCard } from './cards/GoalsCard';
 import { TrainingScheduleCard } from './cards/TrainingScheduleCard';
 import { EquipmentCard } from './cards/EquipmentCard';
 import { InjuriesCard } from './cards/InjuriesCard';
+import { WeatherCard } from './cards/WeatherCard';
 import type { Exercise } from '@/components/exercise-search/types';
+import type { WeatherData } from '@/types/weather';
 
 export const ModernWorkoutForm: React.FC = () => {
   const { config, updateConfig } = useWorkoutConfig();
@@ -29,6 +31,11 @@ export const ModernWorkoutForm: React.FC = () => {
         selectedExercises: [...config.selectedExercises, exercise]
       });
     }
+  };
+
+  const handleWeatherUpdate = (weatherData: WeatherData | null, weatherPrompt: string) => {
+    updateConfig({ weatherData, weatherPrompt });
+    markFieldUpdated('weather');
   };
 
   const markFieldUpdated = (fieldName: string) => {
@@ -82,6 +89,12 @@ export const ModernWorkoutForm: React.FC = () => {
       <EquipmentCard
         selectedExercises={config.selectedExercises}
         onExerciseSelect={handleExerciseSelect}
+      />
+
+      <WeatherCard
+        weatherData={config.weatherData}
+        onWeatherUpdate={handleWeatherUpdate}
+        numberOfDays={config.numberOfDays}
       />
 
       <InjuriesCard

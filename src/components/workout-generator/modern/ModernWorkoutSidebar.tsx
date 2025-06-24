@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -14,21 +15,26 @@ import {
   CloudSun, 
   Check,
   Zap,
-  Sparkles
+  Sparkles,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface ConfigItem {
   icon: React.ReactNode;
   label: string;
   value: string | null;
+  fullValue?: string | null;
   isNew?: boolean;
   isUpdated?: boolean;
+  isExpandable?: boolean;
 }
 
 export const ModernWorkoutSidebar: React.FC = () => {
   const { config } = useWorkoutConfig();
   const [recentlyUpdatedFields, setRecentlyUpdatedFields] = useState<Set<string>>(new Set());
   const [animationKey, setAnimationKey] = useState(0);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   // Listen for configuration updates
   useEffect(() => {
@@ -51,6 +57,23 @@ export const ModernWorkoutSidebar: React.FC = () => {
     };
   }, []);
 
+  const toggleExpanded = (label: string) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(label)) {
+        newSet.delete(label);
+      } else {
+        newSet.add(label);
+      }
+      return newSet;
+    });
+  };
+
+  const truncateText = (text: string, maxLength: number = 100) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
   const getConfigItems = (): ConfigItem[] => {
     const items: ConfigItem[] = [];
 
@@ -66,38 +89,42 @@ export const ModernWorkoutSidebar: React.FC = () => {
 
     // Goals/Prescribed Exercises
     if (config.prescribedExercises) {
-      const truncated = config.prescribedExercises.length > 60 
-        ? `${config.prescribedExercises.substring(0, 60)}...`
-        : config.prescribedExercises;
-      
+      const isLong = config.prescribedExercises.length > 100;
       items.push({
         icon: <Target className="h-4 w-4" />,
         label: 'Goals',
-        value: truncated,
+        value: isLong ? truncateText(config.prescribedExercises) : config.prescribedExercises,
+        fullValue: config.prescribedExercises,
+        isExpandable: isLong,
         isUpdated: recentlyUpdatedFields.has('prescribedExercises')
       });
     }
 
     // Equipment/Selected Exercises
     if (config.selectedExercises && config.selectedExercises.length > 0) {
+      const exerciseNames = config.selectedExercises.map(e => e.name);
+      const exerciseText = exerciseNames.join(', ');
+      const isLong = exerciseText.length > 100;
+      
       items.push({
         icon: <Dumbbell className="h-4 w-4" />,
         label: 'Equipment',
-        value: config.selectedExercises.map(e => e.name).join(', '),
+        value: isLong ? truncateText(exerciseText) : exerciseText,
+        fullValue: exerciseText,
+        isExpandable: isLong,
         isUpdated: recentlyUpdatedFields.has('selectedExercises')
       });
     }
 
     // Injuries/Limitations
     if (config.injuries) {
-      const truncated = config.injuries.length > 60 
-        ? `${config.injuries.substring(0, 60)}...`
-        : config.injuries;
-      
+      const isLong = config.injuries.length > 100;
       items.push({
         icon: <AlertTriangle className="h-4 w-4" />,
         label: 'Limitations',
-        value: truncated,
+        value: isLong ? truncateText(config.injuries) : config.injuries,
+        fullValue: config.injuries,
+        isExpandable: isLong,
         isUpdated: recentlyUpdatedFields.has('injuries')
       });
     }
@@ -157,78 +184,97 @@ export const ModernWorkoutSidebar: React.FC = () => {
                 </div>
               </motion.div>
             ) : (
-              configItems.map((item, index) => (
-                <motion.div
-                  key={`${item.label}-${animationKey}-${index}`}
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                  transition={{ 
-                    duration: 0.3,
-                    delay: index * 0.05,
-                    type: "spring",
-                    damping: 20,
-                    stiffness: 300
-                  }}
-                >
-                  <Card className={`relative overflow-hidden transition-all duration-300 ${
-                    item.isUpdated 
-                      ? 'border-primary/50 bg-primary/5 shadow-md' 
-                      : 'border-border/50 bg-card'
-                  }`}>
-                    {item.isUpdated && (
-                      <motion.div
-                        initial={{ x: '-100%' }}
-                        animate={{ x: '100%' }}
-                        transition={{ duration: 1, ease: "easeInOut" }}
-                        className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-primary/20 to-transparent pointer-events-none"
-                      />
-                    )}
-                    
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-md transition-colors ${
-                          item.isUpdated 
-                            ? 'bg-primary/20 text-primary' 
-                            : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {item.icon}
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-sm font-medium">{item.label}</h3>
-                            {item.isUpdated && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="flex items-center gap-1"
-                              >
-                                <Zap className="h-3 w-3 text-primary" />
-                                <Badge variant="secondary" className="text-xs px-1">
-                                  Updated
-                                </Badge>
-                              </motion.div>
-                            )}
+              configItems.map((item, index) => {
+                const isExpanded = expandedItems.has(item.label);
+                const displayValue = isExpanded && item.fullValue ? item.fullValue : item.value;
+                
+                return (
+                  <motion.div
+                    key={`${item.label}-${animationKey}-${index}`}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                    transition={{ 
+                      duration: 0.3,
+                      delay: index * 0.05,
+                      type: "spring",
+                      damping: 20,
+                      stiffness: 300
+                    }}
+                  >
+                    <Card className={`relative overflow-hidden transition-all duration-300 ${
+                      item.isUpdated 
+                        ? 'border-primary/50 bg-primary/5 shadow-md' 
+                        : 'border-border/50 bg-card'
+                    }`}>
+                      {item.isUpdated && (
+                        <motion.div
+                          initial={{ x: '-100%' }}
+                          animate={{ x: '100%' }}
+                          transition={{ duration: 1, ease: "easeInOut" }}
+                          className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-primary/20 to-transparent pointer-events-none"
+                        />
+                      )}
+                      
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-md transition-colors ${
+                            item.isUpdated 
+                              ? 'bg-primary/20 text-primary' 
+                              : 'bg-muted text-muted-foreground'
+                          }`}>
+                            {item.icon}
                           </div>
                           
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            {item.value}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-sm font-medium">{item.label}</h3>
+                              {item.isUpdated && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Zap className="h-3 w-3 text-primary" />
+                                  <Badge variant="secondary" className="text-xs px-1">
+                                    Updated
+                                  </Badge>
+                                </motion.div>
+                              )}
+                              {item.isExpandable && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-5 w-5 p-0"
+                                  onClick={() => toggleExpanded(item.label)}
+                                >
+                                  {isExpanded ? (
+                                    <ChevronUp className="h-3 w-3" />
+                                  ) : (
+                                    <ChevronDown className="h-3 w-3" />
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                            
+                            <p className="text-xs text-muted-foreground leading-relaxed break-words">
+                              {displayValue}
+                            </p>
+                          </div>
+                          
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <Check className="h-4 w-4 text-green-500" />
+                          </motion.div>
                         </div>
-                        
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.2 }}
-                        >
-                          <Check className="h-4 w-4 text-green-500" />
-                        </motion.div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })
             )}
           </AnimatePresence>
         </div>

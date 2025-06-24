@@ -70,7 +70,7 @@ export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
       
       <div className="space-y-1">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
           <Input
             placeholder="Search for weather location..."
             value={searchQuery}
@@ -79,7 +79,7 @@ export const LiveWeatherSearch: React.FC<LiveWeatherSearchProps> = ({
             disabled={isLoadingWeather}
           />
           {(isLoading || isLoadingWeather) && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
             </div>
           )}

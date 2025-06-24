@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { FitnessLevelCard } from './cards/FitnessLevelCard';
@@ -8,22 +7,21 @@ import { EquipmentCard } from './cards/EquipmentCard';
 import { InjuriesCard } from './cards/InjuriesCard';
 import { WeatherCard } from './cards/WeatherCard';
 import { GenerateWorkoutButton } from './GenerateWorkoutButton';
+import { WorkoutGenerationOverlay } from './WorkoutGenerationOverlay';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Exercise } from '@/components/exercise-search/types';
 import type { WeatherData } from '@/types/weather';
+
+const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
 
 export const ModernWorkoutForm: React.FC = () => {
   const { config, updateConfig } = useWorkoutConfig();
   const [recentlyUpdated, setRecentlyUpdated] = useState<string[]>([]);
   const { generateWorkout, isGenerating } = useWorkoutGeneration();
   const navigate = useNavigate();
-
-  // Track when fields are updated to show visual feedback
-  useEffect(() => {
-    const timer = setTimeout(() => setRecentlyUpdated([]), 3000);
-    return () => clearTimeout(timer);
-  }, [recentlyUpdated]);
+  const { session } = useAuth();
 
   const handleExerciseSelect = (exercise: Exercise) => {
     const isSelected = config.selectedExercises.some(e => e.id === exercise.id);
@@ -85,53 +83,78 @@ export const ModernWorkoutForm: React.FC = () => {
         numberOfCycles: config.numberOfCycles
       });
 
-      if (result?.id) {
-        navigate(`/workout-results?id=${result.id}`);
+      if (result) {
+        // Store the workout data in localStorage
+        const storageKey = session?.user?.id 
+          ? `${WORKOUT_STORAGE_KEY}_${session.user.id}` 
+          : WORKOUT_STORAGE_KEY;
+        
+        localStorage.setItem(storageKey, JSON.stringify(result));
+        
+        // Navigate to results with the workout data
+        navigate('/workout-results', { 
+          state: { 
+            workouts: result,
+            isNewWorkout: true 
+          } 
+        });
       }
     } catch (error) {
       console.error('Failed to generate workout:', error);
     }
   };
 
+  // Track when fields are updated to show visual feedback
+  useEffect(() => {
+    const timer = setTimeout(() => setRecentlyUpdated([]), 3000);
+    return () => clearTimeout(timer);
+  }, [recentlyUpdated]);
+
   return (
     <div className="space-y-6 relative">
-      <FitnessLevelCard
-        fitnessLevel={config.fitnessLevel}
-        onFitnessLevelChange={handleFitnessLevelChange}
-      />
+      {/* Loading overlay during generation */}
+      <WorkoutGenerationOverlay isVisible={isGenerating} />
 
-      <GoalsCard
-        prescribedExercises={config.prescribedExercises}
-        onPrescribedExercisesChange={handlePrescribedExercisesChange}
-      />
+      {/* Form content - disabled during generation */}
+      <div className={isGenerating ? 'pointer-events-none opacity-50' : ''}>
+        <FitnessLevelCard
+          fitnessLevel={config.fitnessLevel}
+          onFitnessLevelChange={handleFitnessLevelChange}
+        />
 
-      <TrainingScheduleCard
-        numberOfDays={config.numberOfDays}
-        numberOfCycles={config.numberOfCycles}
-        onNumberOfDaysChange={handleNumberOfDaysChange}
-        onNumberOfCyclesChange={handleNumberOfCyclesChange}
-      />
+        <GoalsCard
+          prescribedExercises={config.prescribedExercises}
+          onPrescribedExercisesChange={handlePrescribedExercisesChange}
+        />
 
-      <EquipmentCard
-        selectedExercises={config.selectedExercises}
-        onExerciseSelect={handleExerciseSelect}
-      />
+        <TrainingScheduleCard
+          numberOfDays={config.numberOfDays}
+          numberOfCycles={config.numberOfCycles}
+          onNumberOfDaysChange={handleNumberOfDaysChange}
+          onNumberOfCyclesChange={handleNumberOfCyclesChange}
+        />
 
-      <WeatherCard
-        weatherData={config.weatherData}
-        onWeatherUpdate={handleWeatherUpdate}
-        numberOfDays={config.numberOfDays}
-      />
+        <EquipmentCard
+          selectedExercises={config.selectedExercises}
+          onExerciseSelect={handleExerciseSelect}
+        />
 
-      <InjuriesCard
-        injuries={config.injuries}
-        onInjuriesChange={handleInjuriesChange}
-      />
+        <WeatherCard
+          weatherData={config.weatherData}
+          onWeatherUpdate={handleWeatherUpdate}
+          numberOfDays={config.numberOfDays}
+        />
 
-      <GenerateWorkoutButton
-        onGenerate={handleGenerate}
-        isGenerating={isGenerating}
-      />
+        <InjuriesCard
+          injuries={config.injuries}
+          onInjuriesChange={handleInjuriesChange}
+        />
+
+        <GenerateWorkoutButton
+          onGenerate={handleGenerate}
+          isGenerating={isGenerating}
+        />
+      </div>
     </div>
   );
 };

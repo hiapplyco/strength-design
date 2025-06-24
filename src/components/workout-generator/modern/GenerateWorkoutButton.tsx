@@ -35,7 +35,11 @@ export const GenerateWorkoutButton: React.FC<GenerateWorkoutButtonProps> = ({
               onClick={onGenerate}
               disabled={isGenerating}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              className={`font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-200 ${
+                isGenerating 
+                  ? 'bg-primary/70 text-primary-foreground cursor-not-allowed' 
+                  : 'bg-primary hover:bg-primary/90 text-primary-foreground hover:shadow-xl transform hover:scale-105'
+              }`}
             >
               {isGenerating ? (
                 <>

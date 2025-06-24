@@ -24,11 +24,35 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
     return;
   };
 
+  // Handle exercise selection - this should add exercises, not toggle them in the search
+  const handleExerciseSelect = (exercise: Exercise) => {
+    console.log('Exercise selected:', exercise);
+    console.log('Current selected exercises:', selectedExercises);
+    
+    // Check if exercise is already selected
+    const isAlreadySelected = selectedExercises.some(e => e.id === exercise.id);
+    console.log('Is already selected:', isAlreadySelected);
+    
+    if (!isAlreadySelected) {
+      // Add the exercise
+      onExerciseSelect(exercise);
+      console.log('Added exercise:', exercise.name);
+    } else {
+      console.log('Exercise already selected, not adding again');
+    }
+  };
+
+  // Handle exercise removal
+  const handleExerciseRemove = (exercise: Exercise) => {
+    console.log('Removing exercise:', exercise);
+    onExerciseSelect(exercise); // This should toggle/remove the exercise
+  };
+
   // Custom content renderer for the exercise section
   const renderCustomContent = () => (
     <>
       <ExerciseSearch 
-        onExerciseSelect={onExerciseSelect} 
+        onExerciseSelect={handleExerciseSelect}
         selectedExercises={selectedExercises}
       />
 
@@ -43,7 +67,7 @@ export function ExerciseSection({ selectedExercises, onExerciseSelect, renderToo
               >
                 {exercise.name}
                 <button
-                  onClick={() => onExerciseSelect(exercise)}
+                  onClick={() => handleExerciseRemove(exercise)}
                   className="ml-2 p-0.5 rounded-full hover:bg-red-500 hover:text-white transition-colors duration-200"
                   aria-label={`Remove ${exercise.name}`}
                 >

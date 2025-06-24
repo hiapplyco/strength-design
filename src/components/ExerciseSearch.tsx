@@ -15,13 +15,12 @@ export function ExerciseSearch({ onExerciseSelect, selectedExercises = [] }: Exe
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleExercisesSelect = (exercises: Exercise[]) => {
+    console.log('Exercises selected from search:', exercises);
     if (onExerciseSelect) {
-      // Add each new exercise that isn't already selected
+      // Add each exercise individually
       exercises.forEach(exercise => {
-        const isAlreadySelected = selectedExercises.some(e => e.id === exercise.id);
-        if (!isAlreadySelected) {
-          onExerciseSelect(exercise);
-        }
+        console.log('Adding exercise:', exercise.name);
+        onExerciseSelect(exercise);
       });
     }
   };

@@ -41,7 +41,7 @@ export const WorkoutDayCard = ({
   };
 
   return (
-    <div className="w-full bg-card rounded-md shadow-md hover:shadow-lg transition-all duration-200 mx-auto max-w-[95%] sm:max-w-full gradient-border">
+    <div className="w-full bg-card/70 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 mx-auto max-w-[95%] sm:max-w-full border border-border/20 hover:border-primary/20 overflow-hidden">
       <WorkoutHeader
         title={`Day ${index + 1}`}
         isExporting={isExporting}
@@ -68,24 +68,31 @@ export const WorkoutDayCard = ({
         searchInputRef={searchInputRef}
       />
       
-      <div className="p-4 sm:p-6 space-y-6">
-        {/* Search Section */}
-        <SearchSection
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          searchResults={searchResults}
-          setSearchResults={setSearchResults}
-          isSearching={isSearching}
-          setIsSearching={setIsSearching}
-          onExerciseSelect={handleExerciseSelect}
-          searchInputRef={searchInputRef}
-        />
+      <div className="p-6 sm:p-8 space-y-8">
+        {/* Enhanced Search Section */}
+        <div className="bg-gradient-to-r from-slate-500/5 to-slate-500/10 rounded-lg p-4 border border-border/10">
+          <SearchSection
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            searchResults={searchResults}
+            setSearchResults={setSearchResults}
+            isSearching={isSearching}
+            setIsSearching={setIsSearching}
+            onExerciseSelect={handleExerciseSelect}
+            searchInputRef={searchInputRef}
+          />
+        </div>
         
-        {/* Workout Content Sections */}
-        <WorkoutContentSection
-          workout={workout}
-          onExerciseSelect={handleExerciseSelect}
-        />
+        {/* Enhanced Workout Content Sections */}
+        <div className="relative">
+          {/* Background decoration */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/2 to-transparent rounded-lg -z-10"></div>
+          
+          <WorkoutContentSection
+            workout={workout}
+            onExerciseSelect={handleExerciseSelect}
+          />
+        </div>
       </div>
     </div>
   );

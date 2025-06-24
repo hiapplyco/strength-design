@@ -35,21 +35,26 @@ export const ModernWorkoutForm: React.FC<ModernWorkoutFormProps> = ({ onClose })
   // Update handleConfirmReplace to include onClose
   const handleConfirmReplaceWithClose = async () => {
     const result = await handleConfirmReplace();
-    if (result) { // Now properly comparing boolean to boolean
+    if (result) {
       onClose();
     }
   };
 
   return (
-    <div className="w-full">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">AI Workout Generator</CardTitle>
-          <CardDescription>
-            Customize your workout plan with AI-powered suggestions.
+    <div className="w-full max-w-4xl mx-auto">
+      <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <CardTitle className="text-2xl bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
+              AI Workout Generator
+            </CardTitle>
+          </div>
+          <CardDescription className="text-base text-muted-foreground">
+            Customize your workout plan with AI-powered suggestions tailored to your goals and equipment.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pb-6">
           <WorkoutFormTabs
             selectedTab={selectedTab}
             onTabChange={setSelectedTab}

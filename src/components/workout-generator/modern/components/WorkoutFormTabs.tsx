@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Dumbbell } from 'lucide-react';
-import { InputContainer } from '../../input-container';
+import { ModernInputContainer } from './ModernInputContainer';
 import { WorkoutPreview } from './WorkoutPreview';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import type { Exercise } from '@/components/exercise-search/types';
@@ -34,10 +34,6 @@ interface WorkoutFormTabsProps {
 export function WorkoutFormTabs({
   selectedTab,
   onTabChange,
-  generatePrompt,
-  setGeneratePrompt,
-  handleGenerateWorkout,
-  isGenerating,
   numberOfDays,
   setNumberOfDays,
   numberOfCycles,
@@ -48,24 +44,26 @@ export function WorkoutFormTabs({
   existingWorkoutCount,
 }: WorkoutFormTabsProps) {
   return (
-    <Tabs defaultValue="generator" className="space-y-4" value={selectedTab} onValueChange={onTabChange}>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="generator" className="flex items-center gap-2">
+    <Tabs defaultValue="generator" className="space-y-6" value={selectedTab} onValueChange={onTabChange}>
+      <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 h-11">
+        <TabsTrigger 
+          value="generator" 
+          className="flex items-center gap-2 data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400 data-[state=active]:border-green-500/30"
+        >
           <Dumbbell className="h-4 w-4" />
           Workout Generator
         </TabsTrigger>
-        <TabsTrigger value="preview" className="flex items-center gap-2">
+        <TabsTrigger 
+          value="preview" 
+          className="flex items-center gap-2 data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400 data-[state=active]:border-green-500/30"
+        >
           <Calendar className="h-4 w-4" />
           Preview & Schedule
         </TabsTrigger>
       </TabsList>
       
-      <TabsContent value="generator" className="space-y-2">
-        <InputContainer
-          generatePrompt={generatePrompt}
-          setGeneratePrompt={setGeneratePrompt}
-          handleGenerateWorkout={handleGenerateWorkout}
-          isGenerating={isGenerating}
+      <TabsContent value="generator" className="space-y-4 mt-6">
+        <ModernInputContainer
           numberOfDays={numberOfDays}
           setNumberOfDays={setNumberOfDays}
           numberOfCycles={numberOfCycles}
@@ -73,7 +71,7 @@ export function WorkoutFormTabs({
         />
       </TabsContent>
       
-      <TabsContent value="preview">
+      <TabsContent value="preview" className="mt-6">
         <WorkoutPreview
           generatedWorkout={generatedWorkout}
           onReplaceWorkouts={onReplaceWorkouts}

@@ -7,8 +7,14 @@ import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
 import { useAddExerciseEntry } from '@/hooks/useAddExerciseEntry';
 import { ExerciseGenerationForm } from './exercise-search/ExerciseGenerationForm';
 import { WorkoutDisplay } from './exercise-search/WorkoutDisplay';
-import { ExerciseSelectionForm } from './exercise-search/ExerciseSelectionForm';
+import { MultiExerciseConfigForm } from './exercise-search/MultiExerciseConfigForm';
 import { estimateCalories, extractExercisesFromWorkout } from './exercise-search/calorieEstimation';
+
+interface ExerciseConfig {
+  exercise: any;
+  duration: string;
+  calories: string;
+}
 
 interface ExerciseSearchDialogProps {
   isOpen: boolean;
@@ -23,8 +29,9 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
   const [goals, setGoals] = useState('');
   const [showWorkout, setShowWorkout] = useState(false);
   const [generatedWorkout, setGeneratedWorkout] = useState<any>(null);
-  const [selectedExercise, setSelectedExercise] = useState<any>(null);
-  const [customCalories, setCustomCalories] = useState('');
+  const [selectedExercises, setSelectedExercises] = useState<any[]>([]);
+  const [showConfig, setShowConfig] = useState(false);
+  const [exerciseConfigs, setExerciseConfigs] = useState<ExerciseConfig[]>([]);
 
   const { generateWorkout, isGenerating } = useWorkoutGeneration();
   const { addExerciseEntry, isLoading: isAdding } = useAddExerciseEntry();
@@ -50,34 +57,58 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
 
     if (result) {
       setGeneratedWorkout(result);
+      setSelectedExercises([]);
       setShowWorkout(true);
     }
   };
 
-  const handleSelectExercise = (exercise: any) => {
-    console.log('Selected exercise:', exercise);
-    setSelectedExercise(exercise);
-    // Estimate calories based on exercise type and duration
-    const estimatedCalories = estimateCalories(exercise.name, parseInt(duration));
-    setCustomCalories(estimatedCalories.toString());
+  const handleExerciseToggle = (exercise: any) => {
+    setSelectedExercises(prev => {
+      const isSelected = prev.some(selected => selected.id === exercise.id);
+      if (isSelected) {
+        return prev.filter(selected => selected.id !== exercise.id);
+      } else {
+        return [...prev, exercise];
+      }
+    });
   };
 
-  const handleAddExercise = async () => {
-    if (!selectedExercise) return;
+  const handleContinueWithSelected = () => {
+    const configs = selectedExercises.map(exercise => ({
+      exercise,
+      duration: duration,
+      calories: estimateCalories(exercise.name, parseInt(duration)).toString()
+    }));
+    setExerciseConfigs(configs);
+    setShowConfig(true);
+  };
 
+  const handleUpdateConfig = (index: number, field: 'duration' | 'calories', value: string) => {
+    setExerciseConfigs(prev => prev.map((config, i) => 
+      i === index ? { ...config, [field]: value } : config
+    ));
+  };
+
+  const handleRemoveExercise = (index: number) => {
+    setExerciseConfigs(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddAll = async () => {
     try {
-      await addExerciseEntry({
-        exerciseName: selectedExercise.name,
-        durationMinutes: parseInt(duration),
-        caloriesBurned: parseInt(customCalories) || 0,
-        mealGroup,
-        date,
-        workoutData: selectedExercise
-      });
+      for (const config of exerciseConfigs) {
+        await addExerciseEntry({
+          exerciseName: config.exercise.name,
+          durationMinutes: parseInt(config.duration),
+          caloriesBurned: parseInt(config.calories) || 0,
+          mealGroup,
+          date,
+          workoutData: config.exercise
+        });
+      }
       onOpenChange(false);
       resetForm();
     } catch (error) {
-      console.error('Error adding exercise:', error);
+      console.error('Error adding exercises:', error);
     }
   };
 
@@ -87,8 +118,17 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
     setGoals('');
     setShowWorkout(false);
     setGeneratedWorkout(null);
-    setSelectedExercise(null);
-    setCustomCalories('');
+    setSelectedExercises([]);
+    setShowConfig(false);
+    setExerciseConfigs([]);
+  };
+
+  const handleBack = () => {
+    if (showConfig) {
+      setShowConfig(false);
+    } else {
+      setShowWorkout(false);
+    }
   };
 
   const workoutExercises = generatedWorkout ? extractExercisesFromWorkout(generatedWorkout) : [];
@@ -100,32 +140,32 @@ export const ExerciseSearchDialog = ({ isOpen, onOpenChange, mealGroup, date }: 
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => setShowWorkout(false)} className="h-8 w-8">
+              <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <DialogTitle className="flex items-center gap-2">
                 <Dumbbell className="h-5 w-5" />
-                Select Exercise
+                {showConfig ? 'Configure Exercises' : 'Select Exercises'}
               </DialogTitle>
             </div>
           </DialogHeader>
 
           <div className="space-y-4">
-            {selectedExercise ? (
-              <ExerciseSelectionForm
-                selectedExercise={selectedExercise}
-                duration={duration}
-                setDuration={setDuration}
-                customCalories={customCalories}
-                setCustomCalories={setCustomCalories}
-                onAddExercise={handleAddExercise}
-                onBack={() => setSelectedExercise(null)}
+            {showConfig ? (
+              <MultiExerciseConfigForm
+                exerciseConfigs={exerciseConfigs}
+                onUpdateConfig={handleUpdateConfig}
+                onRemoveExercise={handleRemoveExercise}
+                onAddAll={handleAddAll}
+                onBack={handleBack}
                 isAdding={isAdding}
               />
             ) : (
               <WorkoutDisplay
                 exercises={workoutExercises}
-                onSelectExercise={handleSelectExercise}
+                selectedExercises={selectedExercises}
+                onExerciseToggle={handleExerciseToggle}
+                onContinueWithSelected={handleContinueWithSelected}
               />
             )}
           </div>

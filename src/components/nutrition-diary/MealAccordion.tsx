@@ -47,6 +47,33 @@ export const MealAccordion = ({ mealGroup, nutritionLogId, date }: MealAccordion
     }
   }, [showAddMenu]);
 
+  const handleAddMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAddMenu(!showAddMenu);
+    // Auto-expand accordion when opening add menu
+    if (!showAddMenu && !isOpen) {
+      setIsOpen(true);
+    }
+  };
+
+  const handleFoodClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowFoodSearch(true);
+    setShowAddMenu(false);
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+
+  const handleExerciseClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowExerciseSearch(true);
+    setShowAddMenu(false);
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <div className="relative">
@@ -77,26 +104,19 @@ export const MealAccordion = ({ mealGroup, nutritionLogId, date }: MealAccordion
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAddMenu(!showAddMenu);
-                  }}
+                  onClick={handleAddMenuClick}
                   className="h-8 w-8 p-0"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
                 
                 {showAddMenu && (
-                  <div className="absolute right-0 top-full mt-1 bg-background border rounded-md shadow-lg z-50 min-w-[140px]">
+                  <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-[60] min-w-[140px]">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowFoodSearch(true);
-                        setShowAddMenu(false);
-                      }}
-                      className="w-full justify-start gap-2 h-9"
+                      onClick={handleFoodClick}
+                      className="w-full justify-start gap-2 h-9 text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <Apple className="h-4 w-4" />
                       Add Food
@@ -104,12 +124,8 @@ export const MealAccordion = ({ mealGroup, nutritionLogId, date }: MealAccordion
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowExerciseSearch(true);
-                        setShowAddMenu(false);
-                      }}
-                      className="w-full justify-start gap-2 h-9"
+                      onClick={handleExerciseClick}
+                      className="w-full justify-start gap-2 h-9 text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       <Activity className="h-4 w-4" />
                       Add Exercise

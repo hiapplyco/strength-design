@@ -31,7 +31,7 @@ export const WorkoutDisplayButtons = ({ resetWorkouts }: WorkoutDisplayButtonsPr
   return (
     <Button
       onClick={handleBackClick}
-      className="h-auto text-base sm:text-lg font-medium text-white rounded-md px-3 py-1.5 sm:px-4 sm:py-2 
+      className="h-auto text-base sm:text-lg font-medium rounded-md px-3 py-1.5 sm:px-4 sm:py-2 
         shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
       variant="outline"
     >

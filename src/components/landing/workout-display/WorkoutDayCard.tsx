@@ -41,7 +41,7 @@ export const WorkoutDayCard = ({
   };
 
   return (
-    <div className="w-full bg-card rounded-xl border border-border/30 hover:border-primary/20 transition-all duration-300 mx-auto max-w-[95%] sm:max-w-full overflow-hidden">
+    <div className="w-full bg-card/90 backdrop-blur-sm rounded-xl border border-border/60 hover:border-primary/30 hover:bg-card/95 transition-all duration-300 mx-auto max-w-[95%] sm:max-w-full overflow-hidden shadow-sm">
       <WorkoutHeader
         title={`Day ${index + 1}`}
         isExporting={isExporting}

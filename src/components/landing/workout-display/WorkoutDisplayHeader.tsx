@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Database, Send } from "lucide-react";
+import { Database, Send, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,33 +77,57 @@ export const WorkoutDisplayHeader = ({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
-      <WorkoutDisplayButtons resetWorkouts={resetWorkouts} />
-      
-      <div className="flex items-center gap-4 flex-wrap">
-        <Button
-          onClick={handleViewWorkouts}
-          className="h-auto text-base sm:text-lg"
-        >
-          <Database className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-          My Workouts
-        </Button>
+    <div className="space-y-6">
+      {/* Enhanced Summary Section */}
+      {allWorkouts._meta?.summary && (
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 rounded-xl"></div>
+          <div className="relative bg-card/40 backdrop-blur-sm border border-border/50 rounded-xl p-6 shadow-sm">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-1">Workout Summary</h3>
+                <p className="text-sm text-muted-foreground">AI-generated overview of your personalized plan</p>
+              </div>
+            </div>
+            <div className="prose prose-sm max-w-none">
+              <p className="text-foreground/90 leading-relaxed">{allWorkouts._meta.summary}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
-        <Button
-          onClick={handlePublish}
-          disabled={isPublishing}
-          className="h-auto text-base sm:text-lg"
-        >
-          <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-          {isPublishing ? "Publishing..." : "Publish"}
-        </Button>
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <WorkoutDisplayButtons resetWorkouts={resetWorkouts} />
+        
+        <div className="flex items-center gap-4 flex-wrap">
+          <Button
+            onClick={handleViewWorkouts}
+            className="h-auto text-base sm:text-lg"
+          >
+            <Database className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            My Workouts
+          </Button>
 
-        <HeaderActions
-          onExport={async () => {}} // Make this return a Promise
-          isExporting={isExporting}
-          workoutText={workoutText}
-          allWorkouts={allWorkouts}
-        />
+          <Button
+            onClick={handlePublish}
+            disabled={isPublishing}
+            className="h-auto text-base sm:text-lg"
+          >
+            <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            {isPublishing ? "Publishing..." : "Publish"}
+          </Button>
+
+          <HeaderActions
+            onExport={async () => {}}
+            isExporting={isExporting}
+            workoutText={workoutText}
+            allWorkouts={allWorkouts}
+          />
+        </div>
       </div>
     </div>
   );

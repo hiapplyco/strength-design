@@ -82,7 +82,7 @@ export function WeatherSearch({
     <>
       <div className="relative">
         {isSearching && (
-          <div className={cn("absolute right-2 top-2", zIndex.dropdown)}>
+          <div className={cn("absolute right-2 top-2", zIndex.content)}>
             <LoadingIndicator size="small" variant="primary" />
           </div>
         )}

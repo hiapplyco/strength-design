@@ -7,12 +7,17 @@ import { TrainingScheduleCard } from './cards/TrainingScheduleCard';
 import { EquipmentCard } from './cards/EquipmentCard';
 import { InjuriesCard } from './cards/InjuriesCard';
 import { WeatherCard } from './cards/WeatherCard';
+import { GenerateWorkoutButton } from './GenerateWorkoutButton';
+import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
+import { useNavigate } from 'react-router-dom';
 import type { Exercise } from '@/components/exercise-search/types';
 import type { WeatherData } from '@/types/weather';
 
 export const ModernWorkoutForm: React.FC = () => {
   const { config, updateConfig } = useWorkoutConfig();
   const [recentlyUpdated, setRecentlyUpdated] = useState<string[]>([]);
+  const { generateWorkout, isGenerating } = useWorkoutGeneration();
+  const navigate = useNavigate();
 
   // Track when fields are updated to show visual feedback
   useEffect(() => {
@@ -67,8 +72,29 @@ export const ModernWorkoutForm: React.FC = () => {
     markFieldUpdated('injuries');
   };
 
+  const handleGenerate = async () => {
+    try {
+      const result = await generateWorkout({
+        prompt: config.prescribedExercises || 'Create a comprehensive workout program',
+        weatherPrompt: config.weatherPrompt || '',
+        selectedExercises: config.selectedExercises,
+        fitnessLevel: config.fitnessLevel,
+        prescribedExercises: config.prescribedExercises,
+        injuries: config.injuries || undefined,
+        numberOfDays: config.numberOfDays,
+        numberOfCycles: config.numberOfCycles
+      });
+
+      if (result?.id) {
+        navigate(`/workout-results?id=${result.id}`);
+      }
+    } catch (error) {
+      console.error('Failed to generate workout:', error);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <FitnessLevelCard
         fitnessLevel={config.fitnessLevel}
         onFitnessLevelChange={handleFitnessLevelChange}
@@ -100,6 +126,11 @@ export const ModernWorkoutForm: React.FC = () => {
       <InjuriesCard
         injuries={config.injuries}
         onInjuriesChange={handleInjuriesChange}
+      />
+
+      <GenerateWorkoutButton
+        onGenerate={handleGenerate}
+        isGenerating={isGenerating}
       />
     </div>
   );

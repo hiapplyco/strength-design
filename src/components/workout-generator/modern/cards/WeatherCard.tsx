@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CloudSun, MessageSquare, X } from 'lucide-react';
 import { EnhancedWeatherSearch } from '../../weather/EnhancedWeatherSearch';
-import { WeatherDisplay } from '../../weather/WeatherDisplay';
 import type { WeatherData } from '@/types/weather';
 
 interface WeatherCardProps {

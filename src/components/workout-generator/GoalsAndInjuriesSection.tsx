@@ -36,7 +36,7 @@ export function GoalsAndInjuriesSection({
         setContent={setPrescribedExercises}
         isAnalyzing={isAnalyzingPrescribed}
         handleFileSelect={handlePrescribedFileSelect}
-        initialExpanded={true}
+        initialExpanded={false}
       />
       
       <ExpandableSectionContainer
@@ -50,7 +50,7 @@ export function GoalsAndInjuriesSection({
         setContent={setInjuries}
         isAnalyzing={isAnalyzingInjuries}
         handleFileSelect={handleInjuriesFileSelect}
-        initialExpanded={true}
+        initialExpanded={false}
       />
     </div>
   );

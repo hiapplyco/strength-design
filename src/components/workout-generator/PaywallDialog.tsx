@@ -18,7 +18,7 @@ export const PaywallDialog = ({ open, onOpenChange }: PaywallDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md z-[60]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Crown className="h-6 w-6 text-amber-500" />
@@ -56,7 +56,7 @@ export const PaywallDialog = ({ open, onOpenChange }: PaywallDialogProps) => {
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">$25/month</div>
+            <div className="text-2xl font-bold text-gray-900">$24.99/month</div>
             <div className="text-sm text-gray-600">Cancel anytime</div>
           </div>
 

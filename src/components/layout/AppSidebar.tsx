@@ -40,10 +40,7 @@ export function AppSidebar() {
       
       {/* Scrollable Content Section */}
       <div className="flex-1 overflow-y-auto bg-background">
-        <div className="px-4 py-4">
-          <div className="text-sm font-medium text-muted-foreground mb-2">Navigation</div>
-          <SidebarNavigation />
-        </div>
+        <SidebarNavigation />
       </div>
       
       {/* Footer Section */}

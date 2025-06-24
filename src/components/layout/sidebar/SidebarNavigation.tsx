@@ -70,80 +70,83 @@ export const SidebarNavigation = () => {
   };
 
   return (
-    <nav className="space-y-1 px-2">
-      <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
-      <NavItem
-        to="/workout-generator"
-        icon={<Sparkles className="h-5 w-5" />}
-        label="Workout Generator"
-      />
-      <NavItem
-        to="/generated-workouts"
-        icon={<History className="h-5 w-5" />}
-        label="Previous Programs"
-      />
-      <NavItem
-        to="/journal"
-        icon={<Book className="h-5 w-5" />}
-        label="Journal"
-      />
-      <NavItem
-        to="/movement-analysis"
-        icon={<Dumbbell className="h-5 w-5" />}
-        label="Movement Analysis"
-      />
-      <NavItem
-        to="/program-chat"
-        icon={<MessageSquare className="h-5 w-5" />}
-        label="Program Chat"
-      />
-      <NavItem
-        to="/document-editor"
-        icon={<FileText className="h-5 w-5" />}
-        label="Document Editor"
-      />
-      <NavItem
-        to="/video-analysis"
-        icon={<Video className="h-5 w-5" />}
-        label="Publish Program"
-      />
-      <NavItem
-        to="/pricing"
-        icon={<CreditCard className="h-5 w-5" />}
-        label="Pricing"
-      />
-      
-      {/* Auth Section */}
-      <div className="pt-4 border-t border-border">
-        {user ? (
-          <Button
-            onClick={handleLogout}
-            variant="ghost"
-            className="w-full justify-start text-muted-foreground hover:text-secondary-foreground hover:bg-secondary"
-          >
-            <LogOut className="h-5 w-5 mr-2" />
-            Sign Out
-          </Button>
-        ) : (
-          <Button
-            onClick={() => setShowAuthDialog(true)}
-            variant="ghost"
-            className="w-full justify-start text-muted-foreground hover:text-secondary-foreground hover:bg-secondary"
-          >
-            <LogIn className="h-5 w-5 mr-2" />
-            Sign In
-          </Button>
-        )}
-      </div>
+    <div className="px-4 py-4">
+      <div className="text-sm font-medium text-muted-foreground mb-2">Navigation</div>
+      <nav className="space-y-1">
+        <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
+        <NavItem
+          to="/workout-generator"
+          icon={<Sparkles className="h-5 w-5" />}
+          label="Workout Generator"
+        />
+        <NavItem
+          to="/generated-workouts"
+          icon={<History className="h-5 w-5" />}
+          label="Previous Programs"
+        />
+        <NavItem
+          to="/journal"
+          icon={<Book className="h-5 w-5" />}
+          label="Journal"
+        />
+        <NavItem
+          to="/movement-analysis"
+          icon={<Dumbbell className="h-5 w-5" />}
+          label="Movement Analysis"
+        />
+        <NavItem
+          to="/program-chat"
+          icon={<MessageSquare className="h-5 w-5" />}
+          label="Program Chat"
+        />
+        <NavItem
+          to="/document-editor"
+          icon={<FileText className="h-5 w-5" />}
+          label="Document Editor"
+        />
+        <NavItem
+          to="/video-analysis"
+          icon={<Video className="h-5 w-5" />}
+          label="Publish Program"
+        />
+        <NavItem
+          to="/pricing"
+          icon={<CreditCard className="h-5 w-5" />}
+          label="Pricing"
+        />
+        
+        {/* Auth Section */}
+        <div className="pt-4 border-t border-border">
+          {user ? (
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              className="w-full justify-start text-muted-foreground hover:text-secondary-foreground hover:bg-secondary"
+            >
+              <LogOut className="h-5 w-5 mr-2" />
+              Sign Out
+            </Button>
+          ) : (
+            <Button
+              onClick={() => setShowAuthDialog(true)}
+              variant="ghost"
+              className="w-full justify-start text-muted-foreground hover:text-secondary-foreground hover:bg-secondary"
+            >
+              <LogIn className="h-5 w-5 mr-2" />
+              Sign In
+            </Button>
+          )}
+        </div>
 
-      <AuthDialog 
-        isOpen={showAuthDialog} 
-        onOpenChange={setShowAuthDialog} 
-        onSuccess={() => {
-          setShowAuthDialog(false);
-          navigate("/workout-generator");
-        }} 
-      />
-    </nav>
+        <AuthDialog 
+          isOpen={showAuthDialog} 
+          onOpenChange={setShowAuthDialog} 
+          onSuccess={() => {
+            setShowAuthDialog(false);
+            navigate("/workout-generator");
+          }} 
+        />
+      </nav>
+    </div>
   );
 };

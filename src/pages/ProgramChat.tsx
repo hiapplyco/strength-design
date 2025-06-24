@@ -2,6 +2,7 @@
 import { ChatContainer } from "@/components/chat/ChatContainer";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 import { spacing, width, text, layout } from "@/utils/responsive";
+import { ProFeatureWrapper } from "@/components/common/ProFeatureWrapper";
 
 export default function ProgramChat() {
   const header = (
@@ -16,7 +17,9 @@ export default function ProgramChat() {
   return (
     <StandardPageLayout header={header} className="h-screen">
       <div className={`${width.full} ${layout.noOverflow} flex-1 min-h-0 ${spacing.container}`}>
-        <ChatContainer />
+        <ProFeatureWrapper featureName="Program Chat">
+          <ChatContainer />
+        </ProFeatureWrapper>
       </div>
     </StandardPageLayout>
   );

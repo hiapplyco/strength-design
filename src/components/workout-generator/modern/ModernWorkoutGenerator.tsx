@@ -10,6 +10,7 @@ import { WorkoutGeneratorLoading } from "../WorkoutGeneratorLoading";
 import { useWorkoutGeneration as useWorkoutGenerationHook } from "../hooks/useWorkoutGeneration";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWorkoutUsage } from "@/hooks/useWorkoutUsage";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import type { WeeklyWorkouts } from "@/types/fitness";
 
 const WORKOUT_STORAGE_KEY = "strength_design_current_workout";
@@ -21,8 +22,16 @@ export const ModernWorkoutGenerator = () => {
   
   const navigate = useNavigate();
   const { session } = useAuth();
-  const { workoutUsage } = useWorkoutUsage();
+  const { workoutUsage, isLoading: usageLoading } = useWorkoutUsage();
+  const { refetch: refetchSubscription } = useSubscriptionStatus();
   const { isGenerating, generateWorkout, showPaywall, setShowPaywall } = useWorkoutGeneration();
+
+  // Auto-refresh subscription status when component mounts or user changes
+  useEffect(() => {
+    if (session?.user) {
+      refetchSubscription();
+    }
+  }, [session?.user, refetchSubscription]);
 
   const {
     weatherData,
@@ -89,6 +98,16 @@ export const ModernWorkoutGenerator = () => {
   };
 
   const isValid = Boolean(fitnessLevel && numberOfDays > 0);
+
+  if (usageLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center min-h-[200px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

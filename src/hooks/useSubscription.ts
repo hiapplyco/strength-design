@@ -14,6 +14,9 @@ export const useSubscription = () => {
       console.log(`Starting subscription process...`);
       setLoadingStates(prev => ({ ...prev, [type]: true }));
 
+      // Store current location for return after checkout
+      localStorage.setItem('checkout-return-url', window.location.pathname);
+
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (!session) {
@@ -55,7 +58,6 @@ export const useSubscription = () => {
         },
       });
 
-      // Log all result information for debug
       console.log('create-checkout function response:', { data, error });
 
       if (error) {
@@ -70,19 +72,16 @@ export const useSubscription = () => {
       }
 
       if (!data?.url) {
-        // Could be error in edge function or Stripe set up
         console.error('No checkout URL returned from create-checkout', data);
         toast({
           title: "Checkout Error",
-          description:
-            "No checkout URL returned. This is likely a configuration issue. Please contact support or try again later.",
+          description: "No checkout URL returned. This is likely a configuration issue. Please contact support or try again later.",
           variant: "destructive",
         });
         setLoadingStates(prev => ({ ...prev, [type]: false }));
         return;
       }
 
-      // ADDITION: Extra URL validity check before redirecting
       if (typeof data.url !== 'string' || !data.url.startsWith("https://checkout.stripe.com")) {
         console.error('Invalid Stripe checkout URL received:', data.url);
         toast({
@@ -94,10 +93,10 @@ export const useSubscription = () => {
         return;
       }
 
-      console.log('Redirecting to Stripe checkout (new tab):', data.url);
+      console.log('Redirecting to Stripe checkout:', data.url);
 
-      // Open Stripe checkout in a new tab (recommended by Stripe)
-      window.open(data.url, '_blank');
+      // Redirect to Stripe checkout in the same tab
+      window.location.href = data.url;
 
     } catch (error: any) {
       console.error('Error creating checkout session:', error);

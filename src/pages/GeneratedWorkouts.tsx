@@ -8,6 +8,7 @@ import { WorkoutList } from "@/components/generated-workouts/WorkoutList";
 import { BulkActionsBar } from "@/components/generated-workouts/BulkActionsBar";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 import { spacing, width, layout } from "@/utils/responsive";
+import { ProFeatureWrapper } from "@/components/common/ProFeatureWrapper";
 
 export default function GeneratedWorkouts() {
   const { session } = useAuth();
@@ -71,40 +72,42 @@ export default function GeneratedWorkouts() {
   return (
     <StandardPageLayout className={spacing.container}>
       <div className={`${width.full} ${spacing.section} ${layout.stack} ${spacing.gap}`}>
-        <PageHeader 
-          totalWorkouts={filteredWorkouts.length}
-          selectedCount={selectedWorkouts.length}
-        />
-        
-        <WorkoutFilters 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          allTags={allTags}
-          selectedTags={selectedTags}
-          setSelectedTags={setSelectedTags}
-          showOnlyFavorites={showOnlyFavorites}
-          setShowOnlyFavorites={setShowOnlyFavorites}
-        />
-        
-        {selectedWorkouts.length > 0 && (
-          <BulkActionsBar
+        <ProFeatureWrapper featureName="Workout History">
+          <PageHeader 
+            totalWorkouts={filteredWorkouts.length}
             selectedCount={selectedWorkouts.length}
-            onDelete={handleBulkDelete}
-            onClearSelection={() => setSelectedWorkouts([])}
           />
-        )}
-        
-        <div className={`${width.full} ${layout.noOverflow}`}>
-          <WorkoutList
-            workouts={filteredWorkouts.map(session => session.generated_workouts!)}
-            selectedWorkouts={selectedWorkouts}
-            onToggleSelection={handleWorkoutSelect}
-            onToggleFavorite={handleToggleFavorite}
-            onDuplicate={handleDuplicate}
+          
+          <WorkoutFilters 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            allTags={allTags}
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+            showOnlyFavorites={showOnlyFavorites}
+            setShowOnlyFavorites={setShowOnlyFavorites}
           />
-        </div>
+          
+          {selectedWorkouts.length > 0 && (
+            <BulkActionsBar
+              selectedCount={selectedWorkouts.length}
+              onDelete={handleBulkDelete}
+              onClearSelection={() => setSelectedWorkouts([])}
+            />
+          )}
+          
+          <div className={`${width.full} ${layout.noOverflow}`}>
+            <WorkoutList
+              workouts={filteredWorkouts.map(session => session.generated_workouts!)}
+              selectedWorkouts={selectedWorkouts}
+              onToggleSelection={handleWorkoutSelect}
+              onToggleFavorite={handleToggleFavorite}
+              onDuplicate={handleDuplicate}
+            />
+          </div>
+        </ProFeatureWrapper>
       </div>
     </StandardPageLayout>
   );

@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { TikTokStylePublishContent } from "@/components/publish-program/TikTokStylePublishContent";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
+import { ProFeatureWrapper } from "@/components/common/ProFeatureWrapper";
 
 export default function PublishProgram() {
   const [content, setContent] = useState('');
@@ -62,12 +63,14 @@ export default function PublishProgram() {
 
   return (
     <StandardPageLayout header={header}>
-      <TikTokStylePublishContent 
-        initialContent={content}
-        documentId={documentId}
-        shareableLink={shareableLink}
-        onContentChange={handleContentChange}
-      />
+      <ProFeatureWrapper featureName="Publish Program">
+        <TikTokStylePublishContent 
+          initialContent={content}
+          documentId={documentId}
+          shareableLink={shareableLink}
+          onContentChange={handleContentChange}
+        />
+      </ProFeatureWrapper>
     </StandardPageLayout>
   );
 }

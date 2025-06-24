@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Editor } from "@/components/document-editor/Editor";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -6,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { LogoHeader } from "@/components/ui/logo-header";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 import { spacing, width, text, touch, layout } from "@/utils/responsive";
+import { ProFeatureWrapper } from "@/components/common/ProFeatureWrapper";
 
 export default function DocumentEditor() {
   const [content, setContent] = useState('');
@@ -51,7 +53,9 @@ export default function DocumentEditor() {
         </div>
         
         <div className={`${width.full} ${layout.noOverflow}`}>
-          <Editor content={content} onSave={handleSave} />
+          <ProFeatureWrapper featureName="Document Editor">
+            <Editor content={content} onSave={handleSave} />
+          </ProFeatureWrapper>
         </div>
       </div>
     </StandardPageLayout>

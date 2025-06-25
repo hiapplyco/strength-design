@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -20,11 +20,22 @@ export const useEnhancedChatMessages = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { userData, generateUserContext } = useUserDataIntegration();
+  const { userData } = useUserDataIntegration();
   const { workoutTemplates } = useWorkoutTemplates();
+  
+  // Add ref to prevent multiple simultaneous fetches
+  const fetchingRef = useRef(false);
+  const lastFetchRef = useRef<number>(0);
 
   const fetchMessages = useCallback(async () => {
-    if (!user) return;
+    if (!user || fetchingRef.current) return;
+    
+    // Prevent rapid successive calls
+    const now = Date.now();
+    if (now - lastFetchRef.current < 1000) return;
+    
+    fetchingRef.current = true;
+    lastFetchRef.current = now;
 
     try {
       console.log('Fetching enhanced chat messages for user:', user.id);
@@ -44,20 +55,13 @@ export const useEnhancedChatMessages = () => {
     } catch (error: any) {
       console.error('Error fetching enhanced chat messages:', error);
       
-      // More user-friendly error handling
-      if (error.message?.includes('Failed to fetch')) {
-        toast({
-          title: "Connection Error",
-          description: "Unable to connect to the server. Please check your internet connection.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error Loading Messages",
-          description: "There was a problem loading your chat history. Please try refreshing the page.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Connection Issue",
+        description: "Unable to load chat history. Please refresh the page.",
+        variant: "destructive",
+      });
+    } finally {
+      fetchingRef.current = false;
     }
   }, [user, toast]);
 
@@ -68,6 +72,11 @@ export const useEnhancedChatMessages = () => {
         description: "Please sign in to send messages",
         variant: "destructive",
       });
+      return;
+    }
+
+    if (isLoading) {
+      console.log('Message sending already in progress, skipping...');
       return;
     }
 
@@ -127,7 +136,7 @@ export const useEnhancedChatMessages = () => {
       console.log('Received enhanced AI response:', chatResponse);
 
       if (!chatResponse || !chatResponse.response) {
-        throw new Error('Invalid response from AI chat service');
+        throw new Error('No response received from AI chat service');
       }
 
       // Update local state with AI response
@@ -140,29 +149,30 @@ export const useEnhancedChatMessages = () => {
     } catch (error: any) {
       console.error('Error in enhanced chat:', error);
       
-      // Provide specific error messages based on error type
       let errorMessage = "Failed to send message. Please try again.";
       
-      if (error.message?.includes('Invalid response')) {
+      if (error.message?.includes('No response received')) {
         errorMessage = "AI service is temporarily unavailable. Please try again in a moment.";
       } else if (error.message?.includes('Failed to fetch')) {
         errorMessage = "Connection error. Please check your internet connection.";
-      } else if (error.message?.includes('enhanced-chat')) {
-        errorMessage = "Chat service is temporarily unavailable. Please try again.";
       }
 
       toast({
-        title: "Message Send Failed",
+        title: "Message Send Failed", 
         description: errorMessage,
         variant: "destructive",
       });
+      
+      // Remove the failed message from local state if it was added
+      setMessages(prev => prev.filter(msg => msg.message !== message || msg.response));
+      
     } finally {
       setIsLoading(false);
     }
   };
 
   const deleteAllMessages = async () => {
-    if (!user) return;
+    if (!user || isLoading) return;
 
     try {
       setIsLoading(true);

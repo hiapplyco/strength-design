@@ -5,7 +5,7 @@ import { ChatInput } from "./ChatInput";
 import { ChatSubscriptionManager } from "./ChatSubscriptionManager";
 import { useEnhancedChatMessages } from "@/hooks/useEnhancedChatMessages";
 import { useFileUpload } from "@/hooks/useFileUpload";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Database, TrendingUp, Calendar, Heart, MessageSquare, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,9 +27,14 @@ export const EnhancedChatContainer = () => {
   } = useEnhancedChatMessages();
 
   const { isLoading: fileLoading, handleFileSelect } = useFileUpload();
+  const hasInitialized = useRef(false);
 
+  // Only fetch messages once on mount
   useEffect(() => {
-    fetchMessages();
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      fetchMessages();
+    }
   }, [fetchMessages]);
 
   return (
@@ -62,6 +67,7 @@ export const EnhancedChatContainer = () => {
               size="sm"
               className="text-muted-foreground hover:text-foreground"
               onClick={startNewChat}
+              disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-1" />
               New Chat
@@ -71,6 +77,7 @@ export const EnhancedChatContainer = () => {
               size="sm"
               className="text-muted-foreground hover:text-destructive"
               onClick={deleteAllMessages}
+              disabled={isLoading}
             >
               <Trash2 className="h-4 w-4 mr-1" />
               Delete Chat

@@ -3,7 +3,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Dumbbell, ArrowLeft } from 'lucide-react';
+import { Calendar, Dumbbell, ArrowLeft, FileText } from 'lucide-react';
+import { WorkoutDayCard } from './WorkoutDayCard';
+import { WorkoutCycleCard } from './WorkoutCycleCard';
+import { useWorkoutDocumentPublisher } from '../hooks/useWorkoutDocumentPublisher';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import { isWorkoutCycle, isWorkoutDay } from '@/types/fitness';
 
@@ -22,6 +25,8 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   existingWorkoutCount,
   onGoToGenerator,
 }) => {
+  const { publishToDocument, isPublishing } = useWorkoutDocumentPublisher();
+
   if (!generatedWorkout) {
     return (
       <motion.div
@@ -55,6 +60,10 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   // Get workout title from meta or generate one
   const workoutTitle = generatedWorkout._meta?.title || 'Your Custom Workout Plan';
 
+  const handlePublishToDocument = () => {
+    publishToDocument(generatedWorkout);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -82,6 +91,17 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
               <Calendar className="h-4 w-4" />
               {existingWorkoutCount > 0 ? 'Replace & Schedule' : 'Schedule Workouts'}
             </Button>
+            
+            <Button 
+              onClick={handlePublishToDocument}
+              disabled={isPublishing}
+              variant="outline"
+              className="gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              {isPublishing ? 'Publishing...' : 'Publish to Document'}
+            </Button>
+            
             <Button 
               variant="outline" 
               onClick={onGoToGenerator}
@@ -101,58 +121,21 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
           .map(([key, value], index) => {
             if (isWorkoutCycle(value)) {
               return (
-                <motion.div
+                <WorkoutCycleCard
                   key={key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg capitalize">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-3">
-                        {Object.entries(value)
-                          .filter(([dayKey, dayValue]) => isWorkoutDay(dayValue))
-                          .map(([dayKey, dayValue]) => (
-                            <div key={dayKey} className="p-3 bg-muted/50 rounded-lg">
-                              <h4 className="font-medium mb-2 capitalize">
-                                {dayKey.replace(/day(\d+)/, 'Day $1')}
-                              </h4>
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {(dayValue as any).description || (dayValue as any).workout?.substring(0, 100) + '...'}
-                              </p>
-                            </div>
-                          ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                  cycleKey={key}
+                  cycle={value}
+                  index={index}
+                />
               );
             } else if (isWorkoutDay(value)) {
               return (
-                <motion.div
+                <WorkoutDayCard
                   key={key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg capitalize">
-                        {key.replace(/day(\d+)/, 'Day $1')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground line-clamp-3">
-                        {(value as any).description || (value as any).workout?.substring(0, 150) + '...'}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                  dayKey={key}
+                  workout={value}
+                  index={index}
+                />
               );
             }
             return null;

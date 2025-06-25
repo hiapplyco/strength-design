@@ -84,16 +84,18 @@ serve(async (req) => {
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
 
-    // Convert video to base64 using proper encoding
+    // Convert video to base64 using proper binary handling
     console.log('Converting video to base64...')
     let base64Data: string
     try {
       const arrayBuffer = await videoFile.arrayBuffer()
-      
-      // Use Deno's built-in btoa with proper encoding
-      const decoder = new TextDecoder('latin1')
       const uint8Array = new Uint8Array(arrayBuffer)
-      const binaryString = decoder.decode(uint8Array)
+      
+      // Convert binary data to base64 using proper byte-by-byte conversion
+      let binaryString = ''
+      for (let i = 0; i < uint8Array.length; i++) {
+        binaryString += String.fromCharCode(uint8Array[i])
+      }
       base64Data = btoa(binaryString)
       
       console.log(`Base64 conversion successful, length: ${base64Data.length}`)

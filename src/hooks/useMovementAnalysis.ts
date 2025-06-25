@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -74,12 +75,11 @@ export const useMovementAnalysis = () => {
       console.log("Calling enhanced bjj-analyzer function...");
       console.log("Analysis options:", options);
       
-      // Call the enhanced Supabase Edge Function
+      // Call the enhanced Supabase Edge Function without setting Content-Type header
+      // Let the browser handle the multipart boundary automatically
       const { data, error } = await supabase.functions.invoke('bjj-analyzer', {
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        body: formData
+        // Remove the headers configuration to let browser set Content-Type with boundary
       });
 
       if (error) {

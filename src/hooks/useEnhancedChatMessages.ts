@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,9 +26,10 @@ export const useEnhancedChatMessages = () => {
   const fetchingRef = useRef(false);
   const lastFetchRef = useRef<number>(0);
   const initializedRef = useRef(false);
+  const hasLoadedMessagesRef = useRef(false);
 
   const fetchMessages = useCallback(async () => {
-    if (!user || fetchingRef.current) return;
+    if (!user || fetchingRef.current || hasLoadedMessagesRef.current) return;
     
     // Prevent rapid successive calls
     const now = Date.now();
@@ -52,7 +52,16 @@ export const useEnhancedChatMessages = () => {
       }
 
       console.log('Fetched enhanced chat messages:', data);
-      setMessages(data || []);
+      
+      // Only set messages if we have data, otherwise keep empty array
+      if (data && data.length > 0) {
+        setMessages(data);
+      } else {
+        setMessages([]);
+      }
+      
+      // Mark as having loaded messages to prevent re-fetching
+      hasLoadedMessagesRef.current = true;
       
       // Mark as initialized only after successful fetch
       if (!initializedRef.current) {
@@ -190,8 +199,9 @@ export const useEnhancedChatMessages = () => {
       if (error) throw error;
 
       setMessages([]);
-      // Reset initialization flag so new messages load properly
+      // Reset all flags so fresh messages can load properly
       initializedRef.current = false;
+      hasLoadedMessagesRef.current = false;
       
       toast({
         title: "Success",
@@ -211,8 +221,9 @@ export const useEnhancedChatMessages = () => {
 
   const startNewChat = () => {
     setMessages([]);
-    // Reset initialization flag for fresh start
+    // Reset flags for fresh start
     initializedRef.current = false;
+    hasLoadedMessagesRef.current = false;
     
     toast({
       title: "New Chat Started",

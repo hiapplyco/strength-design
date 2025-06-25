@@ -30,11 +30,14 @@ export const EnhancedChatContainer = () => {
   const { isLoading: fileLoading, handleFileSelect } = useFileUpload();
   const mountedRef = useRef(false);
 
-  // Only fetch messages once on mount, and only if we haven't initialized yet
+  // Only fetch messages once on mount for fresh sessions
   useEffect(() => {
-    if (!mountedRef.current && !isInitialized) {
+    if (!mountedRef.current) {
       mountedRef.current = true;
-      fetchMessages();
+      // Only fetch if we haven't initialized yet - this will load existing messages if any
+      if (!isInitialized) {
+        fetchMessages();
+      }
     }
   }, [fetchMessages, isInitialized]);
 

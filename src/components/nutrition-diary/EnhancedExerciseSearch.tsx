@@ -9,6 +9,7 @@ import { Search, Activity, Dumbbell, Clock, Flame } from 'lucide-react';
 import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import { useAddExerciseEntry } from '@/hooks/useAddExerciseEntry';
 import { useWorkoutToNutritionIntegration } from '@/hooks/useWorkoutToNutritionIntegration';
+import type { WeeklyWorkouts } from '@/types/fitness';
 
 interface EnhancedExerciseSearchProps {
   isOpen: boolean;
@@ -33,7 +34,9 @@ export const EnhancedExerciseSearch: React.FC<EnhancedExerciseSearchProps> = ({
 
   // Extract exercises from all workout templates
   const templateExercises = workoutTemplates?.flatMap(template => {
-    const exercises = extractExercisesFromWorkout(template.workout_data);
+    // Safely parse the workout_data as WeeklyWorkouts
+    const workoutData = template.workout_data as WeeklyWorkouts;
+    const exercises = extractExercisesFromWorkout(workoutData);
     return exercises.map(exercise => ({
       ...exercise,
       templateTitle: template.title,

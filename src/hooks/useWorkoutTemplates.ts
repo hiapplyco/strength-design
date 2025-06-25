@@ -40,7 +40,7 @@ export const useWorkoutTemplates = () => {
           user_id: session.user.id,
           title: workoutTitle,
           summary: workoutSummary,
-          workout_data: workout,
+          workout_data: workout as any, // Cast to any to handle Json type
           estimated_duration_minutes: 60, // Default estimate
         })
         .select()

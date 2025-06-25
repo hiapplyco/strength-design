@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { ChevronDown, Plus, Apple, Activity, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FoodSearchDialog } from './FoodSearchDialog';
 import { ExerciseSearchDialog } from './ExerciseSearchDialog';
+import { EnhancedExerciseSearch } from './EnhancedExerciseSearch';
 import { useMealEntries } from '@/hooks/useMealEntries';
 import { useExerciseEntries } from '@/hooks/useExerciseEntries';
 

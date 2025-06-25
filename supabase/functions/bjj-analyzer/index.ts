@@ -15,10 +15,16 @@ serve(async (req) => {
   }
 
   try {
-    // Get API key from environment variables - using GEMINI_API_KEY
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is required')
+      console.error('GEMINI_API_KEY is missing')
+      return new Response(
+        JSON.stringify({ error: 'GEMINI_API_KEY is required' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
     console.log('Processing video analysis request...')
@@ -37,11 +43,25 @@ serve(async (req) => {
     const customSystemPrompt = formData.get('systemPrompt') as string
 
     if (!videoFile) {
-      throw new Error('No video file provided')
+      console.error('No video file provided')
+      return new Response(
+        JSON.stringify({ error: 'No video file provided' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
     if (!query) {
-      throw new Error('No analysis query provided')
+      console.error('No analysis query provided')
+      return new Response(
+        JSON.stringify({ error: 'No analysis query provided' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
     console.log(`Video file: ${videoFile.name}, size: ${videoFile.size}, type: ${videoFile.type}`)

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -128,6 +127,7 @@ export const MovementCameraRecorder = ({ isOpen, onClose, onVideoRecorded }: Mov
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
+              style={{ transform: 'scaleY(-1)' }}
               autoPlay
               muted
               playsInline

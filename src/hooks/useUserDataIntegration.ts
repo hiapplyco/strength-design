@@ -9,6 +9,7 @@ interface UserDataSummary {
   nutritionLogs: any[];
   journalEntries: any[];
   recentMetrics: any[];
+  workoutTemplates?: any[]; // Add workout templates to the interface
   progressTrends: {
     weeklyWorkouts: number;
     avgCalories: number;

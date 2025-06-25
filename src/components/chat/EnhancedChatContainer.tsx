@@ -7,7 +7,7 @@ import { useEnhancedChatMessages } from "@/hooks/useEnhancedChatMessages";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Database, TrendingUp, Calendar, Heart, MessageSquare } from "lucide-react";
+import { Database, TrendingUp, Calendar, Heart, MessageSquare, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { spacing, typography, variants } from "@/lib/design-tokens";
@@ -22,7 +22,8 @@ export const EnhancedChatContainer = () => {
     deleteAllMessages,
     startNewChat,
     userDataSummary,
-    hasUserData
+    hasUserData,
+    workoutTemplates
   } = useEnhancedChatMessages();
 
   const { isLoading: fileLoading, handleFileSelect } = useFileUpload();
@@ -85,6 +86,12 @@ export const EnhancedChatContainer = () => {
                 <Database className="h-3 w-3" />
                 Full Data Access
               </Badge>
+              {workoutTemplates?.length > 0 && (
+                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                  <Dumbbell className="h-3 w-3" />
+                  {workoutTemplates.length} Workout Templates
+                </Badge>
+              )}
               {userDataSummary?.workoutSessions.length > 0 && (
                 <Badge variant="outline" className="text-xs flex items-center gap-1">
                   <TrendingUp className="h-3 w-3" />
@@ -112,7 +119,8 @@ export const EnhancedChatContainer = () => {
         </div>
         
         <p className={cn(typography.caption, "text-muted-foreground")}>
-          Your AI coach has access to your complete fitness journey - workouts, nutrition, wellness data, and progress trends for personalized advice.
+          Your AI coach has access to your complete fitness journey - workouts, nutrition, wellness data, workout templates, and progress trends for personalized advice.
+          {workoutTemplates?.length > 0 && ` Ask about your ${workoutTemplates.length} generated workout templates!`}
         </p>
       </div>
 

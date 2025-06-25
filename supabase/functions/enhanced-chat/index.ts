@@ -22,7 +22,7 @@ serve(async (req) => {
     }
 
     try {
-        const { message, history = [], fileUrl, userId } = await req.json();
+        const { message, history = [], fileUrl, userId, workoutContext, hasWorkoutTemplates } = await req.json();
         console.log('Enhanced chat processing message for user:', userId);
 
         let userContext = '';
@@ -32,7 +32,7 @@ serve(async (req) => {
             const twoWeeksAgo = new Date();
             twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
             
-            // Fetch workout sessions
+            // Fetch workout sessions with generated workouts
             const { data: workoutSessions } = await supabaseAdmin
                 .from('workout_sessions')
                 .select(`
@@ -43,6 +43,14 @@ serve(async (req) => {
                 .eq('user_id', userId)
                 .gte('created_at', twoWeeksAgo.toISOString())
                 .order('created_at', { ascending: false })
+                .limit(10);
+
+            // Fetch generated workout templates
+            const { data: workoutTemplates } = await supabaseAdmin
+                .from('generated_workouts')
+                .select('*')
+                .eq('user_id', userId)
+                .order('generated_at', { ascending: false })
                 .limit(10);
 
             // Fetch nutrition logs
@@ -77,8 +85,8 @@ serve(async (req) => {
                 .eq('user_id', userId)
                 .single();
 
-            // Generate context summary
-            if (workoutSessions || nutritionLogs || journalEntries) {
+            // Generate comprehensive context summary
+            if (workoutSessions || nutritionLogs || journalEntries || workoutTemplates) {
                 const weeklyWorkouts = workoutSessions?.filter(session => {
                     const sessionDate = new Date(session.created_at);
                     const weekAgo = new Date();
@@ -100,17 +108,27 @@ USER FITNESS PROFILE CONTEXT:
 
 CURRENT WEEK ACTIVITY:
 - Workouts completed this week: ${weeklyWorkouts}
+- Generated workout templates available: ${workoutTemplates?.length || 0}
 - Average daily calories: ${Math.round(avgCalories || 0)} kcal
 - Target daily calories: ${nutritionTargets?.daily_calories || 'Not set'}
 - Average mood rating: ${Math.round((avgMood || 0) * 10) / 10}/10
 
-RECENT WORKOUT HISTORY:
+WORKOUT TEMPLATES & HISTORY:
+${workoutTemplates?.slice(0, 5).map(template => `
+- "${template.title || 'Untitled Workout'}" (${new Date(template.generated_at).toLocaleDateString()})
+  Summary: ${template.summary || 'Custom workout plan'}
+  Target Groups: ${template.target_muscle_groups?.join(', ') || 'Not specified'}
+  Equipment: ${template.equipment_needed?.join(', ') || 'Not specified'}
+`).join('') || 'No workout templates generated yet'}
+
+RECENT WORKOUT SESSIONS:
 ${workoutSessions?.slice(0, 3).map(session => `
 - ${new Date(session.created_at).toLocaleDateString()}: ${session.status} workout
   Title: ${session.generated_workouts?.title || 'Custom workout'}
   Satisfaction: ${session.satisfaction_rating || 'Not rated'}/10
   Duration: ${session.actual_duration_minutes || 'Not tracked'} minutes
-`).join('') || 'No recent workouts'}
+  Notes: ${session.notes || 'No notes'}
+`).join('') || 'No recent workout sessions'}
 
 RECENT NUTRITION DATA:
 ${nutritionLogs?.slice(0, 5).map(log => {
@@ -118,20 +136,26 @@ ${nutritionLogs?.slice(0, 5).map(log => {
         sum + (entry.food_items?.calories_per_serving * entry.serving_multiplier || 0), 0) || 0;
     const totalProtein = log.meal_entries?.reduce((sum, entry) => 
         sum + (entry.food_items?.protein_per_serving * entry.serving_multiplier || 0), 0) || 0;
-    return `- ${log.date}: ${Math.round(totalCals)} kcal, ${Math.round(totalProtein * 10) / 10}g protein`;
+    const exerciseCalories = log.exercise_entries?.reduce((sum, entry) => sum + entry.calories_burned, 0) || 0;
+    return `- ${log.date}: ${Math.round(totalCals)} kcal, ${Math.round(totalProtein * 10) / 10}g protein${exerciseCalories > 0 ? `, ${exerciseCalories} cal burned` : ''}`;
 }).join('\n') || 'No recent nutrition data'}
 
 WELLNESS TRENDS:
 ${journalEntries?.slice(0, 3).map(entry => `
 - ${entry.date}: Mood ${entry.mood_rating || 'N/A'}/10, Energy ${entry.energy_level || 'N/A'}/10, Sleep ${entry.sleep_quality || 'N/A'}/10
+  ${entry.content ? `Notes: ${entry.content.substring(0, 100)}...` : ''}
 `).join('') || 'No recent wellness data'}
 
+${workoutContext || ''}
+
 COACHING GUIDELINES:
-- Provide personalized advice based on this actual data
-- Reference specific patterns and trends you observe
+- Provide personalized advice based on this actual data and workout templates
+- Reference specific patterns, workouts, and trends you observe
 - Be encouraging about progress and realistic about improvements
-- Suggest actionable next steps based on their current performance
-- Always connect advice to their actual fitness journey
+- Suggest actionable next steps based on their current performance and available workout templates
+- Help them understand how to use their generated workouts effectively
+- Connect nutrition and exercise data to provide holistic coaching
+- Always relate advice to their actual fitness journey and available resources
 `;
             }
         }
@@ -180,20 +204,29 @@ COACHING GUIDELINES:
             { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
         ];
         
-        const enhancedSystemPrompt = `You are a world-class personal fitness and nutrition coach with access to the user's complete fitness data. You provide personalized, data-driven advice based on their actual performance, nutrition, and wellness patterns.
+        const enhancedSystemPrompt = `You are a world-class personal fitness and nutrition coach with access to the user's complete fitness data, including their generated workout templates, nutrition logs, and wellness patterns. You provide personalized, data-driven advice based on their actual performance and available resources.
 
 ${userContext}
 
 COACHING APPROACH:
 - Always reference specific data points when giving advice
-- Identify patterns and trends in their behavior
-- Provide actionable, specific recommendations
+- Help users understand and utilize their generated workout templates effectively
+- Identify patterns and trends in their behavior across workouts, nutrition, and wellness
+- Provide actionable, specific recommendations based on their actual data and workout library
 - Be encouraging about progress while being realistic about areas for improvement
-- Connect all advice to their actual fitness journey and data
+- Connect all advice to their actual fitness journey, available workout templates, and tracked data
+- Suggest specific workouts from their templates or modifications based on their performance data
+- Help integrate their workout routines with their nutrition tracking for optimal results
 - Ask follow-up questions to better understand their goals and challenges
-- Suggest specific workouts, nutrition adjustments, or lifestyle changes based on their data
+- When they mention specific workouts or exercises, reference their workout templates if applicable
 
-When analyzing documents or files, extract relevant fitness/nutrition information and relate it to their current data and patterns.`;
+WORKOUT TEMPLATE INTEGRATION:
+- Help users choose appropriate workouts from their generated templates
+- Suggest modifications to existing templates based on their performance data
+- Explain how their workout templates align with their goals and current fitness level
+- Reference specific exercises or routines from their workout library when relevant
+
+When analyzing documents or files, extract relevant fitness/nutrition information and relate it to their current data, patterns, and available workout templates.`;
 
         const result = await model.generateContent({
             contents: contents,
@@ -204,7 +237,22 @@ When analyzing documents or files, extract relevant fitness/nutrition informatio
 
         const response = result.response;
         const text = response.text();
-        console.log('Generated enhanced response with user context');
+        console.log('Generated enhanced response with comprehensive user context');
+
+        // Update the message in the database with the response
+        if (userId) {
+            const { error: updateError } = await supabaseAdmin
+                .from('chat_messages')
+                .update({ response: text })
+                .eq('user_id', userId)
+                .eq('message', message)
+                .order('created_at', { ascending: false })
+                .limit(1);
+            
+            if (updateError) {
+                console.error('Error updating message with response:', updateError);
+            }
+        }
 
         return new Response(
             JSON.stringify({ response: text }),
@@ -213,7 +261,10 @@ When analyzing documents or files, extract relevant fitness/nutrition informatio
     } catch (error) {
         console.error('Error in enhanced-chat function:', error);
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ 
+                error: error.message,
+                response: "I'm experiencing technical difficulties right now. Please try again in a moment, and I'll be happy to help with your fitness and nutrition questions!"
+            }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
     }

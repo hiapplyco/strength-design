@@ -49,3 +49,6 @@ verify_jwt = true
 
 [functions.baseball-video-analysis]
 verify_jwt = false
+
+[functions.bjj-analyzer]
+verify_jwt = true

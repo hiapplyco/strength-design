@@ -1,16 +1,13 @@
 
-// Enhanced BJJ Analyzer with Gemini 2.0 and dynamic system prompts
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// Import enhanced analysis functions
-import { analyzeVideoWithGemini, createSystemPrompt } from './gemini-api.ts'
-
-// Main edge function
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -18,127 +15,150 @@ serve(async (req) => {
   }
 
   try {
-    // Get environment variables
-    const GOOGLE_API_KEY = Deno.env.get('GOOGLE_API_KEY')
+    // Get API key from environment variables
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY is required')
+    }
+
+    console.log('Processing video analysis request...')
     
-    if (!GOOGLE_API_KEY) {
-      throw new Error('GOOGLE_API_KEY is required')
+    // Parse the multipart form data
+    const formData = await req.formData()
+    const videoFile = formData.get('video') as File
+    const query = formData.get('query') as string
+    
+    // Get optional analysis parameters
+    const analysisType = formData.get('analysisType') as string || 'general'
+    const frameRate = formData.get('frameRate') as string
+    const startOffset = formData.get('startOffset') as string
+    const endOffset = formData.get('endOffset') as string
+    const useTimestamps = formData.get('useTimestamps') === 'true'
+    const customSystemPrompt = formData.get('systemPrompt') as string
+
+    if (!videoFile) {
+      throw new Error('No video file provided')
     }
 
-    // Parse the request data
-    if (req.headers.get('content-type')?.includes('multipart/form-data')) {
-      const formData = await req.formData()
-      const videoFile = formData.get('video') as File
-      const query = formData.get('query') as string
-      
-      // Enhanced options for analysis
-      const analysisType = formData.get('analysisType') as string || 'technique'
-      const customFrameRate = formData.get('frameRate') ? parseInt(formData.get('frameRate') as string) : undefined
-      const startOffset = formData.get('startOffset') as string || undefined
-      const endOffset = formData.get('endOffset') as string || undefined
-      const useTimestamps = formData.get('useTimestamps') === 'true'
-      const customSystemPrompt = formData.get('systemPrompt') as string || undefined
+    if (!query) {
+      throw new Error('No analysis query provided')
+    }
 
-      if (!videoFile || !query) {
-        return new Response(
-          JSON.stringify({ error: 'Video file and query are required' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
+    console.log(`Video file: ${videoFile.name}, size: ${videoFile.size}, type: ${videoFile.type}`)
+    console.log(`Analysis type: ${analysisType}, query: ${query}`)
 
-      // Enhanced video validation for Gemini 2.0
-      const validVideoTypes = [
-        'video/mp4', 
-        'video/quicktime', 
-        'video/x-msvideo',
-        'video/mpeg',
-        'video/mov',
-        'video/webm',
-        'video/wmv',
-        'video/3gpp'
-      ]
-      
-      if (!validVideoTypes.includes(videoFile.type)) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Unsupported video format. Please use MP4, MOV, AVI, MPEG, WebM, WMV, or 3GPP formats.' 
-          }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
 
-      // Enhanced file size validation
-      const MAX_SIZE = 50 * 1024 * 1024 // 50MB for better support
-      if (videoFile.size > MAX_SIZE) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Video file is too large (max 50MB). For larger files, please compress or trim your video.' 
-          }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
+    // Convert video to base64
+    const arrayBuffer = await videoFile.arrayBuffer()
+    const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
 
-      try {
-        console.log(`Processing video: ${videoFile.name}`)
-        console.log(`Size: ${(videoFile.size / 1024 / 1024).toFixed(2)}MB, Type: ${videoFile.type}`)
-        console.log(`Analysis type: ${analysisType}`)
-        
-        // Prepare analysis options
-        const analysisOptions = {
-          customFrameRate,
-          startOffset,
-          endOffset,
-          systemPrompt: customSystemPrompt || createSystemPrompt(analysisType),
-          useTimestamps
+    // Create analysis prompt based on type
+    let systemPrompt = customSystemPrompt || getSystemPrompt(analysisType)
+    
+    const fullPrompt = `${systemPrompt}
+
+User Question: ${query}
+
+Please provide a detailed analysis of the movement technique shown in this video. Focus on:
+1. Technical execution and form
+2. Areas for improvement
+3. Specific coaching recommendations
+4. Safety considerations if applicable
+
+${useTimestamps ? 'Include timestamps in your analysis where relevant.' : ''}
+`
+
+    console.log('Sending video to Gemini for analysis...')
+
+    // Generate content with Gemini
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: videoFile.type || 'video/mp4'
         }
-        
-        console.log('Analysis options:', analysisOptions)
-        
-        // Analyze the video using enhanced Gemini 2.0
-        const analysis = await analyzeVideoWithGemini(
-          videoFile, 
-          query, 
-          GOOGLE_API_KEY,
-          analysisOptions
-        )
-        
-        // Return enhanced analysis response
-        return new Response(
-          JSON.stringify({ 
-            analysis,
-            metadata: {
-              analysisType,
-              frameRate: customFrameRate,
-              videoClipping: startOffset || endOffset ? { startOffset, endOffset } : null,
-              timestampsUsed: useTimestamps,
-              videoSize: videoFile.size,
-              videoType: videoFile.type,
-              processingModel: 'gemini-2.0-flash-exp'
-            }
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      } catch (error) {
-        console.error('Error processing video:', error)
-        return new Response(
-          JSON.stringify({ 
-            error: `Analysis failed: ${error.message}`,
-            details: 'Please check your video format and try again. For technical support, ensure your video is under 50MB and in a supported format.'
-          }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-    } else {
-      return new Response(
-        JSON.stringify({ error: 'Invalid content type. Expected multipart/form-data' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      },
+      fullPrompt
+    ])
+
+    const response = await result.response
+    const analysisText = response.text()
+
+    console.log('Analysis completed successfully')
+
+    // Create metadata object
+    const metadata = {
+      processingModel: 'gemini-2.0-flash',
+      analysisType,
+      frameRate: frameRate ? parseInt(frameRate) : null,
+      videoClipping: {
+        startOffset: startOffset || null,
+        endOffset: endOffset || null
+      },
+      timestampsUsed: useTimestamps,
+      videoSize: videoFile.size,
+      videoType: videoFile.type
     }
-  } catch (error) {
-    console.error('Error processing request:', error)
+
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        analysis: analysisText,
+        metadata 
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    )
+  } catch (error: any) {
+    console.error('Error processing video analysis:', error)
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || 'Failed to analyze video',
+        details: error.stack
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
   }
 })
+
+function getSystemPrompt(analysisType: string): string {
+  switch (analysisType) {
+    case 'weightlifting':
+      return `You are an expert weightlifting coach and biomechanics analyst. Analyze this weightlifting video focusing on:
+- Proper form and technique
+- Range of motion
+- Muscle activation patterns
+- Safety considerations
+- Progressive overload opportunities`
+
+    case 'martial-arts':
+      return `You are an expert martial arts instructor and movement analyst. Analyze this martial arts technique video focusing on:
+- Technical execution and precision
+- Balance and footwork
+- Timing and rhythm
+- Power generation and transfer
+- Defensive positioning`
+
+    case 'injury-prevention':
+      return `You are a sports medicine specialist and movement analyst. Analyze this movement video focusing on:
+- Injury risk factors
+- Movement compensation patterns
+- Joint stability and mobility
+- Muscle imbalances
+- Corrective exercise recommendations`
+
+    default:
+      return `You are an expert movement analyst and coach. Analyze this movement video focusing on:
+- Overall technique and form
+- Efficiency of movement patterns
+- Areas for improvement
+- Safety considerations
+- Specific coaching recommendations`
+  }
+}

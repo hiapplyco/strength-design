@@ -23,19 +23,32 @@ export const EnhancedChatContainer = () => {
     startNewChat,
     userDataSummary,
     hasUserData,
-    workoutTemplates
+    workoutTemplates,
+    isInitialized
   } = useEnhancedChatMessages();
 
   const { isLoading: fileLoading, handleFileSelect } = useFileUpload();
-  const hasInitialized = useRef(false);
+  const mountedRef = useRef(false);
 
-  // Only fetch messages once on mount
+  // Only fetch messages once on mount, and only if we haven't initialized yet
   useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
+    if (!mountedRef.current && !isInitialized) {
+      mountedRef.current = true;
       fetchMessages();
     }
-  }, [fetchMessages]);
+  }, [fetchMessages, isInitialized]);
+
+  const handleNewChat = () => {
+    startNewChat();
+    // Reset mounted flag to allow fresh initialization
+    mountedRef.current = false;
+  };
+
+  const handleDeleteChat = () => {
+    deleteAllMessages();
+    // Reset mounted flag to allow fresh initialization
+    mountedRef.current = false;
+  };
 
   return (
     <Card 
@@ -66,7 +79,7 @@ export const EnhancedChatContainer = () => {
               variant="ghost"
               size="sm"
               className="text-muted-foreground hover:text-foreground"
-              onClick={startNewChat}
+              onClick={handleNewChat}
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-1" />
@@ -76,7 +89,7 @@ export const EnhancedChatContainer = () => {
               variant="ghost"
               size="sm"
               className="text-muted-foreground hover:text-destructive"
-              onClick={deleteAllMessages}
+              onClick={handleDeleteChat}
               disabled={isLoading}
             >
               <Trash2 className="h-4 w-4 mr-1" />

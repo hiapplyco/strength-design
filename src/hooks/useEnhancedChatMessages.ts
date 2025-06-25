@@ -23,9 +23,10 @@ export const useEnhancedChatMessages = () => {
   const { userData } = useUserDataIntegration();
   const { workoutTemplates } = useWorkoutTemplates();
   
-  // Add ref to prevent multiple simultaneous fetches
+  // Add refs to prevent multiple simultaneous operations
   const fetchingRef = useRef(false);
   const lastFetchRef = useRef<number>(0);
+  const initializedRef = useRef(false);
 
   const fetchMessages = useCallback(async () => {
     if (!user || fetchingRef.current) return;
@@ -52,6 +53,11 @@ export const useEnhancedChatMessages = () => {
 
       console.log('Fetched enhanced chat messages:', data);
       setMessages(data || []);
+      
+      // Mark as initialized only after successful fetch
+      if (!initializedRef.current) {
+        initializedRef.current = true;
+      }
     } catch (error: any) {
       console.error('Error fetching enhanced chat messages:', error);
       
@@ -184,6 +190,9 @@ export const useEnhancedChatMessages = () => {
       if (error) throw error;
 
       setMessages([]);
+      // Reset initialization flag so new messages load properly
+      initializedRef.current = false;
+      
       toast({
         title: "Success",
         description: "Chat history cleared successfully",
@@ -202,6 +211,9 @@ export const useEnhancedChatMessages = () => {
 
   const startNewChat = () => {
     setMessages([]);
+    // Reset initialization flag for fresh start
+    initializedRef.current = false;
+    
     toast({
       title: "New Chat Started",
       description: "Started a fresh conversation with your AI coach",
@@ -217,6 +229,7 @@ export const useEnhancedChatMessages = () => {
     startNewChat,
     userDataSummary: userData,
     hasUserData: !!userData,
-    workoutTemplates: workoutTemplates || []
+    workoutTemplates: workoutTemplates || [],
+    isInitialized: initializedRef.current
   };
 };

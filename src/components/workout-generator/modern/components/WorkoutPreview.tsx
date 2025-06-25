@@ -1,12 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Dumbbell, ArrowLeft, FileText } from 'lucide-react';
+import { Calendar, Dumbbell, ArrowLeft, FileText, Activity } from 'lucide-react';
 import { WorkoutDayCard } from './WorkoutDayCard';
 import { WorkoutCycleCard } from './WorkoutCycleCard';
+import { WorkoutIntegrationDialog } from '@/components/nutrition-diary/WorkoutIntegrationDialog';
 import { useWorkoutDocumentPublisher } from '../hooks/useWorkoutDocumentPublisher';
+import { useWorkoutTemplates } from '@/hooks/useWorkoutTemplates';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import { isWorkoutCycle, isWorkoutDay } from '@/types/fitness';
 
@@ -25,7 +27,9 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   existingWorkoutCount,
   onGoToGenerator,
 }) => {
+  const [showNutritionDialog, setShowNutritionDialog] = useState(false);
   const { publishToDocument, isPublishing } = useWorkoutDocumentPublisher();
+  const { saveWorkoutTemplate, isSaving } = useWorkoutTemplates();
 
   if (!generatedWorkout) {
     return (
@@ -64,6 +68,14 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
     publishToDocument(generatedWorkout);
   };
 
+  const handleSaveTemplate = async () => {
+    try {
+      await saveWorkoutTemplate(generatedWorkout);
+    } catch (error) {
+      // Error is handled by the hook
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -90,6 +102,15 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
             >
               <Calendar className="h-4 w-4" />
               {existingWorkoutCount > 0 ? 'Replace & Schedule' : 'Schedule Workouts'}
+            </Button>
+            
+            <Button 
+              onClick={() => setShowNutritionDialog(true)}
+              variant="outline"
+              className="gap-2"
+            >
+              <Activity className="h-4 w-4" />
+              Add to Nutrition Diary
             </Button>
             
             <Button 
@@ -141,6 +162,13 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
             return null;
           })}
       </div>
+
+      {/* Nutrition Integration Dialog */}
+      <WorkoutIntegrationDialog
+        isOpen={showNutritionDialog}
+        onOpenChange={setShowNutritionDialog}
+        workout={generatedWorkout}
+      />
     </motion.div>
   );
 };

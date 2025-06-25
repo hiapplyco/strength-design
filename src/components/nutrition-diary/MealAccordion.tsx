@@ -20,6 +20,7 @@ export const MealAccordion = ({ mealGroup, nutritionLogId, date }: MealAccordion
   const [isOpen, setIsOpen] = useState(false);
   const [showFoodSearch, setShowFoodSearch] = useState(false);
   const [showExerciseSearch, setShowExerciseSearch] = useState(false);
+  const [showEnhancedExerciseSearch, setShowEnhancedExerciseSearch] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
   
   const { mealEntries, mealSummary, isLoading: isLoadingMeals } = useMealEntries(nutritionLogId, mealGroup);
@@ -67,7 +68,7 @@ export const MealAccordion = ({ mealGroup, nutritionLogId, date }: MealAccordion
 
   const handleExerciseClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setShowExerciseSearch(true);
+    setShowEnhancedExerciseSearch(true);
     setShowAddMenu(false);
     if (!isOpen) {
       setIsOpen(true);
@@ -194,6 +195,13 @@ export const MealAccordion = ({ mealGroup, nutritionLogId, date }: MealAccordion
       <FoodSearchDialog
         isOpen={showFoodSearch}
         onOpenChange={setShowFoodSearch}
+        mealGroup={mealGroup}
+        date={date}
+      />
+
+      <EnhancedExerciseSearch
+        isOpen={showEnhancedExerciseSearch}
+        onOpenChange={setShowEnhancedExerciseSearch}
         mealGroup={mealGroup}
         date={date}
       />

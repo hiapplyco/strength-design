@@ -7,7 +7,7 @@ import { useEnhancedChatMessages } from "@/hooks/useEnhancedChatMessages";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Database, TrendingUp, Calendar, Heart, MessageSquare, Dumbbell } from "lucide-react";
+import { Database, TrendingUp, Calendar, Heart, MessageSquare, Dumbbell, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { spacing, typography, variants } from "@/lib/design-tokens";
@@ -21,36 +21,40 @@ export const EnhancedChatContainer = () => {
     handleSendMessage,
     deleteAllMessages,
     startNewChat,
+    resumeChat,
     userDataSummary,
     hasUserData,
     workoutTemplates,
-    isInitialized
+    isInitialized,
+    isNewChatSession
   } = useEnhancedChatMessages();
 
   const { isLoading: fileLoading, handleFileSelect } = useFileUpload();
   const mountedRef = useRef(false);
 
-  // Only fetch messages once on mount for fresh sessions
+  // Only fetch messages once on mount for fresh page loads (not new chat sessions)
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
-      // Only fetch if we haven't initialized yet - this will load existing messages if any
-      if (!isInitialized) {
+      // Only fetch if we haven't initialized yet and not in a new chat session
+      if (!isInitialized && !isNewChatSession) {
         fetchMessages();
       }
     }
-  }, [fetchMessages, isInitialized]);
+  }, [fetchMessages, isInitialized, isNewChatSession]);
 
   const handleNewChat = () => {
     startNewChat();
-    // Reset mounted flag to allow fresh initialization
-    mountedRef.current = false;
   };
 
   const handleDeleteChat = () => {
     deleteAllMessages();
     // Reset mounted flag to allow fresh initialization
     mountedRef.current = false;
+  };
+
+  const handleResumeChat = () => {
+    resumeChat();
   };
 
   return (
@@ -78,6 +82,18 @@ export const EnhancedChatContainer = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {isNewChatSession && messages.length === 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={handleResumeChat}
+                disabled={isLoading}
+              >
+                <RotateCcw className="h-4 w-4 mr-1" />
+                Resume Chat
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -142,8 +158,14 @@ export const EnhancedChatContainer = () => {
         </div>
         
         <p className={cn(typography.caption, "text-muted-foreground")}>
-          Your AI coach has access to your complete fitness journey - workouts, nutrition, wellness data, workout templates, and progress trends for personalized advice.
-          {workoutTemplates?.length > 0 && ` Ask about your ${workoutTemplates.length} generated workout templates!`}
+          {isNewChatSession && messages.length === 0 ? (
+            "Starting fresh! Your previous conversations are preserved - click 'Resume Chat' to see them again."
+          ) : (
+            <>
+              Your AI coach has access to your complete fitness journey - workouts, nutrition, wellness data, workout templates, and progress trends for personalized advice.
+              {workoutTemplates?.length > 0 && ` Ask about your ${workoutTemplates.length} generated workout templates!`}
+            </>
+          )}
         </p>
       </div>
 

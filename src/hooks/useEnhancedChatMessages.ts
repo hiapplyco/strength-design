@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,14 +23,16 @@ export const useEnhancedChatMessages = () => {
   const { userData } = useUserDataIntegration();
   const { workoutTemplates } = useWorkoutTemplates();
   
-  // Add refs to prevent multiple simultaneous operations
+  // Add refs to prevent multiple simultaneous operations and manage session state
   const fetchingRef = useRef(false);
   const lastFetchRef = useRef<number>(0);
   const initializedRef = useRef(false);
   const hasLoadedMessagesRef = useRef(false);
+  const isNewChatSessionRef = useRef(false); // Track if user started a new chat session
 
   const fetchMessages = useCallback(async () => {
-    if (!user || fetchingRef.current || hasLoadedMessagesRef.current) return;
+    // Don't fetch if we're in a new chat session (user clicked "New Chat")
+    if (!user || fetchingRef.current || hasLoadedMessagesRef.current || isNewChatSessionRef.current) return;
     
     // Prevent rapid successive calls
     const now = Date.now();
@@ -202,6 +205,7 @@ export const useEnhancedChatMessages = () => {
       // Reset all flags so fresh messages can load properly
       initializedRef.current = false;
       hasLoadedMessagesRef.current = false;
+      isNewChatSessionRef.current = false;
       
       toast({
         title: "Success",
@@ -220,14 +224,32 @@ export const useEnhancedChatMessages = () => {
   };
 
   const startNewChat = () => {
+    // Clear current messages from view but don't delete from database
     setMessages([]);
-    // Reset flags for fresh start
-    initializedRef.current = false;
-    hasLoadedMessagesRef.current = false;
+    
+    // Mark as new chat session to prevent auto-loading of old messages
+    isNewChatSessionRef.current = true;
+    
+    // Don't reset hasLoadedMessagesRef - this prevents refetching old messages
+    // Don't reset initializedRef - we know the system is ready
     
     toast({
       title: "New Chat Started",
       description: "Started a fresh conversation with your AI coach",
+    });
+  };
+
+  const resumeChat = async () => {
+    // Reset the new chat session flag and allow fetching of existing messages
+    isNewChatSessionRef.current = false;
+    hasLoadedMessagesRef.current = false;
+    
+    // Fetch existing messages
+    await fetchMessages();
+    
+    toast({
+      title: "Chat Resumed",
+      description: "Loaded your previous conversation history",
     });
   };
 
@@ -238,9 +260,11 @@ export const useEnhancedChatMessages = () => {
     handleSendMessage,
     deleteAllMessages,
     startNewChat,
+    resumeChat,
     userDataSummary: userData,
     hasUserData: !!userData,
     workoutTemplates: workoutTemplates || [],
-    isInitialized: initializedRef.current
+    isInitialized: initializedRef.current,
+    isNewChatSession: isNewChatSessionRef.current
   };
 };

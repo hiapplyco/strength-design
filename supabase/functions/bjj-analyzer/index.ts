@@ -67,13 +67,51 @@ serve(async (req) => {
     console.log(`Video file: ${videoFile.name}, size: ${videoFile.size}, type: ${videoFile.type}`)
     console.log(`Analysis type: ${analysisType}, query: ${query}`)
 
+    // Check video size limit (20MB)
+    const MAX_SIZE = 20 * 1024 * 1024
+    if (videoFile.size > MAX_SIZE) {
+      console.error('Video file too large:', videoFile.size)
+      return new Response(
+        JSON.stringify({ error: 'Video file must be less than 20MB' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
 
-    // Convert video to base64
-    const arrayBuffer = await videoFile.arrayBuffer()
-    const base64Data = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    // Convert video to base64 safely
+    console.log('Converting video to base64...')
+    let base64Data: string
+    try {
+      const arrayBuffer = await videoFile.arrayBuffer()
+      const uint8Array = new Uint8Array(arrayBuffer)
+      
+      // Convert to base64 in chunks to avoid stack overflow
+      const chunkSize = 1024 * 1024 // 1MB chunks
+      let base64String = ''
+      
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.slice(i, i + chunkSize)
+        const chunkString = Array.from(chunk).map(byte => String.fromCharCode(byte)).join('')
+        base64String += btoa(chunkString)
+      }
+      
+      base64Data = base64String
+    } catch (error) {
+      console.error('Error converting video to base64:', error)
+      return new Response(
+        JSON.stringify({ error: 'Failed to process video file' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
 
     // Create analysis prompt based on type
     let systemPrompt = customSystemPrompt || getSystemPrompt(analysisType)
@@ -94,15 +132,27 @@ ${useTimestamps ? 'Include timestamps in your analysis where relevant.' : ''}
     console.log('Sending video to Gemini for analysis...')
 
     // Generate content with Gemini
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: videoFile.type || 'video/mp4'
+    let result
+    try {
+      result = await model.generateContent([
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType: videoFile.type || 'video/mp4'
+          }
+        },
+        fullPrompt
+      ])
+    } catch (error) {
+      console.error('Gemini API error:', error)
+      return new Response(
+        JSON.stringify({ error: 'Failed to analyze video with AI' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
-      },
-      fullPrompt
-    ])
+      )
+    }
 
     const response = await result.response
     const analysisText = response.text()

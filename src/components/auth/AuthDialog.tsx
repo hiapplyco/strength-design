@@ -4,7 +4,6 @@ import { AuthErrorAlert } from "./AuthErrorAlert";
 import { AuthForm } from "./AuthForm";
 import { useAuthState } from "./useAuthState";
 import { Button } from "@/components/ui/button";
-import { SocialAuthButtons } from "./SocialAuthButtons";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -25,11 +24,6 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
         </DialogHeader>
         {error && <AuthErrorAlert error={error} />}
         <AuthForm view={view} onSuccess={onSuccess} />
-        
-        <div className="mt-4">
-          <SocialAuthButtons />
-        </div>
-        
         <div className="mt-4 text-center">
           <Button
             variant="link"

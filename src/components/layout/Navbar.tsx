@@ -3,15 +3,12 @@ import { Link } from "react-router-dom";
 import { Home, FileText, Dumbbell, Video, DollarSign, MessageSquare, BarChart3, Upload, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "./navbar/MobileMenu";
-import { useState } from "react";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export const Navbar = () => {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -97,7 +94,7 @@ export const Navbar = () => {
                 </Button>
               ) : (
                 <Button 
-                  onClick={() => setShowAuthDialog(true)}
+                  onClick={() => navigate("/auth")}
                   variant="ghost"
                   className="text-accent hover:text-accent/80 flex items-center gap-2"
                 >
@@ -113,15 +110,6 @@ export const Navbar = () => {
           </div>
         </div>
       </div>
-      
-      <AuthDialog 
-        isOpen={showAuthDialog} 
-        onOpenChange={setShowAuthDialog} 
-        onSuccess={() => {
-          setShowAuthDialog(false);
-          navigate("/workout-generator");
-        }} 
-      />
     </nav>
   );
 };

@@ -54,7 +54,7 @@ export default function Pricing() {
 
         {!session && (
           <p className={`text-center mt-6 text-foreground/80 ${spacing.container}`}>
-            <Link to="/sign-in" className="text-primary hover:underline">Sign in</Link> to view subscription options.
+            <Link to="/auth" className="text-primary hover:underline">Sign in</Link> to view subscription options.
           </p>
         )}
       </div>

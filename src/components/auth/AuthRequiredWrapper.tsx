@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -47,7 +47,8 @@ export const AuthRequiredWrapper: React.FC<AuthRequiredWrapperProps> = ({
   description
 }) => {
   const { user, isLoading } = useAuth();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Don't show anything while loading to prevent flicker
   if (isLoading) {
@@ -165,7 +166,7 @@ export const AuthRequiredWrapper: React.FC<AuthRequiredWrapperProps> = ({
               <Button 
                 size="lg" 
                 className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3"
-                onClick={() => setShowAuthDialog(true)}
+                onClick={() => navigate('/auth', { state: { from: location } })}
               >
                 <Dumbbell className="h-5 w-5 mr-2" />
                 Sign In & Start Your Journey
@@ -177,12 +178,6 @@ export const AuthRequiredWrapper: React.FC<AuthRequiredWrapperProps> = ({
             </div>
           </CardContent>
         </Card>
-
-        <AuthDialog 
-          isOpen={showAuthDialog} 
-          onOpenChange={setShowAuthDialog}
-          onSuccess={() => setShowAuthDialog(false)}
-        />
       </div>
     </div>
   );

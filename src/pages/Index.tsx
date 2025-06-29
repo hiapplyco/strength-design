@@ -1,9 +1,7 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { StandardPageLayout } from "@/components/layout/StandardPageLayout";
 import { width, spacing, text, layout } from "@/utils/responsive";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
@@ -12,14 +10,13 @@ import { TestimonialsCarousel } from "@/components/landing/TestimonialsCarousel"
 
 export default function Index() {
   const navigate = useNavigate();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { user } = useAuth();
 
   const handleAuth = () => {
     if (user) {
       navigate("/workout-generator");
     } else {
-      setShowAuthDialog(true);
+      navigate("/auth", { state: { from: { pathname: "/workout-generator" } } });
     }
   };
 
@@ -67,15 +64,6 @@ export default function Index() {
           <TestimonialsCarousel />
         </div>
       </div>
-
-      <AuthDialog 
-        isOpen={showAuthDialog} 
-        onOpenChange={setShowAuthDialog} 
-        onSuccess={() => {
-          setShowAuthDialog(false);
-          navigate("/workout-generator");
-        }} 
-      />
     </StandardPageLayout>
   );
 }

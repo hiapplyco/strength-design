@@ -19,6 +19,8 @@ const CheckoutCancel = lazy(() => import("@/pages/CheckoutCancel"));
 const ProgramChat = lazy(() => import("@/pages/ProgramChat"));
 const DesignSystemPlayground = lazy(() => import("@/pages/DesignSystemPlayground"));
 const NutritionDiary = lazy(() => import("@/pages/NutritionDiary"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 
 // Simple route loading component
 const RouteLoader = () => (
@@ -47,6 +49,8 @@ export const MainRoutes = () => {
     <Suspense fallback={<RouteLoader />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/design-system" element={<DesignSystemPlayground />} />
         

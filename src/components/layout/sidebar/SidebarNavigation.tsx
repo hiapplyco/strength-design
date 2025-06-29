@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -18,7 +18,6 @@ import {
   Apple,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,7 +70,6 @@ const NavItem: React.FC<NavItemProps> = ({ to, icon, label, isPro = false, isDis
 
 export const SidebarNavigation = () => {
   const { user } = useAuth();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -163,7 +161,7 @@ export const SidebarNavigation = () => {
             </Button>
           ) : (
             <Button
-              onClick={() => setShowAuthDialog(true)}
+              onClick={() => navigate("/auth")}
               variant="ghost"
               className="w-full justify-start text-muted-foreground hover:text-secondary-foreground hover:bg-secondary"
             >
@@ -172,15 +170,6 @@ export const SidebarNavigation = () => {
             </Button>
           )}
         </div>
-
-        <AuthDialog 
-          isOpen={showAuthDialog} 
-          onOpenChange={setShowAuthDialog} 
-          onSuccess={() => {
-            setShowAuthDialog(false);
-            navigate("/workout-generator");
-          }} 
-        />
       </nav>
     </div>
   );

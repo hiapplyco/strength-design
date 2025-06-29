@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useNavigate } from "react-router-dom";
 import { UserPlus, Weight, LogOut, LogIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 export const EmailSignup = () => {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const navigate = useNavigate();
   const {
     toast
@@ -40,13 +37,9 @@ export const EmailSignup = () => {
       </div>;
   }
   return <div className="flex flex-col items-center gap-2">
-      <Button onClick={() => setShowAuthDialog(true)} variant="ghost" className="text-muted-foreground hover:text-accent flex items-center gap-2">
+      <Button onClick={() => navigate("/auth")} variant="ghost" className="text-muted-foreground hover:text-accent flex items-center gap-2">
         <LogIn className="h-4 w-4" />
         Sign In
       </Button>
-      <AuthDialog isOpen={showAuthDialog} onOpenChange={setShowAuthDialog} onSuccess={() => {
-      setShowAuthDialog(false);
-      navigate("/workout-generator");
-    }} />
     </div>;
 };

@@ -1,6 +1,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { colors } from "@/lib/design-tokens"
 
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -27,8 +28,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
         {borderStyle === "multicolor" && (
           <div 
-            className="absolute inset-0 rounded-md p-[1px] -z-10 pointer-events-none
-            bg-gradient-to-r from-[#4CAF50] via-[#9C27B0] to-[#FF1493] opacity-40"
+            className={cn(
+              "absolute inset-0 rounded-md p-[1px] -z-10 pointer-events-none",
+              `bg-gradient-to-r ${colors.gradients.multicolor} opacity-40`
+            )}
           />
         )}
       </div>

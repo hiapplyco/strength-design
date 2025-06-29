@@ -8,51 +8,104 @@ import { type ClassValue } from "clsx";
 
 // ===== COLOR SYSTEM =====
 export const colors = {
-  // Brand Colors
+  // Brand Colors - Unified palette for light/dark modes
   primary: {
-    DEFAULT: "hsl(25 95% 53%)",        // Warm orange - sunset inspired
+    DEFAULT: "hsl(24 95% 53%)",        // #F97316 - Energetic orange
     foreground: "hsl(0 0% 100%)",      // White text on primary
-    50: "hsl(25 95% 95%)",
-    100: "hsl(25 95% 90%)",
-    200: "hsl(25 95% 80%)",
-    300: "hsl(25 95% 70%)",
-    400: "hsl(25 95% 60%)",
-    500: "hsl(25 95% 53%)",            // Default
-    600: "hsl(25 95% 45%)",
-    700: "hsl(25 95% 38%)",
-    800: "hsl(25 95% 30%)",
-    900: "hsl(25 95% 20%)",
+    50: "hsl(34 100% 96%)",            // #FFF4E6
+    100: "hsl(34 100% 92%)",           // #FFE4CC
+    200: "hsl(33 100% 84%)",           // #FFC899
+    300: "hsl(30 100% 74%)",           // #FFA366
+    400: "hsl(27 100% 64%)",           // #FF7D33
+    500: "hsl(24 95% 53%)",            // #F97316 - Default
+    600: "hsl(21 90% 48%)",            // #EA580C
+    700: "hsl(17 88% 40%)",            // #C2410C
+    800: "hsl(15 79% 34%)",            // #9A3412
+    900: "hsl(15 75% 28%)",            // #7C2D12
+  },
+  
+  // Neutral Colors - Works in both themes
+  neutral: {
+    50: "hsl(0 0% 98%)",               // #FAFAFA
+    100: "hsl(0 0% 96%)",              // #F5F5F5
+    200: "hsl(0 0% 90%)",              // #E5E5E5
+    300: "hsl(0 0% 83%)",              // #D4D4D4
+    400: "hsl(0 0% 64%)",              // #A3A3A3
+    500: "hsl(0 0% 45%)",              // #737373
+    600: "hsl(0 0% 32%)",              // #525252
+    700: "hsl(0 0% 25%)",              // #404040
+    800: "hsl(0 0% 15%)",              // #262626
+    900: "hsl(0 0% 9%)",               // #171717
+    950: "hsl(0 0% 4%)",               // #0A0A0A
   },
   
   // Semantic Colors
   success: {
-    DEFAULT: "hsl(142 71% 45%)",       // Green for achievements
-    light: "hsl(142 71% 95%)",
-    dark: "hsl(142 71% 35%)",
+    DEFAULT: "hsl(142 71% 45%)",       // #10B981
+    light: "hsl(142 76% 93%)",         // #D1FAE5
+    dark: "hsl(142 84% 35%)",          // #059669
+    foreground: "hsl(0 0% 100%)",
+  },
+  
+  error: {
+    DEFAULT: "hsl(0 84% 60%)",         // #EF4444
+    light: "hsl(0 86% 94%)",           // #FEE2E2
+    dark: "hsl(0 73% 50%)",            // #DC2626
     foreground: "hsl(0 0% 100%)",
   },
   
   warning: {
-    DEFAULT: "hsl(38 92% 50%)",        // Amber for warnings
-    light: "hsl(38 92% 95%)",
-    dark: "hsl(38 92% 40%)",
-    foreground: "hsl(38 92% 10%)",
+    DEFAULT: "hsl(45 93% 47%)",        // #F59E0B
+    light: "hsl(45 100% 94%)",         // #FEF3C7
+    dark: "hsl(35 92% 42%)",           // #D97706
+    foreground: "hsl(0 0% 100%)",
   },
   
-  danger: {
-    DEFAULT: "hsl(0 72% 51%)",         // Red for errors/destructive
-    light: "hsl(0 72% 95%)",
-    dark: "hsl(0 72% 41%)",
+  info: {
+    DEFAULT: "hsl(217 91% 60%)",       // #3B82F6
+    light: "hsl(214 95% 93%)",         // #DBEAFE
+    dark: "hsl(221 83% 53%)",          // #2563EB
     foreground: "hsl(0 0% 100%)",
   },
   
   // Gradient System
   gradients: {
-    border: "from-[#4CAF50] via-[#9C27B0] to-[#FF1493]",
-    sunset: "from-orange-400 via-red-500 to-pink-500",
-    energy: "from-yellow-400 via-orange-500 to-red-500",
-    success: "from-green-400 to-green-600",
-    premium: "from-amber-400 via-orange-500 to-red-500",
+    primary: "from-primary-400 to-primary-600",
+    surface: "from-neutral-50 to-neutral-100 dark:from-neutral-900 dark:to-neutral-800",
+    success: "from-success-light to-success",
+    glass: "from-white/10 to-white/5",
+    // The signature multicolor gradient used across the app
+    multicolor: "from-[#4CAF50] via-[#9C27B0] to-[#FF1493]",
+    // Gold gradient for premium features
+    gold: "from-[#DAA520] to-[#FFD700]",
+  },
+  
+  // Individual hex colors for specific use cases
+  hex: {
+    // Multicolor gradient colors
+    green: "#4CAF50",
+    purple: "#9C27B0", 
+    pink: "#FF1493",
+    // Gold colors
+    gold: "#DAA520",
+    goldLight: "#FFD700",
+    goldBrown: "#C4A052",
+    // Chart/data visualization colors
+    chartGreen: "#22c55e",
+    chartBlue: "#3b82f6",
+    chartOrange: "#f59e0b",
+    chartRed: "#ef4444",
+    chartPurple: "#8b5cf6",
+    chartPurpleDark: "#7c3aed",
+    // Social media brand colors
+    facebook: "#4285F4",
+    twitter: "#1DA1F2",
+    instagram: "#E1306C",
+    // Legacy colors (to be phased out)
+    legacyGray: "#e0e0e0",
+    legacyGrayDark: "#999",
+    legacyDarkText: "#333",
+    legacyGrayMed: "#666",
   }
 } as const;
 
@@ -195,6 +248,18 @@ export const shadows = {
   card: "shadow-sm hover:shadow-md transition-shadow",
   elevated: "shadow-lg",
   glow: "shadow-[0_0_15px_rgba(196,160,82,0.1)]",
+  // Brutalist/neo-brutalist shadows
+  brutal: {
+    sm: "shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]",
+    md: "shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]",
+    lg: "shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]",
+  },
+  // Soft shadows
+  soft: {
+    sm: "shadow-[0_2px_8px_0_rgba(0,0,0,0.08)]",
+    md: "shadow-[0_4px_16px_0_rgba(0,0,0,0.12)]",
+    lg: "shadow-[0_8px_32px_0_rgba(0,0,0,0.16)]",
+  }
 } as const;
 
 // ===== ANIMATION PRESETS =====
@@ -348,28 +413,28 @@ export const responsive = {
 
 // ===== COMPONENT VARIANTS =====
 export const variants = {
-  // Card variants
+  // Card variants - Simplified and refined
   card: {
-    default: [
-      "relative rounded-md bg-card text-card-foreground shadow-sm overflow-hidden",
-      "before:absolute before:inset-0 before:rounded-md",
-      "before:bg-gradient-to-r before:from-[#4CAF50] before:via-[#9C27B0] before:to-[#FF1493]",
-      "before:p-[1px] before:-z-10",
-      "after:absolute after:inset-[1px] after:rounded-[calc(0.375rem-1px)]",
-      "after:bg-card after:-z-[5]"
-    ].join(" "),
+    default: "rounded-lg bg-card text-card-foreground shadow-sm border border-border",
     
-    ghost: "rounded-md bg-card/50 backdrop-blur-sm border border-border/50",
+    ghost: "rounded-lg bg-card/50 backdrop-blur-sm border border-border/50",
     
-    elevated: "rounded-md bg-card shadow-lg border border-border/20",
+    elevated: "rounded-lg bg-card shadow-lg border border-border/20",
     
     interactive: [
-      "rounded-md bg-card border border-border/50",
+      "rounded-lg bg-card border border-border",
       "transition-all duration-200",
-      "hover:border-primary/50 hover:shadow-md hover:scale-[1.02]"
+      "hover:border-primary/20 hover:shadow-md"
     ].join(" "),
     
-    flat: "rounded-md bg-card border border-border",
+    flat: "rounded-lg bg-card border border-border",
+    
+    // New gradient variant for special cards
+    gradient: [
+      "rounded-lg bg-gradient-to-br from-primary-500/10 to-primary-600/5",
+      "border border-primary/20",
+      "shadow-sm"
+    ].join(" "),
   },
   
   // Button sizes

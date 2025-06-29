@@ -7,6 +7,8 @@ import { WorkoutHeader } from "./workout/WorkoutHeader";
 import { useWorkoutState } from "@/hooks/useWorkoutState";
 import { exportToCalendar } from "@/utils/calendar";
 import type { WorkoutDay } from "@/types/fitness";
+import { shadows } from "@/lib/design-tokens";
+import { cn } from "@/lib/utils";
 
 interface WorkoutCardProps {
   title: string;
@@ -82,7 +84,10 @@ export function WorkoutCard({ title, description, duration, allWorkouts, onUpdat
 
   return (
     <div className="space-y-2">
-      <Card className="relative w-full animate-fade-in border-[4px] border-primary bg-muted shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rounded-[20px]">
+      <Card className={cn(
+        "relative w-full animate-fade-in border-[4px] border-primary bg-muted rounded-[20px]",
+        shadows.brutal.lg
+      )}>
         <WorkoutHeader
           title={title}
           isExporting={isExporting}

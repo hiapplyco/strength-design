@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { colors } from '@/lib/design-tokens';
 
 interface MacroDonutChartProps {
   calories: number;
@@ -50,7 +51,7 @@ export const MacroDonutChart = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgb(34 197 94)"
+          stroke={colors.hex.chartGreen}
           strokeWidth={strokeWidth}
           fill="transparent"
           strokeDasharray={`${proteinStroke} ${circumference}`}
@@ -63,7 +64,7 @@ export const MacroDonutChart = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgb(59 130 246)"
+          stroke={colors.hex.chartBlue}
           strokeWidth={strokeWidth}
           fill="transparent"
           strokeDasharray={`${carbStroke} ${circumference}`}
@@ -76,7 +77,7 @@ export const MacroDonutChart = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgb(239 68 68)"
+          stroke={colors.hex.chartRed}
           strokeWidth={strokeWidth}
           fill="transparent"
           strokeDasharray={`${fatStroke} ${circumference}`}

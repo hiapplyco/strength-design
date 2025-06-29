@@ -4,6 +4,7 @@ import { AuthErrorAlert } from "./AuthErrorAlert";
 import { AuthForm } from "./AuthForm";
 import { useAuthState } from "./useAuthState";
 import { Button } from "@/components/ui/button";
+import { SocialAuthButtons } from "./SocialAuthButtons";
 
 interface AuthDialogProps {
   isOpen: boolean;
@@ -16,19 +17,24 @@ export const AuthDialog = ({ isOpen, onOpenChange, onSuccess }: AuthDialogProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-black/90 border border-green-500/30 backdrop-blur-sm shadow-xl">
-        <DialogHeader>
-          <DialogTitle className="text-white text-xl">
-            {view === "sign_up" ? "Create Account" : "Sign In"}
+      <DialogContent className="sm:max-w-md bg-background border-2 border-border/50 shadow-2xl">
+        <DialogHeader className="text-center space-y-2 pb-4">
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+            {view === "sign_up" ? "Create Account" : "Welcome Back"}
           </DialogTitle>
         </DialogHeader>
         {error && <AuthErrorAlert error={error} />}
         <AuthForm view={view} onSuccess={onSuccess} />
+        
+        <div className="mt-4">
+          <SocialAuthButtons />
+        </div>
+        
         <div className="mt-4 text-center">
           <Button
             variant="link"
             onClick={() => setView(view === "sign_up" ? "sign_in" : "sign_up")}
-            className="text-sm text-white/80 hover:text-white"
+            className="text-sm text-muted-foreground hover:text-foreground"
           >
             {view === "sign_up" 
               ? "Already have an account? Sign in" 

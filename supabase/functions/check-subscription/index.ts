@@ -95,6 +95,45 @@ serve(async (req) => {
 
     logStep("User authenticated", { userId: user.id });
 
+    // First check local database for manual overrides
+    const { data: localSubscription, error: dbError } = await supabaseService
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .gte('current_period_end', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!dbError && localSubscription) {
+      logStep("Found active subscription in database", { 
+        id: localSubscription.id,
+        hasManualOverride: localSubscription.metadata?.manual_override 
+      });
+
+      // Determine subscription type from price_id
+      let subscriptionType = null;
+      if (localSubscription.price_id === PRICE_IDS.unlimited) {
+        subscriptionType = 'unlimited';
+      } else if (localSubscription.price_id === PRICE_IDS.personalized) {
+        subscriptionType = 'personalized';
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          subscribed: true,
+          subscriptionType,
+          subscriptionEnd: localSubscription.current_period_end,
+          source: 'database'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' })
 
     // SECURITY FIX: Validate email format

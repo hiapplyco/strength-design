@@ -4,10 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Dumbbell } from 'lucide-react';
 import { ModernInputContainer } from './ModernInputContainer';
 import { WorkoutPreview } from './WorkoutPreview';
+import ProgramFinder, { type FitnessProgram } from '../../ProgramFinder';
 import { GenerateWorkoutButton } from '../GenerateWorkoutButton';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import type { Exercise } from '@/components/exercise-search/types';
+import { toast } from 'sonner';
 
 interface WorkoutFormTabsProps {
   selectedTab: string;
@@ -49,7 +51,7 @@ export function WorkoutFormTabs({
   isReplacing,
   existingWorkoutCount,
 }: WorkoutFormTabsProps) {
-  const { config } = useWorkoutConfig();
+  const { config, updateConfig } = useWorkoutConfig();
 
   const handleGenerate = async () => {
     await handleGenerateWorkout({
@@ -60,6 +62,36 @@ export function WorkoutFormTabs({
       prescribedExercises: config.prescribedExercises,
       injuries: config.injuries,
     });
+  };
+
+  const handleSelectProgram = (program: FitnessProgram) => {
+    // Extract equipment from the program
+    const equipmentList = program.equipment.join(', ');
+    
+    // Extract goals from the program
+    const goalsList = program.goals.join(', ');
+    
+    // Build a program description for the prescribed exercises field
+    const programDescription = `${program.programName}: ${program.description}\n\nGoals: ${goalsList}\nLevel: ${program.level}\nDuration: ${program.duration}\nFrequency: ${program.frequency}`;
+    
+    // Extract average workout days per week from frequency
+    let workoutDays = 3; // default
+    const frequencyMatch = program.frequency.match(/(\d+)/);
+    if (frequencyMatch) {
+      workoutDays = parseInt(frequencyMatch[1]);
+    }
+    
+    // Update workout configuration
+    updateConfig({
+      fitnessLevel: program.level.toLowerCase(),
+      prescribedExercises: programDescription,
+      numberOfDays: workoutDays,
+    });
+    
+    // Update generate prompt with program info
+    setGeneratePrompt(`Generate a ${program.programName} style workout program. ${program.description}`);
+    
+    toast.success(`${program.programName} loaded! You can now customize and generate your workout.`);
   };
 
   return (
@@ -91,6 +123,8 @@ export function WorkoutFormTabs({
           setNumberOfCycles={setNumberOfCycles}
           isGenerating={isGenerating}
         />
+        
+        <ProgramFinder onSelectProgram={handleSelectProgram} />
         
         <GenerateWorkoutButton
           onGenerate={handleGenerate}

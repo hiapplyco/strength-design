@@ -1,561 +1,60 @@
 /* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Design System */
+@import './styles/design-system.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Sunset-inspired palette for light mode */
-    --background: 35 91% 96%; /* Soft peach */
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 35 91% 96%; /* Matching background for a soft look */
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 35 91% 96%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 25 95% 53%; /* Warm orange, reminiscent of sunset */
-    --primary-foreground: 355.7 100% 97.3%;
-
-    --secondary: 25 90% 88%; /* Lighter orange shade */
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 30 85% 92%; /* Soft peach-orange */
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 25 90% 88%;
-    --accent-foreground: 240 5.9% 10%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 25 50% 85%;
-    --input: 25 50% 85%;
-    --ring: 25 95% 53%;
-
-    --radius: 0.5rem;
+  /* Legacy color variables are now defined in design-system.css */
+  /* Keeping minimal overrides for smooth transition */
+  
+  * {
+    border-color: hsl(var(--border));
   }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 9.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 142.1 70.6% 45.3%;
-    --primary-foreground: 144.9 80.4% 10%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142.1 76.2% 36.3%;
-    
-    color-scheme: dark;
+  
+  body {
+    color: hsl(var(--foreground));
+    background: hsl(var(--background));
   }
 }
 
-/* Add CSS for both theme modes */
+/* Theme mode indicators */
 .light {
   color-scheme: light;
 }
 
-/* Apply the sunset gradient background to the entire body and html when in light mode */
-html.light, 
-body.light, 
-.light .min-h-screen {
-  background: linear-gradient(135deg, 
-    hsla(30, 91%, 96%, 1) 0%, 
-    hsla(25, 90%, 88%, 0.8) 100%);
-  background-attachment: fixed;
+/* Smooth transitions between themes */
+* {
+  @apply transition-colors duration-200;
 }
 
-/* Let cards have a more subtle background in light mode */
-.light .bg-card\/50 {
-  background-color: hsla(30, 91%, 98%, 0.7);
-  backdrop-filter: blur(8px);
-}
-
-/* Fix for pages/Index.tsx gradient overlay in light mode */
-.light .bg-gradient-to-br.from-primary\/10 {
-  opacity: 0.3;
-}
-
-/* Google Looker Dashboard Styles */
-.looker-dashboard {
-  --looker-primary: #4285F4;
-  --looker-secondary: #DB4437;
-  --looker-success: #0F9D58;
-  --looker-warning: #F4B400;
-  --looker-bg: #f8f9fa;
-  --looker-card: #ffffff;
-  --looker-border: #e0e0e0;
-  --looker-text: #202124;
-  --looker-text-secondary: #5f6368;
-  --looker-header-height: 64px;
+/* Custom scrollbar styling */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary-500) / 0.3) transparent;
+  }
   
-  font-family: 'Google Sans', Roboto, Arial, sans-serif;
-  background-color: var(--looker-bg);
-  color: var(--looker-text);
-  min-height: 100vh;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--primary-500) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--primary-500) / 0.5);
+  }
 }
-
-.looker-container {
-  max-width: 100%;
-  padding: 0;
-  margin: 0;
-}
-
-.looker-header {
-  background-color: var(--looker-card);
-  border-bottom: 1px solid var(--looker-border);
-  height: var(--looker-header-height);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.looker-branding {
-  display: flex;
-  align-items: center;
-}
-
-.looker-logo {
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--looker-primary);
-  margin-right: 8px;
-}
-
-.looker-subtitle {
-  font-size: 14px;
-  color: var(--looker-text-secondary);
-}
-
-.looker-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-}
-
-.looker-title h1 {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 0;
-}
-
-.looker-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.looker-button {
-  background-color: var(--looker-primary);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.looker-button:hover {
-  background-color: #3b78e7;
-}
-
-.looker-button-sm {
-  background-color: transparent;
-  color: var(--looker-primary);
-  border: 1px solid var(--looker-border);
-  border-radius: 4px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.looker-button-sm:hover {
-  background-color: rgba(66, 133, 244, 0.04);
-}
-
-.looker-icon-button {
-  background: transparent;
-  border: none;
-  padding: 6px;
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--looker-text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.looker-icon-button:hover {
-  background-color: rgba(95, 99, 104, 0.08);
-}
-
-.looker-time-selector {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border: 1px solid var(--looker-border);
-  border-radius: 4px;
-  font-size: 14px;
-  color: var(--looker-text);
-  cursor: pointer;
-}
-
-.looker-kpi-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  padding: 16px 24px;
-}
-
-.looker-kpi {
-  background-color: var(--looker-card);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-}
-
-.looker-kpi-label {
-  font-size: 14px;
-  color: var(--looker-text-secondary);
-  margin-bottom: 8px;
-}
-
-.looker-kpi-value {
-  font-size: 28px;
-  font-weight: 500;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.looker-kpi-change {
-  font-size: 14px;
-}
-
-.looker-kpi-change.positive {
-  color: var(--looker-success);
-}
-
-.looker-kpi-change.negative {
-  color: var(--looker-secondary);
-}
-
-.looker-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 16px;
-  padding: 16px 24px;
-}
-
-.looker-panel {
-  background-color: var(--looker-card);
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-}
-
-.looker-panel-tall {
-  grid-row: span 2;
-}
-
-.panel-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.looker-panel-content {
-  padding: 16px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.looker-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.looker-panel-header h2 {
-  font-size: 16px;
-  font-weight: 500;
-  margin: 0;
-  color: var(--looker-text);
-}
-
-.looker-panel-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.looker-chart {
-  flex: 1;
-  min-height: 300px;
-}
-
-.looker-table-container {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.looker-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.looker-table th {
-  text-align: left;
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--looker-border);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--looker-text-secondary);
-}
-
-.looker-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--looker-border);
-  font-size: 13px;
-}
-
-.looker-table-value {
-  font-weight: 500;
-}
-
-.looker-table-change {
-  font-weight: 500;
-}
-
-.looker-table-change.improved {
-  color: var(--looker-success);
-}
-
-.looker-table-change.declined {
-  color: var(--looker-secondary);
-}
-
-.looker-news {
-  display: flex;
-  gap: 16px;
-}
-
-.looker-news-content {
-  flex: 1;
-}
-
-.looker-news-content h3 {
-  font-size: 16px;
-  font-weight: 500;
-  margin-top: 0;
-  margin-bottom: 12px;
-}
-
-.looker-news-content p {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--looker-text);
-}
-
-.looker-news-highlights h4 {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.looker-news-highlights ul {
-  padding-left: 18px;
-  margin: 0;
-}
-
-.looker-news-highlights li {
-  font-size: 13px;
-  margin-bottom: 4px;
-  color: var(--looker-text);
-}
-
-.looker-news-image {
-  width: 200px;
-  flex-shrink: 0;
-}
-
-.looker-news-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-.looker-ranking-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-.looker-ranking-circle {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: var(--looker-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.looker-ranking-value {
-  font-size: 42px;
-  font-weight: 500;
-  color: white;
-}
-
-.looker-ranking-label {
-  font-size: 14px;
-  color: var(--looker-text-secondary);
-}
-
-.looker-activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.looker-activity-item {
-  display: flex;
-  gap: 12px;
-  position: relative;
-}
-
-.looker-activity-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: var(--looker-warning);
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.looker-activity-item:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 18px;
-  left: 5px;
-  width: 2px;
-  height: calc(100% + 12px);
-  background-color: rgba(244, 180, 0, 0.3);
-}
-
-.looker-activity-content {
-  flex: 1;
-  padding-bottom: 12px;
-}
-
-.looker-activity-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.looker-activity-type {
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.looker-activity-date {
-  font-size: 12px;
-  color: var(--looker-text-secondary);
-}
-
-.looker-activity-details {
-  font-size: 13px;
-  color: var(--looker-text);
-}
-
-.looker-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: var(--looker-bg);
-}
-
-.looker-spinner {
-  border: 3px solid rgba(66, 133, 244, 0.3);
-  border-radius: 50%;
-  border-top: 3px solid var(--looker-primary);
-  width: 30px;
-  height: 30px;
-  animation: looker-spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-@keyframes looker-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.looker-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: var(--looker-bg);
-}
-
-.looker-empty-state h2 {
-  font-size: 20px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: var(--looker-text);
-}
-
-.looker-empty-state p {
-  font-size: 16px;
-  color: var(--looker-text-secondary);
-}
-
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');

@@ -6,11 +6,13 @@ import { ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import { TargetsCarousel } from './TargetsCarousel';
 import { WaterTracker } from './WaterTracker';
 import { MealAccordion } from './MealAccordion';
+import { NutritionSettingsDialog } from './NutritionSettingsDialog';
 import { useNutritionData } from '@/hooks/useNutritionData';
 import { format, addDays, subDays } from 'date-fns';
 
 export const NutritionDiaryContent = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const { nutritionLog, targets, isLoading } = useNutritionData(selectedDate);
 
   const handlePreviousDay = () => {
@@ -64,7 +66,11 @@ export const NutritionDiaryContent = () => {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <Button variant="ghost" size="icon">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setSettingsOpen(true)}
+          >
             <Settings className="h-4 w-4" />
           </Button>
         </div>
@@ -94,6 +100,12 @@ export const NutritionDiaryContent = () => {
           />
         ))}
       </div>
+
+      {/* Settings Dialog */}
+      <NutritionSettingsDialog 
+        open={settingsOpen} 
+        onOpenChange={setSettingsOpen} 
+      />
     </div>
   );
 };

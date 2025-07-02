@@ -10,6 +10,7 @@ import { Dumbbell, Github, Mail, Phone } from "lucide-react";
 import { useAuthState } from "@/components/auth/useAuthState";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PhoneAuthModal } from "@/components/auth/PhoneAuthModal";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Auth() {
   const { signIn } = useAuth();
   const { view, setView, error } = useAuthState();
   const [isLoading, setIsLoading] = useState(false);
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
 
   const from = location.state?.from?.pathname || "/";
 
@@ -45,7 +47,7 @@ export default function Auth() {
   };
 
   const handlePhoneSignIn = () => {
-    toast.info("Phone sign-in coming soon!");
+    setPhoneModalOpen(true);
   };
 
   return (
@@ -88,15 +90,33 @@ export default function Auth() {
             
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full opacity-50 cursor-not-allowed"
               size="lg"
-              onClick={() => handleSocialSignIn('github')}
-              disabled={isLoading}
+              onClick={(e) => {
+                e.preventDefault();
+                toast.info("GitHub sign-in coming soon!");
+              }}
+              disabled={true}
             >
               <Github className="mr-2 h-4 w-4" />
-              Continue with GitHub
+              GitHub (Coming Soon)
             </Button>
             
+            <Button
+              variant="outline"
+              className="w-full opacity-50 cursor-not-allowed"
+              size="lg"
+              onClick={(e) => {
+                e.preventDefault();
+                toast.info("Discord sign-in coming soon!");
+              }}
+              disabled={true}
+            >
+              {/* TODO: Replace with Discord icon */}
+              <Github className="mr-2 h-4 w-4" />
+              Discord (Coming Soon)
+            </Button>
+
             <Button
               variant="outline"
               className="w-full"
@@ -149,6 +169,13 @@ export default function Auth() {
           </Button>
         </div>
       </div>
+
+      {/* Phone Auth Modal */}
+      <PhoneAuthModal 
+        open={phoneModalOpen} 
+        onOpenChange={setPhoneModalOpen}
+        onSuccess={handleSuccess}
+      />
     </div>
   );
 }

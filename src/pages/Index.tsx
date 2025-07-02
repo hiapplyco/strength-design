@@ -7,6 +7,7 @@ import { LandingHeader } from "@/components/landing/LandingHeader";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { UpgradeCTASection } from "@/components/landing/UpgradeCTASection";
 import { TestimonialsCarousel } from "@/components/landing/TestimonialsCarousel";
+import { WorkoutUploadButton } from "@/components/workout-upload/WorkoutUploadButton";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -25,6 +26,11 @@ export default function Index() {
   return (
     <StandardPageLayout header={header} className="h-screen">
       <div className={`${width.full} ${layout.noOverflow} flex-1 min-h-0 ${spacing.container}`}>
+        {/* Workout Upload Section */}
+        <div className={`${spacing.section} max-w-3xl mx-auto`}>
+          <WorkoutUploadButton />
+        </div>
+
         {/* Features Teaser */}
         <div className={`${spacing.section} text-center`}>
           <h2 className={`text-xl md:text-2xl font-semibold text-primary mb-4`}>

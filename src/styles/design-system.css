@@ -1,0 +1,225 @@
+/**
+ * Strength Design - Unified Design System
+ * Version: 1.0
+ * 
+ * This file contains the core design tokens for the application.
+ * All colors work harmoniously in both light and dark modes.
+ */
+
+@layer base {
+  :root {
+    /* ===== CORE BRAND COLORS ===== */
+    /* Primary Orange - Energy & Action */
+    --primary-50: 34 100% 96%;    /* hsl(34 100% 96%) - #FFF4E6 */
+    --primary-100: 34 100% 92%;   /* hsl(34 100% 92%) - #FFE4CC */
+    --primary-200: 33 100% 84%;   /* hsl(33 100% 84%) - #FFC899 */
+    --primary-300: 30 100% 74%;   /* hsl(30 100% 74%) - #FFA366 */
+    --primary-400: 27 100% 64%;   /* hsl(27 100% 64%) - #FF7D33 */
+    --primary-500: 24 95% 53%;    /* hsl(24 95% 53%) - #F97316 - Main */
+    --primary-600: 21 90% 48%;    /* hsl(21 90% 48%) - #EA580C */
+    --primary-700: 17 88% 40%;    /* hsl(17 88% 40%) - #C2410C */
+    --primary-800: 15 79% 34%;    /* hsl(15 79% 34%) - #9A3412 */
+    --primary-900: 15 75% 28%;    /* hsl(15 75% 28%) - #7C2D12 */
+
+    /* ===== NEUTRAL PALETTE ===== */
+    --neutral-50: 0 0% 98%;       /* hsl(0 0% 98%) - #FAFAFA */
+    --neutral-100: 0 0% 96%;      /* hsl(0 0% 96%) - #F5F5F5 */
+    --neutral-200: 0 0% 90%;      /* hsl(0 0% 90%) - #E5E5E5 */
+    --neutral-300: 0 0% 83%;      /* hsl(0 0% 83%) - #D4D4D4 */
+    --neutral-400: 0 0% 64%;      /* hsl(0 0% 64%) - #A3A3A3 */
+    --neutral-500: 0 0% 45%;      /* hsl(0 0% 45%) - #737373 */
+    --neutral-600: 0 0% 32%;      /* hsl(0 0% 32%) - #525252 */
+    --neutral-700: 0 0% 25%;      /* hsl(0 0% 25%) - #404040 */
+    --neutral-800: 0 0% 15%;      /* hsl(0 0% 15%) - #262626 */
+    --neutral-900: 0 0% 9%;       /* hsl(0 0% 9%) - #171717 */
+    --neutral-950: 0 0% 4%;       /* hsl(0 0% 4%) - #0A0A0A */
+
+    /* ===== SEMANTIC COLORS ===== */
+    /* Success - Growth & Achievement */
+    --success-light: 142 76% 93%;   /* hsl(142 76% 93%) - #D1FAE5 */
+    --success: 142 71% 45%;        /* hsl(142 71% 45%) - #10B981 */
+    --success-dark: 142 84% 35%;   /* hsl(142 84% 35%) - #059669 */
+
+    /* Error - Alert & Warning */
+    --error-light: 0 86% 94%;      /* hsl(0 86% 94%) - #FEE2E2 */
+    --error: 0 84% 60%;            /* hsl(0 84% 60%) - #EF4444 */
+    --error-dark: 0 73% 50%;       /* hsl(0 73% 50%) - #DC2626 */
+
+    /* Warning - Caution */
+    --warning-light: 45 100% 94%;  /* hsl(45 100% 94%) - #FEF3C7 */
+    --warning: 45 93% 47%;         /* hsl(45 93% 47%) - #F59E0B */
+    --warning-dark: 35 92% 42%;    /* hsl(35 92% 42%) - #D97706 */
+
+    /* Info - Information */
+    --info-light: 214 95% 93%;     /* hsl(214 95% 93%) - #DBEAFE */
+    --info: 217 91% 60%;           /* hsl(217 91% 60%) - #3B82F6 */
+    --info-dark: 221 83% 53%;      /* hsl(221 83% 53%) - #2563EB */
+
+    /* ===== LIGHT MODE TOKENS ===== */
+    --background: var(--neutral-50);
+    --foreground: var(--neutral-900);
+    --card: 0 0% 100%;
+    --card-foreground: var(--neutral-900);
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--neutral-900);
+    --primary: var(--primary-500);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--neutral-100);
+    --secondary-foreground: var(--neutral-900);
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-500);
+    --accent: var(--primary-100);
+    --accent-foreground: var(--primary-900);
+    --destructive: var(--error);
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--neutral-200);
+    --input: var(--neutral-200);
+    --ring: var(--primary-500);
+
+    /* ===== GRADIENTS ===== */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-400)) 0%, hsl(var(--primary-600)) 100%);
+    --gradient-surface: linear-gradient(135deg, hsl(var(--neutral-50)) 0%, hsl(var(--neutral-100)) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(var(--success-light)) 0%, hsl(var(--success)) 100%);
+
+    /* ===== SPACING ===== */
+    --radius: 0.5rem;
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+    --radius-full: 9999px;
+  }
+
+  /* ===== DARK MODE ===== */
+  .dark {
+    /* Dark mode uses the same color values but inverted usage */
+    --background: var(--neutral-950);
+    --foreground: var(--neutral-50);
+    --card: var(--neutral-900);
+    --card-foreground: var(--neutral-50);
+    --popover: var(--neutral-900);
+    --popover-foreground: var(--neutral-50);
+    --primary: var(--primary-500);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--neutral-800);
+    --secondary-foreground: var(--neutral-50);
+    --muted: var(--neutral-800);
+    --muted-foreground: var(--neutral-400);
+    --accent: var(--neutral-800);
+    --accent-foreground: var(--primary-500);
+    --destructive: var(--error);
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--neutral-800);
+    --input: var(--neutral-800);
+    --ring: var(--primary-500);
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-600)) 0%, hsl(var(--primary-400)) 100%);
+    --gradient-surface: linear-gradient(135deg, hsl(var(--neutral-900)) 0%, hsl(var(--neutral-800)) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(var(--success-dark)) 0%, hsl(var(--success)) 100%);
+    
+    color-scheme: dark;
+  }
+}
+
+/* ===== UTILITY CLASSES ===== */
+@layer utilities {
+  /* Text gradient utilities */
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Surface gradients */
+  .bg-gradient-surface {
+    background: var(--gradient-surface);
+  }
+
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary-500) / 0.3);
+  }
+
+  .glow-success {
+    box-shadow: 0 0 20px hsl(var(--success) / 0.3);
+  }
+
+  /* Improved focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background;
+  }
+}
+
+/* ===== COMPONENT OVERRIDES ===== */
+@layer components {
+  /* Clean button styles */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary-600 active:bg-primary-700;
+    @apply transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-neutral-200 dark:hover:bg-neutral-700;
+    @apply border-2 border-transparent hover:border-border;
+    @apply transition-all duration-200;
+  }
+
+  /* Card improvements */
+  .card-base {
+    @apply bg-card text-card-foreground;
+    @apply border border-border;
+    @apply rounded-lg shadow-sm;
+    @apply transition-shadow duration-200;
+  }
+
+  .card-interactive {
+    @apply card-base;
+    @apply hover:shadow-md hover:border-primary/20;
+    @apply cursor-pointer;
+  }
+
+  /* Form elements */
+  .input-base {
+    @apply bg-background border-input;
+    @apply focus:border-primary focus:ring-1 focus:ring-primary/20;
+    @apply transition-colors duration-200;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}

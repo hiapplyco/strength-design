@@ -1,14 +1,19 @@
 {
-  "name": "bjj-video-analyzer",
+  "name": "strength-design",
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "mobile": "npm run dev --workspace=@strength-design/mobile",
+    "shared": "npm run build --workspace=@strength-design/shared"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.17",

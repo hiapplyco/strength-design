@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -112,7 +113,7 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-white">Email</Label>
+        <Label htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"
@@ -120,13 +121,12 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           onChange={(e) => setEmail(e.target.value)}
           required
           maxLength={254}
-          className="bg-black/20 border-green-500/30 text-white placeholder:text-white/60"
           placeholder="Enter your email"
         />
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-white">Password</Label>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           type="password"
@@ -135,7 +135,6 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
           onFocus={() => setShowPasswordValidation(view === "sign_up")}
           required
           maxLength={128}
-          className="bg-black/20 border-green-500/30 text-white placeholder:text-white/60"
           placeholder="Enter your password"
         />
         {view === "sign_up" && (
@@ -149,10 +148,21 @@ export const AuthForm = ({ view, onSuccess }: AuthFormProps) => {
       <Button 
         type="submit" 
         disabled={isLoading || (view === "sign_up" && !validatePassword(password)) || !validateEmail(email)}
-        className="w-full bg-green-600 hover:bg-green-700 text-white"
+        className="w-full"
       >
         {isLoading ? "Loading..." : view === "sign_up" ? "Sign Up" : "Sign In"}
       </Button>
+
+      {view === "sign_in" && (
+        <div className="text-center mt-4">
+          <Link 
+            to="/auth/forgot-password" 
+            className="text-sm text-muted-foreground hover:text-primary hover:underline"
+          >
+            Forgot your password?
+          </Link>
+        </div>
+      )}
     </form>
   );
 };

@@ -10,13 +10,20 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       const next = searchParams.get("next") || "/";
+      const type = searchParams.get("type");
       
       try {
-        const { error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Auth callback error:", error);
           navigate("/auth");
+          return;
+        }
+
+        // Handle password reset flow
+        if (type === "recovery" && session) {
+          navigate("/auth/reset-password", { replace: true });
           return;
         }
 

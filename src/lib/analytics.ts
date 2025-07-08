@@ -2,7 +2,10 @@
 
 declare global {
   interface Window {
-    plausible: (eventName: string, options?: { props?: Record<string, string | number> }) => void;
+    plausible: (eventName: string, options?: { 
+      props?: Record<string, string | number>;
+      revenue?: { currency: string; amount: number | string };
+    }) => void;
   }
 }
 
@@ -116,6 +119,28 @@ export const trackSubscription = (event: 'trial_start' | 'upgrade' | 'downgrade'
   trackEvent('Subscription', {
     event,
     ...(plan && { plan })
+  });
+};
+
+/**
+ * Track revenue events (for purchases, subscriptions, etc.)
+ */
+export const trackRevenue = (eventName: string, amount: number, currency: string = 'USD', props?: Record<string, string | number>) => {
+  if (typeof window !== 'undefined' && window.plausible) {
+    window.plausible(eventName, {
+      revenue: { currency, amount: amount.toString() },
+      props
+    });
+  }
+};
+
+/**
+ * Track subscription purchase with revenue
+ */
+export const trackSubscriptionPurchase = (plan: string, amount: number, currency: string = 'USD', interval?: 'monthly' | 'yearly') => {
+  trackRevenue('Subscription Purchase', amount, currency, {
+    plan,
+    ...(interval && { interval })
   });
 };
 

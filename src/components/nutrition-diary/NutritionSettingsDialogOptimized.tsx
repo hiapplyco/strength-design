@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -31,6 +31,8 @@ import {
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { debounce } from 'lodash';
 
 interface NutritionSettingsDialogProps {
   open: boolean;
@@ -59,14 +61,71 @@ interface Integration {
   comingSoon?: boolean;
 }
 
-export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSettingsDialogProps) {
+// Custom hook for nutrition settings
+function useNutritionSettings(userId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['nutrition-settings', userId],
+    queryFn: async () => {
+      if (!userId) throw new Error('User ID required');
+      
+      const { data, error } = await supabase
+        .from('nutrition_settings')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
+      return data;
+    },
+    enabled: enabled && !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+
+// Memoized input component to prevent re-renders
+const MacroInput = memo(({ 
+  id, 
+  label, 
+  value, 
+  onChange 
+}: { 
+  id: string; 
+  label: string; 
+  value: number; 
+  onChange: (value: number) => void;
+}) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(parseInt(e.target.value) || 0);
+  }, [onChange]);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="number"
+        value={value}
+        onChange={handleChange}
+      />
+    </div>
+  );
+});
+
+MacroInput.displayName = 'MacroInput';
+
+export const NutritionSettingsDialogOptimized = memo(({ 
+  open, 
+  onOpenChange 
+}: NutritionSettingsDialogProps) => {
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   
-  const [macroTargets, setMacroTargets] = useState<MacroTargets>({
+  // Default macro targets
+  const defaultMacros = useMemo(() => ({
     calories: 2000,
     protein: 150,
     carbs: 250,
@@ -77,9 +136,12 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
     cholesterol: 300,
     saturated_fat: 20,
     water_ml: 2000
-  });
+  }), []);
 
-  const [integrations, setIntegrations] = useState<Integration[]>([
+  const [macroTargets, setMacroTargets] = useState<MacroTargets>(defaultMacros);
+
+  // Default integrations
+  const defaultIntegrations = useMemo(() => [
     {
       id: 'apple_health',
       name: 'Apple Health',
@@ -123,122 +185,119 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
       description: 'Import food logs and recipes',
       comingSoon: true
     }
-  ]);
+  ], []);
 
-  // Load existing settings on mount
+  const [integrations, setIntegrations] = useState<Integration[]>(defaultIntegrations);
+
+  // Use React Query for fetching settings
+  const { data: settings, isLoading } = useNutritionSettings(user?.id, open);
+
+  // Update local state when settings are loaded
   useEffect(() => {
-    const loadSettings = async () => {
-      if (!open || !user?.id) return;
-      
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('nutrition_settings')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+    if (settings) {
+      setMacroTargets({
+        calories: settings.target_calories || defaultMacros.calories,
+        protein: settings.target_protein || defaultMacros.protein,
+        carbs: settings.target_carbs || defaultMacros.carbs,
+        fat: settings.target_fat || defaultMacros.fat,
+        fiber: settings.target_fiber || defaultMacros.fiber,
+        sugar: settings.target_sugar || defaultMacros.sugar,
+        sodium: settings.target_sodium || defaultMacros.sodium,
+        cholesterol: settings.target_cholesterol || defaultMacros.cholesterol,
+        saturated_fat: settings.target_saturated_fat || defaultMacros.saturated_fat,
+        water_ml: settings.target_water_ml || defaultMacros.water_ml
+      });
 
-        if (data && !error) {
-          setMacroTargets({
-            calories: data.target_calories || 2000,
-            protein: data.target_protein || 150,
-            carbs: data.target_carbs || 250,
-            fat: data.target_fat || 65,
-            fiber: data.target_fiber || 25,
-            sugar: data.target_sugar || 50,
-            sodium: data.target_sodium || 2300,
-            cholesterol: data.target_cholesterol || 300,
-            saturated_fat: data.target_saturated_fat || 20,
-            water_ml: data.target_water_ml || 2000
-          });
-
-          if (data.integrations) {
-            setIntegrations(prev => prev.map(integration => ({
-              ...integration,
-              connected: data.integrations[integration.id]?.connected || false
-            })));
-          }
-        }
-      } catch (error) {
-        console.error('Error loading settings:', error);
-      } finally {
-        setIsLoading(false);
+      if (settings.integrations) {
+        setIntegrations(prev => prev.map(integration => ({
+          ...integration,
+          connected: settings.integrations?.[integration.id]?.connected || false
+        })));
       }
-    };
+    }
+  }, [settings, defaultMacros]);
 
-    loadSettings();
-  }, [open, user?.id]);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      const integrationsData = integrations.reduce((acc, integration) => ({
-        ...acc,
-        [integration.id]: { connected: integration.connected }
-      }), {});
-
+  // Mutation for saving settings
+  const saveMutation = useMutation({
+    mutationFn: async (data: any) => {
       const { error } = await supabase
         .from('nutrition_settings')
-        .upsert({
-          user_id: user?.id,
-          target_calories: macroTargets.calories,
-          target_protein: macroTargets.protein,
-          target_carbs: macroTargets.carbs,
-          target_fat: macroTargets.fat,
-          target_fiber: macroTargets.fiber,
-          target_sugar: macroTargets.sugar,
-          target_sodium: macroTargets.sodium,
-          target_cholesterol: macroTargets.cholesterol,
-          target_saturated_fat: macroTargets.saturated_fat,
-          target_water_ml: macroTargets.water_ml,
-          integrations: integrationsData,
-          updated_at: new Date().toISOString()
-        });
-
+        .upsert(data);
+      
       if (error) throw error;
-
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['nutrition-settings', user?.id] });
       toast({
         title: "Settings saved",
         description: "Your nutrition settings have been updated successfully.",
       });
-      
       onOpenChange(false);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error saving settings:', error);
       toast({
         title: "Error saving settings",
         description: "Please try again later.",
         variant: "destructive"
       });
-    } finally {
-      setIsSaving(false);
     }
-  };
+  });
 
-  const handleFileUpload = async () => {
-    if (!selectedFile || !user) return;
+  // Debounced save function to prevent rapid updates
+  const debouncedSave = useMemo(
+    () => debounce((data: any) => {
+      saveMutation.mutate(data);
+    }, 1000),
+    [saveMutation]
+  );
 
-    setIsUploading(true);
-    try {
-      // Upload file to Supabase Storage
-      const fileName = `${user.id}/nutrition-plans/${Date.now()}-${selectedFile.name}`;
+  const handleSave = useCallback(() => {
+    const integrationsData = integrations.reduce((acc, integration) => ({
+      ...acc,
+      [integration.id]: { connected: integration.connected }
+    }), {});
+
+    saveMutation.mutate({
+      user_id: user?.id,
+      target_calories: macroTargets.calories,
+      target_protein: macroTargets.protein,
+      target_carbs: macroTargets.carbs,
+      target_fat: macroTargets.fat,
+      target_fiber: macroTargets.fiber,
+      target_sugar: macroTargets.sugar,
+      target_sodium: macroTargets.sodium,
+      target_cholesterol: macroTargets.cholesterol,
+      target_saturated_fat: macroTargets.saturated_fat,
+      target_water_ml: macroTargets.water_ml,
+      integrations: integrationsData,
+      updated_at: new Date().toISOString()
+    });
+  }, [user?.id, macroTargets, integrations, saveMutation]);
+
+  // File upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (!user) throw new Error('User required');
+      
+      const fileName = `${user.id}/nutrition-plans/${Date.now()}-${file.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('nutrition-uploads')
-        .upload(fileName, selectedFile);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Call edge function to process with Gemini
       const { data, error } = await supabase.functions.invoke('parse-nutrition-plan', {
         body: {
           fileName: fileName,
-          fileType: selectedFile.type
+          fileType: file.type
         }
       });
 
       if (error) throw error;
-
-      // Update macro targets from parsed data
+      return data;
+    },
+    onSuccess: (data) => {
       if (data?.macros) {
         setMacroTargets(prev => ({
           ...prev,
@@ -252,19 +311,24 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
       });
 
       setSelectedFile(null);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error uploading file:', error);
       toast({
         title: "Error processing file",
         description: "Please try again with a different file.",
         variant: "destructive"
       });
-    } finally {
-      setIsUploading(false);
     }
-  };
+  });
 
-  const handleIntegrationToggle = async (integrationId: string) => {
+  const handleFileUpload = useCallback(() => {
+    if (selectedFile) {
+      uploadMutation.mutate(selectedFile);
+    }
+  }, [selectedFile, uploadMutation]);
+
+  const handleIntegrationToggle = useCallback((integrationId: string) => {
     const integration = integrations.find(i => i.id === integrationId);
     
     if (integration?.comingSoon) {
@@ -279,14 +343,18 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
       i.id === integrationId ? { ...i, connected: !i.connected } : i
     ));
 
-    // Here you would implement actual OAuth flows for each service
     if (!integrations.find(i => i.id === integrationId)?.connected) {
       toast({
         title: "Integration setup",
         description: "OAuth connection flow would start here in production.",
       });
     }
-  };
+  }, [integrations]);
+
+  // Memoized callbacks for macro updates
+  const updateMacro = useCallback((key: keyof MacroTargets, value: number) => {
+    setMacroTargets(prev => ({ ...prev, [key]: value }));
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -328,107 +396,59 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="calories">Calories</Label>
-                      <Input
-                        id="calories"
-                        type="number"
-                        value={macroTargets.calories}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          calories: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="protein">Protein (g)</Label>
-                      <Input
-                        id="protein"
-                        type="number"
-                        value={macroTargets.protein}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          protein: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="carbs">Carbohydrates (g)</Label>
-                      <Input
-                        id="carbs"
-                        type="number"
-                        value={macroTargets.carbs}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          carbs: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="fat">Fat (g)</Label>
-                      <Input
-                        id="fat"
-                        type="number"
-                        value={macroTargets.fat}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          fat: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
+                    <MacroInput
+                      id="calories"
+                      label="Calories"
+                      value={macroTargets.calories}
+                      onChange={(value) => updateMacro('calories', value)}
+                    />
+                    <MacroInput
+                      id="protein"
+                      label="Protein (g)"
+                      value={macroTargets.protein}
+                      onChange={(value) => updateMacro('protein', value)}
+                    />
+                    <MacroInput
+                      id="carbs"
+                      label="Carbohydrates (g)"
+                      value={macroTargets.carbs}
+                      onChange={(value) => updateMacro('carbs', value)}
+                    />
+                    <MacroInput
+                      id="fat"
+                      label="Fat (g)"
+                      value={macroTargets.fat}
+                      onChange={(value) => updateMacro('fat', value)}
+                    />
                   </div>
 
                   <Separator />
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="fiber">Fiber (g)</Label>
-                      <Input
-                        id="fiber"
-                        type="number"
-                        value={macroTargets.fiber}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          fiber: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sugar">Sugar (g)</Label>
-                      <Input
-                        id="sugar"
-                        type="number"
-                        value={macroTargets.sugar}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          sugar: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sodium">Sodium (mg)</Label>
-                      <Input
-                        id="sodium"
-                        type="number"
-                        value={macroTargets.sodium}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          sodium: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="water">Water (ml)</Label>
-                      <Input
-                        id="water"
-                        type="number"
-                        value={macroTargets.water_ml}
-                        onChange={(e) => setMacroTargets(prev => ({ 
-                          ...prev, 
-                          water_ml: parseInt(e.target.value) || 0 
-                        }))}
-                      />
-                    </div>
+                    <MacroInput
+                      id="fiber"
+                      label="Fiber (g)"
+                      value={macroTargets.fiber}
+                      onChange={(value) => updateMacro('fiber', value)}
+                    />
+                    <MacroInput
+                      id="sugar"
+                      label="Sugar (g)"
+                      value={macroTargets.sugar}
+                      onChange={(value) => updateMacro('sugar', value)}
+                    />
+                    <MacroInput
+                      id="sodium"
+                      label="Sodium (mg)"
+                      value={macroTargets.sodium}
+                      onChange={(value) => updateMacro('sodium', value)}
+                    />
+                    <MacroInput
+                      id="water"
+                      label="Water (ml)"
+                      value={macroTargets.water_ml}
+                      onChange={(value) => updateMacro('water_ml', value)}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -471,9 +491,9 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
                       <Button
                         size="sm"
                         onClick={handleFileUpload}
-                        disabled={isUploading}
+                        disabled={uploadMutation.isLoading}
                       >
-                        {isUploading ? (
+                        {uploadMutation.isLoading ? (
                           <>
                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                             Processing...
@@ -545,8 +565,8 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (
+          <Button onClick={handleSave} disabled={saveMutation.isLoading}>
+            {saveMutation.isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Saving...
@@ -559,4 +579,6 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
       </DialogContent>
     </Dialog>
   );
-}
+});
+
+NutritionSettingsDialogOptimized.displayName = 'NutritionSettingsDialogOptimized';

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
+import { trackWorkoutGeneration } from '@/lib/analytics';
 
 interface GenerateWorkoutButtonProps {
   onGenerate: () => void;
@@ -32,7 +33,10 @@ export const GenerateWorkoutButton: React.FC<GenerateWorkoutButtonProps> = ({
         >
           <div className="flex justify-center">
             <Button
-              onClick={onGenerate}
+              onClick={() => {
+                trackWorkoutGeneration({ method: 'ai' });
+                onGenerate();
+              }}
               disabled={isGenerating}
               size="lg"
               className={`font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-200 ${

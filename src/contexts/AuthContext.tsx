@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { trackAuth } from "@/lib/analytics";
 
 interface AuthContextType {
   session: Session | null;
@@ -44,11 +45,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           title: "Welcome back!",
           description: "You are now signed in"
         });
+        trackAuth('login');
       } else if (event === 'SIGNED_OUT') {
         toast({
           title: "Signed out",
           description: "Come back soon!"
         });
+        trackAuth('logout');
       }
     });
 

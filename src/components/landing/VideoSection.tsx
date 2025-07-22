@@ -18,14 +18,10 @@ export const VideoSection = () => {
     <div className="relative w-full max-w-7xl mx-auto -mt-12 mb-24 px-4">
       <div className="relative rounded-xl overflow-hidden bg-card/30 backdrop-blur-sm border border-border">
         <div className="aspect-video relative">
-          <video
-            className="w-full h-full object-cover absolute inset-0"
-            src="https://ulnsvkrrdcmfiguibkpx.supabase.co/storage/v1/object/public/videos//S.D.mov"
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
+          {/* Video temporarily disabled - Supabase instance deleted */}
+          <div className="w-full h-full absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
+            <p className="text-white/80 text-lg">Demo video coming soon</p>
+          </div>
           <div className="absolute inset-0 bg-black/20 pointer-events-none" />
           <Button
             variant="ghost"

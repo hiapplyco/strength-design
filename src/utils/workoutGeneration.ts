@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+import { workoutQueries } from "@/lib/firebase/db";
+import { auth } from "@/lib/firebase/config";
 import type { Exercise } from "@/components/exercise-search/types";
 import type { WeatherData } from "@/types/weather";
 
@@ -49,67 +50,79 @@ const validateWorkoutDay = (
     }
   }
 
-  // Injury modifications validation
-  if (params.injuries && !day.notes?.toLowerCase().includes(params.injuries.toLowerCase())) {
-    throw new Error(`Day ${dayNumber} missing injury modifications`);
+  // Injury validation
+  if (params.injuries) {
+    const injuryKeywords = params.injuries.toLowerCase().split(/[,\s]+/);
+    const hasInjuryConsideration = injuryKeywords.some(keyword =>
+      day.description.toLowerCase().includes(keyword) ||
+      day.notes?.toLowerCase().includes(keyword) ||
+      day.workout.toLowerCase().includes("modify") ||
+      day.workout.toLowerCase().includes("alternative")
+    );
+    if (!hasInjuryConsideration) {
+      throw new Error(`Day ${dayNumber} doesn't account for injuries`);
+    }
   }
 
-  return true;
+  // Weather validation
+  if (params.weatherData) {
+    const hasWeatherConsideration = 
+      day.description.toLowerCase().includes("indoor") ||
+      day.description.toLowerCase().includes("outdoor") ||
+      day.description.toLowerCase().includes("weather") ||
+      day.description.toLowerCase().includes("rain") ||
+      day.description.toLowerCase().includes("cold") ||
+      day.description.toLowerCase().includes("hot");
+    if (!hasWeatherConsideration) {
+      throw new Error(`Day ${dayNumber} doesn't consider weather conditions`);
+    }
+  }
 };
 
-export const generateWorkout = async (params: WorkoutGenerationParams): Promise<WeeklyWorkouts> => {
-  console.log("Starting workout generation with params:", params);
-
-  const { data, error } = await supabase.functions.invoke<WeeklyWorkouts>('generate-weekly-workouts', {
-    body: params
-  });
-
-  console.log("Edge Function response:", { data, error });
-
-  if (error) {
-    console.error("Edge Function error:", error);
-    throw new Error(error.message || 'Failed to generate workouts');
+export const validateWeeklyWorkouts = (
+  workouts: WeeklyWorkouts | null,
+  params: WorkoutGenerationParams
+): WeeklyWorkouts => {
+  if (!workouts || typeof workouts !== 'object') {
+    throw new Error("Invalid workout structure");
   }
 
-  if (!data) {
-    console.error("No data received from Edge Function");
-    throw new Error("No workout data received");
-  }
-
-  // Validate that we have the correct number of days
   const expectedDays = Array.from({ length: params.numberOfDays }, (_, i) => `day${i + 1}`);
-  const missingDays = expectedDays.filter(day => !data[day]);
   
-  if (missingDays.length > 0) {
-    console.error("Missing days in response:", missingDays);
-    throw new Error(`Missing workouts for days: ${missingDays.join(', ')}`);
-  }
-
-  // Validate each day's content
-  Object.entries(data).forEach(([day, workout], index) => {
-    try {
-      validateWorkoutDay(workout, index + 1, params);
-    } catch (error) {
-      console.error(`Validation error for ${day}:`, error);
-      throw error;
+  expectedDays.forEach((dayKey, index) => {
+    if (!workouts[dayKey]) {
+      throw new Error(`Missing ${dayKey} in workout plan`);
     }
+    validateWorkoutDay(workouts[dayKey], index + 1, params);
   });
 
-  return data;
+  return workouts;
 };
 
 export const saveWorkoutNoAuth = async (workouts: WeeklyWorkouts) => {
   console.log("Saving workouts:", workouts);
   
-  const workoutPromises = Object.entries(workouts).map(([day, workout]) => {
-    return supabase.from('workouts').insert({
-      day,
-      warmup: workout.warmup,
-      workout: workout.workout,
-      notes: workout.notes,
-      strength: workout.strength,
-      description: workout.description
-    });
+  // Get current user
+  const user = auth.currentUser;
+  if (!user) {
+    console.error("No authenticated user found");
+    return false;
+  }
+
+  const workoutPromises = Object.entries(workouts).map(async ([day, workout]) => {
+    try {
+      await workoutQueries.createWorkout(user.uid, {
+        day,
+        warmup: workout.warmup,
+        workout: workout.workout,
+        notes: workout.notes,
+        strength: workout.strength,
+        description: workout.description
+      });
+    } catch (error) {
+      console.error(`Error saving workout for ${day}:`, error);
+      throw error;
+    }
   });
 
   try {

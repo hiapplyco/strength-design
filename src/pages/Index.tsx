@@ -8,6 +8,7 @@ import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { UpgradeCTASection } from "@/components/landing/UpgradeCTASection";
 import { TestimonialsCarousel } from "@/components/landing/TestimonialsCarousel";
 import { WorkoutUploadButton } from "@/components/workout-upload/WorkoutUploadButton";
+import { FirebaseDemo } from "@/components/FirebaseDemo";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -26,10 +27,15 @@ export default function Index() {
   return (
     <StandardPageLayout header={header} className="h-screen">
       <div className={`${width.full} ${layout.noOverflow} flex-1 min-h-0 ${spacing.container}`}>
-        {/* Workout Upload Section */}
+        {/* Firebase Demo - Remove this in production */}
         <div className={`${spacing.section} max-w-3xl mx-auto`}>
-          <WorkoutUploadButton />
+          <FirebaseDemo />
         </div>
+        
+        {/* Workout Upload Section - Temporarily disabled */}
+        {/* <div className={`${spacing.section} max-w-3xl mx-auto`}>
+          <WorkoutUploadButton />
+        </div> */}
 
         {/* Features Teaser */}
         <div className={`${spacing.section} text-center`}>

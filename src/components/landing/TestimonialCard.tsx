@@ -8,7 +8,7 @@ interface TestimonialCardProps {
   name: string;
   role: string;
   testimonial: string;
-  imagePath: string;
+  imagePath: string | null;
   fallbackInitials: string;
 }
 
@@ -43,11 +43,13 @@ export function TestimonialCard({ name, role, testimonial, imagePath, fallbackIn
         <div className="flex flex-col items-center space-y-3 mt-auto pt-4 border-t border-primary/10">
           <div className="relative">
             <Avatar className="w-20 h-20 ring-4 ring-primary/20 ring-offset-2 ring-offset-card transition-all duration-300 group-hover:ring-primary/40">
-              <AvatarImage 
-                src={imagePath}
-                alt={name}
-                className="object-cover"
-              />
+              {imagePath && (
+                <AvatarImage 
+                  src={imagePath}
+                  alt={name}
+                  className="object-cover"
+                />
+              )}
               <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-bold text-lg">
                 {fallbackInitials}
               </AvatarFallback>

@@ -2,9 +2,10 @@
 
 ## Project Overview
 
-Strength.Design is an AI-powered fitness platform that creates personalized workout plans through conversational interfaces. This guide provides essential development patterns, design system, and implementation standards for the project.
+Strength.Design is an AI-powered fitness platform that creates personalized workout plans through conversational interfaces. Built on Firebase's complete platform with Gemini AI integration.
 
-**Status**: Web platform complete, Mobile app development starting
+**Status**: Web platform complete with Firebase migration, Mobile app development starting  
+**Tech Stack**: React + TypeScript + Firebase (Auth, Firestore, Storage, Functions, AI Logic)
 
 ## Quick Start
 
@@ -21,7 +22,138 @@ npm run typecheck    # Type checking
 npm run lint         # Linting
 npm run test         # Testing
 npm run build        # Production build
+
+# Firebase deployment
+firebase deploy      # Deploy all services
+firebase deploy --only functions  # Deploy functions only
+firebase deploy --only firestore:rules  # Deploy Firestore rules
 ```
+
+## Firebase Stack
+
+### Overview
+The application is fully integrated with Firebase services for a complete serverless architecture.
+
+### 1. Firebase Authentication
+```typescript
+// Supported providers
+- Email/Password authentication
+- Google OAuth
+- Phone authentication (with reCAPTCHA)
+- Anonymous authentication
+
+// Implementation: src/hooks/firebase/useAuth.ts
+const { 
+  signIn, 
+  signUp, 
+  signInWithGoogle, 
+  signInWithPhone,
+  verifyPhoneCode,
+  setupPhoneRecaptcha 
+} = useFirebaseAuth();
+```
+
+**Phone Auth Setup**:
+1. Enable Phone provider in Firebase Console
+2. Add test numbers for development: `+1 555-555-5555` (code: `123456`)
+3. Component includes rate limiting (3 attempts/15 min)
+4. Invisible reCAPTCHA integration
+
+### 2. Firestore Database
+```typescript
+// Collections
+users/          # User profiles
+workouts/       # Workout templates
+chatSessions/   # AI chat sessions
+messages/       # Chat messages
+workoutSessions/  # Scheduled workouts
+nutritionLogs/  # Nutrition tracking
+
+// Security: firestore.rules
+- Authentication required for all operations
+- Users can only access their own data
+- Rate limiting on chat operations
+```
+
+### 3. Firebase Storage
+```typescript
+// Storage buckets
+workouts/       # Workout images and videos
+avatars/        # User profile pictures
+exercises/      # Exercise demonstration media
+
+// Security: storage.rules
+- Authenticated uploads only
+- File size limits: 10MB images, 100MB videos
+- Content type validation
+```
+
+### 4. Cloud Functions
+```typescript
+// Deployed functions (Node.js 20)
+chatWithGemini      # AI chat endpoint
+enhancedChat        # Advanced chat with context
+generateWorkout     # Workout generation
+generateWorkoutTitle    # Title generation
+generateWorkoutSummary  # Summary generation
+createCheckout      # Stripe checkout
+customerPortal      # Stripe portal
+stripeWebhook       # Payment webhooks
+
+// Local development
+cd functions && npm run serve
+```
+
+### 5. Firebase AI Logic (Gemini Integration)
+```typescript
+// Initialize AI with Gemini Developer API
+import { getAI, getGenerativeModel, GoogleAIBackend } from "firebase/ai";
+
+const ai = getAI(firebaseApp, { backend: new GoogleAIBackend() });
+const model = getGenerativeModel(ai, { model: "gemini-2.0-flash" });
+
+// Usage
+const result = await model.generateContent(prompt);
+const response = result.response.text();
+
+// Models available
+- gemini-2.0-flash (recommended)
+- gemini-1.5-pro
+- imagen-3 (for image generation)
+```
+
+**Important**: Gemini API keys are stored server-side only. Never expose them in client code.
+
+### 6. Environment Configuration
+```env
+# Required variables (.env.local)
+VITE_FIREBASE_API_KEY=your-api-key
+VITE_FIREBASE_AUTH_DOMAIN=your-auth-domain
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+VITE_FIREBASE_APP_ID=your-app-id
+
+# Functions environment (set via Firebase CLI)
+firebase functions:config:set gemini.api_key="your-key"
+firebase functions:config:set stripe.secret_key="your-key"
+firebase functions:config:set stripe.webhook_secret="your-secret"
+```
+
+### 7. Firebase Security Best Practices
+1. **App Check**: Enable for production to prevent abuse
+2. **Rules**: Strict Firestore and Storage rules enforced
+3. **Rate Limiting**: Implemented in functions and client
+4. **Authentication**: Required for all data operations
+5. **CORS**: Configured for allowed origins only
+
+### 8. Deployment Checklist
+- [ ] Ensure Blaze plan is active
+- [ ] All required APIs enabled
+- [ ] Environment variables configured
+- [ ] Security rules tested
+- [ ] Functions deployed successfully
+- [ ] App Check enabled (production)
 
 ## Design System
 
@@ -320,5 +452,5 @@ PERPLEXITY_API_KEY=your-key  # In Supabase edge functions
 
 ---
 
-*Version: 5.0 - Consolidated Guide*
-*Last Updated: December 2024*
+*Version: 6.0 - Firebase Stack Integration*
+*Last Updated: January 2025*

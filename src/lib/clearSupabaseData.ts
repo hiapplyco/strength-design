@@ -7,7 +7,7 @@ export function clearSupabaseData() {
   
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && (key.includes('supabase') || key.includes('sb-') || key.includes('ulnsvkrrdcmfiguibkpx'))) {
+    if (key && (key.includes('supabase') || key.includes('sb-'))) {
       keysToRemove.push(key);
     }
   }
@@ -21,7 +21,7 @@ export function clearSupabaseData() {
   const sessionKeysToRemove: string[] = [];
   for (let i = 0; i < sessionStorage.length; i++) {
     const key = sessionStorage.key(i);
-    if (key && (key.includes('supabase') || key.includes('sb-') || key.includes('ulnsvkrrdcmfiguibkpx'))) {
+    if (key && (key.includes('supabase') || key.includes('sb-'))) {
       sessionKeysToRemove.push(key);
     }
   }

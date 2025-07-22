@@ -1,4 +1,4 @@
-import * as cors from "cors";
+import cors from "cors";
 
 // CORS configuration for Firebase Functions
 export const corsHandler = cors({

@@ -1,6 +1,7 @@
 export { NutritionSettingsDialog } from './NutritionSettingsDialog.firebase';
 
-/* Original Supabase version - kept for reference during migration
+/* Original Supabase version - kept for reference during migration */
+/*
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -562,4 +563,4 @@ export function NutritionSettingsDialog({ open, onOpenChange }: NutritionSetting
       </DialogContent>
     </Dialog>
   );
-}
+}*/

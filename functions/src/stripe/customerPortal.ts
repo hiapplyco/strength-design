@@ -119,7 +119,6 @@ export const customerPortal = functions.https.onRequest(async (req, res) => {
 
       res.status(200).json({ url: portalSession.url });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
       logStep("ERROR", { message: "Unexpected error occurred" });
 
       res.status(500).json({ error: "Service temporarily unavailable" });

@@ -14,28 +14,28 @@ const testimonials = [
     name: "Hart",
     role: "Bodybuilder",
     testimonial: "The AI workout generation completely transformed my training. It creates personalized muscle-building routines that adapt to my strength gains and recovery needs. I've seen incredible results in just 3 months.",
-    imagePath: null, // Removed Supabase URL
+    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fbodybuilding.png?alt=media",
     fallbackInitials: "HA"
   },
   {
     name: "Christine",
     role: "Swimmer",
     testimonial: "The nutrition tracking feature is a game-changer for my performance. It perfectly balances my macros for endurance training and helps me fuel my body for those long training sessions.",
-    imagePath: null, // Removed Supabase URL
+    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fswimming.png?alt=media",
     fallbackInitials: "CH"
   },
   {
     name: "Georgia",
     role: "Yogi",
     testimonial: "I love the journaling feature combined with mindful movement routines. It helps me track my flexibility progress and mental wellness journey. The app truly understands the mind-body connection.",
-    imagePath: null, // Removed Supabase URL
+    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fyogi.png?alt=media",
     fallbackInitials: "GE"
   },
   {
     name: "Chad",
     role: "CrossFit Athlete",
     testimonial: "Being able to monetize my expertise through the platform is incredible. I create custom CrossFit programs and sell them to my community. It's turned my passion into a thriving business.",
-    imagePath: null, // Removed Supabase URL
+    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fcrossfit.png?alt=media",
     fallbackInitials: "CH"
   }
 ];

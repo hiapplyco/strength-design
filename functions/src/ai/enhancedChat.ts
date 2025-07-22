@@ -43,10 +43,27 @@ export const enhancedChat = functions
         const db = admin.firestore();
         
         // Initialize or get chat session
-        let chatSession;
+        interface ChatSession {
+          id: string;
+          user_id: string;
+          session_type: string;
+          uploaded_files: string[];
+          created_at: admin.firestore.FieldValue;
+          message_count: number;
+        }
+        
+        let chatSession: ChatSession;
         if (sessionId) {
           const sessionDoc = await db.collection('chat_sessions').doc(sessionId).get();
-          chatSession = { id: sessionDoc.id, ...sessionDoc.data() };
+          const sessionData = sessionDoc.data() || {};
+          chatSession = { 
+            id: sessionDoc.id, 
+            user_id: sessionData.user_id || userId,
+            session_type: sessionData.session_type || sessionType,
+            uploaded_files: sessionData.uploaded_files || [],
+            created_at: sessionData.created_at || admin.firestore.FieldValue.serverTimestamp(),
+            message_count: sessionData.message_count || 0
+          };
         } else {
           // Create new session
           const newSession = {
@@ -120,16 +137,27 @@ Instructions:
 
         // Initialize Gemini model
         const model = genAI.getGenerativeModel({ 
-          model: "gemini-2.0-flash-latest",
-          systemInstruction: systemPrompt
+          model: "gemini-2.0-flash-latest"
         });
 
-        // Build conversation history
-        const chat = model.startChat({
-          history: history.map((msg: any) => ({
+        // Build conversation history with system instruction
+        const conversationHistory = [
+          {
+            role: 'user',
+            parts: [{ text: systemPrompt }]
+          },
+          {
+            role: 'model',
+            parts: [{ text: 'I understand. I will act as your expert AI fitness and nutrition coach with access to your complete fitness journey data.' }]
+          },
+          ...history.map((msg: any) => ({
             role: msg.role === 'user' ? 'user' : 'model',
             parts: [{ text: msg.content }]
           }))
+        ];
+        
+        const chat = model.startChat({
+          history: conversationHistory
         });
 
         // Send message and get response

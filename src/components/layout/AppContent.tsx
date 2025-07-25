@@ -1,7 +1,7 @@
 
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { useAuth } from "@/contexts/AuthContext";
+import { useFirebaseAuth } from "@/providers/FirebaseAuthProvider";
 import { LoadingSpinner } from "./app-content/LoadingSpinner";
 import { MainRoutes } from "./app-content/MainRoutes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -41,7 +41,7 @@ const MainContent = () => {
 
 export const AppContent = () => {
   const handleConsoleError = useErrorHandler();
-  const { isLoading } = useAuth();
+  const { loading: isLoading } = useFirebaseAuth();
 
   useEffect(() => {
     window.addEventListener('error', handleConsoleError);

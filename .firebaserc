@@ -1,6 +1,7 @@
 {
   "projects": {
-    "prod": "strength-design"
+    "prod": "strength-design",
+    "default": "strength-design"
   },
   "targets": {},
   "etags": {}

@@ -7,3 +7,4 @@ admin.initializeApp();
 export * from "./stripe";
 export * from "./ai";
 export * from "./utils";
+export * from "./payments";

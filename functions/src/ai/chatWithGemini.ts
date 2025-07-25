@@ -1,9 +1,15 @@
 import * as functions from "firebase-functions";
+import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { corsHandler } from "../shared/cors";
 
-export const chatWithGemini = functions.https.onRequest(async (req, res) => {
+// Define the secret
+const geminiApiKey = defineSecret("GEMINI_API_KEY");
+
+export const chatWithGemini = functions
+  .runWith({ secrets: [geminiApiKey] })
+  .https.onRequest(async (req, res) => {
   // Handle CORS
   corsHandler(req, res, async () => {
     if (req.method !== "POST") {
@@ -12,14 +18,14 @@ export const chatWithGemini = functions.https.onRequest(async (req, res) => {
     }
 
     try {
-      const geminiApiKey = functions.config().gemini?.api_key;
-      if (!geminiApiKey) {
+      const apiKey = geminiApiKey.value();
+      if (!apiKey) {
         console.error("GEMINI_API_KEY not configured");
         res.status(500).json({ error: "Service configuration error" });
         return;
       }
 
-      const genAI = new GoogleGenerativeAI(geminiApiKey);
+      const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const { message, history = [], fileUrl, systemPrompt } = req.body;

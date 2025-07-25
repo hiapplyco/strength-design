@@ -66,14 +66,6 @@ export const EnhancedWeatherSearchDialog: React.FC<EnhancedWeatherSearchDialogPr
             <Search className="h-5 w-5 text-primary" />
             Search Weather Location
           </DialogTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-4 top-4"
-            onClick={handleClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
         
         <div className="space-y-4">

@@ -1,16 +1,17 @@
 import * as functions from "firebase-functions";
+import { defineSecret } from "firebase-functions/params";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { corsHandler } from "../shared/cors";
 import { createWorkoutGenerationPrompt } from "../shared/prompts";
 
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(functions.config().gemini?.api_key || '');
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-latest" });
+// Define the secret
+const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
 export const generateWorkout = functions
   .runWith({
     timeoutSeconds: 540,
-    memory: "1GB"
+    memory: "1GB",
+    secrets: [geminiApiKey]
   })
   .https.onRequest(async (req, res) => {
     corsHandler(req, res, async () => {
@@ -23,6 +24,16 @@ export const generateWorkout = functions
         console.log('Starting workout generation...');
         const params = req.body;
         console.log('Received params:', JSON.stringify(params, null, 2));
+
+        // Initialize Gemini API with secret
+        const apiKey = geminiApiKey.value();
+        if (!apiKey) {
+          console.error("GEMINI_API_KEY not configured");
+          res.status(500).json({ error: "Service configuration error" });
+          return;
+        }
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-latest" });
 
         // Validate and process all input parameters
         const processedParams = {

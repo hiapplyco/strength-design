@@ -14,28 +14,28 @@ const testimonials = [
     name: "Hart",
     role: "Bodybuilder",
     testimonial: "The AI workout generation completely transformed my training. It creates personalized muscle-building routines that adapt to my strength gains and recovery needs. I've seen incredible results in just 3 months.",
-    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fbodybuilding.png?alt=media",
+    imagePath: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&h=400&fit=crop",
     fallbackInitials: "HA"
   },
   {
     name: "Christine",
     role: "Swimmer",
     testimonial: "The nutrition tracking feature is a game-changer for my performance. It perfectly balances my macros for endurance training and helps me fuel my body for those long training sessions.",
-    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fswimming.png?alt=media",
+    imagePath: "https://images.unsplash.com/photo-1530021232320-687d8e3dba54?w=400&h=400&fit=crop",
     fallbackInitials: "CH"
   },
   {
     name: "Georgia",
     role: "Yogi",
     testimonial: "I love the journaling feature combined with mindful movement routines. It helps me track my flexibility progress and mental wellness journey. The app truly understands the mind-body connection.",
-    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fyogi.png?alt=media",
+    imagePath: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=400&fit=crop",
     fallbackInitials: "GE"
   },
   {
     name: "Chad",
     role: "CrossFit Athlete",
     testimonial: "Being able to monetize my expertise through the platform is incredible. I create custom CrossFit programs and sell them to my community. It's turned my passion into a thriving business.",
-    imagePath: "https://firebasestorage.googleapis.com/v0/b/strength-design.firebasestorage.app/o/testimonials%2Fcrossfit.png?alt=media",
+    imagePath: "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=400&h=400&fit=crop",
     fallbackInitials: "CH"
   }
 ];

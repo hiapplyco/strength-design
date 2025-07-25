@@ -1,15 +1,17 @@
 import * as functions from "firebase-functions";
+import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { corsHandler } from "../shared/cors";
 
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(functions.config().gemini?.api_key || '');
+// Define the secret
+const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
 export const enhancedChat = functions
   .runWith({
     timeoutSeconds: 300,
-    memory: "1GB"
+    memory: "1GB",
+    secrets: [geminiApiKey]
   })
   .https.onRequest(async (req, res) => {
     corsHandler(req, res, async () => {
@@ -39,6 +41,15 @@ export const enhancedChat = functions
         } = req.body;
 
         console.log(`Enhanced chat - User: ${userId}, Session: ${sessionId}`);
+
+        // Initialize Gemini API with secret
+        const apiKey = geminiApiKey.value();
+        if (!apiKey) {
+          console.error("GEMINI_API_KEY not configured");
+          res.status(500).json({ error: "Service configuration error" });
+          return;
+        }
+        const genAI = new GoogleGenerativeAI(apiKey);
 
         const db = admin.firestore();
         

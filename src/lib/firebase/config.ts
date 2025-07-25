@@ -1,8 +1,8 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getFunctions } from 'firebase/functions';
+import { getAuth, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getAnalytics } from 'firebase/analytics';
 import './initialize';
 
@@ -26,11 +26,57 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
 
+// Connect to emulators in development - must be synchronous before any service usage
+if (import.meta.env.DEV) {
+  // Track if emulators are already connected
+  const isEmulatorConnected = (service: any) => {
+    return service._delegate?._settings?.host?.includes('localhost') || 
+           service._settings?.host?.includes('localhost') ||
+           service.emulatorConfig !== undefined;
+  };
+
+  try {
+    if (!isEmulatorConnected(auth)) {
+      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+      console.log('Connected to Auth emulator');
+    }
+  } catch (error) {
+    console.warn('Auth emulator connection failed:', error);
+  }
+
+  try {
+    if (!isEmulatorConnected(db)) {
+      connectFirestoreEmulator(db, 'localhost', 8080);
+      console.log('Connected to Firestore emulator');
+    }
+  } catch (error) {
+    console.warn('Firestore emulator connection failed:', error);
+  }
+
+  try {
+    if (!isEmulatorConnected(storage)) {
+      connectStorageEmulator(storage, 'localhost', 9199);
+      console.log('Connected to Storage emulator');
+    }
+  } catch (error) {
+    console.warn('Storage emulator connection failed:', error);
+  }
+
+  try {
+    if (!isEmulatorConnected(functions)) {
+      connectFunctionsEmulator(functions, 'localhost', 5001);
+      console.log('Connected to Functions emulator');
+    }
+  } catch (error) {
+    console.warn('Functions emulator connection failed:', error);
+  }
+}
+
 // Initialize Analytics (client-side only)
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
-// Enable Firestore offline persistence
-if (typeof window !== 'undefined') {
+// Enable Firestore offline persistence (only in production)
+if (typeof window !== 'undefined' && !import.meta.env.DEV) {
   import('firebase/firestore').then(({ enableIndexedDbPersistence }) => {
     enableIndexedDbPersistence(db).catch((err) => {
       if (err.code === 'failed-precondition') {

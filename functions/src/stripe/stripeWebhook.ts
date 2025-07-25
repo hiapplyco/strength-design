@@ -1,28 +1,35 @@
 import * as functions from "firebase-functions";
+import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 
-export const stripeWebhook = functions.https.onRequest(async (req, res) => {
+// Define the secrets
+const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
+const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
+
+export const stripeWebhook = functions
+  .runWith({ secrets: [stripeSecretKey, stripeWebhookSecret] })
+  .https.onRequest(async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).send("Method Not Allowed");
     return;
   }
 
-  const stripeWebhookSecret = functions.config().stripe?.webhook_secret;
-  if (!stripeWebhookSecret) {
+  const webhookSecret = stripeWebhookSecret.value();
+  if (!webhookSecret) {
     console.error("STRIPE_WEBHOOK_SECRET not set");
     res.status(500).json({ error: "Configuration error" });
     return;
   }
 
-  const stripeKey = functions.config().stripe?.secret_key;
-  if (!stripeKey) {
+  const secretKey = stripeSecretKey.value();
+  if (!secretKey) {
     console.error("STRIPE_SECRET_KEY not set");
     res.status(500).json({ error: "Configuration error" });
     return;
   }
 
-  const stripe = new Stripe(stripeKey, {
+  const stripe = new Stripe(secretKey, {
     apiVersion: "2023-10-16",
   });
 
@@ -37,7 +44,7 @@ export const stripeWebhook = functions.https.onRequest(async (req, res) => {
     const event = stripe.webhooks.constructEvent(
       req.rawBody,
       signature,
-      stripeWebhookSecret
+      webhookSecret
     );
 
     console.log(`Received Stripe webhook: ${event.type}`);

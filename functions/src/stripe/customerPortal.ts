@@ -1,7 +1,11 @@
 import * as functions from "firebase-functions";
+import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 import { corsHandler } from "../shared/cors";
+
+// Define the secret
+const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 
 const logStep = (step: string, details?: any) => {
   // Sanitize logs - don't log sensitive data
@@ -15,7 +19,9 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
 };
 
-export const customerPortal = functions.https.onRequest(async (req, res) => {
+export const customerPortal = functions
+  .runWith({ secrets: [stripeSecretKey] })
+  .https.onRequest(async (req, res) => {
   // Handle CORS
   corsHandler(req, res, async () => {
     if (req.method !== "POST") {
@@ -27,8 +33,8 @@ export const customerPortal = functions.https.onRequest(async (req, res) => {
       logStep("Function started");
 
       // Validate Stripe configuration
-      const stripeKey = functions.config().stripe?.secret_key;
-      if (!stripeKey) {
+      const secretKey = stripeSecretKey.value();
+      if (!secretKey) {
         logStep("ERROR: Missing Stripe secret key");
         res.status(500).json({ error: "Service configuration error" });
         return;
@@ -80,7 +86,7 @@ export const customerPortal = functions.https.onRequest(async (req, res) => {
         return;
       }
 
-      const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+      const stripe = new Stripe(secretKey, { apiVersion: "2023-10-16" });
 
       // Find customer
       const customers = await stripe.customers.list({

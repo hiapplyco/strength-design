@@ -98,9 +98,10 @@ export function DocumentPublishing({ className }: DocumentPublishingProps) {
           {publishingMessages.map((_, index) => (
             <motion.div
               key={index}
-              className="w-2 h-2 rounded-full bg-primary/30"
+              className={`w-2 h-2 rounded-full ${
+                index === messageIndex ? 'bg-primary' : 'bg-primary/30'
+              }`}
               animate={{
-                backgroundColor: index === messageIndex ? "hsl(var(--primary))" : "hsl(var(--primary) / 0.3)",
                 scale: index === messageIndex ? 1.5 : 1
               }}
               transition={{ duration: 0.3 }}

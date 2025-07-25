@@ -71,15 +71,19 @@ export class WorkoutGenerationService {
   }
 
   private async checkWorkoutLimits(user: User, idToken: string) {
-    // Check subscription status
-    const checkSubscription = httpsCallable(this.functions, 'checkSubscription');
-    const subscriptionResult = await checkSubscription();
-    const subscriptionData = subscriptionResult.data as any;
-    const isSubscribed = subscriptionData?.subscribed || false;
+    try {
+      // Check subscription status
+      const checkSubscription = httpsCallable(this.functions, 'checkSubscription');
+      const subscriptionResult = await checkSubscription();
+      const subscriptionData = subscriptionResult.data as any;
+      const isSubscribed = subscriptionData?.subscribed || false;
 
-    // If user is subscribed, they can generate unlimited workouts
-    if (isSubscribed) {
-      return;
+      // If user is subscribed, they can generate unlimited workouts
+      if (isSubscribed) {
+        return;
+      }
+    } catch (error) {
+      console.warn('Failed to check subscription status, proceeding with free tier check:', error);
     }
 
     // Check free workout usage from user profile
@@ -87,8 +91,13 @@ export class WorkoutGenerationService {
     const profileSnap = await getDoc(profileRef);
     
     if (!profileSnap.exists()) {
-      console.error('User profile not found');
-      throw new Error('Failed to check workout usage limits');
+      // Create profile if it doesn't exist
+      await setDoc(profileRef, {
+        free_workouts_used: 0,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+      });
+      return;
     }
 
     const profile = profileSnap.data();
@@ -100,11 +109,17 @@ export class WorkoutGenerationService {
   }
 
   private async incrementWorkoutUsage(user: User, idToken: string) {
-    // Check subscription status again
-    const checkSubscription = httpsCallable(this.functions, 'checkSubscription');
-    const subscriptionResult = await checkSubscription();
-    const subscriptionData = subscriptionResult.data as any;
-    const isSubscribed = subscriptionData?.subscribed || false;
+    let isSubscribed = false;
+    
+    try {
+      // Check subscription status again
+      const checkSubscription = httpsCallable(this.functions, 'checkSubscription');
+      const subscriptionResult = await checkSubscription();
+      const subscriptionData = subscriptionResult.data as any;
+      isSubscribed = subscriptionData?.subscribed || false;
+    } catch (error) {
+      console.warn('Failed to check subscription status, treating as free user:', error);
+    }
 
     // Only increment usage for non-subscribed users
     if (!isSubscribed) {
@@ -112,7 +127,12 @@ export class WorkoutGenerationService {
       const profileSnap = await getDoc(profileRef);
       
       if (!profileSnap.exists()) {
-        console.error('User profile not found');
+        // Create profile if it doesn't exist
+        await setDoc(profileRef, {
+          free_workouts_used: 1,
+          created_at: serverTimestamp(),
+          updated_at: serverTimestamp()
+        });
         return;
       }
 

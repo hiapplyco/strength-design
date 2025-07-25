@@ -1,11 +1,17 @@
 import * as functions from "firebase-functions";
+import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 import { corsHandler } from "../shared/cors";
 
+// Define the secret
+const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
+
 const PRICE_ID = "price_1QjidsC3HTLX6YIcMQZNNZjb"; // Pro Program $24.99/mo
 
-export const createCheckout = functions.https.onRequest(async (req, res) => {
+export const createCheckout = functions
+  .runWith({ secrets: [stripeSecretKey] })
+  .https.onRequest(async (req, res) => {
   // Handle CORS
   corsHandler(req, res, async () => {
     if (req.method !== "POST") {
@@ -15,14 +21,14 @@ export const createCheckout = functions.https.onRequest(async (req, res) => {
 
     try {
       // Validate Stripe configuration
-      const stripeKey = functions.config().stripe?.secret_key;
-      if (!stripeKey) {
+      const secretKey = stripeSecretKey.value();
+      if (!secretKey) {
         console.error("Missing Stripe secret key");
         res.status(500).json({ error: "Service configuration error" });
         return;
       }
 
-      const stripe = new Stripe(stripeKey, {
+      const stripe = new Stripe(secretKey, {
         apiVersion: "2023-10-16",
       });
 

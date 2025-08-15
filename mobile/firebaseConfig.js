@@ -22,7 +22,7 @@ import { Platform } from 'react-native';
 
 // --- Use your computer's IP address for emulators ---
 // Make sure your phone and computer are on the same Wi-Fi network.
-const USE_EMULATORS = true; // Enable emulators for development
+const USE_EMULATORS = false; // Disabled - using production Firebase
 // Use localhost for iOS simulator, actual IP for physical devices
 const EMULATOR_HOST = (Platform.OS === 'web' || Platform.OS === 'ios') ? 'localhost' : '192.168.86.26'; 
 

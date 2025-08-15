@@ -1,243 +1,405 @@
 # Auto Execute and Implement Requirements
 
 ## Purpose
-Automate the implementation of requirements in Claude Code with structured planning, execution, and validation phases.
+Automate the implementation of requirements in Claude Code with structured planning, execution, and validation phases using the new consolidated documentation structure.
+
+## 📚 Documentation Structure Reference
+
+### Primary Documentation Hub
+```
+docs/
+├── README.md                    # Master navigation and quick start
+├── project-management/          # Current tasks and tracking
+│   ├── PROJECT_STATUS.md       # Project overview and status
+│   ├── MASTER_TRACKING.md      # Sprint tracking and metrics
+│   └── ROADMAP.md              # Product roadmap and milestones
+├── architecture/                # System design and technical decisions
+│   ├── ARCHITECTURE_OVERVIEW.md # Complete system architecture
+│   └── DATABASE_SCHEMA.md      # Data models and relationships
+├── development/                 # Development guides and standards
+│   ├── DEVELOPMENT_GUIDE.md    # Core development principles
+│   └── CLAUDE_GUIDE.md         # AI assistant guidelines
+├── features/                    # Feature documentation
+│   └── FEATURE_MATRIX.md       # Complete feature inventory
+├── design/                      # Design system and UI/UX
+│   ├── GLASSMORPHISM_SYSTEM.md # Glass morphism implementation
+│   └── MOBILE_REDESIGN_2025.md # Premium mobile design spec
+├── platforms/                   # Platform-specific docs
+│   ├── web/                    # Web application
+│   └── mobile/                 # Mobile application
+├── infrastructure/              # Backend and deployment
+│   ├── FIREBASE_SETUP.md       # Firebase configuration
+│   └── TWILIO_PHONE_AUTH.md    # Phone auth implementation
+└── integrations/               # Third-party services
+```
 
 ## Agent Instructions
 
 ### Phase 1: Planning & Analysis (10-15% time)
 
-#### 1.1 Project Setup
+#### 1.1 Project Setup with Context
 - **Assign Project Name**: Use PascalCase format (e.g., `VideoAIIntegration`, `PaymentSystemRefactor`)
-- **Create Requirements Doc**: `docs/Reqs_{ProjectName}.md`
-- **Use Agent**: `strategic-planner` subagent for comprehensive planning
+- **Create Requirements Doc**: `docs/features/Reqs_{ProjectName}.md`
+- **Reference Core Documentation**: 
+  ```bash
+  # Always check these first
+  docs/project-management/MASTER_TRACKING.md  # Current sprint goals
+  docs/features/FEATURE_MATRIX.md             # Existing implementations
+  docs/development/CLAUDE_GUIDE.md            # Development standards
+  docs/architecture/ARCHITECTURE_OVERVIEW.md  # System design
+  ```
 
-#### 1.2 Requirements Analysis
+#### 1.2 Dynamic Agent Creation
 ```markdown
-Read and analyze:
-1. User requirements (explicit and implicit)
-2. Existing codebase structure
-3. Dependencies and integrations
-4. Potential conflicts or breaking changes
+## Create Specialized Agents as Needed
+
+### Assessment Criteria:
+1. Task complexity and domain specificity
+2. Required expertise and tools
+3. Performance optimization needs
+4. Testing and validation requirements
+
+### Dynamic Agent Templates:
+
+**For Architecture & Design:**
+- Agent: `architecture-analyzer`
+- Purpose: System design analysis and recommendations
+- Tools: Read, Grep, architectural pattern analysis
+- Reference: docs/architecture/
+
+**For Testing & Quality:**
+- Agent: `test-generator`
+- Purpose: Comprehensive test creation and validation
+- Tools: Testing frameworks, coverage analysis
+- Reference: docs/development/DEVELOPMENT_GUIDE.md
+
+**For Performance:**
+- Agent: `performance-optimizer`
+- Purpose: Code optimization and bundle analysis
+- Tools: Profiling, bundle analyzers, metrics
+- Reference: docs/analytics/
+
+**For Security:**
+- Agent: `security-auditor`
+- Purpose: Security review and vulnerability scanning
+- Tools: Security scanners, best practices validation
+- Reference: Security sections in docs/development/
+
+**For Documentation:**
+- Agent: `documentation-writer`
+- Purpose: Technical documentation and API specs
+- Tools: Markdown generation, diagram creation
+- Reference: docs/README.md structure
+
+**Custom Feature Agents:**
+Create domain-specific agents for:
+- Payment processing
+- AI/ML integration
+- Real-time features
+- Mobile-specific features
+- Data migration
 ```
 
-#### 1.3 Task Breakdown
+#### 1.3 Requirements Analysis with Documentation
+```markdown
+Read and analyze from organized docs:
+1. User requirements + docs/project-management/ROADMAP.md alignment
+2. Architecture constraints from docs/architecture/
+3. Platform requirements from docs/platforms/{web|mobile}/
+4. Integration needs from docs/integrations/
+5. Design requirements from docs/design/
+6. Feature conflicts from docs/features/FEATURE_MATRIX.md
+```
+
+#### 1.4 Enhanced Task Breakdown
+```markdown
 Create TodoWrite list with:
-- Clear, actionable items (max 10-15 words each)
-- Priority levels (P0: Critical, P1: High, P2: Medium)
-- Estimated time per task
-- Dependencies between tasks
+- Clear items linked to documentation sections
+- Priority from docs/project-management/MASTER_TRACKING.md
+- Dependencies from docs/architecture/
+- Feature status from docs/features/FEATURE_MATRIX.md
+
+Example:
+- [ ] P0: Implement auth flow (ref: docs/infrastructure/FIREBASE_SETUP.md)
+- [ ] P1: Add UI components (ref: docs/design/GLASSMORPHISM_SYSTEM.md)
+- [ ] P2: Update tests (ref: docs/development/DEVELOPMENT_GUIDE.md)
+```
 
 ### Phase 2: Implementation (70-75% time)
 
-#### 2.1 Pre-Implementation Checks
+#### 2.1 Pre-Implementation Checks with Context
 ```bash
-# Always run before starting
-git status                    # Check for uncommitted changes
-npm test                      # Ensure tests pass
-npm run typecheck            # Verify TypeScript
-npm run lint                 # Check code quality
+# Check project status
+cat docs/project-management/PROJECT_STATUS.md | head -20
+
+# Verify current sprint goals
+grep -A 10 "Current Sprint" docs/project-management/MASTER_TRACKING.md
+
+# Check for related features
+grep -i "{feature_name}" docs/features/FEATURE_MATRIX.md
+
+# Standard checks
+git status
+npm test
+npm run typecheck
+npm run lint
 ```
 
-#### 2.2 Implementation Strategy
-- **Use Agent**: `software-e-todo` subagent for code implementation
-- **Follow Pattern**: Read → Plan → Implement → Verify
-- **File Operations**:
-  - ALWAYS read files before editing
-  - Prefer `MultiEdit` for multiple changes
-  - Use `Edit` with `replace_all` for refactoring
-  - Create new files ONLY when necessary
+#### 2.2 Enhanced Implementation Strategy
+- **Use Appropriate Agent**: 
+  - `general-purpose` for standard features
+  - Create custom agents for specialized domains
+  - Use multiple agents concurrently when possible
+  
+- **Follow Documentation Pattern**:
+  ```
+  1. Read docs/development/CLAUDE_GUIDE.md for standards
+  2. Check docs/architecture/ for system constraints
+  3. Review docs/features/ for existing patterns
+  4. Implement following docs/development/DEVELOPMENT_GUIDE.md
+  5. Validate against docs/project-management/MASTER_TRACKING.md goals
+  ```
 
-#### 2.3 Code Quality Standards
+#### 2.3 Code Quality Standards from Documentation
 ```typescript
-// Production-ready patterns
-try {
-  // Operation with logging
-  logger.info('Starting operation', { context });
-  const result = await operation();
-  logger.info('Success', { result });
-  return result;
-} catch (error) {
-  logger.error('Failed', { error, context });
-  // User-friendly error
-  throw new UserError('Unable to complete. Please try again.');
+// Follow patterns from docs/development/DEVELOPMENT_GUIDE.md
+// Reference: Production Code Patterns section
+
+import { logger } from '@/lib/logger';
+import { analytics } from '@/lib/analytics';
+
+export async function implementFeature(params: FeatureParams) {
+  // Start with logging (ref: docs/development/DEVELOPMENT_GUIDE.md#logging)
+  logger.info('Starting feature implementation', { 
+    feature: 'FeatureName',
+    params,
+    sprint: 'Current Sprint from MASTER_TRACKING.md'
+  });
+  
+  try {
+    // Implementation following architecture patterns
+    const result = await operation(params);
+    
+    // Track success (ref: docs/analytics/)
+    analytics.track('feature_success', {
+      feature: 'FeatureName',
+      duration: Date.now() - startTime
+    });
+    
+    return { success: true, data: result };
+  } catch (error) {
+    // Error handling per CLAUDE_GUIDE.md
+    logger.error('Feature implementation failed', { error, params });
+    
+    // User-friendly error
+    throw new UserError('Unable to complete action. Please try again.');
+  }
 }
 ```
 
 ### Phase 3: Testing & Validation (10-15% time)
 
-#### 3.1 Testing Protocol
-- **Use Agent**: `e2e-testing-export` for comprehensive testing
-- **Test Types**:
-  1. Unit tests for new functions
+#### 3.1 Testing Protocol with Documentation
+- **Create Test Agent**: `test-validator` with access to test patterns
+- **Test Requirements from docs/development/DEVELOPMENT_GUIDE.md**:
+  1. Unit tests (>80% coverage for new code)
   2. Integration tests for API changes
-  3. E2E tests for user flows
-  4. Manual testing for UI changes
+  3. E2E tests for critical user flows
+  4. Performance tests against metrics in docs/analytics/
 
-#### 3.2 Validation Checklist
+#### 3.2 Enhanced Validation Checklist
 ```markdown
-- [ ] All TodoWrite items completed
-- [ ] No console errors in development
-- [ ] Tests passing (unit, integration, E2E)
-- [ ] TypeScript compilation successful
-- [ ] Linting rules satisfied
-- [ ] Performance metrics maintained
-- [ ] Accessibility standards met
+## Validation Against Documentation
+
+### Feature Checklist (docs/features/FEATURE_MATRIX.md):
+- [ ] Feature implemented as specified
+- [ ] Platform compatibility verified (web/mobile)
+- [ ] Integration points tested
+
+### Architecture Checklist (docs/architecture/):
+- [ ] Follows system architecture patterns
+- [ ] Database schema compliance
+- [ ] API contracts maintained
+
+### Development Standards (docs/development/):
+- [ ] Code quality standards met
+- [ ] Error handling implemented
+- [ ] Logging added appropriately
+- [ ] TypeScript types complete
+
+### Design Requirements (docs/design/):
+- [ ] UI follows design system
+- [ ] Responsive design verified
+- [ ] Accessibility standards met (WCAG 2.1 AA)
+
+### Performance Metrics (docs/analytics/):
+- [ ] Response time < 200ms
+- [ ] Bundle size within limits
+- [ ] Memory usage acceptable
 ```
 
 ### Phase 4: Documentation & Cleanup (5% time)
 
-#### 4.1 Documentation Updates
-- Update `MASTER_TRACKING.md` with changes
-- Update component-specific `CLAUDE.md` if exists
-- Add inline comments for complex logic
-- Update API documentation if changed
-
-#### 4.2 Project Summary
-Generate `docs/Summary_{ProjectName}.md` containing:
+#### 4.1 Comprehensive Documentation Updates
 ```markdown
-## Implementation Summary
-- **Date**: [Date]
-- **Duration**: [Time spent]
-- **Files Modified**: [Count and list]
-- **Tests Added**: [Count]
-- **Breaking Changes**: [Yes/No, details]
+## Update All Relevant Documentation
 
-## Key Changes
-1. [Feature/Fix description]
-2. [Technical implementation details]
-3. [Impact on existing functionality]
+1. **Project Management** (docs/project-management/)
+   - Update MASTER_TRACKING.md with completed tasks
+   - Update PROJECT_STATUS.md if major feature
+   - Check off items in ROADMAP.md if applicable
 
-## Testing Results
-- Unit Tests: [Pass/Fail count]
-- Integration Tests: [Pass/Fail count]
-- E2E Tests: [Pass/Fail count]
-- Manual Testing: [Checklist completed]
+2. **Feature Documentation** (docs/features/)
+   - Update FEATURE_MATRIX.md with new feature status
+   - Create feature-specific doc if complex
+   - Update implementation notes
 
-## Next Steps
-- [Follow-up tasks if any]
-- [Monitoring requirements]
-- [Documentation needs]
+3. **Architecture** (docs/architecture/)
+   - Update diagrams if structure changed
+   - Document new patterns introduced
+   - Update API documentation
+
+4. **Platform Specific** (docs/platforms/)
+   - Update platform-specific guides
+   - Document any platform limitations
+   - Add deployment notes
 ```
 
-#### 4.3 Cleanup
-```bash
-# Clean temporary files
-rm -rf *.tmp *.log
-# Archive logs if needed
-mkdir -p logs/archive
-mv *.log logs/archive/
-# Update git
-git add -A
-git status
+#### 4.2 Enhanced Project Summary
+Generate `docs/features/Summary_{ProjectName}.md`:
+```markdown
+# {ProjectName} Implementation Summary
+
+## Overview
+- **Date**: {Date}
+- **Sprint**: {From MASTER_TRACKING.md}
+- **Duration**: {Time spent}
+- **Documentation Updated**: {List of updated docs}
+
+## Implementation Details
+
+### Requirements Source
+- User Story: {Reference}
+- Documentation: {Links to relevant docs}
+- Feature Matrix Entry: {Link to FEATURE_MATRIX.md section}
+
+### Architecture Impact
+- Components Modified: {List with links}
+- Database Changes: {If any, ref DATABASE_SCHEMA.md}
+- API Changes: {If any, ref API docs}
+
+### Code Changes
+- Files Modified: {Count and categorized list}
+- Lines Added/Removed: {Stats}
+- Test Coverage: {Before/After}
+
+### Testing Results
+| Test Type | Passed | Failed | Coverage |
+|-----------|--------|--------|----------|
+| Unit      | X      | 0      | XX%      |
+| Integration| X     | 0      | XX%      |
+| E2E       | X      | 0      | XX%      |
+
+### Performance Impact
+- Bundle Size: {Before → After}
+- Load Time: {Before → After}
+- API Response: {Average time}
+
+### Documentation Updates
+- [ ] MASTER_TRACKING.md updated
+- [ ] FEATURE_MATRIX.md updated
+- [ ] Platform docs updated
+- [ ] API docs updated
+- [ ] CHANGELOG updated
+
+### Next Steps
+1. Monitor feature adoption (analytics)
+2. Gather user feedback
+3. Plan iterations based on usage
+
+### Lessons Learned
+- What worked well
+- Challenges encountered
+- Recommendations for similar features
 ```
 
-## Execution Patterns
+## Execution Patterns with Documentation
 
 ### Pattern 1: Feature Implementation
 ```
-1. Read existing code → 2. Plan changes → 3. Implement incrementally → 
-4. Test each component → 5. Integration test → 6. Document
+1. Check ROADMAP.md → 2. Review FEATURE_MATRIX.md → 3. Read ARCHITECTURE_OVERVIEW.md →
+4. Implement per DEVELOPMENT_GUIDE.md → 5. Test per standards → 6. Update all docs
 ```
 
 ### Pattern 2: Bug Fix
 ```
-1. Reproduce issue → 2. Identify root cause → 3. Fix with minimal changes → 
-4. Add regression test → 5. Verify fix → 6. Document solution
+1. Check issue in MASTER_TRACKING.md → 2. Review related docs → 3. Fix per CLAUDE_GUIDE.md →
+4. Add tests → 5. Update documentation → 6. Close issue
 ```
 
 ### Pattern 3: Refactoring
 ```
-1. Analyze current structure → 2. Plan migration path → 3. Create compatibility layer → 
-4. Migrate incrementally → 5. Remove old code → 6. Update documentation
+1. Document current state → 2. Check ARCHITECTURE_OVERVIEW.md → 3. Plan per best practices →
+4. Implement incrementally → 5. Update all affected docs → 6. Verify no regressions
 ```
 
-## Best Practices
+## Enhanced Best Practices
 
 ### DO:
-- ✅ Read files before editing
-- ✅ Use TodoWrite for task tracking
-- ✅ Test incrementally
-- ✅ Commit working code frequently
-- ✅ Handle errors gracefully
-- ✅ Log important operations
-- ✅ Follow existing patterns
-- ✅ Ask for clarification when unclear
+- ✅ Always start by reading relevant docs/
+- ✅ Create specialized agents for complex tasks
+- ✅ Reference documentation in code comments
+- ✅ Update docs as you implement
+- ✅ Link commits to documentation sections
+- ✅ Use documentation examples as templates
+- ✅ Validate against FEATURE_MATRIX.md
+- ✅ Follow patterns in DEVELOPMENT_GUIDE.md
 
 ### DON'T:
-- ❌ Make assumptions about code structure
-- ❌ Skip reading relevant files
-- ❌ Implement without planning
-- ❌ Ignore TypeScript errors
-- ❌ Leave console.log statements
-- ❌ Create unnecessary files
-- ❌ Break existing functionality
-- ❌ Skip testing phase
+- ❌ Implement without checking docs/features/
+- ❌ Ignore architecture constraints in docs/
+- ❌ Skip documentation updates
+- ❌ Create patterns that conflict with guides
+- ❌ Assume feature status without checking
+- ❌ Bypass standards in CLAUDE_GUIDE.md
 
-## Error Recovery
+## Documentation-Driven Development
 
-### If Build Fails:
-```bash
-npm ci                        # Clean install
-rm -rf node_modules && npm i  # Full reinstall
-npm run typecheck            # Check types
-npm run lint -- --fix        # Auto-fix lint
-```
+### Before Starting Any Task:
+1. **Navigate**: Start at `docs/README.md`
+2. **Context**: Read `docs/project-management/PROJECT_STATUS.md`
+3. **Goals**: Check `docs/project-management/MASTER_TRACKING.md`
+4. **Standards**: Review `docs/development/CLAUDE_GUIDE.md`
+5. **Architecture**: Understand via `docs/architecture/ARCHITECTURE_OVERVIEW.md`
+6. **Features**: Verify in `docs/features/FEATURE_MATRIX.md`
 
-### If Tests Fail:
-```bash
-npm test -- --verbose        # Detailed output
-npm test -- --watch         # Interactive mode
-npm test -- --coverage      # Coverage report
-```
+### During Implementation:
+- Reference documentation in code comments
+- Follow examples from guides
+- Update docs immediately when patterns change
+- Create new docs for complex features
 
-### If Deployment Fails:
-```bash
-npm run build               # Check build
-npm run build:analyze       # Bundle analysis
-firebase deploy --debug     # Debug deployment
-```
+### After Completion:
+- Update all affected documentation
+- Ensure cross-references are valid
+- Add lessons learned
+- Update feature status
 
-## Performance Metrics
-
-### Target Metrics:
-- **Response Time**: < 200ms for API calls
-- **Bundle Size**: < 200KB main chunk
-- **Test Coverage**: > 80% for new code
-- **Lighthouse Score**: > 90 for web
-- **Build Time**: < 5 minutes
-- **Memory Usage**: < 500MB during build
-
-## Communication Protocol
-
-### Status Updates:
-1. **Starting**: "Beginning {ProjectName} implementation"
-2. **Progress**: "Completed {X/Y} tasks, currently {action}"
-3. **Blocking**: "Blocked by {issue}, attempting {solution}"
-4. **Complete**: "Finished {ProjectName}, {X} files modified"
-
-### Error Reporting:
-```markdown
-**Error Encountered**:
-- Location: [File:Line]
-- Error: [Message]
-- Context: [What was being attempted]
-- Solution: [How it was/will be resolved]
-```
-
-## Success Criteria
+## Success Criteria with Documentation
 
 A task is complete when:
-1. All requirements are implemented
-2. All tests pass
-3. No regression in existing features
-4. Documentation is updated
-5. Code follows project standards
-6. Performance metrics are met
-7. User can successfully use the feature
+1. ✅ Requirements from docs/project-management/ are met
+2. ✅ Tests pass per docs/development/ standards
+3. ✅ Architecture follows docs/architecture/ patterns
+4. ✅ Feature matrix in docs/features/ is updated
+5. ✅ Design matches docs/design/ specifications
+6. ✅ Performance meets docs/analytics/ metrics
+7. ✅ All relevant documentation is updated
+8. ✅ User can successfully use the feature
 
 ---
 
-**Version**: 2.0.0
-**Last Updated**: 2025-01-13
-**Optimized for**: Production-ready development with comprehensive testing
+**Version**: 3.0.0
+**Last Updated**: 2025-01-15
+**Optimized for**: Documentation-driven development with dynamic agent creation
+**Documentation Root**: `/docs/README.md`

@@ -199,7 +199,8 @@ export default function UnifiedSearchScreen({ navigation, route }) {
       if (parsed.type === 'exercise' || parsed.type === 'mixed') {
         // Search exercises
         const exerciseQuery = parsed.exerciseIntent || query;
-        const exerciseResults = await searchService.searchExercises(exerciseQuery);
+        const exerciseSearchResult = await searchService.searchExercises(exerciseQuery);
+        const exerciseResults = exerciseSearchResult.exercises || [];
         
         // Filter by muscle groups if specified
         if (parsed.muscleGroups.length > 0) {

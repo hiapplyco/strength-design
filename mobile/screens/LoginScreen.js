@@ -14,6 +14,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
+import { useTheme, themedStyles } from '../contexts/ThemeContext';
+import { GlassContainer, GlassCard, GlassButton } from '../components/GlassmorphismComponents';
+import { colors } from '../utils/designTokens';
 
 export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -21,6 +24,8 @@ export default function LoginScreen({ onLogin }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  const theme = useTheme();
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -47,95 +52,290 @@ export default function LoginScreen({ onLogin }) {
     }
     setLoading(false);
   };
+  
+  // Theme-aware styles
+  const containerStyles = themedStyles(({ theme }) => ({
+    flex: 1,
+    backgroundColor: 'transparent',
+  }));
+  
+  const scrollContentStyles = themedStyles(({ spacing }) => ({
+    flexGrow: 1,
+    paddingBottom: spacing[6] || 24,
+  }));
+  
+  const headerStyles = themedStyles(({ spacing }) => ({
+    paddingTop: 80,
+    paddingBottom: spacing[8] || 32,
+    alignItems: 'center',
+  }));
+  
+  const logoStyles = themedStyles(({ typography }) => ({
+    fontSize: typography?.fontSize?.['3xl'] || 28,
+    fontWeight: typography?.fontWeight?.bold || 'bold',
+    color: 'white',
+    marginTop: 10,
+    textAlign: 'center',
+    textShadow: '0px 2px 6px rgba(0, 0, 0, 0.6)',
+  }));
+  
+  const taglineStyles = themedStyles(({ typography }) => ({
+    fontSize: typography?.fontSize?.base || 15,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginTop: 6,
+    textAlign: 'center',
+    textShadow: '0px 1px 3px rgba(0, 0, 0, 0.4)',
+  }));
+  
+  const formContainerStyles = themedStyles(({ spacing }) => ({
+    flex: 1,
+    padding: spacing[4] || 16,
+    paddingHorizontal: spacing[5] || 20,
+    justifyContent: 'center',
+  }));
+  
+  const titleStyles = themedStyles(({ theme, typography, spacing }) => ({
+    fontSize: typography?.fontSize?.['2xl'] || 22,
+    fontWeight: typography?.fontWeight?.bold || 'bold',
+    color: theme.textOnGlass,
+    textAlign: 'center',
+    marginBottom: spacing[6] || 24,
+    textShadow: theme.isDarkMode ? '0px 1px 3px rgba(0, 0, 0, 0.8)' : '0px 1px 3px rgba(0, 0, 0, 0.3)',
+  }));
+  
+  const inputContainerStyles = themedStyles(({ spacing, borderRadius }) => ({
+    marginBottom: spacing[4] || 15,
+    borderRadius: borderRadius?.component?.input?.md || 12,
+  }));
+  
+  const inputWrapperStyles = themedStyles(() => ({
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    minHeight: 54, // Enhanced touch target
+  }));
+  
+  const inputStyles = themedStyles(({ theme, typography, isDarkMode }) => ({
+    flex: 1,
+    paddingVertical: 16,
+    paddingLeft: 12,
+    color: isDarkMode ? '#FFFFFF' : '#000000',
+    fontSize: typography?.fontSize?.base || 15,
+    fontWeight: typography?.fontWeight?.medium || '500',
+  }));
+  
+  const buttonWrapperStyles = themedStyles(({ spacing }) => ({
+    marginTop: spacing[5] || 20,
+    marginBottom: spacing[4] || 16,
+  }));
+  
+  const switchButtonStyles = themedStyles(({ spacing }) => ({
+    marginTop: spacing[4] || 16,
+    alignItems: 'center',
+  }));
+  
+  const switchTextStyles = themedStyles(({ theme, typography }) => ({
+    color: theme.primary,
+    fontSize: typography?.fontSize?.sm || 13,
+    fontWeight: typography?.fontWeight?.medium || '500',
+  }));
+  
+  const demoHintStyles = themedStyles(({ spacing }) => ({
+    marginTop: spacing[8] || 32,
+  }));
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={containerStyles}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={scrollContentStyles}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Enhanced Header with Unified Gradient */}
         <LinearGradient
-          colors={['#FF6B35', '#F7931E']}
-          style={styles.header}
+          colors={theme.isDarkMode ? colors.gradients.accent.dark.aurora : colors.gradients.accent.light.sunset}
+          style={headerStyles}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         >
-          <Ionicons name="fitness" size={60} color="white" />
-          <Text style={styles.logo}>Strength.Design</Text>
-          <Text style={styles.tagline}>AI-Powered Fitness</Text>
+          <Ionicons 
+            name="fitness" 
+            size={60} 
+            color="white"
+            style={{
+              textShadow: '0px 2px 4px rgba(0, 0, 0, 0.4)',
+            }}
+          />
+          <Text style={logoStyles}>Strength.Design</Text>
+          <Text style={taglineStyles}>AI-Powered Fitness</Text>
         </LinearGradient>
 
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>
+        {/* Enhanced Form with Glass Container */}
+        <View style={formContainerStyles}>
+          <Text style={titleStyles}>
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </Text>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#666"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
+          {/* Email Input with Glass Effect */}
+          <View
+            style={[inputContainerStyles, { 
+              backgroundColor: 'white',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: 'rgba(0, 0, 0, 0.1)',
+              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+            }]}
+            accessible={true}
+            accessibilityLabel="Email input container"
+          >
+            <View style={inputWrapperStyles}>
+              <Ionicons 
+                name="mail" 
+                size={20} 
+                color="#666666"
+                style={{ marginRight: 12 }}
+              />
+              <TextInput
+                style={[inputStyles, { color: '#000000' }]}
+                placeholder="Email"
+                placeholderTextColor="#999999"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                accessibilityLabel="Email input"
+                accessibilityHint="Enter your email address"
+              />
+            </View>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#666"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeIcon}
-            >
-              <Ionicons
-                name={showPassword ? 'eye' : 'eye-off'}
-                size={20}
-                color="#666"
+          {/* Password Input with Glass Effect */}
+          <View
+            style={[inputContainerStyles, { 
+              backgroundColor: 'white',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: 'rgba(0, 0, 0, 0.1)',
+              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+            }]}
+            accessible={true}
+            accessibilityLabel="Password input container"
+          >
+            <View style={inputWrapperStyles}>
+              <Ionicons 
+                name="lock-closed" 
+                size={20} 
+                color="#666666"
+                style={{ marginRight: 12 }}
               />
+              <TextInput
+                style={[inputStyles, { color: '#000000' }]}
+                placeholder="Password"
+                placeholderTextColor="#999999"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                returnKeyType="done"
+                onSubmitEditing={handleAuth}
+                accessibilityLabel="Password input"
+                accessibilityHint="Enter your password"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={{ padding: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye' : 'eye-off'}
+                  size={20}
+                  color="#666666"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Enhanced Glass Button */}
+          <View style={buttonWrapperStyles}>
+            <TouchableOpacity
+              onPress={handleAuth}
+              disabled={loading}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={loading ? 'Loading' : (isSignUp ? 'Create account' : 'Sign in')}
+              accessibilityState={{ disabled: loading }}
+            >
+              <LinearGradient
+                colors={theme.isDarkMode ? colors.gradients.accent.dark.aurora : colors.gradients.accent.light.sunset}
+                style={{
+                  paddingVertical: 18,
+                  paddingHorizontal: 24,
+                  borderRadius: 12,
+                  alignItems: 'center',
+                  boxShadow: `0px 4px 8px ${theme.theme.primary}30`,
+                  elevation: 8,
+                }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={{
+                  color: 'white',
+                  fontSize: 16,
+                  fontWeight: '600',
+                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.3)',
+                }}>
+                  {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+                </Text>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={handleAuth}
-            disabled={loading}
-            style={styles.buttonContainer}
-          >
-            <LinearGradient
-              colors={['#FF6B35', '#F7931E']}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>
-                {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
+          {/* Switch Mode Button */}
           <TouchableOpacity
             onPress={() => setIsSignUp(!isSignUp)}
-            style={styles.switchButton}
+            style={switchButtonStyles}
+            accessibilityRole="button"
+            accessibilityLabel={isSignUp ? 'Switch to sign in' : 'Switch to sign up'}
           >
-            <Text style={styles.switchText}>
+            <Text style={switchTextStyles}>
               {isSignUp
                 ? 'Already have an account? Sign In'
                 : "Don't have an account? Sign Up"}
             </Text>
           </TouchableOpacity>
 
-          {/* Demo credentials hint */}
-          <View style={styles.demoHint}>
-            <Text style={styles.demoText}>Demo Account:</Text>
-            <Text style={styles.demoCredentials}>demo@strength.design / demo123</Text>
-          </View>
+          {/* Enhanced Demo Credentials Hint */}
+          <GlassCard
+            variant="subtle"
+            style={demoHintStyles}
+            accessible={true}
+            accessibilityLabel="Demo account credentials"
+          >
+            <View style={{ alignItems: 'center', paddingVertical: 4 }}>
+              <Text style={{
+                color: theme.theme.textSecondary,
+                fontSize: 12,
+                fontWeight: '500',
+                marginBottom: 6,
+              }}>
+                Demo Account:
+              </Text>
+              <Text style={{
+                color: theme.theme.primary,
+                fontSize: 14,
+                fontWeight: '600',
+                fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+                textAlign: 'center',
+              }}>
+                demo@strength.design / demo123
+              </Text>
+            </View>
+          </GlassCard>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -145,7 +345,7 @@ export default function LoginScreen({ onLogin }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     flexGrow: 1,
@@ -160,12 +360,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     marginTop: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   tagline: {
     fontSize: 16,
     color: 'white',
     opacity: 0.9,
     marginTop: 5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   formContainer: {
     flex: 1,
@@ -178,16 +384,19 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     marginBottom: 30,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 10,
     marginBottom: 15,
     paddingHorizontal: 15,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   inputIcon: {
     marginRight: 10,
@@ -225,13 +434,13 @@ const styles = StyleSheet.create({
   demoHint: {
     marginTop: 40,
     padding: 15,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   demoText: {
-    color: '#666',
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 12,
     textAlign: 'center',
   },

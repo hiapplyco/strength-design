@@ -17,27 +17,82 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { auth, db } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFunctionsUrl } from '../config/firebase';
+import { colors } from '../utils/designTokens';
 
-const SYSTEM_PROMPT = `You are an elite fitness coach and movement specialist. Your approach is:
+const SYSTEM_PROMPT = `You are Coach Alex, an elite fitness coach with 15+ years of experience helping people transform their lives through movement. Your personality is warm, encouraging, and scientifically-minded.
 
-1. PERSONALIZED: Tailor every response to the user's specific context, history, and goals
-2. INTELLIGENT: Ask insightful questions that reveal deeper needs and preferences
-3. PROGRESSIVE: Build understanding gradually through natural conversation
-4. SCIENTIFIC: Base recommendations on exercise science and biomechanics
-5. ENCOURAGING: Maintain a positive, supportive tone while being realistic
+## Your Core Personality:
+- **Enthusiastic but never overwhelming** - You genuinely care about each person's journey
+- **Knowledgeable yet accessible** - You translate complex exercise science into simple, actionable advice
+- **Adaptive communicator** - You match your tone to the user's experience level and energy
+- **Motivational realist** - You inspire while being honest about what's achievable
+- **Curious listener** - You ask thoughtful follow-up questions that show you're paying attention
 
-When you have user context (previous workouts, preferences, etc.), acknowledge it and build upon it.
-When context is minimal, focus on understanding their story first.
+## Your Communication Style:
+- Use encouraging language: "That's awesome!", "I love that you're thinking about...", "Great question!"
+- Acknowledge effort and honesty: "Thanks for sharing that", "I appreciate you being upfront about..."
+- Share relatable examples: "I had a client who...", "Many people find that..."
+- Use fitness insider knowledge: Mention specific benefits, techniques, or progressions
+- Be conversational, not clinical: "Let's figure this out together" vs. "Please provide information"
 
-Track information gathering progress:
-- Basic info (fitness level, experience): 20%
-- Primary goals and motivations: 40%
-- Schedule and time availability: 60%
-- Equipment and environment: 75%
-- Limitations and preferences: 85%
-- Ready for detailed program: 100%
+## Information Gathering Strategy:
+**Stage 1 (0-20%): Breaking the Ice & Experience**
+- Start with genuine interest in their fitness story
+- Ask: "What's your relationship with fitness been like?" or "Tell me about your exercise background"
+- Listen for: experience level, past successes/failures, current activity
+- Follow up on specifics: "What did you love about [mentioned activity]?" "What made you stop [previous routine]?"
 
-Always be specific. If someone mentions yoga, ask about their practice. If they mention injuries, understand the specifics.`;
+**Stage 2 (20-40%): Goals & Motivation Deep Dive**
+- Explore the "why" behind their goals: "What would achieving [goal] mean to you?"
+- Ask about timeline and priority: "If you could only improve one thing in the next 3 months, what would it be?"
+- Understand their vision: "Paint me a picture of your ideal fitness level"
+- Listen for intrinsic vs. extrinsic motivations
+
+**Stage 3 (40-60%): Lifestyle & Schedule Reality Check**
+- Explore their daily rhythm: "Walk me through a typical day - when do you feel most energetic?"
+- Ask about constraints: "What's your biggest challenge when it comes to working out?"
+- Understand preferences: "Are you a morning person or do you prefer evening workouts?"
+- Discuss realistic commitment: "How many days per week feels sustainable for you?"
+
+**Stage 4 (60-75%): Equipment & Environment**
+- Ask about their setup: "Where do you picture yourself working out most often?"
+- Understand limitations: "What equipment do you have access to?" or "Do you prefer gym or home workouts?"
+- Explore preferences: "Do you like the energy of a gym or the privacy of home workouts?"
+
+**Stage 5 (75-85%): Safety & Preferences**
+- Address limitations with care: "Are there any movements or areas we should be extra mindful of?"
+- Understand dislikes: "What types of exercise have you tried and didn't enjoy?"
+- Explore preferences: "Do you prefer strength training, cardio, or a mix?" "Any favorite ways to move your body?"
+
+**Stage 6 (85-100%): Program Design & Readiness**
+- Summarize what you've learned: "So based on our conversation, here's what I'm hearing..."
+- Get final confirmation: "Does this sound like a program that would excite you?"
+- Set expectations: "I'm thinking we start with [X] and build from there. How does that feel?"
+
+## Advanced Coaching Techniques:
+- **Mirror their language**: If they say "get in shape," use that phrase back
+- **Build on their strengths**: "Since you already love hiking, we can use that as cardio"
+- **Address concerns proactively**: "I know you mentioned being worried about time..."
+- **Use progressive disclosure**: Share more advanced concepts as they show readiness
+- **Create micro-commitments**: "Would you be willing to try this for just one week?"
+
+## Knowledge Areas to Draw From:
+- Exercise physiology and biomechanics
+- Progressive overload and program design
+- Injury prevention and movement quality
+- Nutrition basics as they relate to performance
+- Psychology of habit formation and motivation
+- Equipment alternatives and modifications
+- Time-efficient training methods
+
+## Conversation Flow Management:
+- If they're vague, ask for specifics: "When you say 'get stronger,' what would that look like day-to-day?"
+- If they're hesitant, normalize concerns: "That's totally normal - a lot of people feel that way"
+- If they're overwhelming you with info, summarize: "Wow, thanks for all that detail! Let me make sure I got the key points..."
+- If they seem ready to move forward, validate and transition: "You've given me everything I need to create something amazing for you"
+
+Remember: Your goal isn't just to collect information, but to build trust, understanding, and excitement for their fitness journey. Every question should feel like it's coming from genuine curiosity about helping them succeed.`;
 
 export default function EnhancedAIWorkoutChat({ navigation }) {
   const [messages, setMessages] = useState([]);
@@ -63,6 +118,58 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
   useEffect(() => {
     loadUserContext();
   }, []);
+  
+  // Initialize progress tracking based on existing user context
+  useEffect(() => {
+    if (userContext && userContext.preferences) {
+      let initialProgress = 0;
+      let initialInfo = { ...collectedInfo };
+      
+      // Check if we have existing user data to auto-populate progress
+      if (userContext.preferences.fitnessLevel) {
+        initialProgress = Math.max(initialProgress, 20);
+        initialInfo.basicInfo = true;
+        initialInfo.experience = userContext.preferences.fitnessLevel;
+      }
+      
+      if (userContext.preferences.goals) {
+        initialProgress = Math.max(initialProgress, 40);
+        initialInfo.goals = true;
+        initialInfo.primaryGoals = userContext.preferences.goals;
+      }
+      
+      if (userContext.preferences.frequency) {
+        initialProgress = Math.max(initialProgress, 60);
+        initialInfo.schedule = true;
+        initialInfo.timeAvailability = userContext.preferences.frequency;
+      }
+      
+      if (userContext.preferences.equipment) {
+        initialProgress = Math.max(initialProgress, 75);
+        initialInfo.equipment = true;
+        initialInfo.environmentEquipment = userContext.preferences.equipment;
+      }
+      
+      if (userContext.preferences.injuries || userContext.preferences.preferences) {
+        initialProgress = Math.max(initialProgress, 85);
+        initialInfo.limitations = true;
+        initialInfo.limitationsPreferences = userContext.preferences.injuries || userContext.preferences.preferences;
+      }
+      
+      if (initialProgress > progress) {
+        setProgress(initialProgress);
+        setCollectedInfo(initialInfo);
+        console.log('Initialized progress from user context:', { initialProgress, initialInfo });
+      }
+    }
+  }, [userContext]);
+
+  useEffect(() => {
+    console.log('Messages state updated, total messages:', messages.length);
+    messages.forEach((msg, index) => {
+      console.log(`Message ${index}: ${msg.role} - ${msg.content?.substring(0, 30)}...`);
+    });
+  }, [messages]);
 
   useEffect(() => {
     // Progress bar animation
@@ -208,6 +315,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
 
   const initializeChat = async (context) => {
     setIsInitializing(true);
+    console.log('Initializing chat with context:', context);
     
     // Fade in animation
     Animated.timing(fadeAnim, {
@@ -220,7 +328,8 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : null;
       
-      const functionsUrl = 'http://localhost:5001/demo-strength-design/us-central1';
+      const functionsUrl = getFunctionsUrl();
+      console.log('Using functions URL:', functionsUrl);
       
       // Build context-aware initial prompt
       let initialPrompt = "You are starting a conversation with a user. ";
@@ -250,13 +359,24 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
         },
         body: JSON.stringify({
           message: initialPrompt,
-          systemPrompt: SYSTEM_PROMPT,
-          context: context || { isNewUser: true },
+          history: [],
+          userProfile: {
+            fitnessLevel: context?.preferences?.fitnessLevel,
+            goals: context?.preferences?.goals ? [context.preferences.goals] : [],
+            equipment: context?.preferences?.equipment ? [context.preferences.equipment] : [],
+            frequency: context?.preferences?.frequency,
+            timePerSession: context?.preferences?.timePerSession,
+            injuries: context?.preferences?.injuries || 'None mentioned'
+          },
         }),
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        console.error('HTTP error:', response.status, response.statusText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
+      console.log('Response received, starting stream processing...');
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let fullResponse = '';
@@ -289,12 +409,20 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
 
             try {
               const parsed = JSON.parse(data);
-              if (parsed.text) {
-                fullResponse += parsed.text;
-                // Animate text appearance
+              console.log('Parsed streaming data:', parsed);
+              
+              if (parsed.type === 'chunk' && parsed.content) {
+                fullResponse += parsed.content;
                 setStreamingMessage(fullResponse);
+              } else if (parsed.type === 'complete' && parsed.fullContent) {
+                fullResponse = parsed.fullContent;
+                setStreamingMessage(fullResponse);
+              } else if (parsed.type === 'error') {
+                console.error('Streaming error from server:', parsed.error);
+                throw new Error(parsed.error);
               }
             } catch (e) {
+              console.log('Non-JSON streaming data:', data);
               if (data && data !== '[DONE]') {
                 fullResponse += data;
                 setStreamingMessage(fullResponse);
@@ -304,15 +432,34 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
         }
       }
 
-      setMessages([{ role: 'assistant', content: fullResponse }]);
-      setStreamingMessage('');
+      console.log('Final response length:', fullResponse.length);
+      if (fullResponse.trim()) {
+        console.log('Setting AI message with content:', fullResponse.substring(0, 100) + '...');
+        setMessages([{ role: 'assistant', content: fullResponse }]);
+        setStreamingMessage('');
+        
+        // Analyze initial AI response for progress tracking
+        updateProgress('', fullResponse);
+      } else {
+        // If no response received, show a default welcome message
+        console.log('No AI response received, showing default welcome message');
+        const defaultMessage = "Welcome! I'm your AI fitness coach. I'm here to help you create personalized workout plans based on your goals, experience, and preferences. What would you like to work on today?";
+        setMessages([{ 
+          role: 'assistant', 
+          content: defaultMessage
+        }]);
+        setStreamingMessage('');
+        
+        // Initialize progress tracking
+        setTimeout(() => updateProgress('', defaultMessage), 100);
+      }
       
     } catch (error) {
       console.error('Initialization error:', error);
-      // Show clear message that API key is needed
+      // Show a more user-friendly fallback message
       setMessages([{ 
         role: 'assistant', 
-        content: "⚠️ Gemini AI is not connected.\n\nTo enable AI-powered workout generation:\n1. Get a FREE API key from Google AI Studio\n2. Follow the setup guide in SETUP_GEMINI.md\n3. Restart the Firebase emulators\n\nThis will give you real AI conversations powered by Gemini 2.5 Flash!" 
+        content: "Hi there! 👋\n\nI'm your AI fitness coach, ready to help you create amazing workout plans! While I'm getting fully set up, I can still help you plan your fitness journey.\n\nTell me about your fitness goals and experience level, and we'll get started!" 
       }]);
     } finally {
       setIsInitializing(false);
@@ -323,11 +470,13 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
     if (!input.trim() || isStreaming) return;
 
     const userMessage = input.trim();
+    console.log('Sending user message:', userMessage);
     setInput('');
     
     // Add user message with fade-in animation
     const newMessages = [...messages, { role: 'user', content: userMessage }];
     setMessages(newMessages);
+    console.log('Updated messages array with user message, total messages:', newMessages.length);
     
     // Start streaming
     setIsStreaming(true);
@@ -337,7 +486,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : null;
       
-      const functionsUrl = 'http://localhost:5001/demo-strength-design/us-central1';
+      const functionsUrl = getFunctionsUrl();
       
       // Build comprehensive context
       const conversationContext = {
@@ -357,9 +506,21 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
           ...(token && { 'Authorization': `Bearer ${token}` })
         },
         body: JSON.stringify({
-          message: `User said: "${userMessage}". Progress: ${progress}%. Respond as a fitness coach, building on the conversation context.`,
-          systemPrompt: SYSTEM_PROMPT,
-          context: conversationContext,
+          message: userMessage,
+          history: newMessages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })),
+          userProfile: {
+            fitnessLevel: userContext?.preferences?.fitnessLevel || collectedInfo.experience,
+            goals: collectedInfo.primaryGoals ? [collectedInfo.primaryGoals] : [],
+            equipment: collectedInfo.environmentEquipment ? [collectedInfo.environmentEquipment] : [],
+            frequency: collectedInfo.timeAvailability,
+            timePerSession: userContext?.preferences?.timePerSession,
+            injuries: collectedInfo.limitationsPreferences || 'None mentioned',
+            progress: progress,
+            collectedInfo: collectedInfo
+          },
         }),
       });
 
@@ -387,12 +548,22 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
 
             try {
               const parsed = JSON.parse(data);
-              if (parsed.text) {
-                fullResponse += parsed.text;
+              console.log('Parsed streaming data:', parsed);
+              
+              if (parsed.type === 'chunk' && parsed.content) {
+                fullResponse += parsed.content;
                 setStreamingMessage(fullResponse);
                 scrollViewRef.current?.scrollToEnd({ animated: true });
+              } else if (parsed.type === 'complete' && parsed.fullContent) {
+                fullResponse = parsed.fullContent;
+                setStreamingMessage(fullResponse);
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+              } else if (parsed.type === 'error') {
+                console.error('Streaming error from server:', parsed.error);
+                throw new Error(parsed.error);
               }
             } catch (e) {
+              console.log('Non-JSON streaming data:', data);
               if (data && data !== '[DONE]') {
                 fullResponse += data;
                 setStreamingMessage(fullResponse);
@@ -403,18 +574,26 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
         }
       }
 
-      // Update progress based on conversation depth
-      updateProgress(userMessage, fullResponse);
+      // Progress is updated before adding the message above
+      
+      // Update progress before adding response
+      updateProgress(userMessage, fullResponse || '');
       
       // Add complete response
-      setMessages(prev => [...prev, { role: 'assistant', content: fullResponse }]);
+      console.log('sendMessage - Final response length:', fullResponse.length);
+      if (fullResponse.trim()) {
+        console.log('sendMessage - Adding AI response to messages');
+        setMessages(prev => [...prev, { role: 'assistant', content: fullResponse }]);
+      } else {
+        console.log('sendMessage - No AI response received');
+      }
       
     } catch (error) {
       console.error('Chat error:', error);
-      // Clear error message - API key needed
+      // Show helpful error message
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "❌ Gemini API is not available. Please set up your API key to enable real AI conversations.\n\nSee SETUP_GEMINI.md for instructions."
+        content: "I'm having trouble connecting right now, but don't worry! I can still help you plan your workout.\n\nLet me know what you're looking for - strength training, cardio, specific muscle groups, or something else - and I'll do my best to guide you!"
       }]);
     } finally {
       setIsStreaming(false);
@@ -423,31 +602,90 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
   };
 
   const updateProgress = (userMessage, aiResponse) => {
-    const lower = userMessage.toLowerCase();
+    const userLower = userMessage.toLowerCase();
+    const aiLower = aiResponse.toLowerCase();
     let newProgress = progress;
+    let newCollectedInfo = { ...collectedInfo };
     
-    if (lower.match(/beginner|intermediate|advanced|years?|months?/)) {
+    // Check what information has been collected based on user responses and AI questions
+    
+    // Stage 1: Basic info (fitness level, experience) - 20%
+    if (!newCollectedInfo.basicInfo && (
+      userLower.match(/beginner|intermediate|advanced|new to|started|years?|months?|first time|never|always|experienced/) ||
+      userLower.match(/\d+\s*(year|month|week)/) ||
+      aiLower.match(/fitness level|experience|how long|background/)
+    )) {
       newProgress = Math.max(newProgress, 20);
-      setCollectedInfo(prev => ({ ...prev, experience: userMessage }));
-    }
-    if (lower.match(/goal|want|objective|achieve/)) {
-      newProgress = Math.max(newProgress, 40);
-      setCollectedInfo(prev => ({ ...prev, goals: userMessage }));
-    }
-    if (lower.match(/\d+\s*(days?|times?)/)) {
-      newProgress = Math.max(newProgress, 60);
-      setCollectedInfo(prev => ({ ...prev, frequency: userMessage }));
-    }
-    if (lower.match(/equipment|gym|home|space/)) {
-      newProgress = Math.max(newProgress, 75);
-      setCollectedInfo(prev => ({ ...prev, equipment: userMessage }));
-    }
-    if (lower.match(/injury|limit|condition|prefer/)) {
-      newProgress = Math.max(newProgress, 85);
-      setCollectedInfo(prev => ({ ...prev, limitations: userMessage }));
+      newCollectedInfo.basicInfo = true;
+      newCollectedInfo.experience = userMessage;
     }
     
+    // Stage 2: Primary goals and motivations - 40%
+    if (!newCollectedInfo.goals && (
+      userLower.match(/goal|want|lose|gain|build|strength|muscle|weight|tone|fit|healthy|marathon|compete/) ||
+      userLower.match(/objective|achieve|improve|better|stronger|faster|leaner/) ||
+      aiLower.match(/goals|what.*you.*want|motivat|why.*fitness/)
+    )) {
+      newProgress = Math.max(newProgress, 40);
+      newCollectedInfo.goals = true;
+      newCollectedInfo.primaryGoals = userMessage;
+    }
+    
+    // Stage 3: Schedule and time availability - 60%
+    if (!newCollectedInfo.schedule && (
+      userLower.match(/\d+\s*(day|time|hour|minute|week|daily|weekly)/) ||
+      userLower.match(/morning|evening|lunch|weekend|busy|schedule|available|free/) ||
+      userLower.match(/monday|tuesday|wednesday|thursday|friday|saturday|sunday/) ||
+      aiLower.match(/how often|schedule|time.*day|when.*work/)
+    )) {
+      newProgress = Math.max(newProgress, 60);
+      newCollectedInfo.schedule = true;
+      newCollectedInfo.timeAvailability = userMessage;
+    }
+    
+    // Stage 4: Equipment and environment - 75%
+    if (!newCollectedInfo.equipment && (
+      userLower.match(/gym|home|equipment|weights|dumbbells|barbell|machine|bodyweight|none|outdoor/) ||
+      userLower.match(/space|room|apartment|park|yard|membership|access/) ||
+      aiLower.match(/equipment|where.*work|gym.*home|space.*exercise/)
+    )) {
+      newProgress = Math.max(newProgress, 75);
+      newCollectedInfo.equipment = true;
+      newCollectedInfo.environmentEquipment = userMessage;
+    }
+    
+    // Stage 5: Limitations and preferences - 85%
+    if (!newCollectedInfo.limitations && (
+      userLower.match(/injury|hurt|pain|condition|limit|avoid|can't|cannot|difficult|problem/) ||
+      userLower.match(/prefer|like|dislike|hate|enjoy|love|favorite|boring/) ||
+      userLower.match(/knee|back|shoulder|ankle|wrist|hip|neck/) ||
+      aiLower.match(/injur|limit|avoid|prefer|restrictions/)
+    )) {
+      newProgress = Math.max(newProgress, 85);
+      newCollectedInfo.limitations = true;
+      newCollectedInfo.limitationsPreferences = userMessage;
+    }
+    
+    // Stage 6: Ready to generate - 100%
+    if (newProgress >= 85 && (
+      userLower.match(/ready|let's go|create|generate|make.*workout|sounds good|perfect/) ||
+      userLower.match(/yes.*ready|start.*workout|begin/) ||
+      aiLower.match(/ready.*create|enough.*information|let.*generate/)
+    )) {
+      newProgress = 100;
+      newCollectedInfo.readyToGenerate = true;
+    }
+    
+    setCollectedInfo(newCollectedInfo);
     setProgress(newProgress);
+    
+    console.log('Progress updated:', {
+      oldProgress: progress,
+      newProgress,
+      collectedInfo: newCollectedInfo,
+      userMessage: userMessage.substring(0, 50),
+      aiResponse: aiResponse.substring(0, 50)
+    });
   };
 
   const generateWorkout = async () => {
@@ -463,7 +701,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : null;
       
-      const functionsUrl = 'http://localhost:5001/demo-strength-design/us-central1';
+      const functionsUrl = getFunctionsUrl();
       
       const response = await fetch(`${functionsUrl}/generateWorkout`, {
         method: 'POST',
@@ -485,7 +723,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       await addDoc(collection(db, 'workouts'), {
         userId: user?.uid,
         ...result.data,
-        goals: collectedInfo,
+        goals: collectedInfo.primaryGoals || collectedInfo,
         createdAt: serverTimestamp(),
       });
 
@@ -514,7 +752,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
         ],
         difficulty: progress > 80 ? 'Advanced' : progress > 50 ? 'Intermediate' : 'Beginner',
         duration: '30-45 minutes',
-        goals: collectedInfo,
+        goals: collectedInfo.primaryGoals || collectedInfo,
         createdAt: serverTimestamp(),
       };
       
@@ -537,6 +775,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
 
   const renderMessage = (message, index) => {
     const isUser = message.role === 'user';
+    console.log(`Rendering message ${index}:`, message.role, message.content?.substring(0, 50) + '...');
     
     return (
       <Animated.View
@@ -550,8 +789,10 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
         {!isUser && (
           <Animated.View style={{ transform: [{ scale: isStreaming && index === messages.length - 1 ? pulseAnim : 1 }] }}>
             <LinearGradient
-              colors={['#FF7E87', '#FFB86B']}
+              colors={colors.gradients.accent.dark.aurora}
               style={styles.avatar}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
             >
               <Ionicons name="fitness" size={20} color="#FFF" />
             </LinearGradient>
@@ -568,14 +809,16 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
   };
 
   const renderStreamingMessage = () => {
-    if (!isStreaming || !streamingMessage) return null;
+    if (!isStreaming || !streamingMessage || !streamingMessage.trim()) return null;
     
     return (
       <Animated.View style={[styles.messageContainer, styles.assistantMessageContainer]}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <LinearGradient
-            colors={['#FF7E87', '#FFB86B']}
+            colors={colors.gradients.accent.dark.aurora}
             style={styles.avatar}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
             <Ionicons name="fitness" size={20} color="#FFF" />
           </LinearGradient>
@@ -594,8 +837,10 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
     return (
       <View style={styles.typingContainer}>
         <LinearGradient
-          colors={['#FF7E87', '#FFB86B']}
+          colors={colors.gradients.accent.dark.aurora}
           style={styles.avatar}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         >
           <Ionicons name="fitness" size={20} color="#FFF" />
         </LinearGradient>
@@ -609,8 +854,23 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
     );
   };
 
+  const getProgressLabel = () => {
+    if (progress === 0) return 'Getting started';
+    if (progress >= 100) return 'Ready to generate workout';
+    if (progress >= 85) return 'Understanding preferences';
+    if (progress >= 75) return 'Learning about equipment';
+    if (progress >= 60) return 'Discussing schedule';
+    if (progress >= 40) return 'Exploring goals';
+    if (progress >= 20) return 'Assessing experience';
+    return 'Gathering information';
+  };
+
   const renderContextBar = () => {
-    if (!userContext || Object.keys(collectedInfo).length === 0) return null;
+    const hasInfo = Object.keys(collectedInfo).some(key => 
+      collectedInfo[key] && typeof collectedInfo[key] !== 'boolean'
+    );
+    
+    if (!userContext && !hasInfo) return null;
     
     return (
       <ScrollView 
@@ -625,12 +885,59 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
           </View>
         )}
         
-        {Object.entries(collectedInfo).map(([key, value]) => (
-          <View key={key} style={styles.contextChip}>
-            <Text style={styles.contextChipLabel}>{key}</Text>
-            <Text style={styles.contextChipValue} numberOfLines={1}>{value}</Text>
+        {/* Show progress stages as chips */}
+        {collectedInfo.basicInfo && (
+          <View style={styles.contextChip}>
+            <Ionicons name="person" size={12} color="#FFB86B" />
+            <Text style={styles.contextChipText}>Experience Level</Text>
           </View>
-        ))}
+        )}
+        
+        {collectedInfo.goals && (
+          <View style={styles.contextChip}>
+            <Ionicons name="target" size={12} color="#FFB86B" />
+            <Text style={styles.contextChipText}>Goals Set</Text>
+          </View>
+        )}
+        
+        {collectedInfo.schedule && (
+          <View style={styles.contextChip}>
+            <Ionicons name="time" size={12} color="#FFB86B" />
+            <Text style={styles.contextChipText}>Schedule Ready</Text>
+          </View>
+        )}
+        
+        {collectedInfo.equipment && (
+          <View style={styles.contextChip}>
+            <Ionicons name="barbell" size={12} color="#FFB86B" />
+            <Text style={styles.contextChipText}>Equipment Known</Text>
+          </View>
+        )}
+        
+        {collectedInfo.limitations && (
+          <View style={styles.contextChip}>
+            <Ionicons name="shield-checkmark" size={12} color="#FFB86B" />
+            <Text style={styles.contextChipText}>Preferences Set</Text>
+          </View>
+        )}
+        
+        {/* Show detailed info for non-boolean collected data */}
+        {Object.entries(collectedInfo)
+          .filter(([key, value]) => value && typeof value === 'string' && value.length > 0)
+          .map(([key, value]) => {
+            // Skip the summary boolean flags
+            if (['basicInfo', 'goals', 'schedule', 'equipment', 'limitations', 'readyToGenerate'].includes(key)) {
+              return null;
+            }
+            
+            return (
+              <View key={key} style={styles.contextChip}>
+                <Text style={styles.contextChipLabel}>{key}</Text>
+                <Text style={styles.contextChipValue} numberOfLines={1}>{value}</Text>
+              </View>
+            );
+          })
+          .filter(Boolean)}
       </ScrollView>
     );
   };
@@ -640,8 +947,10 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       <View style={styles.loadingContainer}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
           <LinearGradient
-            colors={['#FF7E87', '#FFB86B']}
+            colors={colors.gradients.accent.dark.aurora}
             style={styles.loadingAvatar}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
             <Ionicons name="fitness" size={40} color="#FFF" />
           </LinearGradient>
@@ -656,10 +965,12 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Header */}
+      {/* Header with unified gradient */}
       <LinearGradient
-        colors={['#1A1A1E', '#2C2C3E']}
+        colors={colors.gradients.background.dark.cosmic}
         style={styles.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -672,8 +983,10 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
             disabled={isGenerating || progress < 60}
           >
             <LinearGradient
-              colors={progress >= 60 ? ['#4CAF50', '#45B049'] : ['#666', '#555']}
+              colors={progress >= 60 ? colors.gradients.success : ['#666', '#555']}
               style={styles.generateButtonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
             >
               <Text style={styles.generateButtonText}>
                 {isGenerating ? 'Creating...' : progress >= 60 ? 'Generate' : `${60 - progress}% more`}
@@ -697,7 +1010,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
               ]}
             >
               <LinearGradient
-                colors={['#FFB86B', '#FF7E87']}
+                colors={colors.gradients.accent.dark.aurora}
                 style={styles.progressGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
@@ -705,7 +1018,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
             </Animated.View>
           </View>
           <Text style={styles.progressText}>
-            {progress}% Complete - {progress === 0 ? 'Getting started' : progress < 60 ? 'Gathering information' : 'Ready to generate'}
+            {progress}% Complete - {getProgressLabel()}
           </Text>
         </View>
         
@@ -750,8 +1063,10 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
           disabled={!input.trim() || isStreaming || isGenerating}
         >
           <LinearGradient
-            colors={input.trim() && !isStreaming && !isGenerating ? ['#FF7E87', '#FFB86B'] : ['#333', '#444']}
+            colors={input.trim() && !isStreaming && !isGenerating ? colors.gradients.accent.dark.aurora : ['#333', '#444']}
             style={styles.sendButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
           >
             <Ionicons name="send" size={20} color="#FFF" />
           </LinearGradient>

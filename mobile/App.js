@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ScrollView, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebaseConfig';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme, themedStyles } from './contexts/ThemeContext';
+import { colors, animations, theme } from './utils/designTokens';
+import { GlassContainer } from './components/GlassmorphismComponents';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import EnhancedAIWorkoutChat from './screens/EnhancedAIWorkoutChat';
@@ -14,10 +17,11 @@ import UnifiedSearchScreen from './screens/UnifiedSearchScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import healthService from './services/healthService';
 
-// Simple navigation implementation for web compatibility
+// Enhanced authenticated app with theme integration
 function AuthenticatedApp() {
   const [currentScreen, setCurrentScreen] = useState('Home');
   const [healthInitialized, setHealthInitialized] = useState(false);
+  const theme = useTheme();
 
   useEffect(() => {
     // Initialize health service on app start
@@ -65,51 +69,155 @@ function AuthenticatedApp() {
     }
   };
 
+  // Unified theme-aware gradient colors using new gradient system
+  const currentThemeMode = theme.isDarkMode ? 'dark' : 'light';
+  const gradientColors = theme.getAppBackgroundGradient 
+    ? theme.getAppBackgroundGradient(currentThemeMode, 'energy')
+    : colors.gradients.background[currentThemeMode]?.energy || colors.gradients.background[currentThemeMode]?.primary;
+    
+  const containerStyles = themedStyles(({ theme, isDarkMode }) => ({
+    flex: 1,
+    backgroundColor: 'transparent',
+  }));
+  
+  // Enhanced tab bar with improved glass effects and smooth transitions
+  const tabBarStyles = themedStyles(({ theme, isDarkMode, glass, spacing }) => ({
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: Platform.select({ ios: 34, android: 20 }), // Safe area handling
+    paddingTop: spacing[3] || 12,
+    paddingHorizontal: spacing[2] || 8,
+    borderTopWidth: 1,
+    borderTopColor: theme.borderGlass || theme.borderLight,
+    // Enhanced glass background with subtle gradient
+    backgroundColor: isDarkMode 
+      ? 'rgba(26, 27, 30, 0.85)' 
+      : 'rgba(255, 255, 255, 0.85)',
+  }));
+  
+  const tabItemStyles = themedStyles(({ spacing, borderRadius }) => ({
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing[2] || 8,
+    paddingHorizontal: spacing[1] || 4,
+    borderRadius: borderRadius?.component?.button?.sm || 8,
+    minHeight: 44, // Accessibility minimum touch target
+  }));
+  
+  const tabLabelStyles = themedStyles(({ theme, typography }) => ({
+    fontSize: typography?.fontSize?.xs || 11,
+    marginTop: 2,
+    color: theme.textTertiary,
+    fontWeight: typography?.fontWeight?.medium || '500',
+    textAlign: 'center',
+  }));
+  
+  const tabLabelActiveStyles = themedStyles(({ theme, typography }) => ({
+    color: theme.primary,
+    fontWeight: typography?.fontWeight?.semibold || '600',
+  }));
+
+  // Enhanced active tab background with glass effect
+  const getActiveTabStyle = () => themedStyles(({ theme, isDarkMode }) => ({
+    backgroundColor: isDarkMode 
+      ? 'rgba(255, 184, 107, 0.08)' // Warm glow for dark mode
+      : 'rgba(255, 107, 53, 0.08)',  // Primary glow for light mode
+    transform: [{ scale: 1.02 }],
+  }));
+
   return (
-    <View style={styles.container}>
-      <View style={styles.screenContainer}>
-        {renderScreen()}
-      </View>
+    <View style={containerStyles}>
+      <LinearGradient
+        colors={gradientColors}
+        style={styles.gradientBackground}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        locations={[0, 0.5, 1]}
+      >
+        <View style={styles.screenContainer}>
+          {renderScreen()}
+        </View>
+      </LinearGradient>
       
-      {/* Custom Tab Bar */}
-      <View style={styles.tabBar}>
-        {['Home', 'Generator', 'Search', 'Workouts', 'Profile'].map((tab) => {
-          const icons = {
-            Home: currentScreen === 'Home' ? 'home' : 'home-outline',
-            Generator: currentScreen === 'Generator' ? 'chatbubbles' : 'chatbubbles-outline',
-            Search: currentScreen === 'Search' ? 'search' : 'search-outline',
-            Workouts: currentScreen === 'Workouts' ? 'calendar' : 'calendar-outline',
-            Profile: currentScreen === 'Profile' ? 'person' : 'person-outline',
-          };
-          
-          return (
-            <TouchableOpacity
-              key={tab}
-              style={styles.tabItem}
-              onPress={() => setCurrentScreen(tab)}
-            >
-              <Ionicons 
-                name={icons[tab]} 
-                size={24} 
-                color={currentScreen === tab ? '#FF6B35' : '#888'} 
-              />
-              <Text style={[
-                styles.tabLabel,
-                currentScreen === tab && styles.tabLabelActive
-              ]}>
-                {tab}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+      {/* Enhanced Glass Tab Bar with BlurWrapper */}
+      <View style={tabBarStyles}>
+        <GlassContainer 
+          variant="medium"
+          blurIntensity="medium"
+          showShadow={true}
+          borderRadius="lg"
+          padding="sm"
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            marginHorizontal: 8,
+            marginBottom: 8,
+          }}
+        >
+          {['Home', 'Generator', 'Search', 'Workouts', 'Profile'].map((tab) => {
+            const icons = {
+              Home: currentScreen === 'Home' ? 'home' : 'home-outline',
+              Generator: currentScreen === 'Generator' ? 'chatbubbles' : 'chatbubbles-outline',
+              Search: currentScreen === 'Search' ? 'search' : 'search-outline',
+              Workouts: currentScreen === 'Workouts' ? 'calendar' : 'calendar-outline',
+              Profile: currentScreen === 'Profile' ? 'person' : 'person-outline',
+            };
+            
+            const isActive = currentScreen === tab;
+            const activeTabStyle = isActive ? getActiveTabStyle() : {};
+            
+            return (
+              <TouchableOpacity
+                key={tab}
+                style={[
+                  tabItemStyles,
+                  activeTabStyle,
+                ]}
+                onPress={() => setCurrentScreen(tab)}
+                activeOpacity={0.7}
+                accessibilityRole="tab"
+                accessibilityLabel={`${tab} tab`}
+                accessibilityState={{ selected: isActive }}
+              >
+                <Ionicons 
+                  name={icons[tab]} 
+                  size={22} 
+                  color={isActive ? theme.theme.primary : theme.theme.textTertiary} 
+                  style={{
+                    marginBottom: 2,
+                    textShadowColor: isActive ? (theme.isDarkMode ? 'rgba(255,184,107,0.4)' : 'rgba(255,107,53,0.4)') : 'transparent',
+                    textShadowOffset: { width: 0, height: 0 },
+                    textShadowRadius: isActive ? 6 : 0,
+                  }}
+                />
+                <Text 
+                  style={[
+                    tabLabelStyles,
+                    isActive && tabLabelActiveStyles
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {tab}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </GlassContainer>
       </View>
     </View>
   );
 }
 
+// Enhanced app wrapper with theme loading and transitions
 function AppWithTheme() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -121,12 +229,57 @@ function AppWithTheme() {
     return unsubscribe;
   }, []);
 
-  if (loading) {
+  // Theme-aware loading screen styles with unified gradients
+  const loadingStyles = themedStyles(({ theme: themeObj, typography, isDarkMode }) => {
+    const currentThemeMode = isDarkMode ? 'dark' : 'light';
+    const gradientColors = colors.gradients.background[currentThemeMode]?.primary || 
+                          (isDarkMode ? colors.gradients.background.dark.primary : colors.gradients.background.light.primary);
+      
+    return {
+      container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      text: {
+        color: themeObj.text,
+        marginTop: 16,
+        fontSize: typography.fontSize.lg,
+        fontWeight: typography.fontWeight.medium,
+        textAlign: 'center',
+      },
+      gradientColors,
+    };
+  });
+
+  // Show theme-aware loading screen
+  if (loading || theme.isLoading) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#FF6B35" />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <LinearGradient
+        colors={loadingStyles.gradientColors}
+        style={[styles.container, loadingStyles.container]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        locations={[0, 0.5, 1]}
+      >
+        <GlassContainer 
+          variant="medium" 
+          style={{ 
+            padding: 32, 
+            alignItems: 'center',
+            minWidth: 200,
+          }}
+        >
+          <ActivityIndicator 
+            size="large" 
+            color={theme.theme?.primary || '#FF6B35'} 
+          />
+          <Text style={loadingStyles.text}>Loading...</Text>
+          {theme.isTransitioning && (
+            <Text style={[loadingStyles.text, { fontSize: 12, marginTop: 8 }]}>Switching theme...</Text>
+          )}
+        </GlassContainer>
+      </LinearGradient>
     );
   }
 
@@ -145,11 +298,21 @@ export default function App() {
   );
 }
 
+// Enhanced styles with theme integration
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: 'transparent',
   },
+  gradientBackground: {
+    flex: 1,
+  },
+  screenContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  
+  // Legacy styles for backwards compatibility
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -158,33 +321,9 @@ const styles = StyleSheet.create({
     color: 'white',
     marginTop: 10,
   },
-  screenContainer: {
-    flex: 1,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: '#1a1a1a',
-    borderTopWidth: 1,
-    borderTopColor: '#2a2a2a',
-    paddingBottom: 20,
-    paddingTop: 10,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabLabel: {
-    fontSize: 10,
-    marginTop: 4,
-    color: '#888',
-  },
-  tabLabelActive: {
-    color: '#FF6B35',
-  },
   placeholderScreen: {
     flex: 1,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -215,5 +354,15 @@ const styles = StyleSheet.create({
   signOutText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  
+  // New glassmorphism styles
+  glassTabBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 20,
+    paddingTop: 10,
   },
 });

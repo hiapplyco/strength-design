@@ -1,6 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,14 +13,15 @@ interface WorkoutUsage {
 }
 
 export const useWorkoutUsage = () => {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const functions = getFunctions();
 
   const { data: workoutUsage, isLoading } = useQuery({
-    queryKey: ['workout-usage', session?.user?.id],
+    queryKey: ['workout-usage', user?.uid],
     queryFn: async (): Promise<WorkoutUsage> => {
-      if (!session?.user) {
+      if (!user) {
         return {
           free_workouts_used: 0,
           free_workouts_remaining: 3,
@@ -29,55 +31,64 @@ export const useWorkoutUsage = () => {
       }
 
       // Get user's profile data
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('free_workouts_used')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching workout usage:', error);
-        throw error;
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        // User profile doesn't exist yet, return defaults
+        return {
+          free_workouts_used: 0,
+          free_workouts_remaining: 3,
+          can_generate_workout: true,
+          needs_subscription: false,
+        };
       }
 
-      const freeWorkoutsUsed = profile?.free_workouts_used || 0;
+      const userData = userSnap.data();
+      const freeWorkoutsUsed = userData?.free_workouts_used || 0;
       const freeWorkoutsRemaining = Math.max(0, 3 - freeWorkoutsUsed);
 
       // Check subscription status
-      const { data: subscriptionData } = await supabase.functions.invoke('check-subscription', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      try {
+        const checkSubscription = httpsCallable(functions, 'checkSubscription');
+        const result = await checkSubscription();
+        const subscriptionData = result.data as any;
+        
+        const isSubscribed = subscriptionData?.subscribed || false;
+        const canGenerateWorkout = isSubscribed || freeWorkoutsRemaining > 0;
+        const needsSubscription = !isSubscribed && freeWorkoutsRemaining === 0;
 
-      const isSubscribed = subscriptionData?.subscribed || false;
-      const canGenerateWorkout = isSubscribed || freeWorkoutsRemaining > 0;
-      const needsSubscription = !isSubscribed && freeWorkoutsRemaining === 0;
-
-      return {
-        free_workouts_used: freeWorkoutsUsed,
-        free_workouts_remaining: freeWorkoutsRemaining,
-        can_generate_workout: canGenerateWorkout,
-        needs_subscription: needsSubscription,
-      };
+        return {
+          free_workouts_used: freeWorkoutsUsed,
+          free_workouts_remaining: freeWorkoutsRemaining,
+          can_generate_workout: canGenerateWorkout,
+          needs_subscription: needsSubscription,
+        };
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+        // If subscription check fails, fall back to free tier limits
+        return {
+          free_workouts_used: freeWorkoutsUsed,
+          free_workouts_remaining: freeWorkoutsRemaining,
+          can_generate_workout: freeWorkoutsRemaining > 0,
+          needs_subscription: freeWorkoutsRemaining === 0,
+        };
+      }
     },
-    enabled: !!session?.user,
+    enabled: !!user,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: true,
   });
 
   const incrementUsageMutation = useMutation({
     mutationFn: async () => {
-      if (!session?.user) throw new Error('User not authenticated');
+      if (!user) throw new Error('User not authenticated');
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          free_workouts_used: (workoutUsage?.free_workouts_used || 0) + 1 
-        })
-        .eq('id', session.user.id);
-
-      if (error) throw error;
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { 
+        free_workouts_used: (workoutUsage?.free_workouts_used || 0) + 1,
+        updated_at: new Date()
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workout-usage'] });

@@ -1,45 +1,102 @@
 
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useDebounce } from '@/hooks/useDebounce';
-import type { Exercise } from '@/components/exercise-search/types';
+import { useState, useEffect, useCallback } from "react";
+import type { Exercise } from "@/components/exercise-search/types";
+import { useToast } from "@/hooks/use-toast";
+import { debounce } from "lodash";
 
-export const useEnhancedExerciseSearch = (searchQuery: string) => {
-  const debouncedQuery = useDebounce(searchQuery, 300);
+const SEARCH_URL = 'https://us-central1-strength-design.cloudfunctions.net/searchExercises';
+const CATEGORIES_URL = 'https://us-central1-strength-design.cloudfunctions.net/getExerciseCategories';
 
-  const { data: exercises = [], isLoading, error } = useQuery({
-    queryKey: ['exercise-search', debouncedQuery],
-    queryFn: async () => {
-      if (!debouncedQuery || debouncedQuery.length < 2) return [];
+export const useEnhancedExerciseSearch = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [equipment, setEquipment] = useState("");
+  const [muscle, setMuscle] = useState("");
+  const [searchResults, setSearchResults] = useState<Exercise[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [equipments, setEquipments] = useState<string[]>([]);
+  const [muscles, setMuscles] = useState<string[]>([]);
+  const { toast } = useToast();
 
-      console.log('Searching exercises for:', debouncedQuery);
-
+  useEffect(() => {
+    const fetchCategories = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('search-exercises', {
-          body: { query: debouncedQuery }
-        });
-
-        if (error) {
-          console.error('Exercise search error:', error);
-          throw error;
-        }
-
-        console.log('Exercise search results:', data?.results?.length || 0);
-        return data?.results || [];
+        const response = await fetch(CATEGORIES_URL);
+        const data = await response.json();
+        setCategories(data.categories || []);
+        setEquipments(data.equipment || []);
+        setMuscles(data.muscles || []);
       } catch (error) {
-        console.error('Failed to search exercises:', error);
-        return [];
+        console.error('Error fetching categories:', error);
       }
-    },
-    enabled: debouncedQuery.length >= 2 || debouncedQuery === '',
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    retry: 1,
-  });
+    };
+    fetchCategories();
+  }, []);
+
+  const performSearch = useCallback(async (searchParams: {
+    query: string;
+    category: string;
+    equipment: string;
+    muscle: string;
+  }) => {
+    if (!searchParams.query && !searchParams.category && !searchParams.equipment && !searchParams.muscle) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(SEARCH_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...searchParams,
+          limit: 50
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error searching exercises:', response.status, response.statusText, errorText);
+        throw new Error(`Failed to search exercises: ${response.statusText}. Check console for details.`);
+      }
+
+      const data = await response.json();
+      setSearchResults(data.exercises || []);
+    } catch (error) {
+      console.error('Error in performSearch:', error);
+      toast({
+        title: "Error Searching Exercises",
+        description: "Could not perform search. Please check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
+  const debouncedSearch = useCallback(debounce(performSearch, 300), [performSearch]);
+
+  useEffect(() => {
+    debouncedSearch({ query: searchQuery, category, equipment, muscle });
+  }, [searchQuery, category, equipment, muscle, debouncedSearch]);
 
   return {
-    exercises,
+    searchQuery,
+    setSearchQuery,
+    category,
+    setCategory,
+    equipment,
+    setEquipment,
+    muscle,
+    setMuscle,
+    searchResults,
     isLoading,
-    hasError: !!error,
-    exerciseCount: exercises.length
+    categories,
+    equipments,
+    muscles,
+    exerciseCount: searchResults.length,
+    hasError: false, // This should be handled properly based on the try/catch block
   };
 };

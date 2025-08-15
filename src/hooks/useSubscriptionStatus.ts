@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface SubscriptionStatus {
@@ -13,12 +13,13 @@ interface SubscriptionStatus {
 }
 
 export const useSubscriptionStatus = () => {
-  const { session } = useAuth();
+  const { user } = useAuth();
+  const functions = getFunctions();
 
   return useQuery({
-    queryKey: ['subscription-status', session?.user?.id],
+    queryKey: ['subscription-status', user?.uid],
     queryFn: async (): Promise<SubscriptionStatus> => {
-      if (!session?.user) {
+      if (!user) {
         return {
           isTrialing: false,
           trialEndsAt: null,
@@ -31,38 +32,26 @@ export const useSubscriptionStatus = () => {
 
       try {
         console.log('Checking subscription status...');
+        console.log('Using Firebase callable function...');
         
-        const { data, error } = await supabase.functions.invoke('check-subscription', {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
-
-        if (error) {
-          console.error('Error calling check-subscription function:', error);
-          return {
-            isTrialing: false,
-            trialEndsAt: null,
-            isSubscribed: false,
-            subscriptionType: null,
-            subscriptionEnd: null,
-            status: null
-          };
-        }
+        const checkSubscription = httpsCallable(functions, 'checkSubscription');
+        const result = await checkSubscription();
+        const data = result.data as any;
 
         console.log('Subscription status response:', data);
 
         const isSubscribed = data?.subscribed || false;
+        const status = data?.status || null;
         const subscriptionType = data?.subscriptionType || null;
         const subscriptionEnd = data?.subscriptionEnd ? new Date(data.subscriptionEnd) : null;
 
         return {
-          isTrialing: false,
-          trialEndsAt: null,
+          isTrialing: status === 'trialing',
+          trialEndsAt: null, // We'll need to add this to the Firebase function if needed
           isSubscribed,
           subscriptionType,
           subscriptionEnd,
-          status: isSubscribed ? 'active' : null
+          status
         };
       } catch (error) {
         console.error('Error checking subscription status:', error);
@@ -77,7 +66,7 @@ export const useSubscriptionStatus = () => {
         };
       }
     },
-    enabled: !!session?.user,
+    enabled: !!user,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     refetchOnWindowFocus: true,

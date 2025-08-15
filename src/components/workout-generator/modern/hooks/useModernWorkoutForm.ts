@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useWorkoutGeneration } from '@/hooks/useWorkoutGeneration';
 import { useWorkoutReplacement } from '@/hooks/useWorkoutReplacement';
+import { useWorkoutStore } from '@/stores/workoutStore';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import type { Exercise } from '@/components/exercise-search/types';
 
 export function useModernWorkoutForm() {
+  const { currentWorkout, workoutTitle, hasValidWorkout } = useWorkoutStore();
   const [selectedTab, setSelectedTab] = useState('generator');
   const [generatedWorkout, setGeneratedWorkout] = useState<WeeklyWorkouts | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -16,6 +18,14 @@ export function useModernWorkoutForm() {
   
   const { generateWorkout } = useWorkoutGeneration();
   const { getScheduledWorkoutCount, replaceWorkouts, isReplacing } = useWorkoutReplacement();
+
+  // Check for stored workout on mount
+  useEffect(() => {
+    if (hasValidWorkout() && currentWorkout) {
+      setGeneratedWorkout(currentWorkout as WeeklyWorkouts);
+      setSelectedTab('preview');
+    }
+  }, []);
 
   const existingWorkoutCount = getScheduledWorkoutCount();
 

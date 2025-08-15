@@ -8,7 +8,7 @@ Strength.Design is an AI-powered fitness platform that creates personalized work
 
 ### ✅ Completed (Web Platform)
 - **Core Infrastructure**
-  - Supabase backend with authentication, database, and real-time features
+  - Firebase backend with Authentication, Firestore, Storage, Functions (Gemini integration)
   - Vite + React + TypeScript web application
   - Comprehensive design system with Tailwind CSS and shadcn/ui
   - Mobile-responsive web interface
@@ -30,7 +30,7 @@ Strength.Design is an AI-powered fitness platform that creates personalized work
   - Gradient borders and consistent styling
 
 ### 🚧 In Progress
-- **Mobile App Development**: Currently no functional mobile app exists despite initial directory setup
+- **Mobile App Development**: Foundation complete (Firebase + NativeWind + Navigation + Auth). Core features in progress.
 
 ## Mobile App Requirements
 
@@ -42,8 +42,8 @@ Strength.Design is an AI-powered fitness platform that creates personalized work
   "navigation": "React Navigation v6",
   "state": "TanStack Query + Zustand",
   "ui": "NativeWind (Tailwind for RN) + Custom Components",
-  "backend": "Existing Supabase (shared with web)",
-  "auth": "Supabase Auth with biometric support",
+  "backend": "Firebase (shared with web)",
+  "auth": "Firebase Auth with biometric support",
   "testing": "Jest + React Native Testing Library",
   "ci/cd": "EAS Build + GitHub Actions"
 }
@@ -51,35 +51,65 @@ Strength.Design is an AI-powered fitness platform that creates personalized work
 
 ### Mobile MVP Features (Phase 1 - 4 weeks)
 
-#### 1. Project Setup & Core Infrastructure
-- **Week 1**: Initialize Expo project with TypeScript
-  - Configure NativeWind for consistent styling with web
-  - Set up navigation structure
-  - Configure Supabase client
-  - Implement shared types/interfaces from web
+#### ✅ Completed (Foundation)
+- **Project Setup & Core Infrastructure**
+  - ✅ Expo project with TypeScript configured
+  - ✅ NativeWind for consistent styling with web
+  - ✅ Navigation structure (Auth + Main flows)
+  - ✅ Firebase client (Auth, Firestore, Storage)
+  - ✅ Shared types/interfaces from web
+  - ✅ TypeScript setup with NativeWind support
 
-#### 2. Authentication Flow
-- **Week 1-2**: Complete auth implementation
-  - Email/password login
-  - Social auth (Google, Apple)
-  - Phone number verification
-  - Biometric authentication (FaceID/TouchID)
-  - Session persistence
-  - Auto-login on app launch
+- **Authentication Flow**
+  - ✅ Email/password login
+  - ✅ User registration with display name
+  - ✅ Biometric authentication (FaceID/TouchID)
+  - ✅ Session persistence with Expo SecureStore
+  - ✅ Auto-login on app launch
+  - ✅ Proper error handling and loading states
 
-#### 3. Core Workout Features
-- **Week 2-3**: Port essential workout functionality
-  - Workout generation chat interface
-  - Exercise library browsing
-  - Workout template viewing
-  - Active workout tracking with timer
-  - Exercise completion marking
+- **Core Workout Features (Partial)**
+  - ✅ Workout listing with Firebase Firestore integration
+  - ✅ Favorite workout toggling
+  - ✅ Basic workout management UI
+  - 🚧 Workout generation chat interface (next)
+  - 🚧 Exercise library browsing (next)
+  - 🚧 Active workout tracking (next)
+
+#### 🚧 In Progress (Week 1-2)
+- **Workout Generation UI**
+  - Chat interface for AI workout generation
+  - Form inputs for workout preferences
+  - Integration with Firebase Functions (generateWorkout)
+  - Real-time chat with Gemini AI
+  - Save generated workouts to Firestore
+
+- **Exercise Library**
+  - Browse exercises by category
+  - Search functionality
+  - Exercise details with images/videos
+  - Add exercises to favorites
+  - Integration with existing exercise data
+
+#### 📋 Planned (Week 2-3)
+- **Enhanced Workout Management**
+  - Create new workout from template
+  - Edit existing workouts
+  - Delete workouts
+  - Workout scheduling
+  - Progress tracking
+
+- **Active Workout Tracking**
+  - Timer functionality
+  - Exercise completion tracking
   - Rest timer with notifications
+  - Form check integration
+  - Progress logging
 
-#### 4. Data Sync & Offline Support
-- **Week 3-4**: Implement robust data handling
-  - Offline-first architecture with local SQLite
-  - Background sync with Supabase
+#### 📋 Planned (Week 3-4)
+- **Data Sync & Offline Support**
+  - Offline-first architecture
+  - Background sync
   - Conflict resolution for offline edits
   - Image caching for exercises
   - Queue system for offline actions
@@ -118,7 +148,6 @@ strength-design/
 ├── packages/
 │   ├── shared/
 │   │   ├── types/          # TypeScript interfaces
-│   │   ├── api/            # Supabase queries and mutations
 │   │   ├── utils/          # Common utilities
 │   │   ├── constants/      # Shared constants
 │   │   └── validators/     # Form validation schemas
@@ -126,54 +155,30 @@ strength-design/
 │   └── mobile/             # New React Native app
 ```
 
+- Shared API calls should target Firebase from each app; avoid Supabase-specific bindings.
+
 ### Development Approach
 
 #### Immediate Actions (Week 1)
 1. **Clean up existing structure**
-   - Remove empty `/apps/mobile` directory
-   - Move `/apps/mobile-fresh` to `/packages/mobile`
-   - Initialize proper Expo project
-
+   - Remove legacy Supabase references from mobile
+   - Ensure shared package exports types/utilities only (or Firebase-friendly helpers)
 2. **Set up monorepo**
    - Configure workspace with npm/yarn workspaces
    - Share TypeScript config
    - Set up shared package
-
 3. **Port critical types**
    - User types
    - Workout/Exercise types
    - API response types
-   - Supabase generated types
 
 #### Code Sharing Examples
 ```typescript
-// packages/shared/api/workouts.ts
-export const workoutQueries = {
-  getWorkouts: (userId: string) => ({
-    queryKey: ['workouts', userId],
-    queryFn: () => supabase
-      .from('workouts')
-      .select('*')
-      .eq('user_id', userId)
-  }),
-  
-  createWorkout: async (workout: WorkoutInput) => {
-    const { data, error } = await supabase
-      .from('workouts')
-      .insert(workout)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }
-};
+// packages/shared/types/workout.ts
+export interface WorkoutPlan { /* ... */ }
 
-// Used in both web and mobile:
-// packages/web/src/hooks/useWorkouts.ts
-// packages/mobile/src/hooks/useWorkouts.ts
-import { useQuery } from '@tanstack/react-query';
-import { workoutQueries } from '@strength-design/shared/api';
+// Mobile/Web usage
+import type { WorkoutPlan } from '@strength-design/shared/types';
 ```
 
 ### UI/UX Consistency
@@ -187,16 +192,13 @@ export const colors = {
     light: "#FF8F5A",
     dark: "#E55A2B",
   },
-  // ... rest of color system
 };
-
-// Web: Used directly in Tailwind config
-// Mobile: Used in NativeWind config
+// Web: Tailwind config; Mobile: NativeWind config
 ```
 
 #### Component Parity
 - Maintain identical information architecture
-- Use same iconography (Lucide React Native)
+- Use same iconography (Lucide/Ionicons for RN)
 - Consistent navigation patterns
 - Matching animation timings
 - Identical form validation
@@ -252,13 +254,15 @@ gantt
 ### Next Steps
 
 1. **Immediate (This Week)**
-   - Set up monorepo structure
-   - Initialize Expo project with TypeScript
-   - Configure shared packages
-   - Port authentication flow
+   - ✅ Firebase migration in mobile complete
+   - ✅ Authentication flow implemented
+   - ✅ Basic workout listing and management
+   - 🚧 **NEXT**: Implement Workout Generation UI (chat interface)
+   - 🚧 **NEXT**: Create Exercise Library screen
 
 2. **Short-term (Next 2 Weeks)**
-   - Implement core workout features
+   - Complete core workout features (generation, library, tracking)
+   - Implement active workout tracking with timer
    - Set up CI/CD pipeline
    - Begin TestFlight beta
 
@@ -321,10 +325,10 @@ gantt
 
 This PRD consolidates all product requirements and provides a clear path forward for Strength.Design. The immediate priority is establishing the mobile app foundation while maintaining feature parity with the web platform. The shared code architecture will ensure consistency and reduce development time.
 
-**Key Decision**: Start fresh with a properly structured React Native/Expo project rather than trying to salvage the empty directory attempts. This will provide a solid foundation for the mobile app development.
+**Key Decision**: Proceed with Firebase across web and mobile for a unified backend and developer experience.
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: December 2024*  
-*Next Review: After Phase 1 Mobile Launch*
+*Document Version: 1.2*  
+*Last Updated: January 2025*  
+*Next Review: After Phase 2 Mobile Launch*

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Loader2, X, Search } from "lucide-react";
 import { useEnhancedExerciseSearch } from "@/hooks/useEnhancedExerciseSearch";
 import { EnhancedSearchResults } from "./EnhancedSearchResults";
 import type { Exercise } from "./types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EnhancedSearchDialogProps {
   isOpen: boolean;
@@ -22,10 +23,29 @@ export function EnhancedSearchDialog({
   onExercisesSelect,
   selectedExercises
 }: EnhancedSearchDialogProps) {
-  const [searchQuery, setSearchQuery] = useState("");
   const [tempSelectedExercises, setTempSelectedExercises] = useState<Exercise[]>([]);
   
-  const { exercises, isLoading, hasError, exerciseCount } = useEnhancedExerciseSearch(searchQuery);
+  const { 
+    exercises, 
+    isLoading, 
+    hasError, 
+    exerciseCount,
+    searchQuery,
+    setSearchQuery,
+    category,
+    setCategory,
+    equipment,
+    setEquipment,
+    muscle,
+    setMuscle,
+    categories,
+    equipments,
+    muscles,
+  } = useEnhancedExerciseSearch();
+
+  useEffect(() => {
+    setTempSelectedExercises(selectedExercises);
+  }, [selectedExercises]);
 
   const handleExerciseToggle = (exercise: Exercise) => {
     setTempSelectedExercises(prev => {
@@ -90,6 +110,28 @@ export function EnhancedSearchDialog({
               )}
               <Search className="h-4 w-4 text-muted-foreground" />
             </div>
+          </div>
+
+          {/* Filters */}
+          <div className="grid grid-cols-3 gap-2">
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
+              <SelectContent>
+                {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={equipment} onValueChange={setEquipment}>
+              <SelectTrigger><SelectValue placeholder="Equipment" /></SelectTrigger>
+              <SelectContent>
+                {equipments.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={muscle} onValueChange={setMuscle}>
+              <SelectTrigger><SelectValue placeholder="Muscle" /></SelectTrigger>
+              <SelectContent>
+                {muscles.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Search Stats */}

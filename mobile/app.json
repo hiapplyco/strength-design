@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Strength Design",
+    "slug": "strength-design",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0B0D"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.strengthdesign.app",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "This app uses Apple Health to track your workouts and fitness progress.",
+        "NSHealthUpdateUsageDescription": "This app saves workout data to Apple Health to help you track your fitness journey."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0B0D"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.strengthdesign.app",
+      "permissions": ["android.permission.ACTIVITY_RECOGNITION"]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9a0ffcf1-6667-469a-a67d-e367b2314dfb"
+      }
+    },
+    "owner": "hiapplyco"
+  }
+}

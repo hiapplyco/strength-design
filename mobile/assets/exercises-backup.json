@@ -1,0 +1,83 @@
+[
+  {
+    "id": "157",
+    "name": "Barbell Alternating Reverse Lunges",
+    "video_url": "https://www.youtube.com/embed/NmfQzqGktgs?autoplay=1",
+    "images": [
+      "https://img.youtube.com/vi/NmfQzqGktgs/hqdefault.jpg"
+    ],
+    "instructions": [
+      "Stand upright holding a barbell placed across the back of your shoulders.Step back 2-3 feet with one foot and lower your body to the ground.Your back knee should almost touch the ground and your front knee should be at a 90-degree angle.Push up to return to the starting position.Repeat with the other leg.Repeat the movement for the recommended number of repetitions, then switch to the other leg."
+    ],
+    "primary_muscles": [
+      "QUADRICEPS"
+    ],
+    "secondary_muscles": [
+      "GLUTES",
+      "HAMSTRINGS"
+    ],
+    "equipment": [
+      "BARBELL",
+      "BAR"
+    ],
+    "type": [
+      "STRENGTH"
+    ],
+    "mechanics_type": [
+      "COMPOUND"
+    ]
+  },
+  {
+    "id": "163",
+    "name": "Facepulls",
+    "video_url": "https://www.youtube.com/embed/3ZViIERC1QQ?autoplay=1",
+    "images": [
+      "https://img.youtube.com/vi/3ZViIERC1QQ/hqdefault.jpg"
+    ],
+    "instructions": [
+      "Attach a rope to a low pulley cable machine.Stand facing the machine and hold the rope with an overhand grip.Step back to create tension in the cable, with feet shoulder-width apart.Keep your back straight and lean slightly forward, bending your knees slightly.Pull the rope towards your chest, squeezing your shoulder blades together.Pause at the end of the movement, then slowly release and extend your arms back to the starting position.Repeat for the desired number of repetitions."
+    ],
+    "primary_muscles": [
+      "SHOULDERS"
+    ],
+    "secondary_muscles": [
+      "FOREARMS"
+    ],
+    "equipment": [
+      "CABLE",
+      "ROPE"
+    ],
+    "type": [
+      "STRENGTH"
+    ],
+    "mechanics_type": [
+      "ISOLATION"
+    ]
+  },
+  {
+    "id": "164",
+    "name": "Bench Hops",
+    "video_url": "https://www.youtube.com/embed/R3TCOHRwCl8?autoplay=1",
+    "images": [
+      "https://img.youtube.com/vi/R3TCOHRwCl8/hqdefault.jpg"
+    ],
+    "instructions": [
+      "Start with a box or bench in front of you. Stand with feet shoulder-width apart. This will be your starting position. Perform a short squat in preparation for the jump. Jump over the bench, landing with your knees bent, absorbing the impact through your legs."
+    ],
+    "primary_muscles": [
+      "FULL_BODY"
+    ],
+    "secondary_muscles": [],
+    "equipment": [
+      "BENCH"
+    ],
+    "type": [
+      "PLYOMETRICS",
+      "CROSSFIT",
+      "CARDIO"
+    ],
+    "mechanics_type": [
+      "COMPOUND"
+    ]
+  }
+]

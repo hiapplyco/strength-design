@@ -71,21 +71,21 @@ export const SearchResults = ({
                 <TableCell className="text-sm text-muted-foreground">
                   <div className="space-y-2">
                     <div className="flex flex-wrap gap-1">
-                      {exercise.level && (
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                          {exercise.level}
+                      {exercise.type && exercise.type.map((t) => (
+                        <span key={t} className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                          {t}
                         </span>
-                      )}
-                      {exercise.equipment && (
-                        <span className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-1 text-xs font-medium">
-                          {exercise.equipment}
+                      ))}
+                      {exercise.equipment && exercise.equipment.map((eq) => (
+                        <span key={eq} className="inline-flex items-center rounded-full bg-secondary/10 px-2 py-1 text-xs font-medium">
+                          {eq}
                         </span>
-                      )}
+                      ))}
                     </div>
                     {exercise.instructions && exercise.instructions.length > 0 && (
                       <p className="text-xs leading-relaxed max-w-md">
-                        {exercise.instructions[0].substring(0, 150)}
-                        {exercise.instructions[0].length > 150 ? '...' : ''}
+                        {exercise.instructions.join(' ').substring(0, 150)}
+                        {exercise.instructions.join(' ').length > 150 ? '...' : ''}
                       </p>
                     )}
                   </div>

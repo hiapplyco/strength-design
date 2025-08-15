@@ -2,15 +2,12 @@
 export interface Exercise {
   id: string;
   name: string;
-  level?: string;
-  equipment?: string;
-  instructions?: string[];
+  video_url?: string;
   images?: string[];
-  type?: string;
-  muscle?: string;
-  difficulty?: string;
-  mechanic?: string;
-  force?: string;
-  primaryMuscles?: string[];
-  secondaryMuscles?: string[];
+  instructions?: string[];
+  primary_muscles: string[];
+  secondary_muscles: string[];
+  equipment: string[];
+  type: string[];
+  mechanics_type: string[];
 }

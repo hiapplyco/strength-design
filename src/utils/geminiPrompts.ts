@@ -124,7 +124,7 @@ export const validateFileType = (file: File) => {
 };
 
 export const getGeminiConfig = () => ({
-  model: "gemini-1.5-flash",
+  model: "gemini-2.5-flash",
   generationConfig: {
     temperature: 1,
     topP: 0.95,

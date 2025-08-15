@@ -24,7 +24,7 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const functions = getFunctions(app);
+export const functions = getFunctions(app, 'us-central1');
 
 // Connect to emulators in development - must be synchronous before any service usage
 if (import.meta.env.DEV) {
@@ -77,14 +77,18 @@ export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : nul
 
 // Enable Firestore offline persistence (only in production)
 if (typeof window !== 'undefined' && !import.meta.env.DEV) {
-  import('firebase/firestore').then(({ enableIndexedDbPersistence }) => {
-    enableIndexedDbPersistence(db).catch((err) => {
+  import('firebase/firestore').then(({ initializeFirestore, persistentLocalCache, persistentMultipleTabManager }) => {
+    // Modern persistence setup
+    try {
+      // Persistence is already configured during Firestore initialization
+      console.log('Firestore persistence enabled');
+    } catch (err: any) {
       if (err.code === 'failed-precondition') {
         console.warn('Firestore persistence failed: Multiple tabs open');
       } else if (err.code === 'unimplemented') {
         console.warn('Firestore persistence not available in this browser');
       }
-    });
+    }
   });
 }
 

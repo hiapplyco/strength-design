@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidUserData() {
+      return request.resource.data.keys().hasAll(['createdAt', 'updatedAt']) &&
+             request.resource.data.tier in ['free', 'pro', 'premium'];
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserData();
+      allow update: if isOwner(userId);
+      allow delete: if false; // Prevent accidental deletion
+      
+      // Workouts subcollection
+      match /workouts/{workoutId} {
+        allow read, write: if isOwner(userId);
+        
+        // Workout history subcollection
+        match /history/{historyId} {
+          allow read, write: if isOwner(userId);
+        }
+        
+        // Voice recordings subcollection
+        match /voiceRecordings/{recordingId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+      
+      // Workout sessions subcollection
+      match /workoutSessions/{sessionId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // Nutrition logs subcollection
+      match /nutritionLogs/{date} {
+        allow read, write: if isOwner(userId);
+        
+        // Meals subcollection
+        match /meals/{mealId} {
+          allow read, write: if isOwner(userId);
+        }
+        
+        // Exercise entries subcollection
+        match /exercises/{exerciseId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+      
+      // Chat sessions subcollection
+      match /chatSessions/{sessionId} {
+        allow read, write: if isOwner(userId);
+        
+        // Messages subcollection
+        match /messages/{messageId} {
+          allow read, write: if isOwner(userId);
+        }
+      }
+      
+      // File uploads subcollection
+      match /fileUploads/{uploadId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // Journal entries subcollection
+      match /journalEntries/{entryId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // AI insights subcollection
+      match /aiInsights/{insightId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) || 
+                       request.auth.token.admin == true; // Allow AI service to write
+      }
+      
+      // Saved exercises subcollection
+      match /savedExercises/{exerciseId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Global exercises collection (read-only for users)
+    match /exercises/{exerciseId} {
+      allow read: if isAuthenticated();
+      allow write: if request.auth.token.admin == true; // Admin only
+    }
+    
+    // Workout-cool exercises collection - TEMPORARY OPEN FOR MIGRATION
+    match /workout_cool_exercises/{exerciseId} {
+      allow read: if true; // Public read
+      allow write: if true; // TEMPORARY - Remove after migration!
+    }
+    
+    // Global food items collection
+    match /foodItems/{foodItemId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                      request.resource.data.createdBy == request.auth.uid;
+      allow update: if isAuthenticated() && 
+                      resource.data.createdBy == request.auth.uid;
+      allow delete: if isAuthenticated() && 
+                      resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Admin collections (if needed)
+    match /admin/{document=**} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -6,6 +6,10 @@ import { useRef, useState } from "react";
 import type { WorkoutDay } from "@/types/fitness";
 import { SearchSection } from "./workout-day-card/SearchSection";
 import { WorkoutContentSection } from "./workout-day-card/WorkoutContentSection";
+import { EditWorkoutDayDialog } from "@/components/workout/EditWorkoutDayDialog";
+import { Button } from "@/components/ui/button";
+import { Edit2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WorkoutDayCardProps {
   day: string;
@@ -15,6 +19,7 @@ interface WorkoutDayCardProps {
   setIsExporting: (value: boolean) => void;
   allWorkouts: Record<string, WorkoutDay>;
   onUpdate: (day: string, updates: Partial<WorkoutDay>) => void;
+  cycleNumber?: number;
 }
 
 export const WorkoutDayCard = ({
@@ -24,13 +29,16 @@ export const WorkoutDayCard = ({
   isExporting,
   setIsExporting,
   allWorkouts,
-  onUpdate
+  onUpdate,
+  cycleNumber = 1
 }: WorkoutDayCardProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleExerciseSelect = (exerciseName: string) => {
     setSearchTerm(exerciseName);
@@ -69,6 +77,21 @@ export const WorkoutDayCard = ({
       />
       
       <div className="p-6 sm:p-8 space-y-8">
+        {/* Edit Button */}
+        {user && (
+          <div className="flex justify-end -mt-4 mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditDialogOpen(true)}
+              className="gap-2"
+            >
+              <Edit2 className="h-4 w-4" />
+              Edit Day
+            </Button>
+          </div>
+        )}
+
         {/* Clean Search Section */}
         <div className="bg-muted/30 rounded-lg p-4 border border-border/20">
           <SearchSection
@@ -89,6 +112,19 @@ export const WorkoutDayCard = ({
           onExerciseSelect={handleExerciseSelect}
         />
       </div>
+
+      {/* Edit Dialog */}
+      <EditWorkoutDayDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        workoutDay={workout}
+        dayNumber={index + 1}
+        cycleNumber={cycleNumber}
+        fitnessLevel={user?.user_metadata?.fitness_level || "beginner"}
+        onUpdate={(updatedDay) => {
+          onUpdate(day, updatedDay);
+        }}
+      />
     </div>
   );
 };

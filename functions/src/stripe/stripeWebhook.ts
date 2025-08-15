@@ -1,15 +1,14 @@
-import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
+import { Request, Response } from "express";
 
 // Define the secrets
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 const stripeWebhookSecret = defineSecret("STRIPE_WEBHOOK_SECRET");
 
-export const stripeWebhook = functions
-  .runWith({ secrets: [stripeSecretKey, stripeWebhookSecret] })
-  .https.onRequest(async (req, res) => {
+export const stripeWebhook = onRequest({ secrets: [stripeSecretKey, stripeWebhookSecret] }, async (req: Request, res: Response) => {
   if (req.method !== "POST") {
     res.status(405).send("Method Not Allowed");
     return;
@@ -42,7 +41,7 @@ export const stripeWebhook = functions
 
   try {
     const event = stripe.webhooks.constructEvent(
-      req.rawBody,
+      (req as any).rawBody,
       signature,
       webhookSecret
     );

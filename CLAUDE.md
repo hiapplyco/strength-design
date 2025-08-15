@@ -1,5 +1,123 @@
 # Strength.Design - AI Claude Development Guide
 
+## 🚨 PRODUCTION DEVELOPMENT STANDARDS
+
+### Core Principles
+1. **NO FALLBACKS** - Build for production reliability from the start
+2. **Proper Error Handling** - Every error must be caught, logged, and handled gracefully
+3. **Comprehensive Logging** - Log all critical operations with appropriate levels (error, warn, info, debug)
+4. **Production Testing** - All code must be tested for production scenarios
+5. **Monitoring & Analytics** - Implement tracking for all user actions and system events
+6. **Performance First** - Optimize for real-world usage patterns
+
+### Development Requirements
+- **Error Boundaries**: Wrap all components with error boundaries
+- **Retry Logic**: Implement exponential backoff for network requests
+- **Loading States**: Show proper loading indicators, never leave users guessing
+- **Error Messages**: User-friendly error messages with actionable next steps
+- **Telemetry**: Track performance metrics and user behavior
+- **Crash Reporting**: Integrate Sentry or similar for production monitoring
+
+### Production Code Patterns
+
+#### Error Handling Pattern
+```typescript
+try {
+  // Operation
+  logger.info('Starting operation', { context });
+  const result = await operation();
+  logger.info('Operation successful', { result });
+  return result;
+} catch (error) {
+  logger.error('Operation failed', { error, context });
+  // Send to crash reporting
+  Sentry.captureException(error);
+  // User-friendly error
+  throw new UserError('Unable to complete action. Please try again.');
+}
+```
+
+#### NO FALLBACK - Use Proper Error States
+```typescript
+// ❌ NEVER DO THIS - Silent fallback
+const data = await fetchData().catch(() => localData);
+
+// ✅ DO THIS - Explicit error handling
+try {
+  const data = await fetchData();
+  return { status: 'success', data };
+} catch (error) {
+  logger.error('Data fetch failed', error);
+  return { status: 'error', error: error.message };
+}
+```
+
+#### Logging Standards
+```typescript
+// Use structured logging with context
+logger.info('User action', {
+  action: 'exercise_search',
+  userId: user.id,
+  query: searchTerm,
+  timestamp: Date.now(),
+  sessionId: session.id
+});
+
+// Log levels:
+// ERROR: System errors, failures requiring attention
+// WARN: Degraded performance, retry scenarios
+// INFO: User actions, successful operations
+// DEBUG: Development only, detailed traces
+```
+
+## 🎯 Current Status & Next Steps
+
+### ✅ Phase 3 Complete! (Mobile App Feature-Complete)
+- **Firebase Migration**: Complete - mobile app fully migrated from Supabase to Firebase
+- **Authentication**: Firebase Auth with biometric support (FaceID/TouchID)
+- **Navigation**: Complete auth flow and main app navigation structure
+- **Workout Features**: Full workout management with listing, favorites, and active tracking
+- **TypeScript**: All components properly typed with NativeWind className support
+- **AI Workout Generation**: Full chat interface with real-time AI responses and workout creation
+- **Exercise Library**: Complete browse/search functionality with categories, filters, and favorites
+- **Workout Detail Views**: Comprehensive workout display with cycle navigation and expandable sections
+- **Active Workout Tracking**: Complete with timers, set/rep tracking, progress logging, and session saving
+- **Offline Support**: ✅ SQLite database with automatic background sync and conflict resolution
+- **Push Notifications**: ✅ Complete notification system with workout reminders and motivational messages
+- **Health Integration**: ✅ Apple Health (iOS) and Google Fit (Android) full integration
+- **Haptic Feedback**: ✅ Rich tactile feedback throughout the app with customization settings
+- **Gesture Navigation**: ✅ Swipe gestures for intuitive exercise navigation
+- **Pull-to-Refresh**: ✅ Implemented across all major screens with haptic feedback
+
+### 🚀 Future Enhancements
+1. **Social Features** - Share workouts with friends, follow users, community challenges
+2. **Video Analysis** - AI-powered form checking with device camera
+3. **Gamification** - Achievements, streaks, XP system, and leaderboards
+4. **Premium Features** - Advanced AI coaching personalities, custom programs
+
+### 📁 Mobile App Structure (Consolidated)
+**Location**: `/mobile/` - Single unified mobile directory
+
+**Key Files:**
+- `/mobile/screens/UnifiedSearchScreen.js` - Unified exercise + nutrition search with NLU
+- `/mobile/screens/ContextAwareGeneratorScreen.js` - AI workout generation with Gemini 2.5
+- `/mobile/services/searchService.js` - Intelligent search with 873 exercises
+- `/mobile/services/NutritionService.js` - USDA nutrition database integration
+- `/mobile/functions/index.js` - Firebase Functions with real Gemini AI
+
+**Features Implemented:**
+- ✅ Real Gemini 2.5 Flash integration (not mocks)
+- ✅ Unified Search with natural language understanding
+- ✅ Firebase emulator support for local development
+- ✅ Health service integration (Apple Health/Google Fit)
+- ✅ Comprehensive exercise database (873 exercises)
+- ✅ Nutrition search with USDA fallback
+
+**Firebase Functions:**
+- `functions/src/notifications/` - Notification scheduling functions ✅
+- `functions/src/exercises/searchExercises.ts` - Exercise search ✅
+- `functions/src/exercises/getExerciseCategories.ts` - Categories ✅
+
 ## Project Overview
 
 Strength.Design is an AI-powered fitness platform that creates personalized workout plans through conversational interfaces. Built on Firebase's complete platform with Gemini AI integration.
@@ -10,23 +128,23 @@ Strength.Design is an AI-powered fitness platform that creates personalized work
 ## Quick Start
 
 ```bash
-# Clone and setup
-git clone https://github.com/yourusername/strength-design.git
+# Web Development
 cd strength-design
 npm install
-cp .env.example .env.local
+npm run dev          # Start web app at localhost:3000
 
-# Development
-npm run dev          # Start dev server
-npm run typecheck    # Type checking
-npm run lint         # Linting
-npm run test         # Testing
-npm run build        # Production build
+# Mobile Development
+cd mobile
+npm install
+npm run web          # Start mobile web at localhost:8081
 
-# Firebase deployment
+# Firebase Emulators (for mobile)
+cd mobile
+firebase emulators:start --project demo-strength-design
+
+# Deployment
 firebase deploy      # Deploy all services
 firebase deploy --only functions  # Deploy functions only
-firebase deploy --only firestore:rules  # Deploy Firestore rules
 ```
 
 ## Firebase Stack
@@ -104,35 +222,72 @@ stripeWebhook       # Payment webhooks
 cd functions && npm run serve
 ```
 
-### 5. Firebase AI Logic (Gemini Integration)
+### 5. Firebase AI Logic (Gemini 2.5 Integration)
+
+**CRITICAL**: Always use `gemini-2.5-flash` model exclusively. All other models are deprecated.
+
 ```typescript
-// Initialize AI with Gemini Developer API
-import { getAI, getGenerativeModel, GoogleAIBackend } from "firebase/ai";
+// Server-side (Firebase Functions) - REQUIRED for production
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const ai = getAI(firebaseApp, { backend: new GoogleAIBackend() });
-const model = getGenerativeModel(ai, { model: "gemini-2.0-flash" });
+const genAI = new GoogleGenerativeAI(apiKey);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-// Usage
-const result = await model.generateContent(prompt);
-const response = result.response.text();
+// Correct usage with system instruction
+const result = await model.generateContent({
+  contents: [{ role: "user", parts: [{ text: prompt }] }],
+  generationConfig: {
+    maxOutputTokens: 8192,
+    temperature: 0.7,
+  },
+  systemInstruction: "You are a fitness expert...", // Simple string format
+});
 
-// Models available
-- gemini-2.0-flash (recommended)
-- gemini-1.5-pro
-- imagen-3 (for image generation)
+// Handle httpsCallable wrapped data
+const data = req.body.data || req.body;
+const { message, history } = data;
 ```
+
+**Key Features of Gemini 2.5 Flash**:
+- First Flash model with thinking capabilities
+- Reasoning model with self fact-checking
+- Dynamic and controllable computing
+- Most cost-efficient ($0.10/1M input, $0.40/1M output)
+- Best price/performance ratio
+- 1M+ token context window
+
+**Best Practices**:
+1. **Model Selection**: ONLY use `gemini-2.5-flash` - all other models deprecated
+2. **System Instructions**: Use simple string format, not object
+3. **Data Handling**: Support both direct calls and httpsCallable wrapped data
+4. **Error Handling**: Always validate API key availability
+5. **Security**: Never expose API keys in client code - use Firebase Functions
+
+**Migration Alert**:
+- ❌ Gemini 1.0/1.5: Deprecated/Retired
+- ❌ Gemini 2.0: Deprecated
+- ✅ Gemini 2.5-flash: Current production model
+- ✅ Gemini 2.5-flash-lite: Available for ultra-low-cost needs
 
 **Important**: Gemini API keys are stored server-side only. Never expose them in client code.
 
 ### 6. Environment Configuration
 ```env
-# Required variables (.env.local)
+# Web (.env.local)
 VITE_FIREBASE_API_KEY=your-api-key
 VITE_FIREBASE_AUTH_DOMAIN=your-auth-domain
 VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-storage-bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 VITE_FIREBASE_APP_ID=your-app-id
+
+# Mobile (Expo .env)
+EXPO_PUBLIC_FIREBASE_API_KEY=your-api-key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+EXPO_PUBLIC_FIREBASE_APP_ID=your-app-id
 
 # Functions environment (set via Firebase CLI)
 firebase functions:config:set gemini.api_key="your-key"
@@ -146,6 +301,7 @@ firebase functions:config:set stripe.webhook_secret="your-secret"
 3. **Rate Limiting**: Implemented in functions and client
 4. **Authentication**: Required for all data operations
 5. **CORS**: Configured for allowed origins only
+6. **Mobile**: Use Expo config vars (EXPO_PUBLIC_FIREBASE_*) for client-side keys
 
 ### 8. Deployment Checklist
 - [ ] Ensure Blaze plan is active
@@ -300,14 +456,15 @@ export function useExample() {
 ### ✅ Completed Features
 - **Authentication**: Email, social (Google/Apple), phone
 - **AI Workout Generation**: Chat-based workout creation
-- **Exercise Library**: Categorized exercise database
+- **Exercise Library**: Categorized exercise database (800+ exercises)
 - **Workout Templates**: Save and reuse workouts
 - **Program Search**: Perplexity AI integration for popular programs
 - **Design System**: Unified components and tokens
 - **Real-time Updates**: Live notifications and updates
+- **Mobile App Core Features**: AI generation + Exercise library implemented
 
 ### 🚧 In Development
-- **Mobile App**: React Native with Expo (starting fresh)
+- **Mobile App Workout Management**: Workout details, editing, active tracking
 - **AI Personalities**: Custom trainer voices and styles
 - **Advanced Analytics**: Progress tracking and insights
 
@@ -318,139 +475,3 @@ export function useExample() {
 - **Health Integration**: Apple Health, Google Fit
 - **Payment System**: Stripe for premium features
 
-## Mobile Development Plan
-
-### Technology Stack
-```json
-{
-  "framework": "React Native with Expo SDK 50+",
-  "navigation": "React Navigation v6",
-  "state": "TanStack Query + Zustand",
-  "ui": "NativeWind (Tailwind for RN)",
-  "backend": "Shared Supabase instance"
-}
-```
-
-### MVP Timeline (4 weeks)
-1. **Week 1**: Project setup, authentication
-2. **Week 2-3**: Core workout features, offline support
-3. **Week 3-4**: Testing, polish, beta release
-
-### Shared Code Strategy
-```
-packages/
-├── shared/       # Shared types, API, utils
-├── web/          # Current web app
-└── mobile/       # New React Native app
-```
-
-## Testing Standards
-
-### Test Requirements
-- Unit tests for all utilities and hooks
-- Component tests for UI components
-- Integration tests for API endpoints
-- E2E tests for critical user flows
-
-### Running Tests
-```bash
-npm test              # Run all tests
-npm run test:watch    # Watch mode
-npm run test:coverage # Coverage report
-```
-
-## Performance Optimization
-
-### Key Metrics
-- **Bundle size**: < 200KB JS, < 50KB CSS
-- **Core Web Vitals**: LCP < 2.5s, FID < 100ms, CLS < 0.1
-- **Lighthouse score**: > 90 for all categories
-
-### Optimization Checklist
-- [ ] Lazy load routes and heavy components
-- [ ] Optimize images (WebP, proper sizing)
-- [ ] Implement virtual scrolling for long lists
-- [ ] Use React.memo for expensive components
-- [ ] Debounce user inputs
-- [ ] Cache API responses
-
-## Key Development Guidelines
-
-### Code Standards
-- **TypeScript**: Strict mode enabled, no `any` types
-- **Components**: < 200 lines, single responsibility
-- **Styling**: Use Tailwind classes, avoid inline styles
-- **State**: Prefer React Query for server state
-- **Performance**: Memoize expensive operations
-- **Accessibility**: ARIA labels, keyboard navigation
-
-### Git Workflow
-```bash
-# Branch naming
-feature/description
-fix/issue-description
-chore/task-description
-
-# Commit format
-feat(scope): add new feature
-fix(scope): resolve issue
-docs(scope): update documentation
-style(scope): formatting changes
-refactor(scope): code improvements
-test(scope): add tests
-chore(scope): maintenance tasks
-```
-
-### Before Committing
-1. Run `npm run typecheck`
-2. Run `npm run lint`
-3. Run `npm test`
-4. Verify no console errors
-5. Check responsive design
-
-## Environment Variables
-
-### Required Variables
-```env
-# Supabase
-VITE_SUPABASE_URL=your-supabase-url
-VITE_SUPABASE_ANON_KEY=your-anon-key
-
-# Feature Flags
-VITE_ENABLE_DEBUG=false
-VITE_ENABLE_ANALYTICS=false
-
-# API Keys (server-side only)
-PERPLEXITY_API_KEY=your-key  # In Supabase edge functions
-```
-
-## Quick Reference Checklists
-
-### New Component Checklist
-- [ ] Uses TypeScript with proper types
-- [ ] Follows component pattern from guide
-- [ ] Uses design tokens for styling
-- [ ] Includes loading/error states
-- [ ] Mobile responsive
-- [ ] Keyboard accessible
-- [ ] Has unit tests
-
-### PR Checklist
-- [ ] Tests pass
-- [ ] No TypeScript errors
-- [ ] Lint errors resolved
-- [ ] Responsive design verified
-- [ ] Documentation updated if needed
-- [ ] No console.log statements
-
-### Performance Checklist
-- [ ] Images optimized
-- [ ] Components lazy loaded
-- [ ] API calls cached
-- [ ] Animations use GPU
-- [ ] Bundle size checked
-
----
-
-*Version: 6.0 - Firebase Stack Integration*
-*Last Updated: January 2025*

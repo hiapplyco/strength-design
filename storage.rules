@@ -91,6 +91,12 @@ service firebase.storage {
     match /admin/{path=**} {
       allow read, write: if request.auth.token.admin == true;
     }
+
+    // Publicly accessible exercise data
+    match /exercises.json {
+      allow read: if true;
+      allow write: if request.auth.token.admin == true; // Only admins can overwrite
+    }
     
     // Deny all other access
     match /{allPaths=**} {

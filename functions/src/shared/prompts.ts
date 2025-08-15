@@ -77,7 +77,7 @@ Please use this conversational context to create a workout that aligns with the 
 };
 
 export const getGeminiConfig = () => ({
-  model: "gemini-2.0-flash-latest",
+  model: "gemini-2.5-flash",
   generationConfig: {
     temperature: 1,
     topP: 0.95,

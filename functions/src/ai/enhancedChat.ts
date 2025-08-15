@@ -1,19 +1,18 @@
-import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { corsHandler } from "../shared/cors";
+import { Request, Response } from "express";
 
 // Define the secret
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
-export const enhancedChat = functions
-  .runWith({
+export const enhancedChat = onRequest({
     timeoutSeconds: 300,
-    memory: "1GB",
+    memory: "1GiB",
     secrets: [geminiApiKey]
-  })
-  .https.onRequest(async (req, res) => {
+  }, async (req: Request, res: Response) => {
     corsHandler(req, res, async () => {
       if (req.method !== "POST") {
         res.status(405).json({ error: "Method not allowed" });
@@ -121,34 +120,11 @@ export const enhancedChat = functions
         }
 
         // Build comprehensive prompt
-        const systemPrompt = `You are an expert AI fitness and nutrition coach with access to the user's complete fitness journey data. 
-
-${sessionType === 'nutrition' ? 'Focus on nutrition, meal planning, and dietary advice.' : ''}
-${sessionType === 'workout' ? 'Focus on workout planning, exercise form, and training advice.' : ''}
-${sessionType === 'wellness' ? 'Focus on recovery, sleep, stress management, and overall wellness.' : ''}
-
-User Context:
-- Profile: ${JSON.stringify(userContext.profile || {})}
-- Recent Workouts (${userContext.recentWorkouts?.length || 0}): ${JSON.stringify(userContext.recentWorkouts?.slice(0, 3) || [])}
-- Recent Nutrition (${userContext.recentNutrition?.length || 0} days): ${JSON.stringify(userContext.recentNutrition?.slice(0, 3) || [])}
-- Workout Templates: ${userContext.workoutTemplates || 0} saved
-- Uploaded Files: ${userContext.uploadedFiles || 0} total files
-
-Session Files Context:
-${filesContext || 'No files uploaded in this session'}
-
-Instructions:
-1. Use all available user data to provide personalized advice
-2. Reference specific data points from their history when relevant
-3. If files were uploaded, analyze and incorporate their content
-4. Extract and store any new profile information mentioned in the conversation
-5. Be specific and actionable in your recommendations
-6. For nutrition discussions, reference their macro targets and recent intake
-7. For workout discussions, consider their recent training and templates`;
+        const systemPrompt = `You are an expert AI fitness and nutrition coach with access to the user's complete fitness journey data. \n\n${sessionType === 'nutrition' ? 'Focus on nutrition, meal planning, and dietary advice.' : ''}\n${sessionType === 'workout' ? 'Focus on workout planning, exercise form, and training advice.' : ''}\n${sessionType === 'wellness' ? 'Focus on recovery, sleep, stress management, and overall wellness.' : ''}\n\nUser Context:\n- Profile: ${JSON.stringify(userContext.profile || {})}\n- Recent Workouts (${userContext.recentWorkouts?.length || 0}): ${JSON.stringify(userContext.recentWorkouts?.slice(0, 3) || [])}\n- Recent Nutrition (${userContext.recentNutrition?.length || 0} days): ${JSON.stringify(userContext.recentNutrition?.slice(0, 3) || [])}\n- Workout Templates: ${userContext.workoutTemplates || 0} saved\n- Uploaded Files: ${userContext.uploadedFiles || 0} total files\n\nSession Files Context:\n${filesContext || 'No files uploaded in this session'}\n\nInstructions:\n1. Use all available user data to provide personalized advice\n2. Reference specific data points from their history when relevant\n3. If files were uploaded, analyze and incorporate their content\n4. Extract and store any new profile information mentioned in the conversation\n5. Be specific and actionable in your recommendations\n6. For nutrition discussions, reference their macro targets and recent intake\n7. For workout discussions, consider their recent training and templates`;
 
         // Initialize Gemini model
         const model = genAI.getGenerativeModel({ 
-          model: "gemini-2.0-flash-latest"
+          model: "gemini-2.5-flash"
         });
 
         // Build conversation history with system instruction
@@ -193,7 +169,7 @@ Instructions:
           user_id: userId,
           role: 'assistant',
           content: response,
-          model_used: 'gemini-2.0-flash-latest',
+          model_used: 'gemini-2.5-flash',
           created_at: admin.firestore.FieldValue.serverTimestamp()
         });
 
@@ -298,9 +274,9 @@ async function extractProfileData(userId: string, text: string, db: admin.firest
 
     // Goals extraction
     const goalKeywords = ['goal', 'want to', 'trying to', 'aim to', 'objective'];
-    const goalMatches = text.match(new RegExp(`(?:${goalKeywords.join('|')})\\s+(?:is\\s+)?(.+?)(?:\\.|,|;|$)`, 'gi'));
+    const goalMatches = text.match(new RegExp(`(?:${goalKeywords.join('|')})\\s+(?:is\\s+)?(.+?)(?:\\.|, |; |$)`, 'gi'));
     if (goalMatches) {
-      extractedData.primary_goal = goalMatches[0].replace(/^.*?(goal|want to|trying to|aim to|objective)\s+(?:is\s+)?/i, '').trim();
+      extractedData.primary_goal = goalMatches[0].replace(/^.*?(goal|want to|trying to|aim to|objective)\\s+(?:is\\s+)?/i, '').trim();
     }
 
     // Training experience

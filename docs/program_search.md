@@ -9,12 +9,11 @@ This document outlines the steps to implement a "Program Finder" feature that us
 1. **Perplexity API Key**
    - Sign up at [Perplexity API](https://www.perplexity.ai/api)
    - Generate an API key from your account dashboard
-   - Add the key to your Supabase environment variables:
-     ```bash
-     # In Supabase dashboard, go to Settings > Edge Functions
-     # Add a new secret:
-     PERPLEXITY_API_KEY=your_api_key_here
-     ```
+   - Add the key as a Firebase Functions config secret:
+      ```bash
+      # In Firebase functions config
+      firebase functions:config:set perplexity.api_key="your_api_key_here"
+      ```
 
 2. **Local Development**
    - Copy `.env.example` to `.env.local`
@@ -22,7 +21,7 @@ This document outlines the steps to implement a "Program Finder" feature that us
 
 ### File Structure
 - `docs/` directory - Documentation
-- `supabase/functions/program-search/` - Backend API endpoint
+- `functions/src/program-search.ts` - Backend API endpoint (Firebase Functions)
 - `src/hooks/useProgramSearch.ts` - Frontend React hook
 - `src/components/workout-generator/ProgramFinder.tsx` - UI component
 

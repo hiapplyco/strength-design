@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1",
+    "name": "Push Up",
+    "video_url": "http://example.com/pushup.mp4",
+    "images": [
+      "http://example.com/pushup.jpg"
+    ],
+    "instructions": [
+      "A basic push up."
+    ],
+    "primary_muscles": [
+      "Chest"
+    ],
+    "secondary_muscles": [
+      "Triceps"
+    ],
+    "equipment": [
+      "Bodyweight"
+    ],
+    "type": [],
+    "mechanics_type": []
+  },
+  {
+    "id": "2",
+    "name": "Squat",
+    "video_url": "http://example.com/squat.mp4",
+    "images": [
+      "http://example.com/squat.jpg"
+    ],
+    "instructions": [
+      "A basic squat."
+    ],
+    "primary_muscles": [
+      "Quads"
+    ],
+    "secondary_muscles": [
+      "Glutes"
+    ],
+    "equipment": [
+      "Bodyweight"
+    ],
+    "type": [],
+    "mechanics_type": []
+  }
+]

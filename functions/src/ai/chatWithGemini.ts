@@ -1,15 +1,14 @@
-import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 import { corsHandler } from "../shared/cors";
+import { Request, Response } from "express";
 
 // Define the secret
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
-export const chatWithGemini = functions
-  .runWith({ secrets: [geminiApiKey] })
-  .https.onRequest(async (req, res) => {
+export const chatWithGemini = onRequest({ secrets: [geminiApiKey] }, async (req: Request, res: Response) => {
   // Handle CORS
   corsHandler(req, res, async () => {
     if (req.method !== "POST") {
@@ -26,9 +25,11 @@ export const chatWithGemini = functions
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-      const { message, history = [], fileUrl, systemPrompt } = req.body;
+      // Handle both direct calls and httpsCallable wrapped calls
+      const data = req.body.data || req.body;
+      const { message, history = [], fileUrl } = data;
       console.log("Processing message:", message, "with file:", fileUrl);
 
       const userMessageParts: any[] = [{ text: message }];
@@ -67,8 +68,15 @@ export const chatWithGemini = functions
         }
       }
 
+      // Convert history messages to proper format
+      // Gemini API uses "model" instead of "assistant" for AI responses
+      const formattedHistory = history.map((msg: any) => ({
+        role: msg.role === 'assistant' ? 'model' : msg.role,
+        parts: msg.parts || [{ text: msg.content || msg.text || '' }]
+      }));
+
       const contents = [
-        ...history,
+        ...formattedHistory,
         { role: "user", parts: userMessageParts }
       ];
 
@@ -84,20 +92,19 @@ export const chatWithGemini = functions
         { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
       ];
 
-      const defaultSystemPrompt = "You are a world-class expert in fitness and nutrition. Provide helpful, accurate, and safe advice. Be encouraging and clear. When analyzing a document, summarize it and ask the user what they want to do next.";
-
       const result = await model.generateContent({
         contents: contents,
         generationConfig: generationConfig,
         safetySettings: safetySettings,
-        systemInstruction: systemPrompt || defaultSystemPrompt,
+        // Remove systemInstruction for now as it's causing issues with the API
       });
 
       const response = result.response;
       const text = response.text();
       console.log("Generated response:", text);
 
-      res.status(200).json({ response: text });
+      // httpsCallable expects response wrapped in 'data' field
+      res.status(200).json({ data: { response: text } });
     } catch (error: any) {
       console.error("Error in chat-with-gemini function:", error);
       res.status(500).json({ error: error.message });

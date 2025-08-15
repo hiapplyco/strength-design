@@ -5,6 +5,7 @@ import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta, WorkoutCycle } from "@/ty
 import { isWorkoutDay, isWorkoutCycle } from "@/types/fitness";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/firebase/useAuth";
+import { useWorkoutStore } from "@/stores/workoutStore";
 
 interface WorkoutDisplayProps {
   workouts: WeeklyWorkouts;
@@ -29,6 +30,8 @@ export function WorkoutDisplay({
   useEffect(() => {
     setWorkouts(initialWorkouts);
   }, [initialWorkouts]);
+
+  const { updateWorkoutDay } = useWorkoutStore();
 
   const handleUpdate = (cycleKey: string, day: string, updates: Partial<WorkoutDay | WorkoutMeta>) => {
     const updatedWorkouts = { ...workouts };
@@ -55,6 +58,8 @@ export function WorkoutDisplay({
           ...updates as Partial<WorkoutDay>
         }
       };
+      // Update the store
+      updateWorkoutDay(cycleKey, day, updates as WorkoutDay);
     } else if (isWorkoutDay(workouts[day])) {
       // Legacy case: Update workout day directly (no cycle)
       updatedWorkouts[day] = {

@@ -1,19 +1,18 @@
-import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { corsHandler } from "../shared/cors";
 import { createWorkoutGenerationPrompt } from "../shared/prompts";
+import { Request, Response } from "express";
 
 // Define the secret
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
-export const generateWorkout = functions
-  .runWith({
+export const generateWorkout = onRequest({
     timeoutSeconds: 540,
-    memory: "1GB",
+    memory: "1GiB",
     secrets: [geminiApiKey]
-  })
-  .https.onRequest(async (req, res) => {
+  }, async (req: Request, res: Response) => {
     corsHandler(req, res, async () => {
       if (req.method !== "POST") {
         res.status(405).json({ error: "Method not allowed" });
@@ -33,7 +32,7 @@ export const generateWorkout = functions
           return;
         }
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         // Validate and process all input parameters
         const processedParams = {
@@ -131,7 +130,8 @@ export const generateWorkout = functions
           }
         };
 
-        res.status(200).json(responseData);
+        // Return response wrapped in data field for httpsCallable compatibility
+        res.status(200).json({ data: responseData });
 
       } catch (error: any) {
         console.error('Error generating workout:', error);

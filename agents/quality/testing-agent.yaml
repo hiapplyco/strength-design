@@ -1,0 +1,218 @@
+name: TestingAgent
+version: 1.0.0
+description: Comprehensive testing for mobile app quality assurance
+parent: MasterAgent
+
+specializations:
+  - unit_testing
+  - integration_testing
+  - e2e_testing
+  - visual_regression
+  - performance_testing
+  - accessibility_testing
+
+test_coverage_requirements:
+  minimum: 80%
+  target: 95%
+  critical_paths: 100%
+  
+test_suites:
+  unit:
+    framework: jest
+    coverage:
+      - components: 95%
+      - hooks: 90%
+      - utils: 100%
+      - services: 90%
+    patterns:
+      - arrange_act_assert
+      - mock_external_deps
+      - test_edge_cases
+      - error_scenarios
+      
+  integration:
+    framework: react-native-testing-library
+    coverage:
+      - user_flows: 90%
+      - api_integration: 85%
+      - state_management: 90%
+    patterns:
+      - user_interaction_simulation
+      - api_mocking
+      - state_verification
+      
+  e2e:
+    framework: detox
+    coverage:
+      - critical_paths: 100%
+      - user_journeys: 85%
+      - error_recovery: 90%
+    patterns:
+      - real_device_testing
+      - network_conditions
+      - background_foreground
+      - deep_linking
+
+test_strategies:
+  exercise_search:
+    unit_tests:
+      - search_algorithm_accuracy
+      - filter_logic_correctness
+      - debounce_functionality
+      - cache_behavior
+    integration_tests:
+      - api_integration
+      - error_handling
+      - loading_states
+      - empty_states
+    e2e_tests:
+      - full_search_flow
+      - filter_combinations
+      - network_failures
+      - performance_under_load
+      
+  workout_tracking:
+    unit_tests:
+      - timer_accuracy
+      - state_calculations
+      - data_validation
+      - progress_tracking
+    integration_tests:
+      - firebase_sync
+      - offline_storage
+      - conflict_resolution
+    e2e_tests:
+      - complete_workout_flow
+      - interruption_recovery
+      - background_sync
+      
+  authentication:
+    unit_tests:
+      - token_management
+      - validation_logic
+      - error_messages
+    integration_tests:
+      - firebase_auth_flow
+      - biometric_integration
+      - session_management
+    e2e_tests:
+      - sign_up_flow
+      - sign_in_flow
+      - password_reset
+      - biometric_auth
+
+test_data_management:
+  fixtures:
+    - user_profiles
+    - exercise_library
+    - workout_templates
+    - search_queries
+  factories:
+    - user_factory
+    - workout_factory
+    - exercise_factory
+  seeds:
+    - development_data
+    - test_scenarios
+    - edge_cases
+
+continuous_testing:
+  pre_commit:
+    - lint_check
+    - type_check
+    - unit_tests
+  pre_push:
+    - integration_tests
+    - coverage_check
+  ci_pipeline:
+    - full_test_suite
+    - visual_regression
+    - performance_benchmarks
+  nightly:
+    - e2e_full_suite
+    - device_matrix
+    - stress_testing
+
+error_scenarios:
+  network_failures:
+    - timeout_handling
+    - retry_logic
+    - offline_mode
+    - error_messages
+  data_corruption:
+    - validation_errors
+    - recovery_mechanisms
+    - data_integrity
+  auth_failures:
+    - token_expiry
+    - permission_denied
+    - account_locked
+  performance_issues:
+    - slow_responses
+    - memory_leaks
+    - cpu_spikes
+
+reporting:
+  coverage_reports:
+    format: [html, json, lcov]
+    threshold_enforcement: true
+    trend_analysis: true
+  test_results:
+    format: junit
+    failure_analysis: true
+    flaky_test_detection: true
+  performance_metrics:
+    benchmarks: true
+    regression_detection: true
+    trend_charts: true
+
+production_monitoring:
+  crash_free_rate:
+    target: 99.9%
+    alert_threshold: 99.5%
+  error_rate:
+    target: < 0.1%
+    alert_threshold: 0.5%
+  performance:
+    app_startup: < 2s
+    screen_load: < 1s
+    api_response: < 500ms
+
+tools:
+  - name: TestGenerator
+    path: /agents/tools/test_generator.ts
+  - name: MockDataFactory
+    path: /agents/tools/mock_factory.ts
+  - name: CoverageAnalyzer
+    path: /agents/tools/coverage_analyzer.ts
+  - name: TestReporter
+    path: /agents/tools/test_reporter.ts
+  - name: FlakeDetector
+    path: /agents/tools/flake_detector.ts
+
+automation:
+  test_generation:
+    - component_tests_from_props
+    - api_tests_from_schema
+    - e2e_from_user_stories
+  test_maintenance:
+    - auto_update_snapshots
+    - fix_simple_failures
+    - update_mocks
+  test_optimization:
+    - parallel_execution
+    - selective_testing
+    - test_splitting
+
+metrics:
+  track:
+    - test_execution_time
+    - coverage_percentage
+    - failure_rate
+    - flaky_test_count
+    - bug_escape_rate
+  analyze:
+    - coverage_gaps
+    - test_effectiveness
+    - failure_patterns
+    - performance_trends

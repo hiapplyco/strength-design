@@ -10,7 +10,7 @@
 
 ### 1. User Authentication
 ```typescript
-// Already implemented in AuthContext.tsx
+// Example usage (call from your auth handlers)
 trackAuth('signup', 'email'); // When user signs up
 trackAuth('login', 'google');  // When user logs in
 trackAuth('logout');           // When user logs out
@@ -152,7 +152,7 @@ window.plausible('Test Event', { props: { test: 'true' } });
 3. **Performance**
    - Plausible is lightweight (~1KB)
    - Events are sent asynchronously
-   - No impact on page load speed
+   - No significant impact on page load speed
 
 ## 🚀 Next Steps
 

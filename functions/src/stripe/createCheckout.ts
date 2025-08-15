@@ -1,17 +1,16 @@
-import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 import { corsHandler } from "../shared/cors";
+import { Request, Response } from "express";
 
 // Define the secret
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
 
 const PRICE_ID = "price_1QjidsC3HTLX6YIcMQZNNZjb"; // Pro Program $24.99/mo
 
-export const createCheckout = functions
-  .runWith({ secrets: [stripeSecretKey] })
-  .https.onRequest(async (req, res) => {
+export const createCheckout = onRequest({ secrets: [stripeSecretKey] }, async (req: Request, res: Response) => {
   // Handle CORS
   corsHandler(req, res, async () => {
     if (req.method !== "POST") {

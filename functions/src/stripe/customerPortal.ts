@@ -1,8 +1,9 @@
-import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
 import { corsHandler } from "../shared/cors";
+import { Request, Response } from "express";
 
 // Define the secret
 const stripeSecretKey = defineSecret("STRIPE_SECRET_KEY");
@@ -19,9 +20,7 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CUSTOMER-PORTAL] ${step}${detailsStr}`);
 };
 
-export const customerPortal = functions
-  .runWith({ secrets: [stripeSecretKey] })
-  .https.onRequest(async (req, res) => {
+export const customerPortal = onRequest({ secrets: [stripeSecretKey] }, async (req: Request, res: Response) => {
   // Handle CORS
   corsHandler(req, res, async () => {
     if (req.method !== "POST") {

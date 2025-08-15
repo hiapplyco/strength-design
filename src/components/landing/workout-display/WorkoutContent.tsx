@@ -184,6 +184,7 @@ export const WorkoutContent = ({
                     setIsExporting={setIsExporting}
                     allWorkouts={(workouts[cycleKey] as WorkoutCycle)}
                     onUpdate={(day, updates) => onUpdate(cycleKey, day, updates)}
+                    cycleNumber={parseInt(cycleKey.replace('cycle', '')) || 1}
                   />
                 </div>
               ))}

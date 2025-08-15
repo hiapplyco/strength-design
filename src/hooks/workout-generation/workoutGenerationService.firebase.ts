@@ -5,6 +5,7 @@ import type { WeeklyWorkouts } from "@/types/fitness";
 import type { GenerateWorkoutParams, WorkoutGenerationResult } from "./types";
 import { generateWorkoutSummary } from "./workoutSummaryUtils";
 import { User } from "firebase/auth";
+import { useWorkoutStore } from "@/stores/workoutStore";
 
 export class WorkoutGenerationService {
   private functions = getFunctions();
@@ -54,6 +55,10 @@ export class WorkoutGenerationService {
       const sessionDuration = Math.round(performance.now() - startTime);
       await this.updateSessionDuration(sessionId, sessionDuration, workoutData);
 
+      // Save to store for persistence
+      const { setWorkout } = useWorkoutStore.getState();
+      setWorkout(workoutData, workoutTitle, workoutSummary);
+
       // Return enhanced data
       return {
         ...workoutData,
@@ -87,7 +92,7 @@ export class WorkoutGenerationService {
     }
 
     // Check free workout usage from user profile
-    const profileRef = doc(db, 'user_profiles', user.uid);
+    const profileRef = doc(db, 'users', user.uid);
     const profileSnap = await getDoc(profileRef);
     
     if (!profileSnap.exists()) {
@@ -123,7 +128,7 @@ export class WorkoutGenerationService {
 
     // Only increment usage for non-subscribed users
     if (!isSubscribed) {
-      const profileRef = doc(db, 'user_profiles', user.uid);
+      const profileRef = doc(db, 'users', user.uid);
       const profileSnap = await getDoc(profileRef);
       
       if (!profileSnap.exists()) {
@@ -162,7 +167,8 @@ export class WorkoutGenerationService {
   }
 
   private async logSessionInput(params: any): Promise<string> {
-    const sessionRef = await addDoc(collection(db, 'session_io'), {
+    if (!auth.currentUser) throw new Error('Not authenticated');
+    const sessionRef = await addDoc(collection(db, 'users', auth.currentUser.uid, 'chatSessions'), {
       weather_prompt: params.weatherPrompt,
       fitness_level: params.fitnessLevel,
       prescribed_exercises: params.prescribedExercises,
@@ -231,7 +237,8 @@ export class WorkoutGenerationService {
 
   private async updateSessionDuration(sessionId: string, duration: number, workoutData: any) {
     try {
-      const sessionRef = doc(db, 'session_io', sessionId);
+      if (!auth.currentUser) return;
+      const sessionRef = doc(db, 'users', auth.currentUser.uid, 'chatSessions', sessionId);
       await updateDoc(sessionRef, {
         generated_workouts: workoutData,
         session_duration_ms: duration,

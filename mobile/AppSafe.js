@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ScrollView
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { SearchProvider } from './contexts/SearchContext';
 import { SafeIcon } from './services/IconService';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreenSafe';
@@ -140,7 +141,9 @@ function AppWithTheme() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppWithTheme />
+      <SearchProvider>
+        <AppWithTheme />
+      </SearchProvider>
     </ThemeProvider>
   );
 }

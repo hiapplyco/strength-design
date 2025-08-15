@@ -18,6 +18,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db, functions } from '../firebaseConfig';
+import { GlassContainer, GlassCard } from '../components/GlassmorphismComponents';
+import { useTheme } from '../contexts/ThemeContext';
+import { useSearchContext } from '../contexts/SearchContext';
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 
@@ -51,6 +54,9 @@ const getExercisePlaceholder = (category, name) => {
 };
 
 export default function CleanExerciseLibraryScreen({ navigation }) {
+  const theme = useTheme();
+  const { addExercise, addToHistory, selectedExercises } = useSearchContext();
+  
   // Enhanced search hook - replaces all manual search logic
   const {
     searchQuery,

@@ -25,6 +25,9 @@ import { collection, doc, setDoc, deleteDoc, getDocs, addDoc } from 'firebase/fi
 import { httpsCallable } from 'firebase/functions';
 import { searchService } from '../services/searchService';
 import NutritionService from '../services/NutritionService';
+import { GlassContainer, GlassCard } from '../components/GlassmorphismComponents';
+import { useTheme } from '../contexts/ThemeContext';
+import { useSearchContext } from '../contexts/SearchContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -143,6 +146,15 @@ const parseUserQuery = (query) => {
 };
 
 export default function UnifiedSearchScreen({ navigation, route }) {
+  const theme = useTheme();
+  const { 
+    addToHistory, 
+    addExercise, 
+    addFood, 
+    selectedExercises, 
+    selectedFoods,
+    getAIChatContext 
+  } = useSearchContext();
   const { fromChat = false, chatContext = null } = route?.params || {};
   
   // State
@@ -218,7 +230,8 @@ export default function UnifiedSearchScreen({ navigation, route }) {
       if (parsed.type === 'nutrition' || parsed.type === 'mixed') {
         // Search nutrition
         const nutritionQuery = parsed.nutritionIntent || query;
-        const nutritionResults = await NutritionService.searchFoods(nutritionQuery);
+        const nutritionSearchResult = await NutritionService.searchFoods(nutritionQuery);
+        const nutritionResults = nutritionSearchResult.foods || [];
         
         // Filter by food categories if specified
         if (parsed.foodCategories.length > 0) {
@@ -444,13 +457,13 @@ export default function UnifiedSearchScreen({ navigation, route }) {
   const getFilteredResults = () => {
     switch (activeTab) {
       case 'exercises':
-        return searchResults.exercises;
+        return searchResults.exercises || [];
       case 'nutrition':
-        return searchResults.nutrition;
+        return searchResults.nutrition || [];
       default:
         return [
-          ...searchResults.exercises.map(e => ({ ...e, type: 'exercise' })),
-          ...searchResults.nutrition.map(n => ({ ...n, type: 'nutrition' }))
+          ...(searchResults.exercises || []).map(e => ({ ...e, type: 'exercise' })),
+          ...(searchResults.nutrition || []).map(n => ({ ...n, type: 'nutrition' }))
         ];
     }
   };

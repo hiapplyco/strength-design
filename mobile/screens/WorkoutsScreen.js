@@ -11,7 +11,9 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeLinearGradient } from '../components/SafeLinearGradient';
+import { useTheme, themedStyles } from '../contexts/ThemeContext';
+import { GlassCard, GlassContainer } from '../components/GlassmorphismComponents';
 import { auth, db } from '../firebaseConfig';
 import { 
   collection, 
@@ -23,6 +25,7 @@ import {
   doc,
   deleteDoc 
 } from 'firebase/firestore';
+import ProgramSearchModal from '../components/ProgramSearchModal';
 
 export default function WorkoutsScreen({ navigation }) {
   const [dailyWorkouts, setDailyWorkouts] = useState([]);
@@ -30,6 +33,9 @@ export default function WorkoutsScreen({ navigation }) {
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editedExercises, setEditedExercises] = useState([]);
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  
+  const theme = useTheme();
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -45,14 +51,24 @@ export default function WorkoutsScreen({ navigation }) {
       orderBy('scheduledDate', 'asc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const workouts = [];
-      snapshot.forEach((doc) => {
-        workouts.push({ id: doc.id, ...doc.data() });
-      });
-      setDailyWorkouts(workouts);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const workouts = [];
+        snapshot.forEach((doc) => {
+          workouts.push({ id: doc.id, ...doc.data() });
+        });
+        setDailyWorkouts(workouts);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching workouts:', error);
+        // If it's an index error, show a message but don't crash
+        if (error.code === 'failed-precondition' && error.message.includes('index')) {
+          console.log('Creating Firestore index... This may take a few minutes.');
+        }
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, []);
@@ -153,6 +169,23 @@ export default function WorkoutsScreen({ navigation }) {
     setEditedExercises(editedExercises.filter((_, i) => i !== index));
   };
 
+  const handleProgramSelect = (program) => {
+    // Navigate to context-aware workout generator with the selected program as context
+    navigation.navigate('ContextAwareGenerator', { 
+      selectedProgram: program,
+      programContext: {
+        name: program.name,
+        creator: program.creator,
+        methodology: program.methodology,
+        structure: program.structure,
+        goals: program.goals,
+        experienceLevel: program.experienceLevel,
+        duration: program.duration,
+        credibilityScore: program.credibilityScore
+      }
+    });
+  };
+
   const renderWorkoutCard = (workout) => {
     const isToday = formatDate(workout.scheduledDate) === 'Today';
     const progress = workout.completed ? 100 : 0;
@@ -160,19 +193,24 @@ export default function WorkoutsScreen({ navigation }) {
     return (
       <TouchableOpacity
         key={workout.id}
-        style={[styles.workoutCard, workout.completed && styles.completedCard]}
+        style={{ marginBottom: 16, opacity: workout.completed ? 0.8 : 1 }}
         onPress={() => navigation.navigate('WorkoutDetail', { workout })}
         activeOpacity={0.8}
       >
-        <LinearGradient
-          colors={workout.completed 
-            ? ['#4CAF50', '#45B049'] 
-            : isToday 
-              ? ['#FF7E87', '#FFB86B']
-              : ['#2C2C3E', '#1C1C1E']
-          }
-          style={styles.cardGradient}
-        >
+        <GlassCard variant="medium" style={{ padding: 0, overflow: 'hidden' }}>
+          <SafeLinearGradient
+            colors={workout.completed 
+              ? ['#4CAF50', '#45B049']
+              : isToday 
+                ? ['#FFB86B', '#FF7E87']
+                : theme.isDarkMode
+                  ? ['rgba(44, 44, 62, 0.8)', 'rgba(28, 28, 30, 0.8)']
+                  : ['rgba(248, 249, 250, 0.8)', 'rgba(241, 243, 244, 0.8)']
+            }
+            style={{ padding: 20 }}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
           {/* Card Header */}
           <View style={styles.cardHeader}>
             <View style={styles.cardHeaderLeft}>
@@ -235,7 +273,8 @@ export default function WorkoutsScreen({ navigation }) {
               </Text>
             </View>
           )}
-        </LinearGradient>
+          </SafeLinearGradient>
+        </GlassCard>
       </TouchableOpacity>
     );
   };
@@ -328,12 +367,12 @@ export default function WorkoutsScreen({ navigation }) {
               style={styles.saveButton}
               onPress={saveEditedWorkout}
             >
-              <LinearGradient
+              <SafeLinearGradient
                 colors={['#FF7E87', '#FFB86B']}
                 style={styles.saveButtonGradient}
               >
                 <Text style={styles.saveButtonText}>Save Changes</Text>
-              </LinearGradient>
+              </SafeLinearGradient>
             </TouchableOpacity>
           </View>
         </View>
@@ -343,77 +382,124 @@ export default function WorkoutsScreen({ navigation }) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#FFB86B" />
-      </View>
+      <GlassContainer>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.theme.primary} />
+        </View>
+      </GlassContainer>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <LinearGradient
-        colors={['#1A1A1E', '#2C2C3E']}
-        style={styles.header}
-      >
-        <Text style={styles.headerTitle}>My Workouts</Text>
-        <TouchableOpacity 
-          style={styles.generateButton}
-          onPress={() => navigation.navigate('WorkoutGenerator')}
-        >
-          <LinearGradient
-            colors={['#FF7E87', '#FFB86B']}
-            style={styles.generateButtonGradient}
-          >
-            <Ionicons name="add" size={20} color="#FFF" />
-            <Text style={styles.generateButtonText}>Generate New</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </LinearGradient>
-
-      {/* Workouts List */}
-      <ScrollView style={styles.workoutsList}>
-        {dailyWorkouts.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="barbell-outline" size={80} color="#666" />
-            <Text style={styles.emptyTitle}>No Workouts Yet</Text>
-            <Text style={styles.emptyText}>
-              Generate your first personalized workout plan!
-            </Text>
+    <GlassContainer>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={[styles.headerTitle, { color: theme.theme.textOnGlass }]}>My Workouts</Text>
+          <View style={styles.headerActions}>
             <TouchableOpacity 
-              style={styles.ctaButton}
-              onPress={() => navigation.navigate('WorkoutGenerator')}
+              onPress={() => setSearchModalVisible(true)}
             >
-              <LinearGradient
-                colors={['#FF7E87', '#FFB86B']}
-                style={styles.ctaButtonGradient}
+              <GlassCard variant="subtle" style={{ paddingHorizontal: 14, paddingVertical: 9 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="search" size={18} color={theme.theme.primary} />
+                  <Text style={[styles.searchButtonText, { color: theme.theme.textOnGlass }]}>Find Programs</Text>
+                </View>
+              </GlassCard>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('MockupWorkout')}
+            >
+              <GlassCard variant="subtle" style={{ paddingHorizontal: 14, paddingVertical: 9 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="flask" size={18} color={theme.theme.warning || '#FFA500'} />
+                  <Text style={[styles.searchButtonText, { color: theme.theme.textOnGlass, marginLeft: 6 }]}>Demo</Text>
+                </View>
+              </GlassCard>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('WorkoutGenerator')}
+              style={{ overflow: 'hidden', borderRadius: 12 }}
+            >
+              <SafeLinearGradient
+                colors={['#FFB86B', '#FF7E87']}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                  paddingVertical: 12,
+                  gap: 8,
+                }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.ctaButtonText}>Get Started</Text>
-              </LinearGradient>
+                <Ionicons name="add" size={20} color="#FFF" />
+                <Text style={styles.generateButtonText}>Generate New</Text>
+              </SafeLinearGradient>
             </TouchableOpacity>
           </View>
-        ) : (
-          <View style={styles.cardsContainer}>
-            {dailyWorkouts.map(renderWorkoutCard)}
-          </View>
-        )}
-      </ScrollView>
+        </View>
 
-      {renderEditModal()}
-    </View>
+        {/* Workouts List */}
+        <View style={{ padding: 16, paddingBottom: 120 }}>
+          {dailyWorkouts.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="barbell-outline" size={80} color={theme.theme.textSecondary} />
+              <Text style={[styles.emptyTitle, { color: theme.theme.textOnGlass }]}>No Workouts Yet</Text>
+              <Text style={[styles.emptyText, { color: theme.theme.textSecondary }]}>
+                Generate your first personalized workout plan!
+              </Text>
+              <TouchableOpacity 
+                onPress={() => navigation.navigate('WorkoutGenerator')}
+                style={{ marginTop: 24, overflow: 'hidden', borderRadius: 14 }}
+              >
+                <SafeLinearGradient
+                  colors={['#FFB86B', '#FF7E87']}
+                  style={{
+                    paddingHorizontal: 32,
+                    paddingVertical: 18,
+                    alignItems: 'center',
+                  }}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={styles.ctaButtonText}>Get Started</Text>
+                </SafeLinearGradient>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View>
+              {dailyWorkouts.map(renderWorkoutCard)}
+            </View>
+          )}
+        </View>
+
+        {renderEditModal()}
+        
+        {/* Program Search Modal */}
+        <ProgramSearchModal
+          visible={searchModalVisible}
+          onClose={() => setSearchModalVisible(false)}
+          onProgramSelect={handleProgramSelect}
+          navigation={navigation}
+        />
+      </ScrollView>
+    </GlassContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0C',
+    backgroundColor: 'transparent',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0A0A0C',
+    backgroundColor: 'transparent',
   },
   header: {
     paddingTop: 60,
@@ -427,6 +513,28 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#FFF',
+    flex: 1,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  searchButton: {
+    borderRadius: 18,
+  },
+  searchButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 18,
+  },
+  searchButtonText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   generateButton: {
     borderRadius: 20,

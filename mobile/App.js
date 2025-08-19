@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ScrollView, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeLinearGradient, OuraBackgroundGradient } from './components/SafeLinearGradient';
 import { Ionicons } from '@expo/vector-icons';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import { ThemeProvider, useTheme, themedStyles } from './contexts/ThemeContext';
+import { UserContextProvider } from './contexts/UserContextProvider';
+import useUserContext from './hooks/useUserContext';
+import ContextModal from './components/ContextModal';
 import { colors, animations, theme } from './utils/designTokens';
 import { GlassContainer } from './components/GlassmorphismComponents';
 import LoginScreen from './screens/LoginScreen';
@@ -15,13 +18,18 @@ import StreamingChatScreen from './screens/StreamingChatScreen';
 import CleanExerciseLibraryScreen from './screens/CleanExerciseLibraryScreen';
 import UnifiedSearchScreen from './screens/UnifiedSearchScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import { SearchProvider } from './contexts/SearchContext';
+import MockupWorkoutScreen from './screens/MockupWorkoutScreen';
+import WorkoutResultsScreen from './screens/WorkoutResultsScreen';
 import healthService from './services/healthService';
 
-// Enhanced authenticated app with theme integration
+// Enhanced authenticated app with theme integration and context awareness
 function AuthenticatedApp() {
   const [currentScreen, setCurrentScreen] = useState('Home');
   const [healthInitialized, setHealthInitialized] = useState(false);
+  const [showContextModal, setShowContextModal] = useState(false);
   const theme = useTheme();
+  const userContext = useUserContext();
 
   useEffect(() => {
     // Initialize health service on app start
@@ -48,32 +56,69 @@ function AuthenticatedApp() {
     }
   };
 
+  // Handle navigation with context awareness
+  const handleNavigation = (screen) => {
+    try {
+      // Check if user is trying to access Generator without context
+      if (screen === 'Generator' && userContext.needsContextSetup()) {
+        userContext.recordContextModalShown();
+        setShowContextModal(true);
+        return;
+      }
+      
+      // Track navigation for analytics
+      if (screen === 'Generator') {
+        userContext.tracking.trackGeneratorUse();
+      } else if (screen === 'Search') {
+        userContext.tracking.trackSearch('navigation');
+      } else if (screen === 'Profile') {
+        userContext.tracking.trackProfileView();
+      }
+      
+      setCurrentScreen(screen);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback - just navigate normally
+      setCurrentScreen(screen);
+    }
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'Home':
-        return <HomeScreen navigation={{ navigate: setCurrentScreen }} />;
+        return <HomeScreen navigation={{ navigate: handleNavigation }} />;
       case 'Generator':
         // Enhanced AI Chat with context awareness, streaming animations, and real Gemini 2.5 Flash
-        return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />;
       case 'Workouts':
-        return <WorkoutsScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        return <WorkoutsScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />;
       case 'Exercises':
-        return <CleanExerciseLibraryScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        return <CleanExerciseLibraryScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />;
       case 'Search':
-        return <UnifiedSearchScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        return (
+          <SearchProvider>
+            <UnifiedSearchScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />
+          </SearchProvider>
+        );
       case 'Profile':
         // Use the new comprehensive ProfileScreen
-        return <ProfileScreen navigation={{ navigate: setCurrentScreen, replace: (screen) => setCurrentScreen(screen) }} />;
+        return <ProfileScreen navigation={{ navigate: handleNavigation, replace: (screen) => setCurrentScreen(screen) }} />;
+      case 'MockupWorkout':
+        return <MockupWorkoutScreen navigation={{ goBack: () => setCurrentScreen('Workouts'), navigate: handleNavigation }} />;
+      case 'WorkoutResults':
+        return <WorkoutResultsScreen navigation={{ goBack: () => setCurrentScreen('Workouts'), navigate: handleNavigation }} />;
+      case 'WorkoutGenerator':
+        return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Workouts'), navigate: handleNavigation }} />;
       default:
-        return <HomeScreen navigation={{ navigate: setCurrentScreen }} />;
+        return <HomeScreen navigation={{ navigate: handleNavigation }} />;
     }
   };
 
   // Unified theme-aware gradient colors using new gradient system
   const currentThemeMode = theme.isDarkMode ? 'dark' : 'light';
-  const gradientColors = theme.getAppBackgroundGradient 
-    ? theme.getAppBackgroundGradient(currentThemeMode, 'energy')
-    : colors.gradients.background[currentThemeMode]?.energy || colors.gradients.background[currentThemeMode]?.primary;
+  const gradientColors = theme.isDarkMode 
+    ? ['#000000', '#0A0A0A', '#141414'] // Pure black gradient for dark mode
+    : ['#FFFFFF', '#F8F9FA', '#F0F1F3']; // Neutral light gradient for light mode
     
   const containerStyles = themedStyles(({ theme, isDarkMode }) => ({
     flex: 1,
@@ -131,8 +176,9 @@ function AuthenticatedApp() {
 
   return (
     <View style={containerStyles}>
-      <LinearGradient
+      <SafeLinearGradient
         colors={gradientColors}
+        fallbackColors={theme.isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
         style={styles.gradientBackground}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -141,73 +187,73 @@ function AuthenticatedApp() {
         <View style={styles.screenContainer}>
           {renderScreen()}
         </View>
-      </LinearGradient>
+      </SafeLinearGradient>
       
-      {/* Enhanced Glass Tab Bar with BlurWrapper */}
-      <View style={tabBarStyles}>
-        <GlassContainer 
-          variant="medium"
-          blurIntensity="medium"
-          showShadow={true}
-          borderRadius="lg"
-          padding="sm"
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            marginHorizontal: 8,
-            marginBottom: 8,
-          }}
-        >
-          {['Home', 'Generator', 'Search', 'Workouts', 'Profile'].map((tab) => {
-            const icons = {
-              Home: currentScreen === 'Home' ? 'home' : 'home-outline',
-              Generator: currentScreen === 'Generator' ? 'chatbubbles' : 'chatbubbles-outline',
-              Search: currentScreen === 'Search' ? 'search' : 'search-outline',
-              Workouts: currentScreen === 'Workouts' ? 'calendar' : 'calendar-outline',
-              Profile: currentScreen === 'Profile' ? 'person' : 'person-outline',
-            };
-            
-            const isActive = currentScreen === tab;
-            const activeTabStyle = isActive ? getActiveTabStyle() : {};
-            
-            return (
-              <TouchableOpacity
-                key={tab}
-                style={[
-                  tabItemStyles,
-                  activeTabStyle,
-                ]}
-                onPress={() => setCurrentScreen(tab)}
-                activeOpacity={0.7}
-                accessibilityRole="tab"
-                accessibilityLabel={`${tab} tab`}
-                accessibilityState={{ selected: isActive }}
+      {/* Context Setup Modal */}
+      <ContextModal
+        visible={showContextModal}
+        onClose={() => setShowContextModal(false)}
+        onNavigate={(screen) => {
+          setShowContextModal(false);
+          if (screen === 'Generator') {
+            // User chose to skip - record the skip and allow access
+            userContext.recordSkip();
+          }
+          setCurrentScreen(screen);
+        }}
+      />
+      
+      {/* Clean Tab Bar */}
+      <View style={[tabBarStyles, { 
+        flexDirection: 'row',
+        backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFFFFF',
+        borderTopWidth: 1,
+        borderTopColor: theme.isDarkMode ? '#333' : '#E0E0E0',
+      }]}>
+        {['Home', 'Generator', 'Search', 'Workouts', 'Profile'].map((tab) => {
+          const icons = {
+            Home: currentScreen === 'Home' ? 'home' : 'home-outline',
+            Generator: currentScreen === 'Generator' ? 'sparkles' : 'sparkles-outline',
+            Search: currentScreen === 'Search' ? 'search' : 'search-outline',
+            Workouts: currentScreen === 'Workouts' ? 'calendar' : 'calendar-outline',
+            Profile: currentScreen === 'Profile' ? 'person' : 'person-outline',
+          };
+          
+          const isActive = currentScreen === tab;
+          const activeColor = '#4CAF50';  // Green for active
+          const inactiveColor = theme.isDarkMode ? '#888' : '#666';
+          
+          return (
+            <TouchableOpacity
+              key={tab}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingVertical: 10,
+                paddingTop: 12,
+              }}
+              onPress={() => handleNavigation(tab)}
+              activeOpacity={0.7}
+            >
+              <Ionicons 
+                name={icons[tab]} 
+                size={24} 
+                color={isActive ? activeColor : inactiveColor}
+                style={{ marginBottom: 4 }}
+              />
+              <Text 
+                style={{
+                  fontSize: 11,
+                  color: isActive ? activeColor : inactiveColor,
+                  fontWeight: isActive ? '600' : '400',
+                }}
               >
-                <Ionicons 
-                  name={icons[tab]} 
-                  size={22} 
-                  color={isActive ? theme.theme.primary : theme.theme.textTertiary} 
-                  style={{
-                    marginBottom: 2,
-                    textShadowColor: isActive ? (theme.isDarkMode ? 'rgba(255,184,107,0.4)' : 'rgba(255,107,53,0.4)') : 'transparent',
-                    textShadowOffset: { width: 0, height: 0 },
-                    textShadowRadius: isActive ? 6 : 0,
-                  }}
-                />
-                <Text 
-                  style={[
-                    tabLabelStyles,
-                    isActive && tabLabelActiveStyles
-                  ]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {tab}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </GlassContainer>
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -244,8 +290,8 @@ function AppWithTheme() {
       text: {
         color: themeObj.text,
         marginTop: 16,
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.medium,
+        fontSize: typography?.fontSize?.lg || 17,
+        fontWeight: typography?.fontWeight?.medium || '500',
         textAlign: 'center',
       },
       gradientColors,
@@ -255,8 +301,9 @@ function AppWithTheme() {
   // Show theme-aware loading screen
   if (loading || theme.isLoading) {
     return (
-      <LinearGradient
+      <SafeLinearGradient
         colors={loadingStyles.gradientColors}
+        fallbackColors={theme.isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
         style={[styles.container, loadingStyles.container]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -279,7 +326,7 @@ function AppWithTheme() {
             <Text style={[loadingStyles.text, { fontSize: 12, marginTop: 8 }]}>Switching theme...</Text>
           )}
         </GlassContainer>
-      </LinearGradient>
+      </SafeLinearGradient>
     );
   }
 
@@ -293,7 +340,9 @@ function AppWithTheme() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppWithTheme />
+      <UserContextProvider>
+        <AppWithTheme />
+      </UserContextProvider>
     </ThemeProvider>
   );
 }

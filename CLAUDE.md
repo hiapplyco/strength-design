@@ -294,6 +294,8 @@ EXPO_PUBLIC_FIREBASE_APP_ID=your-app-id
 firebase functions:config:set gemini.api_key="your-key"
 firebase functions:config:set stripe.secret_key="your-key"
 firebase functions:config:set stripe.webhook_secret="your-secret"
+firebase functions:config:set reddit.client_id="strength.design"
+firebase functions:config:set reddit.client_secret="xdGqr-OMc08HbOW-Fnnqug"
 ```
 
 ### 7. Firebase Security Best Practices

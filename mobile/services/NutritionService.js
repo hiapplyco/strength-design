@@ -887,7 +887,7 @@ class NutritionService {
     this.maxCacheSize = 100;
     this.cacheTimeout = 30 * 60 * 1000; // 30 minutes
     this.localDatabase = LOCAL_NUTRITION_DATABASE;
-    this.useApiFirst = true; // Try API first, fallback to local
+    this.useApiFirst = true; // Enable API first with proper fallback
   }
 
   /**
@@ -918,17 +918,23 @@ class NutritionService {
     }
 
     // Try USDA API first if we have an API key and user preference
+    let apiResults = null;
     if (this.useApiFirst && this.apiKey) {
       try {
         console.log('🔍 Trying USDA API for:', query);
-        const apiResults = await this.searchUSDAFoods(query, options);
+        apiResults = await this.searchUSDAFoods(query, options);
         
-        // Cache and return API results
-        this.setCache(cacheKey, apiResults);
-        this.addToSearchHistory(query, apiResults.totalHits);
-        
-        console.log(`✅ USDA API: Found ${apiResults.foods.length} foods for "${query}"`);
-        return apiResults;
+        // Only use API results if we got actual results
+        if (apiResults && apiResults.foods && apiResults.foods.length > 0) {
+          // Cache and return API results
+          this.setCache(cacheKey, apiResults);
+          this.addToSearchHistory(query, apiResults.totalHits);
+          
+          console.log(`✅ USDA API: Found ${apiResults.foods.length} foods for "${query}"`);
+          return apiResults;
+        } else {
+          console.log('⚠️ USDA API returned no results, trying local database');
+        }
         
       } catch (error) {
         console.warn('⚠️ USDA API failed, falling back to local database:', error.message);
@@ -936,21 +942,47 @@ class NutritionService {
       }
     }
 
-    // Use local database
+    // Always try local database if API didn't return results or failed
     try {
       console.log('🔍 Searching local nutrition database for:', query);
       const localResults = this.searchLocalDatabase(query, options);
       
-      // Cache results
-      this.setCache(cacheKey, localResults);
-      this.addToSearchHistory(query, localResults.totalHits);
+      // If we have local results, use them
+      if (localResults && localResults.foods && localResults.foods.length > 0) {
+        // Cache results
+        this.setCache(cacheKey, localResults);
+        this.addToSearchHistory(query, localResults.totalHits);
+        
+        console.log(`✅ Local DB: Found ${localResults.foods.length} foods for "${query}"`);
+        return localResults;
+      }
       
-      console.log(`✅ Local DB: Found ${localResults.foods.length} foods for "${query}"`);
-      return localResults;
+      // If neither API nor local has results, return empty result
+      const emptyResult = {
+        foods: [],
+        totalHits: 0,
+        currentPage: 1,
+        totalPages: 0,
+        query: query,
+        searchTime: new Date().toISOString(),
+        source: 'None'
+      };
+      
+      console.log(`ℹ️ No results found for "${query}" in API or local database`);
+      return emptyResult;
       
     } catch (error) {
       console.error('❌ Local food search failed:', error);
-      throw new Error(`Failed to search foods: ${error.message}`);
+      // Return empty result instead of throwing
+      return {
+        foods: [],
+        totalHits: 0,
+        currentPage: 1,
+        totalPages: 0,
+        query: query,
+        searchTime: new Date().toISOString(),
+        source: 'Error'
+      };
     }
   }
 
@@ -980,7 +1012,7 @@ class NutritionService {
       searchUrl.searchParams.set('dataType', dataType);
     }
 
-    console.log(`🌐 USDA API search: ${query}`);
+    console.log(`🌐 USDA API search URL: ${searchUrl.toString()}`);
 
     const response = await fetch(searchUrl.toString(), {
       method: 'GET',
@@ -1006,10 +1038,30 @@ class NutritionService {
     }
 
     const data = await response.json();
+    console.log(`🌐 USDA API raw response:`, {
+      totalHits: data.totalHits,
+      foodsCount: data.foods?.length || 0,
+      firstFood: data.foods?.[0] ? {
+        fdcId: data.foods[0].fdcId,
+        description: data.foods[0].description,
+        nutrientsCount: data.foods[0].foodNutrients?.length || 0
+      } : null
+    });
     
     // Transform to consistent format
-    return {
-      foods: data.foods?.map(food => this.transformUSDAFood(food)) || [],
+    const transformedFoods = data.foods?.map(food => {
+      const transformed = this.transformUSDAFood(food);
+      console.log(`🔄 Transformed food:`, {
+        fdcId: transformed.fdcId,
+        description: transformed.description,
+        calories: transformed.calories,
+        protein: transformed.protein
+      });
+      return transformed;
+    }) || [];
+    
+    const result = {
+      foods: transformedFoods,
       totalHits: data.totalHits || 0,
       currentPage: data.currentPage || pageNumber,
       totalPages: Math.ceil((data.totalHits || 0) / pageSize),
@@ -1017,6 +1069,14 @@ class NutritionService {
       searchTime: new Date().toISOString(),
       source: 'USDA'
     };
+    
+    console.log(`🌐 USDA API final result:`, {
+      foodsCount: result.foods.length,
+      totalHits: result.totalHits,
+      source: result.source
+    });
+    
+    return result;
   }
 
   /**

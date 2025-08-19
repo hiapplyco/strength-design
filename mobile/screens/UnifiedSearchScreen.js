@@ -155,7 +155,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
     selectedFoods,
     getAIChatContext 
   } = useSearchContext();
-  const { fromChat = false, chatContext = null } = route?.params || {};
+  const { fromChat = false, chatContext = null, exercisesOnly = false } = route?.params || {};
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -193,7 +193,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
     ]).start();
   }, []);
   
-  // Intelligent search handler
+  // Simplified and more reliable search handler
   const performSearch = useCallback(async (query) => {
     if (!query.trim()) {
       setSearchResults({ exercises: [], nutrition: [], suggestions: [] });
@@ -201,73 +201,151 @@ export default function UnifiedSearchScreen({ navigation, route }) {
     }
     
     setIsLoading(true);
-    const parsed = parseUserQuery(query);
-    setParsedQuery(parsed);
+    console.log(`🔍 Starting unified search for: "${query}"`);
     
     try {
       const results = { exercises: [], nutrition: [], suggestions: [] };
       
-      // Search based on intent
-      if (parsed.type === 'exercise' || parsed.type === 'mixed') {
-        // Search exercises
-        const exerciseQuery = parsed.exerciseIntent || query;
-        const exerciseSearchResult = await searchService.searchExercises(exerciseQuery);
-        const exerciseResults = exerciseSearchResult.exercises || [];
+      // Parse query for context (but don't let it interfere with basic search)
+      const parsed = parseUserQuery(query);
+      setParsedQuery(parsed);
+      
+      // Always search nutrition for unified results
+      try {
+        console.log(`🥗 Searching nutrition for: "${query}"`);
+        const nutritionSearchResult = await NutritionService.searchFoods(query);
+        console.log(`🥗 Nutrition search raw result:`, {
+          hasData: !!nutritionSearchResult,
+          hasFoods: !!nutritionSearchResult?.foods,
+          foodsLength: nutritionSearchResult?.foods?.length || 0,
+          totalHits: nutritionSearchResult?.totalHits || 0,
+          source: nutritionSearchResult?.source || 'unknown',
+          firstFood: nutritionSearchResult?.foods?.[0] ? {
+            fdcId: nutritionSearchResult.foods[0].fdcId,
+            description: nutritionSearchResult.foods[0].description,
+            calories: nutritionSearchResult.foods[0].calories
+          } : null
+        });
         
-        // Filter by muscle groups if specified
-        if (parsed.muscleGroups.length > 0) {
-          results.exercises = exerciseResults.filter(ex => 
-            parsed.muscleGroups.some(group => 
-              ex.muscleGroups?.toLowerCase().includes(group) ||
-              ex.category?.toLowerCase().includes(group)
-            )
-          );
+        if (nutritionSearchResult && nutritionSearchResult.foods && nutritionSearchResult.foods.length > 0) {
+          // Transform nutrition results to ensure consistent structure
+          const transformedNutrition = nutritionSearchResult.foods.map(food => {
+            const transformed = {
+              id: food.fdcId || food.id || Math.random().toString(36).substr(2, 9),
+              name: food.description || food.name || 'Unknown Food',
+              brand: food.brandOwner || food.brandName || food.brand || 'USDA Database',
+              category: food.category || 'Food',
+              serving: food.serving || { 
+                size: food.servingSize || 100, 
+                unit: food.servingSizeUnit || 'g' 
+              },
+              // Flatten nutrition data for easier access
+              calories: food.calories?.value || food.nutrition?.calories || 0,
+              protein: food.protein?.value || food.nutrition?.protein || 0,
+              carbs: food.carbs?.value || food.nutrition?.carbs || 0,
+              fat: food.fat?.value || food.nutrition?.fat || 0,
+              // Keep original nutrition object for compatibility
+              nutrition: {
+                calories: food.calories?.value || food.nutrition?.calories || 0,
+                protein: food.protein?.value || food.nutrition?.protein || 0,
+                carbs: food.carbs?.value || food.nutrition?.carbs || 0,
+                fat: food.fat?.value || food.nutrition?.fat || 0,
+                fiber: food.fiber?.value || food.nutrition?.fiber || 0,
+                sugar: food.sugar?.value || food.nutrition?.sugar || 0,
+                sodium: food.sodium?.value || food.nutrition?.sodium || 0
+              }
+            };
+            console.log(`🔄 Transformed nutrition item:`, {
+              id: transformed.id,
+              name: transformed.name,
+              calories: transformed.calories,
+              protein: transformed.protein
+            });
+            return transformed;
+          });
+          
+          results.nutrition = transformedNutrition.slice(0, 20);
+          console.log(`✅ Found ${results.nutrition.length} nutrition results from ${nutritionSearchResult.source}`);
         } else {
-          results.exercises = exerciseResults;
+          console.log('⚠️ No nutrition results from search');
+          results.nutrition = [];
         }
+      } catch (error) {
+        console.error('❌ Nutrition search failed:', error.message);
+        console.error('Full error:', error);
+        results.nutrition = [];
       }
       
-      if (parsed.type === 'nutrition' || parsed.type === 'mixed') {
-        // Search nutrition
-        const nutritionQuery = parsed.nutritionIntent || query;
-        const nutritionSearchResult = await NutritionService.searchFoods(nutritionQuery);
-        const nutritionResults = nutritionSearchResult.foods || [];
+      // Search exercises SECOND 
+      try {
+        console.log(`💪 Searching exercises for: "${query}"`);
+        const exerciseSearchResult = await searchService.searchExercises({
+          query: query.trim(),
+          categories: [],
+          equipment: [],
+          muscles: parsed.muscleGroups || [],
+          difficulty: [],
+          limit: 50
+        });
         
-        // Filter by food categories if specified
-        if (parsed.foodCategories.length > 0) {
-          results.nutrition = nutritionResults.filter(food => 
-            parsed.foodCategories.some(category => 
-              food.category?.toLowerCase().includes(category) ||
-              food.name?.toLowerCase().includes(category)
-            )
-          );
-        } else {
-          results.nutrition = nutritionResults;
+        if (exerciseSearchResult && exerciseSearchResult.exercises) {
+          // Apply simple case-insensitive filtering
+          const queryLower = query.toLowerCase().trim();
+          const exerciseResults = exerciseSearchResult.exercises.filter(ex => {
+            return ex.name?.toLowerCase().includes(queryLower) ||
+                   ex.category?.toLowerCase().includes(queryLower) ||
+                   ex.description?.toLowerCase().includes(queryLower) ||
+                   (ex.primary_muscles?.some(m => m.toLowerCase().includes(queryLower))) ||
+                   (ex.secondary_muscles?.some(m => m.toLowerCase().includes(queryLower))) ||
+                   (Array.isArray(ex.equipment) 
+                     ? ex.equipment.some(e => e.toLowerCase().includes(queryLower))
+                     : ex.equipment?.toLowerCase().includes(queryLower));
+          });
+          
+          results.exercises = exerciseResults.slice(0, 20);
+          console.log(`✅ Found ${results.exercises.length} exercise results`);
         }
+      } catch (error) {
+        console.error('❌ Exercise search failed:', error);
+        results.exercises = [];
       }
       
-      // Generate smart suggestions based on context
-      if (parsed.context === 'meal_planning') {
+      // Generate smart suggestions based on results
+      const nutritionCount = results.nutrition.length;
+      const exerciseCount = results.exercises.length;
+      
+      if (nutritionCount > 0) {
         results.suggestions = [
-          { type: 'tip', text: 'Pre-workout: Focus on carbs for energy' },
-          { type: 'tip', text: 'Post-workout: Prioritize protein for recovery' },
-          { type: 'action', text: 'Create a meal plan', action: 'createMealPlan' }
+          { type: 'tip', text: '🥗 Pre-workout: Focus on carbs for energy' },
+          { type: 'tip', text: '🥩 Post-workout: Prioritize protein for recovery' },
+          { type: 'action', text: '📱 Create a personalized meal plan', action: 'createMealPlan' }
         ];
+        parsed.type = exerciseCount > 0 ? 'mixed' : 'nutrition';
+      } else if (exerciseCount > 0) {
+        results.suggestions = [
+          { type: 'tip', text: '💪 Warm up before intense exercises' },
+          { type: 'tip', text: '⏱️ Rest 60-90 seconds between sets' },
+          { type: 'action', text: '🎯 Generate a workout plan', action: 'createWorkout' }
+        ];
+        parsed.type = 'exercise';
       }
+      
+      console.log(`🎯 Search completed: ${exerciseCount} exercises, ${nutritionCount} nutrition items`);
       
       setSearchResults(results);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('❌ Search error:', error);
+      setSearchResults({ exercises: [], nutrition: [], suggestions: [] });
     } finally {
       setIsLoading(false);
     }
   }, []);
   
-  // Debounced search
+  // Debounced search - reduced to 300ms for better responsiveness
   useEffect(() => {
     const timer = setTimeout(() => {
       performSearch(searchQuery);
-    }, 500);
+    }, 300);
     
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -276,20 +354,29 @@ export default function UnifiedSearchScreen({ navigation, route }) {
   const addToContext = useCallback(() => {
     if (selectedItems.length === 0) return;
     
+    // Add selected items to the global context
+    const exercises = selectedItems.filter(item => item.type === 'exercise');
+    const foods = selectedItems.filter(item => item.type === 'nutrition');
+    
+    // Add to global search context
+    exercises.forEach(ex => addExercise(ex));
+    foods.forEach(food => addFood(food));
+    
     // Prepare context data
     const contextData = {
-      exercises: selectedItems.filter(item => item.type === 'exercise'),
-      foods: selectedItems.filter(item => item.type === 'nutrition'),
+      exercises: exercises,
+      foods: foods,
       query: searchQuery,
-      parsedIntent: parsedQuery
+      parsedIntent: parsedQuery,
+      timestamp: Date.now()
     };
     
-    // Navigate back to chat with context
+    // Navigate to chat with context
     navigation.navigate('Generator', {
       searchContext: contextData,
-      message: `I found ${selectedItems.length} items for "${searchQuery}". Let me help you create a plan with these.`
+      message: `I found ${selectedItems.length} items for "${searchQuery}". I've added them to your workout context. Let me help you create a personalized plan with these selections.`
     });
-  }, [selectedItems, searchQuery, parsedQuery, navigation]);
+  }, [selectedItems, searchQuery, parsedQuery, navigation, addExercise, addFood]);
   
   // Toggle item selection
   const toggleSelection = (item, type) => {
@@ -308,7 +395,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
     }
   };
   
-  // Render exercise card
+  // Render exercise card with emoji indicator
   const renderExerciseCard = ({ item }) => {
     const isSelected = selectedItems.some(
       selected => selected.id === item.id && selected.type === 'exercise'
@@ -332,12 +419,8 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             end={{ x: 1, y: 1 }}
           >
             <View style={styles.cardHeader}>
-              <View style={styles.cardIcon}>
-                <Ionicons 
-                  name="fitness" 
-                  size={24} 
-                  color={isSelected ? '#FFF' : '#FF6B35'} 
-                />
+              <View style={[styles.cardIcon, styles.exerciseIcon]}>
+                <Text style={styles.emojiIcon}>💪</Text>
               </View>
               <View style={styles.cardInfo}>
                 <Text style={[styles.cardTitle, isSelected && styles.selectedText]}>
@@ -369,11 +452,34 @@ export default function UnifiedSearchScreen({ navigation, route }) {
     );
   };
   
-  // Render nutrition card
+  // Render nutrition card with emoji indicator
   const renderNutritionCard = ({ item }) => {
     const isSelected = selectedItems.some(
       selected => selected.id === item.id && selected.type === 'nutrition'
     );
+    
+    // Get appropriate food emoji based on category or name
+    const getFoodEmoji = (food) => {
+      const name = food.name?.toLowerCase() || '';
+      const category = food.category?.toLowerCase() || '';
+      
+      if (name.includes('apple')) return '🍎';
+      if (name.includes('banana')) return '🍌';
+      if (name.includes('avocado')) return '🥑';
+      if (name.includes('chicken')) return '🍗';
+      if (name.includes('beef') || name.includes('steak')) return '🥩';
+      if (name.includes('fish') || name.includes('salmon')) return '🐟';
+      if (name.includes('egg')) return '🥚';
+      if (name.includes('bread')) return '🍞';
+      if (name.includes('rice')) return '🍚';
+      if (name.includes('pasta')) return '🍝';
+      if (name.includes('milk') || category.includes('dairy')) return '🥛';
+      if (name.includes('cheese')) return '🧀';
+      if (name.includes('vegetable') || name.includes('salad')) return '🥗';
+      if (category.includes('fruit')) return '🍓';
+      if (category.includes('protein')) return '🥩';
+      return '🍽️'; // Default food emoji
+    };
     
     return (
       <TouchableOpacity
@@ -393,19 +499,15 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             end={{ x: 1, y: 1 }}
           >
             <View style={styles.cardHeader}>
-              <View style={[styles.cardIcon, { backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(76,175,80,0.1)' }]}>
-                <Ionicons 
-                  name="nutrition" 
-                  size={24} 
-                  color={isSelected ? '#FFF' : '#4CAF50'} 
-                />
+              <View style={[styles.cardIcon, styles.nutritionIcon]}>
+                <Text style={styles.emojiIcon}>{getFoodEmoji(item)}</Text>
               </View>
               <View style={styles.cardInfo}>
                 <Text style={[styles.cardTitle, isSelected && styles.selectedText]}>
                   {item.name}
                 </Text>
                 <Text style={[styles.cardSubtitle, isSelected && styles.selectedText]}>
-                  {item.brand || 'Generic'} • {item.serving?.size}{item.serving?.unit}
+                  {item.brand || 'USDA Database'} • {item.serving?.size || '100'}{item.serving?.unit || 'g'}
                 </Text>
               </View>
               {isSelected && (
@@ -416,7 +518,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             <View style={styles.nutritionStats}>
               <View style={styles.nutritionStat}>
                 <Text style={[styles.statValue, isSelected && styles.selectedText]}>
-                  {item.nutrition?.calories || 0}
+                  {item.calories || item.nutrition?.calories || 0}
                 </Text>
                 <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
                   cal
@@ -424,7 +526,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
               </View>
               <View style={styles.nutritionStat}>
                 <Text style={[styles.statValue, isSelected && styles.selectedText]}>
-                  {item.nutrition?.protein || 0}g
+                  {item.protein || item.nutrition?.protein || 0}g
                 </Text>
                 <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
                   protein
@@ -432,7 +534,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
               </View>
               <View style={styles.nutritionStat}>
                 <Text style={[styles.statValue, isSelected && styles.selectedText]}>
-                  {item.nutrition?.carbs || 0}g
+                  {item.carbs || item.nutrition?.carbs || 0}g
                 </Text>
                 <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
                   carbs
@@ -440,7 +542,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
               </View>
               <View style={styles.nutritionStat}>
                 <Text style={[styles.statValue, isSelected && styles.selectedText]}>
-                  {item.nutrition?.fat || 0}g
+                  {item.fat || item.nutrition?.fat || 0}g
                 </Text>
                 <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
                   fat
@@ -453,39 +555,110 @@ export default function UnifiedSearchScreen({ navigation, route }) {
     );
   };
   
-  // Get filtered results based on active tab
-  const getFilteredResults = () => {
-    switch (activeTab) {
-      case 'exercises':
-        return searchResults.exercises || [];
-      case 'nutrition':
-        return searchResults.nutrition || [];
-      default:
-        return [
-          ...(searchResults.exercises || []).map(e => ({ ...e, type: 'exercise' })),
-          ...(searchResults.nutrition || []).map(n => ({ ...n, type: 'nutrition' }))
-        ];
+  // Split column view for exercises and nutrition
+  const renderSplitResults = () => {
+    const exercises = searchResults.exercises || [];
+    const nutrition = searchResults.nutrition || [];
+    
+    // If exercises only mode, use full width for exercises
+    if (exercisesOnly) {
+      return (
+        <View style={styles.fullWidthContainer}>
+          <View style={styles.columnHeader}>
+            <Text style={styles.columnTitle}>💪 {exercises.length} Exercise Results</Text>
+          </View>
+          <FlatList
+            data={exercises}
+            keyExtractor={(item, index) => `exercise-${item.id}-${index}`}
+            renderItem={renderExerciseCard}
+            contentContainerStyle={styles.columnContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              !isLoading && searchQuery.length > 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="barbell-outline" size={60} color="#666" />
+                  <Text style={styles.emptyText}>No exercises found</Text>
+                  <Text style={styles.emptySubtext}>Try different search terms</Text>
+                </View>
+              ) : null
+            }
+          />
+        </View>
+      );
     }
+    
+    // Normal split view for unified search
+    return (
+      <View style={styles.splitContainer}>
+        {/* Exercises Column */}
+        <View style={styles.splitColumn}>
+          <View style={styles.columnHeader}>
+            <Text style={styles.columnTitle}>💪 Exercises</Text>
+            <Text style={styles.columnCount}>{exercises.length} results</Text>
+          </View>
+          <FlatList
+            data={exercises}
+            keyExtractor={(item, index) => `exercise-${item.id}-${index}`}
+            renderItem={renderExerciseCard}
+            contentContainerStyle={styles.columnContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              !isLoading && searchQuery.length > 0 ? (
+                <View style={styles.emptyColumn}>
+                  <Text style={styles.emptyColumnText}>No exercises found</Text>
+                </View>
+              ) : null
+            }
+          />
+        </View>
+        
+        {/* Divider */}
+        <View style={styles.columnDivider} />
+        
+        {/* Nutrition Column */}
+        <View style={styles.splitColumn}>
+          <View style={styles.columnHeader}>
+            <Text style={styles.columnTitle}>🍽️ Nutrition</Text>
+            <Text style={styles.columnCount}>{nutrition.length} results</Text>
+          </View>
+          <FlatList
+            data={nutrition}
+            keyExtractor={(item, index) => `nutrition-${item.id}-${index}`}
+            renderItem={renderNutritionCard}
+            contentContainerStyle={styles.columnContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              !isLoading && searchQuery.length > 0 ? (
+                <View style={styles.emptyColumn}>
+                  <Text style={styles.emptyColumnText}>No foods found</Text>
+                </View>
+              ) : null
+            }
+          />
+        </View>
+      </View>
+    );
   };
-  
-  const filteredResults = getFilteredResults();
   
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0a0a0a', '#1a1a1a']}
+        colors={theme.isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
         style={styles.gradient}
       >
-        {/* Header */}
+        {/* Enhanced Header with Info */}
         <View style={styles.header}>
           <TouchableOpacity 
             onPress={() => navigation.goBack()}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color="#FFF" />
+            <Ionicons name="arrow-back" size={24} color={theme.theme.text} />
           </TouchableOpacity>
           
-          <Text style={styles.headerTitle}>Smart Search</Text>
+          <View style={styles.headerContent}>
+            <Text style={[styles.headerTitle, { color: theme.theme.text }]}>{exercisesOnly ? 'Exercise Library' : 'Intelligent Search'}</Text>
+            <Text style={[styles.headerSubtitle, { color: theme.theme.textSecondary }]}>Find exercises & nutrition info</Text>
+          </View>
           
           {selectedItems.length > 0 && (
             <TouchableOpacity 
@@ -514,15 +687,15 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
           ]}
         >
-          <View style={styles.searchInputContainer}>
-            <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+          <GlassContainer variant="subtle" style={styles.searchInputContainer}>
+            <Ionicons name="search" size={20} color={theme.theme.textSecondary} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
-              placeholder="Try: 'chest exercises' or 'protein for breakfast' or 'pre-workout meal'"
-              placeholderTextColor="#666"
+              style={[styles.searchInput, { color: theme.theme.text }]}
+              placeholder={exercisesOnly ? "Search 872+ exercises..." : "Try: 'chest exercises' or 'protein for breakfast'"}
+              placeholderTextColor={theme.theme.textTertiary}
               value={searchQuery}
               onChangeText={setSearchQuery}
-              autoFocus
+              autoFocus={!exercisesOnly}
               multiline={false}
             />
             {searchQuery.length > 0 && (
@@ -530,13 +703,59 @@ export default function UnifiedSearchScreen({ navigation, route }) {
                 onPress={() => setSearchQuery('')}
                 style={styles.clearButton}
               >
-                <Ionicons name="close-circle" size={20} color="#888" />
+                <Ionicons name="close-circle" size={20} color={theme.theme.textSecondary} />
               </TouchableOpacity>
             )}
-          </View>
+          </GlassContainer>
           
-          {/* NLU Understanding Indicator */}
-          {parsedQuery && (
+          {/* Informational Card - Show when no search */}
+          {!searchQuery && (
+            <GlassCard variant="subtle" style={styles.infoCard}>
+              <View style={styles.infoHeader}>
+                <View style={[styles.infoIconContainer, { backgroundColor: theme.isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(76, 175, 80, 0.35)' }]}>
+                  <Ionicons name="sparkles" size={24} color={theme.isDarkMode ? '#A7F3D0' : '#FFFFFF'} />
+                </View>
+                <Text style={[styles.infoTitle, { color: theme.theme.text }]}>What can you search?</Text>
+              </View>
+              
+              <View style={styles.infoGrid}>
+                <View style={styles.infoItem}>
+                  <View style={[styles.infoItemIcon, { backgroundColor: 'rgba(76, 175, 80, 0.15)' }]}>
+                    <Ionicons name="fitness" size={16} color="#4CAF50" />
+                  </View>
+                  <Text style={[styles.infoItemText, { color: theme.theme.textSecondary }]}>"Chest exercises" - Find targeted workouts</Text>
+                </View>
+                
+                <View style={styles.infoItem}>
+                  <View style={[styles.infoItemIcon, { backgroundColor: 'rgba(33, 150, 243, 0.15)' }]}>
+                    <Ionicons name="restaurant" size={16} color="#2196F3" />
+                  </View>
+                  <Text style={[styles.infoItemText, { color: theme.theme.textSecondary }]}>"Protein for breakfast" - Get nutrition info</Text>
+                </View>
+                
+                <View style={styles.infoItem}>
+                  <View style={[styles.infoItemIcon, { backgroundColor: 'rgba(255, 152, 0, 0.15)' }]}>
+                    <Ionicons name="body" size={16} color="#FF9800" />
+                  </View>
+                  <Text style={[styles.infoItemText, { color: theme.theme.textSecondary }]}>"Upper body workout" - Build routines</Text>
+                </View>
+                
+                <View style={styles.infoItem}>
+                  <View style={[styles.infoItemIcon, { backgroundColor: 'rgba(233, 30, 99, 0.15)' }]}>
+                    <Ionicons name="nutrition" size={16} color="#E91E63" />
+                  </View>
+                  <Text style={[styles.infoItemText, { color: theme.theme.textSecondary }]}>"Calories in chicken" - Track macros</Text>
+                </View>
+              </View>
+              
+              <Text style={[styles.infoTip, { color: theme.theme.textTertiary }]}>
+                💡 Tip: Use natural language like "how to build stronger legs"
+              </Text>
+            </GlassCard>
+          )}
+          
+          {/* NLU Understanding Indicator with emojis */}
+          {parsedQuery && searchQuery && (
             <View style={styles.nluIndicator}>
               <View style={styles.nluBadge}>
                 <Ionicons 
@@ -545,65 +764,49 @@ export default function UnifiedSearchScreen({ navigation, route }) {
                   color="#FFB86B" 
                 />
                 <Text style={styles.nluText}>
-                  Understanding: {parsedQuery.type === 'mixed' ? 'Exercise + Nutrition' : 
-                                parsedQuery.type === 'exercise' ? 'Exercise Search' : 'Nutrition Search'}
+                  {parsedQuery.type === 'mixed' ? '💪 Exercise + 🍽️ Nutrition' : 
+                   parsedQuery.type === 'exercise' ? '💪 Exercise Search' : 
+                   parsedQuery.type === 'nutrition' ? '🍽️ Nutrition Search' : 'Searching...'}
                 </Text>
               </View>
               {parsedQuery.muscleGroups.length > 0 && (
                 <Text style={styles.nluDetail}>
-                  Targeting: {parsedQuery.muscleGroups.join(', ')}
+                  🎯 Targeting: {parsedQuery.muscleGroups.join(', ')}
+                </Text>
+              )}
+              {parsedQuery.foodCategories.length > 0 && (
+                <Text style={styles.nluDetail}>
+                  🥗 Food type: {parsedQuery.foodCategories.join(', ')}
                 </Text>
               )}
             </View>
           )}
         </Animated.View>
         
-        {/* Tab Selector */}
-        <View style={styles.tabContainer}>
-          {['all', 'exercises', 'nutrition'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setActiveTab(tab)}
-              style={[styles.tab, activeTab === tab && styles.activeTab]}
-            >
-              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
-                {tab === 'all' ? 'All Results' : 
-                 tab === 'exercises' ? `Exercises (${searchResults.exercises.length})` :
-                 `Nutrition (${searchResults.nutrition.length})`}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {/* Result Count Summary */}
+        {(searchResults.exercises.length > 0 || searchResults.nutrition.length > 0) && (
+          <View style={styles.resultSummary}>
+            <Text style={styles.resultSummaryText}>
+              Found {searchResults.exercises.length + searchResults.nutrition.length} results for "{searchQuery}"
+            </Text>
+          </View>
+        )}
         
-        {/* Results */}
+        {/* Results - Split View or Loading */}
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FF6B35" />
             <Text style={styles.loadingText}>Searching intelligently...</Text>
           </View>
-        ) : (
-          <FlatList
-            data={filteredResults}
-            keyExtractor={(item, index) => `${item.type}-${item.id}-${index}`}
-            renderItem={({ item }) => 
-              item.type === 'exercise' ? renderExerciseCard({ item }) :
-              item.type === 'nutrition' ? renderNutritionCard({ item }) :
-              item.type ? (item.type === 'exercise' ? renderExerciseCard({ item }) : renderNutritionCard({ item })) :
-              null
-            }
-            contentContainerStyle={styles.resultsContainer}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              searchQuery.length > 0 && !isLoading ? (
-                <View style={styles.emptyContainer}>
-                  <Ionicons name="search-outline" size={60} color="#666" />
-                  <Text style={styles.emptyText}>No results found</Text>
-                  <Text style={styles.emptySubtext}>Try different keywords or phrases</Text>
-                </View>
-              ) : null
-            }
-          />
-        )}
+        ) : searchQuery.length > 0 && searchResults.exercises.length === 0 && searchResults.nutrition.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="search-outline" size={60} color="#666" />
+            <Text style={styles.emptyText}>No results found</Text>
+            <Text style={styles.emptySubtext}>Try different keywords or phrases</Text>
+          </View>
+        ) : searchQuery.length > 0 ? (
+          renderSplitResults()
+        ) : null}
         
         {/* Smart Suggestions */}
         {searchResults.suggestions.length > 0 && (
@@ -639,6 +842,75 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0a0a0a',
+  },
+  headerContent: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  infoCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    marginBottom: 10,
+    padding: 20,
+    borderRadius: 16,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  infoIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  infoGrid: {
+    gap: 12,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoItemIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  infoItemText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  infoTip: {
+    fontSize: 12,
+    marginTop: 16,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  emojiIcon: {
+    fontSize: 20,
+  },
+  exerciseIcon: {
+    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+  },
+  nutritionIcon: {
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
   },
   gradient: {
     flex: 1,
@@ -683,11 +955,11 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
     borderRadius: 12,
     paddingHorizontal: 15,
-    borderWidth: 1,
-    borderColor: '#2a2a2a',
+    paddingVertical: 12,
+    marginHorizontal: 20,
+    marginTop: 10,
   },
   searchIcon: {
     marginRight: 10,
@@ -755,41 +1027,100 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingBottom: 20,
   },
+  splitContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+  },
+  fullWidthContainer: {
+    flex: 1,
+    paddingHorizontal: 15,
+  },
+  splitColumn: {
+    flex: 1,
+    paddingHorizontal: 5,
+  },
+  columnDivider: {
+    width: 1,
+    backgroundColor: '#2a2a2a',
+    marginVertical: 10,
+  },
+  columnHeader: {
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2a2a2a',
+    marginBottom: 10,
+  },
+  columnTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFF',
+    marginBottom: 4,
+  },
+  columnCount: {
+    fontSize: 12,
+    color: '#888',
+  },
+  columnContent: {
+    paddingBottom: 20,
+  },
+  emptyColumn: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyColumnText: {
+    color: '#666',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  resultSummary: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#1a1a1a',
+    borderBottomWidth: 1,
+    borderBottomColor: '#2a2a2a',
+  },
+  resultSummaryText: {
+    color: '#888',
+    fontSize: 13,
+    textAlign: 'center',
+  },
   resultCard: {
-    marginBottom: 12,
-    borderRadius: 12,
+    marginBottom: 8,
+    borderRadius: 10,
     overflow: 'hidden',
   },
   selectedCard: {
     transform: [{ scale: 0.98 }],
   },
   cardGradient: {
-    padding: 15,
+    padding: 12,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   cardIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255, 107, 53, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 10,
   },
   cardInfo: {
     flex: 1,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFF',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   cardSubtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#888',
   },
   selectedText: {
@@ -820,21 +1151,21 @@ const styles = StyleSheet.create({
   },
   nutritionStats: {
     flexDirection: 'row',
-    marginTop: 12,
+    marginTop: 8,
     justifyContent: 'space-around',
   },
   nutritionStat: {
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: 'bold',
     color: '#FFF',
   },
   statLabel: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#888',
-    marginTop: 2,
+    marginTop: 1,
   },
   loadingContainer: {
     flex: 1,

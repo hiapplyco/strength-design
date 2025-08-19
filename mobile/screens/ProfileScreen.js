@@ -19,8 +19,12 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import healthService from '../services/healthService';
+import { useTheme } from '../contexts/ThemeContext';
+import { GlassContainer, GlassCard } from '../components/GlassmorphismComponents';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ProfileScreen({ navigation }) {
+  const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userData, setUserData] = useState({
@@ -62,7 +66,6 @@ export default function ProfileScreen({ navigation }) {
     crashReporting: true,
     
     // Display
-    theme: 'dark',
     measurementUnit: 'metric', // metric or imperial
     startWeekOn: 'monday',
     
@@ -406,9 +409,15 @@ export default function ProfileScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Profile Header */}
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={theme.isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
+        style={StyleSheet.absoluteFillObject}
+      />
+      
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Enhanced Header with Glassmorphism */}
+        <GlassContainer variant="subtle" style={styles.header}>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
           {userData.photoURL ? (
             <Image source={{ uri: userData.photoURL }} style={styles.avatar} />
@@ -422,8 +431,8 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </TouchableOpacity>
         
-        <Text style={styles.name}>{userData.displayName || 'User'}</Text>
-        <Text style={styles.email}>{userData.email}</Text>
+        <Text style={[styles.name, { color: theme.theme.text }]}>{userData.displayName || 'User'}</Text>
+        <Text style={[styles.email, { color: theme.theme.textSecondary }]}>{userData.email}</Text>
         
         <TouchableOpacity
           style={styles.editButton}
@@ -433,7 +442,7 @@ export default function ProfileScreen({ navigation }) {
             {editMode ? 'Cancel' : 'Edit Profile'}
           </Text>
         </TouchableOpacity>
-      </View>
+      </GlassContainer>
 
       {/* Profile Information */}
       {editMode && (
@@ -591,8 +600,8 @@ export default function ProfileScreen({ navigation }) {
       )}
 
       {/* Health Integration */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Health Integration</Text>
+      <GlassCard variant="subtle" style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Health Integration</Text>
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
@@ -667,11 +676,11 @@ export default function ProfileScreen({ navigation }) {
             </View>
           </>
         )}
-      </View>
+      </GlassCard>
 
       {/* Notifications */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notifications</Text>
+      <GlassCard variant="subtle" style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Notifications</Text>
         
         <View style={styles.settingRow}>
           <Text style={styles.settingLabel}>Workout Reminders</Text>
@@ -702,11 +711,11 @@ export default function ProfileScreen({ navigation }) {
             thumbColor={settings.motivationalMessages ? '#FF7E87' : '#f4f3f4'}
           />
         </View>
-      </View>
+      </GlassCard>
 
       {/* Privacy */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Privacy</Text>
+      <GlassCard variant="subtle" style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Privacy</Text>
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
@@ -732,14 +741,56 @@ export default function ProfileScreen({ navigation }) {
             thumbColor={settings.anonymousAnalytics ? '#FF7E87' : '#f4f3f4'}
           />
         </View>
-      </View>
+      </GlassCard>
 
       {/* Display */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Display</Text>
+      <GlassCard variant="subtle" style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Display</Text>
+        
+        {/* Theme Toggle */}
+        <View style={styles.settingRow}>
+          <View>
+            <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Theme</Text>
+            <Text style={[styles.settingDescription, { color: theme.theme.textSecondary }]}>Choose your preferred appearance</Text>
+          </View>
+          <View style={styles.themeSelector}>
+            {['light', 'dark', 'system'].map((mode) => (
+              <TouchableOpacity
+                key={mode}
+                style={[
+                  styles.themeOption,
+                  theme.themeMode === mode && styles.themeOptionActive,
+                  { 
+                    backgroundColor: theme.themeMode === mode 
+                      ? theme.theme.primary 
+                      : theme.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                    borderColor: theme.themeMode === mode 
+                      ? theme.theme.primary 
+                      : theme.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+                  }
+                ]}
+                onPress={() => theme.changeTheme(mode)}
+              >
+                <Ionicons 
+                  name={mode === 'light' ? 'sunny' : mode === 'dark' ? 'moon' : 'phone-portrait'} 
+                  size={20} 
+                  color={theme.themeMode === mode ? '#FFFFFF' : theme.theme.textSecondary} 
+                />
+                <Text
+                  style={[
+                    styles.themeOptionText,
+                    { color: theme.themeMode === mode ? '#FFFFFF' : theme.theme.textSecondary }
+                  ]}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
         
         <View style={styles.settingRow}>
-          <Text style={styles.settingLabel}>Measurement Unit</Text>
+          <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Measurement Unit</Text>
           <View style={styles.segmentedControl}>
             {['metric', 'imperial'].map((unit) => (
               <TouchableOpacity
@@ -762,11 +813,11 @@ export default function ProfileScreen({ navigation }) {
             ))}
           </View>
         </View>
-      </View>
+      </GlassCard>
 
       {/* Account Actions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account</Text>
+      <GlassCard variant="subtle" style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Account</Text>
         
         <TouchableOpacity style={styles.actionButton} onPress={exportData}>
           <Ionicons name="download-outline" size={20} color="#FFB86B" />
@@ -790,17 +841,45 @@ export default function ProfileScreen({ navigation }) {
           <Ionicons name="log-out-outline" size={20} color="#FF7E87" />
           <Text style={[styles.actionButtonText, { color: '#FF7E87' }]}>Sign Out</Text>
         </TouchableOpacity>
-      </View>
+      </GlassCard>
       
       <View style={{ height: 100 }} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0B0D',
+  },
+  themeSelector: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  themeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 6,
+  },
+  themeOptionActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  themeOptionText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  settingDescription: {
+    fontSize: 11,
+    marginTop: 2,
   },
   loadingContainer: {
     flex: 1,

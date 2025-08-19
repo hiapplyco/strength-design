@@ -40,10 +40,10 @@ export const colors = {
       tertiary: '#F1F3F4',          // Content areas
       elevated: '#FFFFFF',          // Elevated surfaces
       glass: {
-        subtle: 'rgba(255,255,255,0.08)',    // 8% white - minimal glass
-        medium: 'rgba(255,255,255,0.12)',    // 12% white - standard glass
-        strong: 'rgba(255,255,255,0.20)',    // 20% white - elevated glass
-        modal: 'rgba(255,255,255,0.85)',     // 85% white - modal overlay
+        subtle: 'rgba(255,255,255,0.75)',    // 75% white - more opaque glass
+        medium: 'rgba(255,255,255,0.85)',    // 85% white - standard glass
+        strong: 'rgba(255,255,255,0.92)',    // 92% white - elevated glass
+        modal: 'rgba(255,255,255,0.98)',     // 98% white - modal overlay
       },
       gradient: {
         primary: ['#FEFEFE', '#F8F9FA'],              // Subtle background gradient
@@ -87,25 +87,26 @@ export const colors = {
     },
   },
 
-  // Dark Mode Color Palette - "Midnight Focus"
+  // Dark Mode Color Palette - "Oura Black Focus" 
   dark: {
-    // Background System
+    // Background System - Deep blacks like Oura Ring app
     background: {
-      primary: '#0A0B0D',           // Deep focus base
-      secondary: '#1A1B1E',         // Elevated surfaces
-      tertiary: '#252629',          // Content cards
-      elevated: '#2F3033',          // Highest elevation
+      primary: '#000000',           // Pure black for true dark mode (Oura style)
+      secondary: '#0A0A0A',         // Slightly lighter black for elevated surfaces
+      tertiary: '#141414',          // Content cards - subtle gray
+      elevated: '#1C1C1C',          // Highest elevation - visible but dark
       glass: {
-        subtle: 'rgba(255,255,255,0.05)',    // 5% white - minimal glass
-        medium: 'rgba(255,255,255,0.08)',    // 8% white - standard glass
-        strong: 'rgba(255,255,255,0.12)',    // 12% white - elevated glass
-        modal: 'rgba(10,11,13,0.85)',        // 85% dark - modal overlay
+        subtle: 'rgba(10,11,13,0.75)',       // 75% opacity - more opaque dark glass
+        medium: 'rgba(10,11,13,0.85)',       // 85% opacity - standard dark glass
+        strong: 'rgba(10,11,13,0.92)',       // 92% opacity - elevated dark glass
+        modal: 'rgba(0,0,0,0.98)',           // 98% black - modal overlay
       },
       gradient: {
-        primary: ['#0A0B0D', '#1A1B1E'],             // Depth gradient
-        glass: ['rgba(255,255,255,0.08)', 'rgba(255,255,255,0.05)'], // Glass gradient
-        energy: ['#2D1B0E', '#1A1B1E'],              // Energy background
-        app: ['#4A4458', '#6D5A7A', '#3B2F4A'],     // App background (existing)
+        primary: ['#000000', '#0A0A0A', '#141414'],   // Oura-style black gradient
+        glass: ['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.02)'], // Glass gradient
+        energy: ['#000000', '#141414', '#0A0A0A'],    // Energy background
+        app: ['#000000', '#0A0A0A', '#141414'],       // Main app background (Oura inspired)
+        cosmos: ['#000000', '#1C1C1C', '#0A0A0A'],    // Alternative cosmic gradient
       },
     },
 
@@ -179,44 +180,44 @@ export const colors = {
     surface: {
       light: {
         subtle: {
-          backgroundColor: 'rgba(255,255,255,0.08)',
+          backgroundColor: 'rgba(255,255,255,0.75)',  // Increased from 0.08 for less transparency
           borderColor: 'rgba(0,0,0,0.08)',
           backdropFilter: 'blur(8px)',
         },
         medium: {
-          backgroundColor: 'rgba(255,255,255,0.12)',
+          backgroundColor: 'rgba(255,255,255,0.85)',  // Increased from 0.12 for less transparency
           borderColor: 'rgba(0,0,0,0.12)',
           backdropFilter: 'blur(12px)',
         },
         strong: {
-          backgroundColor: 'rgba(255,255,255,0.20)',
+          backgroundColor: 'rgba(255,255,255,0.92)',  // Increased from 0.20 for less transparency
           borderColor: 'rgba(0,0,0,0.15)',
           backdropFilter: 'blur(16px)',
         },
         modal: {
-          backgroundColor: 'rgba(255,255,255,0.85)',
+          backgroundColor: 'rgba(255,255,255,0.98)',  // Increased from 0.85 for less transparency
           borderColor: 'rgba(0,0,0,0.10)',
           backdropFilter: 'blur(20px)',
         },
       },
       dark: {
         subtle: {
-          backgroundColor: 'rgba(255,255,255,0.05)',
-          borderColor: 'rgba(255,255,255,0.05)',
+          backgroundColor: 'rgba(10,11,13,0.75)',    // Increased opacity for less transparency
+          borderColor: 'rgba(255,255,255,0.08)',      // Slightly increased border visibility
           backdropFilter: 'blur(8px)',
         },
         medium: {
-          backgroundColor: 'rgba(255,255,255,0.08)',
-          borderColor: 'rgba(255,255,255,0.10)',
+          backgroundColor: 'rgba(10,11,13,0.85)',    // Increased opacity for less transparency
+          borderColor: 'rgba(255,255,255,0.12)',
           backdropFilter: 'blur(12px)',
         },
         strong: {
-          backgroundColor: 'rgba(255,255,255,0.12)',
+          backgroundColor: 'rgba(10,11,13,0.92)',    // Increased opacity for less transparency
           borderColor: 'rgba(255,255,255,0.15)',
           backdropFilter: 'blur(16px)',
         },
         modal: {
-          backgroundColor: 'rgba(10,11,13,0.85)',
+          backgroundColor: 'rgba(10,11,13,0.98)',    // Increased from 0.85 for less transparency
           borderColor: 'rgba(255,255,255,0.10)',
           backdropFilter: 'blur(20px)',
         },
@@ -228,27 +229,29 @@ export const colors = {
   gradients: {
     // Primary Brand Gradients
     primary: {
-      light: ['#FF6B35', '#F7931E'],        // Warm orange to golden amber (light mode)
+      light: ['#FFFFFF', '#F8F9FA', '#F0F1F3'],        // Neutral white gradient (light mode)
       dark: ['#FFB86B', '#FF7E87'],         // Soft orange to warm pink (dark mode)
     },
     
     // App Background Gradients - Main container backgrounds
     background: {
       light: {
-        primary: ['#FF6B35', '#F7931E', '#FFA366'],     // Orange to amber blend
+        primary: ['#FFFFFF', '#F8F9FA', '#F0F1F3'],     // Neutral white gradient
         warm: ['#FFF4E6', '#FFE4CC', '#FFC899'],        // Subtle warm whites
-        energy: ['#FF8F65', '#FFB86B', '#F7931E'],      // Energetic warm tones
-        sunset: ['#FF6B35', '#FF7E87', '#FFB86B'],      // Sunset inspired
+        energy: ['#F0F0F0', '#E8E8E8', '#E0E0E0'],      // Neutral light grays
+        sunset: ['#F8F8F8', '#F0F0F0', '#E8E8E8'],      // Light gray gradient
       },
       dark: {
-        primary: ['#2D1B0E', '#1A1B1E', '#0A0B0D'],     // Deep warm blacks
-        cosmic: ['#4A4458', '#6D5A7A', '#3B2F4A'],      // Cosmic purple blend
-        energy: ['#3D2817', '#2D1B0E', '#1A1B1E'],      // Dark energy blend
-        midnight: ['#1A1B1E', '#252629', '#2F3033'],    // Midnight grays
+        primary: ['#000000', '#0A0A0A', '#141414'],     // Oura-style black gradient
+        cosmic: ['#000000', '#1C1C1C', '#0A0A0A'],      // Refined cosmic blend
+        energy: ['#000000', '#141414', '#0A0A0A'],      // Dark energy blend (Oura inspired)
+        midnight: ['#000000', '#0A0A0A', '#1C1C1C'],    // Pure black gradient (Oura style)
+        oura: ['#000000', '#141414', '#000000'],        // Oura Ring app style
+        deep: ['#000000', '#000000', '#0A0A0A'],        // Ultra deep black
       },
     },
     
-    // Accent Gradients - For cards, buttons, highlights
+    // Accent Gradients - For cards, buttons, highlights (Oura-inspired)
     accent: {
       light: {
         orange: ['#FF6B35', '#FF8F65'],     // Primary orange
@@ -257,10 +260,13 @@ export const colors = {
         warm: ['#FFB86B', '#FFC899'],       // Soft warm tones
       },
       dark: {
-        orange: ['#FFB86B', '#FF8F65'],     // Soft orange
-        aurora: ['#FFB86B', '#FF7E87'],     // Aurora blend
-        ember: ['#FF7E87', '#FFB86B'],      // Ember glow
+        orange: ['#FF8F65', '#FFB86B'],     // Softer orange (Oura style)
+        aurora: ['#FFB86B', '#FF7E87'],     // Aurora blend 
+        ember: ['#FF7E87', '#FF8F65'],      // Ember glow (refined)
         glow: ['#FFB86B', '#FFA366'],       // Gentle glow
+        oura: ['#6B7EFF', '#8F9BFF'],       // Oura blue-purple
+        teal: ['#4ECDC4', '#44A08D'],       // Calming teal
+        minimal: ['#333333', '#555555'],     // Minimal gray gradient
       },
     },
     
@@ -1154,28 +1160,57 @@ export const theme = {
     };
   },
 
-  // Unified gradient getter with theme awareness
+  // Enhanced gradient getter with comprehensive fallbacks
   getGradient: (type = 'background', variant = 'primary', currentTheme = 'light') => {
-    // Handle nested gradient structure
-    if (colors.gradients[type] && colors.gradients[type][currentTheme]) {
-      return colors.gradients[type][currentTheme][variant] || colors.gradients[type][currentTheme].primary;
+    try {
+      // Handle nested gradient structure
+      if (colors.gradients[type] && colors.gradients[type][currentTheme]) {
+        const result = colors.gradients[type][currentTheme][variant] || colors.gradients[type][currentTheme].primary;
+        if (result && Array.isArray(result)) return result;
+      }
+      
+      // Handle direct gradients (like primary)
+      if (colors.gradients[type] && colors.gradients[type][currentTheme]) {
+        const result = colors.gradients[type][currentTheme];
+        if (result && Array.isArray(result)) return result;
+      }
+      
+      // Fallback to legacy gradients
+      const legacyKey = currentTheme === 'dark' ? `${type}Dark` : type;
+      if (colors.gradients[legacyKey] && Array.isArray(colors.gradients[legacyKey])) {
+        return colors.gradients[legacyKey];
+      }
+      
+      // Comprehensive fallbacks based on theme and type
+      const fallbacks = {
+        dark: {
+          success: ['#4CAF50', '#45B049'],
+          error: ['#F87171', '#EF4444'],
+          warning: ['#FBBF24', '#F59E0B'],
+          info: ['#60A5FA', '#3B82F6'],
+          accent: ['#FFB86B', '#FF7E87'],
+          primary: ['#FFB86B', '#FF7E87'],
+          background: ['#000000', '#0A0A0A', '#141414'],
+          default: ['#FFB86B', '#FF7E87'],
+        },
+        light: {
+          success: ['#10B981', '#059669'],
+          error: ['#EF4444', '#DC2626'],
+          warning: ['#F59E0B', '#D97706'],
+          info: ['#3B82F6', '#2563EB'],
+          accent: ['#E0E0E0', '#F0F0F0'],
+          primary: ['#FFFFFF', '#F8F9FA', '#F0F1F3'],
+          background: ['#FFFFFF', '#F8F9FA', '#F0F1F3'],
+          default: ['#FFFFFF', '#F8F9FA', '#F0F1F3'],
+        }
+      };
+      
+      return fallbacks[currentTheme]?.[type] || fallbacks[currentTheme]?.default || fallbacks.dark.default;
+    } catch (error) {
+      console.warn('Gradient getter error:', error, { type, variant, currentTheme });
+      // Ultimate fallback - always return a valid gradient
+      return currentTheme === 'dark' ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3'];
     }
-    
-    // Handle direct gradients (like primary)
-    if (colors.gradients[type] && colors.gradients[type][currentTheme]) {
-      return colors.gradients[type][currentTheme];
-    }
-    
-    // Fallback to legacy gradients
-    const legacyKey = currentTheme === 'dark' ? `${type}Dark` : type;
-    if (colors.gradients[legacyKey]) {
-      return colors.gradients[legacyKey];
-    }
-    
-    // Ultimate fallback
-    return currentTheme === 'dark' 
-      ? colors.gradients.primary.dark 
-      : colors.gradients.primary.light;
   },
 
   // App background gradient getter - main function for unified backgrounds

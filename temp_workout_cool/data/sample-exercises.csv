@@ -1,7 +1,0 @@
-id,name_en,full_video_url,full_video_image_url,description_en,attribute_name,attribute_value
-1,Push Up,http://example.com/pushup.mp4,http://example.com/pushup.jpg,"A basic push up.","primary_muscle","Chest"
-1,Push Up,http://example.com/pushup.mp4,http://example.com/pushup.jpg,"A basic push up.","secondary_muscle","Triceps"
-1,Push Up,http://example.com/pushup.mp4,http://example.com/pushup.jpg,"A basic push up.","equipment","Bodyweight"
-2,Squat,http://example.com/squat.mp4,http://example.com/squat.jpg,"A basic squat.","primary_muscle","Quads"
-2,Squat,http://example.com/squat.mp4,http://example.com/squat.jpg,"A basic squat.","secondary_muscle","Glutes"
-2,Squat,http://example.com/squat.mp4,http://example.com/squat.jpg,"A basic squat.","equipment","Bodyweight"

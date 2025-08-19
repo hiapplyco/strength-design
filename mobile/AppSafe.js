@@ -18,6 +18,7 @@ import healthService from './services/healthService';
 // Simple navigation implementation for web compatibility
 function AuthenticatedApp() {
   const [currentScreen, setCurrentScreen] = useState('Home');
+  const [navigationParams, setNavigationParams] = useState({});
   const [healthInitialized, setHealthInitialized] = useState(false);
 
   useEffect(() => {
@@ -44,20 +45,27 @@ function AuthenticatedApp() {
       console.error('Sign out error:', error);
     }
   };
+  
+  // Navigation helper that preserves params
+  const navigate = (screen, params = {}) => {
+    setCurrentScreen(screen);
+    setNavigationParams(params);
+  };
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'Home':
-        return <HomeScreen navigation={{ navigate: setCurrentScreen }} />;
+        return <HomeScreen navigation={{ navigate }} />;
       case 'Generator':
         // Enhanced AI Chat with context awareness, streaming animations, and real Gemini 2.5 Flash
-        return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Home'), navigate }} route={{ params: navigationParams }} />;
       case 'Workouts':
-        return <WorkoutsScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        return <WorkoutsScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate }} />;
       case 'Exercises':
-        return <CleanExerciseLibraryScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        // Use unified search but filter to exercises only
+        return <UnifiedSearchScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate }} route={{ params: { exercisesOnly: true } }} />;
       case 'Search':
-        return <UnifiedSearchScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: setCurrentScreen }} />;
+        return <UnifiedSearchScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate }} route={{ params: navigationParams }} />;
       case 'Profile':
         // Use the new comprehensive ProfileScreen
         return <ProfileScreen navigation={{ navigate: setCurrentScreen, replace: (screen) => setCurrentScreen(screen) }} />;

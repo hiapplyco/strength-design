@@ -35,13 +35,52 @@ class ContextAggregator {
     try {
       console.log('[ContextAggregator] Getting user context, forceRefresh:', forceRefresh);
       
+      // Validate authentication
+      const user = this.auth.currentUser;
+      if (!user) {
+        console.warn('[ContextAggregator] No authenticated user found');
+        return this.getMinimalContext();
+      }
+      
       // Check cache validity
       if (!forceRefresh && this.isCacheValid()) {
         console.log('[ContextAggregator] Returning cached context');
         return this.buildContext();
       }
       
-      // Fetch all data in parallel for better performance
+      // Set timeout for context loading
+      const contextPromise = Promise.all([
+        this.getUserProfile().catch(error => {
+          console.warn('[ContextAggregator] Failed to get user profile:', error.message);
+          return null;
+        }),
+        this.getWorkoutHistory().catch(error => {
+          console.warn('[ContextAggregator] Failed to get workout history:', error.message);
+          return { workouts: [], stats: {}, totalCount: 0 };
+        }),
+        this.getNutritionLogs().catch(error => {
+          console.warn('[ContextAggregator] Failed to get nutrition logs:', error.message);
+          return { logs: [], dailyAverages: {}, totalDays: 0, compliance: 0 };
+        }),
+        this.getHealthMetrics().catch(error => {
+          console.warn('[ContextAggregator] Failed to get health metrics:', error.message);
+          return { today: {}, weekly: {}, isConnected: false };
+        }),
+        this.getExercisePreferences().catch(error => {
+          console.warn('[ContextAggregator] Failed to get exercise preferences:', error.message);
+          return { favorites: [], searchHistory: [], mostUsed: [] };
+        }),
+        this.getPerformanceMetrics().catch(error => {
+          console.warn('[ContextAggregator] Failed to get performance metrics:', error.message);
+          return this.getDefaultPerformanceMetrics();
+        })
+      ]);
+      
+      // Add timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Context loading timeout')), 15000)
+      );
+      
       const [
         userProfile,
         workoutHistory,
@@ -49,34 +88,41 @@ class ContextAggregator {
         healthMetrics,
         exercisePreferences,
         performanceMetrics
-      ] = await Promise.all([
-        this.getUserProfile(),
-        this.getWorkoutHistory(),
-        this.getNutritionLogs(),
-        this.getHealthMetrics(),
-        this.getExercisePreferences(),
-        this.getPerformanceMetrics()
-      ]);
+      ] = await Promise.race([contextPromise, timeoutPromise]);
+      
+      // Validate essential data
+      const validatedData = {
+        userProfile: userProfile || { uid: user.uid, experienceLevel: 'beginner' },
+        workoutHistory: workoutHistory || { workouts: [], stats: {}, totalCount: 0 },
+        nutritionLogs: nutritionLogs || { logs: [], dailyAverages: {}, totalDays: 0, compliance: 0 },
+        healthMetrics: healthMetrics || { today: {}, weekly: {}, isConnected: false },
+        exercisePreferences: exercisePreferences || { favorites: [], searchHistory: [], mostUsed: [] },
+        performanceMetrics: performanceMetrics || this.getDefaultPerformanceMetrics()
+      };
       
       // Update cache
       this.cache = {
-        userProfile,
-        workoutHistory,
-        nutritionLogs,
-        healthMetrics,
-        exercisePreferences,
-        performanceMetrics,
+        ...validatedData,
         contextHash: this.generateContextHash(),
         lastUpdated: Date.now()
       };
       
-      // Persist cache to storage
-      await this.persistCache();
+      // Persist cache to storage (don't await to avoid blocking)
+      this.persistCache().catch(error => 
+        console.warn('[ContextAggregator] Failed to persist cache:', error.message)
+      );
       
       return this.buildContext();
     } catch (error) {
       console.error('[ContextAggregator] Error getting context:', error);
-      // Return minimal context on error
+      
+      // Try to load from cache as fallback
+      if (this.cache.lastUpdated) {
+        console.log('[ContextAggregator] Using stale cache as fallback');
+        return this.buildContext();
+      }
+      
+      // Return minimal context as last resort
       return this.getMinimalContext();
     }
   }
@@ -309,7 +355,7 @@ class ContextAggregator {
   /**
    * Build the final context object for AI
    */
-  buildContext() {
+  buildContext(programContext = null) {
     const context = {
       user: this.cache.userProfile,
       workoutHistory: this.cache.workoutHistory,
@@ -325,13 +371,87 @@ class ContextAggregator {
       }
     };
     
+    // Add program context if provided (from Perplexity search)
+    if (programContext) {
+      context.selectedProgram = {
+        name: programContext.name,
+        creator: programContext.creator,
+        methodology: programContext.methodology,
+        structure: programContext.structure,
+        goals: programContext.goals,
+        experienceLevel: programContext.experienceLevel,
+        duration: programContext.duration,
+        credibilityScore: programContext.credibilityScore,
+        source: 'Perplexity Search',
+        selectedAt: new Date().toISOString()
+      };
+      
+      // Add program-specific insights
+      context.programInsights = this.generateProgramInsights(context, programContext);
+    }
+    
     // Add derived insights
     context.insights = this.generateInsights(context);
     
     // Add recommendations
-    context.recommendations = this.generateRecommendations(context);
+    context.recommendations = this.generateRecommendations(context, programContext);
     
     return context;
+  }
+
+  /**
+   * Generate insights specific to the selected program
+   */
+  generateProgramInsights(context, programContext) {
+    const insights = {
+      compatibility: 'unknown',
+      adjustments: [],
+      expectations: [],
+      progressionPlan: []
+    };
+
+    // Check program compatibility with user's level
+    const userLevel = context.performance?.strengthLevel || 'beginner';
+    const programLevel = programContext.experienceLevel?.toLowerCase() || 'beginner';
+    
+    if (userLevel === programLevel) {
+      insights.compatibility = 'excellent';
+      insights.expectations.push(`Perfect match for your ${userLevel} level`);
+    } else if (
+      (userLevel === 'beginner' && programLevel.includes('intermediate')) ||
+      (userLevel === 'intermediate' && programLevel.includes('advanced'))
+    ) {
+      insights.compatibility = 'challenging';
+      insights.adjustments.push('Consider starting with lighter weights or fewer sets');
+      insights.expectations.push('This program will challenge you to grow');
+    } else if (
+      (userLevel === 'advanced' && programLevel.includes('beginner')) ||
+      (userLevel === 'intermediate' && programLevel.includes('beginner'))
+    ) {
+      insights.compatibility = 'easy';
+      insights.adjustments.push('Consider increasing intensity or adding volume');
+      insights.expectations.push('Good for active recovery or building consistency');
+    }
+
+    // Program-specific adjustments based on user context
+    if (context.user?.injuries) {
+      insights.adjustments.push(`Modify exercises to accommodate ${context.user.injuries}`);
+    }
+
+    if (context.preferences?.equipment?.length > 0) {
+      insights.adjustments.push('Adapt exercises to available equipment');
+    }
+
+    // Progression planning
+    if (programContext.duration) {
+      insights.progressionPlan.push(`Follow ${programContext.duration} timeline`);
+    }
+    
+    if (programContext.methodology?.includes('progressive')) {
+      insights.progressionPlan.push('Focus on gradual weight increases');
+    }
+
+    return insights;
   }
 
   /**
@@ -379,7 +499,7 @@ class ContextAggregator {
   /**
    * Generate recommendations based on context
    */
-  generateRecommendations(context) {
+  generateRecommendations(context, programContext = null) {
     const recommendations = {
       workoutFocus: [],
       nutritionFocus: [],
@@ -410,6 +530,25 @@ class ContextAggregator {
     // Equipment suggestions
     if (context.preferences?.equipment?.length < 3) {
       recommendations.equipmentSuggestions.push('Consider adding resistance bands for variety');
+    }
+    
+    // Program-specific recommendations
+    if (programContext) {
+      recommendations.programSpecific = {
+        focus: `Emphasize ${programContext.goals?.toLowerCase() || 'general fitness'}`,
+        schedule: `Follow ${programContext.methodology || 'progressive training'} approach`,
+        expectations: `Expected duration: ${programContext.duration || 'Variable'}`,
+        credibility: `High-quality program (${programContext.credibilityScore || 7}/10)`
+      };
+      
+      // Add program-specific workout focus
+      if (programContext.goals?.toLowerCase().includes('strength')) {
+        recommendations.workoutFocus.push('Focus on compound movements and progressive overload');
+      } else if (programContext.goals?.toLowerCase().includes('muscle')) {
+        recommendations.workoutFocus.push('Emphasize hypertrophy rep ranges (8-12 reps)');
+      } else if (programContext.goals?.toLowerCase().includes('endurance')) {
+        recommendations.workoutFocus.push('Include cardio and higher rep training');
+      }
     }
     
     return recommendations;

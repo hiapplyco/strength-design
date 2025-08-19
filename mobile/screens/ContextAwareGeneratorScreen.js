@@ -26,7 +26,7 @@ import DailyWorkoutCard from '../components/DailyWorkoutCard';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-export default function ContextAwareGeneratorScreen({ navigation }) {
+export default function ContextAwareGeneratorScreen({ navigation, route }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,26 +40,33 @@ export default function ContextAwareGeneratorScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [cachedResponses, setCachedResponses] = useState({});
   const [selectedDay, setSelectedDay] = useState(0);
+  const [programContext, setProgramContext] = useState(null);
   
   const scrollViewRef = useRef();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-100)).current;
 
   useEffect(() => {
+    // Check for program context from navigation
+    if (route?.params?.programContext) {
+      setProgramContext(route.params.programContext);
+    }
+    
     initializeChat();
     loadCachedResponses();
-  }, []);
+  }, [route?.params]);
 
   const initializeChat = async () => {
     try {
       setContextLoading(true);
       
-      // Load user context
+      // Load user context with program context if available
       const context = await contextAggregator.getContext();
-      setUserContext(context);
+      const contextWithProgram = contextAggregator.buildContext(programContext);
+      setUserContext(contextWithProgram);
       
       // Generate personalized greeting
-      const greeting = generatePersonalizedGreeting(context);
+      const greeting = generatePersonalizedGreeting(contextWithProgram, programContext);
       setMessages([{ role: 'assistant', content: greeting }]);
       
       // Animate entry
@@ -87,10 +94,35 @@ export default function ContextAwareGeneratorScreen({ navigation }) {
     }
   };
 
-  const generatePersonalizedGreeting = (context) => {
-    const { user, workoutHistory, health, insights, recommendations } = context;
+  const generatePersonalizedGreeting = (context, programContext = null) => {
+    const { user, workoutHistory, health, insights, recommendations, selectedProgram, programInsights } = context;
     
     let greeting = `👋 **Welcome back, ${user?.displayName || 'there'}!**\n\n`;
+    
+    // Add program-specific greeting if a program was selected
+    if (selectedProgram && programInsights) {
+      greeting += `🎯 **I see you selected "${selectedProgram.name}" by ${selectedProgram.creator}!**\n\n`;
+      greeting += `This is a ${selectedProgram.goals?.toLowerCase() || 'fitness'} program designed for ${selectedProgram.experienceLevel?.toLowerCase() || 'all levels'}. `;
+      
+      if (programInsights.compatibility === 'excellent') {
+        greeting += `Perfect match for your current level! 🎉\n\n`;
+      } else if (programInsights.compatibility === 'challenging') {
+        greeting += `This will be a great challenge to help you grow! 💪\n\n`;
+      } else if (programInsights.compatibility === 'easy') {
+        greeting += `This should be manageable and help build consistency! 📈\n\n`;
+      }
+      
+      greeting += `I'll help you adapt this program to your specific needs, available equipment, and preferences. `;
+      greeting += `Let's create a personalized version that works perfectly for you!\n\n`;
+      
+      if (programInsights.adjustments?.length > 0) {
+        greeting += `**Key Adjustments I'll Make:**\n`;
+        programInsights.adjustments.forEach(adjustment => {
+          greeting += `• ${adjustment}\n`;
+        });
+        greeting += `\n`;
+      }
+    }`;
     
     // Add context-aware information
     if (workoutHistory?.stats?.totalWorkouts > 0) {

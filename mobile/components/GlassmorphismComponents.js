@@ -23,7 +23,7 @@ import {
   AccessibilityInfo,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeLinearGradient } from './SafeLinearGradient';
 import { useTheme, themedStyles } from '../contexts/ThemeContext';
 import { borderRadius, spacing, animations } from '../utils/designTokens';
 

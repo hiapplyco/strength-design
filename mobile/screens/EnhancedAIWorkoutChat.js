@@ -13,12 +13,17 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeLinearGradient } from '../components/SafeLinearGradient';
+import { useTheme, themedStyles } from '../contexts/ThemeContext';
+import { GlassCard, GlassContainer } from '../components/GlassmorphismComponents';
 import { auth, db } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFunctionsUrl } from '../config/firebase';
 import { colors } from '../utils/designTokens';
+import MarkdownRenderer from '../components/MarkdownRenderer';
+import chatSessionService from '../services/chatSessionService';
+import { STRUCTURED_WORKOUT_PROMPT } from '../prompts/structuredWorkoutPrompt';
 
 const SYSTEM_PROMPT = `You are Coach Alex, an elite fitness coach with 15+ years of experience helping people transform their lives through movement. Your personality is warm, encouraging, and scientifically-minded.
 
@@ -94,7 +99,7 @@ const SYSTEM_PROMPT = `You are Coach Alex, an elite fitness coach with 15+ years
 
 Remember: Your goal isn't just to collect information, but to build trust, understanding, and excitement for their fitness journey. Every question should feel like it's coming from genuine curiosity about helping them succeed.`;
 
-export default function EnhancedAIWorkoutChat({ navigation }) {
+export default function EnhancedAIWorkoutChat({ navigation, route }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -104,6 +109,9 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
   const [collectedInfo, setCollectedInfo] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [currentSession, setCurrentSession] = useState(null);
+  
+  const theme = useTheme();
   
   // Animation refs
   const scrollViewRef = useRef(null);
@@ -117,7 +125,32 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
 
   useEffect(() => {
     loadUserContext();
-  }, []);
+    
+    // Check if we have search context from navigation
+    if (route?.params?.searchContext) {
+      const { searchContext, message } = route.params;
+      console.log('Received search context:', searchContext);
+      
+      // Add the context message to the chat
+      if (message) {
+        setMessages([{
+          id: 'search-context-' + Date.now(),
+          role: 'system',
+          content: message,
+          timestamp: new Date()
+        }]);
+      }
+      
+      // Store the search context
+      if (searchContext) {
+        setUserContext(prev => ({
+          ...prev,
+          searchContext: searchContext,
+          hasSearchContext: true
+        }));
+      }
+    }
+  }, [route?.params]);
   
   // Initialize progress tracking based on existing user context
   useEffect(() => {
@@ -334,7 +367,24 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       // Build context-aware initial prompt
       let initialPrompt = "You are starting a conversation with a user. ";
       
-      if (context && context.previousWorkouts.length > 0) {
+      // Include search context if available
+      if (context?.searchContext) {
+        initialPrompt += `The user has just searched for and selected: `;
+        
+        if (context.searchContext.exercises?.length > 0) {
+          const exerciseNames = context.searchContext.exercises.map(e => e.name).join(', ');
+          initialPrompt += `Exercises: ${exerciseNames}. `;
+        }
+        
+        if (context.searchContext.foods?.length > 0) {
+          const foodNames = context.searchContext.foods.map(f => f.name).join(', ');
+          initialPrompt += `Foods: ${foodNames}. `;
+        }
+        
+        initialPrompt += `They searched for "${context.searchContext.query}". Use this context to create a personalized workout and nutrition plan. Ask them about their specific goals with these selections and how you can help incorporate them into their routine. `;
+      }
+      
+      if (context && context.previousWorkouts?.length > 0) {
         initialPrompt += `This user has completed ${context.stats.completedWorkouts} workouts with us. `;
         if (context.stats.streak > 0) {
           initialPrompt += `They're on a ${context.stats.streak} day streak! `;
@@ -346,7 +396,7 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
         }
         
         initialPrompt += "Welcome them back warmly, acknowledge their progress, and ask how their fitness journey is going and what they'd like to work on today.";
-      } else {
+      } else if (!context?.searchContext) {
         initialPrompt += "This appears to be a new user or someone without recent workout history. Welcome them warmly and start by understanding their fitness background and current goals. Be conversational and encouraging.";
       }
       
@@ -498,11 +548,10 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
         timestamp: new Date().toISOString()
       };
       
-      const response = await fetch(`${functionsUrl}/streamingChatEnhanced`, {
+      const response = await fetch(`${functionsUrl}/enhancedChat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
           ...(token && { 'Authorization': `Bearer ${token}` })
         },
         body: JSON.stringify({
@@ -511,6 +560,14 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
             role: msg.role,
             content: msg.content
           })),
+          sessionType: 'workout',
+          uploadedFiles: [],
+          useRAG: true,
+          ragConfig: {
+            maxChunks: 5,
+            maxTokens: 4000,
+            minRelevance: 0.5
+          },
           userProfile: {
             fitnessLevel: userContext?.preferences?.fitnessLevel || collectedInfo.experience,
             goals: collectedInfo.primaryGoals ? [collectedInfo.primaryGoals] : [],
@@ -526,52 +583,21 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') break;
-
-            try {
-              const parsed = JSON.parse(data);
-              console.log('Parsed streaming data:', parsed);
-              
-              if (parsed.type === 'chunk' && parsed.content) {
-                fullResponse += parsed.content;
-                setStreamingMessage(fullResponse);
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-              } else if (parsed.type === 'complete' && parsed.fullContent) {
-                fullResponse = parsed.fullContent;
-                setStreamingMessage(fullResponse);
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-              } else if (parsed.type === 'error') {
-                console.error('Streaming error from server:', parsed.error);
-                throw new Error(parsed.error);
-              }
-            } catch (e) {
-              console.log('Non-JSON streaming data:', data);
-              if (data && data !== '[DONE]') {
-                fullResponse += data;
-                setStreamingMessage(fullResponse);
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-              }
-            }
-          }
-        }
+      const result = await response.json();
+      console.log('Enhanced chat response:', result);
+      
+      const fullResponse = result.response || '';
+      const knowledgeSources = result.knowledgeSources || [];
+      const ragMetadata = result.ragMetadata || null;
+      
+      // Simulate typing effect for better UX
+      setStreamingMessage('');
+      const words = fullResponse.split(' ');
+      for (let i = 0; i < words.length; i++) {
+        const partial = words.slice(0, i + 1).join(' ');
+        setStreamingMessage(partial);
+        await new Promise(resolve => setTimeout(resolve, 30)); // Typing speed
+        scrollViewRef.current?.scrollToEnd({ animated: true });
       }
 
       // Progress is updated before adding the message above
@@ -579,11 +605,18 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       // Update progress before adding response
       updateProgress(userMessage, fullResponse || '');
       
-      // Add complete response
+      // Add complete response with knowledge sources
       console.log('sendMessage - Final response length:', fullResponse.length);
       if (fullResponse.trim()) {
         console.log('sendMessage - Adding AI response to messages');
-        setMessages(prev => [...prev, { role: 'assistant', content: fullResponse }]);
+        const assistantMessage = { 
+          role: 'assistant', 
+          content: fullResponse,
+          knowledgeSources: knowledgeSources,
+          ragMetadata: ragMetadata,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMessage]);
       } else {
         console.log('sendMessage - No AI response received');
       }
@@ -703,7 +736,18 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       
       const functionsUrl = getFunctionsUrl();
       
-      const response = await fetch(`${functionsUrl}/generateWorkout`, {
+      // Create a comprehensive user profile from collected info
+      const userProfile = {
+        fitnessLevel: collectedInfo.fitnessLevel || 'intermediate',
+        goals: collectedInfo.primaryGoals || ['strength', 'muscle'],
+        equipment: collectedInfo.equipment || ['full_gym'],
+        timePerSession: collectedInfo.sessionDuration || 45,
+        daysPerWeek: collectedInfo.frequency || 4,
+        restrictions: collectedInfo.limitations || [],
+        preferences: collectedInfo.preferences || {},
+      };
+      
+      const response = await fetch(`${functionsUrl}/generateStructuredWorkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -713,25 +757,34 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
           goals: collectedInfo,
           context: userContext,
           conversation: messages,
+          userProfile,
+          systemPrompt: STRUCTURED_WORKOUT_PROMPT,
           userId: user?.uid,
         }),
       });
 
       const result = await response.json();
       
-      // Save to Firestore
-      await addDoc(collection(db, 'workouts'), {
-        userId: user?.uid,
-        ...result.data,
-        goals: collectedInfo.primaryGoals || collectedInfo,
-        createdAt: serverTimestamp(),
-      });
-
-      Alert.alert(
-        '🎉 Workout Generated!',
-        'Your personalized workout plan is ready!',
-        [{ text: 'View Workouts', onPress: () => navigation.navigate('Workouts') }]
-      );
+      if (result.program) {
+        // Save the structured workout to Firestore
+        const workoutDoc = await addDoc(collection(db, 'structuredWorkouts'), {
+          userId: user?.uid,
+          program: result.program,
+          metadata: result.metadata,
+          createdAt: serverTimestamp(),
+        });
+        
+        // Complete the chat session
+        await chatSessionService.completeSession(true);
+        
+        // Navigate to the workout results screen with the workout data
+        navigation.navigate('WorkoutResults', {
+          workoutId: workoutDoc.id,
+          workoutData: result
+        });
+      } else {
+        throw new Error('Invalid workout structure received');
+      }
 
     } catch (error) {
       console.error('Generation error:', error);
@@ -788,21 +841,76 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
       >
         {!isUser && (
           <Animated.View style={{ transform: [{ scale: isStreaming && index === messages.length - 1 ? pulseAnim : 1 }] }}>
-            <LinearGradient
-              colors={colors.gradients.accent.dark.aurora}
+            <SafeLinearGradient
+              colors={['#FFB86B', '#FF7E87']}
               style={styles.avatar}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
               <Ionicons name="fitness" size={20} color="#FFF" />
-            </LinearGradient>
+            </SafeLinearGradient>
           </Animated.View>
         )}
         
         <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
-          <Text style={[styles.messageText, isUser && styles.userMessageText]}>
-            {message.content}
-          </Text>
+          {isUser ? (
+            <Text style={[styles.messageText, styles.userMessageText]}>
+              {message.content}
+            </Text>
+          ) : (
+            <MarkdownRenderer 
+              content={message.content}
+              style={{
+                text: styles.messageText,
+                h1: styles.markdownH1,
+                h2: styles.markdownH2,
+                h3: styles.markdownH3,
+                bold: styles.markdownBold,
+                listText: styles.messageText
+              }}
+            />
+          )}
+          
+          {/* Render knowledge sources if available */}
+          {!isUser && message.knowledgeSources && message.knowledgeSources.length > 0 && (
+            <View style={styles.sourcesContainer}>
+              <Text style={styles.sourcesHeader}>Sources:</Text>
+              {message.knowledgeSources.slice(0, 3).map((source, sourceIndex) => (
+                <TouchableOpacity 
+                  key={sourceIndex} 
+                  style={styles.sourceItem}
+                  onPress={() => {
+                    // Handle source link tap - could open in browser or show details
+                    Alert.alert(
+                      source.title,
+                      `Type: ${source.type}\nRelevance: ${source.relevance}`,
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Open Link', onPress: () => {
+                          // You could use Linking.openURL(source.url) here
+                          console.log('Opening source:', source.url);
+                        }}
+                      ]
+                    );
+                  }}
+                >
+                  <Text style={styles.sourceTitle} numberOfLines={1}>
+                    📄 {source.title}
+                  </Text>
+                  <Text style={styles.sourceDetails}>
+                    {source.type} • {source.relevance}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              
+              {/* Show RAG metadata if available */}
+              {message.ragMetadata && (
+                <Text style={styles.ragMetadata}>
+                  Knowledge base: {message.ragMetadata.chunksUsed} sources used
+                </Text>
+              )}
+            </View>
+          )}
         </View>
       </Animated.View>
     );
@@ -814,14 +922,14 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
     return (
       <Animated.View style={[styles.messageContainer, styles.assistantMessageContainer]}>
         <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <LinearGradient
-            colors={colors.gradients.accent.dark.aurora}
+          <SafeLinearGradient
+            colors={['#FFB86B', '#FF7E87']}
             style={styles.avatar}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
             <Ionicons name="fitness" size={20} color="#FFF" />
-          </LinearGradient>
+          </SafeLinearGradient>
         </Animated.View>
         
         <View style={[styles.messageBubble, styles.assistantBubble]}>
@@ -836,14 +944,14 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
     
     return (
       <View style={styles.typingContainer}>
-        <LinearGradient
-          colors={colors.gradients.accent.dark.aurora}
+        <SafeLinearGradient
+          colors={['#FFB86B', '#FF7E87']}
           style={styles.avatar}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
           <Ionicons name="fitness" size={20} color="#FFF" />
-        </LinearGradient>
+        </SafeLinearGradient>
         
         <View style={styles.typingBubble}>
           <Animated.View style={[styles.typingDot, { opacity: typingDot1 }]} />
@@ -944,55 +1052,94 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
 
   if (isInitializing) {
     return (
-      <View style={styles.loadingContainer}>
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <LinearGradient
-            colors={colors.gradients.accent.dark.aurora}
-            style={styles.loadingAvatar}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <Ionicons name="fitness" size={40} color="#FFF" />
-          </LinearGradient>
-        </Animated.View>
-        <Text style={styles.loadingText}>Preparing your AI coach...</Text>
-      </View>
+      <GlassContainer>
+        <View style={styles.loadingContainer}>
+          <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+            <SafeLinearGradient
+              colors={['#FFB86B', '#FF7E87']}
+              style={styles.loadingAvatar}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="fitness" size={40} color="#FFF" />
+            </SafeLinearGradient>
+          </Animated.View>
+          <Text style={[styles.loadingText, { color: theme.theme.primary }]}>Preparing your AI coach...</Text>
+        </View>
+      </GlassContainer>
     );
   }
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      {/* Header with unified gradient */}
-      <LinearGradient
-        colors={colors.gradients.background.dark.cosmic}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+    <GlassContainer>
+      <KeyboardAvoidingView 
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
+        {/* Header */}
+        <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#FFF" />
+            <Ionicons name="arrow-back" size={24} color={theme.theme.textOnGlass} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>AI Workout Coach</Text>
-          <TouchableOpacity 
-            style={[styles.generateButton, progress >= 60 && styles.generateButtonActive]}
-            onPress={generateWorkout}
-            disabled={isGenerating || progress < 60}
-          >
-            <LinearGradient
-              colors={progress >= 60 ? colors.gradients.success : ['#666', '#555']}
-              style={styles.generateButtonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
+          <Text style={[styles.headerTitle, { color: theme.theme.textOnGlass }]}>AI Coach</Text>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.headerActionButton}
+              onPress={async () => {
+                Alert.alert(
+                  'New Chat',
+                  'Start a new chat session? Current conversation will be saved.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { 
+                      text: 'New Chat', 
+                      onPress: async () => {
+                        await chatSessionService.completeSession(false);
+                        await chatSessionService.createNewSession();
+                        setProgress(0);
+                        setCollectedInfo({});
+                        initializeChat();
+                      }
+                    }
+                  ]
+                );
+              }}
             >
-              <Text style={styles.generateButtonText}>
-                {isGenerating ? 'Creating...' : progress >= 60 ? 'Generate' : `${60 - progress}% more`}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              <Ionicons name="add-circle-outline" size={24} color={theme.theme.primary} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.headerActionButton}
+              onPress={async () => {
+                await chatSessionService.completeSession(progress >= 60);
+                Alert.alert(
+                  'Chat Completed',
+                  'Your chat session has been saved.',
+                  [{ text: 'OK', onPress: () => navigation.goBack() }]
+                );
+              }}
+            >
+              <Ionicons name="checkmark-circle-outline" size={24} color={theme.theme.success} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.generateButton, progress >= 60 && styles.generateButtonActive]}
+              onPress={generateWorkout}
+              disabled={isGenerating || progress < 60}
+            >
+              <SafeLinearGradient
+                colors={progress >= 60 ? ['#4CAF50', '#45B049'] : ['#666666', '#888888']}
+                style={styles.generateButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.generateButtonText}>
+                  {isGenerating ? 'Creating...' : progress >= 60 ? 'Generate' : `${60 - progress}% more`}
+                </Text>
+              </SafeLinearGradient>
+            </TouchableOpacity>
+          </View>
         </View>
         
         {/* Progress Bar */}
@@ -1009,22 +1156,22 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
                 }
               ]}
             >
-              <LinearGradient
-                colors={colors.gradients.accent.dark.aurora}
+              <SafeLinearGradient
+                colors={['#FFB86B', '#FF7E87']}
                 style={styles.progressGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               />
             </Animated.View>
           </View>
-          <Text style={styles.progressText}>
+          <Text style={[styles.progressText, { color: theme.theme.textOnGlass }]}>
             {progress}% Complete - {getProgressLabel()}
           </Text>
         </View>
         
-        {/* Context Bar */}
-        {renderContextBar()}
-      </LinearGradient>
+          {/* Context Bar */}
+          {renderContextBar()}
+        </View>
 
       {/* Messages */}
       <ScrollView
@@ -1062,30 +1209,31 @@ export default function EnhancedAIWorkoutChat({ navigation }) {
           onPress={sendMessage}
           disabled={!input.trim() || isStreaming || isGenerating}
         >
-          <LinearGradient
-            colors={input.trim() && !isStreaming && !isGenerating ? colors.gradients.accent.dark.aurora : ['#333', '#444']}
+          <SafeLinearGradient
+            colors={input.trim() && !isStreaming && !isGenerating ? ['#FFB86B', '#FF7E87'] : ['#333', '#444']}
             style={styles.sendButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
             <Ionicons name="send" size={20} color="#FFF" />
-          </LinearGradient>
+          </SafeLinearGradient>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </GlassContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0C',
+    backgroundColor: 'transparent',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0A0A0C',
+    backgroundColor: 'transparent',
   },
   loadingAvatar: {
     width: 80,
@@ -1096,12 +1244,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   loadingText: {
-    color: '#FFB86B',
     fontSize: 16,
   },
   header: {
     paddingTop: 60,
     paddingBottom: 16,
+    backgroundColor: 'transparent',
   },
   headerTop: {
     flexDirection: 'row',
@@ -1113,7 +1261,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerActionButton: {
+    padding: 4,
   },
   generateButton: {
     borderRadius: 20,
@@ -1302,5 +1457,72 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  // Source citation styles
+  sourcesContainer: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  sourcesHeader: {
+    color: '#FFB86B',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  sourceItem: {
+    backgroundColor: 'rgba(255, 184, 107, 0.1)',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 184, 107, 0.2)',
+  },
+  sourceTitle: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  sourceDetails: {
+    color: '#FFB86B',
+    fontSize: 11,
+    opacity: 0.8,
+  },
+  ragMetadata: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 10,
+    fontStyle: 'italic',
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  // Markdown styles
+  markdownH1: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFB86B',
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  markdownH2: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FF6B35',
+    marginTop: 14,
+    marginBottom: 10,
+  },
+  markdownH3: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFB86B',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  markdownBold: {
+    fontWeight: 'bold',
+    color: '#FFB86B',
   },
 });

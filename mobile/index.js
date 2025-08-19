@@ -1,5 +1,5 @@
 import { registerRootComponent } from 'expo';
-import AppSafe from './AppSafe';
+import App from './App';
 
-console.log('Starting Strength.Design with SafeIcon system...');
-registerRootComponent(AppSafe);
+console.log('Starting Strength.Design...');
+registerRootComponent(App);

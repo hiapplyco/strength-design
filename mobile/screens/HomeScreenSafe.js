@@ -42,12 +42,12 @@ export default function HomeScreen({ navigation }) {
 
         <TouchableOpacity 
           style={styles.card}
-          onPress={() => navigation.navigate('Exercises')}
+          onPress={() => navigation.navigate('Search')}
         >
           <View style={styles.cardContent}>
-            <SafeIcon name="library" size={40} color="#FF6B35" />
-            <Text style={styles.cardTitleDark}>Exercise Library</Text>
-            <Text style={styles.cardTextDark}>Browse 800+ exercises</Text>
+            <SafeIcon name="search" size={40} color="#FF6B35" />
+            <Text style={styles.cardTitleDark}>Intelligent Search</Text>
+            <Text style={styles.cardTextDark}>Find exercises & nutrition</Text>
           </View>
         </TouchableOpacity>
 

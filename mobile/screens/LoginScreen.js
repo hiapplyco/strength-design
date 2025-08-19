@@ -10,7 +10,7 @@ import {
   Platform,
   ScrollView
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeLinearGradient } from '../components/SafeLinearGradient';
 import { Ionicons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -66,25 +66,24 @@ export default function LoginScreen({ onLogin }) {
   
   const headerStyles = themedStyles(({ spacing }) => ({
     paddingTop: 80,
-    paddingBottom: spacing[8] || 32,
+    paddingBottom: spacing[10] || 40,
+    paddingHorizontal: spacing[4] || 16,
     alignItems: 'center',
   }));
   
-  const logoStyles = themedStyles(({ typography }) => ({
+  const logoStyles = themedStyles(({ typography, theme }) => ({
     fontSize: typography?.fontSize?.['3xl'] || 28,
     fontWeight: typography?.fontWeight?.bold || 'bold',
-    color: 'white',
+    color: theme.isDarkMode ? '#FFFFFF' : '#1A1A1A',
     marginTop: 10,
     textAlign: 'center',
-    textShadow: '0px 2px 6px rgba(0, 0, 0, 0.6)',
   }));
   
-  const taglineStyles = themedStyles(({ typography }) => ({
+  const taglineStyles = themedStyles(({ typography, theme }) => ({
     fontSize: typography?.fontSize?.base || 15,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: theme.isDarkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
     marginTop: 6,
     textAlign: 'center',
-    textShadow: '0px 1px 3px rgba(0, 0, 0, 0.4)',
   }));
   
   const formContainerStyles = themedStyles(({ spacing }) => ({
@@ -100,7 +99,6 @@ export default function LoginScreen({ onLogin }) {
     color: theme.textOnGlass,
     textAlign: 'center',
     marginBottom: spacing[6] || 24,
-    textShadow: theme.isDarkMode ? '0px 1px 3px rgba(0, 0, 0, 0.8)' : '0px 1px 3px rgba(0, 0, 0, 0.3)',
   }));
   
   const inputContainerStyles = themedStyles(({ spacing, borderRadius }) => ({
@@ -153,24 +151,16 @@ export default function LoginScreen({ onLogin }) {
         contentContainerStyle={scrollContentStyles}
         showsVerticalScrollIndicator={false}
       >
-        {/* Enhanced Header with Unified Gradient */}
-        <LinearGradient
-          colors={theme.isDarkMode ? colors.gradients.accent.dark.aurora : colors.gradients.accent.light.sunset}
-          style={headerStyles}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+        {/* Enhanced Header with Dark Subtle Gradient */}
+        <View style={headerStyles}>
           <Ionicons 
             name="fitness" 
             size={60} 
-            color="white"
-            style={{
-              textShadow: '0px 2px 4px rgba(0, 0, 0, 0.4)',
-            }}
+            color={theme.isDarkMode ? '#FFB86B' : '#FF6B35'}
           />
           <Text style={logoStyles}>Strength.Design</Text>
           <Text style={taglineStyles}>AI-Powered Fitness</Text>
-        </LinearGradient>
+        </View>
 
         {/* Enhanced Form with Glass Container */}
         <View style={formContainerStyles}>
@@ -185,7 +175,11 @@ export default function LoginScreen({ onLogin }) {
               borderRadius: 12,
               borderWidth: 1,
               borderColor: 'rgba(0, 0, 0, 0.1)',
-              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 2,
             }]}
             accessible={true}
             accessibilityLabel="Email input container"
@@ -220,7 +214,11 @@ export default function LoginScreen({ onLogin }) {
               borderRadius: 12,
               borderWidth: 1,
               borderColor: 'rgba(0, 0, 0, 0.1)',
-              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 2,
             }]}
             accessible={true}
             accessibilityLabel="Password input container"
@@ -270,14 +268,18 @@ export default function LoginScreen({ onLogin }) {
               accessibilityLabel={loading ? 'Loading' : (isSignUp ? 'Create account' : 'Sign in')}
               accessibilityState={{ disabled: loading }}
             >
-              <LinearGradient
-                colors={theme.isDarkMode ? colors.gradients.accent.dark.aurora : colors.gradients.accent.light.sunset}
+              <SafeLinearGradient
+                colors={theme.isDarkMode ? ['#D97A4A', '#C9626B'] : ['#FF6B35', '#FF7E87']}
+                fallbackColors={['#D97A4A', '#C9626B']}
                 style={{
                   paddingVertical: 18,
                   paddingHorizontal: 24,
                   borderRadius: 12,
                   alignItems: 'center',
-                  boxShadow: `0px 4px 8px ${theme.theme.primary}30`,
+                  shadowColor: theme.theme.primary,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.19,
+                  shadowRadius: 8,
                   elevation: 8,
                 }}
                 start={{ x: 0, y: 0 }}
@@ -287,11 +289,10 @@ export default function LoginScreen({ onLogin }) {
                   color: 'white',
                   fontSize: 16,
                   fontWeight: '600',
-                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.3)',
                 }}>
                   {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
                 </Text>
-              </LinearGradient>
+              </SafeLinearGradient>
             </TouchableOpacity>
           </View>
 
@@ -360,18 +361,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     marginTop: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadow: '0px 2px 4px rgba(0, 0, 0, 0.4)',
   },
   tagline: {
     fontSize: 16,
     color: 'white',
     opacity: 0.9,
     marginTop: 5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textShadow: '0px 1px 2px rgba(0, 0, 0, 0.3)',
   },
   formContainer: {
     flex: 1,
@@ -384,9 +381,7 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     marginBottom: 30,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadow: '0px 2px 4px rgba(0, 0, 0, 0.4)',
   },
   inputContainer: {
     flexDirection: 'row',

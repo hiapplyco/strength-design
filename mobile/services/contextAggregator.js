@@ -353,6 +353,143 @@ class ContextAggregator {
   }
 
   /**
+   * Store selected program context for future use
+   */
+  async storeProgramContext(program) {
+    try {
+      console.log('[ContextAggregator] Storing program context:', program.name);
+      
+      const programContext = {
+        name: program.name,
+        creator: program.creator,
+        methodology: program.methodology,
+        structure: program.structure,
+        goals: program.goals,
+        experienceLevel: program.experienceLevel,
+        duration: program.duration,
+        credibilityScore: program.credibilityScore,
+        source: program.source || 'Perplexity Search',
+        selectedAt: new Date().toISOString(),
+        exercises: program.exercises || [],
+        principles: program.principles || [],
+        equipment: program.equipment || []
+      };
+      
+      // Store in AsyncStorage for persistence
+      await AsyncStorage.setItem('selectedProgramContext', JSON.stringify(programContext));
+      
+      // Also store in cache for immediate use
+      this.cache.programContext = programContext;
+      
+      console.log('[ContextAggregator] Program context stored successfully');
+      return programContext;
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to store program context:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Get stored program context
+   */
+  async getStoredProgramContext() {
+    try {
+      // Check cache first
+      if (this.cache.programContext) {
+        return this.cache.programContext;
+      }
+      
+      // Load from AsyncStorage
+      const storedContext = await AsyncStorage.getItem('selectedProgramContext');
+      if (storedContext) {
+        const programContext = JSON.parse(storedContext);
+        this.cache.programContext = programContext;
+        return programContext;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to get stored program context:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * Clear stored program context
+   */
+  async clearProgramContext() {
+    try {
+      await AsyncStorage.removeItem('selectedProgramContext');
+      this.cache.programContext = null;
+      console.log('[ContextAggregator] Program context cleared');
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to clear program context:', error);
+    }
+  }
+  
+  /**
+   * Store selected exercises context for workout generation
+   */
+  async storeExerciseContext(exercises, foods = [], additionalContext = {}) {
+    try {
+      console.log('[ContextAggregator] Storing exercise context:', exercises.length, 'exercises');
+      
+      const exerciseContext = {
+        exercises: exercises.map(ex => ({
+          id: ex.id,
+          name: ex.name,
+          category: ex.category,
+          primaryMuscles: ex.primaryMuscles,
+          secondaryMuscles: ex.secondaryMuscles,
+          equipment: ex.equipment,
+          difficulty: ex.difficulty,
+          instructions: ex.instructions
+        })),
+        foods: foods,
+        ...additionalContext,
+        selectedAt: new Date().toISOString()
+      };
+      
+      // Store in AsyncStorage for persistence
+      await AsyncStorage.setItem('selectedExerciseContext', JSON.stringify(exerciseContext));
+      
+      // Also store in cache for immediate use
+      this.cache.exerciseContext = exerciseContext;
+      
+      console.log('[ContextAggregator] Exercise context stored successfully');
+      return exerciseContext;
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to store exercise context:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Get stored exercise context
+   */
+  async getStoredExerciseContext() {
+    try {
+      // Check cache first
+      if (this.cache.exerciseContext) {
+        return this.cache.exerciseContext;
+      }
+      
+      // Load from AsyncStorage
+      const storedContext = await AsyncStorage.getItem('selectedExerciseContext');
+      if (storedContext) {
+        const exerciseContext = JSON.parse(storedContext);
+        this.cache.exerciseContext = exerciseContext;
+        return exerciseContext;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to get stored exercise context:', error);
+      return null;
+    }
+  }
+
+  /**
    * Build the final context object for AI
    */
   buildContext(programContext = null) {

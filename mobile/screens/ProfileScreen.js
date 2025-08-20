@@ -19,8 +19,10 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import healthService from '../services/healthService';
+import sessionContextManager from '../services/sessionContextManager';
 import { useTheme } from '../contexts/ThemeContext';
 import { GlassContainer, GlassCard } from '../components/GlassmorphismComponents';
+import BiometricSettings from '../components/BiometricSettings';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ProfileScreen({ navigation }) {
@@ -88,6 +90,9 @@ export default function ProfileScreen({ navigation }) {
     confirm: ''
   });
 
+  const [biometricModalVisible, setBiometricModalVisible] = useState(false);
+  const [biometricData, setBiometricData] = useState({});
+
   const auth = getAuth();
   const db = getFirestore();
   const storage = getStorage();
@@ -96,6 +101,7 @@ export default function ProfileScreen({ navigation }) {
     loadUserData();
     loadSettings();
     checkHealthStatus();
+    loadBiometricData();
   }, []);
 
   const loadUserData = async () => {
@@ -153,9 +159,26 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
+  const loadBiometricData = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const data = userDoc.exists() ? userDoc.data() : {};
+        setBiometricData(data.biometrics || {});
+      }
+    } catch (error) {
+      console.error('Error loading biometric data:', error);
+    }
+  };
+
   const saveProfile = async () => {
     setSaving(true);
     try {
+      // Initialize session manager and track screen visit
+      await sessionContextManager.initialize();
+      await sessionContextManager.trackScreenVisit('Profile');
+      
       const user = auth.currentUser;
       if (user) {
         // Update Firebase Auth profile
@@ -175,6 +198,31 @@ export default function ProfileScreen({ navigation }) {
           const unit = settings.measurementUnit === 'metric' ? 'kg' : 'lbs';
           await healthService.updateWeight(parseFloat(userData.weight), unit);
         }
+        
+        // Update session context with profile data
+        await sessionContextManager.updateBiometrics({
+          height: userData.height,
+          weight: userData.weight,
+          age: userData.age,
+          gender: userData.gender,
+          experienceLevel: userData.experienceLevel
+        }, 'profile');
+        
+        await sessionContextManager.updatePreferences({
+          fitnessGoals: userData.fitnessGoals,
+          preferredWorkoutDays: userData.preferredWorkoutDays,
+          injuries: userData.injuries
+        }, 'profile');
+        
+        if (userData.fitnessGoals) {
+          await sessionContextManager.addGoals([{
+            name: userData.fitnessGoals,
+            source: 'profile',
+            priority: 'high'
+          }], 'profile');
+        }
+        
+        console.log('✅ Profile saved and session context updated');
         
         Alert.alert('Success', 'Profile updated successfully');
         setEditMode(false);
@@ -398,6 +446,19 @@ export default function ProfileScreen({ navigation }) {
         }
       ]
     );
+  };
+
+  const handleBiometricSave = (newBiometricData) => {
+    setBiometricData(newBiometricData);
+    // Update user data with basic info from biometrics
+    setUserData(prev => ({
+      ...prev,
+      age: newBiometricData.age || prev.age,
+      height: newBiometricData.height || prev.height,
+      weight: newBiometricData.weight || prev.weight,
+      gender: newBiometricData.gender || prev.gender,
+      injuries: newBiometricData.injuries || prev.injuries,
+    }));
   };
 
   if (loading) {
@@ -748,8 +809,8 @@ export default function ProfileScreen({ navigation }) {
         <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Display</Text>
         
         {/* Theme Toggle */}
-        <View style={styles.settingRow}>
-          <View>
+        <View style={styles.settingRowColumn}>
+          <View style={styles.settingInfo}>
             <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Theme</Text>
             <Text style={[styles.settingDescription, { color: theme.theme.textSecondary }]}>Choose your preferred appearance</Text>
           </View>
@@ -773,7 +834,7 @@ export default function ProfileScreen({ navigation }) {
               >
                 <Ionicons 
                   name={mode === 'light' ? 'sunny' : mode === 'dark' ? 'moon' : 'phone-portrait'} 
-                  size={20} 
+                  size={16} 
                   color={theme.themeMode === mode ? '#FFFFFF' : theme.theme.textSecondary} 
                 />
                 <Text
@@ -789,30 +850,99 @@ export default function ProfileScreen({ navigation }) {
           </View>
         </View>
         
-        <View style={styles.settingRow}>
-          <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Measurement Unit</Text>
-          <View style={styles.segmentedControl}>
+        <View style={styles.settingRowColumn}>
+          <View style={styles.settingInfo}>
+            <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Measurement Unit</Text>
+            <Text style={[styles.settingDescription, { color: theme.theme.textSecondary }]}>Choose your preferred measurement system</Text>
+          </View>
+          <View style={styles.compactSegmentedControl}>
             {['metric', 'imperial'].map((unit) => (
               <TouchableOpacity
                 key={unit}
                 style={[
-                  styles.segment,
+                  styles.compactSegment,
                   settings.measurementUnit === unit && styles.segmentActive
                 ]}
                 onPress={() => setSettings({ ...settings, measurementUnit: unit })}
               >
                 <Text
                   style={[
-                    styles.segmentText,
+                    styles.compactSegmentText,
                     settings.measurementUnit === unit && styles.segmentTextActive
                   ]}
                 >
-                  {unit.charAt(0).toUpperCase() + unit.slice(1)}
+                  {unit === 'metric' ? 'kg' : 'lb'}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
+      </GlassCard>
+
+      {/* Biometric Settings */}
+      <GlassCard variant="subtle" style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Biometric Data</Text>
+        
+        <View style={styles.settingRow}>
+          <View style={styles.settingInfo}>
+            <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Body Metrics & Goals</Text>
+            <Text style={[styles.settingDescription, { color: theme.theme.textSecondary }]}>
+              Manage your body composition, performance data, and fitness goals
+            </Text>
+            {Object.keys(biometricData).length > 0 && (
+              <Text style={styles.statusText}>
+                Last updated: {biometricData.biometricsUpdatedAt ? new Date(biometricData.biometricsUpdatedAt).toLocaleDateString() : 'Never'}
+              </Text>
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={() => setBiometricModalVisible(true)}
+          >
+            <Ionicons name="analytics" size={20} color="#FFB86B" />
+          </TouchableOpacity>
+        </View>
+
+        {Object.keys(biometricData).length > 0 && (
+          <View style={styles.biometricSummary}>
+            <Text style={[styles.subSectionTitle, { color: theme.theme.textSecondary }]}>Quick Stats</Text>
+            <View style={styles.statsRow}>
+              {biometricData.age && (
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.age}</Text>
+                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>Age</Text>
+                </View>
+              )}
+              {biometricData.bmi && (
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.bmi}</Text>
+                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>BMI</Text>
+                </View>
+              )}
+              {biometricData.bodyFatPercentage && (
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.bodyFatPercentage}%</Text>
+                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>Body Fat</Text>
+                </View>
+              )}
+              {biometricData.restingHeartRate && (
+                <View style={styles.statItem}>
+                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.restingHeartRate}</Text>
+                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>RHR</Text>
+                </View>
+              )}
+            </View>
+            
+            {biometricData.fitnessGoals && biometricData.fitnessGoals.length > 0 && (
+              <View style={styles.goalsPreview}>
+                <Text style={[styles.goalsLabel, { color: theme.theme.textSecondary }]}>Goals:</Text>
+                <Text style={[styles.goalsText, { color: theme.theme.text }]}>
+                  {biometricData.fitnessGoals.map(goal => goal.replace('_', ' ')).join(', ')}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
       </GlassCard>
 
       {/* Account Actions */}
@@ -845,6 +975,21 @@ export default function ProfileScreen({ navigation }) {
       
       <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Biometric Settings Modal */}
+      <BiometricSettings
+        visible={biometricModalVisible}
+        onClose={() => setBiometricModalVisible(false)}
+        onSave={handleBiometricSave}
+        initialData={{
+          ...biometricData,
+          age: userData.age || biometricData.age,
+          height: userData.height || biometricData.height,
+          weight: userData.weight || biometricData.weight,
+          gender: userData.gender || biometricData.gender,
+          injuries: userData.injuries || biometricData.injuries,
+        }}
+      />
     </View>
   );
 }
@@ -853,9 +998,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  settingRowColumn: {
+    flexDirection: 'column',
+    paddingVertical: 10,
+  },
   themeSelector: {
     flexDirection: 'row',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+    justifyContent: 'center',
   },
   themeOption: {
     flexDirection: 'row',
@@ -865,6 +1017,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     gap: 6,
+    flex: 1,
+    maxWidth: 110,
+    justifyContent: 'center',
   },
   themeOptionActive: {
     shadowColor: '#000',
@@ -891,6 +1046,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 30,
     paddingHorizontal: 20,
+    marginHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#1A1B1E',
   },
@@ -943,6 +1099,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   section: {
+    marginHorizontal: 15,
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
@@ -1004,20 +1161,47 @@ const styles = StyleSheet.create({
     backgroundColor: '#1A1B1E',
     borderRadius: 10,
     padding: 2,
+    flexShrink: 1,
+  },
+  compactSegmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1B1E',
+    borderRadius: 10,
+    padding: 2,
+    marginTop: 8,
+    alignSelf: 'center',
+    minWidth: 100,
   },
   segment: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
     alignItems: 'center',
     borderRadius: 8,
+    minWidth: 0,
+  },
+  compactSegment: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    minWidth: 40,
   },
   segmentActive: {
     backgroundColor: '#FFB86B',
   },
   segmentText: {
     color: '#9CA3AF',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  compactSegmentText: {
+    color: '#9CA3AF',
     fontSize: 14,
     fontWeight: '600',
+    textAlign: 'center',
   },
   segmentTextActive: {
     color: '#0A0B0D',
@@ -1080,5 +1264,46 @@ const styles = StyleSheet.create({
   signOutButton: {
     borderBottomWidth: 0,
     marginTop: 10,
+  },
+  settingsButton: {
+    padding: 8,
+  },
+  biometricSummary: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#2A2B2E',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+    marginBottom: 15,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  goalsPreview: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 10,
+  },
+  goalsLabel: {
+    fontSize: 13,
+    marginRight: 8,
+    fontWeight: '600',
+  },
+  goalsText: {
+    fontSize: 13,
+    flex: 1,
+    textTransform: 'capitalize',
   },
 });

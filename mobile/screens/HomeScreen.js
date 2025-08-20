@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { GlassContainer, GlassCard, GlassButton } from '../components/GlassmorphismComponents';
+import { SafeLinearGradient } from '../components/SafeLinearGradient';
 
 export default function HomeScreen({ navigation }) {
   console.log('NEW HOMESCREEN LOADED - REDESIGNED VERSION');
@@ -46,12 +48,24 @@ export default function HomeScreen({ navigation }) {
   ];
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: theme.isDarkMode ? '#0A0A0A' : '#FAFAFA' }]}
-      showsVerticalScrollIndicator={false}
+    <SafeLinearGradient
+      colors={theme.isDarkMode 
+        ? ['#000000', '#0A0A0A', '#141414']
+        : ['#FEFEFE', '#F8F9FA', '#F1F3F4']
+      }
+      style={{ flex: 1 }}
     >
-      {/* Header Section */}
-      <View style={[styles.header, { backgroundColor: theme.isDarkMode ? '#0A0A0A' : '#FAFAFA' }]}>
+      <ScrollView 
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Section */}
+        <GlassContainer 
+          variant="subtle" 
+          style={styles.header}
+          showBorder={false}
+          showShadow={false}
+        >
         <Text style={[styles.welcomeText, { color: theme.isDarkMode ? '#888' : '#666' }]}>
           Welcome to
         </Text>
@@ -61,7 +75,7 @@ export default function HomeScreen({ navigation }) {
         <Text style={[styles.subtitle, { color: theme.isDarkMode ? '#AAA' : '#666' }]}>
           Your AI-Powered Fitness Companion
         </Text>
-      </View>
+        </GlassContainer>
 
       {/* How It Works Section */}
       <View style={styles.section}>
@@ -70,8 +84,13 @@ export default function HomeScreen({ navigation }) {
         </Text>
         <View style={styles.stepsContainer}>
           {steps.map((step, index) => (
-            <View key={index} style={styles.stepItem}>
-              <View style={[styles.stepNumber, { backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFF' }]}>
+            <GlassContainer
+              key={index}
+              variant="subtle"
+              style={styles.stepItem}
+              showShadow={false}
+            >
+              <View style={[styles.stepNumber, { backgroundColor: `#4CAF5020` }]}>
                 <Text style={[styles.stepNumberText, { color: '#4CAF50' }]}>
                   {step.number}
                 </Text>
@@ -79,7 +98,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={[styles.stepText, { color: theme.isDarkMode ? '#CCC' : '#555' }]}>
                 {step.text}
               </Text>
-            </View>
+            </GlassContainer>
           ))}
         </View>
       </View>
@@ -91,17 +110,11 @@ export default function HomeScreen({ navigation }) {
         </Text>
         <View style={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <TouchableOpacity
+            <GlassCard
               key={index}
-              style={[
-                styles.featureCard,
-                { 
-                  backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFF',
-                  borderColor: theme.isDarkMode ? '#333' : '#E0E0E0'
-                }
-              ]}
+              variant="medium"
               onPress={() => navigation.navigate(feature.action)}
-              activeOpacity={0.7}
+              style={styles.featureCard}
             >
               <View style={[styles.iconContainer, { backgroundColor: `${feature.color}15` }]}>
                 <Ionicons name={feature.icon} size={28} color={feature.color} />
@@ -119,50 +132,56 @@ export default function HomeScreen({ navigation }) {
                   color={feature.color} 
                 />
               </View>
-            </TouchableOpacity>
+            </GlassCard>
           ))}
         </View>
       </View>
 
       {/* Quick Actions */}
-      <View style={[styles.quickActions, { backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFF' }]}>
+      <GlassContainer 
+        variant="strong" 
+        style={styles.quickActions}
+      >
         <Text style={[styles.quickActionsTitle, { color: theme.isDarkMode ? '#FFF' : '#333' }]}>
           Ready to Start?
         </Text>
-        <TouchableOpacity
-          style={[styles.primaryButton, { backgroundColor: '#4CAF50' }]}
+        <GlassButton
+          variant="strong"
           onPress={() => navigation.navigate('Generator')}
-          activeOpacity={0.8}
+          style={[styles.primaryButton, { backgroundColor: '#4CAF50' }]}
         >
-          <Ionicons name="sparkles" size={20} color="#FFF" />
-          <Text style={styles.primaryButtonText}>Generate Your First Workout</Text>
-        </TouchableOpacity>
-      </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="sparkles" size={20} color="#FFF" />
+            <Text style={styles.primaryButtonText}>Generate Your First Workout</Text>
+          </View>
+        </GlassButton>
+      </GlassContainer>
 
       {/* Stats Preview */}
       <View style={styles.statsContainer}>
-        <View style={[styles.statItem, { backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFF' }]}>
+        <GlassContainer variant="medium" style={styles.statItem}>
           <Text style={[styles.statNumber, { color: '#4CAF50' }]}>873+</Text>
           <Text style={[styles.statLabel, { color: theme.isDarkMode ? '#AAA' : '#666' }]}>
             Exercises
           </Text>
-        </View>
-        <View style={[styles.statItem, { backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFF' }]}>
+        </GlassContainer>
+        <GlassContainer variant="medium" style={styles.statItem}>
           <Text style={[styles.statNumber, { color: '#2196F3' }]}>AI</Text>
           <Text style={[styles.statLabel, { color: theme.isDarkMode ? '#AAA' : '#666' }]}>
             Powered
           </Text>
-        </View>
-        <View style={[styles.statItem, { backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFF' }]}>
+        </GlassContainer>
+        <GlassContainer variant="medium" style={styles.statItem}>
           <Text style={[styles.statNumber, { color: '#9C27B0' }]}>100%</Text>
           <Text style={[styles.statLabel, { color: theme.isDarkMode ? '#AAA' : '#666' }]}>
             Offline
           </Text>
-        </View>
+        </GlassContainer>
       </View>
 
       <View style={{ height: 100 }} />
-    </ScrollView>
+      </ScrollView>
+    </SafeLinearGradient>
   );
 }
 

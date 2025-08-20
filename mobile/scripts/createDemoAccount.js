@@ -5,9 +5,9 @@
  * Run: node scripts/createDemoAccount.js
  */
 
-import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+const { initializeApp } = require('firebase/app');
+const { getAuth, createUserWithEmailAndPassword } = require('firebase/auth');
+const { getFirestore, doc, setDoc } = require('firebase/firestore');
 
 const firebaseConfig = {
   apiKey: "AIzaSyDTyxs6cZKUbN7ejmYk_rLVxNg5wVKoSlQ",

@@ -45,6 +45,7 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
   const scrollViewRef = useRef();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-100)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     // Check for program context from navigation
@@ -83,6 +84,22 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
           useNativeDriver: true,
         }),
       ]).start();
+
+      // Start pulse animation
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.2,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
     } catch (error) {
       console.error('Error initializing chat:', error);
       setMessages([{
@@ -645,6 +662,9 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
             ref={scrollViewRef}
             style={styles.messagesContainer}
             contentContainerStyle={styles.messagesContent}
+            keyboardShouldPersistTaps="handled"
+            automaticallyAdjustKeyboardInsets={true}
+            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -897,6 +917,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#2A2B2E',
     alignItems: 'flex-end',
+    backgroundColor: '#0A0B0D',
   },
   input: {
     flex: 1,

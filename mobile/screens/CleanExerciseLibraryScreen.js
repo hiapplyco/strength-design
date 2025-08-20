@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db, functions } from '../firebaseConfig';
 import { GlassContainer, GlassCard } from '../components/GlassmorphismComponents';
+import { GlassSearchInput } from '../components/GlassSearchInput';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSearchContext } from '../contexts/SearchContext';
 import { collection, doc, setDoc, deleteDoc, getDocs } from 'firebase/firestore';
@@ -269,7 +270,10 @@ export default function CleanExerciseLibraryScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Exercise Library</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Exercise Library</Text>
+          <Text style={styles.headerSubtitle}>Browse and save exercises</Text>
+        </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity 
             onPress={() => clearSearch()}
@@ -280,30 +284,15 @@ export default function CleanExerciseLibraryScreen({ navigation }) {
         </View>
       </LinearGradient>
 
-      {/* Enhanced Search Bar */}
+      {/* Enhanced Search Bar - positioned under header */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#666" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search exercises, muscles, equipment..."
-            placeholderTextColor="#666"
-            value={searchQuery}
-            onChangeText={handleSearchInputChange}
-            onFocus={() => setShowSuggestions(searchQuery.length > 0)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-            returnKeyType="search"
-            onSubmitEditing={() => setShowSuggestions(false)}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => {
-              updateSearchQuery('');
-              setShowSuggestions(false);
-            }}>
-              <Ionicons name="close-circle" size={20} color="#666" />
-            </TouchableOpacity>
-          )}
-        </View>
+        <GlassSearchInput
+          value={searchQuery}
+          onChangeText={handleSearchInputChange}
+          placeholder="Search exercises, muscles, equipment..."
+          onSubmit={() => setShowSuggestions(false)}
+          containerStyle={styles.searchBar}
+        />
         
         {/* Search Suggestions */}
         <SearchSuggestions

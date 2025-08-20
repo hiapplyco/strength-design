@@ -497,6 +497,69 @@ class HealthService {
   }
 
   /**
+   * Biometric data methods
+   */
+  async getLatestBiometrics() {
+    try {
+      const biometrics = {};
+
+      // Get latest weight
+      const weightData = await this.getData(this.dataTypes.WEIGHT, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date());
+      if (weightData && weightData.length > 0) {
+        biometrics.weight = this.getLatestValue(weightData);
+      }
+
+      // Get latest heart rate data
+      const heartRateData = await this.getData(this.dataTypes.HEART_RATE, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date());
+      if (heartRateData && heartRateData.length > 0) {
+        biometrics.restingHeartRate = Math.min(...heartRateData.map(hr => hr.value));
+      }
+
+      // For demo purposes, provide some mock data
+      if (this.platform === 'web') {
+        return {
+          weight: 75,
+          height: 180,
+          restingHeartRate: 65,
+          bodyFatPercentage: 15,
+          ...biometrics
+        };
+      }
+
+      return biometrics;
+    } catch (error) {
+      console.error('[HealthService] Error getting latest biometrics:', error);
+      return {};
+    }
+  }
+
+  async updateBiometrics(biometricData) {
+    try {
+      const updates = [];
+
+      if (biometricData.weight) {
+        updates.push(this.updateWeight(biometricData.weight, 'kg'));
+      }
+
+      if (biometricData.bodyFatPercentage) {
+        updates.push(this.syncData({
+          type: 'body_fat_percentage',
+          value: biometricData.bodyFatPercentage,
+          unit: 'percent',
+          timestamp: new Date().toISOString()
+        }));
+      }
+
+      await Promise.all(updates);
+      console.log('[HealthService] Biometric data updated successfully');
+      return { success: true };
+    } catch (error) {
+      console.error('[HealthService] Error updating biometrics:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Cleanup and destroy
    */
   destroy() {

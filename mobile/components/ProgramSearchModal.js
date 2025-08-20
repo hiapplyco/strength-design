@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { GlassSearchInput } from './GlassSearchInput';
 // Note: expo-blur might need to be installed: npx expo install expo-blur
 // For now, we'll use a fallback that doesn't require expo-blur
 // import { BlurView } from 'expo-blur';
@@ -49,8 +50,11 @@ export default function ProgramSearchModal({
     // In production, this would check environment variables or secure storage
     const checkApiKey = async () => {
       try {
-        // For now, we'll simulate this - in production you'd check actual config
-        setApiKeyConfigured(false); // Set to true when API key is available
+        // Configure the Perplexity API key
+        const apiKey = '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';
+        PerplexitySearchService.setApiKey(apiKey);
+        setApiKeyConfigured(true); // API key is now configured
+        console.log('✅ Perplexity API configured successfully');
       } catch (error) {
         console.error('Error checking API configuration:', error);
         setApiKeyConfigured(false);
@@ -75,11 +79,8 @@ export default function ProgramSearchModal({
       return;
     }
 
-    if (!apiKeyConfigured) {
-      // Show demo results for development
-      showDemoResults();
-      return;
-    }
+    // API key is now configured, proceed with real search
+    // Remove the demo results fallback since we have a real API key
 
     setLoading(true);
     try {
@@ -124,7 +125,7 @@ export default function ProgramSearchModal({
       Alert.alert('Search Error', errorMessage);
       
       // Show demo results as fallback
-      if (results.length === 0) {
+      if (searchResults.length === 0) {
         console.log('Showing demo results as fallback');
         showDemoResults();
       }
@@ -368,7 +369,13 @@ export default function ProgramSearchModal({
         </Text>
 
         {/* Select Button */}
-        <TouchableOpacity style={styles.selectButton}>
+        <TouchableOpacity 
+          style={styles.selectButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            selectProgram(program);
+          }}
+        >
           <LinearGradient
             colors={['#FF7E87', '#FFB86B']}
             style={styles.selectButtonGradient}
@@ -421,18 +428,13 @@ export default function ProgramSearchModal({
 
             {/* Search Section */}
             <View style={styles.searchSection}>
-              <View style={styles.searchInputContainer}>
-                <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search for workout programs (e.g., '5/3/1', 'beginner strength')"
-                  placeholderTextColor="#666"
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  onSubmitEditing={searchPrograms}
-                  returnKeyType="search"
-                />
-              </View>
+              <GlassSearchInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder="Search for workout programs (e.g., '5/3/1', 'beginner strength')"
+                onSubmit={searchPrograms}
+                containerStyle={styles.searchInputContainer}
+              />
 
               <View style={styles.searchActions}>
                 <TouchableOpacity

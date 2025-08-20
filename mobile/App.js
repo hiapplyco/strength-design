@@ -22,6 +22,7 @@ import { SearchProvider } from './contexts/SearchContext';
 import MockupWorkoutScreen from './screens/MockupWorkoutScreen';
 import WorkoutResultsScreen from './screens/WorkoutResultsScreen';
 import healthService from './services/healthService';
+import sessionContextManager from './services/sessionContextManager';
 
 // Enhanced authenticated app with theme integration and context awareness
 function AuthenticatedApp() {
@@ -32,9 +33,19 @@ function AuthenticatedApp() {
   const userContext = useUserContext();
 
   useEffect(() => {
-    // Initialize health service on app start
+    // Initialize health service and session manager on app start
     initializeHealthService();
+    initializeSessionManager();
   }, []);
+
+  const initializeSessionManager = async () => {
+    try {
+      await sessionContextManager.initialize();
+      console.log('🎯 Session context manager initialized');
+    } catch (error) {
+      console.error('Failed to initialize session context manager:', error);
+    }
+  };
 
   const initializeHealthService = async () => {
     try {
@@ -57,23 +68,27 @@ function AuthenticatedApp() {
   };
 
   // Handle navigation with context awareness
-  const handleNavigation = (screen) => {
+  const handleNavigation = async (screen) => {
     try {
-      // Check if user is trying to access Generator without context
-      if (screen === 'Generator' && userContext.needsContextSetup()) {
-        userContext.recordContextModalShown();
-        setShowContextModal(true);
-        return;
-      }
-      
-      // Track navigation for analytics
+      // Special handling for Generator screen - check session context
       if (screen === 'Generator') {
+        const hasMinimalContext = await sessionContextManager.hasMinimalContext();
+        
+        if (!hasMinimalContext && userContext.needsContextSetup()) {
+          userContext.recordContextModalShown();
+          setShowContextModal(true);
+          return;
+        }
+        
         userContext.tracking.trackGeneratorUse();
       } else if (screen === 'Search') {
         userContext.tracking.trackSearch('navigation');
       } else if (screen === 'Profile') {
         userContext.tracking.trackProfileView();
       }
+      
+      // Track screen visit in session manager
+      await sessionContextManager.trackScreenVisit(screen);
       
       setCurrentScreen(screen);
     } catch (error) {
@@ -89,6 +104,9 @@ function AuthenticatedApp() {
         return <HomeScreen navigation={{ navigate: handleNavigation }} />;
       case 'Generator':
         // Enhanced AI Chat with context awareness, streaming animations, and real Gemini 2.5 Flash
+        return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />;
+      case 'ContextAwareGenerator':
+        // Context-aware generator screen (same as Generator but accessed via different route)
         return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />;
       case 'Workouts':
         return <WorkoutsScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />;
@@ -210,7 +228,7 @@ function AuthenticatedApp() {
         borderTopWidth: 1,
         borderTopColor: theme.isDarkMode ? '#333' : '#E0E0E0',
       }]}>
-        {['Home', 'Generator', 'Search', 'Workouts', 'Profile'].map((tab) => {
+        {['Home', 'Workouts', 'Search', 'Profile', 'Generator'].map((tab) => {
           const icons = {
             Home: currentScreen === 'Home' ? 'home' : 'home-outline',
             Generator: currentScreen === 'Generator' ? 'sparkles' : 'sparkles-outline',

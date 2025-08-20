@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,12 @@ import {
   Dimensions,
   ScrollView,
   Platform,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, themedStyles } from '../contexts/ThemeContext';
 import { GlassContainer } from './GlassmorphismComponents';
+import sessionContextManager from '../services/sessionContextManager';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -36,6 +38,70 @@ export default function ContextModal({
   subtitle = "Tell us about yourself to get personalized workouts"
 }) {
   const theme = useTheme();
+  const scrollViewRef = useRef(null);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [contextSummary, setContextSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+
+  // Load context summary when modal becomes visible
+  useEffect(() => {
+    if (visible) {
+      loadContextSummary();
+    }
+  }, [visible]);
+
+  // Pulse animation for scroll indicator
+  useEffect(() => {
+    if (showScrollIndicator) {
+      const pulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 0.7,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 0.4,
+            duration: 1500,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulse.start();
+      return () => pulse.stop();
+    }
+  }, [showScrollIndicator, pulseAnim]);
+
+  const loadContextSummary = async () => {
+    try {
+      setLoading(true);
+      await sessionContextManager.initialize();
+      const summary = await sessionContextManager.getSummary();
+      setContextSummary(summary);
+    } catch (error) {
+      console.error('Error loading context summary:', error);
+      setContextSummary(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle scroll events to show/hide indicator
+  const handleScroll = (event) => {
+    const { contentOffset, layoutMeasurement, contentSize } = event.nativeEvent;
+    const isAtBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 20;
+    setShowScrollIndicator(isScrollable && !isAtBottom);
+  };
+
+  // Check if content is scrollable
+  const handleContentSizeChange = (contentWidth, contentHeight) => {
+    const scrollViewHeight = screenHeight * 0.7;
+    const isContentScrollable = contentHeight > scrollViewHeight;
+    setIsScrollable(isContentScrollable);
+    setShowScrollIndicator(isContentScrollable);
+  };
   
   // Production error handling
   const handleNavigation = (screen) => {
@@ -130,6 +196,14 @@ export default function ContextModal({
       textAlign: 'center',
       marginBottom: spacing?.sm || 8,
       lineHeight: 30,
+      // Subtle background for better readability
+      backgroundColor: isDarkMode 
+        ? 'rgba(0, 0, 0, 0.25)' 
+        : 'rgba(255, 255, 255, 0.45)',
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 8,
+      overflow: 'hidden',
     },
     subtitle: {
       fontSize: typography?.fontSize?.md || 16,
@@ -137,6 +211,14 @@ export default function ContextModal({
       color: theme.textSecondary,
       textAlign: 'center',
       lineHeight: 22,
+      // Subtle background for better readability
+      backgroundColor: isDarkMode 
+        ? 'rgba(0, 0, 0, 0.2)' 
+        : 'rgba(255, 255, 255, 0.4)',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 6,
+      overflow: 'hidden',
     },
     benefitsContainer: {
       marginBottom: spacing?.xl || 32,
@@ -146,6 +228,15 @@ export default function ContextModal({
       fontWeight: typography?.fontWeight?.semibold || '600',
       color: theme.text,
       marginBottom: spacing?.md || 16,
+      // Subtle background for better readability
+      backgroundColor: isDarkMode 
+        ? 'rgba(0, 0, 0, 0.25)' 
+        : 'rgba(255, 255, 255, 0.45)',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 6,
+      overflow: 'hidden',
+      alignSelf: 'flex-start',
     },
     benefitItem: {
       flexDirection: 'row',
@@ -162,6 +253,14 @@ export default function ContextModal({
       fontSize: typography?.fontSize?.sm || 14,
       color: theme.textSecondary,
       lineHeight: 20,
+      // Subtle background for better readability
+      backgroundColor: isDarkMode 
+        ? 'rgba(0, 0, 0, 0.2)' 
+        : 'rgba(255, 255, 255, 0.4)',
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 5,
+      overflow: 'hidden',
     },
     actionsContainer: {
       gap: spacing?.sm || 12,
@@ -231,6 +330,154 @@ export default function ContextModal({
       color: theme.textTertiary,
       textAlign: 'center',
       marginTop: 4,
+      alignSelf: 'center',
+    },
+    // Scroll indicator styles
+    scrollIndicatorContainer: {
+      position: 'absolute',
+      bottom: 16,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      zIndex: 2,
+      pointerEvents: 'none',
+    },
+    scrollIndicator: {
+      backgroundColor: isDarkMode 
+        ? 'rgba(255, 255, 255, 0.3)' 
+        : 'rgba(0, 0, 0, 0.3)',
+      borderRadius: 12,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+    },
+    // Context Summary Styles
+    contextSummaryContainer: {
+      marginBottom: spacing?.lg || 24,
+      padding: spacing?.md || 16,
+      backgroundColor: isDarkMode 
+        ? 'rgba(16, 185, 129, 0.08)'  // Subtle green tint
+        : 'rgba(76, 175, 80, 0.08)',
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: isDarkMode
+        ? 'rgba(52, 211, 153, 0.2)'
+        : 'rgba(134, 239, 172, 0.2)',
+    },
+    progressContainer: {
+      marginBottom: spacing?.md || 16,
+    },
+    progressBar: {
+      height: 8,
+      backgroundColor: isDarkMode 
+        ? 'rgba(255, 255, 255, 0.1)' 
+        : 'rgba(0, 0, 0, 0.1)',
+      borderRadius: 4,
+      overflow: 'hidden',
+      marginBottom: 8,
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: isDarkMode ? '#10B981' : '#4CAF50',
+      borderRadius: 4,
+    },
+    progressText: {
+      fontSize: typography?.fontSize?.sm || 14,
+      color: theme.textSecondary,
+      textAlign: 'center',
+      fontWeight: typography?.fontWeight?.medium || '500',
+    },
+    contextItems: {
+      gap: spacing?.sm || 12,
+      marginBottom: spacing?.md || 16,
+    },
+    contextItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 4,
+    },
+    contextItemIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: isDarkMode 
+        ? 'rgba(255, 255, 255, 0.1)' 
+        : 'rgba(0, 0, 0, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: spacing?.sm || 12,
+      position: 'relative',
+    },
+    contextItemIconComplete: {
+      backgroundColor: isDarkMode ? '#10B981' : '#4CAF50',
+    },
+    contextItemEmoji: {
+      fontSize: 16,
+    },
+    checkmarkOverlay: {
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: '#4CAF50',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    contextItemText: {
+      flex: 1,
+      fontSize: typography?.fontSize?.sm || 14,
+      color: theme.textSecondary,
+      fontWeight: typography?.fontWeight?.medium || '500',
+    },
+    contextItemTextComplete: {
+      color: theme.text,
+      fontWeight: typography?.fontWeight?.semibold || '600',
+    },
+    recommendationsContainer: {
+      borderTopWidth: 1,
+      borderTopColor: isDarkMode
+        ? 'rgba(52, 211, 153, 0.2)'
+        : 'rgba(134, 239, 172, 0.2)',
+      paddingTop: spacing?.md || 16,
+    },
+    recommendationsTitle: {
+      fontSize: typography?.fontSize?.sm || 14,
+      fontWeight: typography?.fontWeight?.semibold || '600',
+      color: theme.text,
+      marginBottom: spacing?.sm || 12,
+    },
+    recommendationItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing?.sm || 12,
+      paddingHorizontal: spacing?.sm || 12,
+      backgroundColor: isDarkMode 
+        ? 'rgba(255, 107, 53, 0.08)' 
+        : 'rgba(255, 107, 53, 0.05)',
+      borderRadius: 8,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: isDarkMode
+        ? 'rgba(255, 107, 53, 0.2)'
+        : 'rgba(255, 107, 53, 0.1)',
+    },
+    recommendationIcon: {
+      marginRight: spacing?.sm || 12,
+    },
+    recommendationContent: {
+      flex: 1,
+    },
+    recommendationTitle: {
+      fontSize: typography?.fontSize?.sm || 14,
+      fontWeight: typography?.fontWeight?.semibold || '600',
+      color: theme.text,
+      marginBottom: 2,
+    },
+    recommendationDescription: {
+      fontSize: typography?.fontSize?.xs || 12,
+      color: theme.textTertiary,
+      lineHeight: 16,
     },
   }));
 
@@ -293,9 +540,13 @@ export default function ContextModal({
           </TouchableOpacity>
 
           <ScrollView 
+            ref={scrollViewRef}
             style={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.contentContainer}
+            onScroll={handleScroll}
+            onContentSizeChange={handleContentSizeChange}
+            scrollEventThrottle={16}
           >
             {/* Header */}
             <View style={styles.header}>
@@ -309,6 +560,84 @@ export default function ContextModal({
               <Text style={styles.title}>{title}</Text>
               <Text style={styles.subtitle}>{subtitle}</Text>
             </View>
+
+            {/* Context Summary Section */}
+            {!loading && contextSummary && (
+              <View style={styles.contextSummaryContainer}>
+                <Text style={styles.sectionTitle}>Context gathered so far:</Text>
+                
+                {/* Progress Bar */}
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressBar}>
+                    <View 
+                      style={[
+                        styles.progressFill, 
+                        { width: `${contextSummary.completionPercentage}%` }
+                      ]} 
+                    />
+                  </View>
+                  <Text style={styles.progressText}>
+                    {contextSummary.completionPercentage}% complete
+                  </Text>
+                </View>
+
+                {/* Context Items */}
+                <View style={styles.contextItems}>
+                  {contextSummary.items.map((item, index) => {
+                    const isComplete = (item.count !== undefined && item.count > 0) || 
+                                     (item.hasData !== undefined && item.hasData);
+                    
+                    return (
+                      <View key={index} style={styles.contextItem}>
+                        <View style={[styles.contextItemIcon, isComplete && styles.contextItemIconComplete]}>
+                          <Text style={styles.contextItemEmoji}>{item.icon}</Text>
+                          {isComplete && (
+                            <View style={styles.checkmarkOverlay}>
+                              <Ionicons name="checkmark" size={12} color="#FFF" />
+                            </View>
+                          )}
+                        </View>
+                        <Text style={[styles.contextItemText, isComplete && styles.contextItemTextComplete]}>
+                          {item.count !== undefined ? 
+                            `${item.count} ${item.label}` : 
+                            `${isComplete ? '✅' : '❌'} ${item.label}`
+                          }
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Recommendations */}
+                {contextSummary.recommendations && contextSummary.recommendations.length > 0 && (
+                  <View style={styles.recommendationsContainer}>
+                    <Text style={styles.recommendationsTitle}>
+                      Missing for optimal workouts:
+                    </Text>
+                    {contextSummary.recommendations.slice(0, 3).map((rec, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.recommendationItem}
+                        onPress={() => handleNavigation(rec.screen)}
+                      >
+                        <View style={styles.recommendationIcon}>
+                          <Ionicons 
+                            name={rec.type === 'missing' ? 'alert-circle' : 'information-circle'} 
+                            size={16} 
+                            color={rec.type === 'missing' ? '#FF6B35' : '#FFB86B'} 
+                          />
+                        </View>
+                        <View style={styles.recommendationContent}>
+                          <Text style={styles.recommendationTitle}>{rec.title}</Text>
+                          <Text style={styles.recommendationDescription}>{rec.description}</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color="#666" />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
 
             {/* Benefits Section */}
             <View style={styles.benefitsContainer}>
@@ -391,6 +720,19 @@ export default function ContextModal({
               </TouchableOpacity>
             </View>
           </ScrollView>
+          
+          {/* Scroll Indicator */}
+          {showScrollIndicator && (
+            <View style={styles.scrollIndicatorContainer}>
+              <Animated.View style={[styles.scrollIndicator, { opacity: pulseAnim }]}>
+                <Ionicons 
+                  name="chevron-down" 
+                  size={16} 
+                  color={theme.isDarkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'}
+                />
+              </Animated.View>
+            </View>
+          )}
         </GlassContainer>
       </View>
     </Modal>

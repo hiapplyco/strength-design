@@ -40,10 +40,10 @@ export const colors = {
       tertiary: '#F1F3F4',          // Content areas
       elevated: '#FFFFFF',          // Elevated surfaces
       glass: {
-        subtle: 'rgba(255,255,255,0.75)',    // 75% white - more opaque glass
-        medium: 'rgba(255,255,255,0.85)',    // 85% white - standard glass
-        strong: 'rgba(255,255,255,0.92)',    // 92% white - elevated glass
-        modal: 'rgba(255,255,255,0.98)',     // 98% white - modal overlay
+        subtle: 'rgba(242,242,247,0.72)',    // iOS 26 system gray6 with opacity
+        medium: 'rgba(242,242,247,0.82)',    // Standard glass with system color
+        strong: 'rgba(242,242,247,0.90)',    // Elevated glass
+        modal: 'rgba(255,255,255,0.96)',     // Modal overlay - almost opaque
       },
       gradient: {
         primary: ['#FEFEFE', '#F8F9FA'],              // Subtle background gradient
@@ -96,10 +96,10 @@ export const colors = {
       tertiary: '#141414',          // Content cards - subtle gray
       elevated: '#1C1C1C',          // Highest elevation - visible but dark
       glass: {
-        subtle: 'rgba(10,11,13,0.75)',       // 75% opacity - more opaque dark glass
-        medium: 'rgba(10,11,13,0.85)',       // 85% opacity - standard dark glass
-        strong: 'rgba(10,11,13,0.92)',       // 92% opacity - elevated dark glass
-        modal: 'rgba(0,0,0,0.98)',           // 98% black - modal overlay
+        subtle: 'rgba(28,28,30,0.72)',       // iOS 26 systemGray5 with opacity
+        medium: 'rgba(28,28,30,0.82)',       // Standard dark glass
+        strong: 'rgba(28,28,30,0.90)',       // Elevated dark glass
+        modal: 'rgba(0,0,0,0.95)',           // Modal overlay - very opaque
       },
       gradient: {
         primary: ['#000000', '#0A0A0A', '#141414'],   // Oura-style black gradient
@@ -167,59 +167,60 @@ export const colors = {
 
   // Glassmorphism Effect System
   glass: {
-    // Backdrop Blur Levels
+    // Backdrop Blur Levels - iOS 26 Enhanced
     blur: {
       none: 0,
-      subtle: 8,      // Minimal glass effect
-      medium: 12,     // Standard glass
-      strong: 16,     // Elevated glass
-      intense: 20,    // Modal/overlay glass
+      subtle: 24,      // Minimal glass effect (3x stronger)
+      medium: 48,      // Standard glass (4x stronger)
+      strong: 72,      // Elevated glass (4.5x stronger)
+      intense: 96,     // Modal/overlay glass (5x stronger)
+      max: 120,        // Maximum blur for special cases
     },
 
     // Glass Surface Treatments
     surface: {
       light: {
         subtle: {
-          backgroundColor: 'rgba(255,255,255,0.75)',  // Increased from 0.08 for less transparency
-          borderColor: 'rgba(0,0,0,0.08)',
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(242,242,247,0.72)',  // iOS 26 systemGray6
+          borderColor: 'rgba(60,60,67,0.06)',         // systemGray3 border
+          backdropFilter: 'blur(24px)',
         },
         medium: {
-          backgroundColor: 'rgba(255,255,255,0.85)',  // Increased from 0.12 for less transparency
-          borderColor: 'rgba(0,0,0,0.12)',
-          backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(242,242,247,0.82)',  // More opaque for better contrast
+          borderColor: 'rgba(60,60,67,0.08)',
+          backdropFilter: 'blur(48px)',
         },
         strong: {
-          backgroundColor: 'rgba(255,255,255,0.92)',  // Increased from 0.20 for less transparency
-          borderColor: 'rgba(0,0,0,0.15)',
-          backdropFilter: 'blur(16px)',
+          backgroundColor: 'rgba(242,242,247,0.90)',  // Nearly opaque
+          borderColor: 'rgba(60,60,67,0.10)',
+          backdropFilter: 'blur(72px)',
         },
         modal: {
-          backgroundColor: 'rgba(255,255,255,0.98)',  // Increased from 0.85 for less transparency
-          borderColor: 'rgba(0,0,0,0.10)',
-          backdropFilter: 'blur(20px)',
+          backgroundColor: 'rgba(255,255,255,0.96)',  // Modal white
+          borderColor: 'rgba(60,60,67,0.08)',
+          backdropFilter: 'blur(96px)',
         },
       },
       dark: {
         subtle: {
-          backgroundColor: 'rgba(10,11,13,0.75)',    // Increased opacity for less transparency
-          borderColor: 'rgba(255,255,255,0.08)',      // Slightly increased border visibility
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'rgba(28,28,30,0.72)',     // iOS 26 systemGray5
+          borderColor: 'rgba(142,142,147,0.10)',      // systemGray border
+          backdropFilter: 'blur(24px)',
         },
         medium: {
-          backgroundColor: 'rgba(10,11,13,0.85)',    // Increased opacity for less transparency
-          borderColor: 'rgba(255,255,255,0.12)',
-          backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(28,28,30,0.82)',     // More opaque dark
+          borderColor: 'rgba(142,142,147,0.12)',
+          backdropFilter: 'blur(48px)',
         },
         strong: {
-          backgroundColor: 'rgba(10,11,13,0.92)',    // Increased opacity for less transparency
-          borderColor: 'rgba(255,255,255,0.15)',
-          backdropFilter: 'blur(16px)',
+          backgroundColor: 'rgba(28,28,30,0.90)',     // Nearly opaque
+          borderColor: 'rgba(142,142,147,0.15)',
+          backdropFilter: 'blur(72px)',
         },
         modal: {
-          backgroundColor: 'rgba(10,11,13,0.98)',    // Increased from 0.85 for less transparency
-          borderColor: 'rgba(255,255,255,0.10)',
-          backdropFilter: 'blur(20px)',
+          backgroundColor: 'rgba(0,0,0,0.95)',        // Pure black modal
+          borderColor: 'rgba(142,142,147,0.10)',
+          backdropFilter: 'blur(96px)',
         },
       },
     },

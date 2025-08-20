@@ -26,8 +26,11 @@ import { httpsCallable } from 'firebase/functions';
 import { searchService } from '../services/searchService';
 import NutritionService from '../services/NutritionService';
 import { GlassContainer, GlassCard } from '../components/GlassmorphismComponents';
+import { GlassSearchInput } from '../components/GlassSearchInput';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSearchContext } from '../contexts/SearchContext';
+import contextAggregator from '../services/contextAggregator';
+import sessionContextManager from '../services/sessionContextManager';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -170,14 +173,16 @@ export default function UnifiedSearchScreen({ navigation, route }) {
   const [activeTab, setActiveTab] = useState('all'); // all, exercises, nutrition
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [sessionSummary, setSessionSummary] = useState(null);
   
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   
-  // Load animation
+  // Load animation and initialize session manager
   useEffect(() => {
+    initializeScreen();
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -192,6 +197,17 @@ export default function UnifiedSearchScreen({ navigation, route }) {
       }),
     ]).start();
   }, []);
+
+  const initializeScreen = async () => {
+    try {
+      await sessionContextManager.initialize();
+      await sessionContextManager.trackScreenVisit('Search');
+      const summary = await sessionContextManager.getSummary();
+      setSessionSummary(summary);
+    } catch (error) {
+      console.error('Error initializing search screen:', error);
+    }
+  };
   
   // Simplified and more reliable search handler
   const performSearch = useCallback(async (query) => {
@@ -350,32 +366,90 @@ export default function UnifiedSearchScreen({ navigation, route }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
   
-  // Add to chat context
-  const addToContext = useCallback(() => {
+  // Add to session context and navigate to generator
+  const addToContext = useCallback(async () => {
     if (selectedItems.length === 0) return;
     
-    // Add selected items to the global context
+    // Add selected items to the session context
     const exercises = selectedItems.filter(item => item.type === 'exercise');
     const foods = selectedItems.filter(item => item.type === 'nutrition');
     
-    // Add to global search context
-    exercises.forEach(ex => addExercise(ex));
-    foods.forEach(food => addFood(food));
-    
-    // Prepare context data
-    const contextData = {
-      exercises: exercises,
-      foods: foods,
-      query: searchQuery,
-      parsedIntent: parsedQuery,
-      timestamp: Date.now()
-    };
-    
-    // Navigate to chat with context
-    navigation.navigate('Generator', {
-      searchContext: contextData,
-      message: `I found ${selectedItems.length} items for "${searchQuery}". I've added them to your workout context. Let me help you create a personalized plan with these selections.`
-    });
+    try {
+      // Add to session context manager
+      if (exercises.length > 0) {
+        await sessionContextManager.addExercises(exercises, 'search');
+      }
+      
+      if (foods.length > 0) {
+        await sessionContextManager.addNutrition(foods, 'search');
+      }
+      
+      // Also add to legacy search context for compatibility
+      exercises.forEach(ex => addExercise(ex));
+      foods.forEach(food => addFood(food));
+      
+      // Store context in aggregator for persistence
+      await contextAggregator.storeExerciseContext(exercises, foods, {
+        query: searchQuery,
+        parsedIntent: parsedQuery
+      });
+      
+      // Get comprehensive context for AI chat
+      const aiContext = await sessionContextManager.getAIChatContext();
+      
+      // Build initial message for AI chat
+      let initialMessage = '';
+      if (exercises.length > 0 && foods.length > 0) {
+        initialMessage = `I've selected ${exercises.length} exercises and ${foods.length} nutrition items. Please create a comprehensive workout and nutrition plan using these selections.`;
+      } else if (exercises.length > 0) {
+        const exerciseNames = exercises.slice(0, 3).map(e => e.name).join(', ');
+        const moreText = exercises.length > 3 ? ` and ${exercises.length - 3} more` : '';
+        initialMessage = `I've selected these exercises: ${exerciseNames}${moreText}. Please create a workout plan incorporating these exercises.`;
+      } else if (foods.length > 0) {
+        initialMessage = `I've selected ${foods.length} nutrition items. Please help me create a meal plan with these foods.`;
+      }
+      
+      // Add context to the initial message
+      if (aiContext.contextText) {
+        initialMessage += `\n\nAdditional context:${aiContext.contextText}`;
+      }
+      
+      console.log('🎯 Navigating to ContextAwareGenerator with session context');
+      
+      // Navigate directly to ContextAwareGenerator with the comprehensive context
+      navigation.navigate('ContextAwareGenerator', {
+        searchContext: {
+          exercises: exercises,
+          foods: foods,
+          query: searchQuery,
+          parsedIntent: parsedQuery,
+          timestamp: Date.now()
+        },
+        sessionContext: aiContext.fullContext,
+        selectedExercises: exercises,
+        selectedFoods: foods,
+        initialMessage: initialMessage,
+        skipContextModal: true, // Flag to skip showing the context modal
+        directFromSearch: true
+      });
+      
+    } catch (error) {
+      console.error('Failed to add items to session context:', error);
+      // Fall back to original navigation
+      navigation.navigate('ContextAwareGenerator', {
+        searchContext: {
+          exercises: exercises,
+          foods: foods,
+          query: searchQuery,
+          parsedIntent: parsedQuery,
+          timestamp: Date.now()
+        },
+        selectedExercises: exercises,
+        selectedFoods: foods,
+        skipContextModal: true,
+        directFromSearch: true
+      });
+    }
   }, [selectedItems, searchQuery, parsedQuery, navigation, addExercise, addFood]);
   
   // Toggle item selection
@@ -657,7 +731,17 @@ export default function UnifiedSearchScreen({ navigation, route }) {
           
           <View style={styles.headerContent}>
             <Text style={[styles.headerTitle, { color: theme.theme.text }]}>{exercisesOnly ? 'Exercise Library' : 'Intelligent Search'}</Text>
-            <Text style={[styles.headerSubtitle, { color: theme.theme.textSecondary }]}>Find exercises & nutrition info</Text>
+            <View style={styles.headerSubtitleContainer}>
+              <Text style={[styles.headerSubtitle, { color: theme.theme.textSecondary }]}>Find exercises & nutrition info</Text>
+              {sessionSummary && sessionSummary.completionPercentage > 0 && (
+                <View style={styles.contextIndicator}>
+                  <Ionicons name="layers" size={12} color="#4CAF50" />
+                  <Text style={styles.contextIndicatorText}>
+                    {sessionSummary.completionPercentage}% context
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
           
           {selectedItems.length > 0 && (
@@ -680,33 +764,20 @@ export default function UnifiedSearchScreen({ navigation, route }) {
           )}
         </View>
         
-        {/* Search Input with NLU Indicator */}
+        {/* Search Input positioned under header */}
         <Animated.View 
           style={[
             styles.searchContainer,
             { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
           ]}
         >
-          <GlassContainer variant="subtle" style={styles.searchInputContainer}>
-            <Ionicons name="search" size={20} color={theme.theme.textSecondary} style={styles.searchIcon} />
-            <TextInput
-              style={[styles.searchInput, { color: theme.theme.text }]}
-              placeholder={exercisesOnly ? "Search 872+ exercises..." : "Try: 'chest exercises' or 'protein for breakfast'"}
-              placeholderTextColor={theme.theme.textTertiary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              autoFocus={!exercisesOnly}
-              multiline={false}
-            />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity 
-                onPress={() => setSearchQuery('')}
-                style={styles.clearButton}
-              >
-                <Ionicons name="close-circle" size={20} color={theme.theme.textSecondary} />
-              </TouchableOpacity>
-            )}
-          </GlassContainer>
+          <GlassSearchInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder={exercisesOnly ? "Search 872+ exercises..." : "Try: 'chest exercises' or 'protein for breakfast'"}
+            autoFocus={!exercisesOnly}
+            containerStyle={styles.searchInputContainer}
+          />
           
           {/* Informational Card - Show when no search */}
           {!searchQuery && (
@@ -850,6 +921,27 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 12,
     marginTop: 2,
+  },
+  headerSubtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  contextIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  contextIndicatorText: {
+    fontSize: 10,
+    color: '#4CAF50',
+    fontWeight: '500',
+    marginLeft: 4,
   },
   infoCard: {
     marginHorizontal: 20,

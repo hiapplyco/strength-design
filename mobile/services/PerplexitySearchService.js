@@ -145,7 +145,7 @@ class PerplexitySearchService {
       });
 
       const response = await this.makeApiCall({
-        model: 'llama-3.1-sonar-large-128k-online',
+        model: 'sonar',
         messages: [
           {
             role: 'system',
@@ -191,7 +191,7 @@ class PerplexitySearchService {
       Provide comprehensive details that would allow someone to follow this program exactly as designed.`;
 
       const response = await this.makeApiCall({
-        model: 'llama-3.1-sonar-large-128k-online',
+        model: 'sonar',
         messages: [
           {
             role: 'system',

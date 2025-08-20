@@ -9,11 +9,12 @@ import {
   Alert,
   TextInput,
   Modal,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeLinearGradient } from '../components/SafeLinearGradient';
 import { useTheme, themedStyles } from '../contexts/ThemeContext';
-import { GlassCard, GlassContainer } from '../components/GlassmorphismComponents';
+import { GlassCard } from '../components/GlassmorphismComponents';
 import { auth, db } from '../firebaseConfig';
 import { 
   collection, 
@@ -26,6 +27,9 @@ import {
   deleteDoc 
 } from 'firebase/firestore';
 import ProgramSearchModal from '../components/ProgramSearchModal';
+import ContextModal from '../components/ContextModal';
+import contextAggregator from '../services/contextAggregator';
+import sessionContextManager from '../services/sessionContextManager';
 
 export default function WorkoutsScreen({ navigation }) {
   const [dailyWorkouts, setDailyWorkouts] = useState([]);
@@ -34,6 +38,7 @@ export default function WorkoutsScreen({ navigation }) {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editedExercises, setEditedExercises] = useState([]);
   const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [contextModalVisible, setContextModalVisible] = useState(false);
   
   const theme = useTheme();
 
@@ -44,11 +49,10 @@ export default function WorkoutsScreen({ navigation }) {
       return;
     }
 
-    // Subscribe to daily workouts
+    // Subscribe to daily workouts - simplified query to avoid index requirement
     const q = query(
       collection(db, 'dailyWorkouts'),
-      where('userId', '==', user.uid),
-      orderBy('scheduledDate', 'asc')
+      where('userId', '==', user.uid)
     );
 
     const unsubscribe = onSnapshot(q, 
@@ -57,15 +61,20 @@ export default function WorkoutsScreen({ navigation }) {
         snapshot.forEach((doc) => {
           workouts.push({ id: doc.id, ...doc.data() });
         });
+        
+        // Sort client-side to avoid index requirement
+        workouts.sort((a, b) => {
+          const dateA = a.scheduledDate?.toDate ? a.scheduledDate.toDate() : new Date(a.scheduledDate || 0);
+          const dateB = b.scheduledDate?.toDate ? b.scheduledDate.toDate() : new Date(b.scheduledDate || 0);
+          return dateA - dateB;
+        });
+        
         setDailyWorkouts(workouts);
         setLoading(false);
       },
       (error) => {
         console.error('Error fetching workouts:', error);
-        // If it's an index error, show a message but don't crash
-        if (error.code === 'failed-precondition' && error.message.includes('index')) {
-          console.log('Creating Firestore index... This may take a few minutes.');
-        }
+        // Still handle gracefully but workouts should load now
         setLoading(false);
       }
     );
@@ -169,21 +178,45 @@ export default function WorkoutsScreen({ navigation }) {
     setEditedExercises(editedExercises.filter((_, i) => i !== index));
   };
 
-  const handleProgramSelect = (program) => {
-    // Navigate to context-aware workout generator with the selected program as context
-    navigation.navigate('ContextAwareGenerator', { 
-      selectedProgram: program,
-      programContext: {
-        name: program.name,
-        creator: program.creator,
-        methodology: program.methodology,
-        structure: program.structure,
-        goals: program.goals,
-        experienceLevel: program.experienceLevel,
-        duration: program.duration,
-        credibilityScore: program.credibilityScore
-      }
-    });
+  const handleProgramSelect = async (program) => {
+    try {
+      // Initialize session manager and track screen visit
+      await sessionContextManager.initialize();
+      await sessionContextManager.trackScreenVisit('Workouts');
+      
+      // Add program to session context
+      await sessionContextManager.addProgram(program, 'workouts');
+      
+      // Store the program context for backward compatibility
+      await contextAggregator.storeProgramContext(program);
+      
+      // Get comprehensive session context for AI
+      const aiContext = await sessionContextManager.getAIChatContext();
+      
+      console.log('🏋️ Program selected, navigating with session context');
+      
+      // Navigate to context-aware workout generator with the selected program as context
+      navigation.navigate('ContextAwareGenerator', { 
+        selectedProgram: program,
+        sessionContext: aiContext.fullContext,
+        programContext: {
+          name: program.name,
+          creator: program.creator,
+          methodology: program.methodology,
+          structure: program.structure,
+          goals: program.goals,
+          experienceLevel: program.experienceLevel,
+          duration: program.duration,
+          credibilityScore: program.credibilityScore,
+          exercises: program.exercises || [],
+          principles: program.principles || [],
+          equipment: program.equipment || []
+        }
+      });
+    } catch (error) {
+      console.error('Error handling program selection:', error);
+      Alert.alert('Error', 'Failed to select program. Please try again.');
+    }
   };
 
   const renderWorkoutCard = (workout) => {
@@ -382,68 +415,85 @@ export default function WorkoutsScreen({ navigation }) {
 
   if (loading) {
     return (
-      <GlassContainer>
+      <View style={styles.container}>
+        <SafeLinearGradient
+          colors={theme.isDarkMode ? ['#0A0A0C', '#1A1A1C'] : ['#F5F5F7', '#E8E8ED']}
+          style={StyleSheet.absoluteFillObject}
+        />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.theme.primary} />
         </View>
-      </GlassContainer>
+      </View>
     );
   }
 
   return (
-    <GlassContainer>
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
+      <SafeLinearGradient
+        colors={theme.isDarkMode ? ['#0A0A0C', '#1A1A1C'] : ['#F5F5F7', '#E8E8ED']}
+        style={StyleSheet.absoluteFillObject}
+      />
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.headerTitle, { color: theme.theme.textOnGlass }]}>My Workouts</Text>
+          <Text style={[styles.headerSubtitle, { color: theme.theme.textSecondary }]}>Track and manage your workout plans</Text>
+          
+          {/* Perplexity Status Badge */}
+          <View style={styles.apiStatusContainer}>
+            <View style={styles.apiStatusBadge}>
+              <View style={styles.apiStatusDot} />
+              <Text style={styles.apiStatusText}>Perplexity AI Active</Text>
+            </View>
+          </View>
+          
+          {/* Action Buttons */}
           <View style={styles.headerActions}>
             <TouchableOpacity 
               onPress={() => setSearchModalVisible(true)}
+              style={styles.actionButton}
             >
-              <GlassCard variant="subtle" style={{ paddingHorizontal: 14, paddingVertical: 9 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="search" size={18} color={theme.theme.primary} />
-                  <Text style={[styles.searchButtonText, { color: theme.theme.textOnGlass }]}>Find Programs</Text>
-                </View>
+              <GlassCard variant="subtle" style={styles.actionCard}>
+                <Ionicons name="search" size={20} color="#20B5AC" />
+                <Text style={[styles.actionButtonText, { color: theme.theme.textOnGlass }]}>Find Programs</Text>
               </GlassCard>
             </TouchableOpacity>
             
             <TouchableOpacity 
               onPress={() => navigation.navigate('MockupWorkout')}
+              style={styles.actionButton}
             >
-              <GlassCard variant="subtle" style={{ paddingHorizontal: 14, paddingVertical: 9 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="flask" size={18} color={theme.theme.warning || '#FFA500'} />
-                  <Text style={[styles.searchButtonText, { color: theme.theme.textOnGlass, marginLeft: 6 }]}>Demo</Text>
-                </View>
+              <GlassCard variant="subtle" style={styles.actionCard}>
+                <Ionicons name="flask" size={20} color={theme.theme.warning || '#FFA500'} />
+                <Text style={[styles.actionButtonText, { color: theme.theme.textOnGlass }]}>Demo Mode</Text>
               </GlassCard>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('WorkoutGenerator')}
-              style={{ overflow: 'hidden', borderRadius: 12 }}
-            >
-              <SafeLinearGradient
-                colors={['#FFB86B', '#FF7E87']}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingHorizontal: 20,
-                  paddingVertical: 12,
-                  gap: 8,
-                }}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="add" size={20} color="#FFF" />
-                <Text style={styles.generateButtonText}>Generate New</Text>
-              </SafeLinearGradient>
-            </TouchableOpacity>
           </View>
+          
+          {/* Primary Generate Button */}
+          <TouchableOpacity 
+            onPress={() => setContextModalVisible(true)}
+            style={styles.primaryButton}
+          >
+            <SafeLinearGradient
+              colors={['#FFB86B', '#FF7E87']}
+              style={styles.primaryButtonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="add-circle" size={24} color="#FFF" />
+              <Text style={styles.primaryButtonText}>Generate New Workout</Text>
+            </SafeLinearGradient>
+          </TouchableOpacity>
         </View>
 
         {/* Workouts List */}
-        <View style={{ padding: 16, paddingBottom: 120 }}>
+        <View style={styles.workoutsContainer}>
           {dailyWorkouts.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="barbell-outline" size={80} color={theme.theme.textSecondary} />
@@ -452,16 +502,12 @@ export default function WorkoutsScreen({ navigation }) {
                 Generate your first personalized workout plan!
               </Text>
               <TouchableOpacity 
-                onPress={() => navigation.navigate('WorkoutGenerator')}
-                style={{ marginTop: 24, overflow: 'hidden', borderRadius: 14 }}
+                onPress={() => setContextModalVisible(true)}
+                style={styles.emptyStateButton}
               >
                 <SafeLinearGradient
                   colors={['#FFB86B', '#FF7E87']}
-                  style={{
-                    paddingHorizontal: 32,
-                    paddingVertical: 18,
-                    alignItems: 'center',
-                  }}
+                  style={styles.emptyStateButtonGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
@@ -476,24 +522,57 @@ export default function WorkoutsScreen({ navigation }) {
           )}
         </View>
 
-        {renderEditModal()}
-        
-        {/* Program Search Modal */}
-        <ProgramSearchModal
-          visible={searchModalVisible}
-          onClose={() => setSearchModalVisible(false)}
-          onProgramSelect={handleProgramSelect}
-          navigation={navigation}
-        />
       </ScrollView>
-    </GlassContainer>
+      
+      {renderEditModal()}
+      
+      {/* Program Search Modal */}
+      <ProgramSearchModal
+        visible={searchModalVisible}
+        onClose={() => setSearchModalVisible(false)}
+        onProgramSelect={handleProgramSelect}
+        navigation={navigation}
+      />
+      
+      {/* Context Modal - Shows when generating without context */}
+      <ContextModal
+        visible={contextModalVisible}
+        onClose={() => setContextModalVisible(false)}
+        onNavigate={(screen) => {
+          setContextModalVisible(false);
+          if (screen === 'Generator') {
+            // Special case: if they skip, check for ContextAwareGenerator
+            const contextAwareScreen = navigation.getState().routes.find(
+              route => route.name === 'ContextAwareGenerator'
+            );
+            navigation.navigate(contextAwareScreen ? 'ContextAwareGenerator' : 'WorkoutGenerator');
+          } else {
+            navigation.navigate(screen);
+          }
+        }}
+        title="Personalize Your Workouts"
+        subtitle="Get AI-powered workouts tailored to your fitness level and goals"
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#000',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 120,
+  },
+  workoutsContainer: {
+    padding: 16,
+    paddingBottom: 40,
+    minHeight: 400,
   },
   loadingContainer: {
     flex: 1,
@@ -503,54 +582,108 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 60,
-    paddingBottom: 20,
+    paddingBottom: 24,
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#FFF',
-    flex: 1,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  apiStatusContainer: {
+    marginBottom: 24,
+  },
+  apiStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(32, 181, 172, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(32, 181, 172, 0.3)',
+  },
+  apiStatusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#20B5AC',
+    marginRight: 6,
+  },
+  apiStatusText: {
+    fontSize: 12,
+    color: '#20B5AC',
+    fontWeight: '600',
   },
   headerActions: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
     gap: 12,
+    marginBottom: 20,
+    width: '100%',
   },
-  searchButton: {
-    borderRadius: 18,
+  actionButton: {
+    flex: 1,
+    maxWidth: 180,
   },
-  searchButtonGradient: {
+  actionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 18,
-  },
-  searchButtonText: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  generateButton: {
-    borderRadius: 20,
-  },
-  generateButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    gap: 8,
+    borderRadius: 12,
   },
-  generateButtonText: {
+  actionButtonText: {
     color: '#FFF',
     fontSize: 14,
     fontWeight: '600',
-    marginLeft: 4,
+  },
+  primaryButton: {
+    width: '100%',
+    maxWidth: 380,
+    borderRadius: 16,
+    overflow: 'hidden',
+    boxShadow: Platform.select({
+      web: '0px 4px 8px rgba(255, 126, 135, 0.3)',
+      default: undefined,
+    }),
+    ...Platform.select({
+      ios: {
+        shadowColor: '#FF7E87',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+      default: {},
+    }),
+  },
+  primaryButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  primaryButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   workoutsList: {
     flex: 1,
@@ -648,10 +781,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   emptyState: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 100,
+    paddingVertical: 60,
+    minHeight: 300,
   },
   emptyTitle: {
     fontSize: 24,
@@ -664,15 +797,17 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 8,
     textAlign: 'center',
+    paddingHorizontal: 40,
   },
-  ctaButton: {
+  emptyStateButton: {
     marginTop: 24,
-    borderRadius: 25,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
-  ctaButtonGradient: {
+  emptyStateButtonGradient: {
     paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 25,
+    paddingVertical: 16,
+    alignItems: 'center',
   },
   ctaButtonText: {
     color: '#FFF',

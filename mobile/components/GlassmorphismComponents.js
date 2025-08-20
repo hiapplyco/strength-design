@@ -33,10 +33,11 @@ import { borderRadius, spacing, animations } from '../utils/designTokens';
  */
 const BLUR_INTENSITY_MAP = {
   none: Platform.select({ ios: 0, android: 0, web: 0 }),
-  subtle: Platform.select({ ios: 8, android: 10, web: 4 }),
-  medium: Platform.select({ ios: 12, android: 15, web: 6 }),
-  strong: Platform.select({ ios: 16, android: 20, web: 8 }),
-  intense: Platform.select({ ios: 20, android: 25, web: 10 }),
+  subtle: Platform.select({ ios: 20, android: 25, web: 10 }),
+  medium: Platform.select({ ios: 40, android: 45, web: 20 }),
+  strong: Platform.select({ ios: 60, android: 65, web: 30 }),
+  intense: Platform.select({ ios: 80, android: 85, web: 40 }),
+  max: Platform.select({ ios: 100, android: 100, web: 50 }),
 };
 
 /**
@@ -45,24 +46,24 @@ const BLUR_INTENSITY_MAP = {
  */
 const BLUR_TINT_MAP = {
   light: Platform.select({ 
-    ios: 'light', 
+    ios: 'systemChromeMaterialLight', 
     android: 'light', 
-    web: 'rgba(255,255,255,0.8)' 
+    web: 'rgba(255,255,255,0.92)' 
   }),
   dark: Platform.select({ 
-    ios: 'dark', 
+    ios: 'systemChromeMaterialDark', 
     android: 'dark', 
-    web: 'rgba(0,0,0,0.8)' 
+    web: 'rgba(0,0,0,0.85)' 
   }),
   systemMaterial: Platform.select({ 
-    ios: 'systemMaterial', 
+    ios: 'systemUltraThinMaterialLight', 
     android: 'light', 
-    web: 'rgba(255,255,255,0.8)' 
+    web: 'rgba(248,248,248,0.95)' 
   }),
   systemMaterialDark: Platform.select({ 
-    ios: 'systemMaterialDark', 
+    ios: 'systemUltraThinMaterialDark', 
     android: 'dark', 
-    web: 'rgba(0,0,0,0.8)' 
+    web: 'rgba(20,20,20,0.92)' 
   }),
 };
 
@@ -75,7 +76,7 @@ export const BlurWrapper = memo(({
   intensity = 'medium', 
   tint = 'systemMaterial',
   style,
-  fallbackOpacity = 0.95,
+  fallbackOpacity = 0.98,
   disabled = false,
   ...props 
 }) => {
@@ -106,13 +107,17 @@ export const BlurWrapper = memo(({
   // Fallback for when blur is not supported
   if (!blurSupported || blurIntensity === 0) {
     const fallbackColor = isDarkMode 
-      ? `rgba(0, 0, 0, ${fallbackOpacity})` 
-      : `rgba(255, 255, 255, ${fallbackOpacity})`;
+      ? `rgba(28, 28, 30, ${fallbackOpacity})` 
+      : `rgba(242, 242, 247, ${fallbackOpacity})`;
     
     return (
       <View 
         style={[
-          { backgroundColor: fallbackColor },
+          { 
+            backgroundColor: fallbackColor,
+            backdropFilter: Platform.OS === 'web' ? `blur(${blurIntensity}px)` : undefined,
+            WebkitBackdropFilter: Platform.OS === 'web' ? `blur(${blurIntensity}px)` : undefined,
+          },
           style
         ]} 
         {...props}
@@ -147,7 +152,7 @@ export const GlassContainer = memo(({
   padding = 'md',
   margin,
   style,
-  blurIntensity = 'medium',
+  blurIntensity = 'strong',
   showBorder = true,
   showShadow = true,
   accessible = true,
@@ -172,18 +177,20 @@ export const GlassContainer = memo(({
       borderRadius: radiusValue,
       padding: paddingValue,
       margin,
-      borderWidth: showBorder ? 1 : 0,
-      borderColor: glassConfig.borderColor,
+      borderWidth: showBorder ? 0.5 : 0,
+      borderColor: isDarkMode 
+        ? 'rgba(255, 255, 255, 0.1)' 
+        : 'rgba(0, 0, 0, 0.06)',
       overflow: 'hidden',
-      // Add subtle inner shadow for depth
+      // Add iOS 26 style depth with stronger shadows
       ...(showShadow && Platform.OS === 'ios' && {
         shadowColor: isDarkMode ? '#000' : '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: isDarkMode ? 0.3 : 0.1,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: isDarkMode ? 0.4 : 0.08,
+        shadowRadius: 12,
       }),
       ...(showShadow && Platform.OS === 'android' && {
-        elevation: isDarkMode ? 8 : 4,
+        elevation: isDarkMode ? 12 : 6,
       }),
     };
   });
@@ -211,7 +218,11 @@ export const GlassContainer = memo(({
         style={StyleSheet.absoluteFillObject}
         disabled={disabled}
       />
-      <View style={{ backgroundColor: 'transparent' }}>
+      <View style={{ 
+        backgroundColor: theme.isDarkMode 
+          ? 'rgba(255, 255, 255, 0.02)' 
+          : 'rgba(255, 255, 255, 0.25)',
+      }}>
         {children}
       </View>
     </Component>
@@ -314,14 +325,26 @@ export const GlassButton = memo(({
   
   const buttonStyles = themedStyles(({ theme, spacing, typography, borderRadius }) => {
     const sizeConfig = {
-      sm: { paddingVertical: spacing[2], paddingHorizontal: spacing[4], fontSize: typography.fontSize.sm },
-      md: { paddingVertical: spacing[3], paddingHorizontal: spacing[6], fontSize: typography.fontSize.base },
-      lg: { paddingVertical: spacing[4], paddingHorizontal: spacing[8], fontSize: typography.fontSize.lg },
+      sm: { 
+        paddingVertical: spacing?.sm || 8, 
+        paddingHorizontal: spacing?.md || 16, 
+        fontSize: typography?.fontSize?.sm || 14 
+      },
+      md: { 
+        paddingVertical: spacing?.md || 12, 
+        paddingHorizontal: spacing?.lg || 24, 
+        fontSize: typography?.fontSize?.base || 16 
+      },
+      lg: { 
+        paddingVertical: spacing?.lg || 16, 
+        paddingHorizontal: spacing?.xl || 32, 
+        fontSize: typography?.fontSize?.lg || 18 
+      },
     };
     
     return {
       ...sizeConfig[size],
-      borderRadius: borderRadius.component.button[size],
+      borderRadius: borderRadius?.component?.button?.[size] || borderRadius?.[size] || 12,
       alignItems: 'center',
       justifyContent: 'center',
       opacity: disabled ? 0.6 : 1,
@@ -329,8 +352,8 @@ export const GlassButton = memo(({
   });
 
   const textStyles = themedStyles(({ theme, typography }) => ({
-    color: theme.text,
-    fontWeight: typography.fontWeight.medium,
+    color: theme?.text || '#000',
+    fontWeight: typography?.fontWeight?.medium || '500',
     textAlign: 'center',
   }));
 
@@ -378,18 +401,18 @@ export const GlassModal = memo(({
   const theme = useTheme();
   const { reducedMotion } = theme;
   
-  const backdropStyles = themedStyles(({ isDarkMode }) => ({
+  const backdropStyles = themedStyles(({ isDarkMode, spacing }) => ({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: isDarkMode 
-      ? `rgba(0, 0, 0, ${backdropOpacity})` 
-      : `rgba(0, 0, 0, ${backdropOpacity * 0.7})`,
+      ? `rgba(0, 0, 0, ${backdropOpacity + 0.2})` 
+      : `rgba(128, 128, 128, ${backdropOpacity * 0.3})`,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing[4],
+    padding: spacing?.lg || 16,
   }));
 
   const modalStyles = themedStyles(({ spacing }) => ({
-    maxWidth: Dimensions.get('window').width - (spacing[8] * 2),
+    maxWidth: Dimensions.get('window').width - ((spacing?.xl || 32) * 2),
     maxHeight: Dimensions.get('window').height * 0.8,
     width: '100%',
   }));
@@ -408,7 +431,7 @@ export const GlassModal = memo(({
       <GlassContainer
         variant={variant}
         style={[modalStyles, style]}
-        blurIntensity="intense"
+        blurIntensity="max"
         {...props}
       >
         <View style={contentStyle}>
@@ -435,15 +458,27 @@ export const GlassInput = memo(({
   
   const inputStyles = themedStyles(({ theme, spacing, typography, borderRadius }) => {
     const sizeConfig = {
-      sm: { paddingVertical: spacing[2], paddingHorizontal: spacing[3], fontSize: typography.fontSize.sm },
-      md: { paddingVertical: spacing[3], paddingHorizontal: spacing[4], fontSize: typography.fontSize.base },
-      lg: { paddingVertical: spacing[4], paddingHorizontal: spacing[5], fontSize: typography.fontSize.lg },
+      sm: { 
+        paddingVertical: spacing?.sm || 8, 
+        paddingHorizontal: spacing?.sm || 12, 
+        fontSize: typography?.fontSize?.sm || 14 
+      },
+      md: { 
+        paddingVertical: spacing?.md || 12, 
+        paddingHorizontal: spacing?.md || 16, 
+        fontSize: typography?.fontSize?.base || 16 
+      },
+      lg: { 
+        paddingVertical: spacing?.lg || 16, 
+        paddingHorizontal: spacing?.lg || 20, 
+        fontSize: typography?.fontSize?.lg || 18 
+      },
     };
     
     return {
       ...sizeConfig[size],
-      borderRadius: borderRadius.component.input[size],
-      color: theme.text,
+      borderRadius: borderRadius?.component?.input?.[size] || borderRadius?.[size] || 12,
+      color: theme?.text || '#000',
       minHeight: 44, // Accessibility minimum touch target
     };
   });

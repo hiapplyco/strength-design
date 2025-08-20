@@ -5,10 +5,10 @@
 | Platform | Version | Status | Last Update |
 |----------|---------|--------|-------------|
 | **Web App** | v2.5.0 | 🟢 Production | Jan 15, 2025 |
-| **Mobile App** | v1.0.0 | 🎉 Feature Complete | Jan 15, 2025 |
-| **Firebase Functions** | v1.2.0 | 🟢 Production | Jan 15, 2025 |
+| **Mobile App** | v1.0.0 | 🚀 TestFlight Deployed | Aug 19, 2025 |
+| **Firebase Functions** | v1.2.0 | 🟢 Production | Aug 19, 2025 |
 
-> 📱 **Mobile App Ready for Release!** All phases complete with offline support, health integration, glassmorphism design, and native features.
+> 📱 **Mobile App on TestFlight!** Successfully deployed to iOS devices with enhanced iOS 26 glassmorphism design, all UI issues resolved, and ready for App Store submission.
 
 ## Overview
 

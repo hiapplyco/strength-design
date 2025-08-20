@@ -304,16 +304,17 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
         context.preferences = JSON.parse(savedPreferences);
       }
 
-      // Get workout stats
+      // Get workout stats - simplified query to avoid index requirement
       const statsQuery = query(
         collection(db, 'dailyWorkouts'),
-        where('userId', '==', user.uid),
-        where('completed', '==', true)
+        where('userId', '==', user.uid)
       );
       
       const statsSnapshot = await getDocs(statsQuery);
-      context.stats.completedWorkouts = statsSnapshot.size;
-      context.stats.streak = calculateStreak(statsSnapshot.docs);
+      // Filter completed workouts client-side
+      const completedDocs = statsSnapshot.docs.filter(doc => doc.data().completed === true);
+      context.stats.completedWorkouts = completedDocs.length;
+      context.stats.streak = calculateStreak(completedDocs);
 
       setUserContext(context);
       initializeChat(context);
@@ -427,7 +428,19 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
       }
 
       console.log('Response received, starting stream processing...');
-      const reader = response.body.getReader();
+      
+      // Check if response body exists and is readable
+      if (!response.body) {
+        console.error('Response body is undefined');
+        throw new Error('Response body is not available - streaming may not be supported');
+      }
+      
+      const reader = response.body.getReader ? response.body.getReader() : null;
+      if (!reader) {
+        console.error('Cannot get reader from response body');
+        throw new Error('Cannot read response - streaming not supported');
+      }
+      
       const decoder = new TextDecoder();
       let fullResponse = '';
       let buffer = '';

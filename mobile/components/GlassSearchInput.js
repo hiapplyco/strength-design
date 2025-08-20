@@ -33,6 +33,11 @@ export const GlassSearchInput = memo(({
   ...props
 }) => {
   const { isDarkMode, theme } = useTheme();
+  
+  // Ensure proper color contrast
+  const textColor = isDarkMode ? '#FFFFFF' : '#000000';
+  const placeholderColor = isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
+  const iconColor = isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
 
   const handleClear = () => {
     if (onClear) {
@@ -44,15 +49,12 @@ export const GlassSearchInput = memo(({
 
   return (
     <GlassContainer
-      variant="medium"
+      variant="subtle"
       style={[
         styles.container, 
-        {
-          borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)',
-        },
         containerStyle
       ]}
-      showShadow={true}
+      showShadow={false}
       padding="none"
     >
       <View style={styles.inputWrapper}>
@@ -60,7 +62,7 @@ export const GlassSearchInput = memo(({
           <Ionicons
             name="search"
             size={20}
-            color={isDarkMode ? '#8E8E93' : '#3C3C43'}
+            color={iconColor}
             style={styles.searchIcon}
           />
         )}
@@ -69,7 +71,7 @@ export const GlassSearchInput = memo(({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={isDarkMode ? '#8E8E93' : '#C7C7CC'}
+          placeholderTextColor={placeholderColor}
           onSubmitEditing={onSubmit}
           autoFocus={autoFocus}
           editable={editable && !loading}
@@ -79,9 +81,9 @@ export const GlassSearchInput = memo(({
           style={[
             styles.input,
             {
-              color: isDarkMode ? '#FFFFFF' : '#000000',
-              paddingLeft: showSearchIcon ? 40 : 16,
-              paddingRight: (showClearButton && value) || loading ? 40 : 16,
+              color: textColor,
+              paddingLeft: showSearchIcon ? 42 : 16,
+              paddingRight: (showClearButton && value) || loading ? 42 : 16,
             },
             inputStyle,
           ]}
@@ -91,7 +93,7 @@ export const GlassSearchInput = memo(({
         {loading ? (
           <ActivityIndicator
             size="small"
-            color={isDarkMode ? '#8E8E93' : '#3C3C43'}
+            color={iconColor}
             style={styles.clearButton}
           />
         ) : (
@@ -104,7 +106,7 @@ export const GlassSearchInput = memo(({
               <Ionicons
                 name="close-circle"
                 size={18}
-                color={isDarkMode ? '#8E8E93' : '#C7C7CC'}
+                color={iconColor}
               />
             </TouchableOpacity>
           ) : null
@@ -120,31 +122,31 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginVertical: 8,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    borderWidth: 1,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 44,
+    minHeight: 48,
     width: '100%',
   },
   searchIcon: {
     position: 'absolute',
-    left: 12,
+    left: 14,
     zIndex: 1,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     backgroundColor: 'transparent',
     width: '100%',
+    fontWeight: '500',
   },
   clearButton: {
     position: 'absolute',
-    right: 12,
+    right: 14,
     zIndex: 1,
   },
 });

@@ -149,7 +149,7 @@ const parseUserQuery = (query) => {
 };
 
 export default function UnifiedSearchScreen({ navigation, route }) {
-  const theme = useTheme();
+  const { theme, isDarkMode } = useTheme();
   const { 
     addToHistory, 
     addExercise, 
@@ -487,20 +487,20 @@ export default function UnifiedSearchScreen({ navigation, route }) {
       >
         <Animated.View style={[styles.resultCard, isSelected && styles.selectedCard]}>
           <LinearGradient
-            colors={isSelected ? ['#FF6B35', '#FF8F65'] : ['#1a1a1a', '#2a2a2a']}
+            colors={isSelected ? ['#FF6B35', '#FF8F65'] : (isDarkMode ? ['#1a1a1a', '#2a2a2a'] : ['#f5f5f5', '#ffffff'])}
             style={styles.cardGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
             <View style={styles.cardHeader}>
               <View style={[styles.cardIcon, styles.exerciseIcon]}>
-                <Text style={styles.emojiIcon}>💪</Text>
+                <Text style={[styles.emojiIcon, { fontSize: 24 }]}>💪</Text>
               </View>
               <View style={styles.cardInfo}>
-                <Text style={[styles.cardTitle, isSelected && styles.selectedText]}>
+                <Text style={[styles.cardTitle, { color: isSelected ? '#FFF' : theme.theme.text }]} numberOfLines={1}>
                   {item.name}
                 </Text>
-                <Text style={[styles.cardSubtitle, isSelected && styles.selectedText]}>
+                <Text style={[styles.cardSubtitle, { color: isSelected ? 'rgba(255,255,255,0.8)' : theme.theme.textSecondary }]} numberOfLines={1}>
                   {item.category} • {item.equipment || 'No equipment'}
                 </Text>
               </View>
@@ -567,20 +567,20 @@ export default function UnifiedSearchScreen({ navigation, route }) {
       >
         <Animated.View style={[styles.resultCard, isSelected && styles.selectedCard]}>
           <LinearGradient
-            colors={isSelected ? ['#4CAF50', '#66BB6A'] : ['#1a1a1a', '#2a2a2a']}
+            colors={isSelected ? ['#4CAF50', '#66BB6A'] : (isDarkMode ? ['#1a1a1a', '#2a2a2a'] : ['#f5f5f5', '#ffffff'])}
             style={styles.cardGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
             <View style={styles.cardHeader}>
               <View style={[styles.cardIcon, styles.nutritionIcon]}>
-                <Text style={styles.emojiIcon}>{getFoodEmoji(item)}</Text>
+                <Text style={[styles.emojiIcon, { fontSize: 24 }]}>{getFoodEmoji(item)}</Text>
               </View>
               <View style={styles.cardInfo}>
-                <Text style={[styles.cardTitle, isSelected && styles.selectedText]}>
+                <Text style={[styles.cardTitle, { color: isSelected ? '#FFF' : theme.theme.text }]} numberOfLines={1}>
                   {item.name}
                 </Text>
-                <Text style={[styles.cardSubtitle, isSelected && styles.selectedText]}>
+                <Text style={[styles.cardSubtitle, { color: isSelected ? 'rgba(255,255,255,0.8)' : theme.theme.textSecondary }]} numberOfLines={1}>
                   {item.brand || 'USDA Database'} • {item.serving?.size || '100'}{item.serving?.unit || 'g'}
                 </Text>
               </View>
@@ -591,34 +591,34 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             
             <View style={styles.nutritionStats}>
               <View style={styles.nutritionStat}>
-                <Text style={[styles.statValue, isSelected && styles.selectedText]}>
+                <Text style={[styles.statValue, { color: isSelected ? '#FFF' : theme.theme.text }]}>
                   {item.calories || item.nutrition?.calories || 0}
                 </Text>
-                <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
+                <Text style={[styles.statLabel, { color: isSelected ? 'rgba(255,255,255,0.7)' : theme.theme.textSecondary }]}>
                   cal
                 </Text>
               </View>
               <View style={styles.nutritionStat}>
-                <Text style={[styles.statValue, isSelected && styles.selectedText]}>
+                <Text style={[styles.statValue, { color: isSelected ? '#FFF' : theme.theme.text }]}>
                   {item.protein || item.nutrition?.protein || 0}g
                 </Text>
-                <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
+                <Text style={[styles.statLabel, { color: isSelected ? 'rgba(255,255,255,0.7)' : theme.theme.textSecondary }]}>
                   protein
                 </Text>
               </View>
               <View style={styles.nutritionStat}>
-                <Text style={[styles.statValue, isSelected && styles.selectedText]}>
+                <Text style={[styles.statValue, { color: isSelected ? '#FFF' : theme.theme.text }]}>
                   {item.carbs || item.nutrition?.carbs || 0}g
                 </Text>
-                <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
+                <Text style={[styles.statLabel, { color: isSelected ? 'rgba(255,255,255,0.7)' : theme.theme.textSecondary }]}>
                   carbs
                 </Text>
               </View>
               <View style={styles.nutritionStat}>
-                <Text style={[styles.statValue, isSelected && styles.selectedText]}>
+                <Text style={[styles.statValue, { color: isSelected ? '#FFF' : theme.theme.text }]}>
                   {item.fat || item.nutrition?.fat || 0}g
                 </Text>
-                <Text style={[styles.statLabel, isSelected && styles.selectedText]}>
+                <Text style={[styles.statLabel, { color: isSelected ? 'rgba(255,255,255,0.7)' : theme.theme.textSecondary }]}>
                   fat
                 </Text>
               </View>
@@ -639,7 +639,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
       return (
         <View style={styles.fullWidthContainer}>
           <View style={styles.columnHeader}>
-            <Text style={styles.columnTitle}>💪 {exercises.length} Exercise Results</Text>
+            <Text style={[styles.columnTitle, { color: theme.theme.text }]}>💪 {exercises.length} Exercise Results</Text>
           </View>
           <FlatList
             data={exercises}
@@ -650,9 +650,9 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             ListEmptyComponent={
               !isLoading && searchQuery.length > 0 ? (
                 <View style={styles.emptyContainer}>
-                  <Ionicons name="barbell-outline" size={60} color="#666" />
-                  <Text style={styles.emptyText}>No exercises found</Text>
-                  <Text style={styles.emptySubtext}>Try different search terms</Text>
+                  <Ionicons name="barbell-outline" size={60} color={theme.theme.textTertiary} />
+                  <Text style={[styles.emptyText, { color: theme.theme.text }]}>No exercises found</Text>
+                  <Text style={[styles.emptySubtext, { color: theme.theme.textSecondary }]}>Try different search terms</Text>
                 </View>
               ) : null
             }
@@ -667,8 +667,8 @@ export default function UnifiedSearchScreen({ navigation, route }) {
         {/* Exercises Column */}
         <View style={styles.splitColumn}>
           <View style={styles.columnHeader}>
-            <Text style={styles.columnTitle}>💪 Exercises</Text>
-            <Text style={styles.columnCount}>{exercises.length} results</Text>
+            <Text style={[styles.columnTitle, { color: theme.theme.text }]}>💪 Exercises</Text>
+            <Text style={[styles.columnCount, { color: theme.theme.textSecondary }]}>{exercises.length} results</Text>
           </View>
           <FlatList
             data={exercises}
@@ -679,7 +679,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             ListEmptyComponent={
               !isLoading && searchQuery.length > 0 ? (
                 <View style={styles.emptyColumn}>
-                  <Text style={styles.emptyColumnText}>No exercises found</Text>
+                  <Text style={[styles.emptyColumnText, { color: theme.theme.textSecondary }]}>No exercises found</Text>
                 </View>
               ) : null
             }
@@ -692,8 +692,8 @@ export default function UnifiedSearchScreen({ navigation, route }) {
         {/* Nutrition Column */}
         <View style={styles.splitColumn}>
           <View style={styles.columnHeader}>
-            <Text style={styles.columnTitle}>🍽️ Nutrition</Text>
-            <Text style={styles.columnCount}>{nutrition.length} results</Text>
+            <Text style={[styles.columnTitle, { color: theme.theme.text }]}>🍽️ Nutrition</Text>
+            <Text style={[styles.columnCount, { color: theme.theme.textSecondary }]}>{nutrition.length} results</Text>
           </View>
           <FlatList
             data={nutrition}
@@ -704,7 +704,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             ListEmptyComponent={
               !isLoading && searchQuery.length > 0 ? (
                 <View style={styles.emptyColumn}>
-                  <Text style={styles.emptyColumnText}>No foods found</Text>
+                  <Text style={[styles.emptyColumnText, { color: theme.theme.textSecondary }]}>No foods found</Text>
                 </View>
               ) : null
             }
@@ -717,7 +717,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={theme.isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
+        colors={isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
         style={styles.gradient}
       >
         {/* Enhanced Header with Info */}
@@ -776,15 +776,14 @@ export default function UnifiedSearchScreen({ navigation, route }) {
             onChangeText={setSearchQuery}
             placeholder={exercisesOnly ? "Search 872+ exercises..." : "Try: 'chest exercises' or 'protein for breakfast'"}
             autoFocus={!exercisesOnly}
-            containerStyle={styles.searchInputContainer}
           />
           
           {/* Informational Card - Show when no search */}
           {!searchQuery && (
             <GlassCard variant="subtle" style={styles.infoCard}>
               <View style={styles.infoHeader}>
-                <View style={[styles.infoIconContainer, { backgroundColor: theme.isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(76, 175, 80, 0.35)' }]}>
-                  <Ionicons name="sparkles" size={24} color={theme.isDarkMode ? '#A7F3D0' : '#FFFFFF'} />
+                <View style={[styles.infoIconContainer, { backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(76, 175, 80, 0.35)' }]}>
+                  <Ionicons name="sparkles" size={24} color={isDarkMode ? '#A7F3D0' : '#4CAF50'} />
                 </View>
                 <Text style={[styles.infoTitle, { color: theme.theme.text }]}>What can you search?</Text>
               </View>
@@ -857,7 +856,7 @@ export default function UnifiedSearchScreen({ navigation, route }) {
         {/* Result Count Summary */}
         {(searchResults.exercises.length > 0 || searchResults.nutrition.length > 0) && (
           <View style={styles.resultSummary}>
-            <Text style={styles.resultSummaryText}>
+            <Text style={[styles.resultSummaryText, { color: theme.theme.textSecondary }]}>
               Found {searchResults.exercises.length + searchResults.nutrition.length} results for "{searchQuery}"
             </Text>
           </View>
@@ -867,13 +866,13 @@ export default function UnifiedSearchScreen({ navigation, route }) {
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FF6B35" />
-            <Text style={styles.loadingText}>Searching intelligently...</Text>
+            <Text style={[styles.loadingText, { color: theme.theme.textSecondary }]}>Searching intelligently...</Text>
           </View>
         ) : searchQuery.length > 0 && searchResults.exercises.length === 0 && searchResults.nutrition.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="search-outline" size={60} color="#666" />
-            <Text style={styles.emptyText}>No results found</Text>
-            <Text style={styles.emptySubtext}>Try different keywords or phrases</Text>
+            <Ionicons name="search-outline" size={60} color={theme.theme.textTertiary} />
+            <Text style={[styles.emptyText, { color: theme.theme.text }]}>No results found</Text>
+            <Text style={[styles.emptySubtext, { color: theme.theme.textSecondary }]}>Try different keywords or phrases</Text>
           </View>
         ) : searchQuery.length > 0 ? (
           renderSplitResults()
@@ -921,6 +920,7 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 12,
     marginTop: 2,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   headerSubtitleContainer: {
     flexDirection: 'row',
@@ -996,7 +996,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   emojiIcon: {
-    fontSize: 20,
+    fontSize: 24,
+    lineHeight: 28,
+    textAlign: 'center',
   },
   exerciseIcon: {
     backgroundColor: 'rgba(255, 107, 53, 0.1)',
@@ -1018,11 +1020,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   headerTitle: {
-    flex: 1,
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
-    marginLeft: 10,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   addButton: {
     borderRadius: 20,
@@ -1043,15 +1043,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 15,
     paddingBottom: 10,
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    marginHorizontal: 20,
-    marginTop: 10,
   },
   searchIcon: {
     marginRight: 10,
@@ -1149,10 +1140,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFF',
     marginBottom: 4,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   columnCount: {
     fontSize: 12,
     color: '#888',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   columnContent: {
     paddingBottom: 20,
@@ -1162,9 +1155,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyColumnText: {
-    color: '#666',
     fontSize: 14,
     textAlign: 'center',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   resultSummary: {
     paddingHorizontal: 15,
@@ -1174,9 +1167,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#2a2a2a',
   },
   resultSummaryText: {
-    color: '#888',
     fontSize: 13,
     textAlign: 'center',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   resultCard: {
     marginBottom: 8,
@@ -1194,13 +1187,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 107, 53, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+    marginRight: 12,
+    flexShrink: 0,
   },
   cardInfo: {
     flex: 1,
@@ -1210,10 +1204,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFF',
     marginBottom: 3,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   cardSubtitle: {
     fontSize: 11,
     color: '#888',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   selectedText: {
     color: '#FFF',
@@ -1253,11 +1249,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: 'bold',
     color: '#FFF',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   statLabel: {
     fontSize: 9,
     color: '#888',
     marginTop: 1,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   loadingContainer: {
     flex: 1,
@@ -1266,8 +1264,8 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
   },
   loadingText: {
-    color: '#888',
     marginTop: 10,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   emptyContainer: {
     flex: 1,
@@ -1276,15 +1274,15 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
   },
   emptyText: {
-    color: '#FFF',
     fontSize: 18,
     fontWeight: '600',
     marginTop: 15,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   emptySubtext: {
-    color: '#888',
     fontSize: 14,
     marginTop: 5,
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto', default: 'System' }),
   },
   suggestionsContainer: {
     paddingHorizontal: 15,

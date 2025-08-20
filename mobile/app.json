@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Strength Design",
-    "slug": "strength-design",
+    "slug": "mobile-working",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.strengthdesign.app",
+      "bundleIdentifier": "com.jms.strengthdesign",
       "infoPlist": {
         "NSHealthShareUsageDescription": "This app uses Apple Health to track your workouts and fitness progress.",
         "NSHealthUpdateUsageDescription": "This app saves workout data to Apple Health to help you track your fitness journey."

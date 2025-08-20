@@ -341,7 +341,7 @@ export default function ProgramSearchModal({
 
         {/* Program Header */}
         <View style={styles.programHeader}>
-          <Text style={styles.programName}>{program.name}</Text>
+          <Text style={styles.programName}>{program.name.replace(/\*\*/g, '')}</Text>
           <Text style={styles.programCreator}>by {program.creator}</Text>
         </View>
 
@@ -433,7 +433,6 @@ export default function ProgramSearchModal({
                 onChangeText={setSearchQuery}
                 placeholder="Search for workout programs (e.g., '5/3/1', 'beginner strength')"
                 onSubmit={searchPrograms}
-                containerStyle={styles.searchInputContainer}
               />
 
               <View style={styles.searchActions}>

@@ -252,32 +252,67 @@ class ContextAggregator {
   }
 
   /**
-   * Get health metrics from health service
+   * Get comprehensive health metrics from health service
    */
   async getHealthMetrics() {
     try {
+      console.log('[ContextAggregator] Getting health metrics...');
+      
       // Get today's summary
-      const todaySummary = await healthService.getTodaySummary();
+      const todaySummary = await healthService.getTodaysSummary();
       
       // Get weekly metrics
       const weekStart = new Date();
       weekStart.setDate(weekStart.getDate() - 7);
       
-      const weeklyMetrics = await healthService.getHealthMetrics(
-        weekStart.toISOString(),
-        new Date().toISOString(),
-        Object.values(healthService.dataTypes)
-      );
+      const weeklyMetrics = await healthService.getWeeklyAverages();
       
-      return {
-        today: todaySummary.data || {},
-        weekly: weeklyMetrics.data || {},
-        isConnected: healthService.isInitialized,
-        lastSync: healthService.lastSyncTime
+      // Get weight history
+      const weightHistory = await healthService.getRecentWeight(30);
+      
+      // Process and enrich health data
+      const processedMetrics = {
+        today: {
+          ...todaySummary,
+          activityLevel: this._assessActivityLevel(todaySummary),
+          caloriesBurnedLevel: this._assessCalorieLevel(todaySummary.calories),
+          stepGoalProgress: this._calculateStepProgress(todaySummary.steps)
+        },
+        weekly: {
+          ...weeklyMetrics,
+          consistencyScore: this._calculateHealthConsistency(weeklyMetrics),
+          improvementTrend: this._analyzeHealthTrend(weeklyMetrics)
+        },
+        weight: {
+          current: weightHistory[0] || null,
+          history: weightHistory,
+          trend: this._analyzeWeightTrend(weightHistory)
+        },
+        isConnected: healthService.isInitialized && healthService.isSyncEnabled,
+        lastSync: healthService.lastSyncTime,
+        dataQuality: todaySummary.dataQuality || 'unknown',
+        healthScore: this._calculateOverallHealthScore(todaySummary, weeklyMetrics)
       };
+      
+      console.log('[ContextAggregator] Health metrics processed:', {
+        isConnected: processedMetrics.isConnected,
+        todaySteps: processedMetrics.today.steps,
+        todayCalories: processedMetrics.today.calories,
+        healthScore: processedMetrics.healthScore
+      });
+      
+      return processedMetrics;
     } catch (error) {
       console.error('[ContextAggregator] Error getting health metrics:', error);
-      return { today: {}, weekly: {}, isConnected: false };
+      return { 
+        today: {}, 
+        weekly: {}, 
+        weight: { current: null, history: [], trend: 'stable' },
+        isConnected: false,
+        lastSync: null,
+        healthScore: 0,
+        error: error.message
+      };
     }
   }
 
@@ -490,7 +525,7 @@ class ContextAggregator {
   }
 
   /**
-   * Build the final context object for AI
+   * Build the final context object for AI with enhanced health integration
    */
   buildContext(programContext = null) {
     const context = {
@@ -500,11 +535,17 @@ class ContextAggregator {
       health: this.cache.healthMetrics,
       preferences: this.cache.exercisePreferences,
       performance: this.cache.performanceMetrics,
+      // Enhanced biometric integration
+      biometrics: this._buildComprehensiveBiometrics(),
+      // Health-based recommendations
+      healthInsights: this._generateHealthInsights(),
       metadata: {
-        contextVersion: '2.0',
+        contextVersion: '2.1',
         generatedAt: new Date().toISOString(),
         cacheAge: Date.now() - this.cache.lastUpdated,
-        hash: this.cache.contextHash
+        hash: this.cache.contextHash,
+        hasHealthData: Boolean(this.cache.healthMetrics?.isConnected),
+        hasBiometrics: Boolean(this.cache.userProfile?.age && this.cache.userProfile?.weight)
       }
     };
     
@@ -592,7 +633,7 @@ class ContextAggregator {
   }
 
   /**
-   * Generate insights from aggregated data
+   * Generate comprehensive insights from aggregated data including health metrics
    */
   generateInsights(context) {
     const insights = {
@@ -601,7 +642,9 @@ class ContextAggregator {
       strengths: [],
       weaknesses: [],
       trends: [],
-      risks: []
+      risks: [],
+      healthStatus: 'good', // excellent, good, fair, poor
+      recommendations: []
     };
     
     // Analyze training status
@@ -611,21 +654,84 @@ class ContextAggregator {
       insights.trainingStatus = 'detraining';
     }
     
-    // Analyze recovery
+    // Analyze recovery with health data
     if (context.performance?.recoveryScore < 50) {
       insights.risks.push('Poor recovery - consider rest days');
     }
     
-    // Analyze nutrition
+    // Health-based insights
+    if (context.health?.isConnected) {
+      const healthData = context.health;
+      
+      // Activity level analysis
+      if (healthData.today?.steps > 10000) {
+        insights.strengths.push('Excellent daily activity level');
+      } else if (healthData.today?.steps < 5000) {
+        insights.weaknesses.push('Low daily activity - increase NEAT');
+        insights.recommendations.push('Try to walk more throughout the day');
+      }
+      
+      // Sleep analysis
+      if (healthData.today?.sleep) {
+        if (healthData.today.sleep >= 7) {
+          insights.strengths.push('Good sleep duration');
+        } else {
+          insights.risks.push('Insufficient sleep affecting recovery');
+          insights.recommendations.push('Prioritize 7-9 hours of sleep');
+        }
+      }
+      
+      // Heart rate analysis
+      if (healthData.today?.heartRate?.resting) {
+        const rhr = healthData.today.heartRate.resting;
+        if (rhr < 60) {
+          insights.strengths.push('Excellent cardiovascular fitness');
+        } else if (rhr > 80) {
+          insights.recommendations.push('Focus on cardiovascular conditioning');
+        }
+      }
+      
+      // Overall health score
+      if (healthData.healthScore > 80) {
+        insights.healthStatus = 'excellent';
+      } else if (healthData.healthScore > 60) {
+        insights.healthStatus = 'good';
+      } else if (healthData.healthScore > 40) {
+        insights.healthStatus = 'fair';
+      } else {
+        insights.healthStatus = 'poor';
+        insights.risks.push('Health metrics suggest need for lifestyle changes');
+      }
+    }
+    
+    // Biometric insights
+    if (context.biometrics?.bmi) {
+      const bmi = context.biometrics.bmi;
+      const category = context.biometrics.bmiCategory;
+      
+      if (category === 'normal') {
+        insights.strengths.push('Healthy BMI range');
+      } else if (category === 'overweight') {
+        insights.recommendations.push('Consider incorporating more cardio and calorie management');
+      } else if (category === 'underweight') {
+        insights.recommendations.push('Focus on muscle building and adequate nutrition');
+      }
+    }
+    
+    // Nutrition analysis
     if (context.nutrition?.compliance > 0.8) {
       insights.strengths.push('Excellent nutrition compliance');
     } else if (context.nutrition?.compliance < 0.5) {
       insights.weaknesses.push('Nutrition needs improvement');
+      insights.recommendations.push('Focus on consistent meal planning and tracking');
     }
     
-    // Analyze volume progression
+    // Volume progression with health context
     if (context.performance?.volumeProgression > 1.1) {
       insights.trends.push('Volume increasing - good progression');
+      if (context.health?.today?.sleep < 7) {
+        insights.risks.push('Increasing volume with poor sleep - monitor recovery');
+      }
     } else if (context.performance?.volumeProgression < 0.9) {
       insights.trends.push('Volume decreasing - check recovery');
     }
@@ -1085,6 +1191,239 @@ class ContextAggregator {
     };
     
     AsyncStorage.removeItem('contextCache').catch(console.error);
+  }
+  
+  /**
+   * Build comprehensive biometrics data combining user profile and health data
+   */
+  _buildComprehensiveBiometrics() {
+    const profile = this.cache.userProfile || {};
+    const health = this.cache.healthMetrics || {};
+    
+    const biometrics = {
+      // Basic profile data
+      age: profile.age,
+      gender: profile.gender,
+      height: profile.height,
+      weight: profile.weight,
+      experienceLevel: profile.experienceLevel,
+      
+      // Health data integration
+      currentWeight: health.weight?.current?.value,
+      weightTrend: health.weight?.trend,
+      restingHeartRate: health.today?.heartRate?.resting,
+      averageHeartRate: health.today?.heartRate?.average,
+      
+      // Activity metrics
+      dailySteps: health.today?.steps,
+      dailyCalories: health.today?.calories,
+      activeMinutes: health.today?.activeMinutes,
+      sleepHours: health.today?.sleep,
+      
+      // Calculated metrics
+      bmi: this._calculateBMI(profile.height, profile.weight),
+      activityLevel: health.today?.activityLevel,
+      healthScore: health.healthScore,
+      
+      // Data quality indicators
+      hasHealthData: health.isConnected,
+      lastHealthSync: health.lastSync,
+      dataQuality: health.dataQuality
+    };
+    
+    // Remove undefined values
+    return Object.fromEntries(
+      Object.entries(biometrics).filter(([_, value]) => value !== undefined && value !== null)
+    );
+  }
+  
+  /**
+   * Generate health-based insights for AI context
+   */
+  _generateHealthInsights() {
+    const health = this.cache.healthMetrics || {};
+    const insights = [];
+    
+    if (!health.isConnected) {
+      insights.push('Health data not connected - recommendations based on profile only');
+      return insights;
+    }
+    
+    // Activity insights
+    if (health.today?.steps > 10000) {
+      insights.push('High daily activity - excellent cardiovascular base');
+    } else if (health.today?.steps < 5000) {
+      insights.push('Low daily activity - focus on increasing NEAT and cardio');
+    }
+    
+    // Sleep insights
+    if (health.today?.sleep < 6) {
+      insights.push('Poor sleep quality - may affect recovery and performance');
+    } else if (health.today?.sleep > 8) {
+      insights.push('Good sleep habits - optimal for recovery');
+    }
+    
+    // Heart rate insights
+    if (health.today?.heartRate?.resting < 60) {
+      insights.push('Low resting heart rate indicates good cardiovascular fitness');
+    } else if (health.today?.heartRate?.resting > 80) {
+      insights.push('Elevated resting heart rate - may benefit from cardio focus');
+    }
+    
+    // Weekly trends
+    if (health.weekly?.consistency > 0.8) {
+      insights.push('Consistent health metrics - good lifestyle habits');
+    } else if (health.weekly?.consistency < 0.5) {
+      insights.push('Inconsistent health patterns - focus on routine building');
+    }
+    
+    // Weight trends
+    if (health.weight?.trend === 'increasing' && health.weekly?.averageCalories > 300) {
+      insights.push('Weight increasing with high calorie burn - likely muscle gain');
+    } else if (health.weight?.trend === 'decreasing' && health.weekly?.averageCalories < 200) {
+      insights.push('Weight decreasing with low activity - may need nutrition review');
+    }
+    
+    return insights;
+  }
+  
+  /**
+   * Calculate BMI from height and weight
+   */
+  _calculateBMI(height, weight) {
+    if (!height || !weight) return null;
+    
+    const heightM = parseFloat(height) / 100; // Assume cm, convert to meters
+    const weightKg = parseFloat(weight); // Assume kg
+    
+    if (heightM > 0 && weightKg > 0) {
+      return Number((weightKg / (heightM * heightM)).toFixed(1));
+    }
+    
+    return null;
+  }
+  
+  /**
+   * Assess activity level from step count
+   */
+  _assessActivityLevel(todayData) {
+    if (!todayData?.steps) return 'unknown';
+    
+    const steps = todayData.steps;
+    if (steps > 12000) return 'very_high';
+    if (steps > 8000) return 'high';
+    if (steps > 5000) return 'moderate';
+    if (steps > 2000) return 'low';
+    return 'very_low';
+  }
+  
+  /**
+   * Assess calorie burn level
+   */
+  _assessCalorieLevel(calories) {
+    if (!calories) return 'unknown';
+    
+    if (calories > 500) return 'high';
+    if (calories > 300) return 'moderate';
+    if (calories > 150) return 'low';
+    return 'very_low';
+  }
+  
+  /**
+   * Calculate step goal progress
+   */
+  _calculateStepProgress(steps) {
+    if (!steps) return 0;
+    
+    const goal = 10000; // Standard step goal
+    return Math.min((steps / goal) * 100, 100);
+  }
+  
+  /**
+   * Calculate health consistency score
+   */
+  _calculateHealthConsistency(weeklyData) {
+    if (!weeklyData) return 0;
+    
+    // Simple consistency based on available metrics
+    return weeklyData.consistency || 0.7; // Default to moderate consistency
+  }
+  
+  /**
+   * Analyze health trend
+   */
+  _analyzeHealthTrend(weeklyData) {
+    if (!weeklyData) return 'stable';
+    
+    return weeklyData.trendDirection || 'stable';
+  }
+  
+  /**
+   * Analyze weight trend
+   */
+  _analyzeWeightTrend(weightHistory) {
+    if (!weightHistory || weightHistory.length < 2) return 'stable';
+    
+    const recent = weightHistory.slice(0, 3);
+    const older = weightHistory.slice(3, 6);
+    
+    if (recent.length === 0 || older.length === 0) return 'stable';
+    
+    const recentAvg = recent.reduce((sum, w) => sum + w.value, 0) / recent.length;
+    const olderAvg = older.reduce((sum, w) => sum + w.value, 0) / older.length;
+    
+    const change = recentAvg - olderAvg;
+    
+    if (change > 1) return 'increasing';
+    if (change < -1) return 'decreasing';
+    return 'stable';
+  }
+  
+  /**
+   * Calculate overall health score
+   */
+  _calculateOverallHealthScore(todayData, weeklyData) {
+    if (!todayData) return 0;
+    
+    let score = 0;
+    let maxScore = 0;
+    
+    // Steps (25 points)
+    maxScore += 25;
+    if (todayData.steps) {
+      score += Math.min((todayData.steps / 10000) * 25, 25);
+    }
+    
+    // Sleep (25 points)
+    maxScore += 25;
+    if (todayData.sleep) {
+      const sleepScore = todayData.sleep >= 7 ? 25 : (todayData.sleep / 7) * 25;
+      score += sleepScore;
+    }
+    
+    // Heart rate (20 points)
+    maxScore += 20;
+    if (todayData.heartRate?.resting) {
+      const rhr = todayData.heartRate.resting;
+      if (rhr < 60) score += 20;
+      else if (rhr < 70) score += 15;
+      else if (rhr < 80) score += 10;
+      else score += 5;
+    }
+    
+    // Activity calories (15 points)
+    maxScore += 15;
+    if (todayData.calories) {
+      score += Math.min((todayData.calories / 400) * 15, 15);
+    }
+    
+    // Consistency (15 points)
+    maxScore += 15;
+    if (weeklyData?.consistency) {
+      score += weeklyData.consistency * 15;
+    }
+    
+    return Math.round((score / maxScore) * 100);
   }
 }
 

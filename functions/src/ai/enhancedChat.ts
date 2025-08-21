@@ -47,7 +47,7 @@ export const enhancedChat = onRequest({
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash",
       generationConfig: {
         maxOutputTokens: 2048,
         temperature: 0.8,
@@ -57,10 +57,29 @@ export const enhancedChat = onRequest({
     });
 
     // Build conversation history for context
-    const conversationHistory = history.map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
+    // Filter out any assistant messages at the beginning to prevent consecutive model messages
+    let cleanHistory = history || [];
+    // Remove leading assistant messages
+    while (cleanHistory.length > 0 && cleanHistory[0].role === 'assistant') {
+      cleanHistory = cleanHistory.slice(1);
+    }
+    
+    // Ensure alternating user/model messages
+    const conversationHistory: any[] = [];
+    let lastRole: string | null = null;
+    
+    for (const msg of cleanHistory) {
+      const currentRole = msg.role === 'user' ? 'user' : 'model';
+      // Skip if we have consecutive messages with the same role
+      if (lastRole === currentRole) {
+        continue;
+      }
+      conversationHistory.push({
+        role: currentRole,
+        parts: [{ text: msg.content || '' }]
+      });
+      lastRole = currentRole;
+    }
 
     // Build context string from various sources
     let contextString = '';
@@ -96,12 +115,27 @@ Guidelines:
 - Use exercise science when explaining concepts
 - Keep responses concise but informative`;
 
-    // Add system instruction to the conversation
-    const fullHistory = [
-      { role: 'user', parts: [{ text: systemPrompt }] },
-      { role: 'model', parts: [{ text: 'Understood! I\'ll be Coach Alex and help with fitness guidance.' }] },
-      ...conversationHistory
-    ];
+    // Build full history ensuring no consecutive model messages
+    const fullHistory: any[] = [];
+    
+    // Add system prompt only if first message isn't from user or if no history
+    if (conversationHistory.length === 0 || conversationHistory[0].role !== 'user') {
+      fullHistory.push(
+        { role: 'user', parts: [{ text: systemPrompt }] },
+        { role: 'model', parts: [{ text: 'Understood! I\'ll be Coach Alex and help with fitness guidance.' }] }
+      );
+    }
+    
+    // Add conversation history
+    fullHistory.push(...conversationHistory);
+    
+    // If history ends with model message or is empty after system prompt, add current user message
+    if (fullHistory.length === 0 || fullHistory[fullHistory.length - 1].role === 'model') {
+      // Current message will be sent via sendMessage
+    } else if (fullHistory[fullHistory.length - 1].role === 'user') {
+      // Remove last user message if it exists (will be sent via sendMessage)
+      fullHistory.pop();
+    }
 
     // Generate response
     const chat = model.startChat({

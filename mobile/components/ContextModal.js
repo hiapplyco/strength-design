@@ -196,14 +196,6 @@ export default function ContextModal({
       textAlign: 'center',
       marginBottom: spacing?.sm || 8,
       lineHeight: 30,
-      // Subtle background for better readability
-      backgroundColor: isDarkMode 
-        ? 'rgba(0, 0, 0, 0.25)' 
-        : 'rgba(255, 255, 255, 0.45)',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 8,
-      overflow: 'hidden',
     },
     subtitle: {
       fontSize: typography?.fontSize?.md || 16,
@@ -211,14 +203,6 @@ export default function ContextModal({
       color: theme.textSecondary,
       textAlign: 'center',
       lineHeight: 22,
-      // Subtle background for better readability
-      backgroundColor: isDarkMode 
-        ? 'rgba(0, 0, 0, 0.2)' 
-        : 'rgba(255, 255, 255, 0.4)',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 6,
-      overflow: 'hidden',
     },
     benefitsContainer: {
       marginBottom: spacing?.xl || 32,
@@ -228,14 +212,6 @@ export default function ContextModal({
       fontWeight: typography?.fontWeight?.semibold || '600',
       color: theme.text,
       marginBottom: spacing?.md || 16,
-      // Subtle background for better readability
-      backgroundColor: isDarkMode 
-        ? 'rgba(0, 0, 0, 0.25)' 
-        : 'rgba(255, 255, 255, 0.45)',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 6,
-      overflow: 'hidden',
       alignSelf: 'flex-start',
     },
     benefitItem: {
@@ -253,14 +229,6 @@ export default function ContextModal({
       fontSize: typography?.fontSize?.sm || 14,
       color: theme.textSecondary,
       lineHeight: 20,
-      // Subtle background for better readability
-      backgroundColor: isDarkMode 
-        ? 'rgba(0, 0, 0, 0.2)' 
-        : 'rgba(255, 255, 255, 0.4)',
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 5,
-      overflow: 'hidden',
     },
     actionsContainer: {
       gap: spacing?.sm || 12,
@@ -668,20 +636,20 @@ export default function ContextModal({
 
             {/* Action Buttons */}
             <View style={styles.actionsContainer}>
-              {/* Primary Action - Set Up Profile */}
+              {/* Primary Action - Update Profile */}
               <TouchableOpacity
                 style={[styles.actionButton, styles.primaryButton]}
                 onPress={() => handleNavigation('Profile')}
                 activeOpacity={0.8}
-                accessibilityLabel="Set up profile to get personalized workouts"
+                accessibilityLabel="Update profile to get personalized workouts"
                 accessibilityRole="button"
-                accessibilityHint="Navigate to profile screen to add your fitness information"
+                accessibilityHint="Navigate to profile screen to update your fitness information"
               >
                 <Text style={[styles.buttonText, styles.primaryButtonText]}>
-                  Set Up Profile
+                  Update Profile
                 </Text>
                 <Text style={[styles.buttonDescription, { color: 'rgba(255, 255, 255, 0.8)' }]}>
-                  Add your fitness level and goals
+                  Modify your fitness level and goals
                 </Text>
               </TouchableOpacity>
 
@@ -699,6 +667,30 @@ export default function ContextModal({
                 </Text>
                 <Text style={styles.buttonDescription}>
                   Discover what you like
+                </Text>
+              </TouchableOpacity>
+
+              {/* Start AI Workout Button - Primary CTA */}
+              <TouchableOpacity
+                style={[styles.actionButton, styles.primaryButton, { 
+                  backgroundColor: '#FF6B35',
+                  borderColor: 'rgba(255, 107, 53, 0.3)',
+                  marginBottom: 12,
+                }]}
+                onPress={() => handleNavigation('Generator')}
+                activeOpacity={0.8}
+                accessibilityLabel="Start AI workout generation"
+                accessibilityRole="button"
+                accessibilityHint="Navigate to AI-powered workout generator"
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="sparkles" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                  <Text style={[styles.buttonText, styles.primaryButtonText]}>
+                    Start AI Workout
+                  </Text>
+                </View>
+                <Text style={[styles.buttonDescription, { color: 'rgba(255, 255, 255, 0.9)' }]}>
+                  Create personalized workout with AI
                 </Text>
               </TouchableOpacity>
 

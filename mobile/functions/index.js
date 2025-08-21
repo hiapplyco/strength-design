@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const cors = require('cors')({ origin: true });
+const fetch = require('node-fetch');
 
 // Import additional functions
 const { streamingChatEnhanced: streamingChatEnhancedFunc, generateWorkout: generateWorkoutFunc } = require('./streamingChat');
@@ -10,12 +11,12 @@ const genAI = new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY || 'AIzaSyCnQPJPLmPCcnEXNNTBSWDCTKLY3nFxECw'
 );
 
+// Perplexity API configuration
+const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY || functions.config().perplexity?.api_key;
+const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
+
 // PRODUCTION: Real streaming chat with Gemini 2.5 Flash
 exports.streamingChatEnhanced = functions
-  .runWith({ 
-    timeoutSeconds: 540,
-    memory: '1GB' 
-  })
   .https.onRequest((req, res) => {
     cors(req, res, async () => {
       try {
@@ -120,10 +121,6 @@ User Query: ${message}`;
 
 // PRODUCTION: Generate structured workout with Gemini
 exports.generateWorkout = functions
-  .runWith({ 
-    timeoutSeconds: 300,
-    memory: '1GB' 
-  })
   .https.onCall(async (data, context) => {
     try {
       const { preferences, goals, experience, equipment, duration } = data;
@@ -251,10 +248,6 @@ Make the workout challenging but achievable for the specified experience level.`
 
 // PRODUCTION: Chat with context and history
 exports.chatWithGemini = functions
-  .runWith({ 
-    timeoutSeconds: 300,
-    memory: '1GB' 
-  })
   .https.onCall(async (data, context) => {
     try {
       const { message, history = [], userContext = {} } = data;
@@ -368,3 +361,220 @@ exports.getExerciseCategories = functions.https.onCall(async (data, context) => 
     );
   }
 });
+
+// PRODUCTION: Search for workout programs using Perplexity API
+exports.searchPrograms = functions
+  .https.onCall(async (data, context) => {
+    try {
+      const { query, searchType = 'general', focus = [], difficulty, duration, equipment = [] } = data;
+      
+      if (!query || typeof query !== 'string') {
+        throw new functions.https.HttpsError('invalid-argument', 'Query is required');
+      }
+
+      // Check if Perplexity API key is configured
+      if (!PERPLEXITY_API_KEY) {
+        console.error('Perplexity API key not configured');
+        throw new functions.https.HttpsError(
+          'failed-precondition',
+          'Perplexity API key is not configured. Please contact support to enable program search.'
+        );
+      }
+
+      // Build the search prompt for Perplexity
+      const searchPrompt = buildProgramSearchPrompt(query, { searchType, focus, difficulty, duration, equipment });
+      
+      // Call Perplexity API
+      const response = await fetch(PERPLEXITY_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'sonar',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a fitness research expert specializing in evidence-based workout programs. Search for and analyze professional workout programs from credible sources. Focus on programs from certified trainers, published athletes, academic research, and established fitness organizations. For each program found, provide: Program Name, Creator/Author with credentials, Target Goals, Experience Level, Duration, Key Principles, and Source/Reference.`
+            },
+            {
+              role: 'user',
+              content: searchPrompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 2000
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Perplexity API error:', response.status, errorData);
+        
+        // Throw specific errors for API failures
+        if (response.status === 401) {
+          throw new functions.https.HttpsError(
+            'unauthenticated',
+            'Invalid Perplexity API key. Please contact support.'
+          );
+        } else if (response.status === 429) {
+          throw new functions.https.HttpsError(
+            'resource-exhausted',
+            'Search rate limit exceeded. Please try again in a few minutes.'
+          );
+        } else {
+          throw new functions.https.HttpsError(
+            'unavailable',
+            `Search service unavailable (${response.status}). Please try again later.`
+          );
+        }
+      }
+
+      const apiData = await response.json();
+      const content = apiData.choices?.[0]?.message?.content || '';
+      
+      // Parse the response into structured program data
+      const programs = parseProgramResponse(content, query);
+      
+      return {
+        programs: programs.slice(0, 8),
+        summary: `Found ${programs.length} evidence-based programs for "${query}"`,
+        relatedQueries: generateRelatedQueries(query),
+        searchTime: new Date().toISOString(),
+        source: 'perplexity'
+      };
+      
+    } catch (error) {
+      console.error('Search programs error:', error);
+      
+      // Re-throw if it's already an HttpsError
+      if (error.code && error.message) {
+        throw error;
+      }
+      
+      // Otherwise throw a generic error
+      throw new functions.https.HttpsError(
+        'internal',
+        'Failed to search programs. Please try again later.'
+      );
+    }
+  });
+
+// Helper function to build search prompt
+function buildProgramSearchPrompt(query, options) {
+  const { searchType, focus, difficulty, duration, equipment } = options;
+  
+  let prompt = `Search for evidence-based workout programs matching: "${query}"`;
+  
+  if (difficulty) prompt += `\nExperience Level: ${difficulty}`;
+  if (focus && focus.length > 0) prompt += `\nFocus Areas: ${focus.join(', ')}`;
+  if (duration) prompt += `\nProgram Duration: ${duration}`;
+  if (equipment && equipment.length > 0) prompt += `\nEquipment: ${equipment.join(', ')}`;
+  
+  prompt += `\n\nFind complete, structured programs with clear progression and methodology. Include programs from credible sources with proven track records. Provide detailed information about each program including creator credentials, structure, and scientific backing.`;
+  
+  return prompt;
+}
+
+// Helper function to parse Perplexity response
+function parseProgramResponse(content, query) {
+  const programs = [];
+  
+  try {
+    // Split content into sections (programs are usually separated by line breaks or numbers)
+    const sections = content.split(/\n\n|\d+\./);
+    
+    sections.forEach(section => {
+      if (section.trim().length > 50) {
+        const program = extractProgramInfo(section);
+        if (program.name && program.name !== 'Unknown Program') {
+          programs.push(program);
+        }
+      }
+    });
+    
+    // If parsing fails, create a basic program from the content
+    if (programs.length === 0 && content.length > 100) {
+      programs.push({
+        name: `${query} Program`,
+        description: content.substring(0, 200) + '...',
+        difficulty: 'intermediate',
+        duration: '8-12 weeks',
+        focus: ['general fitness'],
+        equipment: ['gym equipment'],
+        overview: content,
+        structure: 'See program details',
+        benefits: ['Evidence-based approach'],
+        source: 'Perplexity Search',
+        popularity: 3
+      });
+    }
+  } catch (error) {
+    console.error('Error parsing program response:', error);
+  }
+  
+  return programs;
+}
+
+// Helper to extract program information from text
+function extractProgramInfo(text) {
+  const program = {
+    name: extractField(text, ['Program Name:', 'Name:', 'Program:']) || 'Fitness Program',
+    description: extractField(text, ['Description:', 'Overview:', 'About:']) || text.substring(0, 150),
+    difficulty: extractField(text, ['Level:', 'Experience:', 'Difficulty:']) || 'intermediate',
+    duration: extractField(text, ['Duration:', 'Timeline:', 'Length:']) || '8-12 weeks',
+    focus: extractList(text, ['Goals:', 'Focus:', 'Targets:']) || ['general fitness'],
+    equipment: extractList(text, ['Equipment:', 'Required:', 'Needs:']) || ['gym equipment'],
+    creator: extractField(text, ['Creator:', 'Author:', 'By:']) || 'Various',
+    source: extractField(text, ['Source:', 'Reference:', 'From:']) || 'Research',
+    structure: extractField(text, ['Structure:', 'Schedule:', 'Split:']) || '3-4 days per week',
+    benefits: extractList(text, ['Benefits:', 'Advantages:', 'Pros:']) || ['Structured progression'],
+    popularity: 4
+  };
+  
+  program.overview = text.substring(0, 500);
+  
+  return program;
+}
+
+// Extract a field value from text
+function extractField(text, patterns) {
+  for (const pattern of patterns) {
+    const regex = new RegExp(`${pattern}\\s*([^\\n]+)`, 'i');
+    const match = text.match(regex);
+    if (match) return match[1].trim();
+  }
+  return null;
+}
+
+// Extract a list from text
+function extractList(text, patterns) {
+  for (const pattern of patterns) {
+    const regex = new RegExp(`${pattern}\\s*([^\\n]+)`, 'i');
+    const match = text.match(regex);
+    if (match) {
+      return match[1].split(/[,;]/).map(item => item.trim()).filter(Boolean);
+    }
+  }
+  return null;
+}
+
+// Generate related search queries
+function generateRelatedQueries(query) {
+  const base = ['strength training', 'muscle building', 'beginner workouts', 'home workouts', 'HIIT programs'];
+  const queryLower = query.toLowerCase();
+  
+  if (queryLower.includes('strength')) {
+    return ['powerlifting programs', '5/3/1 program', 'Starting Strength', 'StrongLifts 5x5', 'linear progression'];
+  } else if (queryLower.includes('muscle') || queryLower.includes('hypertrophy')) {
+    return ['bodybuilding programs', 'PPL routine', 'upper lower split', 'high volume training', 'German Volume Training'];
+  } else if (queryLower.includes('beginner')) {
+    return ['starting strength', 'stronglifts', 'full body workout', 'gym basics', 'novice programs'];
+  } else if (queryLower.includes('home')) {
+    return ['bodyweight training', 'calisthenics', 'minimal equipment', 'resistance bands', 'dumbbell only'];
+  }
+  
+  return base.slice(0, 5);
+}
+

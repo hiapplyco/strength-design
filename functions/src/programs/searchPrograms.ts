@@ -38,7 +38,8 @@ export const searchPrograms = onCall<SearchProgramsRequest>(
     cors: true,
     enforceAppCheck: false,
     memory: '512MiB',
-    timeoutSeconds: 60
+    timeoutSeconds: 60,
+    secrets: ['PERPLEXITY_API_KEY']
   },
   async (request): Promise<SearchProgramsResponse> => {
     try {
@@ -52,61 +53,109 @@ export const searchPrograms = onCall<SearchProgramsRequest>(
       const apiKey = process.env.PERPLEXITY_API_KEY;
 
       if (!apiKey) {
-        logger.warn('Perplexity API key not configured, using fallback simulation');
-        // Return simulated results instead of throwing error
-        return simulateProgramSearch(query, searchType, focus, difficulty, duration, equipment);
+        logger.error('Perplexity API key not configured');
+        throw new HttpsError(
+          'failed-precondition',
+          'Perplexity API key is not configured. Please contact support to enable program search.'
+        );
       }
 
-      // Build the search prompt
-      const systemPrompt = `You are a fitness program expert. Search for and provide detailed, accurate information about workout programs, their structure, benefits, and implementation. Focus on evidence-based programs with proven results.`;
+      // Build the search prompt for structured results
+      const systemPrompt = `You are a fitness program expert providing comprehensive, well-structured information about workout programs. 
+      
+      FORMAT YOUR RESPONSE WITH CLEAR SECTIONS:
+      - Use "## Program Name" for each program
+      - Use bullet points for lists
+      - Include specific details about sets, reps, and progression
+      - Cite sources when possible
+      - Focus on evidence-based, proven programs`;
 
-      let userPrompt = `Search for: ${query}\n\n`;
+      let userPrompt = `Search for fitness programs: ${query}\n\n`;
       
       if (searchType === 'specific') {
-        userPrompt += `Provide detailed information about this specific program.\n`;
+        userPrompt += `Focus: Detailed information about this specific program.\n`;
       } else if (searchType === 'comparison') {
-        userPrompt += `Compare different programs that match this query.\n`;
+        userPrompt += `Focus: Compare different programs that match this query.\n`;
       }
 
       if (focus && focus.length > 0) {
-        userPrompt += `Focus areas: ${focus.join(', ')}\n`;
+        userPrompt += `Training focus: ${focus.join(', ')}\n`;
       }
       
       if (difficulty) {
-        userPrompt += `Difficulty level: ${difficulty}\n`;
+        userPrompt += `Experience level: ${difficulty}\n`;
       }
       
       if (duration) {
-        userPrompt += `Program duration: ${duration}\n`;
+        userPrompt += `Time commitment: ${duration}\n`;
       }
       
       if (equipment && equipment.length > 0) {
-        userPrompt += `Available equipment: ${equipment.join(', ')}\n`;
+        userPrompt += `Equipment available: ${equipment.join(', ')}\n`;
       }
 
-      userPrompt += `\nProvide structured information including:
-      1. Program name and description
-      2. Difficulty level and duration
-      3. Focus areas and required equipment
-      4. Program structure and progression
-      5. Benefits and considerations
-      6. Who it's best suited for`;
+      userPrompt += `\nFor each program found, provide:
 
-      // Call Perplexity API
+## [Program Name]
+
+**Overview:** Brief description (2-3 sentences)
+
+**Details:**
+- Difficulty: [beginner/intermediate/advanced]
+- Duration: [weeks/months]
+- Frequency: [days per week]
+- Focus: [strength/hypertrophy/powerlifting/etc]
+- Equipment: [required equipment]
+
+**Structure:**
+- Specific workout split (e.g., Day 1: Squat/Bench/Row)
+- Set and rep schemes
+- Progression method
+
+**Benefits:**
+- Key advantages (3-4 bullet points)
+
+**Considerations:**
+- Important notes or limitations
+
+**Best For:**
+- Target audience
+
+Include 3-5 relevant programs with detailed information.`;
+
+      // Call Perplexity Sonar API with the latest model for best results
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.1-sonar-small-128k-online',
+          model: 'sonar-pro', // Using sonar-pro for best quality search results
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ],
           temperature: 0.7,
-          max_tokens: 2000,
+          max_tokens: 4000, // Increased for more comprehensive results
+          return_citations: true, // Get source citations
+          search_recency_filter: 'year', // Focus on recent content from past year
+          // Add search domain filter for fitness-related sources
+          search_domain_filter: [
+            'stronglifts.com',
+            'startingstrength.com', 
+            'bodybuilding.com',
+            'exrx.net',
+            't-nation.com',
+            'elitefts.com',
+            'jimwendler.com',
+            'reddit.com/r/fitness',
+            'reddit.com/r/powerlifting',
+            'reddit.com/r/bodybuilding',
+            'athleanx.com',
+            'muscleandstrength.com'
+          ]
         }),
       });
 
@@ -153,190 +202,160 @@ export const searchPrograms = onCall<SearchProgramsRequest>(
  * Parse Perplexity response to extract structured program information
  */
 function parsePrograms(content: string): SearchProgramsResponse['programs'] {
-  // This is a simplified parser - in production, use more sophisticated parsing
   const programs: SearchProgramsResponse['programs'] = [];
   
-  // For now, return sample data - replace with actual parsing logic
-  if (content.toLowerCase().includes('starting strength') || content.toLowerCase().includes('strength')) {
-    programs.push({
-      name: 'Starting Strength',
-      description: 'A novice barbell training program focused on fundamental compound movements',
-      difficulty: 'beginner',
-      duration: '3-6 months',
-      focus: ['strength', 'powerlifting', 'compound movements'],
-      equipment: ['barbell', 'squat rack', 'bench', 'plates'],
-      overview: 'Starting Strength is a strength training program created by Mark Rippetoe.',
-      structure: '3 days per week, alternating A/B workouts with squats, deadlifts, bench press, overhead press, and power cleans',
-      benefits: [
-        'Rapid strength gains for beginners',
-        'Focus on proper form and technique',
-        'Simple and effective programming',
-        'Full body development'
-      ],
-      considerations: [
-        'May lack volume for hypertrophy',
-        'Limited accessory work',
-        'Requires proper coaching for form'
-      ],
-      source: 'Mark Rippetoe',
-      popularity: 95
-    });
+  try {
+    // Split by program headers (## Program Name pattern)
+    const programSections = content.split(/##\s+/).filter(s => s.trim().length > 0);
+    
+    for (const section of programSections) {
+      if (section.trim().length < 50) continue; // Skip short sections
+      
+      // Extract program name from the first line
+      const lines = section.split('\n');
+      const name = lines[0].trim().replace(/[*_#]/g, '');
+      if (!name || name.length < 2) continue;
+      
+      // Parse markdown sections
+      const sectionText = lines.slice(1).join('\n');
+      
+      // Extract overview
+      const overviewMatch = sectionText.match(/\*\*Overview:\*\*\s*([^\n]+)/i);
+      const overview = overviewMatch?.[1]?.trim() || '';
+      
+      // Extract details section
+      const detailsMatch = sectionText.match(/\*\*Details:\*\*([^*]*?)(?=\*\*|$)/si);
+      const detailsText = detailsMatch?.[1] || '';
+      
+      // Parse details
+      const difficultyMatch = detailsText.match(/Difficulty:\s*([^\n]+)/i);
+      const difficulty = difficultyMatch?.[1]?.trim().toLowerCase() || 'intermediate';
+      
+      const durationMatch = detailsText.match(/Duration:\s*([^\n]+)/i);
+      const duration = durationMatch?.[1]?.trim() || '8-12 weeks';
+      
+      const frequencyMatch = detailsText.match(/Frequency:\s*([^\n]+)/i);
+      const frequency = frequencyMatch?.[1]?.trim() || '3-4 days per week';
+      
+      const focusMatch = detailsText.match(/Focus:\s*([^\n]+)/i);
+      const focusText = focusMatch?.[1] || 'general fitness';
+      const focus = focusText.split(/[,;\/]/).map(f => f.trim().toLowerCase()).filter(f => f.length > 0);
+      
+      const equipmentMatch = detailsText.match(/Equipment:\s*([^\n]+)/i);
+      const equipmentText = equipmentMatch?.[1] || 'gym equipment';
+      const equipment = equipmentText.split(/[,;\/]/).map(e => e.trim().toLowerCase()).filter(e => e.length > 0);
+      
+      // Extract structure
+      const structureMatch = sectionText.match(/\*\*Structure:\*\*([^*]*?)(?=\*\*|$)/si);
+      const structureText = structureMatch?.[1] || '';
+      const structureLines = structureText.split('\n')
+        .map(l => l.replace(/^[-•*]\s*/, '').trim())
+        .filter(l => l.length > 0)
+        .join('; ');
+      
+      // Extract benefits
+      const benefitsMatch = sectionText.match(/\*\*Benefits:\*\*([^*]*?)(?=\*\*|$)/si);
+      const benefitsText = benefitsMatch?.[1] || '';
+      const benefits = benefitsText.split('\n')
+        .map(l => l.replace(/^[-•*]\s*/, '').trim())
+        .filter(l => l.length > 5 && l.length < 200)
+        .slice(0, 5);
+      
+      // Extract considerations
+      const considerationsMatch = sectionText.match(/\*\*Considerations:\*\*([^*]*?)(?=\*\*|$)/si);
+      const considerationsText = considerationsMatch?.[1] || '';
+      const considerations = considerationsText.split('\n')
+        .map(l => l.replace(/^[-•*]\s*/, '').trim())
+        .filter(l => l.length > 5 && l.length < 200)
+        .slice(0, 3);
+      
+      // Extract best for
+      const bestForMatch = sectionText.match(/\*\*Best For:\*\*\s*([^\n*]+)/i);
+      const bestFor = bestForMatch?.[1]?.trim() || '';
+      
+      // Calculate popularity based on common program names and keywords
+      const popularPrograms = /stronglifts|starting strength|5\/3\/1|push pull legs|ppl|upper lower|phul|phat|gzcl|nsuns/gi;
+      const isPopular = popularPrograms.test(name);
+      const popularityKeywords = /popular|recommended|proven|effective|widely|best|top/gi;
+      const popularityMatches = sectionText.match(popularityKeywords);
+      const popularity = Math.min(95, (isPopular ? 85 : 70) + (popularityMatches?.length || 0) * 3);
+      
+      // Build description combining overview and best for
+      const description = overview || `${name} - ${bestFor || 'Structured workout program'}`.substring(0, 150);
+      
+      programs.push({
+        name,
+        description,
+        difficulty: difficulty as 'beginner' | 'intermediate' | 'advanced',
+        duration: `${duration}${frequency ? ` (${frequency})` : ''}`,
+        focus: focus.length > 0 ? focus : ['general fitness'],
+        equipment: equipment.length > 0 ? equipment : ['gym equipment'],
+        overview: overview || description,
+        structure: structureLines || 'Structured progressive overload',
+        benefits: benefits.length > 0 ? benefits : ['Progressive strength gains', 'Structured approach'],
+        considerations: considerations.length > 0 ? considerations : ['Requires consistency and commitment'],
+        source: 'Perplexity Sonar Pro',
+        popularity
+      });
+      
+      // Limit to 10 programs max
+      if (programs.length >= 10) break;
+    }
+    
+    // Fallback: If no programs parsed with ## headers, try older parsing method
+    if (programs.length === 0) {
+      // Try numbered list format (1. Program Name)
+      const numberedSections = content.split(/\n\d+\.\s+/).filter(s => s.trim().length > 50);
+      
+      for (const section of numberedSections.slice(0, 5)) {
+        const lines = section.split('\n');
+        const firstLine = lines[0].trim();
+        if (!firstLine) continue;
+        
+        // Extract name from first line or bold text
+        const nameMatch = firstLine.match(/^([^:.\n]{3,50})|(?:\*\*|__)([^*_]+)(?:\*\*|__)/);
+        const name = (nameMatch?.[1] || nameMatch?.[2])?.trim();
+        if (!name) continue;
+        
+        programs.push({
+          name,
+          description: section.substring(0, 150).replace(/\n/g, ' ').trim(),
+          difficulty: 'intermediate',
+          duration: '8-12 weeks',
+          focus: ['general fitness'],
+          equipment: ['gym equipment'],
+          overview: section.substring(0, 200).replace(/\n/g, ' ').trim(),
+          structure: 'Progressive overload training',
+          benefits: ['Structured progression', 'Evidence-based approach'],
+          considerations: ['Requires consistency'],
+          source: 'Perplexity Search',
+          popularity: 75
+        });
+      }
+    }
+    
+    // Final fallback if still no programs
+    if (programs.length === 0 && content.length > 100) {
+      programs.push({
+        name: 'Search Results',
+        description: 'Programs matching your search criteria',
+        difficulty: 'intermediate',
+        duration: 'Varies',
+        focus: ['custom'],
+        equipment: ['varies'],
+        overview: content.substring(0, 200).replace(/\n/g, ' ').trim(),
+        structure: 'Based on your specific goals',
+        benefits: ['Tailored to your needs', 'Flexible approach'],
+        considerations: ['Review programs carefully'],
+        source: 'Perplexity AI',
+        popularity: 70
+      });
+    }
+  } catch (error) {
+    logger.error('Error parsing programs:', error);
   }
-
-  if (content.toLowerCase().includes('5/3/1') || content.toLowerCase().includes('wendler')) {
-    programs.push({
-      name: '5/3/1',
-      description: 'An intermediate/advanced strength program with customizable assistance work',
-      difficulty: 'intermediate',
-      duration: 'Ongoing cycles',
-      focus: ['strength', 'powerlifting', 'customizable'],
-      equipment: ['barbell', 'dumbbells', 'various'],
-      overview: '5/3/1 is a strength training program created by Jim Wendler.',
-      structure: '4 days per week, focusing on squat, bench, deadlift, and overhead press with percentage-based progression',
-      benefits: [
-        'Sustainable long-term progression',
-        'Highly customizable',
-        'Prevents burnout with deload weeks',
-        'Proven track record'
-      ],
-      considerations: [
-        'Requires understanding of training max',
-        'May progress slowly for beginners',
-        'Multiple variations can be confusing'
-      ],
-      source: 'Jim Wendler',
-      popularity: 90
-    });
-  }
-
+  
   return programs;
-}
-
-/**
- * Simulate program search when API key is not available
- */
-function simulateProgramSearch(
-  query: string,
-  searchType: string,
-  focus: string[],
-  difficulty?: string,
-  duration?: string,
-  equipment?: string[]
-): SearchProgramsResponse {
-  const programs: SearchProgramsResponse['programs'] = [];
-  const lowerQuery = query.toLowerCase();
-
-  // Yoga programs
-  if (lowerQuery.includes('yoga') || lowerQuery.includes('yogi')) {
-    programs.push({
-      name: 'Inverted Yoga Mastery',
-      description: 'Progressive program for mastering yoga inversions safely',
-      difficulty: difficulty || 'intermediate',
-      duration: duration || '12 weeks',
-      focus: focus.length > 0 ? focus : ['flexibility', 'balance', 'core strength'],
-      equipment: equipment && equipment.length > 0 ? equipment : ['yoga mat', 'yoga blocks', 'wall'],
-      overview: 'A comprehensive program designed to build the strength, flexibility, and technique needed for yoga inversions including headstands, handstands, and forearm stands.',
-      structure: '5 days per week: 3 inversion practice days, 2 strength/flexibility days',
-      benefits: [
-        'Improved balance and body awareness',
-        'Increased core and upper body strength',
-        'Enhanced circulation and lymphatic drainage',
-        'Mental clarity and focus development'
-      ],
-      considerations: [
-        'Requires consistent practice',
-        'Not recommended for neck/back injuries',
-        'Wall space needed for practice'
-      ],
-      source: 'Yoga Alliance Certified Program',
-      popularity: 85
-    });
-
-    programs.push({
-      name: 'Yin Yoga for Flexibility',
-      description: 'Deep stretching and mindfulness practice',
-      difficulty: 'beginner',
-      duration: '8 weeks',
-      focus: ['flexibility', 'mindfulness', 'recovery'],
-      equipment: ['yoga mat', 'bolster', 'yoga blocks'],
-      overview: 'Yin yoga focuses on long-held poses to target deep connective tissues and improve flexibility.',
-      structure: '3-4 sessions per week, 60-90 minutes each',
-      benefits: [
-        'Increased flexibility and range of motion',
-        'Stress reduction and mental calm',
-        'Improved joint health',
-        'Better recovery from intense workouts'
-      ],
-      considerations: [
-        'Requires patience for long holds',
-        'May feel intense for beginners',
-        'Not a cardiovascular workout'
-      ],
-      source: 'Traditional Yin Yoga Practice',
-      popularity: 75
-    });
-  }
-
-  // Strength programs
-  if (lowerQuery.includes('strength') || lowerQuery.includes('strong')) {
-    programs.push({
-      name: 'Starting Strength',
-      description: 'Novice barbell training program',
-      difficulty: 'beginner',
-      duration: '3-6 months',
-      focus: ['strength', 'powerlifting', 'compound movements'],
-      equipment: ['barbell', 'squat rack', 'bench', 'plates'],
-      overview: 'Mark Rippetoe\'s proven program for building foundational strength.',
-      structure: '3 days per week, alternating A/B workouts',
-      benefits: [
-        'Rapid strength gains for beginners',
-        'Focus on proper form',
-        'Simple progression model',
-        'Full body development'
-      ],
-      considerations: [
-        'Limited exercise variety',
-        'Requires gym access',
-        'Form coaching recommended'
-      ],
-      source: 'Mark Rippetoe',
-      popularity: 95
-    });
-  }
-
-  // Default programs if no specific match
-  if (programs.length === 0) {
-    programs.push({
-      name: 'General Fitness Program',
-      description: 'Balanced program for overall fitness improvement',
-      difficulty: difficulty || 'intermediate',
-      duration: duration || '8 weeks',
-      focus: focus.length > 0 ? focus : ['general fitness', 'health'],
-      equipment: equipment && equipment.length > 0 ? equipment : ['basic equipment'],
-      overview: 'A well-rounded program combining strength, cardio, and flexibility work.',
-      structure: '4-5 days per week with varied training modalities',
-      benefits: [
-        'Improved overall fitness',
-        'Better health markers',
-        'Sustainable long-term',
-        'Adaptable to different goals'
-      ],
-      considerations: [
-        'Requires consistency',
-        'May need modification based on individual needs',
-        'Progress varies by individual'
-      ],
-      source: 'Evidence-based fitness principles',
-      popularity: 70
-    });
-  }
-
-  return {
-    programs,
-    summary: `Found ${programs.length} programs matching "${query}"`,
-    relatedQueries: generateRelatedQueries(query, focus, difficulty),
-    searchTime: new Date().toISOString()
-  };
 }
 
 /**

@@ -1,10 +1,10 @@
 /**
  * Program Search Service
  * Integrates with Firebase Functions and Perplexity API for fitness program search
- * Provides comprehensive search and management of workout programs and training methodologies
+ * NO FALLBACKS - Live API only
  */
 
-import { functions } from '../config/firebase.js';
+import { functions } from '../firebaseConfig';
 import { httpsCallable } from 'firebase/functions';
 
 class ProgramSearchService {
@@ -22,6 +22,7 @@ class ProgramSearchService {
 
   /**
    * Search fitness programs using Firebase Function with Perplexity API
+   * NO FALLBACK - Will throw error if API fails
    */
   async searchPrograms(query, options = {}) {
     try {
@@ -43,24 +44,66 @@ class ProgramSearchService {
 
       console.log('🔍 Searching programs:', { query, options });
 
-      // Call the real Firebase Function
-      let results;
-      try {
-        const result = await this.searchProgramsFunction({ 
-          query, 
-          searchType, 
-          focus, 
-          difficulty, 
-          duration, 
-          equipment 
-        });
+      // Call the real Firebase Function - NO FALLBACK
+      const result = await this.searchProgramsFunction({ 
+        query, 
+        searchType, 
+        focus, 
+        difficulty, 
+        duration, 
+        equipment 
+      });
+      
+      const results = result.data;
+      console.log('✅ Firebase Function response:', results);
+      
+      // Enrich program data to ensure comprehensive information
+      if (results.programs && Array.isArray(results.programs)) {
+        results.programs = results.programs.map(program => ({
+          // Basic program info
+          name: program.name || 'Unknown Program',
+          creator: program.creator || program.source || 'Unknown',
+          description: program.description || program.overview || program.methodology || '',
+          
+          // Program characteristics
+          focus: Array.isArray(program.focus) ? program.focus : (program.focus ? [program.focus] : ['General Fitness']),
+          difficulty: program.difficulty || program.experienceLevel || 'Beginner',
+          duration: program.duration || 'Variable',
+          popularity: program.popularity || program.credibilityScore || 85,
+          source: program.source || 'Perplexity Search',
+          
+          // Detailed program structure
+          exercises: program.exercises || program.workouts || program.structure || [],
+          equipment: Array.isArray(program.equipment) ? program.equipment : (program.equipment ? [program.equipment] : ['Basic gym equipment']),
+          schedule: program.schedule || program.frequency || '3-4 days per week',
+          
+          // Program methodology and principles
+          methodology: program.methodology || program.approach || program.principles || '',
+          goals: Array.isArray(program.goals) ? program.goals : (program.goals ? [program.goals] : program.focus || ['General Fitness']),
+          principles: program.principles || program.keyPoints || [],
+          
+          // Additional context
+          overview: program.overview || program.description || '',
+          structure: program.structure || program.workouts || program.exercises || [],
+          experienceLevel: program.experienceLevel || program.difficulty || 'Beginner',
+          
+          // Keep original data as well
+          ...program,
+          
+          // Metadata
+          enrichedAt: new Date().toISOString(),
+          searchQuery: query,
+          searchOptions: options
+        }));
         
-        results = result.data;
-        console.log('✅ Firebase Function response:', results);
-      } catch (firebaseError) {
-        console.warn('🔄 Firebase Function failed, falling back to simulation:', firebaseError);
-        // Fall back to simulation if Firebase Function fails
-        results = await this.simulateFirebaseFunction(query, options);
+        console.log('📋 Enriched program data:', results.programs.map(p => ({
+          name: p.name,
+          hasExercises: Array.isArray(p.exercises) && p.exercises.length > 0,
+          hasStructure: Array.isArray(p.structure) && p.structure.length > 0,
+          hasMethodology: Boolean(p.methodology),
+          equipmentCount: Array.isArray(p.equipment) ? p.equipment.length : 0,
+          goalsCount: Array.isArray(p.goals) ? p.goals.length : 0
+        })));
       }
       
       // Cache results
@@ -69,235 +112,47 @@ class ProgramSearchService {
       // Add to search history
       this.addToSearchHistory(query, results.programs.length);
 
-      console.log(`✅ Found ${results.programs.length} programs for "${query}"`);
+      console.log(`✅ Found ${results.programs.length} enriched programs for "${query}"`);
       return results;
 
     } catch (error) {
       console.error('❌ Program search failed:', error);
-      throw new Error(`Failed to search programs: ${error.message}`);
+      
+      // Provide user-friendly error messages
+      if (error.code === 'failed-precondition') {
+        throw new Error('Program search is not configured. Please contact support.');
+      } else if (error.code === 'unauthenticated') {
+        throw new Error('Authentication error. Please try again or contact support.');
+      } else if (error.code === 'resource-exhausted') {
+        throw new Error('Too many searches. Please wait a moment and try again.');
+      } else if (error.code === 'unavailable') {
+        throw new Error('Search service is temporarily unavailable. Please try again later.');
+      } else {
+        throw new Error(`Search failed: ${error.message || 'Unknown error'}`);
+      }
     }
   }
 
   /**
-   * Simulate Firebase Function call for testing
-   * In production, replace with actual Firebase Function call
-   */
-  async simulateFirebaseFunction(query, options) {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    const lowerQuery = query.toLowerCase();
-    const programs = [];
-
-    // Generate realistic program responses based on query
-    if (lowerQuery.includes('strength') || lowerQuery.includes('strong')) {
-      programs.push(
-        {
-          name: 'Starting Strength',
-          description: 'A beginner strength training program focused on compound movements and linear progression.',
-          difficulty: 'beginner',
-          duration: '12-24 weeks',
-          focus: ['strength', 'muscle building'],
-          equipment: ['barbell', 'plates', 'squat rack'],
-          overview: 'Starting Strength is a novice program designed around the basic barbell exercises: squat, deadlift, bench press, overhead press, and power clean. The program emphasizes proper form and consistent progression.',
-          structure: '3 days per week, alternating between two workouts (A/B split)',
-          benefits: ['Rapid strength gains', 'Builds foundation', 'Simple to follow', 'Proven effective'],
-          considerations: ['Requires barbell access', 'Form coaching recommended', 'Linear progression may stall'],
-          source: 'Mark Rippetoe',
-          popularity: 5
-        },
-        {
-          name: 'StrongLifts 5x5',
-          description: 'Simple 5x5 program focusing on compound movements with progressive overload.',
-          difficulty: 'beginner',
-          duration: '12+ weeks',
-          focus: ['strength', 'muscle building'],
-          equipment: ['barbell', 'plates', 'squat rack'],
-          overview: 'StrongLifts 5x5 uses two alternating workouts with five sets of five reps for main exercises. The program includes built-in deload protocols.',
-          structure: '3 days per week (Monday/Wednesday/Friday)',
-          benefits: ['Clear progression', 'App support', 'Beginner friendly', 'Time efficient'],
-          considerations: ['Can become monotonous', 'Limited exercise variety', 'Upper body progress slower'],
-          source: 'Mehdi Hadim',
-          popularity: 5
-        }
-      );
-    }
-
-    if (lowerQuery.includes('muscle') || lowerQuery.includes('hypertrophy') || lowerQuery.includes('building')) {
-      programs.push(
-        {
-          name: 'PHUL (Power Hypertrophy Upper Lower)',
-          description: 'Four-day program combining power and hypertrophy training in an upper/lower split.',
-          difficulty: 'intermediate',
-          duration: '8-16 weeks',
-          focus: ['muscle building', 'strength', 'power'],
-          equipment: ['full gym'],
-          overview: 'PHUL combines power training (lower reps, higher weight) with hypertrophy training (higher reps, moderate weight) across four training days.',
-          structure: '4 days per week - Upper Power, Lower Power, Upper Hypertrophy, Lower Hypertrophy',
-          benefits: ['Balanced approach', 'Strength and size gains', 'Flexible exercise selection'],
-          considerations: ['Requires 4 days per week', 'Intermediate experience needed', 'High volume'],
-          source: 'Brandon Campbell',
-          popularity: 4
-        },
-        {
-          name: 'Push Pull Legs (PPL)',
-          description: 'Classic bodybuilding split focusing on movement patterns across 3-6 days.',
-          difficulty: 'intermediate',
-          duration: 'ongoing',
-          focus: ['muscle building', 'hypertrophy'],
-          equipment: ['full gym'],
-          overview: 'PPL divides training by movement patterns: pushing exercises, pulling exercises, and leg exercises. Can be run 3x or 6x per week.',
-          structure: '3-6 days per week depending on experience level',
-          benefits: ['High frequency', 'Excellent for muscle building', 'Flexible scheduling'],
-          considerations: ['Requires good recovery', 'Higher time commitment for 6-day version'],
-          source: 'Bodybuilding community',
-          popularity: 5
-        }
-      );
-    }
-
-    if (lowerQuery.includes('beginner') || lowerQuery.includes('start')) {
-      programs.push(
-        {
-          name: 'Reddit Beginner Routine',
-          description: 'Community-developed beginner program emphasizing compound movements and progression.',
-          difficulty: 'beginner',
-          duration: '8-12 weeks',
-          focus: ['strength', 'muscle building', 'general fitness'],
-          equipment: ['barbell', 'dumbbells'],
-          overview: 'A well-rounded beginner program that incorporates both barbell and dumbbell exercises with clear progression guidelines.',
-          structure: '3 days per week full body',
-          benefits: ['Beginner friendly', 'Balanced development', 'Clear instructions', 'Community support'],
-          considerations: ['Requires basic gym access', 'May need form guidance initially'],
-          source: 'Reddit r/Fitness',
-          popularity: 4
-        }
-      );
-    }
-
-    if (lowerQuery.includes('home') || lowerQuery.includes('bodyweight')) {
-      programs.push(
-        {
-          name: 'Recommended Routine (r/bodyweightfitness)',
-          description: 'Comprehensive bodyweight training program requiring minimal equipment.',
-          difficulty: 'beginner',
-          duration: 'ongoing',
-          focus: ['strength', 'muscle building', 'flexibility'],
-          equipment: ['pull-up bar', 'bodyweight'],
-          overview: 'A progression-based bodyweight program that can be done at home with minimal equipment. Includes skill work and flexibility training.',
-          structure: '3 days per week, 1 hour sessions',
-          benefits: ['No gym required', 'Progressive overload', 'Skill development', 'Free'],
-          considerations: ['Requires pull-up bar', 'Progress slower than weighted training', 'Limited lower body options'],
-          source: 'Reddit r/bodyweightfitness',
-          popularity: 4
-        }
-      );
-    }
-
-    if (lowerQuery.includes('531') || lowerQuery.includes('wendler')) {
-      programs.push(
-        {
-          name: '5/3/1 for Beginners',
-          description: 'Jim Wendler\'s percentage-based program adapted for novice lifters.',
-          difficulty: 'beginner',
-          duration: '4+ weeks cycles',
-          focus: ['strength', 'muscle building'],
-          equipment: ['barbell', 'plates'],
-          overview: '5/3/1 uses percentage-based training with main lifts followed by assistance work. The beginner version includes more frequency.',
-          structure: '3 days per week with main lifts done twice per week',
-          benefits: ['Proven system', 'Built-in progression', 'Autoregulation', 'Long-term approach'],
-          considerations: ['Requires understanding of percentages', 'Need to test max', 'Patience required'],
-          source: 'Jim Wendler',
-          popularity: 5
-        }
-      );
-    }
-
-    // Add some default programs if query doesn't match specific categories
-    if (programs.length === 0) {
-      programs.push(
-        {
-          name: 'Full Body Workout Plan',
-          description: 'Balanced full body training program suitable for various goals and experience levels.',
-          difficulty: 'intermediate',
-          duration: '8-12 weeks',
-          focus: ['general fitness', 'strength', 'muscle building'],
-          equipment: ['gym equipment'],
-          overview: 'A comprehensive full body program that can be adapted for different goals and experience levels.',
-          structure: '3-4 days per week',
-          benefits: ['Time efficient', 'Balanced development', 'Flexible'],
-          considerations: ['May need customization for specific goals'],
-          source: 'General fitness principles',
-          popularity: 3
-        }
-      );
-    }
-
-    // Generate summary and related queries
-    const summary = this.generateSummary(query, programs);
-    const relatedQueries = this.generateRelatedQueries(query);
-
-    return {
-      programs: programs.slice(0, 8), // Limit results
-      summary,
-      relatedQueries,
-      searchTime: new Date().toISOString()
-    };
-  }
-
-  /**
-   * Generate search summary
-   */
-  generateSummary(query, programs) {
-    const programCount = programs.length;
-    const difficulties = [...new Set(programs.map(p => p.difficulty))];
-    const focuses = [...new Set(programs.flatMap(p => p.focus))];
-
-    return `Found ${programCount} programs related to "${query}". Programs range from ${difficulties.join(' to ')} difficulty levels, focusing on ${focuses.slice(0, 3).join(', ')}${focuses.length > 3 ? ' and more' : ''}.`;
-  }
-
-  /**
-   * Generate related search queries
-   */
-  generateRelatedQueries(query) {
-    const baseQueries = [
-      'beginner workout programs',
-      'strength training routines',
-      'muscle building programs',
-      'home workout plans',
-      'powerlifting programs'
-    ];
-
-    const lowerQuery = query.toLowerCase();
-    const related = [];
-
-    if (lowerQuery.includes('strength')) {
-      related.push('powerlifting programs', '5/3/1 variations', 'linear progression');
-    }
-    if (lowerQuery.includes('muscle') || lowerQuery.includes('building')) {
-      related.push('hypertrophy programs', 'bodybuilding routines', 'high volume training');
-    }
-    if (lowerQuery.includes('beginner')) {
-      related.push('novice programs', 'gym basics', 'starting routines');
-    }
-    if (lowerQuery.includes('home')) {
-      related.push('bodyweight training', 'minimal equipment workouts', 'home gym setups');
-    }
-
-    // Add some base queries if none matched
-    if (related.length === 0) {
-      related.push(...baseQueries.slice(0, 3));
-    }
-
-    return [...new Set(related)].slice(0, 5);
-  }
-
-  /**
-   * Save a program for later reference
+   * Save a program for later reference with comprehensive data
    */
   saveProgram(program, context = {}) {
     const savedData = {
-      program: { ...program },
+      program: {
+        // Ensure all program data is preserved and enriched
+        ...program,
+        // Validate and ensure key fields exist
+        name: program.name || 'Unknown Program',
+        description: program.description || program.overview || '',
+        exercises: program.exercises || program.structure || [],
+        methodology: program.methodology || '',
+        equipment: program.equipment || [],
+        goals: program.goals || program.focus || [],
+        difficulty: program.difficulty || program.experienceLevel || 'Beginner',
+        duration: program.duration || 'Variable',
+        principles: program.principles || [],
+        schedule: program.schedule || program.frequency || '3-4 days per week'
+      },
       savedAt: new Date().toISOString(),
       context: {
         source: context.source || 'search',
@@ -306,11 +161,20 @@ class ProgramSearchService {
         ...context
       },
       notes: context.notes || '',
-      customizations: context.customizations || {}
+      customizations: context.customizations || {},
+      // Add comprehensive program analysis
+      analysis: {
+        hasExercises: Array.isArray(program.exercises) && program.exercises.length > 0,
+        hasStructure: Array.isArray(program.structure) && program.structure.length > 0,
+        hasMethodology: Boolean(program.methodology),
+        equipmentCount: Array.isArray(program.equipment) ? program.equipment.length : 0,
+        goalsCount: Array.isArray(program.goals) ? program.goals.length : 0,
+        hasPrinciples: Array.isArray(program.principles) && program.principles.length > 0
+      }
     };
 
     this.savedPrograms.set(program.name, savedData);
-    console.log(`💾 Program saved: ${program.name}`);
+    console.log(`💾 Program saved with comprehensive data: ${program.name}`, savedData.analysis);
     return savedData;
   }
 

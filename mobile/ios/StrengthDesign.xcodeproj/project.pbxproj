@@ -8,28 +8,28 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		32C399704EEADBE5B47F37C9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AB3ED30D0F571A48C8D55E23 /* PrivacyInfo.xcprivacy */; };
+		378E2E3927E6036EC03BB0F1 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDDF7FA7FD09A0A8745C66D0 /* ExpoModulesProvider.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		55EE33024349D8AB3FACA21F /* libPods-StrengthDesign.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D11899E15005B34050F8131B /* libPods-StrengthDesign.a */; };
-		5BE2D72269F47118130806A7 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B300444FD8D7D0DF2CDAB5 /* ExpoModulesProvider.swift */; };
-		6D89506E8E9BE6A5721E9F2E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 0DADFAC9E59246F80CAE337B /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		BDC3B8192B7C14BC60634426 /* libPods-StrengthDesign.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D1C6552C3252414339131D /* libPods-StrengthDesign.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0DADFAC9E59246F80CAE337B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = StrengthDesign/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* StrengthDesign.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StrengthDesign.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = StrengthDesign/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = StrengthDesign/Info.plist; sourceTree = "<group>"; };
-		83B300444FD8D7D0DF2CDAB5 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-StrengthDesign/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = StrengthDesign/SplashScreen.storyboard; sourceTree = "<group>"; };
-		AA7680C7FBB4BA683B14E70B /* Pods-StrengthDesign.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StrengthDesign.release.xcconfig"; path = "Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign.release.xcconfig"; sourceTree = "<group>"; };
-		B0A5C05247AAD53381B0B953 /* Pods-StrengthDesign.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StrengthDesign.debug.xcconfig"; path = "Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign.debug.xcconfig"; sourceTree = "<group>"; };
+		AB3ED30D0F571A48C8D55E23 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = StrengthDesign/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		BA53ED125CA9DEDE96C2F2E1 /* Pods-StrengthDesign.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StrengthDesign.debug.xcconfig"; path = "Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign.debug.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		D11899E15005B34050F8131B /* libPods-StrengthDesign.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StrengthDesign.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0D1C6552C3252414339131D /* libPods-StrengthDesign.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StrengthDesign.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB36F8129B39D469FF38A639 /* Pods-StrengthDesign.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StrengthDesign.release.xcconfig"; path = "Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = StrengthDesign/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* StrengthDesign-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "StrengthDesign-Bridging-Header.h"; path = "StrengthDesign/StrengthDesign-Bridging-Header.h"; sourceTree = "<group>"; };
+		FDDF7FA7FD09A0A8745C66D0 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-StrengthDesign/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,13 +37,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				55EE33024349D8AB3FACA21F /* libPods-StrengthDesign.a in Frameworks */,
+				BDC3B8192B7C14BC60634426 /* libPods-StrengthDesign.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		09FDFD920AA4B5A328A6E412 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BA53ED125CA9DEDE96C2F2E1 /* Pods-StrengthDesign.debug.xcconfig */,
+				DB36F8129B39D469FF38A639 /* Pods-StrengthDesign.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* StrengthDesign */ = {
 			isa = PBXGroup;
 			children = (
@@ -53,7 +63,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				0DADFAC9E59246F80CAE337B /* PrivacyInfo.xcprivacy */,
+				AB3ED30D0F571A48C8D55E23 /* PrivacyInfo.xcprivacy */,
 			);
 			name = StrengthDesign;
 			sourceTree = "<group>";
@@ -62,26 +72,25 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				D11899E15005B34050F8131B /* libPods-StrengthDesign.a */,
+				D0D1C6552C3252414339131D /* libPods-StrengthDesign.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		52F5C6DF63D811AC681A921E /* Pods */ = {
+		73C669C919902530B3D2A58F /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				B0A5C05247AAD53381B0B953 /* Pods-StrengthDesign.debug.xcconfig */,
-				AA7680C7FBB4BA683B14E70B /* Pods-StrengthDesign.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		6D46ED6E4C493F0B2E23EEC2 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				91F1903614264DB5B7F91633 /* StrengthDesign */,
+				7D0F5476DDCB1A97FBCEF4D8 /* StrengthDesign */,
 			);
 			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		7D0F5476DDCB1A97FBCEF4D8 /* StrengthDesign */ = {
+			isa = PBXGroup;
+			children = (
+				FDDF7FA7FD09A0A8745C66D0 /* ExpoModulesProvider.swift */,
+			);
+			name = StrengthDesign;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -98,8 +107,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				52F5C6DF63D811AC681A921E /* Pods */,
-				6D46ED6E4C493F0B2E23EEC2 /* ExpoModulesProviders */,
+				09FDFD920AA4B5A328A6E412 /* Pods */,
+				73C669C919902530B3D2A58F /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -112,14 +121,6 @@
 				13B07F961A680F5B00A75B9A /* StrengthDesign.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		91F1903614264DB5B7F91633 /* StrengthDesign */ = {
-			isa = PBXGroup;
-			children = (
-				83B300444FD8D7D0DF2CDAB5 /* ExpoModulesProvider.swift */,
-			);
-			name = StrengthDesign;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -139,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "StrengthDesign" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				AEE204AE69B2EFF7B191E9A6 /* [Expo] Configure project */,
+				747972C4870EF10D99DADF73 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				5AB3D742D676B28424F965EB /* [CP] Embed Pods Frameworks */,
+				BCC18AFDF87F182944A9C879 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -195,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				6D89506E8E9BE6A5721E9F2E /* PrivacyInfo.xcprivacy in Resources */,
+				32C399704EEADBE5B47F37C9 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,23 +240,24 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		5AB3D742D676B28424F965EB /* [CP] Embed Pods Frameworks */ = {
+		747972C4870EF10D99DADF73 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			inputFileListPaths = (
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-StrengthDesign/expo-configure-project.sh\"\n";
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -299,24 +301,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AEE204AE69B2EFF7B191E9A6 /* [Expo] Configure project */ = {
+		BCC18AFDF87F182944A9C879 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
 			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-StrengthDesign/expo-configure-project.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -326,7 +327,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				5BE2D72269F47118130806A7 /* ExpoModulesProvider.swift in Sources */,
+				378E2E3927E6036EC03BB0F1 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -335,33 +336,31 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = B0A5C05247AAD53381B0B953 /* Pods-StrengthDesign.debug.xcconfig */;
+			baseConfigurationReference = BA53ED125CA9DEDE96C2F2E1 /* Pods-StrengthDesign.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StrengthDesign/StrengthDesign.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 24XXN7L7Y9;
+				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = StrengthDesign/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = strength.design;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesschlauch.strengthdesign;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jms.strengthdesign;
 				PRODUCT_NAME = StrengthDesign;
 				SWIFT_OBJC_BRIDGING_HEADER = "StrengthDesign/StrengthDesign-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -373,28 +372,26 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AA7680C7FBB4BA683B14E70B /* Pods-StrengthDesign.release.xcconfig */;
+			baseConfigurationReference = DB36F8129B39D469FF38A639 /* Pods-StrengthDesign.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StrengthDesign/StrengthDesign.entitlements;
-				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 24XXN7L7Y9;
+				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = StrengthDesign/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = strength.design;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesschlauch.strengthdesign;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jms.strengthdesign;
 				PRODUCT_NAME = StrengthDesign;
 				SWIFT_OBJC_BRIDGING_HEADER = "StrengthDesign/StrengthDesign-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -458,7 +455,10 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -513,7 +513,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

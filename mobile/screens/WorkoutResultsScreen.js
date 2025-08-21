@@ -44,7 +44,7 @@ import { SafeLinearGradient, GlassGradient } from '../components/SafeLinearGradi
 import ShareWorkoutDrawer from '../components/ShareWorkoutDrawer';
 import { useTheme } from '../contexts/ThemeContext';
 import { colors, spacing, borderRadius, typography, shadows } from '../utils/designTokens';
-import { functions } from '../config/firebase';
+import { functions } from '../firebaseConfig';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 

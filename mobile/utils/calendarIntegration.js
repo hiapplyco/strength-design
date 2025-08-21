@@ -10,16 +10,34 @@ class CalendarIntegration {
   }
 
   async requestPermissions() {
-    const { status } = await Calendar.requestCalendarPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Calendar access is needed to schedule workouts.',
-        [{ text: 'OK' }]
-      );
+    try {
+      const { status } = await Calendar.requestCalendarPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required',
+          'Calendar access is needed to schedule workouts.',
+          [{ text: 'OK' }]
+        );
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error('Calendar permission error:', error);
+      if (error.message?.includes('MissingCalendarPListValueException')) {
+        Alert.alert(
+          'App Update Required',
+          'Please rebuild the app to enable calendar features. The app configuration has been updated.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'Calendar Error',
+          'Unable to access calendar. Please check your device settings.',
+          [{ text: 'OK' }]
+        );
+      }
       return false;
     }
-    return true;
   }
 
   async getOrCreateCalendar() {

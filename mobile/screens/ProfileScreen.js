@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -10,7 +10,8 @@ import {
   ActivityIndicator,
   Image,
   TextInput,
-  Platform
+  Platform,
+  Animated
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, signOut, updateProfile, updateEmail, updatePassword } from 'firebase/auth';
@@ -24,11 +25,14 @@ import { useTheme } from '../contexts/ThemeContext';
 import { GlassContainer, GlassCard } from '../components/GlassmorphismComponents';
 import BiometricSettings from '../components/BiometricSettings';
 import { LinearGradient } from 'expo-linear-gradient';
+import GlobalContextButton from '../components/GlobalContextButton';
+import GlobalContextStatusLine from '../components/GlobalContextStatusLine';
 
 export default function ProfileScreen({ navigation }) {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const neonAnim = useRef(new Animated.Value(0)).current;
   const [userData, setUserData] = useState({
     displayName: '',
     email: '',
@@ -98,6 +102,22 @@ export default function ProfileScreen({ navigation }) {
   const storage = getStorage();
 
   useEffect(() => {
+    // Start neon animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(neonAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(neonAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+    
     loadUserData();
     loadSettings();
     checkHealthStatus();
@@ -148,7 +168,7 @@ export default function ProfileScreen({ navigation }) {
 
   const checkHealthStatus = async () => {
     try {
-      const summary = await healthService.getTodaySummary();
+      const summary = await healthService.getTodaysSummary();
       setHealthStatus({
         connected: healthService.isInitialized,
         lastSync: healthService.lastSyncTime,
@@ -199,27 +219,58 @@ export default function ProfileScreen({ navigation }) {
           await healthService.updateWeight(parseFloat(userData.weight), unit);
         }
         
-        // Update session context with profile data
+        // Update session context with comprehensive profile data
         await sessionContextManager.updateBiometrics({
           height: userData.height,
           weight: userData.weight,
           age: userData.age,
           gender: userData.gender,
-          experienceLevel: userData.experienceLevel
-        }, 'profile');
+          experienceLevel: userData.experienceLevel,
+          bio: userData.bio,
+          displayName: userData.displayName,
+          measurementUnit: settings.measurementUnit || 'metric'
+        }, 'profile_save');
         
         await sessionContextManager.updatePreferences({
           fitnessGoals: userData.fitnessGoals,
           preferredWorkoutDays: userData.preferredWorkoutDays,
-          injuries: userData.injuries
-        }, 'profile');
+          injuries: userData.injuries,
+          experienceLevel: userData.experienceLevel,
+          measurementUnit: settings.measurementUnit || 'metric',
+          healthSync: settings.healthSync,
+          shareDataWithAI: settings.shareDataWithAI
+        }, 'profile_save');
         
+        // Clear existing goals and add current fitness goals
         if (userData.fitnessGoals) {
           await sessionContextManager.addGoals([{
             name: userData.fitnessGoals,
-            source: 'profile',
-            priority: 'high'
-          }], 'profile');
+            source: 'profile_save',
+            priority: 'high',
+            updatedAt: Date.now()
+          }], 'profile_save');
+        }
+        
+        // Fetch and update health data if health sync is enabled
+        if (settings.healthSync && healthService.isInitialized) {
+          try {
+            const healthSummary = await healthService.getTodaysSummary();
+            if (healthSummary) {
+              // Add health data to biometrics context
+              await sessionContextManager.updateBiometrics({
+                ...userData,
+                healthData: {
+                  steps: healthSummary.steps,
+                  calories: healthSummary.calories,
+                  workouts: healthSummary.workouts,
+                  lastSync: healthSummary.lastSync,
+                  isConnected: true
+                }
+              }, 'profile_health');
+            }
+          } catch (healthError) {
+            console.warn('Could not fetch health data during profile save:', healthError);
+          }
         }
         
         console.log('✅ Profile saved and session context updated');
@@ -251,6 +302,24 @@ export default function ProfileScreen({ navigation }) {
         healthService.startBackgroundSync(parseInt(settings.syncInterval));
       }
       
+      // Update session context with new settings preferences
+      await sessionContextManager.initialize();
+      await sessionContextManager.updatePreferences({
+        healthSync: settings.healthSync,
+        shareDataWithAI: settings.shareDataWithAI,
+        measurementUnit: settings.measurementUnit,
+        workoutReminders: settings.workoutReminders,
+        motivationalMessages: settings.motivationalMessages,
+        syncInterval: settings.syncInterval,
+        notificationSettings: {
+          workoutReminders: settings.workoutReminders,
+          restDayReminders: settings.restDayReminders,
+          motivationalMessages: settings.motivationalMessages,
+          progressUpdates: settings.progressUpdates
+        }
+      }, 'settings_save');
+      
+      console.log('✅ Settings saved and session context updated');
       Alert.alert('Success', 'Settings saved successfully');
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -448,17 +517,74 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
-  const handleBiometricSave = (newBiometricData) => {
-    setBiometricData(newBiometricData);
-    // Update user data with basic info from biometrics
-    setUserData(prev => ({
-      ...prev,
-      age: newBiometricData.age || prev.age,
-      height: newBiometricData.height || prev.height,
-      weight: newBiometricData.weight || prev.weight,
-      gender: newBiometricData.gender || prev.gender,
-      injuries: newBiometricData.injuries || prev.injuries,
-    }));
+  const handleBiometricSave = async (newBiometricData) => {
+    try {
+      setBiometricData(newBiometricData);
+      
+      // Update user data with basic info from biometrics
+      const updatedUserData = {
+        ...userData,
+        age: newBiometricData.age || userData.age,
+        height: newBiometricData.height || userData.height,
+        weight: newBiometricData.weight || userData.weight,
+        gender: newBiometricData.gender || userData.gender,
+        injuries: newBiometricData.injuries || userData.injuries,
+      };
+      setUserData(updatedUserData);
+      
+      // Save biometric data to Firestore
+      const user = auth.currentUser;
+      if (user) {
+        await setDoc(doc(db, 'users', user.uid), {
+          ...updatedUserData,
+          biometrics: newBiometricData,
+          biometricsUpdatedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        
+        // Immediately update session context with comprehensive biometric data
+        await sessionContextManager.initialize();
+        
+        // Update biometrics in session context
+        await sessionContextManager.updateBiometrics({
+          ...newBiometricData,
+          height: updatedUserData.height,
+          weight: updatedUserData.weight,
+          age: updatedUserData.age,
+          gender: updatedUserData.gender,
+          experienceLevel: updatedUserData.experienceLevel
+        }, 'profile_biometrics');
+        
+        // Update preferences with any new data
+        await sessionContextManager.updatePreferences({
+          fitnessGoals: updatedUserData.fitnessGoals,
+          preferredWorkoutDays: updatedUserData.preferredWorkoutDays,
+          injuries: updatedUserData.injuries,
+          experienceLevel: updatedUserData.experienceLevel
+        }, 'profile_biometrics');
+        
+        // Add goals if fitness goals are set
+        if (updatedUserData.fitnessGoals) {
+          await sessionContextManager.addGoals([{
+            name: updatedUserData.fitnessGoals,
+            source: 'profile_biometrics',
+            priority: 'high',
+            addedAt: Date.now()
+          }], 'profile_biometrics');
+        }
+        
+        // If weight changed and health sync is enabled, update health service
+        if (newBiometricData.weight && settings.healthSync && settings.syncWeight) {
+          const unit = settings.measurementUnit === 'metric' ? 'kg' : 'lbs';
+          await healthService.updateWeight(parseFloat(newBiometricData.weight), unit);
+        }
+        
+        console.log('✅ Biometric data saved and session context updated comprehensively');
+      }
+    } catch (error) {
+      console.error('❌ Error saving biometric data:', error);
+      Alert.alert('Error', 'Failed to save biometric data');
+    }
   };
 
   if (loading) {
@@ -470,16 +596,41 @@ export default function ProfileScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={theme.isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
-        style={StyleSheet.absoluteFillObject}
-      />
+    <View style={[styles.container, { backgroundColor: '#000000' }]}>
+      {/* Global Context Status Line */}
+      <GlobalContextStatusLine navigation={navigation} />
       
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Enhanced Header with Glassmorphism */}
-        <GlassContainer variant="subtle" style={styles.header}>
-        <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ 
+          paddingTop: 0,
+        }}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            {/* Neon Title */}
+            <Animated.Text style={[
+              styles.pageTitle,
+              {
+                color: neonAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: theme.isDarkMode ? ['#FFFFFF', '#FF6B35'] : ['#000000', '#FF6B35'],
+                }),
+                textShadowColor: neonAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['transparent', '#FF6B35'],
+                }),
+                textShadowOffset: { width: 0, height: 0 },
+                textShadowRadius: neonAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 30],
+                }),
+              },
+            ]}>
+              PROFILE
+            </Animated.Text>
+            <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
           {userData.photoURL ? (
             <Image source={{ uri: userData.photoURL }} style={styles.avatar} />
           ) : (
@@ -490,20 +641,21 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.editBadge}>
             <Ionicons name="camera" size={16} color="#fff" />
           </View>
-        </TouchableOpacity>
-        
-        <Text style={[styles.name, { color: theme.theme.text }]}>{userData.displayName || 'User'}</Text>
-        <Text style={[styles.email, { color: theme.theme.textSecondary }]}>{userData.email}</Text>
-        
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => setEditMode(!editMode)}
-        >
-          <Text style={styles.editButtonText}>
-            {editMode ? 'Cancel' : 'Edit Profile'}
-          </Text>
-        </TouchableOpacity>
-      </GlassContainer>
+            </TouchableOpacity>
+            
+            <Text style={[styles.name, { color: theme.theme.text }]}>{userData.displayName || 'User'}</Text>
+            <Text style={[styles.email, { color: theme.theme.textSecondary }]}>{userData.email}</Text>
+            
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => setEditMode(!editMode)}
+            >
+              <Text style={styles.editButtonText}>
+                {editMode ? 'Cancel' : 'Edit Profile'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
       {/* Profile Information */}
       {editMode && (
@@ -661,7 +813,13 @@ export default function ProfileScreen({ navigation }) {
       )}
 
       {/* Health Integration */}
-      <GlassCard variant="subtle" style={styles.section}>
+      <View style={styles.section}>
+        {/* Neon Section Divider */}
+        <View style={styles.sectionDivider}>
+          <View style={styles.neonLine} />
+          <Text style={styles.sectionDividerText}>HEALTH INTEGRATION</Text>
+          <View style={styles.neonLine} />
+        </View>
         <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Health Integration</Text>
         
         <View style={styles.settingRow}>
@@ -737,11 +895,15 @@ export default function ProfileScreen({ navigation }) {
             </View>
           </>
         )}
-      </GlassCard>
+      </View>
 
       {/* Notifications */}
-      <GlassCard variant="subtle" style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Notifications</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionDivider}>
+          <View style={styles.neonLine} />
+          <Text style={styles.sectionDividerText}>NOTIFICATIONS</Text>
+          <View style={styles.neonLine} />
+        </View>
         
         <View style={styles.settingRow}>
           <Text style={styles.settingLabel}>Workout Reminders</Text>
@@ -772,11 +934,15 @@ export default function ProfileScreen({ navigation }) {
             thumbColor={settings.motivationalMessages ? '#FF7E87' : '#f4f3f4'}
           />
         </View>
-      </GlassCard>
+      </View>
 
       {/* Privacy */}
-      <GlassCard variant="subtle" style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Privacy</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionDivider}>
+          <View style={styles.neonLine} />
+          <Text style={styles.sectionDividerText}>PRIVACY</Text>
+          <View style={styles.neonLine} />
+        </View>
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
@@ -802,11 +968,15 @@ export default function ProfileScreen({ navigation }) {
             thumbColor={settings.anonymousAnalytics ? '#FF7E87' : '#f4f3f4'}
           />
         </View>
-      </GlassCard>
+      </View>
 
       {/* Display */}
-      <GlassCard variant="subtle" style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Display</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionDivider}>
+          <View style={styles.neonLine} />
+          <Text style={styles.sectionDividerText}>DISPLAY</Text>
+          <View style={styles.neonLine} />
+        </View>
         
         {/* Theme Toggle */}
         <View style={styles.settingRowColumn}>
@@ -877,11 +1047,15 @@ export default function ProfileScreen({ navigation }) {
             ))}
           </View>
         </View>
-      </GlassCard>
+      </View>
 
       {/* Biometric Settings */}
-      <GlassCard variant="subtle" style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Biometric Data</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionDivider}>
+          <View style={styles.neonLine} />
+          <Text style={styles.sectionDividerText}>BIOMETRIC DATA</Text>
+          <View style={styles.neonLine} />
+        </View>
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
@@ -943,11 +1117,15 @@ export default function ProfileScreen({ navigation }) {
             )}
           </View>
         )}
-      </GlassCard>
+      </View>
 
       {/* Account Actions */}
-      <GlassCard variant="subtle" style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Account</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionDivider}>
+          <View style={styles.neonLine} />
+          <Text style={styles.sectionDividerText}>ACCOUNT</Text>
+          <View style={styles.neonLine} />
+        </View>
         
         <TouchableOpacity style={styles.actionButton} onPress={exportData}>
           <Ionicons name="download-outline" size={20} color="#FFB86B" />
@@ -971,7 +1149,7 @@ export default function ProfileScreen({ navigation }) {
           <Ionicons name="log-out-outline" size={20} color="#FF7E87" />
           <Text style={[styles.actionButtonText, { color: '#FF7E87' }]}>Sign Out</Text>
         </TouchableOpacity>
-      </GlassCard>
+      </View>
       
       <View style={{ height: 100 }} />
       </ScrollView>
@@ -990,6 +1168,9 @@ export default function ProfileScreen({ navigation }) {
           injuries: userData.injuries || biometricData.injuries,
         }}
       />
+      
+      {/* Global Context Button */}
+      <GlobalContextButton navigation={navigation} position="bottom-right" />
     </View>
   );
 }
@@ -997,6 +1178,19 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  pageTitle: {
+    fontSize: 36,
+    fontWeight: '900',
+    marginBottom: 12,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    fontFamily: Platform.select({
+      ios: 'Helvetica Neue',
+      android: 'sans-serif-black',
+      default: 'System',
+    }),
+    textAlign: 'center',
   },
   settingRowColumn: {
     flexDirection: 'column',
@@ -1043,12 +1237,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#0A0B0D',
   },
   header: {
-    alignItems: 'center',
     paddingVertical: 30,
     paddingHorizontal: 20,
     marginHorizontal: 15,
+    marginTop: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#1A1B1E',
+  },
+  headerContent: {
+    alignItems: 'center',
   },
   avatarContainer: {
     position: 'relative',
@@ -1305,5 +1502,29 @@ const styles = StyleSheet.create({
     fontSize: 13,
     flex: 1,
     textTransform: 'capitalize',
+  },
+  sectionDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  neonLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#FF6B35',
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+  },
+  sectionDividerText: {
+    color: '#FF6B35',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 2,
+    marginHorizontal: 15,
+    textShadowColor: '#FF6B35',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
 });

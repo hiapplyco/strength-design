@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -11,6 +12,7 @@ import {
   ActivityIndicator,
   Animated,
   Alert,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeLinearGradient } from '../components/SafeLinearGradient';
@@ -19,11 +21,13 @@ import { GlassCard, GlassContainer } from '../components/GlassmorphismComponents
 import { auth, db } from '../firebaseConfig';
 import { collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFunctionsUrl } from '../config/firebase';
+import { getFunctionsUrl, FUNCTION_URLS } from '../config/firebase';
 import { colors } from '../utils/designTokens';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import chatSessionService from '../services/chatSessionService';
 import { STRUCTURED_WORKOUT_PROMPT } from '../prompts/structuredWorkoutPrompt';
+import ContextModal from '../components/ContextModal';
+import WorkoutVideoRecorderAI from '../components/WorkoutVideoRecorderAI';
 
 const SYSTEM_PROMPT = `You are Coach Alex, an elite fitness coach with 15+ years of experience helping people transform their lives through movement. Your personality is warm, encouraging, and scientifically-minded.
 
@@ -110,6 +114,9 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [currentSession, setCurrentSession] = useState(null);
+  const [showContextModal, setShowContextModal] = useState(false);
+  const [showVideoRecorder, setShowVideoRecorder] = useState(false);
+  const [generatedWorkout, setGeneratedWorkout] = useState(null);
   
   const theme = useTheme();
   
@@ -122,9 +129,35 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
   const typingDot2 = useRef(new Animated.Value(0)).current;
   const typingDot3 = useRef(new Animated.Value(0)).current;
   const charAnim = useRef(new Animated.Value(0)).current;
+  const neonAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Start neon animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(neonAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(neonAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+    
+    // Load user context first to determine welcome message
     loadUserContext();
+    
+    // Set a maximum time for initialization
+    const initTimeout = setTimeout(() => {
+      if (isInitializing) {
+        console.log('Initialization timeout reached, forcing completion');
+        setIsInitializing(false);
+      }
+    }, 3000); // 3 second maximum initialization time
     
     // Check if we have search context from navigation
     if (route?.params?.searchContext) {
@@ -150,6 +183,8 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
         }));
       }
     }
+    
+    return () => clearTimeout(initTimeout);
   }, [route?.params]);
   
   // Initialize progress tracking based on existing user context
@@ -200,8 +235,13 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
   useEffect(() => {
     console.log('Messages state updated, total messages:', messages.length);
     messages.forEach((msg, index) => {
-      console.log(`Message ${index}: ${msg.role} - ${msg.content?.substring(0, 30)}...`);
+      console.log(`Message ${index}: ${msg.role} - ${msg.content?.substring(0, 50)}...`);
     });
+    // Force re-render when messages change
+    if (messages.length > 0 && isInitializing) {
+      console.log('Messages loaded, stopping initialization');
+      setIsInitializing(false);
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -285,18 +325,28 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
         stats: {}
       };
 
-      // Get user's previous workouts
+      // Get user's previous workouts - simplified to avoid composite index
       const workoutsQuery = query(
         collection(db, 'workouts'),
         where('userId', '==', user.uid),
-        orderBy('createdAt', 'desc'),
-        limit(5)
+        limit(10)  // Get more to ensure we have recent ones after sorting
       );
       
       const workoutsSnapshot = await getDocs(workoutsQuery);
+      const workouts = [];
       workoutsSnapshot.forEach(doc => {
-        context.previousWorkouts.push(doc.data());
+        workouts.push({ ...doc.data(), id: doc.id });
       });
+      
+      // Sort client-side to avoid composite index requirement
+      workouts.sort((a, b) => {
+        const aTime = a.createdAt?.seconds || 0;
+        const bTime = b.createdAt?.seconds || 0;
+        return bTime - aTime;
+      });
+      
+      // Take the 5 most recent
+      context.previousWorkouts = workouts.slice(0, 5);
 
       // Get user preferences from AsyncStorage
       const savedPreferences = await AsyncStorage.getItem('userPreferences');
@@ -317,10 +367,58 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
       context.stats.streak = calculateStreak(completedDocs);
 
       setUserContext(context);
-      initializeChat(context);
+      
+      // Create context-aware welcome message
+      let welcomeMessage = "Welcome back! I'm your AI fitness coach. ";
+      
+      if (context.stats?.streak > 0) {
+        welcomeMessage += `🔥 Amazing ${context.stats.streak} day streak! `;
+      }
+      
+      if (context.previousWorkouts?.length > 0) {
+        welcomeMessage += `I see you've completed ${context.stats.completedWorkouts} workouts. `;
+        const lastWorkout = context.previousWorkouts[0];
+        if (lastWorkout?.name) {
+          welcomeMessage += `Your last workout was "${lastWorkout.name}". `;
+        }
+      }
+      
+      if (context.preferences?.fitnessLevel) {
+        welcomeMessage += `\n\n📊 **Your Profile:**\n`;
+        welcomeMessage += `• Fitness Level: ${context.preferences.fitnessLevel}\n`;
+        if (context.preferences.goals) {
+          welcomeMessage += `• Goals: ${context.preferences.goals}\n`;
+        }
+        if (context.preferences.equipment) {
+          welcomeMessage += `• Equipment: ${context.preferences.equipment}\n`;
+        }
+        if (context.preferences.frequency) {
+          welcomeMessage += `• Frequency: ${context.preferences.frequency} days/week\n`;
+        }
+      }
+      
+      welcomeMessage += "\n\nWhat would you like to work on today? I can:\n";
+      welcomeMessage += "• Create a new workout plan\n";
+      welcomeMessage += "• Modify your existing routine\n";
+      welcomeMessage += "• Answer fitness questions\n";
+      welcomeMessage += "• Help with nutrition planning";
+      
+      console.log('Setting initial welcome message:', welcomeMessage.substring(0, 100) + '...');
+      const initialMessage = { role: 'assistant', content: welcomeMessage, timestamp: new Date() };
+      setMessages([initialMessage]);
+      setIsInitializing(false);
+      console.log('Initial message set, isInitializing set to false');
     } catch (error) {
       console.error('Error loading context:', error);
-      initializeChat(null);
+      // Default welcome for new users or errors
+      console.log('Setting fallback welcome message due to error:', error.message);
+      const fallbackMessage = { 
+        role: 'assistant', 
+        content: "Welcome! I'm your AI fitness coach. Let's create a personalized workout plan for you.\n\nTell me about:\n• Your fitness goals\n• Current experience level\n• Available equipment\n• Time commitment",
+        timestamp: new Date()
+      };
+      setMessages([fallbackMessage]);
+      setIsInitializing(false);
     }
   };
 
@@ -348,7 +446,6 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
   };
 
   const initializeChat = async (context) => {
-    setIsInitializing(true);
     console.log('Initializing chat with context:', context);
     
     // Fade in animation
@@ -358,175 +455,10 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
       useNativeDriver: true,
     }).start();
 
-    try {
-      const user = auth.currentUser;
-      const token = user ? await user.getIdToken() : null;
-      
-      const functionsUrl = getFunctionsUrl();
-      console.log('Using functions URL:', functionsUrl);
-      
-      // Build context-aware initial prompt
-      let initialPrompt = "You are starting a conversation with a user. ";
-      
-      // Include search context if available
-      if (context?.searchContext) {
-        initialPrompt += `The user has just searched for and selected: `;
-        
-        if (context.searchContext.exercises?.length > 0) {
-          const exerciseNames = context.searchContext.exercises.map(e => e.name).join(', ');
-          initialPrompt += `Exercises: ${exerciseNames}. `;
-        }
-        
-        if (context.searchContext.foods?.length > 0) {
-          const foodNames = context.searchContext.foods.map(f => f.name).join(', ');
-          initialPrompt += `Foods: ${foodNames}. `;
-        }
-        
-        initialPrompt += `They searched for "${context.searchContext.query}". Use this context to create a personalized workout and nutrition plan. Ask them about their specific goals with these selections and how you can help incorporate them into their routine. `;
-      }
-      
-      if (context && context.previousWorkouts?.length > 0) {
-        initialPrompt += `This user has completed ${context.stats.completedWorkouts} workouts with us. `;
-        if (context.stats.streak > 0) {
-          initialPrompt += `They're on a ${context.stats.streak} day streak! `;
-        }
-        
-        const lastWorkout = context.previousWorkouts[0];
-        if (lastWorkout?.goals) {
-          initialPrompt += `Their recent goals included: ${JSON.stringify(lastWorkout.goals)}. `;
-        }
-        
-        initialPrompt += "Welcome them back warmly, acknowledge their progress, and ask how their fitness journey is going and what they'd like to work on today.";
-      } else if (!context?.searchContext) {
-        initialPrompt += "This appears to be a new user or someone without recent workout history. Welcome them warmly and start by understanding their fitness background and current goals. Be conversational and encouraging.";
-      }
-      
-      const response = await fetch(`${functionsUrl}/streamingChatEnhanced`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({
-          message: initialPrompt,
-          history: [],
-          userProfile: {
-            fitnessLevel: context?.preferences?.fitnessLevel,
-            goals: context?.preferences?.goals ? [context.preferences.goals] : [],
-            equipment: context?.preferences?.equipment ? [context.preferences.equipment] : [],
-            frequency: context?.preferences?.frequency,
-            timePerSession: context?.preferences?.timePerSession,
-            injuries: context?.preferences?.injuries || 'None mentioned'
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        console.error('HTTP error:', response.status, response.statusText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      console.log('Response received, starting stream processing...');
-      
-      // Check if response body exists and is readable
-      if (!response.body) {
-        console.error('Response body is undefined');
-        throw new Error('Response body is not available - streaming may not be supported');
-      }
-      
-      const reader = response.body.getReader ? response.body.getReader() : null;
-      if (!reader) {
-        console.error('Cannot get reader from response body');
-        throw new Error('Cannot read response - streaming not supported');
-      }
-      
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let buffer = '';
-      let charIndex = 0;
-
-      // Start character reveal animation
-      const revealChars = () => {
-        Animated.timing(charAnim, {
-          toValue: 1,
-          duration: 30 * fullResponse.length, // 30ms per character
-          useNativeDriver: false,
-        }).start();
-      };
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') break;
-
-            try {
-              const parsed = JSON.parse(data);
-              console.log('Parsed streaming data:', parsed);
-              
-              if (parsed.type === 'chunk' && parsed.content) {
-                fullResponse += parsed.content;
-                setStreamingMessage(fullResponse);
-              } else if (parsed.type === 'complete' && parsed.fullContent) {
-                fullResponse = parsed.fullContent;
-                setStreamingMessage(fullResponse);
-              } else if (parsed.type === 'error') {
-                console.error('Streaming error from server:', parsed.error);
-                throw new Error(parsed.error);
-              }
-            } catch (e) {
-              console.log('Non-JSON streaming data:', data);
-              if (data && data !== '[DONE]') {
-                fullResponse += data;
-                setStreamingMessage(fullResponse);
-              }
-            }
-          }
-        }
-      }
-
-      console.log('Final response length:', fullResponse.length);
-      if (fullResponse.trim()) {
-        console.log('Setting AI message with content:', fullResponse.substring(0, 100) + '...');
-        setMessages([{ role: 'assistant', content: fullResponse }]);
-        setStreamingMessage('');
-        
-        // Analyze initial AI response for progress tracking
-        updateProgress('', fullResponse);
-      } else {
-        // If no response received, show a default welcome message
-        console.log('No AI response received, showing default welcome message');
-        const defaultMessage = "Welcome! I'm your AI fitness coach. I'm here to help you create personalized workout plans based on your goals, experience, and preferences. What would you like to work on today?";
-        setMessages([{ 
-          role: 'assistant', 
-          content: defaultMessage
-        }]);
-        setStreamingMessage('');
-        
-        // Initialize progress tracking
-        setTimeout(() => updateProgress('', defaultMessage), 100);
-      }
-      
-    } catch (error) {
-      console.error('Initialization error:', error);
-      // Show a more user-friendly fallback message
-      setMessages([{ 
-        role: 'assistant', 
-        content: "Hi there! 👋\n\nI'm your AI fitness coach, ready to help you create amazing workout plans! While I'm getting fully set up, I can still help you plan your fitness journey.\n\nTell me about your fitness goals and experience level, and we'll get started!" 
-      }]);
-    } finally {
-      setIsInitializing(false);
-    }
+    // Skip API call - just use the welcome message that was already set
+    // The API call was causing unnecessary delays and errors
+    console.log('Chat initialized with welcome message');
+    setIsInitializing(false);
   };
 
   const sendMessage = async () => {
@@ -549,7 +481,8 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : null;
       
-      const functionsUrl = getFunctionsUrl();
+      // Use the correct v2 function URL
+      const functionsUrl = FUNCTION_URLS.enhancedChat;
       
       // Build comprehensive context
       const conversationContext = {
@@ -561,38 +494,54 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
         timestamp: new Date().toISOString()
       };
       
-      const response = await fetch(`${functionsUrl}/enhancedChat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          history: newMessages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          })),
-          sessionType: 'workout',
-          uploadedFiles: [],
-          useRAG: true,
-          ragConfig: {
-            maxChunks: 5,
-            maxTokens: 4000,
-            minRelevance: 0.5
+      // Add timeout to prevent infinite waiting
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout for messages
+      
+      let response;
+      try {
+        response = await fetch(functionsUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
           },
-          userProfile: {
-            fitnessLevel: userContext?.preferences?.fitnessLevel || collectedInfo.experience,
-            goals: collectedInfo.primaryGoals ? [collectedInfo.primaryGoals] : [],
-            equipment: collectedInfo.environmentEquipment ? [collectedInfo.environmentEquipment] : [],
-            frequency: collectedInfo.timeAvailability,
-            timePerSession: userContext?.preferences?.timePerSession,
-            injuries: collectedInfo.limitationsPreferences || 'None mentioned',
-            progress: progress,
-            collectedInfo: collectedInfo
-          },
-        }),
-      });
+          body: JSON.stringify({
+            message: userMessage,
+            history: newMessages.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })),
+            sessionType: 'workout',
+            uploadedFiles: [],
+            useRAG: true,
+            ragConfig: {
+              maxChunks: 5,
+              maxTokens: 4000,
+              minRelevance: 0.5
+            },
+            userProfile: {
+              fitnessLevel: userContext?.preferences?.fitnessLevel || collectedInfo.experience,
+              goals: collectedInfo.primaryGoals ? [collectedInfo.primaryGoals] : [],
+              equipment: collectedInfo.environmentEquipment ? [collectedInfo.environmentEquipment] : [],
+              frequency: collectedInfo.timeAvailability,
+              timePerSession: userContext?.preferences?.timePerSession,
+              injuries: collectedInfo.limitationsPreferences || 'None mentioned',
+              progress: progress,
+              collectedInfo: collectedInfo
+            },
+          }),
+          signal: controller.signal
+        });
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.log('Request timed out');
+          throw new Error('Request timeout - please check your connection');
+        }
+        throw fetchError;
+      }
+      clearTimeout(timeoutId);
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -747,7 +696,8 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
       const user = auth.currentUser;
       const token = user ? await user.getIdToken() : null;
       
-      const functionsUrl = getFunctionsUrl();
+      // Use the correct v2 function URL for generateStructuredWorkout
+      const functionsUrl = FUNCTION_URLS.generateStructuredWorkout;
       
       // Create a comprehensive user profile from collected info
       const userProfile = {
@@ -760,7 +710,7 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
         preferences: collectedInfo.preferences || {},
       };
       
-      const response = await fetch(`${functionsUrl}/generateStructuredWorkout`, {
+      const response = await fetch(functionsUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -777,15 +727,22 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
       });
 
       const result = await response.json();
+      console.log('Workout generation result:', result);
       
-      if (result.program) {
+      // Handle different response structures
+      const workoutData = result.program || result.workout || result;
+      
+      if (workoutData && (workoutData.weeks || workoutData.days || workoutData.exercises)) {
         // Save the structured workout to Firestore
         const workoutDoc = await addDoc(collection(db, 'structuredWorkouts'), {
           userId: user?.uid,
-          program: result.program,
-          metadata: result.metadata,
+          program: workoutData,
+          metadata: result.metadata || {},
           createdAt: serverTimestamp(),
         });
+        
+        // Store the generated workout for video recording
+        setGeneratedWorkout(result);
         
         // Complete the chat session
         await chatSessionService.completeSession(true);
@@ -845,11 +802,11 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
     
     return (
       <Animated.View
-        key={index}
+        key={`message-${index}-${message.timestamp || Date.now()}`}
         style={[
           styles.messageContainer,
           isUser ? styles.userMessageContainer : styles.assistantMessageContainer,
-          { opacity: fadeAnim }
+          { opacity: 1 } // Remove fade animation that might be causing issues
         ]}
       >
         {!isUser && (
@@ -865,7 +822,16 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
           </Animated.View>
         )}
         
-        <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
+        <View style={[
+          styles.messageBubble, 
+          isUser ? styles.userBubble : [
+            styles.assistantBubble,
+            { 
+              backgroundColor: theme.isDarkMode ? '#1C1C1E' : '#F0F0F0',
+              borderColor: theme.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+            }
+          ]
+        ]}>
           {isUser ? (
             <Text style={[styles.messageText, styles.userMessageText]}>
               {message.content}
@@ -874,7 +840,7 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
             <MarkdownRenderer 
               content={message.content}
               style={{
-                text: styles.messageText,
+                text: [styles.messageText, { color: theme.isDarkMode ? '#FFF' : '#000' }],
                 h1: styles.markdownH1,
                 h2: styles.markdownH2,
                 h3: styles.markdownH3,
@@ -882,6 +848,37 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
                 listText: styles.messageText
               }}
             />
+          )}
+          
+          {/* Add action buttons for assistant messages */}
+          {!isUser && message.content && (message.content.toLowerCase().includes('exercise') || 
+            message.content.toLowerCase().includes('workout') || 
+            message.content.toLowerCase().includes('help')) && (
+            <View style={styles.actionButtonsContainer}>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('Search')}
+              >
+                <Ionicons name="search" size={14} color="#FF6B35" />
+                <Text style={styles.actionButtonText}>Browse</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('Workouts')}
+              >
+                <Ionicons name="barbell" size={14} color="#4CAF50" />
+                <Text style={styles.actionButtonText}>Workouts</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('Profile')}
+              >
+                <Ionicons name="person" size={14} color="#2196F3" />
+                <Text style={styles.actionButtonText}>Profile</Text>
+              </TouchableOpacity>
+            </View>
           )}
           
           {/* Render knowledge sources if available */}
@@ -1016,7 +1013,7 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
         
         {collectedInfo.goals && (
           <View style={styles.contextChip}>
-            <Ionicons name="target" size={12} color="#FFB86B" />
+            <Ionicons name="flag" size={12} color="#FFB86B" />
             <Text style={styles.contextChipText}>Goals Set</Text>
           </View>
         )}
@@ -1063,11 +1060,15 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
     );
   };
 
-  if (isInitializing) {
+  // Early return for loading state to ensure proper initialization
+  // This prevents the "blank screen" issue by showing a proper loading UI
+
+  // Show loading screen during initialization
+  if (isInitializing && messages.length === 0) {
     return (
-      <GlassContainer>
+      <View style={{ flex: 1, backgroundColor: theme.isDarkMode ? '#000' : '#FFF' }}>
         <View style={styles.loadingContainer}>
-          <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+          <Animated.View style={[styles.loadingAvatar, { transform: [{ scale: pulseAnim }] }]}>
             <SafeLinearGradient
               colors={['#FFB86B', '#FF7E87']}
               style={styles.loadingAvatar}
@@ -1077,25 +1078,114 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
               <Ionicons name="fitness" size={40} color="#FFF" />
             </SafeLinearGradient>
           </Animated.View>
-          <Text style={[styles.loadingText, { color: theme.theme.primary }]}>Preparing your AI coach...</Text>
+          <Text style={[styles.loadingText, { color: theme.isDarkMode ? '#FFF' : '#000' }]}>
+            Preparing your AI coach...
+          </Text>
+          <ActivityIndicator 
+            size="small" 
+            color="#FFB86B" 
+            style={{ marginTop: 20 }}
+          />
         </View>
-      </GlassContainer>
+      </View>
     );
   }
 
   return (
-    <GlassContainer>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.isDarkMode ? '#000' : '#FFF' }} edges={['top']}>
+      <View style={{ flex: 1, paddingBottom: Platform.OS === 'ios' ? 65 : 55 }}>
+        {/* Context Status Bar - Exercises and Workouts only */}
+        <View style={[styles.contextStatusBar, { 
+          backgroundColor: theme.isDarkMode ? '#1C1C1E' : '#F5F5F5',
+          borderBottomColor: theme.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+        }]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.contextStatusScroll}>
+            {/* Exercises Status */}
+            <TouchableOpacity 
+              style={[styles.contextStatusItem, { 
+                backgroundColor: collectedInfo.exercises ? '#4CAF5020' : '#66666620' 
+              }]}
+              onPress={() => navigation.navigate('Search')}
+            >
+              <Ionicons 
+                name="barbell" 
+                size={14} 
+                color={collectedInfo.exercises ? '#4CAF50' : '#666'} 
+              />
+              <Text style={[styles.contextStatusText, {
+                color: collectedInfo.exercises ? '#4CAF50' : '#666'
+              }]}>
+                {collectedInfo.exerciseCount || 0} Exercises
+              </Text>
+            </TouchableOpacity>
+            
+            {/* Workouts Status */}
+            <TouchableOpacity 
+              style={[styles.contextStatusItem, { 
+                backgroundColor: userContext?.workoutHistory ? '#4CAF5020' : '#66666620' 
+              }]}
+              onPress={() => navigation.navigate('Workouts')}
+            >
+              <Ionicons 
+                name="calendar" 
+                size={14} 
+                color={userContext?.workoutHistory ? '#4CAF50' : '#666'} 
+              />
+              <Text style={[styles.contextStatusText, {
+                color: userContext?.workoutHistory ? '#4CAF50' : '#666'
+              }]}>
+                {userContext?.workoutHistory?.length || 0} Workouts
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      
+      {/* Orange Logo Background - Extra large for visibility */}
+      <Image
+        source={require('../assets/sdlogoorange.png')}
+        style={{
+          position: 'absolute',
+          width: 400,
+          height: 400,
+          opacity: theme.isDarkMode ? 0.06 : 0.04,
+          top: '45%',
+          left: '50%',
+          marginLeft: -200,
+          marginTop: -200,
+          resizeMode: 'contain',
+          zIndex: 0,
+        }}
+      />
+      
+      {/* Main Container with proper safe area handling and tab bar offset */}
       <KeyboardAvoidingView 
-        style={styles.container}
+        style={[styles.container, { marginBottom: 0 }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        {/* Header */}
+        {/* Header with safe area padding */}
         <View style={styles.header}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color={theme.theme.textOnGlass} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: theme.theme.textOnGlass }]}>AI Coach</Text>
+          <Animated.Text style={[
+            styles.headerTitle,
+            {
+              color: neonAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: theme.isDarkMode ? ['#FFFFFF', '#00FF88'] : ['#000000', '#00FF88'],
+              }),
+              textShadowColor: neonAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['transparent', '#00FF88'],
+              }),
+              textShadowOffset: { width: 0, height: 0 },
+              textShadowRadius: neonAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 30],
+              }),
+            },
+          ]}>
+            GENERATOR
+          </Animated.Text>
           <View style={styles.headerButtons}>
             <TouchableOpacity 
               style={styles.headerActionButton}
@@ -1119,7 +1209,7 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
                 );
               }}
             >
-              <Ionicons name="add-circle-outline" size={24} color={theme.theme.primary} />
+              <Ionicons name="add-circle-outline" size={24} color={theme.primary} />
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -1133,8 +1223,9 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
                 );
               }}
             >
-              <Ionicons name="checkmark-circle-outline" size={24} color={theme.theme.success} />
+              <Ionicons name="checkmark-circle-outline" size={24} color={theme.success} />
             </TouchableOpacity>
+            
             
             <TouchableOpacity 
               style={[styles.generateButton, progress >= 60 && styles.generateButtonActive]}
@@ -1148,7 +1239,7 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
                 end={{ x: 1, y: 0 }}
               >
                 <Text style={styles.generateButtonText}>
-                  {isGenerating ? 'Creating...' : progress >= 60 ? 'Generate' : `${60 - progress}% more`}
+                  {isGenerating ? 'Creating...' : 'Generate'}
                 </Text>
               </SafeLinearGradient>
             </TouchableOpacity>
@@ -1177,7 +1268,7 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
               />
             </Animated.View>
           </View>
-          <Text style={[styles.progressText, { color: theme.theme.textOnGlass }]}>
+          <Text style={[styles.progressText, { color: theme.textOnGlass }]}>
             {progress}% Complete - {getProgressLabel()}
           </Text>
         </View>
@@ -1186,33 +1277,69 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
           {renderContextBar()}
         </View>
 
-      {/* Messages */}
+      {/* Messages Container - Fixed styling */}
       <ScrollView
         ref={scrollViewRef}
         style={styles.messagesContainer}
         contentContainerStyle={styles.messagesContent}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+        onContentSizeChange={() => {
+          // Don't auto-scroll on initial load
+          if (messages.length > 1) {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+          }
+        }}
+        showsVerticalScrollIndicator={false}
       >
-        {messages.map(renderMessage)}
-        {renderStreamingMessage()}
-        {renderTypingIndicator()}
+          {messages.length === 0 ? (
+            <View style={styles.emptyMessagesContainer}>
+              <Animated.View style={[styles.loadingAvatar, { transform: [{ scale: pulseAnim }] }]}>
+                <SafeLinearGradient
+                  colors={['#FFB86B', '#FF7E87']}
+                  style={styles.loadingAvatar}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Ionicons name="fitness" size={24} color="#FFF" />
+                </SafeLinearGradient>
+              </Animated.View>
+              <Text style={[styles.emptyMessagesText, { color: theme.isDarkMode ? '#AAA' : '#666' }]}>
+                Welcome! I'm your AI fitness coach.
+              </Text>
+              <Text style={[styles.emptyMessagesSubText, { color: theme.isDarkMode ? '#666' : '#999' }]}>
+                Let's create a personalized workout plan for you.
+              </Text>
+            </View>
+          ) : (
+            <>
+              {messages.map((msg, index) => renderMessage(msg, index))}
+              {renderStreamingMessage()}
+              {renderTypingIndicator()}
+            </>
+          )}
+          
+          {isGenerating && (
+            <View style={styles.generatingContainer}>
+              <ActivityIndicator size="large" color="#FFB86B" />
+              <Text style={styles.generatingText}>Creating your personalized workout plan...</Text>
+            </View>
+          )}
+        </ScrollView>
         
-        {isGenerating && (
-          <View style={styles.generatingContainer}>
-            <ActivityIndicator size="large" color="#FFB86B" />
-            <Text style={styles.generatingText}>Creating your personalized workout plan...</Text>
-          </View>
-        )}
-      </ScrollView>
 
       {/* Input */}
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { 
+        backgroundColor: theme.isDarkMode ? '#0A0A0C' : '#F5F5F5',
+        borderTopColor: theme.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+      }]}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, {
+            backgroundColor: theme.isDarkMode ? '#1C1C1E' : '#FFFFFF',
+            color: theme.isDarkMode ? '#FFF' : '#000'
+          }]}
           value={input}
           onChangeText={setInput}
           placeholder="Type your answer or ask questions..."
-          placeholderTextColor="#666"
+          placeholderTextColor={theme.isDarkMode ? '#666' : '#999'}
           multiline
           maxHeight={100}
           editable={!isStreaming && !isGenerating}
@@ -1233,7 +1360,35 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
         </TouchableOpacity>
       </View>
       </KeyboardAvoidingView>
-    </GlassContainer>
+      
+      {/* Context Modal */}
+      <ContextModal
+        visible={showContextModal}
+        onClose={() => setShowContextModal(false)}
+        onNavigate={(screen) => {
+          setShowContextModal(false);
+          navigation.navigate(screen);
+        }}
+        title="Your Fitness Context"
+        subtitle="Here's what I know about your fitness journey"
+      />
+      
+      {/* Video Recorder Modal */}
+      <WorkoutVideoRecorderAI
+        visible={showVideoRecorder}
+        workout={generatedWorkout}
+        onClose={() => setShowVideoRecorder(false)}
+        onSave={(videoBlob) => {
+          console.log('Video saved:', videoBlob);
+          Alert.alert('Success', 'Your workout video has been saved!');
+        }}
+        onShare={(videoBlob, workout) => {
+          console.log('Sharing video:', videoBlob, workout);
+          // Add sharing functionality here
+        }}
+      />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -1241,6 +1396,70 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'transparent',
+  },
+  contextStatusBar: {
+    paddingTop: 10,
+    paddingBottom: 8,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    zIndex: 10,
+  },
+  contextStatusScroll: {
+    flexGrow: 0,
+  },
+  contextStatusItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    gap: 6,
+  },
+  contextStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  progressItem: {
+    minWidth: 80,
+  },
+  progressBarMini: {
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 2,
+    overflow: 'hidden',
+    flex: 1,
+    marginRight: 8,
+  },
+  progressFillMini: {
+    height: '100%',
+    backgroundColor: '#FF6B35',
+    borderRadius: 2,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    gap: 6,
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#FFF',
   },
   loadingContainer: {
     flex: 1,
@@ -1260,20 +1479,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   header: {
-    paddingTop: 60,
-    paddingBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
     backgroundColor: 'transparent',
+    paddingHorizontal: 16,
   },
   headerTop: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 10,
+    position: 'relative',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center',
+    flex: 1,
   },
   headerButtons: {
     flexDirection: 'row',
@@ -1356,12 +1578,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     maxWidth: 100,
   },
+  messagesWrapper: {
+    flex: 1,
+    zIndex: 1, // Ensure messages are above background
+  },
   messagesContainer: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   messagesContent: {
+    flexGrow: 1,
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   messageContainer: {
     flexDirection: 'row',
@@ -1434,26 +1663,73 @@ const styles = StyleSheet.create({
   generatingText: {
     marginTop: 16,
     color: '#FFB86B',
-    fontSize: 16,
+  },
+  emptyMessagesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 40,
+  },
+  emptyMessagesText: {
+    fontSize: 18,
+    fontWeight: '600',
     textAlign: 'center',
+    marginTop: 16,
+  },
+  emptyMessagesSubText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
+    opacity: 0.8,
+  },
+  contextButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    zIndex: 2,
+  },
+  contextButtonText: {
+    fontSize: 12,
+    marginLeft: 6,
+    fontWeight: '600',
+  },
+  videoButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FF6B35',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 16,
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    paddingBottom: Platform.OS === 'ios' ? 25 : 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: '#0A0A0C',
+    alignItems: 'center',
+    minHeight: 70,
+    backgroundColor: 'transparent',
   },
   input: {
     flex: 1,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
     marginRight: 8,
-    color: '#FFF',
     fontSize: 16,
-    maxHeight: 100,
+    minHeight: 40,
+    maxHeight: 120,
+    textAlignVertical: 'center',
   },
   sendButton: {
     width: 48,

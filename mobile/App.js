@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, ScrollView, Platform } from 'react-native';
-import { SafeLinearGradient, OuraBackgroundGradient } from './components/SafeLinearGradient';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeLinearGradient } from './components/SafeLinearGradient';
 import { Ionicons } from '@expo/vector-icons';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebaseConfig';
@@ -8,8 +9,7 @@ import { ThemeProvider, useTheme, themedStyles } from './contexts/ThemeContext';
 import { UserContextProvider } from './contexts/UserContextProvider';
 import useUserContext from './hooks/useUserContext';
 import ContextModal from './components/ContextModal';
-import { colors, animations, theme } from './utils/designTokens';
-import { GlassContainer } from './components/GlassmorphismComponents';
+import { colors } from './utils/designTokens';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import EnhancedAIWorkoutChat from './screens/EnhancedAIWorkoutChat';
@@ -23,6 +23,9 @@ import MockupWorkoutScreen from './screens/MockupWorkoutScreen';
 import WorkoutResultsScreen from './screens/WorkoutResultsScreen';
 import healthService from './services/healthService';
 import sessionContextManager from './services/sessionContextManager';
+import { TransitionProvider } from './components/animations';
+import StrengthDesignLoader from './components/visualizations/StrengthDesignLoader';
+import AnimationManager from './utils/AnimationManager';
 
 // Enhanced authenticated app with theme integration and context awareness
 function AuthenticatedApp() {
@@ -203,6 +206,7 @@ function AuthenticatedApp() {
         locations={[0, 0.5, 1]}
       >
         <View style={styles.screenContainer}>
+          {/* App Logo removed globally */}
           {renderScreen()}
         </View>
       </SafeLinearGradient>
@@ -221,54 +225,151 @@ function AuthenticatedApp() {
         }}
       />
       
-      {/* Clean Tab Bar */}
-      <View style={[tabBarStyles, { 
+      {/* Modern Compact Tab Bar with Neon Glow */}
+      <View style={{ 
         flexDirection: 'row',
-        backgroundColor: theme.isDarkMode ? '#1A1A1A' : '#FFFFFF',
-        borderTopWidth: 1,
-        borderTopColor: theme.isDarkMode ? '#333' : '#E0E0E0',
-      }]}>
-        {['Home', 'Workouts', 'Search', 'Profile', 'Generator'].map((tab) => {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: Platform.OS === 'ios' ? 65 : 55,
+        backgroundColor: theme.isDarkMode ? 'rgba(10, 10, 10, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+        borderTopWidth: 0.5,
+        borderTopColor: theme.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+        paddingBottom: Platform.OS === 'ios' ? 20 : 5,
+        paddingTop: 5,
+      }}>
+        {['Home', 'Programs', 'Generator', 'Search', 'Profile'].map((tab) => {
           const icons = {
-            Home: currentScreen === 'Home' ? 'home' : 'home-outline',
-            Generator: currentScreen === 'Generator' ? 'sparkles' : 'sparkles-outline',
-            Search: currentScreen === 'Search' ? 'search' : 'search-outline',
-            Workouts: currentScreen === 'Workouts' ? 'calendar' : 'calendar-outline',
-            Profile: currentScreen === 'Profile' ? 'person' : 'person-outline',
+            Home: 'home',
+            Generator: 'sparkles',
+            Search: 'search',
+            Programs: 'library',
+            Profile: 'person',
           };
           
-          const isActive = currentScreen === tab;
-          const activeColor = '#4CAF50';  // Green for active
-          const inactiveColor = theme.isDarkMode ? '#888' : '#666';
+          // Handle multiple screen names for same tab
+          const isActive = 
+            (tab === 'Generator' && ['Generator', 'ContextAwareGenerator', 'WorkoutGenerator'].includes(currentScreen)) ||
+            (tab === 'Programs' && ['Workouts', 'MockupWorkout', 'WorkoutResults'].includes(currentScreen)) ||
+            currentScreen === tab;
+          
+          // Neon colors for each tab
+          const neonColors = {
+            Home: '#00F0FF',      // Cyan
+            Generator: '#00FF88',  // Green
+            Search: '#FF00F0',     // Magenta
+            Programs: '#FFD700',   // Gold
+            Profile: '#FF6B35',    // Orange
+          };
+          
+          const activeColor = neonColors[tab];
+          const inactiveColor = theme.isDarkMode ? '#666' : '#999';
           
           return (
             <TouchableOpacity
               key={tab}
               style={{
-                flex: 1,
+                flex: tab === 'Generator' ? 1.2 : 1,
                 alignItems: 'center',
                 justifyContent: 'center',
-                paddingVertical: 10,
-                paddingTop: 12,
+                paddingVertical: 4,
               }}
-              onPress={() => handleNavigation(tab)}
-              activeOpacity={0.7}
+              onPress={() => handleNavigation(tab === 'Programs' ? 'Workouts' : tab)}
+              activeOpacity={0.8}
             >
-              <Ionicons 
-                name={icons[tab]} 
-                size={24} 
-                color={isActive ? activeColor : inactiveColor}
-                style={{ marginBottom: 4 }}
-              />
-              <Text 
-                style={{
-                  fontSize: 11,
-                  color: isActive ? activeColor : inactiveColor,
-                  fontWeight: isActive ? '600' : '400',
-                }}
-              >
-                {tab}
-              </Text>
+              {/* Neon Glow Effect for Active Tab */}
+              {isActive && tab === 'Generator' && (
+                <View style={{
+                  position: 'absolute',
+                  top: -3,
+                  width: '90%',
+                  height: 3,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                }}>
+                  <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: '#00FF88',
+                    shadowColor: '#00FF88',
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: 1,
+                    shadowRadius: 12,
+                    elevation: 10,
+                  }} />
+                  {/* Rainbow gradient overlay */}
+                  <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    flexDirection: 'row',
+                  }}>
+                    <View style={{ flex: 1, backgroundColor: '#FF0000', opacity: 0.8 }} />
+                    <View style={{ flex: 1, backgroundColor: '#FF7F00', opacity: 0.8 }} />
+                    <View style={{ flex: 1, backgroundColor: '#FFFF00', opacity: 0.8 }} />
+                    <View style={{ flex: 1, backgroundColor: '#00FF00', opacity: 0.8 }} />
+                    <View style={{ flex: 1, backgroundColor: '#0000FF', opacity: 0.8 }} />
+                    <View style={{ flex: 1, backgroundColor: '#4B0082', opacity: 0.8 }} />
+                    <View style={{ flex: 1, backgroundColor: '#9400D3', opacity: 0.8 }} />
+                  </View>
+                </View>
+              )}
+              {isActive && tab !== 'Generator' && (
+                <View style={{
+                  position: 'absolute',
+                  top: -2,
+                  width: '80%',
+                  height: 2,
+                  backgroundColor: activeColor,
+                  shadowColor: activeColor,
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 1,
+                  shadowRadius: 8,
+                  elevation: 10,
+                }} />
+              )}
+              
+              <View style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: tab === 'Generator' ? [{ scale: 1.1 }] : [],
+              }}>
+                <Ionicons 
+                  name={isActive ? icons[tab] : `${icons[tab]}-outline`} 
+                  size={tab === 'Generator' ? 26 : 22} 
+                  color={isActive && tab === 'Generator' ? '#FFFFFF' : (isActive ? activeColor : inactiveColor)}
+                  style={{ 
+                    marginBottom: 2,
+                    ...(isActive && {
+                      shadowColor: activeColor,
+                      shadowOffset: { width: 0, height: 0 },
+                      shadowOpacity: 0.8,
+                      shadowRadius: 4,
+                    })
+                  }}
+                />
+                <Text 
+                  style={{
+                    fontSize: tab === 'Generator' ? 11 : 10,
+                    color: isActive && tab === 'Generator' ? '#FFFFFF' : (isActive ? activeColor : inactiveColor),
+                    fontWeight: isActive ? (tab === 'Generator' ? '700' : '600') : '400',
+                    ...(isActive && theme.isDarkMode && {
+                      textShadowColor: activeColor,
+                      textShadowOffset: { width: 0, height: 0 },
+                      textShadowRadius: 3,
+                    })
+                  }}
+                >
+                  {tab}
+                </Text>
+              </View>
+              
             </TouchableOpacity>
           );
         })}
@@ -284,67 +385,53 @@ function AppWithTheme() {
   const theme = useTheme();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      console.log('🔥 Auth state changed:', user?.email);
-    });
-
-    return unsubscribe;
+    // Cleanup animations on unmount
+    return () => {
+      AnimationManager.stopAll();
+    };
   }, []);
 
-  // Theme-aware loading screen styles with unified gradients
-  const loadingStyles = themedStyles(({ theme: themeObj, typography, isDarkMode }) => {
-    const currentThemeMode = isDarkMode ? 'dark' : 'light';
-    const gradientColors = colors.gradients.background[currentThemeMode]?.primary || 
-                          (isDarkMode ? colors.gradients.background.dark.primary : colors.gradients.background.light.primary);
+  useEffect(() => {
+    // Optimized loader timing
+    const minLoaderDuration = 3500; // 3.5 seconds for smooth experience
+    const startTime = Date.now();
+    let timeoutId;
+    
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       
-    return {
-      container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      text: {
-        color: themeObj.text,
-        marginTop: 16,
-        fontSize: typography?.fontSize?.lg || 17,
-        fontWeight: typography?.fontWeight?.medium || '500',
-        textAlign: 'center',
-      },
-      gradientColors,
-    };
-  });
+      // Calculate remaining time to meet minimum duration
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(100, minLoaderDuration - elapsedTime);
+      
+      // Delay hiding loader to ensure smooth transition
+      timeoutId = setTimeout(() => {
+        setLoading(false);
+      }, remainingTime);
+    });
 
-  // Show theme-aware loading screen
-  if (loading || theme.isLoading) {
+    return () => {
+      unsubscribe();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
+  // Show StrengthDesignLoader with signature S.D. pixel animation during initial load
+  if (loading) {
     return (
-      <SafeLinearGradient
-        colors={loadingStyles.gradientColors}
-        fallbackColors={theme.isDarkMode ? ['#000000', '#0A0A0A', '#141414'] : ['#FFFFFF', '#F8F9FA', '#F0F1F3']}
-        style={[styles.container, loadingStyles.container]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        locations={[0, 0.5, 1]}
-      >
-        <GlassContainer 
-          variant="medium" 
-          style={{ 
-            padding: 32, 
-            alignItems: 'center',
-            minWidth: 200,
-          }}
-        >
-          <ActivityIndicator 
-            size="large" 
-            color={theme.theme?.primary || '#FF6B35'} 
-          />
-          <Text style={loadingStyles.text}>Loading...</Text>
-          {theme.isTransitioning && (
-            <Text style={[loadingStyles.text, { fontSize: 12, marginTop: 8 }]}>Switching theme...</Text>
-          )}
-        </GlassContainer>
-      </SafeLinearGradient>
+      <StrengthDesignLoader 
+        duration={4000}
+        colors={['#FF6B35', '#00F0FF', '#00FF88', '#FFD700']}
+        animationType="spiral"
+        pattern="strengthLogo"
+        intensity={1.0}
+        size={300}
+        isVisible={true}
+        onComplete={() => {
+          // Clean transition
+          AnimationManager.stopAll();
+        }}
+      />
     );
   }
 
@@ -357,11 +444,15 @@ function AppWithTheme() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <UserContextProvider>
-        <AppWithTheme />
-      </UserContextProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <UserContextProvider>
+          <TransitionProvider>
+            <AppWithTheme />
+          </TransitionProvider>
+        </UserContextProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

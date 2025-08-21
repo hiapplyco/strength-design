@@ -15,15 +15,19 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  Platform
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { GlassSearchInput } from './GlassSearchInput';
+import { useTheme } from '../contexts/ThemeContext';
 // Note: expo-blur might need to be installed: npx expo install expo-blur
 // For now, we'll use a fallback that doesn't require expo-blur
 // import { BlurView } from 'expo-blur';
-import PerplexitySearchService from '../services/PerplexitySearchService';
+import programSearchService from '../services/ProgramSearchService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -33,6 +37,7 @@ export default function ProgramSearchModal({
   onProgramSelect,
   navigation 
 }) {
+  const { theme, isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,28 +48,6 @@ export default function ProgramSearchModal({
     duration: 'any'
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
-
-  useEffect(() => {
-    // Check if API key is configured
-    // In production, this would check environment variables or secure storage
-    const checkApiKey = async () => {
-      try {
-        // Configure the Perplexity API key
-        const apiKey = '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';
-        PerplexitySearchService.setApiKey(apiKey);
-        setApiKeyConfigured(true); // API key is now configured
-        console.log('✅ Perplexity API configured successfully');
-      } catch (error) {
-        console.error('Error checking API configuration:', error);
-        setApiKeyConfigured(false);
-      }
-    };
-
-    if (visible) {
-      checkApiKey();
-    }
-  }, [visible]);
 
   const filterOptions = {
     experienceLevel: ['any', 'beginner', 'intermediate', 'advanced'],
@@ -79,17 +62,24 @@ export default function ProgramSearchModal({
       return;
     }
 
-    // API key is now configured, proceed with real search
-    // Remove the demo results fallback since we have a real API key
-
     setLoading(true);
     try {
       // Validate search query
-      if (searchQuery.length < 3) {
-        throw new Error('Search term must be at least 3 characters long');
+      if (searchQuery.length < 2) {
+        throw new Error('Search term must be at least 2 characters long');
       }
 
-      const results = await PerplexitySearchService.searchPrograms(searchQuery, selectedFilters);
+      // Call Firebase Function through the service
+      const response = await programSearchService.searchPrograms(searchQuery, {
+        searchType: 'general',
+        focus: selectedFilters.goals !== 'any' ? [selectedFilters.goals] : [],
+        difficulty: selectedFilters.experienceLevel !== 'any' ? selectedFilters.experienceLevel : undefined,
+        duration: selectedFilters.duration !== 'any' ? selectedFilters.duration : undefined,
+        equipment: selectedFilters.equipment !== 'any' ? [selectedFilters.equipment] : []
+      });
+      
+      // Extract programs from response
+      const results = response.programs || [];
       
       // Validate results
       if (!Array.isArray(results)) {
@@ -123,130 +113,72 @@ export default function ProgramSearchModal({
       }
 
       Alert.alert('Search Error', errorMessage);
-      
-      // Show demo results as fallback
-      if (searchResults.length === 0) {
-        console.log('Showing demo results as fallback');
-        showDemoResults();
-      }
+      setSearchResults([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const showDemoResults = () => {
-    // Demo results for development and testing
-    const demoResults = [
-      {
-        id: 'demo1',
-        name: "Jim Wendler's 5/3/1",
-        creator: 'Jim Wendler (Powerlifting Coach)',
-        goals: 'Strength Building',
-        experienceLevel: 'Intermediate to Advanced',
-        duration: '4-week cycles, ongoing',
-        credibilityScore: 9,
-        methodology: 'Progressive percentage-based training with assistance work',
-        structure: '4 main lifts per cycle, 3 training days per week',
-        source: 'Elite FTS, Multiple Publications'
-      },
-      {
-        id: 'demo2',
-        name: 'StrongLifts 5x5',
-        creator: 'Mehdi Hadim (Certified Trainer)',
-        goals: 'Beginner Strength',
-        experienceLevel: 'Beginner',
-        duration: '12+ weeks',
-        credibilityScore: 8,
-        methodology: 'Linear progression with compound movements',
-        structure: '5 sets of 5 reps, 3 days per week',
-        source: 'StrongLifts.com'
-      },
-      {
-        id: 'demo3',
-        name: 'Upper/Lower Split',
-        creator: 'Lyle McDonald (Exercise Physiologist)',
-        goals: 'Muscle Gain',
-        experienceLevel: 'Intermediate',
-        duration: '8-16 weeks',
-        credibilityScore: 9,
-        methodology: 'Volume-based training with optimal recovery',
-        structure: '4 days per week, alternating upper and lower body',
-        source: 'Body Recomposition'
-      },
-      {
-        id: 'demo4',
-        name: 'Push Pull Legs (PPL)',
-        creator: 'Jeff Nippard (Science-based Training)',
-        goals: 'Hypertrophy & Strength',
-        experienceLevel: 'Intermediate to Advanced',
-        duration: '6-12 weeks',
-        credibilityScore: 9,
-        methodology: 'High frequency training with scientific periodization',
-        structure: '6 days per week, push/pull/legs rotation',
-        source: 'Jeff Nippard Programs'
-      },
-      {
-        id: 'demo5',
-        name: 'Couch to 5K',
-        creator: 'Josh Clark (Running Coach)',
-        goals: 'Cardiovascular Endurance',
-        experienceLevel: 'Beginner',
-        duration: '9 weeks',
-        credibilityScore: 8,
-        methodology: 'Gradual run/walk intervals building to continuous running',
-        structure: '3 days per week, 30-minute sessions',
-        source: 'Cool Running, NHS, Multiple Health Organizations'
-      }
-    ];
-
-    // Filter demo results based on search query and filters
-    let filteredResults = demoResults;
-    
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filteredResults = filteredResults.filter(program => 
-        program.name.toLowerCase().includes(query) ||
-        program.goals.toLowerCase().includes(query) ||
-        program.methodology.toLowerCase().includes(query)
-      );
-    }
-
-    setSearchResults(filteredResults);
-  };
 
   const selectProgram = async (program) => {
     try {
       Alert.alert(
         'Use This Program?',
-        `Do you want to use "${program.name}" by ${program.creator} as a starting point for your workout generation?`,
+        `Do you want to use "${program.name}" as a starting point for your workout generation?`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
             text: 'Yes, Use This',
             onPress: async () => {
-              setLoading(true);
-              try {
-                // Get detailed program information
-                let programDetails = program;
+              // Ensure comprehensive program data is passed
+              const enrichedProgram = {
+                ...program,
+                // Core program information
+                name: program.name || 'Unknown Program',
+                creator: program.creator || program.source || 'Unknown',
+                description: program.description || program.overview || program.methodology || '',
                 
-                if (apiKeyConfigured) {
-                  programDetails = await PerplexitySearchService.getProgramDetails(
-                    program.name, 
-                    program.creator
-                  );
-                }
-
-                // Pass program to parent component
-                onProgramSelect(programDetails);
-                onClose();
-              } catch (error) {
-                console.error('Error getting program details:', error);
-                // Still pass the basic program info if detailed fetch fails
-                onProgramSelect(program);
-                onClose();
-              } finally {
-                setLoading(false);
-              }
+                // Program characteristics
+                focus: Array.isArray(program.focus) ? program.focus : (program.focus ? [program.focus] : ['General Fitness']),
+                difficulty: program.difficulty || program.experienceLevel || 'Beginner',
+                duration: program.duration || 'Variable',
+                popularity: program.popularity || program.credibilityScore || 85,
+                source: program.source || 'Perplexity Search',
+                
+                // Detailed program structure
+                exercises: program.exercises || program.workouts || program.structure || [],
+                equipment: Array.isArray(program.equipment) ? program.equipment : (program.equipment ? [program.equipment] : ['Basic gym equipment']),
+                schedule: program.schedule || program.frequency || '3-4 days per week',
+                
+                // Program methodology and principles
+                methodology: program.methodology || program.approach || program.principles || '',
+                goals: Array.isArray(program.goals) ? program.goals : (program.goals ? [program.goals] : program.focus || ['General Fitness']),
+                principles: program.principles || program.keyPoints || [],
+                
+                // Additional context for AI
+                overview: program.overview || program.description || '',
+                structure: program.structure || program.workouts || program.exercises || [],
+                experienceLevel: program.experienceLevel || program.difficulty || 'Beginner',
+                
+                // Selection metadata
+                selectedAt: new Date().toISOString(),
+                selectedFrom: 'ProgramSearchModal',
+                searchFilters: selectedFilters
+              };
+              
+              console.log('📋 Program selected with enriched data:', {
+                name: enrichedProgram.name,
+                hasExercises: Array.isArray(enrichedProgram.exercises) && enrichedProgram.exercises.length > 0,
+                hasStructure: Array.isArray(enrichedProgram.structure) && enrichedProgram.structure.length > 0,
+                hasMethodology: Boolean(enrichedProgram.methodology),
+                equipmentCount: Array.isArray(enrichedProgram.equipment) ? enrichedProgram.equipment.length : 0,
+                goalsCount: Array.isArray(enrichedProgram.goals) ? enrichedProgram.goals.length : 0,
+                hasPrinciples: Array.isArray(enrichedProgram.principles) && enrichedProgram.principles.length > 0
+              });
+              
+              // Pass enriched program to parent component
+              onProgramSelect(enrichedProgram);
+              onClose();
             }
           }
         ]
@@ -313,9 +245,9 @@ export default function ProgramSearchModal({
     </View>
   );
 
-  const renderProgramCard = (program) => (
+  const renderProgramCard = (program, index) => (
     <TouchableOpacity
-      key={program.id}
+      key={`${program.name}-${index}`}
       style={styles.programCard}
       onPress={() => selectProgram(program)}
       activeOpacity={0.8}
@@ -324,37 +256,37 @@ export default function ProgramSearchModal({
         colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
         style={styles.programCardGradient}
       >
-        {/* Credibility Score Badge */}
+        {/* Popularity Badge */}
         <View style={styles.credibilityBadge}>
           <Ionicons 
-            name="shield-checkmark" 
+            name="star" 
             size={16} 
-            color={program.credibilityScore >= 8 ? '#4CAF50' : '#FFB86B'} 
+            color={program.popularity >= 80 ? '#4CAF50' : '#FFB86B'} 
           />
           <Text style={[
             styles.credibilityScore,
-            { color: program.credibilityScore >= 8 ? '#4CAF50' : '#FFB86B' }
+            { color: program.popularity >= 80 ? '#4CAF50' : '#FFB86B' }
           ]}>
-            {program.credibilityScore}/10
+            {Math.round(program.popularity)}%
           </Text>
         </View>
 
         {/* Program Header */}
         <View style={styles.programHeader}>
           <Text style={styles.programName}>{program.name.replace(/\*\*/g, '')}</Text>
-          <Text style={styles.programCreator}>by {program.creator}</Text>
+          <Text style={styles.programCreator}>{program.source}</Text>
         </View>
 
         {/* Program Details */}
         <View style={styles.programDetails}>
           <View style={styles.detailRow}>
             <Ionicons name="target" size={16} color="#FFB86B" />
-            <Text style={styles.detailText}>{program.goals}</Text>
+            <Text style={styles.detailText}>{Array.isArray(program.focus) ? program.focus.join(', ') : 'General'}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Ionicons name="trending-up" size={16} color="#FFB86B" />
-            <Text style={styles.detailText}>{program.experienceLevel}</Text>
+            <Text style={styles.detailText}>{program.difficulty || 'All levels'}</Text>
           </View>
           
           <View style={styles.detailRow}>
@@ -363,9 +295,9 @@ export default function ProgramSearchModal({
           </View>
         </View>
 
-        {/* Program Methodology */}
+        {/* Program Overview */}
         <Text style={styles.programMethodology} numberOfLines={2}>
-          {program.methodology}
+          {program.overview || program.description}
         </Text>
 
         {/* Select Button */}
@@ -388,14 +320,31 @@ export default function ProgramSearchModal({
     </TouchableOpacity>
   );
 
-  const renderApiKeyWarning = () => (
-    <View style={styles.warningContainer}>
-      <Ionicons name="warning" size={24} color="#FFB86B" />
-      <Text style={styles.warningTitle}>Demo Mode</Text>
-      <Text style={styles.warningText}>
-        Perplexity API key not configured. Showing demo programs for testing.
-        {'\n\n'}To enable live search, configure your Perplexity API key in the app settings.
+  const renderSearchInfo = () => (
+    <View style={[styles.infoContainer, { 
+      backgroundColor: isDarkMode ? '#1C1C1E' : '#F5F5F5',
+      borderColor: isDarkMode ? '#4CAF5030' : '#4CAF5020'
+    }]}>
+      <View style={styles.infoGraphic}>
+        <Ionicons name="search" size={32} color="#4CAF50" />
+        <View style={styles.pulseCircle} />
+      </View>
+      <Text style={[styles.infoTitle, { color: isDarkMode ? '#FFF' : '#000' }]}>
+        Discover Proven Programs
       </Text>
+      <Text style={[styles.infoText, { color: isDarkMode ? '#AAA' : '#666' }]}>
+        Search thousands of workout programs from certified trainers and use them as templates for your personalized routine.
+      </Text>
+      <View style={styles.featuresRow}>
+        <View style={styles.featureItem}>
+          <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+          <Text style={styles.featureText}>Expert-designed</Text>
+        </View>
+        <View style={styles.featureItem}>
+          <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+          <Text style={styles.featureText}>Customizable</Text>
+        </View>
+      </View>
     </View>
   );
 
@@ -406,12 +355,17 @@ export default function ProgramSearchModal({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <LinearGradient
-            colors={['rgba(26, 26, 30, 0.95)', 'rgba(44, 44, 62, 0.95)']}
-            style={styles.modalContent}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView 
+            style={styles.modalContainer}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <LinearGradient
+                colors={['rgba(26, 26, 30, 0.95)', 'rgba(44, 44, 62, 0.95)']}
+                style={styles.modalContent}
+              >
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.headerLeft}>
@@ -423,8 +377,8 @@ export default function ProgramSearchModal({
               </TouchableOpacity>
             </View>
 
-            {/* API Key Warning */}
-            {!apiKeyConfigured && renderApiKeyWarning()}
+            {/* Search Info */}
+            {searchResults.length === 0 && !loading && renderSearchInfo()}
 
             {/* Search Section */}
             <View style={styles.searchSection}>
@@ -486,7 +440,7 @@ export default function ProgramSearchModal({
                   <Text style={styles.resultsHeader}>
                     Found {searchResults.length} Program{searchResults.length !== 1 ? 's' : ''}
                   </Text>
-                  {searchResults.map(renderProgramCard)}
+                  {searchResults.map((program, index) => renderProgramCard(program, index))}
                 </View>
               ) : (
                 <View style={styles.emptyState}>
@@ -499,9 +453,11 @@ export default function ProgramSearchModal({
                 </View>
               )}
             </ScrollView>
-          </LinearGradient>
+              </LinearGradient>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
@@ -545,27 +501,55 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 4,
   },
-  warningContainer: {
-    backgroundColor: 'rgba(255, 184, 107, 0.1)',
+  infoContainer: {
     margin: 16,
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 184, 107, 0.3)',
     alignItems: 'center',
   },
-  warningTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFB86B',
-    marginTop: 8,
+  infoGraphic: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    position: 'relative',
   },
-  warningText: {
+  pulseCircle: {
+    position: 'absolute',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+    transform: [{ scale: 1.5 }],
+  },
+  infoTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  infoText: {
     fontSize: 14,
-    color: '#FFF',
     textAlign: 'center',
-    marginTop: 8,
     lineHeight: 20,
+    marginBottom: 16,
+  },
+  featuresRow: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  featureText: {
+    fontSize: 12,
+    color: '#4CAF50',
+    fontWeight: '600',
   },
   searchSection: {
     padding: 16,

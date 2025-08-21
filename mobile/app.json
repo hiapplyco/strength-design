@@ -4,33 +4,39 @@
     "slug": "mobile-working",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/sdlogo.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/sdlogo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0A0B0D"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jms.strengthdesign",
+      "entitlements": {
+        "com.apple.developer.healthkit": true
+      },
       "infoPlist": {
         "NSHealthShareUsageDescription": "This app uses Apple Health to track your workouts and fitness progress.",
-        "NSHealthUpdateUsageDescription": "This app saves workout data to Apple Health to help you track your fitness journey."
+        "NSHealthUpdateUsageDescription": "This app saves workout data to Apple Health to help you track your fitness journey.",
+        "NSCalendarsUsageDescription": "This app needs access to your calendar to schedule workout reminders and track your training schedule.",
+        "NSRemindersUsageDescription": "This app uses reminders to help you stay on track with your fitness goals.",
+        "UIRequiredDeviceCapabilities": ["healthkit"]
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0A0B0D"
+        "foregroundImage": "./assets/sdlogo.png",
+        "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.strengthdesign.app",
       "permissions": ["android.permission.ACTIVITY_RECOGNITION"]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/sdlogo.png"
     },
     "extra": {
       "eas": {

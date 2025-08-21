@@ -11,20 +11,20 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Dimensions,
   RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { functions, db, auth } from '../firebaseConfig';
 import { collection, addDoc, doc, setDoc, getDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import contextAggregator from '../services/contextAggregator';
 import healthService from '../services/healthService';
 import MarkdownRenderer from '../components/MarkdownRenderer';
-import DailyWorkoutCard from '../components/DailyWorkoutCard';
+import GlobalContextStatusLine from '../components/GlobalContextStatusLine';
 
-const { width: screenWidth } = Dimensions.get('window');
 
 export default function ContextAwareGeneratorScreen({ navigation, route }) {
   const [messages, setMessages] = useState([]);
@@ -34,12 +34,10 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [userContext, setUserContext] = useState(null);
   const [contextLoading, setContextLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('chat'); // 'chat', 'preview', 'cards'
   const [generatedPlan, setGeneratedPlan] = useState(null);
   const [showContextPanel, setShowContextPanel] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [cachedResponses, setCachedResponses] = useState({});
-  const [selectedDay, setSelectedDay] = useState(0);
   const [programContext, setProgramContext] = useState(null);
   
   const scrollViewRef = useRef();
@@ -53,6 +51,9 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
       setProgramContext(route.params.programContext);
     }
     
+    // Clear old cached messages on mount
+    AsyncStorage.removeItem('chatCache').catch(() => {});
+    
     initializeChat();
     loadCachedResponses();
   }, [route?.params]);
@@ -61,13 +62,24 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
     try {
       setContextLoading(true);
       
+      // Show initial analyzing message
+      setMessages([{ 
+        role: 'assistant', 
+        content: '🔍 **Analyzing your context...**\n\nI\'m gathering information from:\n• Your profile and fitness goals\n• Exercise preferences and favorites\n• Workout history and patterns\n• Health data and biometrics\n• Previous chat conversations\n• Selected programs and preferences\n\nThis helps me create truly personalized workout plans tailored specifically to you...' 
+      }]);
+      
       // Load user context with program context if available
       const context = await contextAggregator.getContext();
       const contextWithProgram = contextAggregator.buildContext(programContext);
       setUserContext(contextWithProgram);
       
+      // Wait a moment for effect, then show personalized greeting
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       // Generate personalized greeting
-      const greeting = generatePersonalizedGreeting(contextWithProgram, programContext);
+      let greeting = generatePersonalizedGreeting(contextWithProgram, programContext);
+      // Remove any old button references that might be cached
+      greeting = greeting.replace(/Browse.*?Profile/gs, '').replace(/\n\n+/g, '\n\n');
       setMessages([{ role: 'assistant', content: greeting }]);
       
       // Animate entry
@@ -173,11 +185,11 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
       greeting += '\n';
     }
     
-    greeting += `**How can I help you today?**\n`;
-    greeting += `• Generate a new workout plan\n`;
-    greeting += `• Adjust your current program\n`;
-    greeting += `• Get nutrition guidance\n`;
-    greeting += `• Review your progress\n`;
+    greeting += `**How can I help you today?**\n\n`;
+    greeting += `💪 Generate a personalized workout\n`;
+    greeting += `🔧 Adjust your current program\n`;
+    greeting += `🥗 Get nutrition guidance\n`;
+    greeting += `📊 Review your progress`;
     
     return greeting;
   };
@@ -257,67 +269,22 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
       // Prepare context-enhanced prompt
       const enhancedPrompt = await prepareEnhancedPrompt(userMessage, newMessages);
       
-      // Call streaming chat function
-      // Use emulator URL in development with demo project
-      const functionsUrl = 'http://localhost:5001/demo-strength-design/us-central1';
+      // Use Firebase callable function for chat
+      const chatFunction = httpsCallable(functions, 'chatWithGemini');
       
-      // Get auth token
-      const user = auth.currentUser;
-      const token = user ? await user.getIdToken() : null;
-      
-      const response = await fetch(`${functionsUrl}/streamingChatEnhanced`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({
-          message: enhancedPrompt,
-          context: userContext,
-          history: newMessages.slice(-10), // Last 10 messages for context
-        }),
+      // Call the function with enhanced context
+      const result = await chatFunction({
+        message: enhancedPrompt,
+        context: userContext,
+        history: newMessages.slice(-10), // Last 10 messages for context
       });
       
-      if (!response.ok) throw new Error('Network response was not ok');
+      // Get the response from the function
+      const fullResponse = result.data?.response || result.data || '';
       
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = '';
-      let buffer = '';
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-        
-        // Process SSE format
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep incomplete line in buffer
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') break;
-            
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.text) {
-                fullResponse += parsed.text;
-                setStreamingMessage(fullResponse);
-                // Auto-scroll to bottom
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-              }
-            } catch (e) {
-              // Not JSON, treat as plain text
-              fullResponse += data;
-              setStreamingMessage(fullResponse);
-            }
-          }
-        }
-      }
+      // Show the response immediately (no streaming for now)
+      setStreamingMessage(fullResponse);
+      scrollViewRef.current?.scrollToEnd({ animated: true });
       
       // Process structured response if it contains workout data
       const structuredData = extractStructuredData(fullResponse);
@@ -333,11 +300,12 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
       setMessages(prev => [...prev, { role: 'assistant', content: fullResponse }]);
       
     } catch (error) {
-      console.error('Error in chat:', error);
-      Alert.alert('Error', 'Failed to get response. Please try again.');
+      console.error('Chat error:', error);
+      const errorMessage = error.message || 'Failed to get response';
+      Alert.alert('Chat Error', `Error: HTTP error! status: 500`);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'I apologize, but I encountered an error. Please try again or check your connection.' 
+        content: `❌ Sorry, I encountered an error: ${errorMessage}\n\nPlease try again or check your connection.` 
       }]);
     } finally {
       setLoading(false);
@@ -515,96 +483,45 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
   };
 
   const renderContextPanel = () => {
-    if (!userContext) return null;
+    if (!userContext || !showContextPanel) return null;
     
     return (
       <Animated.View style={[styles.contextPanel, { transform: [{ translateY: slideAnim }] }]}>
-        <TouchableOpacity 
-          style={styles.contextHeader}
-          onPress={() => setShowContextPanel(!showContextPanel)}
-        >
-          <Text style={styles.contextTitle}>Your Context</Text>
-          <Ionicons 
-            name={showContextPanel ? 'chevron-up' : 'chevron-down'} 
-            size={20} 
-            color="#FFB86B" 
-          />
-        </TouchableOpacity>
-        
-        {showContextPanel && (
-          <View style={styles.contextContent}>
-            <View style={styles.contextRow}>
-              <Text style={styles.contextLabel}>Level:</Text>
-              <Text style={styles.contextValue}>
-                {userContext.user?.experienceLevel || 'Not set'}
-              </Text>
-            </View>
-            
-            <View style={styles.contextRow}>
-              <Text style={styles.contextLabel}>Consistency:</Text>
-              <Text style={styles.contextValue}>
-                {Math.round((userContext.performance?.consistency || 0) * 100)}%
-              </Text>
-            </View>
-            
-            <View style={styles.contextRow}>
-              <Text style={styles.contextLabel}>Progress:</Text>
-              <Text style={styles.contextValue}>
-                {Math.round(userContext.performance?.overallProgress || 0)}%
-              </Text>
-            </View>
-            
-            <View style={styles.contextRow}>
-              <Text style={styles.contextLabel}>Recovery:</Text>
-              <Text style={styles.contextValue}>
-                {userContext.performance?.recoveryScore || 0}/100
-              </Text>
-            </View>
-            
-            {userContext.health?.isConnected && (
-              <View style={styles.contextRow}>
-                <Text style={styles.contextLabel}>Today's Steps:</Text>
-                <Text style={styles.contextValue}>
-                  {userContext.health.today?.steps?.toLocaleString() || '0'}
-                </Text>
-              </View>
-            )}
+        <View style={styles.contextContent}>
+          <View style={styles.contextRow}>
+            <Text style={styles.contextLabel}>Level:</Text>
+            <Text style={styles.contextValue}>
+              {userContext.user?.experienceLevel || 'Not set'}
+            </Text>
           </View>
-        )}
+          
+          <View style={styles.contextRow}>
+            <Text style={styles.contextLabel}>Consistency:</Text>
+            <Text style={styles.contextValue}>
+              {Math.round((userContext.performance?.consistency || 0) * 100)}%
+            </Text>
+          </View>
+          
+          <View style={styles.contextRow}>
+            <Text style={styles.contextLabel}>Progress:</Text>
+            <Text style={styles.contextValue}>
+              {Math.round(userContext.performance?.overallProgress || 0)}%
+            </Text>
+          </View>
+          
+          {userContext.health?.isConnected && (
+            <View style={styles.contextRow}>
+              <Text style={styles.contextLabel}>Today's Steps:</Text>
+              <Text style={styles.contextValue}>
+                {userContext.health.today?.steps?.toLocaleString() || '0'}
+              </Text>
+            </View>
+          )}
+        </View>
       </Animated.View>
     );
   };
 
-  const renderWorkoutCards = () => {
-    if (!generatedPlan || !generatedPlan.dailyPlans) return null;
-    
-    return (
-      <ScrollView 
-        horizontal 
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        style={styles.cardsContainer}
-      >
-        {generatedPlan.dailyPlans.map((day, index) => (
-          <View key={index} style={styles.cardWrapper}>
-            <DailyWorkoutCard
-              day={day}
-              dayIndex={index}
-              onComplete={async (workoutData) => {
-                // Save completed workout
-                await healthService.syncWorkout(workoutData);
-                Alert.alert('Great job!', 'Workout completed and synced!');
-              }}
-              onSchedule={() => {
-                // Handle scheduling
-                navigation.navigate('Schedule', { workout: day });
-              }}
-            />
-          </View>
-        ))}
-      </ScrollView>
-    );
-  };
 
   if (contextLoading) {
     return (
@@ -616,163 +533,152 @@ export default function ContextAwareGeneratorScreen({ navigation, route }) {
   }
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={styles.container}>
       <LinearGradient
         colors={['#0A0B0D', '#1A1B1E']}
-        style={styles.gradient}
+        style={StyleSheet.absoluteFillObject}
+      />
+      
+      {/* Global Context Status Line */}
+      <GlobalContextStatusLine navigation={navigation} />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>GENERATOR</Text>
+        
+        <TouchableOpacity 
+          onPress={() => setShowContextPanel(!showContextPanel)}
+          style={styles.contextToggle}
+        >
+          <Ionicons 
+            name={showContextPanel ? 'information-circle' : 'information-circle-outline'} 
+            size={24} 
+            color="#FFB86B" 
+          />
+        </TouchableOpacity>
+      </View>
+      
+      {/* Context Panel */}
+      {renderContextPanel()}
+      
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="#F8F9FA" />
-          </TouchableOpacity>
-          
-          <Text style={styles.headerTitle}>AI Coach</Text>
-          
-          <View style={styles.headerActions}>
-            <TouchableOpacity 
-              onPress={() => setViewMode(viewMode === 'cards' ? 'chat' : 'cards')}
-              style={styles.headerButton}
-            >
-              <Ionicons 
-                name={viewMode === 'cards' ? 'chatbubbles' : 'albums'} 
-                size={24} 
-                color="#FFB86B" 
-              />
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={onRefresh}
-              style={styles.headerButton}
-            >
-              <Ionicons name="refresh" size={24} color="#FFB86B" />
-            </TouchableOpacity>
-          </View>
-        </View>
         
-        {/* Context Panel */}
-        {renderContextPanel()}
-        
-        {/* Main Content */}
-        {viewMode === 'chat' ? (
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.messagesContainer}
-            contentContainerStyle={styles.messagesContent}
-            keyboardShouldPersistTaps="handled"
-            automaticallyAdjustKeyboardInsets={true}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#FFB86B"
-              />
-            }
-          >
-            {messages.map((message, index) => (
-              <Animated.View
-                key={index}
-                style={[
-                  styles.messageWrapper,
-                  message.role === 'user' ? styles.userMessage : styles.assistantMessage,
-                  { opacity: fadeAnim }
-                ]}
-              >
-                {message.role === 'assistant' && (
-                  <View style={styles.avatarContainer}>
-                    <LinearGradient
-                      colors={['#FFB86B', '#FF7E87']}
-                      style={styles.avatar}
-                    >
-                      <Ionicons name="fitness" size={16} color="#FFF" />
-                    </LinearGradient>
-                  </View>
-                )}
-                
-                <View style={[
-                  styles.messageBubble,
-                  message.role === 'user' ? styles.userBubble : styles.assistantBubble
-                ]}>
-                  {message.role === 'assistant' ? (
-                    <MarkdownRenderer content={message.content} />
-                  ) : (
-                    <Text style={styles.messageText}>{message.content}</Text>
-                  )}
-                </View>
-              </Animated.View>
-            ))}
-            
-            {isStreaming && streamingMessage && (
-              <View style={[styles.messageWrapper, styles.assistantMessage]}>
-                <View style={styles.avatarContainer}>
-                  <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                    <LinearGradient
-                      colors={['#FFB86B', '#FF7E87']}
-                      style={styles.avatar}
-                    >
-                      <Ionicons name="fitness" size={16} color="#FFF" />
-                    </LinearGradient>
-                  </Animated.View>
-                </View>
-                
-                <View style={[styles.messageBubble, styles.assistantBubble]}>
-                  <MarkdownRenderer content={streamingMessage} />
-                </View>
-              </View>
-            )}
-            
-            {loading && !isStreaming && (
-              <View style={styles.typingIndicator}>
-                <ActivityIndicator size="small" color="#FFB86B" />
-                <Text style={styles.typingText}>AI is thinking...</Text>
-              </View>
-            )}
-          </ScrollView>
-        ) : (
-          renderWorkoutCards()
-        )}
-        
-        {/* Input Area */}
-        {viewMode === 'chat' && (
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={input}
-              onChangeText={setInput}
-              placeholder="Ask me anything about fitness..."
-              placeholderTextColor="#666"
-              multiline
-              maxHeight={100}
+        {/* Main Content */}        
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.messagesContainer}
+          contentContainerStyle={styles.messagesContent}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets={true}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#FFB86B"
             />
-            
-            <TouchableOpacity
-              style={[styles.sendButton, loading && styles.sendButtonDisabled]}
-              onPress={handleSend}
-              disabled={loading || !input.trim()}
+          }
+        >
+          {messages.map((message, index) => (
+            <Animated.View
+              key={index}
+              style={[
+                styles.messageWrapper,
+                message.role === 'user' ? styles.userMessage : styles.assistantMessage,
+                { opacity: fadeAnim }
+              ]}
             >
-              <LinearGradient
-                colors={loading ? ['#666', '#555'] : ['#FFB86B', '#FF7E87']}
-                style={styles.sendButtonGradient}
-              >
-                <Ionicons name="send" size={20} color="#FFF" />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        )}
-      </LinearGradient>
-    </KeyboardAvoidingView>
+              {message.role === 'assistant' && (
+                <View style={styles.avatarContainer}>
+                  <LinearGradient
+                    colors={['#FFB86B', '#FF7E87']}
+                    style={styles.avatar}
+                  >
+                    <Ionicons name="fitness" size={16} color="#FFF" />
+                  </LinearGradient>
+                </View>
+              )}
+              
+              <View style={[
+                styles.messageBubble,
+                message.role === 'user' ? styles.userBubble : styles.assistantBubble
+              ]}>
+                {message.role === 'assistant' ? (
+                  <MarkdownRenderer content={message.content.replace(/Browse.*?Profile/gs, '').replace(/\n\n+/g, '\n\n')} />
+                ) : (
+                  <Text style={styles.messageText}>{message.content}</Text>
+                )}
+              </View>
+            </Animated.View>
+          ))}
+          
+          {isStreaming && streamingMessage && (
+            <View style={[styles.messageWrapper, styles.assistantMessage]}>
+              <View style={styles.avatarContainer}>
+                <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                  <LinearGradient
+                    colors={['#FFB86B', '#FF7E87']}
+                    style={styles.avatar}
+                  >
+                    <Ionicons name="fitness" size={16} color="#FFF" />
+                  </LinearGradient>
+                </Animated.View>
+              </View>
+              
+              <View style={[styles.messageBubble, styles.assistantBubble]}>
+                <MarkdownRenderer content={streamingMessage} />
+              </View>
+            </View>
+          )}
+          
+          {loading && !isStreaming && (
+            <View style={styles.typingIndicator}>
+              <ActivityIndicator size="small" color="#FFB86B" />
+              <Text style={styles.typingText}>AI is thinking...</Text>
+            </View>
+          )}
+        </ScrollView>
+        
+        {/* Input Area */}        
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Ask me anything about fitness..."
+            placeholderTextColor="#666"
+            multiline
+            maxHeight={100}
+          />
+          
+          <TouchableOpacity
+            style={[styles.sendButton, loading && styles.sendButtonDisabled]}
+            onPress={handleSend}
+            disabled={loading || !input.trim()}
+          >
+            <LinearGradient
+              colors={loading ? ['#666', '#555'] : ['#FFB86B', '#FF7E87']}
+              style={styles.sendButtonGradient}
+            >
+              <Ionicons name="send" size={20} color="#FFF" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: Platform.OS === 'ios' ? 65 : 55, // Account for tab bar height
   },
-  gradient: {
+  keyboardAvoid: {
     flex: 1,
   },
   loadingContainer: {
@@ -788,18 +694,26 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    paddingBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#2A2B2E',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#F8F9FA',
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#00F0FF',
+    textAlign: 'center',
+    letterSpacing: 1.5,
+    textShadowColor: '#00F0FF',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
+    fontFamily: Platform.select({
+      ios: 'Helvetica Neue',
+      android: 'sans-serif',
+    }),
   },
   headerActions: {
     flexDirection: 'row',
@@ -808,29 +722,23 @@ const styles = StyleSheet.create({
   headerButton: {
     padding: 5,
   },
+  contextToggle: {
+    position: 'absolute',
+    right: 20,
+    padding: 5,
+  },
   contextPanel: {
     backgroundColor: '#1A1B1E',
     marginHorizontal: 15,
-    marginTop: 10,
+    marginTop: 5,
+    marginBottom: 5,
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#2A2B2E',
   },
-  contextHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-  },
-  contextTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFB86B',
-  },
   contextContent: {
-    paddingHorizontal: 15,
-    paddingBottom: 15,
+    padding: 10,
   },
   contextRow: {
     flexDirection: 'row',
@@ -851,10 +759,11 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     paddingHorizontal: 15,
-    paddingVertical: 20,
+    paddingTop: 10,
+    paddingBottom: 15,
   },
   messageWrapper: {
-    marginBottom: 15,
+    marginBottom: 12,
     flexDirection: 'row',
   },
   userMessage: {
@@ -901,13 +810,6 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 13,
     marginLeft: 8,
-  },
-  cardsContainer: {
-    flex: 1,
-  },
-  cardWrapper: {
-    width: screenWidth - 30,
-    paddingHorizontal: 15,
   },
   inputContainer: {
     flexDirection: 'row',

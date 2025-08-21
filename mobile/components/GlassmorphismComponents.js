@@ -218,13 +218,7 @@ export const GlassContainer = memo(({
         style={StyleSheet.absoluteFillObject}
         disabled={disabled}
       />
-      <View style={{ 
-        backgroundColor: theme.isDarkMode 
-          ? 'rgba(255, 255, 255, 0.02)' 
-          : 'rgba(255, 255, 255, 0.25)',
-      }}>
-        {children}
-      </View>
+      {children}
     </Component>
   );
 });

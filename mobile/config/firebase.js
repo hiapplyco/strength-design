@@ -5,9 +5,20 @@
 
 import { Platform } from 'react-native';
 
-// Firebase Functions URL
-// Use production URL - local emulators are disabled
+// Firebase Functions URLs
+// Firebase Functions v2 have specific URLs per function
+// Use production URLs - local emulators are disabled
 export const FUNCTIONS_URL = 'https://us-central1-strength-design.cloudfunctions.net';
+
+// Function-specific URLs for v2 functions
+export const FUNCTION_URLS = {
+  enhancedChat: 'https://enhancedchat-ieybkt7vca-uc.a.run.app',
+  streamingChatEnhanced: 'https://streamingchatenhanced-ieybkt7vca-uc.a.run.app',
+  generateStructuredWorkout: 'https://generatestructuredworkout-ieybkt7vca-uc.a.run.app',
+  chatWithGemini: 'https://chatwithgemini-ieybkt7vca-uc.a.run.app',
+  generateWorkout: 'https://generateworkout-ieybkt7vca-uc.a.run.app',
+  searchPrograms: 'https://searchprograms-ieybkt7vca-uc.a.run.app',
+};
 
 // For local development with emulators (currently disabled)
 const LOCAL_FUNCTIONS_URL = Platform.select({

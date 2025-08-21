@@ -574,6 +574,13 @@ class SearchService {
       return 'The service is temporarily unavailable. Please try again later.';
     }
   }
+  
+  /**
+   * Get all exercises for debugging/fallback
+   */
+  getAllExercises() {
+    return this.exercisesDatabase;
+  }
 }
 
 // Export singleton instance

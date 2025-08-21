@@ -17,6 +17,7 @@ import { auth } from '../firebaseConfig';
 import { useTheme, themedStyles } from '../contexts/ThemeContext';
 import { GlassContainer, GlassCard, GlassButton } from '../components/GlassmorphismComponents';
 import { colors } from '../utils/designTokens';
+import { AppLogo } from '../components/AppLogo';
 
 export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -151,12 +152,12 @@ export default function LoginScreen({ onLogin }) {
         contentContainerStyle={scrollContentStyles}
         showsVerticalScrollIndicator={false}
       >
-        {/* Enhanced Header with Dark Subtle Gradient */}
+        {/* Enhanced Header with New Logo */}
         <View style={headerStyles}>
-          <Ionicons 
-            name="fitness" 
-            size={60} 
-            color={theme.isDarkMode ? '#FFB86B' : '#FF6B35'}
+          <AppLogo 
+            size="xlarge" 
+            showGlow={true}
+            style={{ marginBottom: 20 }}
           />
           <Text style={logoStyles}>Strength.Design</Text>
           <Text style={taglineStyles}>AI-Powered Fitness</Text>

@@ -155,21 +155,60 @@ class SessionContextManager {
   }
 
   /**
-   * Add program to session context
+   * Add program to session context with comprehensive data
    */
   async addProgram(program, source = 'unknown') {
     await this._ensureInitialized();
     
-    // Store the selected program (replace existing)
-    this.sessionContext.programs = [{
+    // Store the selected program with comprehensive data (replace existing)
+    const enrichedProgram = {
+      // Core program information
+      name: program.name || 'Unknown Program',
+      creator: program.creator || program.source || 'Unknown',
+      description: program.description || program.overview || program.methodology || '',
+      
+      // Program characteristics
+      focus: Array.isArray(program.focus) ? program.focus : (program.focus ? [program.focus] : ['General Fitness']),
+      difficulty: program.difficulty || program.experienceLevel || 'Beginner',
+      duration: program.duration || 'Variable',
+      popularity: program.popularity || program.credibilityScore || 85,
+      
+      // Detailed program structure
+      exercises: program.exercises || program.workouts || program.structure || [],
+      equipment: Array.isArray(program.equipment) ? program.equipment : (program.equipment ? [program.equipment] : ['Basic gym equipment']),
+      schedule: program.schedule || program.frequency || '3-4 days per week',
+      
+      // Program methodology and principles
+      methodology: program.methodology || program.approach || program.principles || '',
+      goals: Array.isArray(program.goals) ? program.goals : (program.goals ? [program.goals] : program.focus || ['General Fitness']),
+      principles: program.principles || program.keyPoints || [],
+      
+      // Additional context for AI
+      overview: program.overview || program.description || '',
+      structure: program.structure || program.workouts || program.exercises || [],
+      experienceLevel: program.experienceLevel || program.difficulty || 'Beginner',
+      
+      // Keep all original data
       ...program,
+      
+      // Session metadata
       addedAt: Date.now(),
-      source
-    }];
+      source,
+      contextEnriched: true
+    };
+    
+    this.sessionContext.programs = [enrichedProgram];
     
     await this._updateContext('programs', source);
     
-    console.log(`✅ Added program "${program.name}" to session context`);
+    console.log(`✅ Added enriched program "${enrichedProgram.name}" to session context:`, {
+      hasExercises: Array.isArray(enrichedProgram.exercises) && enrichedProgram.exercises.length > 0,
+      hasStructure: Array.isArray(enrichedProgram.structure) && enrichedProgram.structure.length > 0,
+      hasMethodology: Boolean(enrichedProgram.methodology),
+      equipmentCount: Array.isArray(enrichedProgram.equipment) ? enrichedProgram.equipment.length : 0,
+      goalsCount: Array.isArray(enrichedProgram.goals) ? enrichedProgram.goals.length : 0,
+      hasPrinciples: Array.isArray(enrichedProgram.principles) && enrichedProgram.principles.length > 0
+    });
   }
 
   /**
@@ -275,10 +314,29 @@ class SessionContextManager {
     const hasPreferences = Object.keys(this.sessionContext.preferences).length > 0;
     const goalCount = this.sessionContext.goals.length;
     
+    // Get program details for enhanced display
+    const selectedProgram = this.sessionContext.programs.length > 0 ? this.sessionContext.programs[0] : null;
+    const programLabel = selectedProgram 
+      ? `program selected: ${selectedProgram.name}` 
+      : 'program selected';
+    
     const completionItems = [
       { type: 'exercises', count: exerciseCount, icon: '💪', label: 'exercises selected' },
       { type: 'nutrition', count: nutritionCount, icon: '🍽️', label: 'nutrition items selected' },
-      { type: 'programs', count: programCount, icon: '📋', label: 'program selected' },
+      { 
+        type: 'programs', 
+        count: programCount, 
+        icon: '📋', 
+        label: programLabel,
+        details: selectedProgram ? {
+          name: selectedProgram.name,
+          creator: selectedProgram.creator,
+          difficulty: selectedProgram.difficulty,
+          duration: selectedProgram.duration,
+          hasExercises: Array.isArray(selectedProgram.exercises) && selectedProgram.exercises.length > 0,
+          exerciseCount: Array.isArray(selectedProgram.exercises) ? selectedProgram.exercises.length : 0
+        } : null
+      },
       { type: 'biometrics', hasData: hasBiometrics, icon: '📊', label: 'biometric data added' },
       { type: 'preferences', hasData: hasPreferences, icon: '⚙️', label: 'preferences set' },
       { type: 'goals', count: goalCount, icon: '🎯', label: 'goals defined' }
@@ -320,7 +378,35 @@ class SessionContextManager {
     if (context.exercises.length > 0) {
       chatContext += `\n## Selected Exercises (${context.exercises.length}):\n`;
       context.exercises.forEach(ex => {
-        chatContext += `- ${ex.name} (${ex.category}, targets: ${ex.primary_muscles?.join(', ') || ex.muscleGroups || 'unknown'})\n`;
+        const primaryMuscles = ex.primary_muscles?.join(', ') || ex.muscleGroups || 'unknown';
+        const secondaryMuscles = ex.secondary_muscles?.length > 0 ? ex.secondary_muscles.join(', ') : null;
+        const equipment = Array.isArray(ex.equipment) ? ex.equipment.join(', ') : ex.equipment || 'bodyweight';
+        const difficulty = ex.difficulty || 'intermediate';
+        
+        chatContext += `- **${ex.name}**\n`;
+        chatContext += `  - Category: ${ex.category || 'strength'}\n`;
+        chatContext += `  - Primary Muscles: ${primaryMuscles}\n`;
+        if (secondaryMuscles) {
+          chatContext += `  - Secondary Muscles: ${secondaryMuscles}\n`;
+        }
+        chatContext += `  - Equipment: ${equipment}\n`;
+        chatContext += `  - Difficulty: ${difficulty}\n`;
+        if (ex.force) {
+          chatContext += `  - Force Type: ${ex.force}\n`;
+        }
+        if (ex.mechanics_type) {
+          chatContext += `  - Movement Type: ${ex.mechanics_type}\n`;
+        }
+        if (ex.instructions && ex.instructions.length > 0) {
+          chatContext += `  - Key Instructions: ${ex.instructions[0]}\n`;
+          if (ex.instructions.length > 1) {
+            chatContext += `  - Additional Instructions: ${ex.instructions.slice(1, 3).join('. ')}\n`;
+          }
+        }
+        if (ex.images && ex.images.length > 0 && !ex.images[0].includes('data:image/svg+xml')) {
+          chatContext += `  - Has Visual References: ${ex.images.length} image(s)\n`;
+        }
+        chatContext += '\n';
       });
     }
     
@@ -333,8 +419,61 @@ class SessionContextManager {
     
     if (context.programs.length > 0) {
       const program = context.programs[0];
-      chatContext += `\n## Selected Program:\n- ${program.name} by ${program.creator || 'Unknown'}\n`;
-      if (program.description) chatContext += `- Description: ${program.description}\n`;
+      chatContext += `\n## Selected Program: ${program.name}\n`;
+      chatContext += `- Creator/Source: ${program.creator || 'Unknown'}\n`;
+      
+      if (program.description) {
+        chatContext += `- Description: ${program.description}\n`;
+      }
+      
+      if (program.methodology) {
+        chatContext += `- Methodology: ${program.methodology}\n`;
+      }
+      
+      if (Array.isArray(program.goals) && program.goals.length > 0) {
+        chatContext += `- Goals: ${program.goals.join(', ')}\n`;
+      }
+      
+      if (Array.isArray(program.focus) && program.focus.length > 0) {
+        chatContext += `- Focus Areas: ${program.focus.join(', ')}\n`;
+      }
+      
+      if (program.difficulty || program.experienceLevel) {
+        chatContext += `- Difficulty Level: ${program.difficulty || program.experienceLevel}\n`;
+      }
+      
+      if (program.duration) {
+        chatContext += `- Duration: ${program.duration}\n`;
+      }
+      
+      if (program.schedule) {
+        chatContext += `- Schedule: ${program.schedule}\n`;
+      }
+      
+      if (Array.isArray(program.equipment) && program.equipment.length > 0) {
+        chatContext += `- Equipment Needed: ${program.equipment.join(', ')}\n`;
+      }
+      
+      if (Array.isArray(program.principles) && program.principles.length > 0) {
+        chatContext += `- Key Principles: ${program.principles.join(', ')}\n`;
+      }
+      
+      if (Array.isArray(program.exercises) && program.exercises.length > 0) {
+        chatContext += `- Includes ${program.exercises.length} specific exercises/workouts\n`;
+        // Include first few exercises as examples
+        const exerciseExamples = program.exercises.slice(0, 3);
+        if (exerciseExamples.length > 0) {
+          chatContext += `- Exercise Examples: ${exerciseExamples.map(ex => 
+            typeof ex === 'string' ? ex : (ex.name || ex.exercise || 'Exercise')
+          ).join(', ')}\n`;
+        }
+      }
+      
+      if (Array.isArray(program.structure) && program.structure.length > 0) {
+        chatContext += `- Program includes ${program.structure.length} structured workout components\n`;
+      }
+      
+      chatContext += `- Selected from: ${program.source || 'Program Search'}\n`;
     }
     
     if (Object.keys(context.biometrics).length > 0) {
@@ -433,6 +572,40 @@ class SessionContextManager {
   async hasRichContext() {
     const summary = await this.getSummary();
     return summary.hasRichContext;
+  }
+
+  /**
+   * Debug: Print current exercise data structure (for testing)
+   */
+  async debugExerciseData() {
+    await this._ensureInitialized();
+    console.log('=== DEBUG: Current Exercise Data ===');
+    this.sessionContext.exercises.forEach((ex, index) => {
+      console.log(`Exercise ${index + 1}:`, {
+        name: ex.name,
+        category: ex.category,
+        equipment: ex.equipment,
+        primary_muscles: ex.primary_muscles,
+        secondary_muscles: ex.secondary_muscles,
+        difficulty: ex.difficulty,
+        mechanics_type: ex.mechanics_type,
+        force: ex.force,
+        hasInstructions: Boolean(ex.instructions?.length),
+        instructionCount: ex.instructions?.length || 0,
+        source: ex.source
+      });
+    });
+    
+    const aiContext = await this.getAIChatContext();
+    console.log('=== DEBUG: AI Context Text ===');
+    console.log(aiContext.contextText.substring(0, 500) + '...');
+    
+    return {
+      exerciseCount: this.sessionContext.exercises.length,
+      hasCompleteData: this.sessionContext.exercises.every(ex => 
+        ex.name && ex.category && ex.primary_muscles && ex.equipment
+      )
+    };
   }
 
   // Private methods
@@ -582,6 +755,101 @@ class SessionContextManager {
     }
     
     return recommendations;
+  }
+  
+  // Helper methods for biometric data processing
+  
+  /**
+   * Calculate BMI category
+   */
+  _getBMICategory(bmi) {
+    if (bmi < 18.5) return 'underweight';
+    if (bmi < 25) return 'normal';
+    if (bmi < 30) return 'overweight';
+    return 'obese';
+  }
+  
+  /**
+   * Generate fitness insights based on biometric data
+   */
+  _generateFitnessInsights(biometrics) {
+    const insights = [];
+    
+    if (biometrics.experienceLevel) {
+      const level = biometrics.experienceLevel.toLowerCase();
+      if (level === 'beginner') {
+        insights.push('New to fitness - focus on form and consistency');
+      } else if (level === 'intermediate') {
+        insights.push('Experienced exerciser - ready for progressive challenges');
+      } else if (level === 'advanced') {
+        insights.push('Advanced fitness level - can handle complex programming');
+      }
+    }
+    
+    if (biometrics.bmi) {
+      const category = biometrics.bmiCategory;
+      if (category === 'underweight') {
+        insights.push('BMI suggests focus on muscle building and strength training');
+      } else if (category === 'overweight') {
+        insights.push('BMI suggests incorporating cardio and calorie management');
+      } else if (category === 'normal') {
+        insights.push('Healthy BMI - focus on personal fitness goals');
+      }
+    }
+    
+    if (biometrics.age) {
+      const age = parseInt(biometrics.age);
+      if (age < 25) {
+        insights.push('Young adult - excellent recovery capacity');
+      } else if (age > 40) {
+        insights.push('Mature adult - emphasize mobility and injury prevention');
+      }
+    }
+    
+    if (biometrics.injuries) {
+      insights.push(`Injury considerations: ${biometrics.injuries}`);
+    }
+    
+    if (biometrics.healthData?.steps) {
+      const steps = biometrics.healthData.steps;
+      if (steps < 5000) {
+        insights.push('Low daily activity - gradually increase movement');
+      } else if (steps > 10000) {
+        insights.push('Very active lifestyle - good cardio base');
+      }
+    }
+    
+    return insights;
+  }
+  
+  /**
+   * Calculate biometric data completeness score
+   */
+  _calculateBiometricCompleteness(biometrics) {
+    const basicFields = ['age', 'height', 'weight', 'gender', 'experienceLevel'];
+    const advancedFields = ['bodyFatPercentage', 'muscleMass', 'restingHeartRate'];
+    const healthFields = ['healthData'];
+    
+    let score = 0;
+    let maxScore = 0;
+    
+    // Basic fields (60% of total score)
+    basicFields.forEach(field => {
+      maxScore += 12; // 60% / 5 fields = 12% each
+      if (biometrics[field]) score += 12;
+    });
+    
+    // Advanced fields (25% of total score)
+    advancedFields.forEach(field => {
+      maxScore += 8.33; // 25% / 3 fields = 8.33% each
+      if (biometrics[field]) score += 8.33;
+    });
+    
+    // Health integration (15% of total score)
+    maxScore += 15;
+    if (biometrics.healthData?.isConnected) score += 15;
+    
+    return Math.round((score / maxScore) * 100);
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,13 @@ import {
   TextInput,
   Modal,
   Platform,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeLinearGradient } from '../components/SafeLinearGradient';
 import { useTheme, themedStyles } from '../contexts/ThemeContext';
+import GlobalContextStatusLine from '../components/GlobalContextStatusLine';
 import { GlassCard } from '../components/GlassmorphismComponents';
 import { auth, db } from '../firebaseConfig';
 import { 
@@ -28,8 +31,11 @@ import {
 } from 'firebase/firestore';
 import ProgramSearchModal from '../components/ProgramSearchModal';
 import ContextModal from '../components/ContextModal';
+import GlobalContextButton from '../components/GlobalContextButton';
 import contextAggregator from '../services/contextAggregator';
 import sessionContextManager from '../services/sessionContextManager';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function WorkoutsScreen({ navigation }) {
   const [dailyWorkouts, setDailyWorkouts] = useState([]);
@@ -41,6 +47,25 @@ export default function WorkoutsScreen({ navigation }) {
   const [contextModalVisible, setContextModalVisible] = useState(false);
   
   const theme = useTheme();
+  const neonAnim = useRef(new Animated.Value(0)).current;
+  
+  useEffect(() => {
+    // Neon pulsing animation for title
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(neonAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(neonAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, []);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -49,7 +74,7 @@ export default function WorkoutsScreen({ navigation }) {
       return;
     }
 
-    // Subscribe to daily workouts - simplified query to avoid index requirement
+    // Subscribe to daily workouts
     const q = query(
       collection(db, 'dailyWorkouts'),
       where('userId', '==', user.uid)
@@ -62,7 +87,7 @@ export default function WorkoutsScreen({ navigation }) {
           workouts.push({ id: doc.id, ...doc.data() });
         });
         
-        // Sort client-side to avoid index requirement
+        // Sort client-side
         workouts.sort((a, b) => {
           const dateA = a.scheduledDate?.toDate ? a.scheduledDate.toDate() : new Date(a.scheduledDate || 0);
           const dateB = b.scheduledDate?.toDate ? b.scheduledDate.toDate() : new Date(b.scheduledDate || 0);
@@ -74,7 +99,6 @@ export default function WorkoutsScreen({ navigation }) {
       },
       (error) => {
         console.error('Error fetching workouts:', error);
-        // Still handle gracefully but workouts should load now
         setLoading(false);
       }
     );
@@ -114,88 +138,17 @@ export default function WorkoutsScreen({ navigation }) {
     }
   };
 
-  const openEditModal = (workout) => {
-    setEditingWorkout(workout);
-    setEditedExercises(workout.exercises || []);
-    setEditModalVisible(true);
-  };
-
-  const saveEditedWorkout = async () => {
-    if (!editingWorkout) return;
-
-    try {
-      await updateDoc(doc(db, 'dailyWorkouts', editingWorkout.id), {
-        exercises: editedExercises,
-        modifiedAt: new Date(),
-      });
-      setEditModalVisible(false);
-      Alert.alert('Success', 'Workout updated successfully!');
-    } catch (error) {
-      console.error('Error saving workout:', error);
-      Alert.alert('Error', 'Failed to save changes');
-    }
-  };
-
-  const deleteWorkout = async (workoutId) => {
-    Alert.alert(
-      'Delete Workout',
-      'Are you sure you want to delete this workout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteDoc(doc(db, 'dailyWorkouts', workoutId));
-            } catch (error) {
-              console.error('Error deleting workout:', error);
-              Alert.alert('Error', 'Failed to delete workout');
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const updateExercise = (exerciseIndex, field, value) => {
-    const updated = [...editedExercises];
-    updated[exerciseIndex] = {
-      ...updated[exerciseIndex],
-      [field]: value
-    };
-    setEditedExercises(updated);
-  };
-
-  const addExercise = () => {
-    setEditedExercises([
-      ...editedExercises,
-      { name: 'New Exercise', sets: 3, reps: '10', weight: '0' }
-    ]);
-  };
-
-  const removeExercise = (index) => {
-    setEditedExercises(editedExercises.filter((_, i) => i !== index));
-  };
-
   const handleProgramSelect = async (program) => {
     try {
-      // Initialize session manager and track screen visit
       await sessionContextManager.initialize();
       await sessionContextManager.trackScreenVisit('Workouts');
-      
-      // Add program to session context
       await sessionContextManager.addProgram(program, 'workouts');
-      
-      // Store the program context for backward compatibility
       await contextAggregator.storeProgramContext(program);
       
-      // Get comprehensive session context for AI
       const aiContext = await sessionContextManager.getAIChatContext();
       
       console.log('🏋️ Program selected, navigating with session context');
       
-      // Navigate to context-aware workout generator with the selected program as context
       navigation.navigate('ContextAwareGenerator', { 
         selectedProgram: program,
         sessionContext: aiContext.fullContext,
@@ -244,36 +197,25 @@ export default function WorkoutsScreen({ navigation }) {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-          {/* Card Header */}
           <View style={styles.cardHeader}>
             <View style={styles.cardHeaderLeft}>
               <Text style={styles.dayLabel}>Day {workout.dayNumber}</Text>
               <Text style={styles.dateLabel}>{formatDate(workout.scheduledDate)}</Text>
             </View>
-            <View style={styles.cardActions}>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={() => openEditModal(workout)}
-              >
-                <Ionicons name="pencil" size={18} color="#FFF" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.actionButton}
-                onPress={() => toggleWorkoutComplete(workout)}
-              >
-                <Ionicons 
-                  name={workout.completed ? "checkmark-circle" : "checkmark-circle-outline"} 
-                  size={24} 
-                  color="#FFF" 
-                />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => toggleWorkoutComplete(workout)}
+            >
+              <Ionicons 
+                name={workout.completed ? "checkmark-circle" : "checkmark-circle-outline"} 
+                size={24} 
+                color="#FFF" 
+              />
+            </TouchableOpacity>
           </View>
 
-          {/* Workout Name */}
           <Text style={styles.workoutName}>{workout.dayName || 'Workout'}</Text>
 
-          {/* Exercise List Preview */}
           <View style={styles.exerciseList}>
             {(workout.exercises || []).slice(0, 3).map((exercise, index) => (
               <View key={index} style={styles.exerciseItem}>
@@ -290,7 +232,6 @@ export default function WorkoutsScreen({ navigation }) {
             )}
           </View>
 
-          {/* Progress Bar */}
           {isToday && (
             <View style={styles.progressContainer}>
               <View style={styles.progressBar}>
@@ -312,107 +253,6 @@ export default function WorkoutsScreen({ navigation }) {
     );
   };
 
-  const renderEditModal = () => (
-    <Modal
-      visible={editModalVisible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={() => setEditModalVisible(false)}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Edit Workout</Text>
-            <TouchableOpacity onPress={() => setEditModalVisible(false)}>
-              <Ionicons name="close" size={24} color="#FFF" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.modalBody}>
-            {editedExercises.map((exercise, index) => (
-              <View key={index} style={styles.editExerciseItem}>
-                <View style={styles.exerciseHeader}>
-                  <TextInput
-                    style={styles.exerciseNameInput}
-                    value={exercise.name}
-                    onChangeText={(text) => updateExercise(index, 'name', text)}
-                    placeholder="Exercise name"
-                    placeholderTextColor="#666"
-                  />
-                  <TouchableOpacity 
-                    onPress={() => removeExercise(index)}
-                    style={styles.removeButton}
-                  >
-                    <Ionicons name="trash-outline" size={20} color="#FF4444" />
-                  </TouchableOpacity>
-                </View>
-                
-                <View style={styles.exerciseDetailsRow}>
-                  <View style={styles.detailInput}>
-                    <Text style={styles.detailLabel}>Sets</Text>
-                    <TextInput
-                      style={styles.detailValue}
-                      value={String(exercise.sets)}
-                      onChangeText={(text) => updateExercise(index, 'sets', text)}
-                      keyboardType="numeric"
-                      placeholderTextColor="#666"
-                    />
-                  </View>
-                  
-                  <View style={styles.detailInput}>
-                    <Text style={styles.detailLabel}>Reps</Text>
-                    <TextInput
-                      style={styles.detailValue}
-                      value={String(exercise.reps)}
-                      onChangeText={(text) => updateExercise(index, 'reps', text)}
-                      placeholderTextColor="#666"
-                    />
-                  </View>
-                  
-                  <View style={styles.detailInput}>
-                    <Text style={styles.detailLabel}>Weight</Text>
-                    <TextInput
-                      style={styles.detailValue}
-                      value={String(exercise.weight || '0')}
-                      onChangeText={(text) => updateExercise(index, 'weight', text)}
-                      placeholderTextColor="#666"
-                    />
-                  </View>
-                </View>
-              </View>
-            ))}
-
-            <TouchableOpacity style={styles.addExerciseButton} onPress={addExercise}>
-              <Ionicons name="add-circle-outline" size={24} color="#FFB86B" />
-              <Text style={styles.addExerciseText}>Add Exercise</Text>
-            </TouchableOpacity>
-          </ScrollView>
-
-          <View style={styles.modalFooter}>
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={() => setEditModalVisible(false)}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.saveButton}
-              onPress={saveEditedWorkout}
-            >
-              <SafeLinearGradient
-                colors={['#FF7E87', '#FFB86B']}
-                style={styles.saveButtonGradient}
-              >
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              </SafeLinearGradient>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-
   if (loading) {
     return (
       <View style={styles.container}>
@@ -433,63 +273,69 @@ export default function WorkoutsScreen({ navigation }) {
         colors={theme.isDarkMode ? ['#0A0A0C', '#1A1A1C'] : ['#F5F5F7', '#E8E8ED']}
         style={StyleSheet.absoluteFillObject}
       />
+      
+      {/* Global Context Status Line */}
+      <GlobalContextStatusLine navigation={navigation} />
+      
       <ScrollView 
         style={styles.scrollView} 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         bounces={true}
       >
-        {/* Header */}
+        {/* Neon Header */}
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, { color: theme.theme.textOnGlass }]}>My Workouts</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.theme.textSecondary }]}>Track and manage your workout plans</Text>
-          
-          {/* Perplexity Status Badge */}
-          <View style={styles.apiStatusContainer}>
-            <View style={styles.apiStatusBadge}>
-              <View style={styles.apiStatusDot} />
-              <Text style={styles.apiStatusText}>Perplexity AI Active</Text>
-            </View>
+          <View style={styles.titleContainer}>
+            <Animated.Text style={[
+              styles.headerTitle,
+              {
+                color: neonAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['#00F0FF', '#FFD700'],
+                }),
+                textShadowColor: neonAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['#00F0FF', '#FFD700'],
+                }),
+                textShadowOffset: { width: 0, height: 0 },
+                textShadowRadius: neonAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 35], // Increased blur
+                }),
+              }
+            ]}>
+              PROGRAMS
+            </Animated.Text>
+            {/* Removed outline - keeping just glow */}
           </View>
+          <Text style={[styles.headerSubtitle, { color: theme.theme.textSecondary }]}>
+            Search for highly technical workout programs and get AI-tailored workouts
+          </Text>
           
-          {/* Action Buttons */}
-          <View style={styles.headerActions}>
-            <TouchableOpacity 
-              onPress={() => setSearchModalVisible(true)}
-              style={styles.actionButton}
-            >
-              <GlassCard variant="subtle" style={styles.actionCard}>
-                <Ionicons name="search" size={20} color="#20B5AC" />
-                <Text style={[styles.actionButtonText, { color: theme.theme.textOnGlass }]}>Find Programs</Text>
-              </GlassCard>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => navigation.navigate('MockupWorkout')}
-              style={styles.actionButton}
-            >
-              <GlassCard variant="subtle" style={styles.actionCard}>
-                <Ionicons name="flask" size={20} color={theme.theme.warning || '#FFA500'} />
-                <Text style={[styles.actionButtonText, { color: theme.theme.textOnGlass }]}>Demo Mode</Text>
-              </GlassCard>
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.explanationText}>
+            Find specialized programs like 5/3/1 variations, nSuns, GZCL methods, or powerlifting protocols. Our AI will adapt them to your experience level, equipment, and goals.
+          </Text>
           
-          {/* Primary Generate Button */}
+          {/* Primary Search Focus */}
           <TouchableOpacity 
-            onPress={() => setContextModalVisible(true)}
-            style={styles.primaryButton}
+            onPress={() => setSearchModalVisible(true)}
+            style={styles.primarySearchButton}
           >
             <SafeLinearGradient
-              colors={['#FFB86B', '#FF7E87']}
-              style={styles.primaryButtonGradient}
+              colors={['#00F0FF', '#00FF88']}
+              style={styles.primarySearchGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Ionicons name="add-circle" size={24} color="#FFF" />
-              <Text style={styles.primaryButtonText}>Generate New Workout</Text>
+              <Ionicons name="search" size={24} color="#000" />
+              <Text style={styles.primarySearchText}>Search Technical Programs</Text>
+              <Ionicons name="arrow-forward" size={20} color="#000" />
             </SafeLinearGradient>
           </TouchableOpacity>
+
+          <Text style={styles.searchHint}>
+            StrongLifts 5x5 • Wendler 5/3/1 • nSuns • GZCL • Smolov • Mag/Ort • Any technical program!
+          </Text>
         </View>
 
         {/* Workouts List */}
@@ -497,34 +343,22 @@ export default function WorkoutsScreen({ navigation }) {
           {dailyWorkouts.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="barbell-outline" size={80} color={theme.theme.textSecondary} />
-              <Text style={[styles.emptyTitle, { color: theme.theme.textOnGlass }]}>No Workouts Yet</Text>
-              <Text style={[styles.emptyText, { color: theme.theme.textSecondary }]}>
-                Generate your first personalized workout plan!
+              <Text style={[styles.emptyTitle, { color: theme.theme.textOnGlass }]}>
+                Ready to Start?
               </Text>
-              <TouchableOpacity 
-                onPress={() => setContextModalVisible(true)}
-                style={styles.emptyStateButton}
-              >
-                <SafeLinearGradient
-                  colors={['#FFB86B', '#FF7E87']}
-                  style={styles.emptyStateButtonGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.ctaButtonText}>Get Started</Text>
-                </SafeLinearGradient>
-              </TouchableOpacity>
+              <Text style={[styles.emptyText, { color: theme.theme.textSecondary }]}>
+                Search for technical programs and we'll create personalized workouts based on your context
+              </Text>
             </View>
           ) : (
             <View>
+              <Text style={styles.sectionTitle}>Your Active Workouts</Text>
               {dailyWorkouts.map(renderWorkoutCard)}
             </View>
           )}
         </View>
 
       </ScrollView>
-      
-      {renderEditModal()}
       
       {/* Program Search Modal */}
       <ProgramSearchModal
@@ -534,25 +368,20 @@ export default function WorkoutsScreen({ navigation }) {
         navigation={navigation}
       />
       
-      {/* Context Modal - Shows when generating without context */}
+      {/* Context Modal */}
       <ContextModal
         visible={contextModalVisible}
         onClose={() => setContextModalVisible(false)}
         onNavigate={(screen) => {
           setContextModalVisible(false);
-          if (screen === 'Generator') {
-            // Special case: if they skip, check for ContextAwareGenerator
-            const contextAwareScreen = navigation.getState().routes.find(
-              route => route.name === 'ContextAwareGenerator'
-            );
-            navigation.navigate(contextAwareScreen ? 'ContextAwareGenerator' : 'WorkoutGenerator');
-          } else {
-            navigation.navigate(screen);
-          }
+          navigation.navigate(screen === 'Generator' ? 'WorkoutGenerator' : screen);
         }}
         title="Personalize Your Workouts"
         subtitle="Get AI-powered workouts tailored to your fitness level and goals"
       />
+      
+      {/* Global Context Button */}
+      <GlobalContextButton navigation={navigation} position="top-right" />
     </View>
   );
 }
@@ -581,126 +410,102 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   header: {
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 24,
     paddingHorizontal: 20,
     alignItems: 'center',
   },
+  titleContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFF',
-    textAlign: 'center',
-    marginBottom: 8,
+    fontSize: 34,
+    fontWeight: '900',
+    letterSpacing: 2,
+    fontFamily: Platform.select({
+      ios: 'Helvetica Neue',
+      android: 'sans-serif-black',
+      default: 'System',
+    }),
+    textTransform: 'uppercase',
   },
   headerSubtitle: {
     fontSize: 16,
     color: '#999',
     textAlign: 'center',
-    marginBottom: 16,
-  },
-  apiStatusContainer: {
     marginBottom: 24,
   },
-  apiStatusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(32, 181, 172, 0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(32, 181, 172, 0.3)',
-  },
-  apiStatusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#20B5AC',
-    marginRight: 6,
-  },
-  apiStatusText: {
-    fontSize: 12,
-    color: '#20B5AC',
-    fontWeight: '600',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12,
-    marginBottom: 20,
-    width: '100%',
-  },
-  actionButton: {
-    flex: 1,
-    maxWidth: 180,
-  },
-  actionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    gap: 8,
-    borderRadius: 12,
-  },
-  actionButtonText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  primaryButton: {
+  primarySearchButton: {
     width: '100%',
     maxWidth: 380,
     borderRadius: 16,
     overflow: 'hidden',
-    boxShadow: Platform.select({
-      web: '0px 4px 8px rgba(255, 126, 135, 0.3)',
-      default: undefined,
-    }),
-    ...Platform.select({
-      ios: {
-        shadowColor: '#FF7E87',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-      default: {},
-    }),
+    marginBottom: 12,
+    shadowColor: '#00F0FF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
   },
-  primaryButtonGradient: {
+  primarySearchGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
+    paddingVertical: 20,
     paddingHorizontal: 24,
-    gap: 8,
+    gap: 10,
   },
-  primaryButtonText: {
-    color: '#FFF',
-    fontSize: 16,
+  primarySearchText: {
+    color: '#000',
+    fontSize: 17,
     fontWeight: 'bold',
     letterSpacing: 0.5,
-  },
-  workoutsList: {
     flex: 1,
+    textAlign: 'center',
   },
-  cardsContainer: {
-    padding: 16,
+  searchHint: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+    fontStyle: 'italic',
+    paddingHorizontal: 30,
   },
-  workoutCard: {
+  explanationText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 20,
+    lineHeight: 20,
+  },
+  secondaryButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 255, 0.3)',
+  },
+  secondaryButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  secondaryButtonText: {
+    color: '#FF00FF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFF',
     marginBottom: 16,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  completedCard: {
-    opacity: 0.8,
-  },
-  cardGradient: {
-    padding: 20,
+    marginLeft: 4,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -721,10 +526,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold',
     marginTop: 2,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   actionButton: {
     padding: 8,
@@ -798,140 +599,5 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     paddingHorizontal: 40,
-  },
-  emptyStateButton: {
-    marginTop: 24,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  emptyStateButtonGradient: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  ctaButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#1C1C1E',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  modalTitle: {
-    fontSize: 20,
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
-  modalBody: {
-    padding: 20,
-  },
-  editExerciseItem: {
-    marginBottom: 20,
-    padding: 16,
-    backgroundColor: '#0A0A0C',
-    borderRadius: 12,
-  },
-  exerciseHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  exerciseNameInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#FFF',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 4,
-  },
-  removeButton: {
-    marginLeft: 12,
-    padding: 4,
-  },
-  exerciseDetailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  detailInput: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  detailLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  detailValue: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 8,
-    padding: 8,
-    color: '#FFF',
-    textAlign: 'center',
-  },
-  addExerciseButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 184, 107, 0.3)',
-    borderStyle: 'dashed',
-  },
-  addExerciseText: {
-    color: '#FFB86B',
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  cancelButton: {
-    flex: 1,
-    marginRight: 8,
-    padding: 14,
-    backgroundColor: '#2C2C3E',
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  saveButton: {
-    flex: 1,
-    marginLeft: 8,
-    borderRadius: 12,
-  },
-  saveButtonGradient: {
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

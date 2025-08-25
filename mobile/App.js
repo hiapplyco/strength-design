@@ -21,6 +21,9 @@ import ProfileScreen from './screens/ProfileScreen';
 import { SearchProvider } from './contexts/SearchContext';
 import MockupWorkoutScreen from './screens/MockupWorkoutScreen';
 import WorkoutResultsScreen from './screens/WorkoutResultsScreen';
+import PoseAnalysisUploadScreen from './screens/PoseAnalysisUploadScreen';
+import PoseAnalysisProcessingScreen from './screens/PoseAnalysisProcessingScreen';
+import PoseAnalysisResultsScreen from './screens/PoseAnalysisResultsScreen';
 import healthService from './services/healthService';
 import sessionContextManager from './services/sessionContextManager';
 import { TransitionProvider } from './components/animations';
@@ -130,6 +133,12 @@ function AuthenticatedApp() {
         return <WorkoutResultsScreen navigation={{ goBack: () => setCurrentScreen('Workouts'), navigate: handleNavigation }} />;
       case 'WorkoutGenerator':
         return <EnhancedAIWorkoutChat navigation={{ goBack: () => setCurrentScreen('Workouts'), navigate: handleNavigation }} />;
+      case 'PoseAnalysisUpload':
+        return <PoseAnalysisUploadScreen navigation={{ goBack: () => setCurrentScreen('Home'), navigate: handleNavigation }} />;
+      case 'PoseAnalysisProcessing':
+        return <PoseAnalysisProcessingScreen navigation={{ goBack: () => setCurrentScreen('PoseAnalysisUpload'), navigate: handleNavigation }} />;
+      case 'PoseAnalysisResults':
+        return <PoseAnalysisResultsScreen navigation={{ goBack: () => setCurrentScreen('PoseAnalysisUpload'), navigate: handleNavigation, restart: () => setCurrentScreen('PoseAnalysisUpload') }} />;
       default:
         return <HomeScreen navigation={{ navigate: handleNavigation }} />;
     }

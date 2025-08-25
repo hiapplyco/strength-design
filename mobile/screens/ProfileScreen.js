@@ -96,6 +96,8 @@ export default function ProfileScreen({ navigation }) {
 
   const [biometricModalVisible, setBiometricModalVisible] = useState(false);
   const [biometricData, setBiometricData] = useState({});
+  const [poseAnalysisHistory, setPoseAnalysisHistory] = useState([]);
+  const [loadingPoseHistory, setLoadingPoseHistory] = useState(false);
 
   const auth = getAuth();
   const db = getFirestore();
@@ -122,6 +124,7 @@ export default function ProfileScreen({ navigation }) {
     loadSettings();
     checkHealthStatus();
     loadBiometricData();
+    loadPoseAnalysisHistory();
   }, []);
 
   const loadUserData = async () => {
@@ -163,6 +166,42 @@ export default function ProfileScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error loading settings:', error);
+    }
+  };
+
+  const loadPoseAnalysisHistory = async () => {
+    setLoadingPoseHistory(true);
+    try {
+      // In a real app, this would call the Firebase Function
+      // For demo purposes, we'll use mock data
+      const mockHistory = [
+        {
+          id: 'analysis_1',
+          exerciseType: 'SQUAT',
+          overallScore: 8.5,
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          feedback: [
+            { category: "Depth", score: 9, severity: "info" },
+            { category: "Knee Alignment", score: 8, severity: "warning" }
+          ]
+        },
+        {
+          id: 'analysis_2',
+          exerciseType: 'DEADLIFT',
+          overallScore: 7.2,
+          createdAt: new Date(Date.now() - 172800000).toISOString(),
+          feedback: [
+            { category: "Bar Path", score: 8, severity: "info" },
+            { category: "Back Position", score: 6, severity: "error" }
+          ]
+        }
+      ];
+      
+      setPoseAnalysisHistory(mockHistory);
+    } catch (error) {
+      console.error('Error loading pose analysis history:', error);
+    } finally {
+      setLoadingPoseHistory(false);
     }
   };
 
@@ -1119,6 +1158,140 @@ export default function ProfileScreen({ navigation }) {
         )}
       </View>
 
+      {/* Pose Analysis History */}
+      <View style={styles.section}>
+        <View style={styles.sectionDivider}>
+          <View style={styles.neonLine} />
+          <Text style={styles.sectionDividerText}>FORM ANALYSIS</Text>
+          <View style={styles.neonLine} />
+        </View>
+        
+        {loadingPoseHistory ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color="#9C27B0" />
+            <Text style={[styles.loadingText, { color: theme.theme.textSecondary }]}>
+              Loading analysis history...
+            </Text>
+          </View>
+        ) : poseAnalysisHistory.length === 0 ? (
+          <TouchableOpacity 
+            style={styles.emptyStateContainer}
+            onPress={() => navigation.navigate('PoseAnalysisUpload')}
+          >
+            <Ionicons name="analytics-outline" size={48} color="#9C27B0" />
+            <Text style={[styles.emptyStateTitle, { color: theme.theme.text }]}>
+              No form analysis yet
+            </Text>
+            <Text style={[styles.emptyStateSubtitle, { color: theme.theme.textSecondary }]}>
+              Upload a video to get AI-powered form feedback
+            </Text>
+            <View style={styles.emptyStateButton}>
+              <Text style={styles.emptyStateButtonText}>Start Analysis</Text>
+              <Ionicons name="arrow-forward" size={16} color="#9C27B0" />
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <View style={styles.analysisOverview}>
+              <View style={styles.analysisStats}>
+                <View style={styles.analysisStat}>
+                  <Text style={[styles.analysisStatValue, { color: theme.theme.text }]}>
+                    {poseAnalysisHistory.length}
+                  </Text>
+                  <Text style={[styles.analysisStatLabel, { color: theme.theme.textSecondary }]}>
+                    Analyses
+                  </Text>
+                </View>
+                <View style={styles.analysisStat}>
+                  <Text style={[styles.analysisStatValue, { color: theme.theme.text }]}>
+                    {poseAnalysisHistory.length > 0 
+                      ? (poseAnalysisHistory.reduce((sum, item) => sum + item.overallScore, 0) / poseAnalysisHistory.length).toFixed(1)
+                      : '0.0'
+                    }
+                  </Text>
+                  <Text style={[styles.analysisStatLabel, { color: theme.theme.textSecondary }]}>
+                    Avg Score
+                  </Text>
+                </View>
+                <View style={styles.analysisStat}>
+                  <Text style={[styles.analysisStatValue, { color: theme.theme.text }]}>
+                    {[...new Set(poseAnalysisHistory.map(item => item.exerciseType))].length}
+                  </Text>
+                  <Text style={[styles.analysisStatLabel, { color: theme.theme.textSecondary }]}>
+                    Exercises
+                  </Text>
+                </View>
+              </View>
+              
+              <TouchableOpacity 
+                style={styles.viewAllButton}
+                onPress={() => navigation.navigate('PoseAnalysisUpload')}
+              >
+                <Text style={styles.viewAllButtonText}>New Analysis</Text>
+                <Ionicons name="add-circle-outline" size={20} color="#9C27B0" />
+              </TouchableOpacity>
+            </View>
+            
+            {/* Recent Analyses */}
+            <View style={styles.recentAnalyses}>
+              {poseAnalysisHistory.slice(0, 3).map((analysis, index) => (
+                <View key={analysis.id} style={styles.analysisItem}>
+                  <View style={styles.analysisHeader}>
+                    <View style={styles.analysisExercise}>
+                      <Ionicons 
+                        name={analysis.exerciseType === 'SQUAT' ? 'fitness-outline' : 
+                              analysis.exerciseType === 'DEADLIFT' ? 'barbell-outline' : 'body-outline'} 
+                        size={20} 
+                        color="#9C27B0" 
+                      />
+                      <Text style={[styles.analysisExerciseText, { color: theme.theme.text }]}>
+                        {analysis.exerciseType.toLowerCase().replace('_', ' ')}
+                      </Text>
+                    </View>
+                    <View style={styles.analysisScore}>
+                      <Text style={[styles.analysisScoreValue, { 
+                        color: analysis.overallScore >= 8 ? '#4CAF50' : 
+                              analysis.overallScore >= 6 ? '#FF9800' : '#F44336'
+                      }]}>
+                        {analysis.overallScore.toFixed(1)}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <Text style={[styles.analysisDate, { color: theme.theme.textSecondary }]}>
+                    {new Date(analysis.createdAt).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </Text>
+                  
+                  {analysis.feedback && analysis.feedback.length > 0 && (
+                    <View style={styles.analysisFeedback}>
+                      {analysis.feedback.slice(0, 2).map((feedback, fIndex) => (
+                        <View key={fIndex} style={styles.feedbackItem}>
+                          <Ionicons 
+                            name={feedback.severity === 'error' ? 'warning' : 
+                                  feedback.severity === 'warning' ? 'alert-circle' : 'checkmark-circle'} 
+                            size={12} 
+                            color={feedback.severity === 'error' ? '#F44336' : 
+                                  feedback.severity === 'warning' ? '#FF9800' : '#4CAF50'}
+                          />
+                          <Text style={[styles.feedbackText, { color: theme.theme.textSecondary }]}>
+                            {feedback.category}: {feedback.score}/10
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+      </View>
+
       {/* Account Actions */}
       <View style={styles.section}>
         <View style={styles.sectionDivider}>
@@ -1526,5 +1699,130 @@ const styles = StyleSheet.create({
     textShadowColor: '#FF6B35',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
+  },
+  // Pose Analysis Styles
+  emptyStateContainer: {
+    alignItems: 'center',
+    padding: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(156, 39, 176, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(156, 39, 176, 0.2)',
+    marginBottom: 20,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  emptyStateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(156, 39, 176, 0.1)',
+    gap: 8,
+  },
+  emptyStateButtonText: {
+    color: '#9C27B0',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  analysisOverview: {
+    marginBottom: 20,
+  },
+  analysisStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: 'rgba(156, 39, 176, 0.05)',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+  },
+  analysisStat: {
+    alignItems: 'center',
+  },
+  analysisStatValue: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  analysisStatLabel: {
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(156, 39, 176, 0.1)',
+    gap: 8,
+  },
+  viewAllButtonText: {
+    color: '#9C27B0',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  recentAnalyses: {
+    gap: 12,
+  },
+  analysisItem: {
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  analysisHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  analysisExercise: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  analysisExerciseText: {
+    fontSize: 16,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  analysisScore: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  analysisScoreValue: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  analysisDate: {
+    fontSize: 12,
+    marginBottom: 12,
+  },
+  analysisFeedback: {
+    gap: 6,
+  },
+  feedbackItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  feedbackText: {
+    fontSize: 12,
   },
 });

@@ -48,18 +48,18 @@ export default function HomeScreen({ navigation }) {
       gradient: ['#4CAF50', '#66BB6A']
     },
     {
+      icon: 'analytics',
+      title: 'Form Analysis',
+      subtitle: 'AI-powered feedback',
+      action: 'PoseAnalysisUpload',
+      gradient: ['#9C27B0', '#BA68C8']
+    },
+    {
       icon: 'calendar',
       title: 'Workouts',
       subtitle: 'Your programs',
       action: 'Workouts',
       gradient: ['#2196F3', '#42A5F5']
-    },
-    {
-      icon: 'barbell',
-      title: 'Library',
-      subtitle: 'Browse exercises',
-      action: 'Exercises',
-      gradient: ['#9C27B0', '#BA68C8']
     }
   ];
 

@@ -878,6 +878,14 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
                 <Ionicons name="person" size={14} color="#2196F3" />
                 <Text style={styles.actionButtonText}>Profile</Text>
               </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('PoseAnalysisUpload')}
+              >
+                <Ionicons name="analytics" size={14} color="#9C27B0" />
+                <Text style={styles.actionButtonText}>Form Check</Text>
+              </TouchableOpacity>
             </View>
           )}
           
@@ -1135,6 +1143,25 @@ export default function EnhancedAIWorkoutChat({ navigation, route }) {
                 color: userContext?.workoutHistory ? '#4CAF50' : '#666'
               }]}>
                 {userContext?.workoutHistory?.length || 0} Workouts
+              </Text>
+            </TouchableOpacity>
+            
+            {/* Form Analysis Status */}
+            <TouchableOpacity 
+              style={[styles.contextStatusItem, { 
+                backgroundColor: '#9C27B020' 
+              }]}
+              onPress={() => navigation.navigate('PoseAnalysisUpload')}
+            >
+              <Ionicons 
+                name="analytics" 
+                size={14} 
+                color='#9C27B0' 
+              />
+              <Text style={[styles.contextStatusText, {
+                color: '#9C27B0'
+              }]}>
+                Form Analysis
               </Text>
             </TouchableOpacity>
           </ScrollView>

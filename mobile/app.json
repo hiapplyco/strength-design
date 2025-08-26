@@ -23,6 +23,9 @@
         "NSHealthUpdateUsageDescription": "This app saves workout data to Apple Health to help you track your fitness journey.",
         "NSCalendarsUsageDescription": "This app needs access to your calendar to schedule workout reminders and track your training schedule.",
         "NSRemindersUsageDescription": "This app uses reminders to help you stay on track with your fitness goals.",
+        "NSCameraUsageDescription": "This app uses the camera to record exercise videos for AI-powered form analysis and technique improvement.",
+        "NSPhotoLibraryUsageDescription": "This app accesses your photo library to analyze exercise videos and provide form feedback.",
+        "NSMicrophoneUsageDescription": "This app may record audio with exercise videos for complete workout analysis.",
         "UIRequiredDeviceCapabilities": ["healthkit"]
       }
     },
@@ -33,7 +36,13 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.strengthdesign.app",
-      "permissions": ["android.permission.ACTIVITY_RECOGNITION"]
+      "permissions": [
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/sdlogo.png"

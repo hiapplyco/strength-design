@@ -123,12 +123,12 @@ export default function ProgramSearchModal({
   const selectProgram = async (program) => {
     try {
       Alert.alert(
-        'Use This Program?',
-        `Do you want to use "${program.name}" as a starting point for your workout generation?`,
+        'Add This Program?',
+        `Do you want to add "${program.name}" to your context? You can select multiple programs and then choose when to go to chat.`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
-            text: 'Yes, Use This',
+            text: 'Add to Context',
             onPress: async () => {
               // Ensure comprehensive program data is passed
               const enrichedProgram = {
@@ -176,9 +176,11 @@ export default function ProgramSearchModal({
                 hasPrinciples: Array.isArray(enrichedProgram.principles) && enrichedProgram.principles.length > 0
               });
               
-              // Pass enriched program to parent component
+              // Pass enriched program to parent component (now adds to context instead of navigating)
               onProgramSelect(enrichedProgram);
-              onClose();
+              
+              // Don't close the modal - let user continue selecting more programs
+              // onClose();
             }
           }
         ]

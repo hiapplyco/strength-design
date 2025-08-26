@@ -388,11 +388,67 @@ class ContextAggregator {
   }
 
   /**
-   * Store selected program context for future use
+   * Add program to selected programs context (supports multiple programs)
+   */
+  async addProgramContext(program) {
+    try {
+      console.log('[ContextAggregator] Adding program to context:', program.name);
+      
+      const programContext = {
+        name: program.name,
+        creator: program.creator,
+        methodology: program.methodology,
+        structure: program.structure,
+        goals: program.goals,
+        experienceLevel: program.experienceLevel,
+        duration: program.duration,
+        credibilityScore: program.credibilityScore,
+        source: program.source || 'Perplexity Search',
+        selectedAt: new Date().toISOString(),
+        exercises: program.exercises || [],
+        principles: program.principles || [],
+        equipment: program.equipment || [],
+        id: `program_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      // Get existing programs
+      const existingPrograms = await this.getStoredProgramsContext() || [];
+      
+      // Check if program already exists (by name and creator)
+      const existingIndex = existingPrograms.findIndex(p => 
+        p.name === programContext.name && p.creator === programContext.creator
+      );
+      
+      if (existingIndex !== -1) {
+        // Update existing program
+        existingPrograms[existingIndex] = programContext;
+        console.log('[ContextAggregator] Updated existing program in context');
+      } else {
+        // Add new program
+        existingPrograms.push(programContext);
+        console.log('[ContextAggregator] Added new program to context');
+      }
+      
+      // Store in AsyncStorage for persistence
+      await AsyncStorage.setItem('selectedProgramsContext', JSON.stringify(existingPrograms));
+      
+      // Also store in cache for immediate use
+      this.cache.programsContext = existingPrograms;
+      
+      console.log('[ContextAggregator] Programs context updated successfully. Total programs:', existingPrograms.length);
+      return existingPrograms;
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to add program context:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Store selected program context for future use (legacy single program method)
    */
   async storeProgramContext(program) {
     try {
-      console.log('[ContextAggregator] Storing program context:', program.name);
+      console.log('[ContextAggregator] Storing single program context (legacy):', program.name);
       
       const programContext = {
         name: program.name,
@@ -425,7 +481,69 @@ class ContextAggregator {
   }
   
   /**
-   * Get stored program context
+   * Get stored programs context (multiple programs)
+   */
+  async getStoredProgramsContext() {
+    try {
+      // Check cache first
+      if (this.cache.programsContext) {
+        return this.cache.programsContext;
+      }
+      
+      // Load from AsyncStorage
+      const storedContext = await AsyncStorage.getItem('selectedProgramsContext');
+      if (storedContext) {
+        const programsContext = JSON.parse(storedContext);
+        this.cache.programsContext = programsContext;
+        return programsContext;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to get stored programs context:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Remove a program from context by ID
+   */
+  async removeProgramContext(programId) {
+    try {
+      console.log('[ContextAggregator] Removing program from context:', programId);
+      
+      const existingPrograms = await this.getStoredProgramsContext() || [];
+      const filteredPrograms = existingPrograms.filter(p => p.id !== programId);
+      
+      // Store updated list
+      await AsyncStorage.setItem('selectedProgramsContext', JSON.stringify(filteredPrograms));
+      this.cache.programsContext = filteredPrograms;
+      
+      console.log('[ContextAggregator] Program removed successfully. Remaining programs:', filteredPrograms.length);
+      return filteredPrograms;
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to remove program context:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Clear all programs context
+   */
+  async clearProgramsContext() {
+    try {
+      await AsyncStorage.removeItem('selectedProgramsContext');
+      this.cache.programsContext = [];
+      console.log('[ContextAggregator] All programs context cleared');
+      return [];
+    } catch (error) {
+      console.error('[ContextAggregator] Failed to clear programs context:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get stored program context (legacy single program)
    */
   async getStoredProgramContext() {
     try {
@@ -540,7 +658,7 @@ class ContextAggregator {
       // Health-based recommendations
       healthInsights: this._generateHealthInsights(),
       metadata: {
-        contextVersion: '2.1',
+        contextVersion: '2.2',
         generatedAt: new Date().toISOString(),
         cacheAge: Date.now() - this.cache.lastUpdated,
         hash: this.cache.contextHash,
@@ -549,7 +667,35 @@ class ContextAggregator {
       }
     };
     
-    // Add program context if provided (from Perplexity search)
+    // Add multiple programs context from cache
+    const storedPrograms = this.cache.programsContext || [];
+    if (storedPrograms.length > 0) {
+      context.selectedPrograms = storedPrograms.map(program => ({
+        name: program.name,
+        creator: program.creator,
+        methodology: program.methodology,
+        structure: program.structure,
+        goals: program.goals,
+        experienceLevel: program.experienceLevel,
+        duration: program.duration,
+        credibilityScore: program.credibilityScore,
+        source: program.source || 'Perplexity Search',
+        selectedAt: program.selectedAt,
+        exercises: program.exercises || [],
+        principles: program.principles || [],
+        equipment: program.equipment || [],
+        id: program.id
+      }));
+      
+      // Add program-specific insights for all programs
+      context.programsInsights = storedPrograms.map(program => 
+        this.generateProgramInsights(context, program)
+      );
+      
+      context.metadata.selectedProgramsCount = storedPrograms.length;
+    }
+    
+    // Add single program context if provided (legacy support or direct selection)
     if (programContext) {
       context.selectedProgram = {
         name: programContext.name,
@@ -571,8 +717,8 @@ class ContextAggregator {
     // Add derived insights
     context.insights = this.generateInsights(context);
     
-    // Add recommendations
-    context.recommendations = this.generateRecommendations(context, programContext);
+    // Add recommendations (considering both single and multiple programs)
+    context.recommendations = this.generateRecommendations(context, programContext, storedPrograms);
     
     return context;
   }
@@ -742,7 +888,7 @@ class ContextAggregator {
   /**
    * Generate recommendations based on context
    */
-  generateRecommendations(context, programContext = null) {
+  generateRecommendations(context, programContext = null, multiplePrograms = []) {
     const recommendations = {
       workoutFocus: [],
       nutritionFocus: [],
@@ -775,7 +921,39 @@ class ContextAggregator {
       recommendations.equipmentSuggestions.push('Consider adding resistance bands for variety');
     }
     
-    // Program-specific recommendations
+    // Multiple programs recommendations
+    if (multiplePrograms && multiplePrograms.length > 0) {
+      const allGoals = multiplePrograms.flatMap(p => p.goals || []);
+      const uniqueGoals = [...new Set(allGoals)];
+      
+      recommendations.multiProgramSpecific = {
+        combinedFocus: `Blend elements from ${multiplePrograms.length} programs: ${multiplePrograms.map(p => p.name).join(', ')}`,
+        diverseGoals: `Address multiple goals: ${uniqueGoals.join(', ').toLowerCase()}`,
+        programCount: `${multiplePrograms.length} programs selected for comprehensive approach`,
+        averageCredibility: `Average program quality: ${Math.round(multiplePrograms.reduce((sum, p) => sum + (p.credibilityScore || 7), 0) / multiplePrograms.length)}/10`
+      };
+      
+      // Add multi-program specific workout focus
+      const strengthPrograms = multiplePrograms.filter(p => p.goals?.some(g => g.toLowerCase().includes('strength')));
+      const hypertrophyPrograms = multiplePrograms.filter(p => p.goals?.some(g => g.toLowerCase().includes('muscle')));
+      const endurancePrograms = multiplePrograms.filter(p => p.goals?.some(g => g.toLowerCase().includes('endurance')));
+      
+      if (strengthPrograms.length > 0) {
+        recommendations.workoutFocus.push(`Incorporate strength principles from ${strengthPrograms.length} program(s)`);
+      }
+      if (hypertrophyPrograms.length > 0) {
+        recommendations.workoutFocus.push(`Blend hypertrophy methods from ${hypertrophyPrograms.length} program(s)`);
+      }
+      if (endurancePrograms.length > 0) {
+        recommendations.workoutFocus.push(`Add endurance elements from ${endurancePrograms.length} program(s)`);
+      }
+      
+      if (multiplePrograms.length > 2) {
+        recommendations.programAdjustments.push('Consider focusing on 2-3 key programs to avoid complexity');
+      }
+    }
+    
+    // Single program-specific recommendations (legacy support)
     if (programContext) {
       recommendations.programSpecific = {
         focus: `Emphasize ${programContext.goals?.toLowerCase() || 'general fitness'}`,

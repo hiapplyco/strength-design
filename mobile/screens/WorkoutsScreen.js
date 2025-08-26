@@ -45,6 +45,7 @@ export default function WorkoutsScreen({ navigation }) {
   const [editedExercises, setEditedExercises] = useState([]);
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [contextModalVisible, setContextModalVisible] = useState(false);
+  const [selectedPrograms, setSelectedPrograms] = useState([]);
   
   const theme = useTheme();
   const neonAnim = useRef(new Animated.Value(0)).current;
@@ -106,6 +107,21 @@ export default function WorkoutsScreen({ navigation }) {
     return () => unsubscribe();
   }, []);
 
+  // Load selected programs on component mount and when modal visibility changes
+  useEffect(() => {
+    const loadSelectedPrograms = async () => {
+      try {
+        const programs = await contextAggregator.getStoredProgramsContext();
+        setSelectedPrograms(programs || []);
+      } catch (error) {
+        console.error('Error loading selected programs:', error);
+        setSelectedPrograms([]);
+      }
+    };
+
+    loadSelectedPrograms();
+  }, [searchModalVisible]); // Reload when search modal opens/closes
+
   const formatDate = (date) => {
     if (!date) return 'Today';
     const workoutDate = date.toDate ? date.toDate() : new Date(date);
@@ -140,19 +156,67 @@ export default function WorkoutsScreen({ navigation }) {
 
   const handleProgramSelect = async (program) => {
     try {
+      // Add program to multi-program context instead of navigating immediately
+      await contextAggregator.addProgramContext(program);
+      
+      // Update local state to reflect changes immediately
+      const updatedPrograms = await contextAggregator.getStoredProgramsContext();
+      setSelectedPrograms(updatedPrograms || []);
+      
+      // Show success feedback
+      Alert.alert(
+        'Program Added!',
+        `"${program.name}" has been added to your context. You can continue selecting more programs or go to chat when ready.`,
+        [{ text: 'OK', style: 'default' }]
+      );
+      
+      console.log('🏋️ Program added to context:', program.name);
+    } catch (error) {
+      console.error('Error handling program selection:', error);
+      Alert.alert('Error', 'Failed to add program to context. Please try again.');
+    }
+  };
+
+  const handleRemoveProgram = async (programId) => {
+    try {
+      await contextAggregator.removeProgramContext(programId);
+      
+      // Update local state
+      const updatedPrograms = await contextAggregator.getStoredProgramsContext();
+      setSelectedPrograms(updatedPrograms || []);
+      
+      console.log('🗑️ Program removed from context');
+    } catch (error) {
+      console.error('Error removing program:', error);
+      Alert.alert('Error', 'Failed to remove program from context. Please try again.');
+    }
+  };
+
+  const handleGoToChat = async () => {
+    try {
+      const selectedPrograms = await contextAggregator.getStoredProgramsContext();
+      
+      if (!selectedPrograms || selectedPrograms.length === 0) {
+        Alert.alert('No Programs Selected', 'Please select at least one program before going to chat.');
+        return;
+      }
+
       await sessionContextManager.initialize();
       await sessionContextManager.trackScreenVisit('Workouts');
-      await sessionContextManager.addProgram(program, 'workouts');
-      await contextAggregator.storeProgramContext(program);
+      
+      // Add all selected programs to session context
+      for (const program of selectedPrograms) {
+        await sessionContextManager.addProgram(program, 'workouts');
+      }
       
       const aiContext = await sessionContextManager.getAIChatContext();
       
-      console.log('🏋️ Program selected, navigating with session context');
+      console.log('🏋️ Navigating to chat with', selectedPrograms.length, 'programs');
       
       navigation.navigate('ContextAwareGenerator', { 
-        selectedProgram: program,
+        selectedPrograms: selectedPrograms,
         sessionContext: aiContext.fullContext,
-        programContext: {
+        multiProgramContext: selectedPrograms.map(program => ({
           name: program.name,
           creator: program.creator,
           methodology: program.methodology,
@@ -163,13 +227,74 @@ export default function WorkoutsScreen({ navigation }) {
           credibilityScore: program.credibilityScore,
           exercises: program.exercises || [],
           principles: program.principles || [],
-          equipment: program.equipment || []
-        }
+          equipment: program.equipment || [],
+          id: program.id
+        }))
       });
     } catch (error) {
-      console.error('Error handling program selection:', error);
-      Alert.alert('Error', 'Failed to select program. Please try again.');
+      console.error('Error navigating to chat:', error);
+      Alert.alert('Error', 'Failed to navigate to chat. Please try again.');
     }
+  };
+
+  const renderSelectedPrograms = () => {
+    if (selectedPrograms.length === 0) return null;
+
+    return (
+      <View style={styles.selectedProgramsContainer}>
+        <Text style={styles.selectedProgramsTitle}>
+          Selected Programs ({selectedPrograms.length})
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.selectedProgramsList}>
+            {selectedPrograms.map((program, index) => (
+              <View key={program.id || index} style={styles.selectedProgramCard}>
+                <GlassCard variant="small" style={{ padding: 12, margin: 4 }}>
+                  <View style={styles.selectedProgramHeader}>
+                    <Text style={styles.selectedProgramName} numberOfLines={1}>
+                      {program.name}
+                    </Text>
+                    <TouchableOpacity 
+                      onPress={() => handleRemoveProgram(program.id)}
+                      style={styles.removeProgramButton}
+                    >
+                      <Ionicons name="close-circle" size={20} color="#FF6B6B" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.selectedProgramCreator} numberOfLines={1}>
+                    {program.creator}
+                  </Text>
+                  {program.goals && program.goals.length > 0 && (
+                    <Text style={styles.selectedProgramGoals} numberOfLines={1}>
+                      {program.goals.slice(0, 2).join(', ')}
+                    </Text>
+                  )}
+                </GlassCard>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+        
+        {/* Go to Chat Button */}
+        <TouchableOpacity 
+          style={styles.goToChatButton}
+          onPress={handleGoToChat}
+        >
+          <SafeLinearGradient
+            colors={['#4CAF50', '#45B049']}
+            style={styles.goToChatGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Ionicons name="chatbubbles" size={20} color="#FFF" />
+            <Text style={styles.goToChatText}>
+              Go to Chat with {selectedPrograms.length} Program{selectedPrograms.length > 1 ? 's' : ''}
+            </Text>
+            <Ionicons name="arrow-forward" size={16} color="#FFF" />
+          </SafeLinearGradient>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   const renderWorkoutCard = (workout) => {
@@ -337,6 +462,9 @@ export default function WorkoutsScreen({ navigation }) {
             StrongLifts 5x5 • Wendler 5/3/1 • nSuns • GZCL • Smolov • Mag/Ort • Any technical program!
           </Text>
         </View>
+
+        {/* Selected Programs */}
+        {renderSelectedPrograms()}
 
         {/* Workouts List */}
         <View style={styles.workoutsContainer}>
@@ -599,5 +727,70 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     paddingHorizontal: 40,
+  },
+  selectedProgramsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  selectedProgramsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFF',
+    marginBottom: 12,
+  },
+  selectedProgramsList: {
+    flexDirection: 'row',
+    paddingRight: 20,
+  },
+  selectedProgramCard: {
+    width: 180,
+    marginRight: 8,
+  },
+  selectedProgramHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
+  selectedProgramName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FFF',
+    flex: 1,
+    marginRight: 8,
+  },
+  removeProgramButton: {
+    padding: 2,
+  },
+  selectedProgramCreator: {
+    fontSize: 12,
+    color: '#FFB86B',
+    marginBottom: 4,
+  },
+  selectedProgramGoals: {
+    fontSize: 11,
+    color: '#AAA',
+  },
+  goToChatButton: {
+    marginTop: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  goToChatGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  goToChatText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
   },
 });

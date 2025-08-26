@@ -26,7 +26,7 @@ const { width: screenWidth } = Dimensions.get('window');
  * Positioned just below the safe area/notch on iOS and status bar on Android.
  * 
  * Features:
- * - Always visible exercise and workout counts (even when 0)
+ * - Always visible program and workout counts (even when 0)
  * - Context completion percentage
  * - Selected biometric indicators
  * - Tappable to open detailed ContextStatusModal
@@ -186,7 +186,7 @@ export default function GlobalContextStatusLine({ navigation, style }) {
   const getDisplayMetrics = () => {
     if (!contextSummary) {
       return {
-        exercises: 0,
+        programs: 0,
         workouts: 0,
         percentage: 0,
         biometricsCount: 0,
@@ -195,8 +195,8 @@ export default function GlobalContextStatusLine({ navigation, style }) {
       };
     }
 
-    const exerciseItem = contextSummary.items?.find(item => item.type === 'exercises');
-    const workoutItem = contextSummary.items?.find(item => item.type === 'programs');
+    const programsItem = contextSummary.items?.find(item => item.type === 'programs');
+    const workoutItem = contextSummary.items?.find(item => item.type === 'exercises'); // Keep workouts as exercises for now
     const biometricItem = contextSummary.items?.find(item => item.type === 'biometrics');
     
     // Calculate biometric quality
@@ -215,7 +215,7 @@ export default function GlobalContextStatusLine({ navigation, style }) {
       : 'disconnected';
     
     return {
-      exercises: exerciseItem?.count || 0,
+      programs: programsItem?.count || 0,
       workouts: workoutItem?.count || 0,
       percentage: contextSummary.completionPercentage || 0,
       biometricsCount: Object.keys(biometricData).filter(key => 
@@ -257,19 +257,19 @@ export default function GlobalContextStatusLine({ navigation, style }) {
           />
           
           <View style={styles.content}>
-            {/* Exercise Count */}
+            {/* Programs Count */}
             <View style={styles.metric}>
               <Text style={styles.metricEmoji}>💪</Text>
               <Animated.Text style={[
                 styles.metricCount,
                 { 
-                  color: metrics.exercises > 0 
+                  color: metrics.programs > 0 
                     ? (isDarkMode ? '#4CAF50' : '#388E3C')
                     : (isDarkMode ? '#999' : '#666'),
                   transform: [
                     {
-                      scale: countAnimations['0_exercises'] 
-                        ? countAnimations['0_exercises'].interpolate({
+                      scale: countAnimations['0_programs'] 
+                        ? countAnimations['0_programs'].interpolate({
                             inputRange: [0, 1],
                             outputRange: [1, 1.2],
                           })
@@ -278,9 +278,9 @@ export default function GlobalContextStatusLine({ navigation, style }) {
                   ],
                 }
               ]}>
-                {isLoading ? '...' : metrics.exercises}
+                {isLoading ? '...' : metrics.programs}
               </Animated.Text>
-              <Text style={styles.metricLabel}>Exercises</Text>
+              <Text style={styles.metricLabel}>Programs</Text>
             </View>
 
             {/* Separator */}

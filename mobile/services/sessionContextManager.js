@@ -155,12 +155,12 @@ class SessionContextManager {
   }
 
   /**
-   * Add program to session context with comprehensive data
+   * Add program to session context with comprehensive data (supports multiple programs)
    */
   async addProgram(program, source = 'unknown') {
     await this._ensureInitialized();
     
-    // Store the selected program with comprehensive data (replace existing)
+    // Store the selected program with comprehensive data
     const enrichedProgram = {
       // Core program information
       name: program.name || 'Unknown Program',
@@ -194,14 +194,29 @@ class SessionContextManager {
       // Session metadata
       addedAt: Date.now(),
       source,
-      contextEnriched: true
+      contextEnriched: true,
+      id: program.id || `program_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
     
-    this.sessionContext.programs = [enrichedProgram];
+    // Check if program already exists (by name and creator)
+    const existingIndex = this.sessionContext.programs.findIndex(p => 
+      p.name === enrichedProgram.name && p.creator === enrichedProgram.creator
+    );
+    
+    if (existingIndex !== -1) {
+      // Update existing program
+      this.sessionContext.programs[existingIndex] = enrichedProgram;
+      console.log(`✅ Updated existing program "${enrichedProgram.name}" in session context`);
+    } else {
+      // Add new program
+      this.sessionContext.programs.push(enrichedProgram);
+      console.log(`✅ Added new program "${enrichedProgram.name}" to session context`);
+    }
     
     await this._updateContext('programs', source);
     
-    console.log(`✅ Added enriched program "${enrichedProgram.name}" to session context:`, {
+    console.log(`📋 Session now has ${this.sessionContext.programs.length} program(s):`, {
+      programs: this.sessionContext.programs.map(p => p.name),
       hasExercises: Array.isArray(enrichedProgram.exercises) && enrichedProgram.exercises.length > 0,
       hasStructure: Array.isArray(enrichedProgram.structure) && enrichedProgram.structure.length > 0,
       hasMethodology: Boolean(enrichedProgram.methodology),
@@ -315,10 +330,13 @@ class SessionContextManager {
     const goalCount = this.sessionContext.goals.length;
     
     // Get program details for enhanced display
-    const selectedProgram = this.sessionContext.programs.length > 0 ? this.sessionContext.programs[0] : null;
-    const programLabel = selectedProgram 
-      ? `program selected: ${selectedProgram.name}` 
-      : 'program selected';
+    const selectedPrograms = this.sessionContext.programs || [];
+    let programLabel = 'programs selected';
+    if (selectedPrograms.length === 1) {
+      programLabel = `program selected: ${selectedPrograms[0].name}`;
+    } else if (selectedPrograms.length > 1) {
+      programLabel = `${selectedPrograms.length} programs selected: ${selectedPrograms.map(p => p.name).join(', ')}`;
+    }
     
     const completionItems = [
       { type: 'exercises', count: exerciseCount, icon: '💪', label: 'exercises selected' },
@@ -328,13 +346,17 @@ class SessionContextManager {
         count: programCount, 
         icon: '📋', 
         label: programLabel,
-        details: selectedProgram ? {
-          name: selectedProgram.name,
-          creator: selectedProgram.creator,
-          difficulty: selectedProgram.difficulty,
-          duration: selectedProgram.duration,
-          hasExercises: Array.isArray(selectedProgram.exercises) && selectedProgram.exercises.length > 0,
-          exerciseCount: Array.isArray(selectedProgram.exercises) ? selectedProgram.exercises.length : 0
+        details: selectedPrograms.length > 0 ? {
+          programs: selectedPrograms.map(program => ({
+            name: program.name,
+            creator: program.creator,
+            difficulty: program.difficulty,
+            duration: program.duration,
+            hasExercises: Array.isArray(program.exercises) && program.exercises.length > 0,
+            exerciseCount: Array.isArray(program.exercises) ? program.exercises.length : 0
+          })),
+          totalExercises: selectedPrograms.reduce((sum, p) => sum + (Array.isArray(p.exercises) ? p.exercises.length : 0), 0),
+          isMultiProgram: selectedPrograms.length > 1
         } : null
       },
       { type: 'biometrics', hasData: hasBiometrics, icon: '📊', label: 'biometric data added' },
@@ -418,62 +440,122 @@ class SessionContextManager {
     }
     
     if (context.programs.length > 0) {
-      const program = context.programs[0];
-      chatContext += `\n## Selected Program: ${program.name}\n`;
-      chatContext += `- Creator/Source: ${program.creator || 'Unknown'}\n`;
-      
-      if (program.description) {
-        chatContext += `- Description: ${program.description}\n`;
-      }
-      
-      if (program.methodology) {
-        chatContext += `- Methodology: ${program.methodology}\n`;
-      }
-      
-      if (Array.isArray(program.goals) && program.goals.length > 0) {
-        chatContext += `- Goals: ${program.goals.join(', ')}\n`;
-      }
-      
-      if (Array.isArray(program.focus) && program.focus.length > 0) {
-        chatContext += `- Focus Areas: ${program.focus.join(', ')}\n`;
-      }
-      
-      if (program.difficulty || program.experienceLevel) {
-        chatContext += `- Difficulty Level: ${program.difficulty || program.experienceLevel}\n`;
-      }
-      
-      if (program.duration) {
-        chatContext += `- Duration: ${program.duration}\n`;
-      }
-      
-      if (program.schedule) {
-        chatContext += `- Schedule: ${program.schedule}\n`;
-      }
-      
-      if (Array.isArray(program.equipment) && program.equipment.length > 0) {
-        chatContext += `- Equipment Needed: ${program.equipment.join(', ')}\n`;
-      }
-      
-      if (Array.isArray(program.principles) && program.principles.length > 0) {
-        chatContext += `- Key Principles: ${program.principles.join(', ')}\n`;
-      }
-      
-      if (Array.isArray(program.exercises) && program.exercises.length > 0) {
-        chatContext += `- Includes ${program.exercises.length} specific exercises/workouts\n`;
-        // Include first few exercises as examples
-        const exerciseExamples = program.exercises.slice(0, 3);
-        if (exerciseExamples.length > 0) {
-          chatContext += `- Exercise Examples: ${exerciseExamples.map(ex => 
-            typeof ex === 'string' ? ex : (ex.name || ex.exercise || 'Exercise')
-          ).join(', ')}\n`;
+      if (context.programs.length === 1) {
+        // Single program
+        const program = context.programs[0];
+        chatContext += `\n## Selected Program: ${program.name}\n`;
+        chatContext += `- Creator/Source: ${program.creator || 'Unknown'}\n`;
+        
+        if (program.description) {
+          chatContext += `- Description: ${program.description}\n`;
         }
+        
+        if (program.methodology) {
+          chatContext += `- Methodology: ${program.methodology}\n`;
+        }
+        
+        if (Array.isArray(program.goals) && program.goals.length > 0) {
+          chatContext += `- Goals: ${program.goals.join(', ')}\n`;
+        }
+        
+        if (Array.isArray(program.focus) && program.focus.length > 0) {
+          chatContext += `- Focus Areas: ${program.focus.join(', ')}\n`;
+        }
+        
+        if (program.difficulty || program.experienceLevel) {
+          chatContext += `- Difficulty Level: ${program.difficulty || program.experienceLevel}\n`;
+        }
+        
+        if (program.duration) {
+          chatContext += `- Duration: ${program.duration}\n`;
+        }
+        
+        if (program.schedule) {
+          chatContext += `- Schedule: ${program.schedule}\n`;
+        }
+        
+        if (Array.isArray(program.equipment) && program.equipment.length > 0) {
+          chatContext += `- Equipment Needed: ${program.equipment.join(', ')}\n`;
+        }
+        
+        if (Array.isArray(program.principles) && program.principles.length > 0) {
+          chatContext += `- Key Principles: ${program.principles.join(', ')}\n`;
+        }
+        
+        if (Array.isArray(program.exercises) && program.exercises.length > 0) {
+          chatContext += `- Includes ${program.exercises.length} specific exercises/workouts\n`;
+          // Include first few exercises as examples
+          const exerciseExamples = program.exercises.slice(0, 3);
+          if (exerciseExamples.length > 0) {
+            chatContext += `- Exercise Examples: ${exerciseExamples.map(ex => 
+              typeof ex === 'string' ? ex : (ex.name || ex.exercise || 'Exercise')
+            ).join(', ')}\n`;
+          }
+        }
+        
+        if (Array.isArray(program.structure) && program.structure.length > 0) {
+          chatContext += `- Program includes ${program.structure.length} structured workout components\n`;
+        }
+        
+        chatContext += `- Selected from: ${program.source || 'Program Search'}\n`;
+      } else {
+        // Multiple programs
+        chatContext += `\n## Selected Programs (${context.programs.length}):\n`;
+        
+        context.programs.forEach((program, index) => {
+          chatContext += `\n### ${index + 1}. ${program.name}\n`;
+          chatContext += `- Creator/Source: ${program.creator || 'Unknown'}\n`;
+          
+          if (program.description) {
+            chatContext += `- Description: ${program.description}\n`;
+          }
+          
+          if (program.methodology) {
+            chatContext += `- Methodology: ${program.methodology}\n`;
+          }
+          
+          if (Array.isArray(program.goals) && program.goals.length > 0) {
+            chatContext += `- Goals: ${program.goals.join(', ')}\n`;
+          }
+          
+          if (Array.isArray(program.focus) && program.focus.length > 0) {
+            chatContext += `- Focus Areas: ${program.focus.join(', ')}\n`;
+          }
+          
+          if (program.difficulty || program.experienceLevel) {
+            chatContext += `- Difficulty Level: ${program.difficulty || program.experienceLevel}\n`;
+          }
+          
+          if (program.duration) {
+            chatContext += `- Duration: ${program.duration}\n`;
+          }
+          
+          if (Array.isArray(program.equipment) && program.equipment.length > 0) {
+            chatContext += `- Equipment: ${program.equipment.join(', ')}\n`;
+          }
+          
+          if (Array.isArray(program.exercises) && program.exercises.length > 0) {
+            chatContext += `- Includes ${program.exercises.length} exercises/workouts\n`;
+          }
+        });
+        
+        // Add combined analysis
+        const allGoals = [...new Set(context.programs.flatMap(p => p.goals || []))];
+        const allEquipment = [...new Set(context.programs.flatMap(p => p.equipment || []))];
+        const totalExercises = context.programs.reduce((sum, p) => sum + (p.exercises?.length || 0), 0);
+        
+        chatContext += `\n### Combined Program Analysis:\n`;
+        if (allGoals.length > 0) {
+          chatContext += `- Combined Goals: ${allGoals.join(', ')}\n`;
+        }
+        if (allEquipment.length > 0) {
+          chatContext += `- All Equipment Needed: ${allEquipment.join(', ')}\n`;
+        }
+        if (totalExercises > 0) {
+          chatContext += `- Total Exercises Available: ${totalExercises}\n`;
+        }
+        chatContext += `- Program Sources: ${context.programs.map(p => p.source || 'Program Search').join(', ')}\n`;
       }
-      
-      if (Array.isArray(program.structure) && program.structure.length > 0) {
-        chatContext += `- Program includes ${program.structure.length} structured workout components\n`;
-      }
-      
-      chatContext += `- Selected from: ${program.source || 'Program Search'}\n`;
     }
     
     if (Object.keys(context.biometrics).length > 0) {

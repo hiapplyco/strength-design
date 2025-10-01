@@ -42,7 +42,7 @@ exports.streamingChatEnhanced = functions.https.onRequest(async (req, res) => {
 
     // Initialize model with Gemini 2.5 Flash
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         maxOutputTokens: 8192,
         temperature: 0.8,
@@ -141,7 +141,7 @@ exports.generateWorkout = functions.https.onRequest(async (req, res) => {
     console.log('Generating workout for user:', userId);
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         maxOutputTokens: 8192,
         temperature: 0.7,

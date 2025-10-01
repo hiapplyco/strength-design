@@ -124,10 +124,10 @@ exports.generateWorkout = functions
   .https.onCall(async (data, context) => {
     try {
       const { preferences, goals, experience, equipment, duration } = data;
-      
+
       // Use Gemini 2.5 Flash
-      const model = genAI.getGenerativeModel({ 
-        model: 'gemini-2.0-flash-exp',
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
         generationConfig: {
           maxOutputTokens: 4096,
           temperature: 0.7,
@@ -253,8 +253,8 @@ exports.chatWithGemini = functions
       const { message, history = [], userContext = {} } = data;
       
       // Use Gemini 2.5 Flash
-      const model = genAI.getGenerativeModel({ 
-        model: 'gemini-2.0-flash-exp',
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
         generationConfig: {
           maxOutputTokens: 2048,
           temperature: 0.8,

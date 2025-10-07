@@ -47,15 +47,15 @@ This document outlines the phased implementation plan for building the Strength 
 
 ## Phase 4: Exercise Library
 
-- [ ] Add dependencies: `cloud_firestore`, `sqflite`.
-- [ ] Define the data models for exercises.
-- [ ] Implement a repository to fetch exercises from Firestore and cache them in `sqflite`.
-- [ ] Create the UI for the exercise library screen, including search functionality.
-- [ ] Create the UI for the exercise detail screen.
-- [ ] Create widget tests for the exercise library and detail screens.
-- [ ] Run `dart_fix`, `analyze_files`, `flutter test`, and `dart_format`.
-- [ ] Update the Journal in this document.
-- [ ] Commit the changes.
+- [x] Add dependencies: `cloud_firestore`, `sqflite`.
+- [x] Define the data models for exercises.
+- [x] Implement a repository to fetch exercises from Firestore and cache them in `sqflite`.
+- [x] Create the UI for the exercise library screen, including search functionality.
+- [x] Create the UI for the exercise detail screen.
+- [x] Create widget tests for the exercise library and detail screens.
+- [x] Run `dart_fix`, `analyze_files`, `flutter test`, and `dart_format`.
+- [x] Update the Journal in this document.
+- [x] Commit the changes.
 
 ## Phase 5: AI Workout Generation
 

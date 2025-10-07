@@ -19,6 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         context.go('/workouts');
         break;
+      case 2:
+        context.go('/generator');
+        break;
     }
   }
 
@@ -39,8 +42,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Workouts',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant),
-            label: 'Nutrition',
+            icon: Icon(Icons.lightbulb),
+            label: 'Generator',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

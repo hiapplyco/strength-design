@@ -5,7 +5,11 @@ This document outlines the phased implementation plan for building the Strength 
 
 ## Journal
 
-This section will be updated after each phase to log actions taken, things learned, surprises, and deviations from the plan.
+**Phase 3: Authentication**
+
+*   **Challenge:** I encountered significant issues with the `google_sign_in` package due to breaking changes in version 7.0.0. The documentation and examples I found were outdated, leading to a loop of analyzer errors.
+*   **Solution:** To resolve this, I switched to the `firebase_ui_auth` package, which provides a pre-built UI for Firebase Authentication. This simplified the implementation and resolved the errors quickly.
+*   **Learning:** It's crucial to check the changelog for breaking changes when using packages, and to use higher-level libraries like `firebase_ui_auth` when available to simplify development and avoid common pitfalls.
 
 ## Phase 1: Project Setup
 
@@ -31,15 +35,15 @@ This section will be updated after each phase to log actions taken, things learn
 
 ## Phase 3: Authentication
 
-- [ ] Add dependencies: `firebase_auth`, `google_sign_in`.
-- [ ] Implement an authentication service to handle user sign-in, sign-out, and registration.
-- [ ] Create the UI for the login and sign-up screens.
-- [ ] Implement the authentication flow using `go_router` redirects.
-- [ ] Create a Riverpod provider to manage the authentication state.
-- [ ] Create widget tests for the login and sign-up screens.
-- [ ] Run `dart_fix`, `analyze_files`, `flutter test`, and `dart_format`.
-- [ ] Update the Journal in this document.
-- [ ] Commit the changes.
+- [x] Add dependencies: `firebase_auth`, `google_sign_in`.
+- [x] Implement an authentication service to handle user sign-in, sign-out, and registration.
+- [x] Create the UI for the login and sign-up screens.
+- [x] Implement the authentication flow using `go_router` redirects.
+- [x] Create a Riverpod provider to manage the authentication state.
+- [x] Create widget tests for the login and sign-up screens.
+- [x] Run `dart_fix`, `analyze_files`, `flutter test`, and `dart_format`.
+- [x] Update the Journal in this document.
+- [x] Commit the changes.
 
 ## Phase 4: Exercise Library
 

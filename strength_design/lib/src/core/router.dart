@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import 'package:strength_design/src/features/home/home_screen.dart';
 
+import 'package:strength_design/src/features/workout/exercise_library_screen.dart';
+
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateChangesProvider);
 
@@ -14,6 +16,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const HomeScreen(),
+        routes: [
+          GoRoute(
+            path: 'workouts',
+            builder: (context, state) => const ExerciseLibraryScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/login',

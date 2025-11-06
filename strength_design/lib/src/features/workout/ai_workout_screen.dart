@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strength_design/src/core/services/ai_service_provider.dart';
@@ -30,9 +29,7 @@ class _AiWorkoutScreenState extends ConsumerState<AiWorkoutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AI Workout Generator'),
-      ),
+      appBar: AppBar(title: const Text('AI Workout Generator')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -51,11 +48,7 @@ class _AiWorkoutScreenState extends ConsumerState<AiWorkoutScreen> {
                   : const Text('Generate Workout'),
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Text(_workout),
-              ),
-            ),
+            Expanded(child: SingleChildScrollView(child: Text(_workout))),
           ],
         ),
       ),

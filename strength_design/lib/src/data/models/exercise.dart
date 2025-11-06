@@ -1,4 +1,3 @@
-
 class Exercise {
   final String id;
   final String name;

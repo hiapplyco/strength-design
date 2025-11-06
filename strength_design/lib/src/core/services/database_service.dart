@@ -1,4 +1,3 @@
-
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -8,11 +7,7 @@ class DatabaseService {
 
   static Future<Database> initDatabase() async {
     final String path = join(await getDatabasesPath(), _databaseName);
-    return openDatabase(
-      path,
-      version: _databaseVersion,
-      onCreate: _onCreate,
-    );
+    return openDatabase(path, version: _databaseVersion, onCreate: _onCreate);
   }
 
   static Future<void> _onCreate(Database db, int version) async {

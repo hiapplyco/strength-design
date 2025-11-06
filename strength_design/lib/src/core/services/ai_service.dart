@@ -1,11 +1,11 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AiService {
   final GenerativeModel _model;
 
-  AiService(String apiKey) : _model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+  AiService(String apiKey)
+      : _model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
 
   Future<String> generateWorkout(String prompt) async {
     try {

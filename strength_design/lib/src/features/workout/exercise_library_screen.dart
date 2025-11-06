@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strength_design/src/data/models/exercise.dart';
@@ -16,9 +15,7 @@ class ExerciseLibraryScreen extends ConsumerWidget {
     final exercises = ref.watch(exercisesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Exercise Library'),
-      ),
+      appBar: AppBar(title: const Text('Exercise Library')),
       body: exercises.when(
         data: (data) {
           return ListView.builder(

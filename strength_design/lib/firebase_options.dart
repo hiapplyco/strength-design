@@ -18,21 +18,24 @@ class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
       throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - ' 
-        'you can reconfigure this by running the FlutterFire CLI again.');
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for this platform - ' 
-          'you can reconfigure this by running the FlutterFire CLI again.');
+          'DefaultFirebaseOptions have not been configured for this platform - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
       case TargetPlatform.linux:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for this platform - ' 
-          'you can reconfigure this by running the FlutterFire CLI again.');
+          'DefaultFirebaseOptions have not been configured for this platform - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       default:
         throw UnsupportedError('This platform is not supported by Firebase.');
     }

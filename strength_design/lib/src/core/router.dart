@@ -1,10 +1,10 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart' as ui;
 import 'package:strength_design/src/features/home/home_screen.dart';
 
+import 'package:strength_design/src/features/nutrition/nutrition_screen.dart';
 import 'package:strength_design/src/features/workout/ai_workout_screen.dart';
 import 'package:strength_design/src/features/workout/exercise_library_screen.dart';
 
@@ -26,14 +26,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'generator',
             builder: (context, state) => const AiWorkoutScreen(),
           ),
+          GoRoute(
+            path: 'nutrition',
+            builder: (context, state) => const NutritionScreen(),
+          ),
         ],
       ),
       GoRoute(
         path: '/login',
         builder: (context, state) {
-          return ui.SignInScreen(
-            providers: [ui.EmailAuthProvider()],
-          );
+          return ui.SignInScreen(providers: [ui.EmailAuthProvider()]);
         },
       ),
     ],

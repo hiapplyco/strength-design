@@ -19,6 +19,10 @@ import { Video } from 'expo-av';
 import usageTrackingService from '../usageTrackingService';
 import poseSubscriptionService from '../poseSubscriptionService';
 
+// Performance and video processing services
+import performanceMonitor from '../performanceMonitor';
+import frameOptimizer from '../frameOptimizer';
+
 // Types
 import {
   PoseLandmarks,
@@ -345,6 +349,10 @@ class PoseAnalysisService {
     const startTime = Date.now();
     let framesProcessed = 0;
 
+    // Start performance monitoring session
+    const videoInfo = { videoUri, exerciseType };
+    performanceMonitor.startSession(videoInfo);
+
     try {
       // Step 1: Validate video file
       const videoValidation = await this.validateVideoFile(videoUri);
@@ -352,10 +360,14 @@ class PoseAnalysisService {
         throw new Error(videoValidation.error || 'Video validation failed');
       }
 
-      // Step 2: Extract frames from video
-      console.log('Extracting frames from video...');
+      // Get video metadata for performance monitoring
+      const videoDuration = await this.getVideoDuration(videoUri);
+      performanceMonitor.startProcessing(Math.floor(videoDuration / 100)); // Estimate total frames
+
+      // Step 2: Extract frames from video using optimized frame optimizer
+      console.log('Extracting frames from video with frameOptimizer...');
       const frames = await this.extractFramesFromVideo(
-        videoUri, 
+        videoUri,
         options?.frameExtractionOptions
       );
 
@@ -393,6 +405,17 @@ class PoseAnalysisService {
       const processingTime = Date.now() - startTime;
       console.log(`Analysis completed in ${processingTime}ms`);
 
+      // End performance monitoring
+      const performanceMetrics = await performanceMonitor.endProcessing(true);
+      const sessionReport = await performanceMonitor.endSession();
+
+      console.log('Performance Report:', {
+        score: sessionReport.score,
+        processingDuration: sessionReport.processingMetrics.duration,
+        batteryDrain: sessionReport.resourceUsage.batteryDrain,
+        recommendations: sessionReport.recommendations
+      });
+
       return {
         success: true,
         analysis,
@@ -405,6 +428,11 @@ class PoseAnalysisService {
 
     } catch (error) {
       console.error('Analysis failed:', error);
+
+      // End performance monitoring with failure
+      await performanceMonitor.endProcessing(false);
+      await performanceMonitor.endSession();
+
       throw error;
     }
   }
@@ -424,30 +452,41 @@ class PoseAnalysisService {
         ...options
       };
 
-      console.log('Extracting frames with options:', extractionOptions);
+      console.log('Extracting frames with frameOptimizer:', extractionOptions);
 
-      // In production, this would use a native module or FFmpeg to extract frames
-      // For now, simulate frame extraction with timestamps
+      // Get device tier from performance monitor for adaptive processing
+      const deviceTier = performanceMonitor.metrics?.performanceTier || 'medium';
       const videoDuration = await this.getVideoDuration(videoUri);
-      const frameInterval = 1000 / extractionOptions.frameRate; // ms per frame
-      const totalFrames = Math.min(
-        Math.floor(videoDuration / frameInterval),
-        extractionOptions.maxFrames || 300
-      );
 
-      const frames: VideoFrame[] = [];
-      for (let i = 0; i < totalFrames; i++) {
-        const timestamp = i * frameInterval;
-        
-        // In production: actual frame extraction would happen here
-        frames.push({
-          uri: `${videoUri}#frame-${i}`, // Simulated frame URI
-          timestamp,
-          duration: frameInterval
-        });
+      // Use frameOptimizer for intelligent frame extraction
+      const result = await frameOptimizer.extractOptimizedFrames(videoUri, {
+        duration: videoDuration / 1000, // Convert to seconds
+        exerciseType: 'general', // Could be passed from options
+        deviceTier: deviceTier,
+        onProgress: (progress) => {
+          // Track frame processing progress
+          performanceMonitor.recordFrameProcessing(
+            progress.current,
+            Date.now() - (performanceMonitor.metrics?.processingStartTime || Date.now()),
+            true
+          );
+        }
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Frame extraction failed');
       }
 
-      console.log(`Extracted ${frames.length} frames from video`);
+      // Convert optimized frames to VideoFrame format expected by pose detection
+      const frames: VideoFrame[] = result.frames.map(frame => ({
+        uri: frame.uri,
+        timestamp: frame.timestamp * 1000, // Convert seconds to ms
+        duration: 1000 / extractionOptions.frameRate
+      }));
+
+      console.log(`✅ Extracted ${frames.length} optimized frames (${result.metadata.compressionRatio.toFixed(2)}x compression)`);
+      console.log(`Frame optimization: ${result.metadata.originalFrameCount} → ${result.metadata.optimizedFrameCount} frames`);
+
       return frames;
     } catch (error) {
       console.error('Frame extraction failed:', error);

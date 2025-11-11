@@ -18,6 +18,12 @@ import { onAuthStateChanged } from 'firebase/auth';
 import performanceMonitor from './services/performanceMonitor';
 import backgroundQueue from './services/backgroundQueue';
 
+// UX Components
+import StrengthDesignLoader from './components/visualizations/StrengthDesignLoader';
+
+// Session management
+import sessionContextManager from './services/sessionContextManager';
+
 // Import Screens
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -127,7 +133,7 @@ function RootStack() {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    // Initialize performance monitoring and background queue
+    // Initialize performance monitoring, background queue, and session tracking
     const initializeServices = async () => {
       try {
         console.log('Initializing performance monitoring...');
@@ -135,6 +141,9 @@ function RootStack() {
 
         console.log('Initializing background queue...');
         await backgroundQueue.initialize();
+
+        console.log('Initializing session context manager...');
+        await sessionContextManager.initialize();
 
         console.log('Services initialized successfully');
       } catch (error) {
@@ -157,8 +166,18 @@ function RootStack() {
   }, [initializing]);
 
   if (initializing) {
-    // You could return a loading screen here
-    return null;
+    // Beautiful animated loading screen
+    return (
+      <StrengthDesignLoader
+        duration={3500}
+        colors={['#FF6B35', '#00F0FF', '#00FF88', '#FFD700']}
+        animationType="spiral"
+        pattern="strengthLogo"
+        intensity={1.0}
+        size={300}
+        isVisible={true}
+      />
+    );
   }
 
   return (
@@ -207,12 +226,55 @@ function RootStack() {
 }
 
 /**
+ * Get current route name from navigation state
+ */
+function getCurrentRouteName(state) {
+  if (!state || !state.routes) return null;
+  const route = state.routes[state.index];
+
+  // If nested navigator, recursively get the current route
+  if (route.state) {
+    return getCurrentRouteName(route.state);
+  }
+
+  return route.name;
+}
+
+/**
  * Main App Component
  */
 export default function App() {
+  const navigationRef = React.useRef(null);
+  const routeNameRef = React.useRef(null);
+
   return (
     <ThemeProvider>
-      <NavigationContainer>
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => {
+          // Save initial route name
+          const currentRouteName = getCurrentRouteName(navigationRef.current?.getRootState());
+          routeNameRef.current = currentRouteName;
+
+          // Track initial screen
+          if (currentRouteName) {
+            sessionContextManager.trackScreenVisit(currentRouteName);
+          }
+        }}
+        onStateChange={async () => {
+          const previousRouteName = routeNameRef.current;
+          const currentRouteName = getCurrentRouteName(navigationRef.current?.getRootState());
+
+          if (previousRouteName !== currentRouteName && currentRouteName) {
+            // Track screen visit
+            await sessionContextManager.trackScreenVisit(currentRouteName);
+            console.log(`📊 Navigated to: ${currentRouteName}`);
+          }
+
+          // Save current route name for next change
+          routeNameRef.current = currentRouteName;
+        }}
+      >
         <StatusBar
           barStyle="light-content"
           backgroundColor="#000000"

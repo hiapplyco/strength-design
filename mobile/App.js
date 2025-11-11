@@ -24,6 +24,9 @@ import StrengthDesignLoader from './components/visualizations/StrengthDesignLoad
 // Session management
 import sessionContextManager from './services/sessionContextManager';
 
+// Navigation components
+import CustomNeonTabBar from './components/navigation/CustomNeonTabBar';
+
 // Import Screens
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -53,47 +56,10 @@ const Stack = createStackNavigator();
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          switch (route.name) {
-            case 'Home':
-              iconName = focused ? 'home' : 'home-outline';
-              break;
-            case 'Workouts':
-              iconName = focused ? 'calendar' : 'calendar-outline';
-              break;
-            case 'Search':
-              iconName = focused ? 'search' : 'search-outline';
-              break;
-            case 'Generator':
-              iconName = focused ? 'sparkles' : 'sparkles-outline';
-              break;
-            case 'Profile':
-              iconName = focused ? 'person' : 'person-outline';
-              break;
-            default:
-              iconName = 'help-outline';
-          }
-
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#FF6B35',
-        tabBarInactiveTintColor: '#8E8E93',
-        tabBarStyle: {
-          backgroundColor: Platform.OS === 'ios' ? '#000000' : '#1C1C1E',
-          borderTopColor: '#2C2C2E',
-          borderTopWidth: 1,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 5,
-          height: Platform.OS === 'ios' ? 85 : 60,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
+      tabBar={(props) => <CustomNeonTabBar {...props} />}
+      screenOptions={{
         headerShown: false,
-      })}
+      }}
     >
       <Tab.Screen
         name="Home"

@@ -298,6 +298,46 @@
 - ✅ All components in `components/` directory are actively used
 - ✅ No component cleanup needed (verified via import analysis)
 
+### Phase 6: Deep Services & Assets Cleanup ✅ **COMPLETE**
+- [x] 6.1 Comprehensive service usage analysis (32 services analyzed)
+- [x] 6.2 Create detailed cleanup plan (docs/PHASE6_CLEANUP_PLAN.md)
+- [x] 6.3 Delete 13 unused service files
+- [x] 6.4 Delete orphaned assets (pixel-canvas-main, prompts directories)
+- [x] 6.5 Verify no broken imports
+- [x] 6.6 Validate all remaining services
+- [x] 6.7 Update documentation
+
+**Services Cleanup Summary**:
+- **Deleted**: 13 unused service files (8,565 lines of dead code)
+- **Deleted**: 2 orphaned asset directories (pixel-canvas-main 56K, prompts 8K)
+- **Total Removed**: 23 files, 10,735 lines
+- **Result**: 19 active service files remaining (down from 32, -40.6% reduction)
+- **Benefits**: Clearer service structure, smaller bundles, faster builds
+
+**Deleted Unused Services** (13 files):
+- ❌ ProgramSearchService-OLD.js, ProgramSearchService.js (legacy search, screens deleted in Phase 5)
+- ❌ IconService.js, KnowledgeService.js, NutritionService.js, searchService.js (unused library services)
+- ❌ PerplexitySearchService.js (unused API integration)
+- ❌ aiService.js, chatSessionService.js (replaced by RealAIWorkoutGenerator inline logic)
+- ❌ WorkoutService.js, ExerciseSelectionService.js (unused workout services)
+- ❌ progressDataAggregator.js, workoutHistoryService.js (unused tracking services)
+
+**Deleted Orphaned Assets** (2 directories, 10 files):
+- ❌ pixel-canvas-main/ (reference implementation, logic copied into StrengthDesignLoader)
+- ❌ prompts/ (unused prompt templates)
+
+**Active Services Verified** (19 files):
+- ✅ Core: contextAggregator.js, formContextService.js, storageService.js, cameraService.js
+- ✅ Epic Migrated (Phase 2.1): backgroundQueue.js, frameOptimizer.js, performanceMonitor.js, sessionContextManager.js, videoProcessor.js
+- ✅ Screen-Specific: abTestingService.js, contentDeliveryService.js, healthService.js, poseProgressService.js, poseSubscriptionService.js, tutorialService.js, usageTrackingService.js
+- ✅ Pose Detection: poseDetection/PoseAnalysisService.ts, types.ts, constants.ts, analyzers/*
+
+**Validation Results**:
+- ✅ 0 syntax errors (App.js, all screens, all remaining services)
+- ✅ 19 service files remaining (16 *.js + 3 in poseDetection/ subdirectory)
+- ✅ All imports verified working
+- ✅ No broken dependencies
+
 ---
 
 ## 7. Next Steps
@@ -307,16 +347,17 @@
 2. ~~Phase 2: Code Consolidation~~ ✅ **COMPLETE** - 6 sub-phases complete (services, UX, testing, config)
 3. ~~Phase 3: Cleanup~~ ✅ **COMPLETE** - Epic repos deleted, 65MB removed
 4. ~~Phase 4.1-4.2: Automated Validation~~ ✅ **COMPLETE** - See `docs/PHASE4_VALIDATION_REPORT.md`
-5. ~~Phase 5: UI Cleanup~~ ✅ **COMPLETE** - See `docs/UI_CLEANUP_PLAN.md` (14 screens deleted, 11,753 lines removed)
+5. ~~Phase 5: UI Cleanup~~ ✅ **COMPLETE** - See `docs/UI_CLEANUP_PLAN.md` (14 screens, 11,753 lines removed)
+6. ~~Phase 6: Deep Services & Assets Cleanup~~ ✅ **COMPLETE** - See `docs/PHASE6_CLEANUP_PLAN.md` (13 services, 10,735 lines removed)
 
 ### 🔄 In Progress
-6. **Phase 4.3-4.6: Manual Testing** - Device testing required (6-10 hours estimated)
+7. **Phase 4.3-4.6: Manual Testing** - Device testing required (6-10 hours estimated)
    - Priority 1: Functional smoke tests
    - Priority 2: Performance validation and regression tests
    - Priority 3: Integration tests
 
 ### 🔜 Future
-7. **Production Deployment** - Store submission preparation when ready
+8. **Production Deployment** - Store submission preparation when ready
 
 ---
 
@@ -324,9 +365,10 @@
 
 **Code Consolidation**:
 - ✅ Single source of truth (mobile/ is canonical)
-- ✅ 65MB of duplicate code removed (epic repos)
-- ✅ 11,753 lines of dead code removed (legacy screens)
-- ✅ **Total reduction**: 76MB+ of unnecessary code eliminated
+- ✅ 65MB + 639,609 lines removed (epic repos, Phase 3)
+- ✅ 11,753 lines removed (14 legacy screens, Phase 5)
+- ✅ 10,735 lines removed (13 unused services + assets, Phase 6)
+- ✅ **Total reduction**: ~662,000+ lines of dead code eliminated
 - ✅ 4,300+ lines of valuable code migrated
 - ✅ 0 broken imports or references
 
@@ -349,6 +391,7 @@
 - ✅ Better UX (neon tabs, loading animations, session tracking)
 - ✅ Comprehensive test utilities
 - ✅ Cleaner UI structure (13 screens vs 27, -52% reduction)
-- ✅ No ambiguity about canonical screens
+- ✅ Cleaner services structure (19 services vs 32, -40.6% reduction)
+- ✅ No ambiguity about canonical screens or services
 
-**Result**: Strength.Design now has a single, faster, more maintainable mobile app that combines epic UX with advanced AI/pose capabilities. Automated validation confirms codebase integrity; UI is clean and refactored; manual device testing ready to begin.***
+**Result**: Strength.Design now has a single, faster, more maintainable mobile app that combines epic UX with advanced AI/pose capabilities. After 6 cleanup phases, ~662,000 lines of dead code eliminated. Automated validation confirms codebase integrity; UI and services are clean and refactored; manual device testing ready to begin.***

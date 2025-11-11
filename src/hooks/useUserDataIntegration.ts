@@ -1,6 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/lib/firebase/config';
+import { collection, query, where, orderBy, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
 
@@ -9,7 +9,7 @@ interface UserDataSummary {
   nutritionLogs: any[];
   journalEntries: any[];
   recentMetrics: any[];
-  workoutTemplates?: any[]; // Add workout templates to the interface
+  workoutTemplates?: any[];
   progressTrends: {
     weeklyWorkouts: number;
     avgCalories: number;
@@ -27,85 +27,157 @@ export const useUserDataIntegration = () => {
     queryFn: async (): Promise<UserDataSummary> => {
       if (!session?.user?.id) throw new Error('No user session');
 
+      const userId = session.user.id;
       const now = new Date();
       const twoWeeksAgo = subDays(now, 14);
       const weekStart = startOfWeek(now);
       const weekEnd = endOfWeek(now);
 
       // Fetch recent workout sessions
-      const { data: workoutSessions } = await supabase
-        .from('workout_sessions')
-        .select(`
-          *,
-          generated_workouts (title, summary, workout_data),
-          workout_metrics (*)
-        `)
-        .eq('user_id', session.user.id)
-        .gte('created_at', twoWeeksAgo.toISOString())
-        .order('created_at', { ascending: false })
-        .limit(20);
+      const workoutSessionsQuery = query(
+        collection(db, `users/${userId}/workout_sessions`),
+        where('created_at', '>=', Timestamp.fromDate(twoWeeksAgo)),
+        orderBy('created_at', 'desc')
+      );
+      const workoutSessionsSnapshot = await getDocs(workoutSessionsQuery);
+
+      const workoutSessions = await Promise.all(
+        workoutSessionsSnapshot.docs.slice(0, 20).map(async (docSnapshot) => {
+          const sessionData = docSnapshot.data();
+
+          // Fetch generated workout if exists
+          let generatedWorkout = null;
+          if (sessionData.generated_workout_id) {
+            const workoutDoc = await getDoc(doc(db, `users/${userId}/workouts`, sessionData.generated_workout_id));
+            if (workoutDoc.exists()) {
+              generatedWorkout = {
+                title: workoutDoc.data().title,
+                summary: workoutDoc.data().summary,
+                workout_data: workoutDoc.data().workout_data
+              };
+            }
+          }
+
+          // Fetch workout metrics
+          const metricsQuery = query(
+            collection(db, `users/${userId}/workout_sessions/${docSnapshot.id}/workout_metrics`)
+          );
+          const metricsSnapshot = await getDocs(metricsQuery);
+          const workout_metrics = metricsSnapshot.docs.map(metricDoc => ({
+            id: metricDoc.id,
+            ...metricDoc.data()
+          }));
+
+          return {
+            id: docSnapshot.id,
+            ...sessionData,
+            created_at: sessionData.created_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+            generated_workouts: generatedWorkout,
+            workout_metrics
+          };
+        })
+      );
 
       // Fetch recent nutrition logs
-      const { data: nutritionLogs } = await supabase
-        .from('nutrition_logs')
-        .select(`
-          *,
-          meal_entries (
-            *,
-            food_items (*)
-          ),
-          exercise_entries (*)
-        `)
-        .eq('user_id', session.user.id)
-        .gte('date', format(twoWeeksAgo, 'yyyy-MM-dd'))
-        .order('date', { ascending: false })
-        .limit(14);
+      const nutritionLogsQuery = query(
+        collection(db, `users/${userId}/nutrition_logs`),
+        where('date', '>=', format(twoWeeksAgo, 'yyyy-MM-dd')),
+        orderBy('date', 'desc')
+      );
+      const nutritionLogsSnapshot = await getDocs(nutritionLogsQuery);
+
+      const nutritionLogs = await Promise.all(
+        nutritionLogsSnapshot.docs.slice(0, 14).map(async (docSnapshot) => {
+          const logData = docSnapshot.data();
+
+          // Fetch meal entries with food items
+          const mealEntriesQuery = query(
+            collection(db, `users/${userId}/nutrition_logs/${docSnapshot.id}/meal_entries`)
+          );
+          const mealEntriesSnapshot = await getDocs(mealEntriesQuery);
+
+          const meal_entries = await Promise.all(
+            mealEntriesSnapshot.docs.map(async (mealDoc) => {
+              const mealData = mealDoc.data();
+
+              // Fetch food item
+              let food_items = null;
+              if (mealData.food_id) {
+                const foodDoc = await getDoc(doc(db, `users/${userId}/food_items`, mealData.food_id));
+                if (foodDoc.exists()) {
+                  food_items = foodDoc.data();
+                }
+              }
+
+              return {
+                id: mealDoc.id,
+                ...mealData,
+                food_items
+              };
+            })
+          );
+
+          // Fetch exercise entries
+          const exerciseEntriesQuery = query(
+            collection(db, `users/${userId}/nutrition_logs/${docSnapshot.id}/exercise_entries`)
+          );
+          const exerciseEntriesSnapshot = await getDocs(exerciseEntriesQuery);
+          const exercise_entries = exerciseEntriesSnapshot.docs.map(exDoc => ({
+            id: exDoc.id,
+            ...exDoc.data()
+          }));
+
+          return {
+            id: docSnapshot.id,
+            ...logData,
+            meal_entries,
+            exercise_entries
+          };
+        })
+      );
 
       // Fetch recent journal entries
-      const { data: journalEntries } = await supabase
-        .from('journal_entries')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .gte('date', format(twoWeeksAgo, 'yyyy-MM-dd'))
-        .order('date', { ascending: false })
-        .limit(14);
-
-      // Get nutrition targets
-      const { data: nutritionTargets } = await supabase
-        .from('nutrition_targets')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .single();
+      const journalEntriesQuery = query(
+        collection(db, `users/${userId}/journal_entries`),
+        where('date', '>=', format(twoWeeksAgo, 'yyyy-MM-dd')),
+        orderBy('date', 'desc')
+      );
+      const journalEntriesSnapshot = await getDocs(journalEntriesQuery);
+      const journalEntries = journalEntriesSnapshot.docs.slice(0, 14).map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
 
       // Calculate recent metrics and trends
-      const weeklyWorkouts = workoutSessions?.filter(session => 
-        new Date(session.created_at) >= weekStart && new Date(session.created_at) <= weekEnd
-      ).length || 0;
+      const weeklyWorkouts = workoutSessions.filter(session => {
+        const sessionDate = new Date(session.created_at);
+        return sessionDate >= weekStart && sessionDate <= weekEnd;
+      }).length;
 
-      const recentNutritionData = nutritionLogs?.slice(0, 7) || [];
+      const recentNutritionData = nutritionLogs.slice(0, 7);
       const avgCalories = recentNutritionData.reduce((sum, log) => {
-        const totalCalories = log.meal_entries?.reduce((mealSum: number, entry: any) => 
+        const totalCalories = log.meal_entries?.reduce((mealSum: number, entry: any) =>
           mealSum + (entry.food_items?.calories_per_serving * entry.serving_multiplier || 0), 0) || 0;
         return sum + totalCalories;
       }, 0) / Math.max(recentNutritionData.length, 1);
 
       const avgProtein = recentNutritionData.reduce((sum, log) => {
-        const totalProtein = log.meal_entries?.reduce((mealSum: number, entry: any) => 
+        const totalProtein = log.meal_entries?.reduce((mealSum: number, entry: any) =>
           mealSum + (entry.food_items?.protein_per_serving * entry.serving_multiplier || 0), 0) || 0;
         return sum + totalProtein;
       }, 0) / Math.max(recentNutritionData.length, 1);
 
-      const recentJournalData = journalEntries?.slice(0, 7) || [];
-      const avgMood = recentJournalData.reduce((sum, entry) => sum + (entry.mood_rating || 0), 0) / Math.max(recentJournalData.length, 1);
-      const avgEnergy = recentJournalData.reduce((sum, entry) => sum + (entry.energy_level || 0), 0) / Math.max(recentJournalData.length, 1);
+      const recentJournalData = journalEntries.slice(0, 7);
+      const avgMood = recentJournalData.reduce((sum, entry: any) => sum + (entry.mood_rating || 0), 0) / Math.max(recentJournalData.length, 1);
+      const avgEnergy = recentJournalData.reduce((sum, entry: any) => sum + (entry.energy_level || 0), 0) / Math.max(recentJournalData.length, 1);
 
       // Aggregate workout metrics
-      const recentMetrics = workoutSessions?.flatMap(session => session.workout_metrics || []) || [];
+      const recentMetrics = workoutSessions.flatMap(session => session.workout_metrics || []);
 
       return {
-        workoutSessions: workoutSessions || [],
-        nutritionLogs: nutritionLogs || [],
-        journalEntries: journalEntries || [],
+        workoutSessions,
+        nutritionLogs,
+        journalEntries,
         recentMetrics,
         progressTrends: {
           weeklyWorkouts,
@@ -124,7 +196,7 @@ export const useUserDataIntegration = () => {
     if (!userData) return '';
 
     const { workoutSessions, nutritionLogs, journalEntries, progressTrends } = userData;
-    
+
     return `
 CURRENT USER FITNESS PROFILE:
 =================================
@@ -144,9 +216,9 @@ ${workoutSessions.slice(0, 5).map(session => `
 
 NUTRITION PATTERNS (Last 7 days):
 ${nutritionLogs.slice(0, 7).map(log => {
-  const totalCals = log.meal_entries?.reduce((sum: number, entry: any) => 
+  const totalCals = log.meal_entries?.reduce((sum: number, entry: any) =>
     sum + (entry.food_items?.calories_per_serving * entry.serving_multiplier || 0), 0) || 0;
-  const totalProtein = log.meal_entries?.reduce((sum: number, entry: any) => 
+  const totalProtein = log.meal_entries?.reduce((sum: number, entry: any) =>
     sum + (entry.food_items?.protein_per_serving * entry.serving_multiplier || 0), 0) || 0;
   return `- ${log.date}: ${Math.round(totalCals)} kcal, ${Math.round(totalProtein * 10) / 10}g protein`;
 }).join('\n')}

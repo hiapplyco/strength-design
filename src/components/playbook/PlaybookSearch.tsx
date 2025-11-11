@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
@@ -13,15 +14,21 @@ export function PlaybookSearch() {
 
   const handleSearch = async () => {
     if (!query.trim()) return;
-    
+
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("playbook-query", {
-        body: { query: query.trim() }
-      });
-      
-      if (error) throw error;
-      setAnswer(data.answer);
+      const playbookQuery = httpsCallable<
+        { query: string },
+        { answer: string }
+      >(functions, 'playbookQuery');
+
+      const result = await playbookQuery({ query: query.trim() });
+
+      if (result.data?.answer) {
+        setAnswer(result.data.answer);
+      } else {
+        setAnswer("No answer received. Please try again.");
+      }
     } catch (error) {
       console.error("Search error:", error);
       setAnswer("An error occurred while searching. Please try again.");

@@ -4,7 +4,10 @@ import type { Exercise } from "./types";
 import { useToast } from "@/hooks/use-toast";
 import { debounce } from "lodash";
 
-const SEARCH_URL = 'https://us-central1-strength-design.cloudfunctions.net/searchExercises';
+// Use emulator URL in development, production URL in production
+const SEARCH_URL = import.meta.env.DEV
+  ? 'http://127.0.0.1:5001/strength-design/us-central1/searchExercises'
+  : 'https://us-central1-strength-design.cloudfunctions.net/searchExercises';
 
 export const useExerciseSearch = () => {
   const [searchQuery, setSearchQuery] = useState("");

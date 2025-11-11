@@ -5,7 +5,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { useWorkoutSessions } from "@/hooks/useWorkoutSessions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/firebase/config";
+import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { format } from "date-fns";
 import { Zap, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,12 +23,23 @@ export const ScheduleWorkoutModal = ({ open, onOpenChange }: ScheduleWorkoutModa
 
   useEffect(() => {
     // Fetch list of user's workouts
-    if (!open) return;
+    if (!open || !user?.uid) return;
     (async () => {
-      const { data } = await supabase.from("generated_workouts").select("*").order("generated_at", { ascending: false }).limit(15);
-      setAvailableWorkouts(data || []);
+      const workoutsRef = collection(db, "generated_workouts");
+      const q = query(
+        workoutsRef,
+        where("user_id", "==", user.uid),
+        orderBy("generated_at", "desc"),
+        limit(15)
+      );
+      const querySnapshot = await getDocs(q);
+      const workouts = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setAvailableWorkouts(workouts);
     })();
-  }, [open]);
+  }, [open, user?.uid]);
 
   // Smart suggestion (pick the first workout or last scheduled + 1 day as default)
   useEffect(() => {
@@ -43,7 +55,7 @@ export const ScheduleWorkoutModal = ({ open, onOpenChange }: ScheduleWorkoutModa
       generated_workout_id: selectedWorkout,
       scheduled_date: format(selectedDate, "yyyy-MM-dd"),
       status: "scheduled",
-      user_id: user.id,
+      user_id: user.uid,
     });
     setSubmitting(false);
     setSelectedDate(undefined);

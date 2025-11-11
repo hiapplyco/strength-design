@@ -1,6 +1,5 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useMemo, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Dumbbell, ArrowLeft, FileText, Activity } from 'lucide-react';
@@ -20,7 +19,7 @@ interface WorkoutPreviewProps {
   onGoToGenerator: () => void;
 }
 
-export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
+const WorkoutPreviewComponent: React.FC<WorkoutPreviewProps> = ({
   generatedWorkout,
   onReplaceWorkouts,
   isReplacing,
@@ -31,13 +30,27 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   const { publishToDocument, isPublishing } = useWorkoutDocumentPublisher();
   const { saveWorkoutTemplate, isSaving } = useWorkoutTemplates();
 
+  // Memoize total workout count
+  const totalWorkouts = useMemo(() => {
+    if (!generatedWorkout) return 0;
+    return Object.entries(generatedWorkout)
+      .filter(([key]) => key !== '_meta')
+      .reduce((count, [key, value]) => {
+        if (isWorkoutCycle(value)) {
+          return count + Object.keys(value).length;
+        }
+        return count + 1;
+      }, 0);
+  }, [generatedWorkout]);
+
+  // Memoize workout title
+  const workoutTitle = useMemo(() => {
+    return generatedWorkout?._meta?.title || 'Your Custom Workout Plan';
+  }, [generatedWorkout?._meta?.title]);
+
   if (!generatedWorkout) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center py-12"
-      >
+      <div className="text-center py-12 animate-in fade-in duration-300">
         <Dumbbell className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">No Workout Generated Yet</h3>
         <p className="text-muted-foreground mb-6">
@@ -47,22 +60,9 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
           <ArrowLeft className="h-4 w-4" />
           Back to Generator
         </Button>
-      </motion.div>
+      </div>
     );
   }
-
-  // Count total workout days
-  const totalWorkouts = Object.entries(generatedWorkout)
-    .filter(([key]) => key !== '_meta')
-    .reduce((count, [key, value]) => {
-      if (isWorkoutCycle(value)) {
-        return count + Object.keys(value).length;
-      }
-      return count + 1;
-    }, 0);
-
-  // Get workout title from meta or generate one
-  const workoutTitle = generatedWorkout._meta?.title || 'Your Custom Workout Plan';
 
   const handlePublishToDocument = () => {
     publishToDocument(generatedWorkout);
@@ -77,11 +77,7 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
-    >
+    <div className="space-y-6 animate-in fade-in duration-300">
       {/* Header */}
       <Card className="bg-gradient-to-r from-green-500/10 to-green-600/10 border-green-500/20">
         <CardHeader>
@@ -95,7 +91,7 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
-            <Button 
+            <Button
               onClick={onReplaceWorkouts}
               disabled={isReplacing}
               className="gap-2"
@@ -103,8 +99,8 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
               <Calendar className="h-4 w-4" />
               {existingWorkoutCount > 0 ? 'Replace & Schedule' : 'Schedule Workouts'}
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={() => setShowNutritionDialog(true)}
               variant="outline"
               className="gap-2"
@@ -112,8 +108,8 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
               <Activity className="h-4 w-4" />
               Add to Nutrition Diary
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={handlePublishToDocument}
               disabled={isPublishing}
               variant="outline"
@@ -122,9 +118,9 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
               <FileText className="h-4 w-4" />
               {isPublishing ? 'Publishing...' : 'Publish to Document'}
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               onClick={onGoToGenerator}
               className="gap-2"
             >
@@ -169,6 +165,9 @@ export const WorkoutPreview: React.FC<WorkoutPreviewProps> = ({
         onOpenChange={setShowNutritionDialog}
         workout={generatedWorkout}
       />
-    </motion.div>
+    </div>
   );
 };
+
+// Memoize component to prevent unnecessary re-renders
+export const WorkoutPreview = memo(WorkoutPreviewComponent);

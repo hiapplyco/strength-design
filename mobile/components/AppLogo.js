@@ -1,74 +1,49 @@
-import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+/**
+ * App Logo Component
+ * Displays the Strength.Design logo
+ */
 
-export const AppLogo = ({ 
-  size = 'medium', 
-  style, 
-  showGlow = true,
-  position = 'header', // header, center, corner
-  noCircle = false
-}) => {
-  const { isDarkMode } = useTheme();
-  
-  const sizeMap = {
-    small: { width: 30, height: 30 },
-    medium: { width: 40, height: 40 },
-    large: { width: 60, height: 60 },
-    xlarge: { width: 100, height: 100 },
-    xxlarge: { width: 150, height: 150 }
-  };
-  
-  const logoSize = typeof size === 'string' ? sizeMap[size] : { width: size, height: size };
-  
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+export function AppLogo({ size = 120, showGlow = false, noCircle = false, style }) {
+  const logoSize = { width: size, height: size };
+
   return (
-    <View style={[
-      styles.container,
-      position === 'corner' && styles.cornerPosition,
-      style
-    ]}>
-      {showGlow && !noCircle && (
-        <View style={[
-          styles.glowEffect,
-          logoSize,
-          isDarkMode && styles.glowDark
-        ]} />
-      )}
-      <Image
-        source={require('../assets/sdlogo.png')}
-        style={[
-          logoSize,
-          styles.logo,
-          { resizeMode: 'contain' }
-        ]}
-      />
+    <View style={[styles.container, style]}>
+      <View style={[
+        !noCircle && styles.circle,
+        !noCircle && logoSize,
+        showGlow && styles.glow,
+      ]}>
+        <Text style={[styles.logoText, { fontSize: size * 0.2 }]}>SD</Text>
+      </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cornerPosition: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 100,
+  circle: {
+    borderRadius: 1000,
+    backgroundColor: '#FF6B35',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  logo: {
-    zIndex: 2,
+  logoText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
-  glowEffect: {
-    position: 'absolute',
-    backgroundColor: 'rgba(76, 255, 80, 0.2)',
-    borderRadius: 100,
-    transform: [{ scale: 1.2 }],
+  glow: {
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 10,
   },
-  glowDark: {
-    backgroundColor: 'rgba(76, 255, 80, 0.3)',
-  }
 });
 
 export default AppLogo;

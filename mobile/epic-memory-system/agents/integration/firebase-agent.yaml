@@ -1,0 +1,240 @@
+name: FirebaseAgent
+version: 1.0.0
+description: Manages all Firebase service integrations and optimizations
+parent: MasterAgent
+
+specializations:
+  - firestore_optimization
+  - auth_management
+  - cloud_functions
+  - storage_handling
+  - analytics_integration
+  - crashlytics_setup
+
+firebase_services:
+  firestore:
+    collections:
+      users:
+        indexes:
+          - [email, created_at]
+          - [subscription_status, updated_at]
+        security_rules:
+          read: auth.uid == resource.data.uid
+          write: auth.uid == resource.data.uid
+      workouts:
+        indexes:
+          - [user_id, created_at]
+          - [user_id, is_favorite]
+          - [user_id, last_performed]
+        security_rules:
+          read: auth.uid == resource.data.user_id
+          write: auth.uid == resource.data.user_id
+      exercises:
+        indexes:
+          - [category, name]
+          - [primary_muscles, equipment]
+        security_rules:
+          read: true
+          write: false
+    optimization:
+      - composite_indexes
+      - query_optimization
+      - pagination_strategy
+      - offline_persistence
+      - cache_configuration
+      
+  authentication:
+    providers:
+      - email_password
+      - google
+      - apple
+      - phone
+      - anonymous
+    features:
+      - multi_factor_auth
+      - custom_claims
+      - session_management
+      - token_refresh
+      - biometric_integration
+    security:
+      - rate_limiting
+      - fraud_prevention
+      - account_linking
+      - password_policies
+      
+  cloud_functions:
+    functions:
+      searchExercemusExercises:
+        memory: 512MB
+        timeout: 30s
+        optimization:
+          - index_usage
+          - query_batching
+          - response_caching
+      generateWorkout:
+        memory: 1GB
+        timeout: 60s
+        optimization:
+          - streaming_response
+          - partial_results
+          - background_processing
+      processPayment:
+        memory: 256MB
+        timeout: 10s
+        optimization:
+          - idempotency
+          - retry_logic
+          - webhook_validation
+    deployment:
+      - region_selection
+      - cold_start_optimization
+      - function_splitting
+      - dependency_optimization
+      
+  storage:
+    buckets:
+      user_avatars:
+        max_size: 5MB
+        allowed_types: [image/*]
+        optimization:
+          - auto_compression
+          - thumbnail_generation
+          - cdn_caching
+      workout_images:
+        max_size: 10MB
+        allowed_types: [image/*, video/*]
+        optimization:
+          - progressive_loading
+          - format_conversion
+          - lazy_loading
+      exercise_videos:
+        max_size: 100MB
+        allowed_types: [video/*]
+        optimization:
+          - streaming_delivery
+          - quality_variants
+          - preloading
+
+query_optimization:
+  exercise_search:
+    current_approach: in_memory_filtering
+    optimized_approach:
+      - create_search_index
+      - implement_algolia
+      - use_compound_queries
+      - cache_frequent_searches
+    performance_gains:
+      - 70%_faster_searches
+      - reduced_function_costs
+      - better_relevance
+      
+  workout_listing:
+    current_approach: fetch_all
+    optimized_approach:
+      - pagination_with_cursors
+      - selective_field_fetching
+      - real_time_listeners
+      - optimistic_ui_updates
+    performance_gains:
+      - reduced_bandwidth
+      - faster_initial_load
+      - real_time_updates
+
+security_implementation:
+  rules_testing:
+    - unit_tests_for_rules
+    - integration_tests
+    - penetration_testing
+    - permission_validation
+  data_validation:
+    - schema_enforcement
+    - input_sanitization
+    - type_checking
+    - range_validation
+  authentication_flow:
+    - secure_token_storage
+    - refresh_token_rotation
+    - session_management
+    - device_fingerprinting
+
+monitoring_and_analytics:
+  performance_monitoring:
+    - api_latency
+    - function_execution_time
+    - database_operations
+    - storage_bandwidth
+  usage_analytics:
+    - user_engagement
+    - feature_adoption
+    - conversion_funnel
+    - retention_metrics
+  error_tracking:
+    - crashlytics_integration
+    - function_errors
+    - permission_denials
+    - quota_exceeded
+
+cost_optimization:
+  firestore:
+    - minimize_reads
+    - batch_operations
+    - efficient_queries
+    - proper_indexing
+  functions:
+    - optimize_memory
+    - reduce_cold_starts
+    - efficient_code
+    - caching_strategy
+  storage:
+    - lifecycle_policies
+    - compression
+    - cdn_usage
+    - cleanup_routines
+
+migration_strategies:
+  data_migration:
+    - batch_processing
+    - progressive_migration
+    - validation_checks
+    - rollback_plan
+  schema_evolution:
+    - backward_compatibility
+    - versioning_strategy
+    - migration_scripts
+    - data_transformation
+
+production_checklist:
+  - [ ] Security rules tested
+  - [ ] Indexes created
+  - [ ] Functions optimized
+  - [ ] Monitoring enabled
+  - [ ] Backup strategy
+  - [ ] Rate limiting configured
+  - [ ] Error handling complete
+  - [ ] Analytics integrated
+
+tools:
+  - name: FirestoreOptimizer
+    path: /agents/tools/firestore_optimizer.ts
+  - name: SecurityRuleTester
+    path: /agents/tools/rule_tester.ts
+  - name: FunctionProfiler
+    path: /agents/tools/function_profiler.ts
+  - name: CostAnalyzer
+    path: /agents/tools/cost_analyzer.ts
+  - name: QueryOptimizer
+    path: /agents/tools/query_optimizer.ts
+
+alerts:
+  - metric: function_error_rate
+    threshold: > 1%
+    action: investigate_errors
+  - metric: firestore_reads
+    threshold: > 50k/day
+    action: optimize_queries
+  - metric: storage_bandwidth
+    threshold: > 10GB/day
+    action: implement_caching
+  - metric: auth_failures
+    threshold: > 5%
+    action: review_security

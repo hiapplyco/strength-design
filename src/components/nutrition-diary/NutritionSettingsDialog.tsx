@@ -1,4 +1,5 @@
-export { NutritionSettingsDialog } from './NutritionSettingsDialog.firebase';
+// Re-export from the optimized Firebase version
+export { NutritionSettingsDialogOptimized as NutritionSettingsDialog } from './NutritionSettingsDialogOptimized';
 
 /* Original Supabase version - kept for reference during migration */
 /*

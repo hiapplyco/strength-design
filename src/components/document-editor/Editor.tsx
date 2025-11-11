@@ -6,7 +6,6 @@ import { useEffect, useCallback } from 'react';
 import { generateShareUrl } from './editorUtils';
 import { useDocumentPublisher } from './hooks/useDocumentPublisher';
 import { DocumentEditorContent } from './EditorContent';
-import { supabase } from '@/integrations/supabase/client';
 import { isWorkoutDay, isWorkoutCycle, WeeklyWorkouts, WorkoutDay, WorkoutCycle } from '@/types/fitness';
 
 interface EditorProps {

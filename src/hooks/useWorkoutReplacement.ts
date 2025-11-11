@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useWorkoutSessions } from './useWorkoutSessions';
 import { useToast } from './use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { db, auth } from '@/lib/firebase/config';
+import { collection, query, where, getDocs, addDoc, deleteDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { format, addDays } from 'date-fns';
 import type { WeeklyWorkouts } from '@/types/fitness';
 import { isWorkoutDay, isWorkoutCycle } from '@/types/fitness';
@@ -11,36 +11,38 @@ export const useWorkoutReplacement = () => {
   const [isReplacing, setIsReplacing] = useState(false);
   const { sessions, refetch } = useWorkoutSessions();
   const { toast } = useToast();
-  const { session } = useAuth();
+  const currentUser = auth.currentUser;
 
   const replaceWorkouts = async (newWorkouts: WeeklyWorkouts): Promise<boolean> => {
-    if (!session?.user?.id) return false;
+    if (!currentUser?.uid) return false;
 
     setIsReplacing(true);
     try {
       // Delete existing scheduled workouts (keep completed ones)
-      const { error: deleteError } = await supabase
-        .from('workout_sessions')
-        .delete()
-        .eq('user_id', session.user.id)
-        .eq('status', 'scheduled');
+      const sessionsRef = collection(db, 'workout_sessions');
+      const q = query(
+        sessionsRef,
+        where('user_id', '==', currentUser.uid),
+        where('status', '==', 'scheduled')
+      );
 
-      if (deleteError) throw deleteError;
+      const snapshot = await getDocs(q);
+      const batch = writeBatch(db);
+      snapshot.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
 
       // Create new generated_workout entry
-      const { data: generatedWorkout, error: workoutError } = await supabase
-        .from('generated_workouts')
-        .insert({
-          user_id: session.user.id,
-          workout_data: newWorkouts as any,
-          title: newWorkouts._meta?.title || 'Replacement Workout Plan',
-          summary: newWorkouts._meta?.summary || '',
-          tags: ['replaced']
-        })
-        .select()
-        .single();
-
-      if (workoutError) throw workoutError;
+      const workoutsRef = collection(db, 'generated_workouts');
+      const generatedWorkoutRef = await addDoc(workoutsRef, {
+        user_id: currentUser.uid,
+        workout_data: newWorkouts,
+        title: newWorkouts._meta?.title || 'Replacement Workout Plan',
+        summary: newWorkouts._meta?.summary || '',
+        tags: ['replaced'],
+        generated_at: serverTimestamp(),
+      });
 
       // Prepare workout events
       const events: Array<{
@@ -76,18 +78,27 @@ export const useWorkoutReplacement = () => {
       const workoutSessions = events.map(event => {
         const scheduledDate = addDays(startDate, event.dayOffset);
         return {
-          user_id: session.user.id,
-          generated_workout_id: generatedWorkout.id,
+          user_id: currentUser.uid,
+          generated_workout_id: generatedWorkoutRef.id,
           scheduled_date: format(scheduledDate, 'yyyy-MM-dd'),
-          status: 'scheduled' as const
+          status: 'scheduled' as const,
+          created_at: serverTimestamp(),
         };
       });
 
-      const { error: sessionsError } = await supabase
-        .from('workout_sessions')
-        .insert(workoutSessions);
+      // Batch insert workout sessions
+      const sessionBatch = writeBatch(db);
+      workoutSessions.forEach(session => {
+        const sessionRef = collection(db, 'workout_sessions');
+        const newSessionRef = addDoc(sessionRef, session);
+      });
 
-      if (sessionsError) throw sessionsError;
+      // Use Promise.all for multiple addDoc operations
+      await Promise.all(
+        workoutSessions.map(session =>
+          addDoc(collection(db, 'workout_sessions'), session)
+        )
+      );
 
       await refetch();
       

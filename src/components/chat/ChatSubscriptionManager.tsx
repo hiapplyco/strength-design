@@ -1,6 +1,7 @@
 
 import { useEffect, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/firebase/config";
+import { collection, query, where, onSnapshot, Unsubscribe } from "firebase/firestore";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ChatSubscriptionManagerProps {
@@ -9,55 +10,62 @@ interface ChatSubscriptionManagerProps {
 
 export const ChatSubscriptionManager = ({ onMessageUpdate }: ChatSubscriptionManagerProps) => {
   const { user } = useAuth();
-  const subscriptionRef = useRef<any>(null);
+  const unsubscribeRef = useRef<Unsubscribe | null>(null);
   const isSubscribedRef = useRef(false);
+  const previousMessagesRef = useRef<Map<string, any>>(new Map());
 
   useEffect(() => {
     if (!user || isSubscribedRef.current) return;
-    
+
     // Clean up existing subscription
-    if (subscriptionRef.current) {
-      supabase.removeChannel(subscriptionRef.current);
-      subscriptionRef.current = null;
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
       isSubscribedRef.current = false;
+      previousMessagesRef.current.clear();
     }
-    
-    console.log('Setting up chat subscription for user:', user.id);
-    
-    subscriptionRef.current = supabase
-      .channel(`chat_messages_${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          console.log('Chat subscription received UPDATE:', payload);
-          // Only trigger update for response updates, not initial message saves
-          if (payload.new.response && !payload.old.response) {
-            console.log('Triggering message update for new response');
-            onMessageUpdate();
+
+    console.log('Setting up chat subscription for user:', user.uid);
+
+    const messagesRef = collection(db, 'chat_messages');
+    const q = query(messagesRef, where('user_id', '==', user.uid));
+
+    unsubscribeRef.current = onSnapshot(
+      q,
+      (snapshot) => {
+        console.log('Chat subscription received changes:', snapshot.docChanges().length);
+
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'modified') {
+            const newData = change.doc.data();
+            const previousData = previousMessagesRef.current.get(change.doc.id);
+
+            // Only trigger update for response updates, not initial message saves
+            if (newData.response && (!previousData || !previousData.response)) {
+              console.log('Triggering message update for new response');
+              onMessageUpdate();
+            }
+
+            // Store current state for next comparison
+            previousMessagesRef.current.set(change.doc.id, newData);
           }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Chat subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          isSubscribedRef.current = true;
-        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-          isSubscribedRef.current = false;
-        }
-      });
+        });
+
+        isSubscribedRef.current = true;
+      },
+      (error) => {
+        console.error('Chat subscription error:', error);
+        isSubscribedRef.current = false;
+      }
+    );
 
     return () => {
-      if (subscriptionRef.current) {
+      if (unsubscribeRef.current) {
         console.log('Cleaning up chat subscription');
-        supabase.removeChannel(subscriptionRef.current);
-        subscriptionRef.current = null;
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
         isSubscribedRef.current = false;
+        previousMessagesRef.current.clear();
       }
     };
   }, [user, onMessageUpdate]);

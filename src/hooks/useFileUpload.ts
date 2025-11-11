@@ -1,6 +1,9 @@
 
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { storage, db, functions } from "@/lib/firebase/config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,51 +25,48 @@ export const useFileUpload = () => {
     try {
       setIsLoading(true);
       const fileName = `${crypto.randomUUID()}-${file.name}`;
-      const filePath = `${user.id}/${fileName}`;
+      const filePath = `chat-uploads/${user.id}/${fileName}`;
 
-      // Upload file to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('chat_uploads')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from('chat_uploads')
-        .getPublicUrl(filePath);
-
-      if (!urlData || !urlData.publicUrl) {
-        throw new Error('Failed to get public URL for uploaded file');
-      }
-
-      console.log('File uploaded, getting public URL:', urlData.publicUrl);
-
-      // Save initial message to database
-      const { data: messageData, error: dbError } = await supabase
-        .from('chat_messages')
-        .insert({
-          user_id: user.id,
-          message: `Uploaded file: ${file.name}`,
-          file_path: urlData.publicUrl,
-          file_type: file.type
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      console.log('Message saved to database:', messageData);
-
-      // Process with Gemini
-      const { data: geminiData, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
-        body: { 
-          message: `Please summarize this file: ${file.name}. After summarizing, ask what I would like to do.`,
-          fileUrl: urlData.publicUrl
-        }
+      // Upload file to Firebase Storage
+      const storageRef = ref(storage, filePath);
+      const uploadResult = await uploadBytes(storageRef, file, {
+        contentType: file.type,
+        customMetadata: {
+          userId: user.id,
+          originalName: file.name,
+          uploadedAt: new Date().toISOString(),
+        },
       });
 
-      if (geminiError) throw geminiError;
+      // Get the download URL
+      const downloadUrl = await getDownloadURL(uploadResult.ref);
+
+      console.log('File uploaded, download URL:', downloadUrl);
+
+      // Save initial message to Firestore
+      const messageRef = await addDoc(collection(db, 'chat_messages'), {
+        user_id: user.id,
+        message: `Uploaded file: ${file.name}`,
+        file_path: downloadUrl,
+        file_type: file.type,
+        created_at: serverTimestamp(),
+        response: null,
+      });
+
+      console.log('Message saved to database:', messageRef.id);
+
+      // Process with Gemini using Firebase Cloud Function
+      const chatWithGemini = httpsCallable<
+        { message: string; fileUrl: string },
+        { response: string }
+      >(functions, 'chatWithGemini');
+
+      const result = await chatWithGemini({
+        message: `Please summarize this file: ${file.name}. After summarizing, ask what I would like to do.`,
+        fileUrl: downloadUrl,
+      });
+
+      const geminiData = result.data;
 
       console.log('Received Gemini response:', geminiData);
 
@@ -75,12 +75,10 @@ export const useFileUpload = () => {
       }
 
       // Update message with Gemini's response
-      const { error: updateError } = await supabase
-        .from('chat_messages')
-        .update({ response: geminiData.response })
-        .eq('id', messageData.id);
-
-      if (updateError) throw updateError;
+      await updateDoc(doc(db, 'chat_messages', messageRef.id), {
+        response: geminiData.response,
+        updated_at: serverTimestamp(),
+      });
 
       toast({
         title: "Success",
@@ -88,11 +86,13 @@ export const useFileUpload = () => {
       });
     } catch (error) {
       console.error('Error uploading file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload and analyze file';
       toast({
         title: "Error",
-        description: "Failed to upload and analyze file",
+        description: errorMessage,
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }

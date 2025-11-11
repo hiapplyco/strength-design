@@ -1,7 +1,5 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useSmartToast } from '@/hooks/useSmartToast';
 import type { WeeklyWorkouts, WorkoutDay, WorkoutCycle } from '@/types/fitness';
 import { isWorkoutCycle, isWorkoutDay } from '@/types/fitness';

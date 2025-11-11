@@ -1,93 +1,93 @@
-import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  initializeAuth, 
-  getReactNativePersistence,
-  connectAuthEmulator
-} from 'firebase/auth';
-import { 
-  getFirestore, 
-  connectFirestoreEmulator 
-} from 'firebase/firestore';
-import { 
-  getFunctions, 
-  connectFunctionsEmulator 
-} from 'firebase/functions';
-import { 
-  getStorage, 
-  connectStorageEmulator 
-} from 'firebase/storage';
+/**
+ * Firebase Configuration for Mobile App
+ *
+ * This file initializes Firebase services for the React Native mobile app.
+ * Configuration values are sourced from environment variables (EXPO_PUBLIC_ prefix).
+ *
+ * Services exported:
+ * - auth: Firebase Authentication
+ * - db: Cloud Firestore
+ * - storage: Cloud Storage
+ * - functions: Cloud Functions (us-central1 region)
+ */
+
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-// --- Use your computer's IP address for emulators ---
-// Make sure your phone and computer are on the same Wi-Fi network.
-const USE_EMULATORS = false; // Disabled - using production Firebase
-// Use localhost for iOS simulator, actual IP for physical devices
-const EMULATOR_HOST = (Platform.OS === 'web' || Platform.OS === 'ios') ? 'localhost' : '192.168.86.26'; 
-
+// Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyDTyxs6cZKUbN7ejmYk_rLVxNg5wVKoSlQ",
-  authDomain: "strength-design.firebaseapp.com",
-  projectId: "strength-design",
-  storageBucket: "strength-design.firebasestorage.app",
-  messagingSenderId: "739613827248",
-  appId: "1:739613827248:web:2ae23e6e858a582275a0d8"
+  apiKey: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_API_KEY ||
+          process.env.EXPO_PUBLIC_FIREBASE_API_KEY ||
+          'demo-api-key',
+  authDomain: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+              process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+              'demo.firebaseapp.com',
+  projectId: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_PROJECT_ID ||
+             process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ||
+             'demo-project',
+  storageBucket: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+                 process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+                 'demo.appspot.com',
+  messagingSenderId: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+                     process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+                     '123456789',
+  appId: Constants.expoConfig?.extra?.EXPO_PUBLIC_FIREBASE_APP_ID ||
+         process.env.EXPO_PUBLIC_FIREBASE_APP_ID ||
+         'demo-app-id',
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Log configuration status (without exposing sensitive data)
+console.log('Firebase Config:', {
+  projectId: firebaseConfig.projectId,
+  hasApiKey: !!firebaseConfig.apiKey && firebaseConfig.apiKey !== 'demo-api-key',
+  environment: __DEV__ ? 'development' : 'production'
+});
 
-// Initialize services
-const auth = Platform.OS === 'web' 
-  ? getAuth(app)
-  : initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage)
-    });
-const db = getFirestore(app);
-const functions = getFunctions(app);
-const storage = getStorage(app);
+// Initialize Firebase (reuse if already initialized)
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Connect to emulators in development
-if (USE_EMULATORS) {
-  console.log(`[EMULATOR] Connecting to Firebase emulators at ${EMULATOR_HOST}`);
-  
-  // Use try-catch to avoid re-connection errors
-  try {
-    // Disable warnings for emulator and handle initial auth state gracefully
-    connectAuthEmulator(auth, `http://${EMULATOR_HOST}:9099`, { 
-      disableWarnings: true
-    });
-    
-    // Set up error handling for auth operations
-    auth.onAuthStateChanged(null, (error) => {
-      if (error?.code === 'auth/user-not-found') {
-        // Silently handle user not found errors in emulator
-        return;
-      }
-    });
-  } catch (error) {
-    console.log('[EMULATOR] Auth emulator already connected');
-  }
-  
-  try {
-    connectFirestoreEmulator(db, EMULATOR_HOST, 8080);
-  } catch (error) {
-    console.log('[EMULATOR] Firestore emulator already connected');
-  }
-  
-  try {
-    connectFunctionsEmulator(functions, EMULATOR_HOST, 5001);
-  } catch (error) {
-    console.log('[EMULATOR] Functions emulator already connected');
-  }
-  
-  try {
-    connectStorageEmulator(storage, EMULATOR_HOST, 9199);
-  } catch (error) {
-    console.log('[EMULATOR] Storage emulator already connected');
+// Initialize Auth with React Native persistence
+// Note: initializeAuth must be called before getAuth for custom persistence
+let auth;
+try {
+  // Try to initialize with AsyncStorage persistence
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+  console.log('Firebase Auth initialized with AsyncStorage persistence');
+} catch (error) {
+  // If already initialized, just get the existing instance
+  if (error.code === 'auth/already-initialized') {
+    auth = getAuth(app);
+    console.log('Firebase Auth already initialized, using existing instance');
+  } else {
+    console.error('Error initializing Firebase Auth:', error);
+    auth = getAuth(app);
   }
 }
 
-export { auth, db, functions, storage };
+// Initialize other Firebase services
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+export const functions = getFunctions(app, 'us-central1');
+
+// Export auth
+export { auth };
+
+// Export the app instance
 export default app;
+
+// Development utilities
+if (__DEV__) {
+  console.log('Firebase services initialized:', {
+    auth: !!auth,
+    db: !!db,
+    storage: !!storage,
+    functions: !!functions,
+  });
+}

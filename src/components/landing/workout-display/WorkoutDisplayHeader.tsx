@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Database, Send, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
 import { HeaderActions } from "@/components/workout/header/HeaderActions";
 import { WorkoutDisplayButtons } from "./WorkoutDisplayButtons";
 
@@ -28,21 +29,27 @@ export const WorkoutDisplayHeader = ({
   const handlePublish = async () => {
     try {
       setIsPublishing(true);
-      
+
       // Create a copy without the _meta field for the document generation
       const workoutsForDocument = { ...allWorkouts };
       delete workoutsForDocument._meta;
-      
-      const { data, error } = await supabase.functions.invoke('generate-tiptap-document', {
-        body: { 
-          workouts: workoutsForDocument,
-          title: allWorkouts._meta?.title,
-          summary: allWorkouts._meta?.summary
-        }
+
+      const generateTiptapDocument = httpsCallable<
+        {
+          workouts: Record<string, any>;
+          title?: string;
+          summary?: string;
+        },
+        { content: string }
+      >(functions, 'generateTiptapDocument');
+
+      const result = await generateTiptapDocument({
+        workouts: workoutsForDocument,
+        title: allWorkouts._meta?.title,
+        summary: allWorkouts._meta?.summary
       });
 
-      if (error) {
-        console.error('Error formatting document:', error);
+      if (!result.data) {
         toast({
           title: "Error",
           description: "Failed to format the document. Please try again.",
@@ -51,11 +58,11 @@ export const WorkoutDisplayHeader = ({
         return;
       }
 
-      navigate('/publish-program', { 
-        state: { 
-          content: JSON.stringify(data),
-          workoutScript: data?.content || JSON.stringify(workoutsForDocument)
-        } 
+      navigate('/publish-program', {
+        state: {
+          content: JSON.stringify(result.data),
+          workoutScript: result.data?.content || JSON.stringify(workoutsForDocument)
+        }
       });
     } catch (error) {
       console.error('Error publishing document:', error);

@@ -1,0 +1,105 @@
+{
+  "name": "strength-design-knowledge-pipeline",
+  "version": "1.0.0",
+  "description": "Fitness knowledge ingestion pipeline for Strength.Design AI-powered fitness app",
+  "main": "src/fitness-ingestor.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/fitness-ingestor.ts",
+    "ingest:reddit": "ts-node src/fitness-ingestor.ts --source reddit --limit 100",
+    "ingest:wikipedia": "ts-node src/fitness-ingestor.ts --source wikipedia --limit 50",
+    "ingest:all": "ts-node src/fitness-ingestor.ts --source all --limit 150",
+    "ingest:test": "ts-node src/fitness-ingestor.ts --source reddit --limit 10",
+    "process:enhance": "ts-node src/processors/enhance-content.ts",
+    "process:categorize": "ts-node src/processors/categorize-content.ts",
+    "upload:firebase": "ts-node src/utils/firebase-uploader.ts",
+    "stats": "ts-node src/utils/stats-generator.ts",
+    "clean": "rm -rf dist logs data/temp",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "commander": "^11.1.0",
+    "winston": "^3.11.0",
+    "firebase-admin": "^12.0.0",
+    "google-auth-library": "^9.4.0",
+    "@google/generative-ai": "^0.7.1",
+    "dotenv": "^16.3.1",
+    "crypto": "^1.0.1",
+    "fs-extra": "^11.2.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "node-cron": "^3.0.3",
+    "compression": "^1.7.4",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/cheerio": "^0.22.35",
+    "@types/lodash": "^4.14.202",
+    "@types/compression": "^1.7.5",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8",
+    "prettier": "^3.1.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "fitness",
+    "knowledge",
+    "ingestion",
+    "ai",
+    "llm",
+    "reddit",
+    "wikipedia",
+    "firebase",
+    "strength-training",
+    "exercise",
+    "nutrition"
+  ],
+  "author": "Strength.Design Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strength-design/knowledge-pipeline.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src"],
+    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts"
+    ]
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+      "eslint:recommended",
+      "@typescript-eslint/recommended"
+    ],
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-explicit-any": "warn"
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 100,
+    "tabWidth": 2
+  }
+}

@@ -40,7 +40,7 @@ export const EnhancedSearchResults = ({
     );
   }
 
-  if (results.length === 0) {
+  if (!results || results.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <p>No exercises found. Try different search terms.</p>

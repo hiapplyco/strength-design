@@ -1,7 +1,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { db, auth } from '@/lib/firebase/config';
+import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -15,59 +15,56 @@ interface AddExerciseEntryParams {
 }
 
 export const useAddExerciseEntry = () => {
-  const { session } = useAuth();
+  const currentUser = auth.currentUser;
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const mutation = useMutation({
     mutationFn: async (params: AddExerciseEntryParams) => {
-      if (!session?.user) throw new Error('Not authenticated');
+      if (!currentUser) throw new Error('Not authenticated');
 
       const { exerciseName, durationMinutes, caloriesBurned, mealGroup, date, workoutData } = params;
       const dateString = format(date, 'yyyy-MM-dd');
 
       // Get or create nutrition log for the date
-      let { data: log, error: logError } = await supabase
-        .from('nutrition_logs')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('date', dateString)
-        .single();
+      const nutritionLogsRef = collection(db, 'nutrition_logs');
+      const logsQuery = query(
+        nutritionLogsRef,
+        where('user_id', '==', currentUser.uid),
+        where('date', '==', dateString)
+      );
 
-      if (logError && logError.code === 'PGRST116') {
+      const logsSnapshot = await getDocs(logsQuery);
+      let logId: string;
+
+      if (logsSnapshot.empty) {
         // Create new log if doesn't exist
-        const { data: newLog, error: createError } = await supabase
-          .from('nutrition_logs')
-          .insert({
-            user_id: session.user.id,
-            date: dateString,
-            water_consumed_ml: 0
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        log = newLog;
-      } else if (logError) {
-        throw logError;
+        const newLogRef = await addDoc(nutritionLogsRef, {
+          user_id: currentUser.uid,
+          date: dateString,
+          water_consumed_ml: 0,
+          created_at: serverTimestamp(),
+          updated_at: serverTimestamp(),
+        });
+        logId = newLogRef.id;
+      } else {
+        logId = logsSnapshot.docs[0].id;
       }
 
       // Add exercise entry
-      const { data, error } = await supabase
-        .from('exercise_entries')
-        .insert({
-          nutrition_log_id: log.id,
-          exercise_name: exerciseName,
-          duration_minutes: durationMinutes,
-          calories_burned: caloriesBurned,
-          meal_group: mealGroup,
-          workout_data: workoutData
-        })
-        .select()
-        .single();
+      const exerciseEntriesRef = collection(db, 'exercise_entries');
+      const exerciseEntryRef = await addDoc(exerciseEntriesRef, {
+        nutrition_log_id: logId,
+        exercise_name: exerciseName,
+        duration_minutes: durationMinutes,
+        calories_burned: caloriesBurned,
+        meal_group: mealGroup,
+        workout_data: workoutData,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp(),
+      });
 
-      if (error) throw error;
-      return data;
+      return { id: exerciseEntryRef.id };
     },
     onSuccess: () => {
       // Invalidate related queries

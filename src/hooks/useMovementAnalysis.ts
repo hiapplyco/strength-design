@@ -1,8 +1,11 @@
-
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { functions, storage } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase/config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 interface AnalysisOptions {
   analysisType?: 'weightlifting' | 'martial-arts' | 'general' | 'injury-prevention';
@@ -13,6 +16,22 @@ interface AnalysisOptions {
   customSystemPrompt?: string;
 }
 
+interface BjjAnalyzerRequest {
+  videoUrl: string;
+  query: string;
+  analysisType?: string;
+  frameRate?: number;
+  startOffset?: string;
+  endOffset?: string;
+  useTimestamps?: boolean;
+  systemPrompt?: string;
+}
+
+interface BjjAnalyzerResponse {
+  analysis: string;
+  metadata?: any;
+}
+
 export const useMovementAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -20,7 +39,7 @@ export const useMovementAnalysis = () => {
   const [question, setQuestion] = useState("");
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [analysisMetadata, setAnalysisMetadata] = useState<any>(null);
-  const { user } = useAuth();
+  const { session } = useAuth();
 
   // Reset form
   const handleReset = () => {
@@ -36,9 +55,14 @@ export const useMovementAnalysis = () => {
       toast.error("Please upload a video first");
       return;
     }
-    
+
     if (!question.trim()) {
       toast.error("Please enter a question about your technique");
+      return;
+    }
+
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to analyze videos");
       return;
     }
 
@@ -47,50 +71,60 @@ export const useMovementAnalysis = () => {
     setAnalysisMetadata(null);
 
     try {
-      // Create enhanced form data with analysis options
-      const formData = new FormData();
-      formData.append('video', uploadedVideo);
-      formData.append('query', question);
-      
+      // Upload video to Firebase Storage
+      const timestamp = Date.now();
+      const videoFileName = `movement-analysis/${session.user.id}/${timestamp}_${uploadedVideo.name}`;
+      const storageRef = ref(storage, videoFileName);
+
+      console.log("Uploading video to Firebase Storage...");
+      await uploadBytes(storageRef, uploadedVideo);
+
+      // Get download URL
+      const videoUrl = await getDownloadURL(storageRef);
+      console.log("Video uploaded successfully, URL:", videoUrl);
+
+      // Prepare request for Cloud Function
+      const requestData: BjjAnalyzerRequest = {
+        videoUrl,
+        query: question,
+      };
+
       // Add analysis options
       if (options.analysisType) {
-        formData.append('analysisType', options.analysisType);
+        requestData.analysisType = options.analysisType;
       }
       if (options.customFrameRate) {
-        formData.append('frameRate', options.customFrameRate.toString());
+        requestData.frameRate = options.customFrameRate;
       }
       if (options.startOffset) {
-        formData.append('startOffset', options.startOffset);
+        requestData.startOffset = options.startOffset;
       }
       if (options.endOffset) {
-        formData.append('endOffset', options.endOffset);
+        requestData.endOffset = options.endOffset;
       }
       if (options.useTimestamps !== undefined) {
-        formData.append('useTimestamps', options.useTimestamps.toString());
+        requestData.useTimestamps = options.useTimestamps;
       }
       if (options.customSystemPrompt) {
-        formData.append('systemPrompt', options.customSystemPrompt);
+        requestData.systemPrompt = options.customSystemPrompt;
       }
 
-      console.log("Calling enhanced bjj-analyzer function...");
+      console.log("Calling bjjAnalyzer Cloud Function...");
       console.log("Analysis options:", options);
-      
-      // Call the enhanced Supabase Edge Function without setting Content-Type header
-      // Let the browser handle the multipart boundary automatically
-      const { data, error } = await supabase.functions.invoke('bjj-analyzer', {
-        body: formData
-        // Remove the headers configuration to let browser set Content-Type with boundary
-      });
 
-      if (error) {
-        throw new Error(error.message || "Analysis failed");
-      }
+      // Call the Firebase Cloud Function
+      const bjjAnalyzer = httpsCallable<BjjAnalyzerRequest, BjjAnalyzerResponse>(
+        functions,
+        'bjjAnalyzer'
+      );
 
-      console.log("Enhanced analysis result:", data);
-      
-      if (data && data.analysis) {
-        setAnalysis(data.analysis);
-        setAnalysisMetadata(data.metadata || null);
+      const result = await bjjAnalyzer(requestData);
+
+      console.log("Enhanced analysis result:", result.data);
+
+      if (result.data && result.data.analysis) {
+        setAnalysis(result.data.analysis);
+        setAnalysisMetadata(result.data.metadata || null);
         toast.success("Enhanced analysis complete!");
       } else {
         throw new Error("No analysis data returned");
@@ -105,7 +139,7 @@ export const useMovementAnalysis = () => {
 
   // Save analysis to user account with metadata
   const saveAnalysis = async () => {
-    if (!user) {
+    if (!session?.user?.id) {
       toast.error("You must be logged in to save analyses");
       return;
     }
@@ -118,17 +152,13 @@ export const useMovementAnalysis = () => {
     setIsSaving(true);
 
     try {
-      const { error } = await supabase.from("movement_analyses").insert({
-        user_id: user.id,
+      await addDoc(collection(db, `users/${session.user.id}/movement_analyses`), {
         question,
         analysis,
         video_name: uploadedVideo.name,
-        metadata: analysisMetadata || null
+        metadata: analysisMetadata || null,
+        created_at: serverTimestamp()
       });
-
-      if (error) {
-        throw error;
-      }
 
       toast.success("Analysis saved to your account!");
     } catch (error: any) {

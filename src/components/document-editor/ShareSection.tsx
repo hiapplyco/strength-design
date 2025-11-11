@@ -5,7 +5,8 @@ import { copyToClipboard } from "./editorUtils";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
 import { LoadingSpinner } from "@/components/layout/app-content/LoadingSpinner";
 
 interface ShareSectionProps {
@@ -47,11 +48,9 @@ export function ShareSection({ shareableLink, handleShare, content }: ShareSecti
       tempDiv.innerHTML = content;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
 
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text: plainText }
-      });
-
-      if (error) throw error;
+      const textToSpeech = httpsCallable(functions, 'textToSpeech');
+      const result = await textToSpeech({ text: plainText });
+      const data = result.data as { audioContent: string };
 
       const audioBlob = new Blob(
         [Uint8Array.from(atob(data.audioContent), c => c.charCodeAt(0))],

@@ -6,7 +6,8 @@ import type { WeeklyWorkouts, WorkoutDay, WorkoutMeta, WorkoutCycle } from "@/ty
 import { isWorkoutDay, isWorkoutCycle } from "@/types/fitness";
 import { formatAllWorkouts, formatWorkoutToMarkdown } from "@/utils/workout-formatting";
 import { filterWorkoutDays } from "@/utils/workout-helpers";
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -60,22 +61,25 @@ export const WorkoutContent = ({
     try {
       const workoutDataForSummary = { ...workouts };
       if (workoutDataForSummary._meta) delete workoutDataForSummary._meta;
-      
-      const { data, error } = await supabase.functions.invoke('generate-workout-summary', {
-        body: { workouts: workoutDataForSummary }
+
+      const generateWorkoutSummary = httpsCallable<
+        { workouts: Record<string, any> },
+        { summary: string }
+      >(functions, 'generateWorkoutSummary');
+
+      const result = await generateWorkoutSummary({
+        workouts: workoutDataForSummary
       });
 
-      if (error) throw error;
-
-      if (data?.summary) {
-        onUpdate('_meta', '_meta', { 
-          summary: data.summary 
+      if (result.data?.summary) {
+        onUpdate('_meta', '_meta', {
+          summary: result.data.summary
         } as Partial<WorkoutMeta>);
-        
+
         setSummaryGenerated(true);
         toast({
           title: "Summary Generated",
-          description: "Gemini has created a summary of your workout program.",
+          description: "AI has created a summary of your workout program.",
         });
       }
     } catch (error) {

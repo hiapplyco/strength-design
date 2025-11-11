@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "contextFiles": [
+    "AGENTS.md",
+    "GEMINI.md",
+    "docs/MOBILE_DEPLOYMENT_PLAYBOOK.md"
+  ],
+  "defaults": {
+    "planOnStart": true,
+    "explainAfterCommand": true
+  }
+}

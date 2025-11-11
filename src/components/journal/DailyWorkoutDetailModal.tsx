@@ -24,9 +24,20 @@ import { format } from "date-fns";
 import { Dumbbell, Heart, Apple, Droplets } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import type { WorkoutSessionWithGeneratedWorkout } from "@/hooks/useWorkoutSessions";
-import type { Database } from "@/integrations/supabase/types";
 
-type JournalEntry = Database['public']['Tables']['journal_entries']['Row'];
+type JournalEntry = {
+  id: string;
+  user_id: string;
+  date: string;
+  title?: string;
+  content?: string;
+  mood_rating?: number;
+  energy_level?: number;
+  sleep_quality?: number;
+  stress_level?: number;
+  created_at?: any;
+  updated_at?: any;
+};
 
 interface DailyWorkoutDetailModalProps {
   open: boolean;
@@ -71,10 +82,10 @@ export const DailyWorkoutDetailModal = ({
   }, [existingEntry]);
 
   const handleSaveJournal = async () => {
-    if (!session?.user?.id) return;
+    if (!session?.uid) return;
 
     const journalData = {
-      user_id: session.user.id,
+      user_id: session.uid,
       date: format(date, 'yyyy-MM-dd'),
       title: journalTitle,
       content: journalContent,

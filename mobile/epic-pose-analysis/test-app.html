@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test App Status</title>
+</head>
+<body>
+  <h1>Testing App Status</h1>
+  <p>Check if the app is loading at: <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></p>
+  
+  <h2>Steps to verify:</h2>
+  <ol>
+    <li>Open the browser developer console (F12)</li>
+    <li>Look for any errors related to Supabase</li>
+    <li>Check if the page loads properly</li>
+  </ol>
+  
+  <h2>Fixed issues:</h2>
+  <ul>
+    <li>Removed Supabase storage URLs from testimonials</li>
+    <li>Disabled video section with Supabase URL</li>
+    <li>Commented out WorkoutUploadButton that uses Supabase</li>
+    <li>Created mock Supabase client to prevent connection attempts</li>
+    <li>Added localStorage cleanup for Supabase tokens</li>
+  </ul>
+</body>
+</html>

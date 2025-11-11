@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { storage, functions } from "@/lib/firebase/config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { httpsCallable } from "firebase/functions";
 
 const ACCEPTED_FILE_TYPES = {
   'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
@@ -47,24 +49,30 @@ export function WorkoutUploadButton() {
     setIsUploading(true);
 
     try {
-      // Upload file to Supabase Storage
+      // Upload file to Firebase Storage
       const fileName = `${user.id}/${Date.now()}-${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('workout-uploads')
-        .upload(fileName, file);
+      const storageRef = ref(storage, `workout-uploads/${fileName}`);
 
-      if (uploadError) throw uploadError;
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
 
-      // Call edge function to process the file
-      const { data, error } = await supabase.functions.invoke('process-workout-upload', {
-        body: {
-          fileName: fileName,
-          fileType: file.type,
-          originalName: file.name
-        }
+      // Call Firebase function to process the file
+      const processWorkoutUpload = httpsCallable<
+        {
+          fileName: string;
+          fileType: string;
+          originalName: string;
+          downloadURL: string;
+        },
+        { workoutId?: string }
+      >(functions, 'processWorkoutUpload');
+
+      const result = await processWorkoutUpload({
+        fileName: fileName,
+        fileType: file.type,
+        originalName: file.name,
+        downloadURL: downloadURL
       });
-
-      if (error) throw error;
 
       toast({
         title: "Upload successful!",
@@ -72,8 +80,8 @@ export function WorkoutUploadButton() {
       });
 
       // Redirect to the generated workout or a processing page
-      if (data?.workoutId) {
-        navigate(`/generated-workouts/${data.workoutId}`);
+      if (result.data?.workoutId) {
+        navigate(`/generated-workouts/${result.data.workoutId}`);
       } else {
         navigate('/workout-generator');
       }

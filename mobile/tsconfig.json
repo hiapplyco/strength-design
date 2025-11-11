@@ -1,4 +1,11 @@
 {
   "compilerOptions": {},
-  "extends": "expo/tsconfig.base"
+  "extends": "expo/tsconfig.base",
+  "exclude": [
+    "node_modules",
+    "jest.setup.js",
+    "jest.config.js",
+    "services/ProgramSearchService-OLD.js",
+    "screens/ContextAwareGeneratorScreen.js"
+  ]
 }

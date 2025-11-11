@@ -7,13 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
-import { supabase } from '@/integrations/supabase/client';
+import { functions } from '@/lib/firebase/config';
+import { httpsCallable } from 'firebase/functions';
+import { WorkoutService } from '@/lib/firebase/services';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { WorkoutDisplay } from './WorkoutDisplay';
 import { Dumbbell, Zap } from 'lucide-react';
 import type { WeeklyWorkouts } from '@/types/fitness';
-import type { Json } from '@/integrations/supabase/types';
 
 export function GenerateWorkoutContainer() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -25,6 +27,7 @@ export function GenerateWorkoutContainer() {
   const [equipment, setEquipment] = useState('');
   const [additionalInfo, setAdditionalInfo] = useState('');
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleGenerateWorkout = async () => {
     setIsGenerating(true);
@@ -32,25 +35,27 @@ export function GenerateWorkoutContainer() {
     setWorkoutData(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-workout', {
-        body: {
-          workoutLength,
-          fitnessLevel,
-          workoutGoal,
-          equipment,
-          additionalInfo
-        }
+      const generateWorkout = httpsCallable<{
+        workoutLength: number;
+        fitnessLevel: string;
+        workoutGoal: string;
+        equipment: string;
+        additionalInfo: string;
+      }, { workout: WeeklyWorkouts }>(functions, 'generateWorkout');
+
+      const result = await generateWorkout({
+        workoutLength,
+        fitnessLevel,
+        workoutGoal,
+        equipment,
+        additionalInfo
       });
 
-      if (error) {
-        throw error;
-      }
-
-      if (!data || !data.workout) {
+      if (!result.data || !result.data.workout) {
         throw new Error('No workout data received');
       }
 
-      setWorkoutData(data.workout);
+      setWorkoutData(result.data.workout);
       toast({
         title: "Workout Generated",
         description: "Your custom workout has been created successfully!",
@@ -58,30 +63,34 @@ export function GenerateWorkoutContainer() {
     } catch (error: any) {
       console.error("Error generating workout:", error);
       setErrorMessage(error?.message || "Failed to generate workout. Please try again.");
-      setIsGenerating(false);
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleSaveWorkout = async () => {
-    if (!workoutData) return;
+    if (!workoutData || !user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to save your workout.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // Store workout in the generated_workouts table
-      // Convert WeeklyWorkouts to Json compatible object using JSON.stringify and JSON.parse
-      const workoutDataJson = JSON.parse(JSON.stringify(workoutData)) as Json;
-      
-      const { error } = await supabase
-        .from('generated_workouts')
-        .insert({
-          workout_data: workoutDataJson,
-          title: workoutGoal || 'Custom Workout',
-          tags: [fitnessLevel, workoutGoal, equipment].filter(Boolean),
-          summary: `A ${fitnessLevel} level workout focusing on ${workoutGoal || 'general fitness'} using ${equipment || 'bodyweight'} for ${workoutLength} minutes.`
-        });
-
-      if (error) throw error;
+      // Store workout in Firestore using WorkoutService
+      await WorkoutService.createWorkout(user.uid, {
+        workoutData: workoutData,
+        title: workoutGoal || 'Custom Workout',
+        tags: [fitnessLevel, workoutGoal, equipment].filter(Boolean),
+        summary: `A ${fitnessLevel} level workout focusing on ${workoutGoal || 'general fitness'} using ${equipment || 'bodyweight'} for ${workoutLength} minutes.`,
+        day: 'custom',
+        warmup: '',
+        workout: '',
+        isFavorite: false,
+        estimatedDurationMinutes: workoutLength,
+      });
 
       toast({
         title: "Workout Saved",

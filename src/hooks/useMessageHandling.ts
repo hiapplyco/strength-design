@@ -1,11 +1,14 @@
 
 import { useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db, functions } from "@/lib/firebase";
+import { collection, query, where, orderBy, getDocs, addDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessage {
   id: string;
+  user_id?: string;
   message: string;
   response?: string | null;
   file_path?: string | null;
@@ -23,14 +26,20 @@ export const useMessageHandling = () => {
     if (!user) return;
 
     try {
-      console.log('Fetching messages for user:', user.id);
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+      console.log('Fetching messages for user:', user.uid);
+      const messagesRef = collection(db, 'chat_messages');
+      const q = query(
+        messagesRef,
+        where('user_id', '==', user.uid),
+        orderBy('created_at', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
 
-      if (error) throw error;
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        created_at: doc.data().created_at?.toDate?.()?.toISOString() || new Date().toISOString()
+      })) as ChatMessage[];
 
       console.log('Fetched messages:', data);
       setMessages(data || []);
@@ -59,16 +68,20 @@ export const useMessageHandling = () => {
       console.log('Sending message:', message);
 
       // First, save the message and get its ID
-      const { data: messageData, error: messageError } = await supabase
-        .from('chat_messages')
-        .insert({
-          user_id: user.id,
-          message: message
-        })
-        .select('*')
-        .single();
+      const messagesRef = collection(db, 'chat_messages');
+      const messageDoc = await addDoc(messagesRef, {
+        user_id: user.uid,
+        message: message,
+        created_at: Timestamp.now()
+      });
 
-      if (messageError) throw messageError;
+      const messageData: ChatMessage = {
+        id: messageDoc.id,
+        user_id: user.uid,
+        message: message,
+        created_at: new Date().toISOString()
+      };
+
       console.log('Message saved to database:', messageData);
 
       // Update local state immediately with the new message
@@ -80,15 +93,14 @@ export const useMessageHandling = () => {
       ]).flat();
 
       // Then, get the AI response
-      const { data, error: geminiError } = await supabase.functions.invoke('chat-with-gemini', {
-        body: { 
-          message,
-          messageId: messageData.id,
-          history: history,
-        }
+      const chatWithGemini = httpsCallable(functions, 'chatWithGemini');
+      const result = await chatWithGemini({
+        message,
+        messageId: messageDoc.id,
+        history: history,
       });
 
-      if (geminiError) throw geminiError;
+      const data = result.data as { response: string };
       console.log('Received Gemini response:', data);
 
       if (!data || !data.response) {
@@ -96,7 +108,7 @@ export const useMessageHandling = () => {
       }
 
       // Update local state with the response from Gemini
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map(msg =>
         msg.id === messageData.id ? { ...msg, response: data.response } : msg
       ));
       console.log('Local state updated with response');
@@ -118,12 +130,13 @@ export const useMessageHandling = () => {
 
     try {
       setIsLoading(true);
-      const { error } = await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('user_id', user.id);
+      const messagesRef = collection(db, 'chat_messages');
+      const q = query(messagesRef, where('user_id', '==', user.uid));
+      const querySnapshot = await getDocs(q);
 
-      if (error) throw error;
+      // Delete all messages for this user
+      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
 
       setMessages([]);
       toast({

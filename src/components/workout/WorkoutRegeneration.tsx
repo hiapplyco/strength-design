@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "@/lib/firebase/config";
 
 interface WorkoutRegenerationProps {
   workout: {
@@ -34,19 +35,18 @@ export function WorkoutRegeneration({ workout, onChange }: WorkoutRegenerationPr
     setIsRegenerating(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('regenerate-workout', {
-        body: {
-          dayToModify: workout.day,
-          modificationPrompt: userPrompt,
-          currentWorkout: {
-            warmup: workout.warm_up,
-            workout: workout.wod,
-            notes: workout.notes || ''
-          }
-        },
+      const regenerateWorkout = httpsCallable(functions, 'regenerateWorkout');
+      const result = await regenerateWorkout({
+        dayToModify: workout.day,
+        modificationPrompt: userPrompt,
+        currentWorkout: {
+          warmup: workout.warm_up,
+          workout: workout.wod,
+          notes: workout.notes || ''
+        }
       });
 
-      if (error) throw error;
+      const data = result.data as any;
 
       if (data) {
         // Map camelCase response to snake_case fields
@@ -77,7 +77,7 @@ export function WorkoutRegeneration({ workout, onChange }: WorkoutRegenerationPr
       console.error('Error regenerating workout:', error);
       toast({
         title: "Error",
-        description: "Failed to regenerate workout. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to regenerate workout. Please try again.",
         variant: "destructive",
       });
     } finally {

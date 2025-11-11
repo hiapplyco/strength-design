@@ -1,6 +1,7 @@
 
 import { Card } from "@/components/ui/card";
-import VideoRecorder from "@/components/video-analysis/VideoRecorder";
+// TODO: Restore VideoRecorder from archive if needed
+// import VideoRecorder from "@/components/video-analysis/VideoRecorder";
 import { useState, useEffect } from "react";
 import { cleanContentForTeleprompter } from "./utils/contentCleaning";
 import { TikTokTeleprompterControls } from "./components/TikTokTeleprompterControls";
@@ -60,7 +61,9 @@ export function TikTokRecordingInterface({
           <h3 className="text-sm sm:text-base font-semibold text-foreground mb-1 sm:mb-2 text-center">📹 Record</h3>
         </div>
         <div className="flex-1 min-h-0 w-full overflow-hidden">
-          <VideoRecorder />
+          {/* TODO: Restore VideoRecorder */}
+          {/* <VideoRecorder /> */}
+          <div className="text-muted-foreground text-sm text-center p-8">Video recorder temporarily disabled</div>
         </div>
       </Card>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { functions } from '@/lib/firebase/config';
+import { httpsCallable } from 'firebase/functions';
 
 interface Exercise {
   name: string;
@@ -54,31 +55,27 @@ const useProgramSearch = (query: string) => {
     }
 
     setState({ data: null, loading: true, error: null });
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('program-search', {
-        body: { query: searchQuery }
-      });
 
-      if (error) {
-        throw error;
-      }
+    try {
+      const searchPrograms = httpsCallable(functions, 'searchPrograms');
+      const result = await searchPrograms({ query: searchQuery });
+      const data = result.data as any;
 
       if (!data || !data.success) {
         throw new Error(data?.error || 'Failed to search for program');
       }
 
-      setState({ 
-        data: data.data as FitnessProgram, 
-        loading: false, 
-        error: null 
+      setState({
+        data: data.data as FitnessProgram,
+        loading: false,
+        error: null
       });
     } catch (error: any) {
       console.error('Program search error:', error);
-      setState({ 
-        data: null, 
-        loading: false, 
-        error: error instanceof Error ? error : new Error('An unexpected error occurred') 
+      setState({
+        data: null,
+        loading: false,
+        error: error instanceof Error ? error : new Error('An unexpected error occurred')
       });
     }
   }, []);

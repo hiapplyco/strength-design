@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Mic, Upload, Video, Settings, Sparkles } from "lucide-react";
 import { TikTokRecordingInterface } from "./TikTokRecordingInterface";
 import { useState } from "react";
-import { VoiceGenerationDialog } from "@/components/video-analysis/components/VoiceGenerationDialog";
-import { VoiceCloningDialog } from "@/components/video-analysis/components/VoiceCloningDialog";
-import { SocialShareDialog } from "@/components/video-analysis/components/SocialShareDialog";
+// TODO: Restore these components from archive if needed
+// import { VoiceGenerationDialog } from "@/components/video-analysis/components/VoiceGenerationDialog";
+// import { VoiceCloningDialog } from "@/components/video-analysis/components/VoiceCloningDialog";
+// import { SocialShareDialog } from "@/components/video-analysis/components/SocialShareDialog";
 
 interface TikTokVideoSectionProps {
   workoutScript: string;
@@ -155,8 +156,8 @@ export function TikTokVideoSection({
         />
       </div>
 
-      {/* Dialogs */}
-      <VoiceGenerationDialog
+      {/* Dialogs - TODO: Restore from archive if needed */}
+      {/* <VoiceGenerationDialog
         showDialog={showVoiceDialog}
         onOpenChange={setShowVoiceDialog}
         isGenerating={isGenerating}
@@ -166,22 +167,22 @@ export function TikTokVideoSection({
         onVoiceChange={onVoiceChange}
         autoRegenEnabled={autoRegenEnabled}
         onAutoRegenChange={onAutoRegenChange}
-      />
+      /> */}
 
-      <VoiceCloningDialog
+      {/* <VoiceCloningDialog
         open={showVoiceCloning}
         onOpenChange={setShowVoiceCloning}
         onVoiceSelect={onVoiceChange}
-      />
+      /> */}
 
-      {shareableLink && (
+      {/* {shareableLink && (
         <SocialShareDialog
           open={showSocialShare}
           onOpenChange={setShowSocialShare}
           shareableLink={shareableLink}
           content={workoutScript}
         />
-      )}
+      )} */}
     </div>
   );
 }

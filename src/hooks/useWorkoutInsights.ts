@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { functions } from '@/lib/firebase/config';
+import { httpsCallable } from 'firebase/functions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { format, subDays } from 'date-fns';
@@ -41,6 +41,14 @@ interface WorkoutInsights {
   }>;
 }
 
+interface GenerateInsightsRequest {
+  userId: string;
+  dateRange: {
+    start: string;
+    end: string;
+  };
+}
+
 export const useWorkoutInsights = () => {
   const [insights, setInsights] = useState<WorkoutInsights | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,29 +70,30 @@ export const useWorkoutInsights = () => {
       const endDate = new Date();
       const startDate = subDays(endDate, daysBack);
 
-      const { data, error } = await supabase.functions.invoke('generate-workout-insights', {
-        body: {
-          userId: session.user.id,
-          dateRange: {
-            start: format(startDate, 'yyyy-MM-dd'),
-            end: format(endDate, 'yyyy-MM-dd')
-          }
+      const generateWorkoutInsights = httpsCallable<GenerateInsightsRequest, WorkoutInsights>(
+        functions,
+        'generateWorkoutInsights'
+      );
+
+      const result = await generateWorkoutInsights({
+        userId: session.user.id,
+        dateRange: {
+          start: format(startDate, 'yyyy-MM-dd'),
+          end: format(endDate, 'yyyy-MM-dd')
         }
       });
 
-      if (error) throw error;
-
-      setInsights(data);
+      setInsights(result.data);
       toast({
         title: "Insights Generated",
         description: "Your fitness insights have been updated with the latest data."
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating insights:', error);
       toast({
         title: "Error",
-        description: "Failed to generate insights. Please try again.",
+        description: error.message || "Failed to generate insights. Please try again.",
         variant: "destructive"
       });
     } finally {

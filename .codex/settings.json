@@ -1,0 +1,14 @@
+{
+  "context": {
+    "files": [
+      "AGENTS.md",
+      "CODEX.md",
+      "docs/MOBILE_DEPLOYMENT_PLAYBOOK.md"
+    ],
+    "autoLoad": true
+  },
+  "workflow": {
+    "planRequired": true,
+    "defaultWorkdir": "."
+  }
+}

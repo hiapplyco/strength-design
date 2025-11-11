@@ -13,6 +13,7 @@
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		BDC3B8192B7C14BC60634426 /* libPods-StrengthDesign.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0D1C6552C3252414339131D /* libPods-StrengthDesign.a */; };
+		C0D365302E984848009C0156 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C0D3652F2E984848009C0156 /* GoogleService-Info.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -21,9 +22,10 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = StrengthDesign/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = StrengthDesign/Info.plist; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = StrengthDesign/SplashScreen.storyboard; sourceTree = "<group>"; };
-		AB3ED30D0F571A48C8D55E23 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = StrengthDesign/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AB3ED30D0F571A48C8D55E23 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = StrengthDesign/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BA53ED125CA9DEDE96C2F2E1 /* Pods-StrengthDesign.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StrengthDesign.debug.xcconfig"; path = "Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign.debug.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		C0D3652F2E984848009C0156 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D0D1C6552C3252414339131D /* libPods-StrengthDesign.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StrengthDesign.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB36F8129B39D469FF38A639 /* Pods-StrengthDesign.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StrengthDesign.release.xcconfig"; path = "Target Support Files/Pods-StrengthDesign/Pods-StrengthDesign.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -50,7 +52,6 @@
 				BA53ED125CA9DEDE96C2F2E1 /* Pods-StrengthDesign.debug.xcconfig */,
 				DB36F8129B39D469FF38A639 /* Pods-StrengthDesign.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -64,6 +65,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				AB3ED30D0F571A48C8D55E23 /* PrivacyInfo.xcprivacy */,
+				C0D3652F2E984848009C0156 /* GoogleService-Info.plist */,
 			);
 			name = StrengthDesign;
 			sourceTree = "<group>";
@@ -179,6 +181,9 @@
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
+			packageReferences = (
+				C0D3652E2E9844A5009C0156 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -195,6 +200,7 @@
 			files = (
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				C0D365302E984848009C0156 /* GoogleService-Info.plist in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				32C399704EEADBE5B47F37C9 /* PrivacyInfo.xcprivacy in Resources */,
 			);
@@ -455,10 +461,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -513,10 +516,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -546,6 +546,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C0D3652E2E9844A5009C0156 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }

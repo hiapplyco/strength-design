@@ -1,57 +1,58 @@
 {
   "expo": {
-    "name": "Strength Design",
-    "slug": "mobile-working",
+    "name": "Strength.Design",
+    "slug": "strength-design",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/sdlogo.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/sdlogo.png",
-      "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jms.strengthdesign",
-      "entitlements": {
-        "com.apple.developer.healthkit": true
-      },
+      "bundleIdentifier": "com.strength.design",
       "infoPlist": {
-        "NSHealthShareUsageDescription": "This app uses Apple Health to track your workouts and fitness progress.",
-        "NSHealthUpdateUsageDescription": "This app saves workout data to Apple Health to help you track your fitness journey.",
-        "NSCalendarsUsageDescription": "This app needs access to your calendar to schedule workout reminders and track your training schedule.",
-        "NSRemindersUsageDescription": "This app uses reminders to help you stay on track with your fitness goals.",
-        "NSCameraUsageDescription": "This app uses the camera to record exercise videos for AI-powered form analysis and technique improvement.",
-        "NSPhotoLibraryUsageDescription": "This app accesses your photo library to analyze exercise videos and provide form feedback.",
-        "NSMicrophoneUsageDescription": "This app may record audio with exercise videos for complete workout analysis.",
-        "UIRequiredDeviceCapabilities": ["healthkit"]
+        "NSCameraUsageDescription": "This app uses the camera to record your workout form for AI-powered analysis and feedback.",
+        "NSPhotoLibraryUsageDescription": "This app accesses your photo library to upload workout videos for form analysis.",
+        "NSPhotoLibraryAddUsageDescription": "This app saves your workout videos to your photo library.",
+        "NSMicrophoneUsageDescription": "This app uses the microphone to record audio with your workout videos."
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/sdlogo.png",
-        "backgroundColor": "#000000"
-      },
-      "edgeToEdgeEnabled": true,
       "package": "com.strengthdesign.app",
       "permissions": [
-        "android.permission.ACTIVITY_RECOGNITION",
         "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
-      "favicon": "./assets/sdlogo.png"
+      "bundler": "metro"
     },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Strength.Design to access your camera for workout form analysis."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Strength.Design to access your photos for workout video analysis.",
+          "savePhotosPermission": "Allow Strength.Design to save your workout videos."
+        }
+      ]
+    ],
+    "scheme": "strengthdesign",
     "extra": {
       "eas": {
-        "projectId": "9a0ffcf1-6667-469a-a67d-e367b2314dfb"
+        "projectId": "strength-design-mobile"
       }
-    },
-    "owner": "hiapplyco"
+    }
   }
 }

@@ -1,10 +1,8 @@
-
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { WorkoutDay } from "@/types/fitness";
 import { RefreshCw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { modifyWorkout } from "@/utils/workout";
 

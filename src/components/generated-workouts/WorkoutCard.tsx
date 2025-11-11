@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { WorkoutData, WorkoutDay } from "@/types/fitness";
-import { Database } from "@/integrations/supabase/types";
+import { Workout } from "@/lib/firebase/types";
 import { WorkoutPreview } from "./WorkoutPreview";
 import { safelyGetWorkoutProperty, isWorkoutDay } from "@/utils/workout-helpers";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +13,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 
-type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
+type GeneratedWorkout = Workout & { id: string };
 
 interface WorkoutCardProps {
   workout: GeneratedWorkout;
@@ -26,7 +26,7 @@ interface WorkoutCardProps {
 
 export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, onToggleFavorite, onDuplicate }: WorkoutCardProps) => {
   const { toast } = useToast();
-  const workoutData = workout.workout_data as unknown as WorkoutData;
+  const workoutData = workout.workoutData as unknown as WorkoutData;
   const firstDay = getFirstDayPreview(workoutData);
   const totalExercises = countExercises(workoutData);
   const totalDays = workoutData ? Object.entries(workoutData).filter(([, value]) => isWorkoutDay(value)).length : 0;
@@ -74,16 +74,16 @@ export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, o
       </div>
 
       <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className={cn(
             "h-8 w-8 text-muted-foreground hover:bg-yellow-500/10",
-            workout.is_favorite ? "text-yellow-400 hover:text-yellow-500" : "hover:text-yellow-500"
-          )} 
+            workout.isFavorite ? "text-yellow-400 hover:text-yellow-500" : "hover:text-yellow-500"
+          )}
           onClick={handleFavoriteClick}
         >
-          <Star className={cn("h-4 w-4", workout.is_favorite && "fill-current")} />
+          <Star className={cn("h-4 w-4", workout.isFavorite && "fill-current")} />
         </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-sky-500 hover:bg-sky-500/10" onClick={handleShareClick}>
           <Share2 className="h-4 w-4" />
@@ -141,8 +141,8 @@ export const WorkoutCard = ({ workout, onClick, isSelected, onToggleSelection, o
       
       <CardFooter className="px-6 py-4 border-t border-border mt-auto bg-card-footer flex justify-between items-center">
         <p className="text-xs text-muted-foreground">
-          {workout.generated_at 
-            ? formatDistanceToNow(new Date(workout.generated_at), { addSuffix: true }) 
+          {workout.createdAt
+            ? formatDistanceToNow(workout.createdAt.toDate(), { addSuffix: true })
             : "Recently generated"}
         </p>
         <Button variant="ghost" size="sm" className="text-muted-foreground group-hover:text-primary group-hover:bg-primary/10">

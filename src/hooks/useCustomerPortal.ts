@@ -1,16 +1,16 @@
-
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { httpsCallable } from "firebase/functions";
+import { functions } from "@/lib/firebase/config";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const useCustomerPortal = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { session } = useAuth();
+  const { user } = useAuth();
 
   const openCustomerPortal = async () => {
-    if (!session) {
+    if (!user) {
       toast({
         title: "Authentication required",
         description: "Please sign in to manage your subscription",
@@ -22,17 +22,10 @@ export const useCustomerPortal = () => {
     try {
       setLoading(true);
       console.log('Opening customer portal...');
-      
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
 
-      if (error) {
-        console.error('Error from customer-portal:', error);
-        throw error;
-      }
+      const customerPortal = httpsCallable(functions, 'customerPortal');
+      const result = await customerPortal({});
+      const data = result.data as any;
 
       if (!data?.url) {
         throw new Error('No portal URL received');
@@ -44,7 +37,7 @@ export const useCustomerPortal = () => {
       console.error('Error opening customer portal:', error);
       toast({
         title: "Portal Error",
-        description: error.message || "Failed to open customer portal. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to open customer portal. Please try again.",
         variant: "destructive",
       });
     } finally {

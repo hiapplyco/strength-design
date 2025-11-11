@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { db, auth } from '@/lib/firebase/config';
+import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useSmartToast } from '@/hooks/useSmartToast';
 import { format } from 'date-fns';
 import type { WeeklyWorkouts, WorkoutDay, WorkoutCycle } from '@/types/fitness';
@@ -16,7 +16,7 @@ interface ExerciseExtraction {
 }
 
 export const useWorkoutToNutritionIntegration = () => {
-  const { session } = useAuth();
+  const currentUser = auth.currentUser;
   const queryClient = useQueryClient();
   const { success, error } = useSmartToast();
   const [isAdding, setIsAdding] = useState(false);
@@ -85,60 +85,58 @@ export const useWorkoutToNutritionIntegration = () => {
     selectedDate: Date,
     mealGroup: string = 'meal 1'
   ) => {
-    if (!session?.user) throw new Error('Not authenticated');
+    if (!currentUser?.uid) throw new Error('Not authenticated');
 
     setIsAdding(true);
     try {
       const dateString = format(selectedDate, 'yyyy-MM-dd');
 
       // Get or create nutrition log for the date
-      let { data: log, error: logError } = await supabase
-        .from('nutrition_logs')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('date', dateString)
-        .single();
+      const nutritionLogsRef = collection(db, 'nutrition_logs');
+      const q = query(
+        nutritionLogsRef,
+        where('user_id', '==', currentUser.uid),
+        where('date', '==', dateString)
+      );
 
-      if (logError && logError.code === 'PGRST116') {
+      const snapshot = await getDocs(q);
+      let logId: string;
+
+      if (snapshot.empty) {
         // Create new log if doesn't exist
-        const { data: newLog, error: createError } = await supabase
-          .from('nutrition_logs')
-          .insert({
-            user_id: session.user.id,
-            date: dateString,
-            water_consumed_ml: 0
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        log = newLog;
-      } else if (logError) {
-        throw logError;
+        const newLogRef = await addDoc(nutritionLogsRef, {
+          user_id: currentUser.uid,
+          date: dateString,
+          water_consumed_ml: 0,
+          created_at: serverTimestamp(),
+        });
+        logId = newLogRef.id;
+      } else {
+        logId = snapshot.docs[0].id;
       }
 
       // Extract exercises from workout
       const exercises = extractExercisesFromWorkout(workout);
 
       // Add each exercise to nutrition diary
-      const exerciseEntries = exercises.map(exercise => ({
-        nutrition_log_id: log.id,
-        exercise_name: exercise.name,
-        duration_minutes: exercise.duration,
-        calories_burned: exercise.calories,
-        meal_group: mealGroup,
-        workout_data: {
-          description: exercise.description,
-          source: 'generated_workout',
-          original_workout_title: workout._meta?.title
-        }
-      }));
-
-      const { error: insertError } = await supabase
-        .from('exercise_entries')
-        .insert(exerciseEntries);
-
-      if (insertError) throw insertError;
+      const exerciseEntriesRef = collection(db, 'exercise_entries');
+      await Promise.all(
+        exercises.map(exercise =>
+          addDoc(exerciseEntriesRef, {
+            nutrition_log_id: logId,
+            exercise_name: exercise.name,
+            duration_minutes: exercise.duration,
+            calories_burned: exercise.calories,
+            meal_group: mealGroup,
+            workout_data: {
+              description: exercise.description,
+              source: 'generated_workout',
+              original_workout_title: workout._meta?.title
+            },
+            created_at: serverTimestamp(),
+          })
+        )
+      );
 
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['nutrition-log'] });

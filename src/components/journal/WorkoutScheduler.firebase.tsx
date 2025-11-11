@@ -8,11 +8,19 @@ import { CalendarIcon, Plus, Target, Clock, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useWorkoutSessions } from '@/hooks/useWorkoutSessions';
-import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { db } from '@/lib/firebase/config';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 
-type GeneratedWorkout = Database['public']['Tables']['generated_workouts']['Row'];
+type GeneratedWorkout = {
+  id: string;
+  title?: string;
+  summary?: string;
+  tags?: string[];
+  estimated_duration_minutes?: number;
+  difficulty_level?: number;
+  generated_at?: any;
+};
 
 export const WorkoutScheduler = () => {
   const [availableWorkouts, setAvailableWorkouts] = useState<GeneratedWorkout[]>([]);
@@ -28,14 +36,23 @@ export const WorkoutScheduler = () => {
 
   const fetchAvailableWorkouts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('generated_workouts')
-        .select('*')
-        .order('generated_at', { ascending: false })
-        .limit(20);
+      if (!user?.uid) return;
 
-      if (error) throw error;
-      setAvailableWorkouts(data || []);
+      const workoutsRef = collection(db, 'generated_workouts');
+      const q = query(
+        workoutsRef,
+        where('user_id', '==', user.uid),
+        orderBy('generated_at', 'desc'),
+        limit(20)
+      );
+
+      const querySnapshot = await getDocs(q);
+      const workouts = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as GeneratedWorkout));
+
+      setAvailableWorkouts(workouts);
     } catch (error) {
       console.error('Error fetching workouts:', error);
     }
@@ -48,7 +65,7 @@ export const WorkoutScheduler = () => {
       generated_workout_id: selectedWorkout,
       scheduled_date: format(selectedDate, 'yyyy-MM-dd'),
       status: 'scheduled',
-      user_id: user.id
+      user_id: user.uid
     });
 
     if (success) {

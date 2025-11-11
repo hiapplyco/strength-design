@@ -1,7 +1,14 @@
 
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
 import { useWorkoutConfig } from "@/contexts/WorkoutConfigContext";
+
+interface ProcessWorkoutFileResponse {
+  extracted?: any;
+  summary?: string;
+  configUpdates?: Record<string, any>;
+}
 
 /**
  * Custom hook for uploading a file and using Gemini to extract config/notes.
@@ -12,12 +19,21 @@ export function useGeminiFileUpload({ addMessage }: { addMessage: (msg: any) => 
   const { updateConfig } = useWorkoutConfig();
 
   const uploadAndProcessFile = async (file: File) => {
-    toast({ title: "Analyzing your document...", description: `Parsing "${file.name}" with Gemini.`, duration: 3000 });
+    toast({
+      title: "Analyzing your document...",
+      description: `Parsing "${file.name}" with Gemini.`,
+      duration: 3000
+    });
+
     try {
-      const { data, error } = await supabase.functions.invoke('process-workout-file', {
-        body: { file },
-      });
-      if (error) throw error;
+      // Call Firebase Cloud Function to process the workout file
+      const processWorkoutFile = httpsCallable<
+        { file: File },
+        ProcessWorkoutFileResponse
+      >(functions, 'processWorkoutFile');
+
+      const result = await processWorkoutFile({ file });
+      const data = result.data;
 
       // data: { extracted, summary, configUpdates }
       if (data?.configUpdates) {
@@ -25,10 +41,16 @@ export function useGeminiFileUpload({ addMessage }: { addMessage: (msg: any) => 
         addMessage({
           id: Date.now().toString(),
           role: 'assistant',
-          content: `I've extracted new details from your uploaded file: ${Object.entries(data.configUpdates).map(([k, v]) => `${k}: ${String(v).slice(0,50)}`).join(', ')}.`,
+          content: `I've extracted new details from your uploaded file: ${Object.entries(data.configUpdates)
+            .map(([k, v]) => `${k}: ${String(v).slice(0, 50)}`)
+            .join(', ')}.`,
           timestamp: new Date(),
         });
-        toast({ title: "Config updated from file!", description: "Extracted notes have been added.", duration: 3500 });
+        toast({
+          title: "Config updated from file!",
+          description: "Extracted notes have been added.",
+          duration: 3500
+        });
       } else {
         addMessage({
           id: Date.now().toString(),
@@ -39,13 +61,19 @@ export function useGeminiFileUpload({ addMessage }: { addMessage: (msg: any) => 
       }
       return data;
     } catch (err: any) {
-      toast({ title: "Failed to analyze file", description: err.message, variant: "destructive" });
+      const errorMessage = err.message || 'Failed to analyze file';
+      toast({
+        title: "Failed to analyze file",
+        description: errorMessage,
+        variant: "destructive"
+      });
       addMessage({
         id: Date.now().toString(),
         role: 'assistant',
-        content: `Sorry, I couldn't process your file: ${err.message}`,
+        content: `Sorry, I couldn't process your file: ${errorMessage}`,
         timestamp: new Date(),
       });
+      throw err;
     }
   };
 

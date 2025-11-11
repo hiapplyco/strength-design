@@ -1,153 +1,91 @@
 /**
- * GlassSearchInput Component
- * Standardized search input with glassmorphism design for consistency across all screens
- * iOS 26 inspired with strong blur and proper light/dark theme support
+ * Glass Search Input Component
+ * Beautiful glassmorphism search input with icon
  */
 
-import React, { memo } from 'react';
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import React from 'react';
+import { View, TextInput, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { useTheme } from '../contexts/ThemeContext';
-import { GlassContainer } from './GlassmorphismComponents';
 
-export const GlassSearchInput = memo(({
+export function GlassSearchInput({
   value,
   onChangeText,
-  placeholder = "Search...",
-  onSubmit,
-  onClear,
-  loading = false,
-  autoFocus = false,
+  placeholder = 'Search...',
   style,
-  containerStyle,
-  inputStyle,
-  showClearButton = true,
-  showSearchIcon = true,
-  editable = true,
+  autoFocus = false,
+  onFocus,
+  onBlur,
   ...props
-}) => {
-  const { isDarkMode, theme } = useTheme();
-  
-  // Ensure proper color contrast
-  const textColor = isDarkMode ? '#FFFFFF' : '#000000';
-  const placeholderColor = isDarkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
-  const iconColor = isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
+}) {
+  const theme = useTheme();
 
-  const handleClear = () => {
-    if (onClear) {
-      onClear();
-    } else if (onChangeText) {
-      onChangeText('');
-    }
-  };
+  const Container = Platform.OS === 'web' ? View : BlurView;
+  const containerProps = Platform.OS === 'web'
+    ? { style: styles.webContainer }
+    : { intensity: 20, tint: theme.isDarkMode ? 'dark' : 'light' };
 
   return (
-    <GlassContainer
-      variant="subtle"
-      style={[
-        styles.container, 
-        containerStyle
-      ]}
-      showShadow={false}
-      padding="none"
-    >
-      <View style={styles.inputWrapper}>
-        {showSearchIcon && (
-          <Ionicons
-            name="search"
-            size={20}
-            color={iconColor}
-            style={styles.searchIcon}
-          />
-        )}
-        
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={placeholderColor}
-          onSubmitEditing={onSubmit}
-          autoFocus={autoFocus}
-          editable={editable && !loading}
-          returnKeyType="search"
-          autoCorrect={false}
-          autoCapitalize="none"
-          style={[
-            styles.input,
-            {
-              color: textColor,
-              paddingLeft: showSearchIcon ? 42 : 16,
-              paddingRight: (showClearButton && value) || loading ? 42 : 16,
-            },
-            inputStyle,
-          ]}
-          {...props}
+    <Container {...containerProps} style={[styles.container, style]}>
+      <Ionicons
+        name="search"
+        size={20}
+        color={theme.colors.textSecondary}
+        style={styles.icon}
+      />
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={theme.colors.textSecondary}
+        style={[styles.input, { color: theme.colors.text }]}
+        autoFocus={autoFocus}
+        autoCapitalize="none"
+        autoCorrect={false}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        {...props}
+      />
+      {value ? (
+        <Ionicons
+          name="close-circle"
+          size={20}
+          color={theme.colors.textSecondary}
+          style={styles.clearIcon}
+          onPress={() => onChangeText('')}
         />
-
-        {loading ? (
-          <ActivityIndicator
-            size="small"
-            color={iconColor}
-            style={styles.clearButton}
-          />
-        ) : (
-          showClearButton && value ? (
-            <TouchableOpacity
-              onPress={handleClear}
-              style={styles.clearButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Ionicons
-                name="close-circle"
-                size={18}
-                color={iconColor}
-              />
-            </TouchableOpacity>
-          ) : null
-        )}
-      </View>
-    </GlassContainer>
+      ) : null}
+    </Container>
   );
-});
-
-GlassSearchInput.displayName = 'GlassSearchInput';
+}
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 48,
-    width: '100%',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    overflow: 'hidden',
   },
-  searchIcon: {
-    position: 'absolute',
-    left: 14,
-    zIndex: 1,
+  webContainer: {
+    backgroundColor: 'rgba(28, 28, 30, 0.7)',
+    backdropFilter: 'blur(20px)',
+  },
+  icon: {
+    marginRight: 8,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    paddingVertical: 14,
-    backgroundColor: 'transparent',
-    width: '100%',
-    fontWeight: '500',
+    fontWeight: '400',
   },
-  clearButton: {
-    position: 'absolute',
-    right: 14,
-    zIndex: 1,
+  clearIcon: {
+    marginLeft: 8,
+    padding: 4,
   },
 });
 

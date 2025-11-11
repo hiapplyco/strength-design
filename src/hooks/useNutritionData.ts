@@ -1,12 +1,12 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { db, auth } from '@/lib/firebase/config';
+import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 export const useNutritionData = (date: Date) => {
-  const { session } = useAuth();
+  const currentUser = auth.currentUser;
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -14,81 +14,76 @@ export const useNutritionData = (date: Date) => {
 
   // Get or create nutrition log for the date
   const { data: nutritionLog, isLoading: isLoadingLog } = useQuery({
-    queryKey: ['nutrition-log', session?.user?.id, dateString],
+    queryKey: ['nutrition-log', currentUser?.uid, dateString],
     queryFn: async () => {
-      if (!session?.user) throw new Error('User not authenticated');
+      if (!currentUser?.uid) throw new Error('User not authenticated');
 
       // Try to get existing log
-      let { data: existingLog, error } = await supabase
-        .from('nutrition_logs')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('date', dateString)
-        .single();
+      const logsRef = collection(db, 'nutrition_logs');
+      const q = query(
+        logsRef,
+        where('user_id', '==', currentUser.uid),
+        where('date', '==', dateString)
+      );
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
       }
 
       // If no log exists, create one
-      if (!existingLog) {
-        const { data: newLog, error: createError } = await supabase
-          .from('nutrition_logs')
-          .insert({
-            user_id: session.user.id,
-            date: dateString,
-            water_consumed_ml: 0
-          })
-          .select()
-          .single();
+      const newLogRef = await addDoc(logsRef, {
+        user_id: currentUser.uid,
+        date: dateString,
+        water_consumed_ml: 0,
+        created_at: serverTimestamp(),
+      });
 
-        if (createError) throw createError;
-        existingLog = newLog;
-      }
-
-      return existingLog;
+      return { id: newLogRef.id, user_id: currentUser.uid, date: dateString, water_consumed_ml: 0 };
     },
-    enabled: !!session?.user?.id,
+    enabled: !!currentUser?.uid,
   });
 
   // Get nutrition targets
   const { data: targets, isLoading: isLoadingTargets } = useQuery({
-    queryKey: ['nutrition-targets', session?.user?.id],
+    queryKey: ['nutrition-targets', currentUser?.uid],
     queryFn: async () => {
-      if (!session?.user) throw new Error('User not authenticated');
+      if (!currentUser?.uid) throw new Error('User not authenticated');
 
-      let { data: existingTargets, error } = await supabase
-        .from('nutrition_targets')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .single();
+      const targetsRef = collection(db, 'nutrition_targets');
+      const q = query(targetsRef, where('user_id', '==', currentUser.uid));
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
       }
 
       // If no targets exist, create default ones
-      if (!existingTargets) {
-        const { data: newTargets, error: createError } = await supabase
-          .from('nutrition_targets')
-          .insert({
-            user_id: session.user.id,
-            daily_calories: 2000,
-            daily_protein: 150,
-            daily_carbs: 250,
-            daily_fat: 65,
-            daily_water_ml: 2000
-          })
-          .select()
-          .single();
+      const newTargetsRef = await addDoc(targetsRef, {
+        user_id: currentUser.uid,
+        daily_calories: 2000,
+        daily_protein: 150,
+        daily_carbs: 250,
+        daily_fat: 65,
+        daily_water_ml: 2000,
+        created_at: serverTimestamp(),
+      });
 
-        if (createError) throw createError;
-        existingTargets = newTargets;
-      }
-
-      return existingTargets;
+      return {
+        id: newTargetsRef.id,
+        user_id: currentUser.uid,
+        daily_calories: 2000,
+        daily_protein: 150,
+        daily_carbs: 250,
+        daily_fat: 65,
+        daily_water_ml: 2000
+      };
     },
-    enabled: !!session?.user?.id,
+    enabled: !!currentUser?.uid,
   });
 
   const isLoading = isLoadingLog || isLoadingTargets;

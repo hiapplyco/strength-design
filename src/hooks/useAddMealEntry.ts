@@ -1,7 +1,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { db, auth } from '@/lib/firebase/config';
+import { collection, query, where, getDocs, addDoc, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import type { NormalizedFood } from '@/services/usdaApi';
@@ -16,13 +16,13 @@ interface AddMealEntryParams {
 }
 
 export const useAddMealEntry = () => {
-  const { session } = useAuth();
+  const currentUser = auth.currentUser;
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const mutation = useMutation({
     mutationFn: async (params: AddMealEntryParams) => {
-      if (!session?.user) throw new Error('Not authenticated');
+      if (!currentUser) throw new Error('Not authenticated');
 
       const { foodId, usdaFood, mealGroup, date, amount, servingMultiplier } = params;
       const dateString = format(date, 'yyyy-MM-dd');
@@ -31,9 +31,9 @@ export const useAddMealEntry = () => {
 
       // If it's a USDA food, save it to our food_items table first
       if (usdaFood && !foodId) {
-        const { data: savedFood, error: saveError } = await supabase
-          .from('food_items')
-          .insert({
+        try {
+          const foodItemsRef = collection(db, 'food_items');
+          const docRef = await addDoc(foodItemsRef, {
             name: usdaFood.name,
             brand: usdaFood.brand,
             serving_size: usdaFood.serving_size.toString(),
@@ -43,15 +43,14 @@ export const useAddMealEntry = () => {
             carbs_per_serving: usdaFood.carbs_per_serving,
             fat_per_serving: usdaFood.fat_per_serving,
             fiber_per_serving: usdaFood.fiber_per_serving || 0,
-          })
-          .select()
-          .single();
-
-        if (saveError) {
+            created_at: serverTimestamp(),
+            updated_at: serverTimestamp(),
+          });
+          finalFoodId = docRef.id;
+        } catch (saveError) {
           console.error('Error saving USDA food:', saveError);
-          throw saveError;
+          throw new Error('Failed to save USDA food to database');
         }
-        finalFoodId = savedFood.id;
       }
 
       if (!finalFoodId) {
@@ -59,46 +58,43 @@ export const useAddMealEntry = () => {
       }
 
       // Get or create nutrition log for the date
-      let { data: log, error: logError } = await supabase
-        .from('nutrition_logs')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('date', dateString)
-        .single();
+      const nutritionLogsRef = collection(db, 'nutrition_logs');
+      const logsQuery = query(
+        nutritionLogsRef,
+        where('user_id', '==', currentUser.uid),
+        where('date', '==', dateString)
+      );
 
-      if (logError && logError.code === 'PGRST116') {
+      const logsSnapshot = await getDocs(logsQuery);
+      let logId: string;
+
+      if (logsSnapshot.empty) {
         // Create new log if doesn't exist
-        const { data: newLog, error: createError } = await supabase
-          .from('nutrition_logs')
-          .insert({
-            user_id: session.user.id,
-            date: dateString,
-            water_consumed_ml: 0
-          })
-          .select()
-          .single();
-
-        if (createError) throw createError;
-        log = newLog;
-      } else if (logError) {
-        throw logError;
+        const newLogRef = await addDoc(nutritionLogsRef, {
+          user_id: currentUser.uid,
+          date: dateString,
+          water_consumed_ml: 0,
+          created_at: serverTimestamp(),
+          updated_at: serverTimestamp(),
+        });
+        logId = newLogRef.id;
+      } else {
+        logId = logsSnapshot.docs[0].id;
       }
 
       // Add meal entry
-      const { data, error } = await supabase
-        .from('meal_entries')
-        .insert({
-          nutrition_log_id: log.id,
-          food_item_id: finalFoodId,
-          meal_group: mealGroup,
-          amount: amount,
-          serving_multiplier: servingMultiplier
-        })
-        .select()
-        .single();
+      const mealEntriesRef = collection(db, 'meal_entries');
+      const mealEntryRef = await addDoc(mealEntriesRef, {
+        nutrition_log_id: logId,
+        food_item_id: finalFoodId,
+        meal_group: mealGroup,
+        amount: amount,
+        serving_multiplier: servingMultiplier,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp(),
+      });
 
-      if (error) throw error;
-      return data;
+      return { id: mealEntryRef.id };
     },
     onSuccess: () => {
       // Invalidate related queries

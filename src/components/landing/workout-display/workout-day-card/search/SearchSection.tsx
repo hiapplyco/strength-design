@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
 import { useToast } from "@/hooks/use-toast";
 import { SearchInput } from "./SearchInput";
 import { SearchResults } from "./SearchResults";
@@ -30,17 +31,15 @@ export const SearchSection = ({
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
-    
+
     setIsSearching(true);
     try {
-      const { data, error } = await supabase.functions.invoke('search-exercises', {
-        body: { query: searchTerm }
-      });
-
-      if (error) throw error;
+      const searchExercises = httpsCallable(functions, 'searchExercises');
+      const result = await searchExercises({ query: searchTerm });
+      const data = result.data as { results?: any[] };
 
       setSearchResults(data.results || []);
-      
+
       if (data.results?.length === 0) {
         toast({
           title: "No results found",

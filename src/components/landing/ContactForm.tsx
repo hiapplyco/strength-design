@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/firebase/config";
+import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { triggerConfetti } from "@/utils/confetti";
 
 interface ContactFormProps {
@@ -28,18 +29,21 @@ export const ContactForm = ({ subscriptionType, onSuccess }: ContactFormProps) =
 
     try {
       setIsSubmitting(true);
-      const { error } = await supabase
-        .from("contact_submissions")
-        .insert([{ name, email, subscription_type: subscriptionType }]);
 
-      if (error) throw error;
+      const contactSubmissionsRef = collection(db, "contact_submissions");
+      await addDoc(contactSubmissionsRef, {
+        name,
+        email,
+        subscription_type: subscriptionType,
+        created_at: Timestamp.now()
+      });
 
       toast({
         title: "Success!",
         description: "Thank you for your interest. We'll reach out to you shortly.",
       });
       triggerConfetti();
-      
+
       // Reset form and notify parent
       setName("");
       setEmail("");

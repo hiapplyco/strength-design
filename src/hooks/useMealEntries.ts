@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/lib/firebase/config';
+import { collection, query, where, getDocs, orderBy, doc, getDoc } from 'firebase/firestore';
 
 export const useMealEntries = (nutritionLogId?: string, mealGroup?: string) => {
   const { data: mealEntries, isLoading } = useQuery({
@@ -9,18 +10,32 @@ export const useMealEntries = (nutritionLogId?: string, mealGroup?: string) => {
     queryFn: async () => {
       if (!nutritionLogId || !mealGroup) return [];
 
-      const { data, error } = await supabase
-        .from('meal_entries')
-        .select(`
-          *,
-          food_items (*)
-        `)
-        .eq('nutrition_log_id', nutritionLogId)
-        .eq('meal_group', mealGroup)
-        .order('created_at', { ascending: true });
+      const mealEntriesRef = collection(db, 'meal_entries');
+      const q = query(
+        mealEntriesRef,
+        where('nutrition_log_id', '==', nutritionLogId),
+        where('meal_group', '==', mealGroup),
+        orderBy('created_at', 'asc')
+      );
 
-      if (error) throw error;
-      return data || [];
+      const querySnapshot = await getDocs(q);
+      const entries = await Promise.all(
+        querySnapshot.docs.map(async (docSnapshot) => {
+          const entryData = { id: docSnapshot.id, ...docSnapshot.data() };
+
+          // Fetch related food_item
+          if (entryData.food_item_id) {
+            const foodItemDoc = await getDoc(doc(db, 'food_items', entryData.food_item_id));
+            if (foodItemDoc.exists()) {
+              entryData.food_items = { id: foodItemDoc.id, ...foodItemDoc.data() };
+            }
+          }
+
+          return entryData;
+        })
+      );
+
+      return entries;
     },
     enabled: !!nutritionLogId && !!mealGroup
   });

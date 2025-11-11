@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Development rules - more permissive for testing
+    // WARNING: DO NOT USE IN PRODUCTION
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection - allow creation without strict validation
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId); // Remove validation for dev
+      allow update: if isOwner(userId);
+      allow delete: if false;
+      
+      // All subcollections
+      match /{subcollection=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Exercise collections - public read
+    match /exercises/{exerciseId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    match /workout_cool_exercises/{exerciseId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    match /exercemus_exercises/{exerciseId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    match /exercise_categories/{categoryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    match /exercise_equipment/{equipmentId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    match /exercise_muscles/{muscleId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Food items
+    match /foodItems/{foodItemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+    
+    // For development - allow authenticated users to read/write their own data
+    match /{collection}/{document=**} {
+      allow read, write: if isAuthenticated() && 
+        collection in ['workouts', 'chatSessions', 'messages', 'nutritionLogs'];
+    }
+  }
+}

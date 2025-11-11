@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from 'firebase/functions';
 import { useToast } from "@/hooks/use-toast";
 
 interface DocumentParsingResponse {
@@ -16,24 +17,20 @@ export function useGeminiExerciseExtraction() {
   const parseDocument = async (file: File): Promise<DocumentParsingResponse> => {
     setIsExtracting(true);
     setIsSuccess(false);
-    
+
     try {
       console.log('Extracting text from file:', file.name);
-      const formData = new FormData();
-      formData.append('file', file);
 
-      const response = await supabase.functions.invoke('process-file', {
-        body: formData,
-      });
+      // TODO: This function needs to be implemented in Firebase Functions
+      // For now, return a not implemented error
+      throw new Error('Document processing feature is not yet implemented in Firebase. This feature is coming soon.');
 
-      if (response.error) {
-        console.error('Error processing file:', response.error);
-        throw response.error;
-      }
+      /* Future implementation:
+      const processFile = httpsCallable(functions, 'processFile');
+      const result = await processFile({ fileName: file.name, fileData: file });
+      const data = result.data as any;
 
-      console.log('File processed successfully:', response.data);
-      
-      if (!response.data || !response.data.text) {
+      if (!data || !data.text) {
         throw new Error('No text extracted from file');
       }
 
@@ -45,14 +42,15 @@ export function useGeminiExerciseExtraction() {
       });
 
       return {
-        text: response.data.text,
+        text: data.text,
         success: true
       };
+      */
     } catch (error) {
       console.error('Error extracting text:', error);
       toast({
         title: "Error",
-        description: "Failed to process document. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to process document. Please try again.",
         variant: "destructive",
       });
       return {

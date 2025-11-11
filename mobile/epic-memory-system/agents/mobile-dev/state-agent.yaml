@@ -1,0 +1,223 @@
+name: StateAgent
+version: 1.0.0
+description: Manages application state, data flow, and caching strategies
+parent: MasterAgent
+
+specializations:
+  - redux_management
+  - context_optimization
+  - data_flow_architecture
+  - cache_strategies
+  - state_persistence
+  - real_time_sync
+
+responsibilities:
+  state_architecture:
+    - global_state_design
+    - local_state_patterns
+    - state_normalization
+    - reducer_composition
+    - action_creators
+    
+  data_management:
+    - api_integration
+    - cache_invalidation
+    - optimistic_updates
+    - conflict_resolution
+    - data_transformation
+    
+  performance:
+    - selector_memoization
+    - subscription_optimization
+    - batch_updates
+    - lazy_loading
+    - prefetching
+
+state_structure:
+  auth:
+    user: User | null
+    isAuthenticated: boolean
+    isLoading: boolean
+    error: Error | null
+    
+  workouts:
+    list: Workout[]
+    active: Workout | null
+    filters: FilterState
+    isLoading: boolean
+    error: Error | null
+    cache: CacheMetadata
+    
+  exercises:
+    library: Exercise[]
+    favorites: string[]
+    searchResults: Exercise[]
+    searchQuery: string
+    filters: ExerciseFilters
+    isSearching: boolean
+    
+  ui:
+    theme: 'light' | 'dark'
+    navigation: NavigationState
+    modals: ModalState
+    toasts: ToastMessage[]
+    
+  offline:
+    queue: OfflineAction[]
+    syncStatus: SyncStatus
+    lastSync: timestamp
+
+action_patterns:
+  async_actions:
+    request:
+      type: ACTION_REQUEST
+      payload: request_data
+    success:
+      type: ACTION_SUCCESS
+      payload: response_data
+    failure:
+      type: ACTION_FAILURE
+      payload: error
+      
+  optimistic_updates:
+    immediate:
+      type: UPDATE_OPTIMISTIC
+      payload: optimistic_data
+    confirmed:
+      type: UPDATE_CONFIRMED
+      payload: server_data
+    rollback:
+      type: UPDATE_ROLLBACK
+      payload: original_data
+
+caching_strategies:
+  exercise_library:
+    ttl: 1_hour
+    storage: async_storage
+    invalidation: manual
+    prefetch: true
+    
+  user_workouts:
+    ttl: 5_minutes
+    storage: memory
+    invalidation: on_mutation
+    prefetch: false
+    
+  search_results:
+    ttl: 5_minutes
+    storage: memory
+    invalidation: on_query_change
+    prefetch: false
+
+sync_protocols:
+  offline_first:
+    - store_locally
+    - queue_sync_action
+    - attempt_sync
+    - handle_conflicts
+    - update_ui
+    
+  real_time:
+    - establish_websocket
+    - subscribe_to_changes
+    - handle_updates
+    - broadcast_changes
+    - reconnect_logic
+
+error_handling:
+  api_errors:
+    strategy: retry_with_backoff
+    max_retries: 3
+    logging: comprehensive
+    user_feedback: toast_notification
+    
+  state_errors:
+    strategy: reset_to_safe_state
+    logging: sentry_breadcrumb
+    user_feedback: error_boundary
+    
+  sync_errors:
+    strategy: queue_for_retry
+    logging: detailed_context
+    user_feedback: sync_status_indicator
+
+testing_requirements:
+  unit_tests:
+    - reducer_logic
+    - action_creators
+    - selectors
+    - middleware
+    
+  integration_tests:
+    - api_integration
+    - cache_behavior
+    - sync_flow
+    - error_scenarios
+    
+  performance_tests:
+    - selector_performance
+    - update_batching
+    - memory_usage
+    - cache_efficiency
+
+production_standards:
+  - immutable_updates
+  - normalized_state
+  - typed_actions
+  - selector_memoization
+  - proper_error_handling
+  - comprehensive_logging
+  - performance_monitoring
+  - state_persistence
+
+middleware:
+  - name: LoggingMiddleware
+    purpose: structured_logging
+    config:
+      level: info
+      include_state_diff: true
+      
+  - name: CacheMiddleware
+    purpose: cache_management
+    config:
+      strategies: per_endpoint
+      storage: hybrid
+      
+  - name: AnalyticsMiddleware
+    purpose: user_tracking
+    config:
+      events: user_actions
+      anonymize: true
+      
+  - name: ErrorMiddleware
+    purpose: error_handling
+    config:
+      retry: true
+      report: true
+
+tools:
+  - name: StateInspector
+    path: /agents/tools/state_inspector.ts
+  - name: ActionLogger
+    path: /agents/tools/action_logger.ts
+  - name: CacheManager
+    path: /agents/tools/cache_manager.ts
+  - name: SyncOrchestrator
+    path: /agents/tools/sync_orchestrator.ts
+  - name: PerformanceProfiler
+    path: /agents/tools/state_profiler.ts
+
+metrics:
+  track:
+    - state_update_frequency
+    - cache_hit_rate
+    - sync_success_rate
+    - error_frequency
+    - memory_usage
+    
+  analyze:
+    - hot_state_paths
+    - unnecessary_renders
+    - cache_effectiveness
+    - sync_bottlenecks
+    - error_patterns

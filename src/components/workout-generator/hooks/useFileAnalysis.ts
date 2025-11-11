@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { functions } from "@/lib/firebase/config";
+import { httpsCallable } from "firebase/functions";
 import { useToast } from "@/hooks/use-toast";
+
+interface ProcessFileResponse {
+  text: string;
+}
 
 export const useFileAnalysis = () => {
   const [prescribedExercises, setPrescribedExercises] = useState<string>("");
@@ -12,32 +17,35 @@ export const useFileAnalysis = () => {
   const handlePrescribedFileSelect = async (file: File) => {
     try {
       setIsAnalyzingPrescribed(true);
-      const formData = new FormData();
-      formData.append('file', file);
 
-      const response = await supabase.functions.invoke('process-file', {
-        body: formData,
-      });
+      // Call Firebase Cloud Function to process the file
+      const processFile = httpsCallable<
+        { file: File },
+        ProcessFileResponse
+      >(functions, 'processFile');
 
-      if (response.error) {
-        console.error('Edge Function error:', response.error);
-        throw response.error;
+      const result = await processFile({ file });
+
+      if (!result.data) {
+        throw new Error('No response data from Cloud Function');
       }
 
-      const { text } = response.data;
+      const { text } = result.data;
       setPrescribedExercises(text);
-      
+
       toast({
         title: "Success",
         description: "Exercise program processed successfully",
       });
     } catch (error) {
       console.error('Error processing file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process file. Please try again.';
       toast({
         title: "Error",
-        description: "Failed to process file. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsAnalyzingPrescribed(false);
     }
@@ -46,32 +54,35 @@ export const useFileAnalysis = () => {
   const handleInjuriesFileSelect = async (file: File) => {
     try {
       setIsAnalyzingInjuries(true);
-      const formData = new FormData();
-      formData.append('file', file);
 
-      const response = await supabase.functions.invoke('process-file', {
-        body: formData,
-      });
+      // Call Firebase Cloud Function to process the file
+      const processFile = httpsCallable<
+        { file: File },
+        ProcessFileResponse
+      >(functions, 'processFile');
 
-      if (response.error) {
-        console.error('Edge Function error:', response.error);
-        throw response.error;
+      const result = await processFile({ file });
+
+      if (!result.data) {
+        throw new Error('No response data from Cloud Function');
       }
 
-      const { text } = response.data;
+      const { text } = result.data;
       setInjuries(text);
-      
+
       toast({
         title: "Success",
         description: "Medical document processed successfully",
       });
     } catch (error) {
       console.error('Error processing file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process file. Please try again.';
       toast({
         title: "Error",
-        description: "Failed to process file. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsAnalyzingInjuries(false);
     }

@@ -1,0 +1,548 @@
+import { getFirestore } from 'firebase-admin/firestore';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { logger } from 'firebase-functions/v2';
+
+interface KnowledgeChunk {
+  id: string;
+  title: string;
+  content: string;
+  summary?: string;
+  source: string;
+  content_type: string;
+  quality_score: number;
+  tags: string[];
+  url: string;
+  created_at: string;
+  similarity_score: number;
+}
+
+interface RAGContext {
+  chunks: KnowledgeChunk[];
+  sources: Set<string>;
+  maxTokens: number;
+  currentTokens: number;
+}
+
+interface RAGResponse {
+  context: string;
+  sources: Array<{
+    title: string;
+    url: string;
+    source: string;
+    content_type: string;
+    similarity_score: number;
+  }>;
+  totalChunks: number;
+  tokensUsed: number;
+}
+
+/**
+ * Retrieval-Augmented Generation utilities for enhancing AI chat with knowledge base
+ */
+export class RAGUtils {
+  private db: any;
+  private genAI: GoogleGenerativeAI;
+  private embeddingModel: any;
+
+  constructor(apiKey: string) {
+    this.db = getFirestore();
+    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.embeddingModel = this.genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  }
+
+  /**
+   * Perform semantic search and build context for AI chat
+   */
+  async retrieveRelevantKnowledge(
+    query: string,
+    maxChunks: number = 5,
+    maxTokens: number = 4000,
+    filters?: {
+      content_type?: string[];
+      source?: string[];
+      min_quality_score?: number;
+    }
+  ): Promise<RAGResponse> {
+    try {
+      logger.info('Starting knowledge retrieval', { 
+        query: query.substring(0, 100),
+        maxChunks,
+        maxTokens,
+        filters 
+      });
+
+      // Generate query embedding
+      const queryEmbedding = await this.generateQueryEmbedding(query);
+
+      // Get candidate embeddings with filters
+      const candidates = await this.getCandidateEmbeddings(filters, maxChunks * 3);
+
+      if (candidates.length === 0) {
+        logger.info('No candidate embeddings found');
+        return {
+          context: '',
+          sources: [],
+          totalChunks: 0,
+          tokensUsed: 0
+        };
+      }
+
+      // Calculate similarities
+      const similarities = this.calculateSimilarities(queryEmbedding, candidates);
+
+      // Get top matches
+      const topMatches = similarities
+        .filter(match => match.similarity_score > 0.5) // Minimum relevance threshold
+        .slice(0, maxChunks * 2); // Get extra for token-based filtering
+
+      if (topMatches.length === 0) {
+        logger.info('No relevant matches found above threshold');
+        return {
+          context: '',
+          sources: [],
+          totalChunks: 0,
+          tokensUsed: 0
+        };
+      }
+
+      // Get full knowledge content
+      const knowledgeChunks = await this.getKnowledgeContent(topMatches);
+
+      // Build context within token limits
+      const ragResponse = this.buildRAGContext(knowledgeChunks, maxTokens, maxChunks);
+
+      logger.info('Knowledge retrieval completed', {
+        totalCandidates: candidates.length,
+        similarities: similarities.length,
+        finalChunks: ragResponse.totalChunks,
+        tokensUsed: ragResponse.tokensUsed
+      });
+
+      return ragResponse;
+
+    } catch (error: any) {
+      logger.error('Knowledge retrieval failed', { error: error.message });
+      // Return empty context on error to not break chat flow
+      return {
+        context: '',
+        sources: [],
+        totalChunks: 0,
+        tokensUsed: 0
+      };
+    }
+  }
+
+  /**
+   * Generate enhanced query embedding with fitness context
+   */
+  private async generateQueryEmbedding(query: string): Promise<number[]> {
+    try {
+      // Enhance query with fitness context for better embeddings
+      const enhancedQuery = this.enhanceQueryForFitness(query);
+      
+      const result = await this.embeddingModel.embedContent(enhancedQuery);
+      
+      if (!result.embedding || !result.embedding.values) {
+        throw new Error('Failed to generate query embedding');
+      }
+
+      return result.embedding.values;
+
+    } catch (error: any) {
+      logger.error('Query embedding generation failed', { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Enhance query with fitness context for better embedding quality
+   */
+  private enhanceQueryForFitness(query: string): string {
+    // Add fitness context to improve embedding quality
+    const fitnessContext = "Fitness, exercise, and health context: ";
+    return `${fitnessContext}${query}`;
+  }
+
+  /**
+   * Get candidate embeddings with optional filters
+   */
+  private async getCandidateEmbeddings(
+    filters?: any,
+    maxCandidates: number = 50
+  ): Promise<any[]> {
+    try {
+      const embeddingsCollection = this.db.collection('knowledge_embeddings');
+      let query = embeddingsCollection as any;
+
+      // Apply filters to reduce candidate set
+      if (filters?.content_type && filters.content_type.length > 0) {
+        query = query.where('content_type', 'in', filters.content_type);
+      }
+
+      if (filters?.source && filters.source.length > 0) {
+        query = query.where('source', 'in', filters.source);
+      }
+
+      if (filters?.min_quality_score) {
+        query = query.where('quality_score', '>=', filters.min_quality_score);
+      }
+
+      // Order by quality score and limit
+      query = query.orderBy('quality_score', 'desc').limit(maxCandidates);
+
+      const snapshot = await query.get();
+      
+      return snapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data(),
+        created_at: doc.data().created_at?.toDate?.()?.toISOString() || doc.data().created_at
+      }));
+
+    } catch (error: any) {
+      logger.error('Failed to get candidate embeddings', { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate cosine similarities between query and candidate embeddings
+   */
+  private calculateSimilarities(
+    queryEmbedding: number[],
+    candidates: any[]
+  ): Array<{ id: string; similarity_score: number }> {
+    const results: Array<{ id: string; similarity_score: number }> = [];
+
+    for (const candidate of candidates) {
+      try {
+        if (!candidate.embedding || !Array.isArray(candidate.embedding)) {
+          logger.warn(`Invalid embedding for ${candidate.id}`);
+          continue;
+        }
+
+        const similarity = this.cosineSimilarity(queryEmbedding, candidate.embedding);
+        
+        results.push({
+          id: candidate.id,
+          similarity_score: similarity
+        });
+
+      } catch (error: any) {
+        logger.warn(`Failed to calculate similarity for ${candidate.id}`, { error: error.message });
+      }
+    }
+
+    // Sort by similarity score (highest first)
+    return results.sort((a, b) => b.similarity_score - a.similarity_score);
+  }
+
+  /**
+   * Calculate cosine similarity between two vectors
+   */
+  private cosineSimilarity(vectorA: number[], vectorB: number[]): number {
+    try {
+      if (vectorA.length !== vectorB.length) {
+        throw new Error('Vector dimensions must match');
+      }
+
+      let dotProduct = 0;
+      let normA = 0;
+      let normB = 0;
+
+      for (let i = 0; i < vectorA.length; i++) {
+        dotProduct += vectorA[i] * vectorB[i];
+        normA += vectorA[i] * vectorA[i];
+        normB += vectorB[i] * vectorB[i];
+      }
+
+      if (normA === 0 || normB === 0) {
+        return 0;
+      }
+
+      return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+
+    } catch (error: any) {
+      logger.error('Cosine similarity calculation failed', { error: error.message });
+      return 0;
+    }
+  }
+
+  /**
+   * Get full knowledge content for similarity matches
+   */
+  private async getKnowledgeContent(
+    similarities: Array<{ id: string; similarity_score: number }>
+  ): Promise<KnowledgeChunk[]> {
+    try {
+      const knowledgeCollection = this.db.collection('knowledge');
+      const results: KnowledgeChunk[] = [];
+
+      // Batch get knowledge documents
+      const batchSize = 10;
+      for (let i = 0; i < similarities.length; i += batchSize) {
+        const batch = similarities.slice(i, i + batchSize);
+        
+        const promises = batch.map(async (item) => {
+          try {
+            const doc = await knowledgeCollection.doc(item.id).get();
+            if (doc.exists) {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                title: data.title,
+                content: data.content,
+                summary: data.summary,
+                source: data.source,
+                content_type: data.content_type,
+                quality_score: data.quality_score,
+                tags: data.tags || [],
+                url: data.url,
+                created_at: data.created_at?.toDate?.()?.toISOString() || data.created_at,
+                similarity_score: item.similarity_score
+              } as KnowledgeChunk;
+            }
+            return null;
+          } catch (error: any) {
+            logger.warn(`Failed to get knowledge content for ${item.id}`, { error: error.message });
+            return null;
+          }
+        });
+
+        const batchResults = await Promise.all(promises);
+        results.push(...batchResults.filter(result => result !== null) as KnowledgeChunk[]);
+      }
+
+      return results;
+
+    } catch (error: any) {
+      logger.error('Failed to get knowledge content', { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Build RAG context within token limits
+   */
+  private buildRAGContext(
+    chunks: KnowledgeChunk[],
+    maxTokens: number,
+    maxChunks: number
+  ): RAGResponse {
+    const context: RAGContext = {
+      chunks: [],
+      sources: new Set(),
+      maxTokens,
+      currentTokens: 0
+    };
+
+    const sources: Array<{
+      title: string;
+      url: string;
+      source: string;
+      content_type: string;
+      similarity_score: number;
+    }> = [];
+
+    // Sort by relevance and quality
+    const sortedChunks = chunks.sort((a, b) => {
+      const scoreA = a.similarity_score * 0.7 + a.quality_score * 0.3;
+      const scoreB = b.similarity_score * 0.7 + b.quality_score * 0.3;
+      return scoreB - scoreA;
+    });
+
+    for (const chunk of sortedChunks) {
+      if (context.chunks.length >= maxChunks) {
+        break;
+      }
+
+      // Estimate tokens (rough approximation: 1 token ≈ 4 characters)
+      const contentTokens = Math.ceil(chunk.content.length / 4);
+      const titleTokens = Math.ceil(chunk.title.length / 4);
+      const summaryTokens = chunk.summary ? Math.ceil(chunk.summary.length / 4) : 0;
+      const totalTokens = contentTokens + titleTokens + summaryTokens + 50; // Buffer for formatting
+
+      if (context.currentTokens + totalTokens > maxTokens) {
+        // Try with just summary if available
+        if (chunk.summary) {
+          const summaryOnlyTokens = titleTokens + summaryTokens + 50;
+          if (context.currentTokens + summaryOnlyTokens <= maxTokens) {
+            // Use summary instead of full content
+            const summaryChunk = { ...chunk, content: chunk.summary };
+            context.chunks.push(summaryChunk);
+            context.currentTokens += summaryOnlyTokens;
+            context.sources.add(chunk.source);
+            
+            sources.push({
+              title: chunk.title,
+              url: chunk.url,
+              source: chunk.source,
+              content_type: chunk.content_type,
+              similarity_score: chunk.similarity_score
+            });
+          }
+        }
+        continue;
+      }
+
+      context.chunks.push(chunk);
+      context.currentTokens += totalTokens;
+      context.sources.add(chunk.source);
+
+      sources.push({
+        title: chunk.title,
+        url: chunk.url,
+        source: chunk.source,
+        content_type: chunk.content_type,
+        similarity_score: chunk.similarity_score
+      });
+    }
+
+    // Build formatted context string
+    const contextString = this.formatContextForAI(context.chunks);
+
+    return {
+      context: contextString,
+      sources,
+      totalChunks: context.chunks.length,
+      tokensUsed: context.currentTokens
+    };
+  }
+
+  /**
+   * Format knowledge chunks for AI context
+   */
+  private formatContextForAI(chunks: KnowledgeChunk[]): string {
+    if (chunks.length === 0) {
+      return '';
+    }
+
+    const contextParts = [
+      '## Relevant Knowledge Base Information:',
+      ''
+    ];
+
+    chunks.forEach((chunk, index) => {
+      contextParts.push(`### Source ${index + 1}: ${chunk.title}`);
+      contextParts.push(`**Type:** ${chunk.content_type} | **Source:** ${chunk.source} | **Relevance:** ${(chunk.similarity_score * 100).toFixed(1)}%`);
+      contextParts.push('');
+      
+      // Use summary if it's shorter, otherwise truncate content
+      const content = chunk.summary && chunk.summary.length < chunk.content.length * 0.5 
+        ? chunk.summary 
+        : chunk.content.length > 800 
+          ? chunk.content.substring(0, 800) + '...'
+          : chunk.content;
+          
+      contextParts.push(content);
+      contextParts.push('');
+      
+      // Add tags if relevant
+      if (chunk.tags && chunk.tags.length > 0) {
+        contextParts.push(`**Tags:** ${chunk.tags.join(', ')}`);
+        contextParts.push('');
+      }
+    });
+
+    contextParts.push('---');
+    contextParts.push('Use this knowledge to provide more accurate and detailed responses. Reference specific sources when applicable.');
+
+    return contextParts.join('\n');
+  }
+
+  /**
+   * Extract fitness-relevant terms from query for better retrieval
+   */
+  extractFitnessTerms(query: string): string[] {
+    const fitnessTerms = [
+      // Exercise types
+      'strength', 'cardio', 'hiit', 'yoga', 'pilates', 'crossfit', 'powerlifting',
+      'bodyweight', 'calisthenics', 'running', 'swimming', 'cycling',
+      
+      // Equipment
+      'barbell', 'dumbbell', 'kettlebell', 'resistance', 'machine', 'cable',
+      
+      // Body parts
+      'chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'abs', 'glutes',
+      
+      // Exercise names
+      'squat', 'deadlift', 'bench', 'pull-up', 'push-up', 'plank', 'lunge',
+      
+      // Nutrition
+      'protein', 'carbs', 'fat', 'calories', 'macro', 'diet', 'meal', 'supplement',
+      
+      // Goals
+      'muscle', 'strength', 'endurance', 'flexibility', 'weight loss', 'bulk'
+    ];
+
+    const queryLower = query.toLowerCase();
+    return fitnessTerms.filter(term => queryLower.includes(term));
+  }
+
+  /**
+   * Suggest query refinements for better knowledge retrieval
+   */
+  suggestQueryRefinements(query: string): string[] {
+    const suggestions: string[] = [];
+    const queryLower = query.toLowerCase();
+
+    // Suggest more specific terms
+    if (queryLower.includes('workout') && !queryLower.includes('routine')) {
+      suggestions.push(`${query} routine`);
+    }
+
+    if (queryLower.includes('exercise') && !queryLower.includes('form')) {
+      suggestions.push(`${query} proper form`);
+    }
+
+    if (queryLower.includes('muscle') && !queryLower.includes('building')) {
+      suggestions.push(`${query} building`);
+    }
+
+    return suggestions.slice(0, 3); // Limit suggestions
+  }
+}
+
+/**
+ * Create RAG-enhanced prompt by combining user query with retrieved knowledge
+ */
+export function createRAGEnhancedPrompt(
+  originalPrompt: string,
+  ragResponse: RAGResponse,
+  userQuery: string
+): string {
+  if (!ragResponse.context || ragResponse.totalChunks === 0) {
+    return originalPrompt;
+  }
+
+  const enhancedPrompt = `${originalPrompt}
+
+${ragResponse.context}
+
+**User Query:** ${userQuery}
+
+**Instructions for using knowledge base:**
+1. Reference the knowledge base information when relevant to the user's query
+2. Cite sources using the format: "According to [Source Name] ([Source Type])"
+3. Combine knowledge base information with your existing expertise
+4. If knowledge base information conflicts with your training, note this and explain both perspectives
+5. Always prioritize user safety and evidence-based recommendations`;
+
+  return enhancedPrompt;
+}
+
+/**
+ * Format source citations for display in chat UI
+ */
+export function formatSourceCitations(sources: RAGResponse['sources']): Array<{
+  title: string;
+  url: string;
+  type: string;
+  relevance: string;
+}> {
+  return sources.map(source => ({
+    title: source.title,
+    url: source.url,
+    type: `${source.source} (${source.content_type})`,
+    relevance: `${(source.similarity_score * 100).toFixed(1)}% relevant`
+  }));
+}

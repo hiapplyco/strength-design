@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter
@@ -15,11 +15,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Settings, 
-  Target, 
-  FileUp, 
-  Heart, 
+import {
+  Settings,
+  Target,
+  FileUp,
+  Heart,
   Activity,
   Watch,
   Smartphone,
@@ -29,7 +29,10 @@ import {
   Info
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { db, storage, functions } from '@/lib/firebase/config';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
+import { httpsCallable } from 'firebase/functions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { debounce } from 'lodash';
@@ -67,19 +70,15 @@ function useNutritionSettings(userId: string | undefined, enabled: boolean) {
     queryKey: ['nutrition-settings', userId],
     queryFn: async () => {
       if (!userId) throw new Error('User ID required');
-      
-      const { data, error } = await supabase
-        .from('nutrition_settings')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-      
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
-      return data;
+
+      const docRef = doc(db, 'nutrition_settings', userId);
+      const docSnap = await getDoc(docRef);
+
+      return docSnap.exists() ? docSnap.data() : null;
     },
     enabled: enabled && !!userId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime in newer React Query)
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -190,7 +189,7 @@ export const NutritionSettingsDialogOptimized = memo(({
   const [integrations, setIntegrations] = useState<Integration[]>(defaultIntegrations);
 
   // Use React Query for fetching settings
-  const { data: settings, isLoading } = useNutritionSettings(user?.id, open);
+  const { data: settings, isLoading } = useNutritionSettings(user?.uid, open);
 
   // Update local state when settings are loaded
   useEffect(() => {
@@ -220,14 +219,16 @@ export const NutritionSettingsDialogOptimized = memo(({
   // Mutation for saving settings
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
-      const { error } = await supabase
-        .from('nutrition_settings')
-        .upsert(data);
-      
-      if (error) throw error;
+      if (!user?.uid) throw new Error('User not authenticated');
+
+      const docRef = doc(db, 'nutrition_settings', user.uid);
+      await setDoc(docRef, {
+        ...data,
+        updated_at: Timestamp.now()
+      }, { merge: true });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['nutrition-settings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['nutrition-settings', user?.uid] });
       toast({
         title: "Settings saved",
         description: "Your nutrition settings have been updated successfully.",
@@ -259,7 +260,7 @@ export const NutritionSettingsDialogOptimized = memo(({
     }), {});
 
     saveMutation.mutate({
-      user_id: user?.id,
+      user_id: user?.uid,
       target_calories: macroTargets.calories,
       target_protein: macroTargets.protein,
       target_carbs: macroTargets.carbs,
@@ -270,32 +271,26 @@ export const NutritionSettingsDialogOptimized = memo(({
       target_cholesterol: macroTargets.cholesterol,
       target_saturated_fat: macroTargets.saturated_fat,
       target_water_ml: macroTargets.water_ml,
-      integrations: integrationsData,
-      updated_at: new Date().toISOString()
+      integrations: integrationsData
     });
-  }, [user?.id, macroTargets, integrations, saveMutation]);
+  }, [user?.uid, macroTargets, integrations, saveMutation]);
 
   // File upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       if (!user) throw new Error('User required');
-      
-      const fileName = `${user.id}/nutrition-plans/${Date.now()}-${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('nutrition-uploads')
-        .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      const fileName = `${user.uid}/nutrition-plans/${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, `nutrition-uploads/${fileName}`);
+      await uploadBytes(storageRef, file);
 
-      const { data, error } = await supabase.functions.invoke('parse-nutrition-plan', {
-        body: {
-          fileName: fileName,
-          fileType: file.type
-        }
+      const parseNutritionPlan = httpsCallable(functions, 'parseNutritionPlan');
+      const result = await parseNutritionPlan({
+        fileName: fileName,
+        fileType: file.type
       });
 
-      if (error) throw error;
-      return data;
+      return result.data;
     },
     onSuccess: (data) => {
       if (data?.macros) {

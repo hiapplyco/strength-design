@@ -1,28 +1,40 @@
-const { getDefaultConfig } = require('@expo/metro-config');
+const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
-const config = getDefaultConfig(__dirname);
+module.exports = (() => {
+  const config = getDefaultConfig(__dirname);
+  const { serializer } = config;
 
-// For Expo SDK 53 compatibility, ensure package.json exports are handled properly
-config.resolver = {
-  ...config.resolver,
-  unstable_enablePackageExports: true, // Enable package.json exports (default in RN 0.79/Expo 53)
-  // Add support for pose analysis video processing
-  assetExts: [...config.resolver.assetExts, 'mp4', 'mov', 'avi', 'mkv', 'webm'],
-  // Add support for TypeScript in pose detection services
-  sourceExts: [...config.resolver.sourceExts, 'ts', 'tsx'],
-  // Ignore ML Kit native modules in web builds
-  platforms: ['ios', 'android', 'native', 'web']
-};
+  const originalProcessModuleFilter = serializer?.processModuleFilter;
 
-// Add transform options for better performance
-config.transformer = {
-  ...config.transformer,
-  getTransformOptions: async () => ({
-    transform: {
-      experimentalImportSupport: false,
-      inlineRequires: true,
+  config.serializer = {
+    ...serializer,
+    processModuleFilter(module) {
+      if (!module?.path) {
+        console.warn('[metro] Skipping module with undefined path:', {
+          id: module?.id,
+          name: module?.name,
+          outputType: module?.output?.[0]?.type,
+        });
+        if (module && module.output?.[0]) {
+          if (!module.output[0].data) {
+            module.output[0].data = {};
+          }
+          module.output[0].data.path = '__invalid__/unknown';
+        }
+        return false;
+      }
+
+      if (module.output?.[0]) {
+        const data = module.output[0].data = module.output[0].data || {};
+        if (!data.path) {
+          data.path = path.relative(__dirname, module.path);
+        }
+      }
+
+      return originalProcessModuleFilter ? originalProcessModuleFilter(module) : true;
     },
-  }),
-};
+  };
 
-module.exports = config;
+  return config;
+})();

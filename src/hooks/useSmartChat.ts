@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { functions } from '@/lib/firebase';
+import { httpsCallable } from 'firebase/functions';
 import { useToast } from '@/hooks/use-toast';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { useGeminiFileUpload } from "./useGeminiFileUpload";
@@ -41,17 +42,14 @@ export const useSmartChat = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('workout-chat', {
-        body: {
-          message: userMessage,
-          currentConfig: config,
-          conversationHistory: messages.slice(-10) // Last 10 messages for context
-        }
+      const workoutChat = httpsCallable(functions, 'workoutChat');
+      const result = await workoutChat({
+        message: userMessage,
+        currentConfig: config,
+        conversationHistory: messages.slice(-10) // Last 10 messages for context
       });
 
-      if (error) throw error;
-
-      const response: ChatResponse = data;
+      const response: ChatResponse = result.data as ChatResponse;
       
       if (
         response.configUpdates &&

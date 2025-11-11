@@ -1,0 +1,41 @@
+// Additional Firestore security rules for vector database collections
+// Add these rules to your existing firestore.rules file
+
+// Knowledge embeddings collection - read access for authenticated users
+match /knowledge_embeddings/{embeddingId} {
+  allow read: if request.auth != null;
+  allow write: if false; // Only allow writes from server-side functions
+}
+
+// Embedding processing statistics - admin access only
+match /embedding_processing_stats/{statId} {
+  allow read: if request.auth != null && 
+    (request.auth.token.admin == true || 
+     request.auth.token.email in ['admin@strength.design']);
+  allow write: if false; // Only allow writes from server-side functions
+}
+
+// Knowledge collection updates - add embedding status fields
+match /knowledge/{knowledgeId} {
+  allow read: if request.auth != null;
+  allow write: if request.auth != null && 
+    validateKnowledgeWrite(resource, request.resource);
+  
+  function validateKnowledgeWrite(existingData, newData) {
+    // Allow updating embedding status fields
+    let allowedEmbeddingFields = ['has_embedding', 'embedding_model', 'embedding_created_at'];
+    let embeddingFieldsChanged = newData.diff(existingData).affectedKeys()
+      .hasAny(allowedEmbeddingFields);
+    
+    // If only embedding fields changed, allow the update
+    return embeddingFieldsChanged || 
+           request.auth.token.admin == true ||
+           existingData.data.user_id == request.auth.uid;
+  }
+}
+
+// Vector search cache - user-specific caching (optional)
+match /user_search_cache/{userId}/searches/{searchId} {
+  allow read, write: if request.auth != null && 
+    request.auth.uid == userId;
+}

@@ -1,10 +1,9 @@
 
-import React, { useState, ReactNode } from 'react';
+import React, { memo, ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Minus, MessageSquare } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface ModernInputCardProps {
@@ -18,7 +17,7 @@ interface ModernInputCardProps {
   className?: string;
 }
 
-export const ModernInputCard: React.FC<ModernInputCardProps> = ({
+const ModernInputCardComponent: React.FC<ModernInputCardProps> = ({
   icon,
   title,
   isExpanded,
@@ -31,13 +30,13 @@ export const ModernInputCard: React.FC<ModernInputCardProps> = ({
   return (
     <Card className={cn(
       "group transition-all duration-300 border-2",
-      hasContent 
-        ? "border-green-500/30 bg-green-500/5 shadow-lg shadow-green-500/10" 
+      hasContent
+        ? "border-green-500/30 bg-green-500/5 shadow-lg shadow-green-500/10"
         : "border-border/30 hover:border-green-500/20",
       "hover:shadow-md",
       className
     )}>
-      <CardHeader 
+      <CardHeader
         className="cursor-pointer select-none p-4"
         onClick={onToggle}
       >
@@ -54,7 +53,7 @@ export const ModernInputCard: React.FC<ModernInputCardProps> = ({
               <MessageSquare className="h-4 w-4 text-green-400 opacity-70" />
             )}
           </div>
-          
+
           <div className="flex items-center gap-2">
             {preview && !isExpanded && (
               <Badge variant="secondary" className="text-xs font-normal bg-green-500/10 text-green-400 border-green-500/20">
@@ -79,23 +78,23 @@ export const ModernInputCard: React.FC<ModernInputCardProps> = ({
         </CardTitle>
       </CardHeader>
 
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <CardContent className="pt-0 pb-4 px-4">
-              <div className="border-t border-border/30 pt-4">
-                {children}
-              </div>
-            </CardContent>
-          </motion.div>
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows] duration-300 ease-in-out",
+          isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
-      </AnimatePresence>
+      >
+        <div className="overflow-hidden">
+          <CardContent className="pt-0 pb-4 px-4">
+            <div className="border-t border-border/30 pt-4">
+              {children}
+            </div>
+          </CardContent>
+        </div>
+      </div>
     </Card>
   );
 };
+
+// Memoize to prevent unnecessary re-renders
+export const ModernInputCard = memo(ModernInputCardComponent);

@@ -1,0 +1,111 @@
+# Firebase Test Lab Configuration
+# Defines device matrix and test configurations for pose analysis feature
+
+# Test timeout (max: 45 minutes)
+timeout: 30m
+
+# Environment variables for tests
+environmentVariables:
+  - key: FIREBASE_TEST_LAB
+    value: "true"
+  - key: TEST_ENVIRONMENT
+    value: "testlab"
+
+# Results storage
+resultsHistoryName: "pose-analysis-testing"
+
+# Results bucket
+resultsBucket: "gs://strength-design-test-results"
+
+# Device matrix organized by performance tier
+# This ensures thorough testing across low/mid/high-end devices
+
+## Low-End Device Tier (≤2GB RAM)
+## Target: Verify degraded experience works smoothly
+low-end-android:
+  - model: sailfish        # Pixel (2016) - 4GB RAM, but older CPU
+    version: "27"          # Android 8.1
+    locale: en_US
+    orientation: portrait
+  - model: j7xelte         # Samsung Galaxy J7 (2016) - 2GB RAM
+    version: "24"          # Android 7.0
+    locale: en_US
+    orientation: portrait
+
+## Mid-Range Device Tier (2-4GB RAM)
+## Target: Most common user segment
+mid-range-android:
+  - model: a10             # Samsung Galaxy A10 (2019) - 2GB RAM
+    version: "29"          # Android 10
+    locale: en_US
+    orientation: portrait
+  - model: oriole          # Pixel 6 (2021) - 8GB RAM, but mid-tier CPU
+    version: "31"          # Android 12
+    locale: en_US
+    orientation: portrait
+
+## High-End Device Tier (>4GB RAM)
+## Target: Premium experience validation
+high-end-android:
+  - model: blueline        # Pixel 3 (2018) - 4GB RAM
+    version: "28"          # Android 9
+    locale: en_US
+    orientation: portrait
+  - model: redfin          # Pixel 5 (2020) - 8GB RAM
+    version: "30"          # Android 11
+    locale: en_US
+    orientation: portrait
+  - model: panther         # Pixel 7 (2022) - 8GB RAM
+    version: "33"          # Android 13
+    locale: en_US
+    orientation: portrait
+
+## iOS Devices
+## Note: Test Lab iOS support requires Xcode Cloud integration
+ios-devices:
+  - model: iphone11        # iPhone 11 (2019) - 4GB RAM
+    version: "14.7"
+    locale: en_US
+    orientation: portrait
+  - model: iphone12pro     # iPhone 12 Pro (2020) - 6GB RAM
+    version: "15.7"
+    locale: en_US
+    orientation: portrait
+  - model: iphone13        # iPhone 13 (2021) - 4GB RAM
+    version: "16.6"
+    locale: en_US
+    orientation: portrait
+  - model: iphone14promax  # iPhone 14 Pro Max (2022) - 6GB RAM
+    version: "17.0"
+    locale: en_US
+    orientation: portrait
+
+# Test sharding (parallel execution)
+numUniformShards: 3
+
+# Performance metrics to collect
+performanceMetrics:
+  enabled: true
+  collectNetworkInfo: true
+  collectVideoQuality: high
+
+# Network profiles for testing different conditions
+networkProfiles:
+  - profile: LTE           # Standard mobile network
+  - profile: 3G            # Slower connection testing
+  - profile: offline       # Offline functionality testing
+
+# Test scenarios
+testTargets:
+  - package: com.strengthdesign.app
+    class: com.strengthdesign.PoseAnalysisE2ETest
+
+# Video recording settings
+recordVideo: true
+videoQuality: high
+
+# Retain artifacts
+retainAllArtifacts: true
+
+# Additional APK/IPA for test execution
+# These will be specified in the CLI command

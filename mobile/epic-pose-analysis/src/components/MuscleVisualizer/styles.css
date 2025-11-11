@@ -1,0 +1,6 @@
+.mv-root { display: grid; gap: 1rem; }
+.mv-canvas { display: grid; grid-template-columns: 1fr; }
+.mv-canvas.mv-split { grid-template-columns: 1fr 1fr; gap: 2rem; }
+.mv-pane { position: relative; }
+.mv-svg { width: 100%; height: auto; display: block; }
+.mv-label-layer { position: absolute; inset: 0; pointer-events: none; }

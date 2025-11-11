@@ -1,6 +1,8 @@
 
 import { useState, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db, functions } from "@/lib/firebase/config";
+import { collection, query, where, orderBy, getDocs, addDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useUserDataIntegration } from "./useUserDataIntegration";
@@ -33,46 +35,49 @@ export const useEnhancedChatMessages = () => {
   const fetchMessages = useCallback(async () => {
     // Don't fetch if we're in a new chat session (user clicked "New Chat")
     if (!user || fetchingRef.current || hasLoadedMessagesRef.current || isNewChatSessionRef.current) return;
-    
+
     // Prevent rapid successive calls
     const now = Date.now();
     if (now - lastFetchRef.current < 1000) return;
-    
+
     fetchingRef.current = true;
     lastFetchRef.current = now;
 
     try {
-      console.log('Fetching enhanced chat messages for user:', user.id);
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+      console.log('Fetching enhanced chat messages for user:', user.uid);
+      const messagesRef = collection(db, 'chat_messages');
+      const q = query(
+        messagesRef,
+        where('user_id', '==', user.uid),
+        orderBy('created_at', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
 
-      if (error) {
-        console.error('Supabase error fetching messages:', error);
-        throw error;
-      }
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        created_at: doc.data().created_at?.toDate?.()?.toISOString() || new Date().toISOString()
+      })) as ChatMessage[];
 
       console.log('Fetched enhanced chat messages:', data);
-      
+
       // Only set messages if we have data, otherwise keep empty array
       if (data && data.length > 0) {
         setMessages(data);
       } else {
         setMessages([]);
       }
-      
+
       // Mark as having loaded messages to prevent re-fetching
       hasLoadedMessagesRef.current = true;
-      
+
       // Mark as initialized only after successful fetch
       if (!initializedRef.current) {
         initializedRef.current = true;
       }
     } catch (error: any) {
       console.error('Error fetching enhanced chat messages:', error);
-      
+
       toast({
         title: "Connection Issue",
         description: "Unable to load chat history. Please refresh the page.",
@@ -103,19 +108,18 @@ export const useEnhancedChatMessages = () => {
       console.log('Sending enhanced chat message:', message);
 
       // Save the message to database first
-      const { data: messageData, error: messageError } = await supabase
-        .from('chat_messages')
-        .insert({
-          user_id: user.id,
-          message: message
-        })
-        .select('*')
-        .single();
+      const messagesRef = collection(db, 'chat_messages');
+      const messageDoc = await addDoc(messagesRef, {
+        user_id: user.uid,
+        message: message,
+        created_at: Timestamp.now()
+      });
 
-      if (messageError) {
-        console.error('Error saving message:', messageError);
-        throw messageError;
-      }
+      const messageData: ChatMessage = {
+        id: messageDoc.id,
+        message: message,
+        created_at: new Date().toISOString()
+      };
 
       console.log('Enhanced chat message saved:', messageData);
 
@@ -129,28 +133,23 @@ export const useEnhancedChatMessages = () => {
       ]).flat();
 
       // Prepare enhanced context with workout templates and user data
-      const workoutContext = workoutTemplates?.length > 0 ? 
-        `\n\nUSER'S WORKOUT TEMPLATES:\n${workoutTemplates.map(template => 
+      const workoutContext = workoutTemplates?.length > 0 ?
+        `\n\nUSER'S WORKOUT TEMPLATES:\n${workoutTemplates.map(template =>
           `- ${template.title}: ${template.summary || 'Custom workout'}`
         ).join('\n')}` : '';
 
       // Call enhanced chat function with comprehensive user data
-      const { data: chatResponse, error: chatError } = await supabase.functions.invoke('enhanced-chat', {
-        body: { 
-          message,
-          messageId: messageData.id,
-          history: history,
-          userId: user.id,
-          workoutContext,
-          hasWorkoutTemplates: workoutTemplates?.length > 0
-        }
+      const enhancedChat = httpsCallable(functions, 'enhancedChat');
+      const result = await enhancedChat({
+        message,
+        messageId: messageDoc.id,
+        history: history,
+        userId: user.uid,
+        workoutContext,
+        hasWorkoutTemplates: workoutTemplates?.length > 0
       });
 
-      if (chatError) {
-        console.error('Enhanced chat function error:', chatError);
-        throw chatError;
-      }
-
+      const chatResponse = result.data as { response: string };
       console.log('Received enhanced AI response:', chatResponse);
 
       if (!chatResponse || !chatResponse.response) {
@@ -158,7 +157,7 @@ export const useEnhancedChatMessages = () => {
       }
 
       // Update local state with AI response
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map(msg =>
         msg.id === messageData.id ? { ...msg, response: chatResponse.response } : msg
       ));
 
@@ -194,19 +193,20 @@ export const useEnhancedChatMessages = () => {
 
     try {
       setIsLoading(true);
-      const { error } = await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('user_id', user.id);
+      const messagesRef = collection(db, 'chat_messages');
+      const q = query(messagesRef, where('user_id', '==', user.uid));
+      const querySnapshot = await getDocs(q);
 
-      if (error) throw error;
+      // Delete all messages for this user
+      const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
 
       setMessages([]);
       // Reset all flags so fresh messages can load properly
       initializedRef.current = false;
       hasLoadedMessagesRef.current = false;
       isNewChatSessionRef.current = false;
-      
+
       toast({
         title: "Success",
         description: "Chat history cleared successfully",

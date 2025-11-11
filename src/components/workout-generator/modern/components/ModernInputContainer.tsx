@@ -1,6 +1,5 @@
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useCallback, useMemo, memo } from 'react';
 import { useWorkoutConfig } from '@/contexts/WorkoutConfigContext';
 import { useInputContainerState } from '../../input-container/hooks/useInputContainerState';
 import { useExerciseSelection } from '../../input-container/hooks/useExerciseSelection';
@@ -22,7 +21,7 @@ interface ModernInputContainerProps {
   isGenerating?: boolean;
 }
 
-export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
+const ModernInputContainerComponent: React.FC<ModernInputContainerProps> = ({
   numberOfDays,
   setNumberOfDays,
   numberOfCycles,
@@ -37,19 +36,31 @@ export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
     handleWeatherUpdate,
   } = useInputContainerState();
 
+  // Memoize selected exercises setter to prevent unnecessary re-renders
+  const setSelectedExercises = useCallback((exercises: Exercise[]) => {
+    updateConfig({ selectedExercises: exercises });
+  }, [updateConfig]);
+
   // Exercise selection handlers
   const { handleExerciseSelection } = useExerciseSelection({
     selectedExercises: config.selectedExercises,
-    setSelectedExercises: (exercises: Exercise[]) => updateConfig({ selectedExercises: exercises }),
+    setSelectedExercises,
   });
 
-  const toggleCard = (cardName: string) => {
+  // Memoize toggle handler
+  const toggleCard = useCallback((cardName: string) => {
     if (isGenerating) return; // Prevent interaction during generation
     setExpandedCards(prev => ({
       ...prev,
       [cardName]: !prev[cardName]
     }));
-  };
+  }, [isGenerating, setExpandedCards]);
+
+  // Memoize weather update handler
+  const handleWeatherUpdateCallback = useCallback((data: any, prompt: string) => {
+    handleWeatherUpdate(data, prompt);
+    updateConfig({ weatherData: data, weatherPrompt: prompt });
+  }, [handleWeatherUpdate, updateConfig]);
 
   // Collapse all cards when generating
   React.useEffect(() => {
@@ -66,61 +77,32 @@ export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
     updateConfig({ numberOfDays, numberOfCycles });
   }, [numberOfDays, numberOfCycles, updateConfig]);
 
-  const containerVariants = {
-    visible: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-        duration: 0.3
-      }
-    },
-    hidden: {
-      opacity: 0.3,
-      transition: {
-        when: "afterChildren",
-        staggerChildren: 0.05,
-        duration: 0.2
-      }
-    }
-  };
+  // Memoize handlers for each card
+  const fitnessLevelChangeHandler = useCallback((value: string) => {
+    updateConfig({ fitnessLevel: value });
+  }, [updateConfig]);
 
-  const cardVariants = {
-    visible: {
-      opacity: 1,
-      scale: 1,
-      height: "auto",
-      transition: { duration: 0.3 }
-    },
-    hidden: {
-      opacity: 0.5,
-      scale: 0.98,
-      height: "auto",
-      transition: { duration: 0.2 }
-    }
-  };
+  const prescribedExercisesChangeHandler = useCallback((value: string) => {
+    updateConfig({ prescribedExercises: value });
+  }, [updateConfig]);
+
+  const injuriesChangeHandler = useCallback((value: string) => {
+    updateConfig({ injuries: value });
+  }, [updateConfig]);
 
   return (
-    <motion.div 
-      className="space-y-4 w-full"
-      initial="visible"
-      animate={isGenerating ? "hidden" : "visible"}
-      variants={containerVariants}
+    <div
+      className="space-y-4 w-full transition-opacity duration-300"
+      style={{ opacity: isGenerating ? 0.6 : 1 }}
     >
-      <AnimatePresence>
-        {!isGenerating && (
-          <motion.div
-            key="progress-bar"
-            variants={cardVariants}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            <ConfigProgressBar />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {!isGenerating && (
+        <div className="animate-in fade-in duration-200">
+          <ConfigProgressBar />
+        </div>
+      )}
 
       {/* Training Schedule - First and auto-expanded */}
-      <motion.div variants={cardVariants}>
+      <div className="transition-all duration-200">
         <ModernTrainingScheduleCard
           numberOfDays={numberOfDays}
           numberOfCycles={numberOfCycles}
@@ -129,78 +111,72 @@ export const ModernInputContainer: React.FC<ModernInputContainerProps> = ({
           isExpanded={expandedCards.schedule && !isGenerating}
           onToggle={() => toggleCard('schedule')}
         />
-      </motion.div>
+      </div>
 
-      <motion.div variants={cardVariants}>
+      <div className="transition-all duration-200">
         <ModernFitnessLevelCard
           fitnessLevel={config.fitnessLevel}
-          onFitnessLevelChange={(value) => updateConfig({ fitnessLevel: value })}
+          onFitnessLevelChange={fitnessLevelChangeHandler}
           isExpanded={expandedCards.fitness && !isGenerating}
           onToggle={() => toggleCard('fitness')}
         />
-      </motion.div>
+      </div>
 
-      <motion.div variants={cardVariants}>
+      <div className="transition-all duration-200">
         <ModernGoalsCard
           prescribedExercises={config.prescribedExercises}
-          onPrescribedExercisesChange={(value) => updateConfig({ prescribedExercises: value })}
+          onPrescribedExercisesChange={prescribedExercisesChangeHandler}
           isExpanded={expandedCards.goals && !isGenerating}
           onToggle={() => toggleCard('goals')}
         />
-      </motion.div>
+      </div>
 
-      <motion.div variants={cardVariants}>
+      <div className="transition-all duration-200">
         <ModernInjuriesCard
           injuries={config.injuries}
-          onInjuriesChange={(value) => updateConfig({ injuries: value })}
+          onInjuriesChange={injuriesChangeHandler}
           isExpanded={expandedCards.injuries && !isGenerating}
           onToggle={() => toggleCard('injuries')}
         />
-      </motion.div>
+      </div>
 
-      <motion.div variants={cardVariants}>
+      <div className="transition-all duration-200">
         <ModernEquipmentCard
           selectedExercises={config.selectedExercises}
           onExerciseSelect={handleExerciseSelection}
           isExpanded={expandedCards.equipment && !isGenerating}
           onToggle={() => toggleCard('equipment')}
         />
-      </motion.div>
+      </div>
 
-      <motion.div variants={cardVariants}>
+      <div className="transition-all duration-200">
         <ModernWeatherCard
           weatherData={weatherData || config.weatherData}
-          onWeatherUpdate={(data, prompt) => {
-            handleWeatherUpdate(data, prompt);
-            updateConfig({ weatherData: data, weatherPrompt: prompt });
-          }}
+          onWeatherUpdate={handleWeatherUpdateCallback}
           numberOfDays={numberOfDays}
           isExpanded={expandedCards.weather && !isGenerating}
           onToggle={() => toggleCard('weather')}
         />
-      </motion.div>
+      </div>
 
       {/* Configuration Summary */}
-      <AnimatePresence>
-        {!isGenerating && (
-          <motion.div
-            key="config-summary"
-            variants={cardVariants}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            <ConfigurationSummary
-              numberOfDays={numberOfDays}
-              numberOfCycles={numberOfCycles}
-              fitnessLevel={config.fitnessLevel}
-              selectedExercises={config.selectedExercises}
-              prescribedExercises={config.prescribedExercises}
-              injuries={config.injuries}
-              weatherData={weatherData || config.weatherData}
-              maxHeight="30vh"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {!isGenerating && (
+        <div className="animate-in fade-in duration-200">
+          <ConfigurationSummary
+            numberOfDays={numberOfDays}
+            numberOfCycles={numberOfCycles}
+            fitnessLevel={config.fitnessLevel}
+            selectedExercises={config.selectedExercises}
+            prescribedExercises={config.prescribedExercises}
+            injuries={config.injuries}
+            weatherData={weatherData || config.weatherData}
+            maxHeight="30vh"
+          />
+        </div>
+      )}
+    </div>
   );
 };
+
+// Memoize the entire component to prevent unnecessary re-renders
+export const ModernInputContainer = memo(ModernInputContainerComponent);

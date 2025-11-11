@@ -103,9 +103,44 @@
 
 ---
 
-## 6. Next Steps
-1. Confirm answers to open questions (especially SDK choice and whether we can remove `mobile/epic-memory-system` entirely post-merge).
-2. Execute Phase 1 inventory scripts and produce a file map (can be added to this document’s appendix).
-3. Begin Phase 2 with navigation + config merge, followed by services.
+## 6. Progress Tracking
+
+### Phase 1: Inventory & Preparation ✅ **COMPLETE**
+- [x] 1.1 Snapshot branch created: `mobile-pre-epic-refactor`
+- [x] 1.2 Dependency audit complete (see `PHASE1_INVENTORY.md`)
+- [x] 1.3 Unique file identification complete
+- [x] 1.4 Detailed inventory documented in `docs/PHASE1_INVENTORY.md`
+
+**Key Findings:**
+- Root mobile already at target Expo 54 / RN 0.81.5 ✅
+- Identified 7 unique services in epic repos requiring evaluation
+- epic-pose-analysis has comprehensive testing infrastructure to port
+- Most screens are duplicates; root is canonical
+
+### Phase 2: Code Consolidation ⏸️ **PENDING**
+- [ ] 2.1 Review and merge valuable epic services
+- [ ] 2.2 Compare navigation structures
+- [ ] 2.3 Identify UI component improvements
+- [ ] 2.4 Integrate testing infrastructure from epic-pose-analysis
+- [ ] 2.5 Config merge (emulator toggles, env flags)
+
+### Phase 3: Cleanup 🔜 **FUTURE**
+- [ ] 3.1 Delete `mobile/epic-memory-system/`
+- [ ] 3.2 Delete `mobile/epic-pose-analysis/`
+- [ ] 3.3 Update documentation
+- [ ] 3.4 CI/Build verification
+
+### Phase 4: Validation 🔜 **FUTURE**
+- [ ] 4.1 Functional smoke tests
+- [ ] 4.2 Performance validation
+- [ ] 4.3 Regression testing
+
+---
+
+## 7. Next Steps
+1. ~~Execute Phase 1 inventory~~ ✅ **COMPLETE** - See `docs/PHASE1_INVENTORY.md`
+2. **Code review epic services** identified in inventory (Priority 3 items)
+3. **Begin Phase 2** with service consolidation and testing infrastructure migration
+4. Confirm answers to remaining open questions (§5)
 
 Once merged, Strength.Design will have a single, faster mobile app that combines the epic UX with our advanced AI/pose capabilities, simplifying maintenance and deployment.***

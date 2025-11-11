@@ -1,1 +1,0 @@
-export { checkSubscription } from "./checkSubscription";

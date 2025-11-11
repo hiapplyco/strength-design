@@ -1,6 +1,0 @@
-
-# A string specifying the project ref.
-project_id = "ulnsvkrrdcmfiguibkpx"
-
-[global.env]
-GEMINI_API_KEY = "project/secret/gemini-api-key"

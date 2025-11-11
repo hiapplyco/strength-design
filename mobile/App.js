@@ -14,6 +14,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { auth } from './firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 
+// Performance monitoring
+import performanceMonitor from './services/performanceMonitor';
+import backgroundQueue from './services/backgroundQueue';
+
 // Import Screens
 import HomeScreen from './screens/HomeScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -123,6 +127,23 @@ function RootStack() {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
+    // Initialize performance monitoring and background queue
+    const initializeServices = async () => {
+      try {
+        console.log('Initializing performance monitoring...');
+        await performanceMonitor.initialize();
+
+        console.log('Initializing background queue...');
+        await backgroundQueue.initialize();
+
+        console.log('Services initialized successfully');
+      } catch (error) {
+        console.error('Service initialization failed:', error);
+      }
+    };
+
+    initializeServices();
+
     // Listen to auth state changes
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);

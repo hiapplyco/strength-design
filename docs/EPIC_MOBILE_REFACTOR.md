@@ -150,7 +150,15 @@
   - [x] Create __mocks__ directory with fileMock.js and styleMock.js
   - [x] Add testing dependencies to package.json (jest, @testing-library, jest-expo)
   - [x] Add test scripts (test, test:watch, test:coverage, test:ci)
-- [ ] 2.6 Config merge (emulator toggles, env flags)
+- [x] 2.6 Firebase emulator configuration
+  - [x] Add emulator connection imports to firebaseConfig.js
+  - [x] Add EXPO_PUBLIC_USE_FIREBASE_EMULATORS environment variable
+  - [x] Add EXPO_PUBLIC_EMULATOR_HOST environment variable (optional override)
+  - [x] Implement platform-specific emulator host defaults (localhost for iOS/web, 10.0.2.2 for Android)
+  - [x] Add emulator connection logic for all services (Auth, Firestore, Functions, Storage)
+  - [x] Add try-catch blocks for re-connection error handling
+  - [x] Update .env.example with emulator configuration
+  - [x] Maintain env-based configuration (no hardcoded credentials)
 
 **Phase 2.1 Complete**: Migrated 5 P0 services (3,206 lines of enterprise-grade code)
 
@@ -183,6 +191,17 @@
 - **Package Updates**: Added 7 test dependencies (jest, @testing-library, jest-expo, react-test-renderer)
 - **Test Scripts**: test, test:watch, test:coverage, test:ci
 - **Ready for**: Comprehensive unit and integration testing with 70% coverage enforcement
+
+**Phase 2.6 Complete**: Firebase emulator configuration
+- **Emulator Support**: Added Firebase emulator connection logic from epic repos
+- **Environment Variables**: EXPO_PUBLIC_USE_FIREBASE_EMULATORS (enable/disable), EXPO_PUBLIC_EMULATOR_HOST (optional override)
+- **Platform-Specific Defaults**: localhost (iOS/web), 10.0.2.2 (Android emulator)
+- **All Services Supported**: Auth (port 9099), Firestore (8080), Functions (5001), Storage (9199)
+- **Error Handling**: Try-catch blocks prevent re-connection errors, graceful fallbacks
+- **Security**: Maintained env-based config (no hardcoded credentials unlike epic repos)
+- **Developer Experience**: Simple toggle for local development, detailed logging with [EMULATOR] prefix
+- **Files Modified**: mobile/firebaseConfig.js (+70 lines), mobile/.env.example (+6 lines)
+- **Ready for**: Local development with Firebase emulators, faster iteration without cloud costs
 
 ### Phase 3: Cleanup 🔜 **FUTURE**
 - [ ] 3.1 Delete `mobile/epic-memory-system/`

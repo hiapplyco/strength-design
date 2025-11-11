@@ -9,7 +9,7 @@ This single document replaces the previous documentation tree. It captures the a
 | Area | Status | Notes |
 |------|--------|-------|
 | **Web App (`/src`)** | ✅ Production | React 19 + Vite, Firebase v9 modular SDK, Plausible analytics hooks, Stripe checkout |
-| **Mobile App (`/mobile`)** | 🚀 Feature-complete, pre-store | Expo SDK 53 / React Native 0.79, glassmorphism UI, offline caches, Gemini-powered chat/workouts |
+| **Mobile App (`/mobile`)** | 🚀 Feature-complete, pre-store | Expo SDK 54 / React Native 0.81.5, glassmorphism UI, offline caches, Gemini-powered chat/workouts |
 | **Cloud Functions (`/functions`)** | ✅ Live | Node 20 runtime, Gemini 2.5 Flash endpoints, Perplexity-backed search, Stripe + notifications scaffolding |
 | **Knowledge Pipeline (`/knowledge-pipeline`)** | ✅ Ready | TypeScript ingestor feeding Firestore knowledge collection with Gemini summarization |
 | **Shared Assets** | ✅ Stable | `comprehensive-exercises.csv`, `packages/muscle-anatomy-tools` scripts, Tailwind tokens in `components.json` |
@@ -173,7 +173,7 @@ expo start --dev-client
 ## 9. Known Gaps & Action Items
 ### P0 (Block Release)
 1. **Gemini model ID mismatch** across `mobile/services/*` and `functions/src/ai/*`.
-2. **Bundle identifier + store assets** updates (`app.json`, icons, splash).
+2. ~~**Bundle identifier** updates (`app.json`)~~ ✅ **COMPLETE** - Set to `com.strengthdesign.app`. Still need: icons, splash assets.
 3. **Robust error boundaries + crash reporting** wrappers for high-risk screens.
 
 ### P1 (Pre-launch polish)

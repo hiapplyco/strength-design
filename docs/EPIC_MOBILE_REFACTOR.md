@@ -14,18 +14,19 @@
 ---
 
 ## 2. Current Landscape
-| Area | `mobile/` (existing) | `mobile/epic-memory-system/mobile` |
-|------|---------------------|------------------------------------|
-| **Expo / RN** | Expo 54.0.0, RN 0.81.5 | Expo 53.x, RN 0.79.5 |
-| **Firebase config** | Env-driven (`firebaseConfig.js`), AsyncStorage persistence | Hard-coded prod keys + optional emulator toggles |
-| **Services** | Full suite: AI, pose, context, nutrition, knowledge, etc. | Subset (search, workout, health) |
-| **Navigation** | Tab + stack linking pose + AI screens | Epic UX flows, but older service bindings |
-| **Docs / assets** | Root-level docs, assets | Entire nested repo (functions, packages, docs, etc.) |
+| Area | `mobile/` (existing) | `mobile/epic-memory-system/mobile` | `mobile/epic-pose-analysis/mobile` |
+|------|---------------------|------------------------------------|------------------------------------|
+| **Expo / RN** | Expo 54.0.0, RN 0.81.5 | Expo 53.x, RN 0.79.5 | Expo 53.x, RN 0.79.5 |
+| **Firebase config** | Env-driven (`firebaseConfig.js`), AsyncStorage persistence | Hard-coded prod keys + optional emulator toggles | Similar to epic-memory-system |
+| **Services** | Full suite: AI, pose, context, nutrition, knowledge, etc. | Subset (search, workout, health) | Pose-focused services |
+| **Navigation** | Tab + stack linking pose + AI screens | Epic UX flows, but older service bindings | Pose analysis screens |
+| **Docs / assets** | Root-level docs, assets | Entire nested repo (functions, packages, docs, etc.) | Entire nested repo |
 
 **Risks if left as-is**:
-- Duplicate dependencies (`npm install` runs twice), conflicting Firebase configs, mismatched Expo SDKs.
-- High maintenance cost (two copies of services/functions).
-- Builds may break because the root project references files not present in the epic sub-tree or vice versa.
+- Duplicate dependencies (`npm install` runs 3x), conflicting Firebase configs, mismatched Expo SDKs.
+- High maintenance cost (three copies of services/functions/docs).
+- Builds may break because the root project references files not present in the nested repos or vice versa.
+- Confusion about which pose analysis implementation is canonical (root vs epic-pose-analysis).
 
 ---
 
@@ -67,8 +68,9 @@
    - Deduplicate `comprehensive-exercises.csv` / `wr kout-exercises` files, referencing one copy in services.
 
 ### Phase 3 — Cleanup
-1. **Delete nested repo**:
-   - Remove `mobile/epic-memory-system` after confirming all needed files/scripts/docs have been absorbed or superseded.
+1. **Delete nested repos**:
+   - Remove `mobile/epic-memory-system` after confirming all needed UX/navigation files have been absorbed.
+   - Remove `mobile/epic-pose-analysis` after confirming pose services are consolidated into root `mobile/services/poseDetection/*`.
 2. **Docs**:
    - Capture any valuable findings from epic docs (e.g., `GLASSMORPHISM_SETUP.md`) as appendices or references inside `docs/MOBILE_DEPLOYMENT_PLAYBOOK.md`.
 3. **Scripts**:
@@ -94,9 +96,10 @@
 ---
 
 ## 5. Open Questions
-1. **Expo SDK**: Proceed with Expo 54 / RN 0.81 as target? (Default assumption is yes.)
-2. **Firebase Functions / packages**: Any modules unique to `epic-memory-system/functions` that still need migration, or is the repo root authoritative?
+1. ~~**Expo SDK**: Proceed with Expo 54 / RN 0.81 as target?~~ ✅ **RESOLVED** - Root mobile already upgraded to Expo 54 / RN 0.81.5.
+2. **Firebase Functions / packages**: Any modules unique to `epic-memory-system/functions` or `epic-pose-analysis/functions` that still need migration, or is the repo root authoritative?
 3. **Remaining doc assets**: Should any epic docs stay verbatim, or will summaries inside the deployment playbook suffice?
+4. **epic-pose-analysis status**: Is this a separate experimental branch, or should it be merged into the root pose implementation? Clarify relationship to `mobile/services/poseDetection/*`.
 
 ---
 

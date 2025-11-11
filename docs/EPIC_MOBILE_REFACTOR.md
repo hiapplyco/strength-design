@@ -142,7 +142,14 @@
   - [x] Add navigation tracking (onReady, onStateChange with getCurrentRouteName)
   - [x] Create CustomNeonTabBar with per-tab glow effects (260 lines)
   - [x] Integrate neon tab bar into React Navigation (reduced App.js by 37 lines)
-- [ ] 2.5 Integrate testing infrastructure from epic-pose-analysis
+- [x] 2.5 Testing infrastructure and model standardization
+  - [x] Update all Gemini models to gemini-2.5-flash (4 files updated)
+  - [x] Enhance jest.config.js with comprehensive coverage thresholds
+  - [x] Expand jest.setup.js with Firebase, Expo, Navigation mocks
+  - [x] Add global test utility functions (createMockVideoUri, createMockAnalysisResult, etc.)
+  - [x] Create __mocks__ directory with fileMock.js and styleMock.js
+  - [x] Add testing dependencies to package.json (jest, @testing-library, jest-expo)
+  - [x] Add test scripts (test, test:watch, test:coverage, test:ci)
 - [ ] 2.6 Config merge (emulator toggles, env flags)
 
 **Phase 2.1 Complete**: Migrated 5 P0 services (3,206 lines of enterprise-grade code)
@@ -165,6 +172,17 @@
 - Special rainbow gradient for Generator tab (brand identity)
 - Files: 3 new components (1,094 lines), App.js simplified (-37 lines)
 - Commits: 6843631 (loader), 4974129 (neon tabs)
+
+**Phase 2.5 Complete**: Testing infrastructure and model standardization
+- **Model Updates**: All gemini-2.0-flash, gemini-1.5-pro, gemini-2.0-pro-vision → gemini-2.5-flash
+- **Fixed Typo**: gemini-2.5-flashflash → gemini-2.5-flash (gradiocoach.py)
+- **Files Updated**: gradiocoach.py, agents/schswrestling-main/{app.py, optimized_app.py, wrestling_analyzer.py}
+- **Testing Infrastructure**: Enhanced jest.config.js with 70% coverage thresholds, jest-expo preset
+- **Mock Enhancements**: Added Firebase (Firestore, Auth, Storage), expo-device, expo-battery, React Navigation, Lucide icons
+- **Test Utilities**: createMockVideoUri, createMockAnalysisResult, createMockUserProgress
+- **Package Updates**: Added 7 test dependencies (jest, @testing-library, jest-expo, react-test-renderer)
+- **Test Scripts**: test, test:watch, test:coverage, test:ci
+- **Ready for**: Comprehensive unit and integration testing with 70% coverage enforcement
 
 ### Phase 3: Cleanup 🔜 **FUTURE**
 - [ ] 3.1 Delete `mobile/epic-memory-system/`

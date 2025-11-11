@@ -1,35 +1,72 @@
 module.exports = {
-  preset: 'react-native',
+  preset: 'jest-expo',
+
+  // Test environment
+  testEnvironment: 'node',
+
+  // Setup files
   setupFilesAfterEnv: [
+    '@testing-library/jest-native/extend-expect',
     '<rootDir>/jest.setup.js'
   ],
-  testMatch: [
-    '**/__tests__/**/*.(js|jsx|ts|tsx)',
-    '**/*.(test|spec).(js|jsx|ts|tsx)'
-  ],
-  transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
-  },
+
+  // Module paths
+  moduleDirectories: ['node_modules', '<rootDir>'],
+
+  // Transform files
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|expo|@expo|@react-navigation|@react-native-ml-kit|react-native-reanimated|react-native-gesture-handler)/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|lucide-react-native)'
   ],
-  coverageDirectory: 'coverage',
+
+  // Coverage configuration
   collectCoverageFrom: [
-    'services/poseDetection/**/*.{js,jsx,ts,tsx}',
-    'components/PoseAnalysis/**/*.{js,jsx,ts,tsx}',
-    'screens/*PoseAnalysis*.{js,jsx,ts,tsx}',
-    '!**/*.d.ts',
-    '!**/node_modules/**',
+    '**/*.{js,jsx,ts,tsx}',
     '!**/coverage/**',
+    '!**/node_modules/**',
+    '!**/babel.config.js',
+    '!**/jest.setup.js',
+    '!**/jest.config.js',
+    '!**/.expo/**',
+    '!**/index.js',
+    '!**/*.test.{js,jsx,ts,tsx}',
+    '!**/__tests__/**',
+    '!**/e2e/**'
   ],
-  moduleNameMapping: {
+
+  coverageThresholds: {
+    global: {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70
+    }
+  },
+
+  // Test match patterns
+  testMatch: [
+    '**/__tests__/**/*.(test|spec).(js|jsx|ts|tsx)',
+    '**/*.test.(js|jsx|ts|tsx)',
+    '**/*.spec.(js|jsx|ts|tsx)'
+  ],
+
+  // Module name mapper for static assets
+  moduleNameMapper: {
+    '\\.(jpg|jpeg|png|gif|svg)$': '<rootDir>/__mocks__/fileMock.js',
+    '\\.(css|less)$': '<rootDir>/__mocks__/styleMock.js',
     '^@/(.*)$': '<rootDir>/$1',
   },
-  testEnvironment: 'node',
+
+  // Test timeout
+  testTimeout: 30000,
+
+  // Globals
   globals: {
     __DEV__: true,
   },
+
   // Pose analysis specific configuration
-  testTimeout: 30000, // 30 seconds for video processing tests
   maxWorkers: 2, // Limit workers for memory-intensive pose analysis tests
+
+  // Verbose output
+  verbose: true
 };

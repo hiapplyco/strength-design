@@ -37,7 +37,7 @@ logging.basicConfig(
 logger = logging.getLogger("wrestling_analyzer")
 
 # Constants
-GEMINI_MODEL_ID = "gemini-2.0-flash"
+GEMINI_MODEL_ID = "gemini-2.5-flash"
 DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Default ElevenLabs voice ID
 MAX_VIDEO_PROCESSING_TIME = 180  # seconds
 MAX_VIDEO_SIZE_MB = 50  # Maximum video size in MB
@@ -586,7 +586,7 @@ def initialize_app():
             genai.configure(api_key=api_key_google)
             
             # Test the API connection
-            test_model = genai.GenerativeModel("gemini-1.5-pro")
+            test_model = genai.GenerativeModel("gemini-2.5-flash")
             test_response = test_model.generate_content("Test connection")
             
             if test_response and hasattr(test_response, 'text'):

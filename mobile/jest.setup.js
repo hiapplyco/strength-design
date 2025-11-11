@@ -122,7 +122,41 @@ jest.mock('react-native-fs', () => ({
 // Mock Firebase for pose analysis
 jest.mock('firebase/app', () => ({
   initializeApp: jest.fn().mockReturnValue({}),
+  getApp: jest.fn(),
   getApps: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('firebase/firestore', () => ({
+  getFirestore: jest.fn(),
+  collection: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn(),
+  getDocs: jest.fn(),
+  setDoc: jest.fn(),
+  updateDoc: jest.fn(),
+  deleteDoc: jest.fn(),
+  query: jest.fn(),
+  where: jest.fn(),
+  orderBy: jest.fn(),
+  limit: jest.fn(),
+  addDoc: jest.fn(),
+  onSnapshot: jest.fn(),
+}));
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  onAuthStateChanged: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+  createUserWithEmailAndPassword: jest.fn(),
+}));
+
+jest.mock('firebase/storage', () => ({
+  getStorage: jest.fn(),
+  ref: jest.fn(),
+  uploadBytesResumable: jest.fn(),
+  getDownloadURL: jest.fn(),
+  deleteObject: jest.fn(),
 }));
 
 jest.mock('firebase/functions', () => ({
@@ -140,6 +174,56 @@ jest.mock('firebase/functions', () => ({
     })
   ),
 }));
+
+// Mock Expo Device
+jest.mock('expo-device', () => ({
+  modelName: 'iPhone 13',
+  osName: 'iOS',
+  osVersion: '17.0',
+  totalMemory: 4294967296, // 4GB
+  deviceYearClass: 2021,
+}));
+
+// Mock Expo Battery
+jest.mock('expo-battery', () => ({
+  getBatteryLevelAsync: jest.fn(() => Promise.resolve(0.8)),
+  getBatteryStateAsync: jest.fn(() => Promise.resolve(2)), // CHARGING
+  addBatteryLevelListener: jest.fn(() => ({ remove: jest.fn() })),
+  addBatteryStateListener: jest.fn(() => ({ remove: jest.fn() })),
+  BatteryState: {
+    UNKNOWN: 0,
+    UNPLUGGED: 1,
+    CHARGING: 2,
+    FULL: 3,
+  },
+}));
+
+// Mock React Navigation
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useNavigation: () => ({
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+    setOptions: jest.fn(),
+    addListener: jest.fn(() => jest.fn()),
+  }),
+  useRoute: () => ({
+    params: {},
+  }),
+  useFocusEffect: jest.fn(),
+}));
+
+// Mock Lucide icons
+jest.mock('lucide-react-native', () => {
+  const React = require('react');
+  return new Proxy({}, {
+    get: (target, prop) => {
+      return React.forwardRef((props, ref) =>
+        React.createElement('View', { ...props, ref })
+      );
+    }
+  });
+});
 
 // Mock React Native Reanimated for pose analysis animations
 jest.mock('react-native-reanimated', () => {
@@ -190,6 +274,40 @@ global.mockPoseLandmarks = Array.from({ length: 33 }, (_, i) => ({
   z: Math.random() * 0.1,
   inFrameLikelihood: 0.8 + Math.random() * 0.2
 }));
+
+// Helper functions for creating test fixtures
+global.createMockVideoUri = (duration = 60) => {
+  return `file:///mock/test-video-${duration}s.mp4`;
+};
+
+global.createMockAnalysisResult = (exerciseType = 'squat', score = 85) => {
+  return {
+    id: 'test-analysis-123',
+    exerciseType,
+    score,
+    feedback: [
+      { id: '1', type: 'correction', severity: 'medium', message: 'Depth could be improved' },
+      { id: '2', type: 'positive', severity: 'low', message: 'Good knee tracking' }
+    ],
+    landmarks: [],
+    timestamp: new Date().toISOString(),
+    processingTimeMs: 25000,
+    success: true
+  };
+};
+
+global.createMockUserProgress = (analysisCount = 5) => {
+  return {
+    totalAnalyses: analysisCount,
+    averageScore: 82,
+    improvements: [
+      { exercise: 'squat', startScore: 70, currentScore: 85, improvement: 15 }
+    ],
+    achievements: [
+      { id: 'first_analysis', name: 'First Steps', unlockedAt: new Date().toISOString() }
+    ]
+  };
+};
 
 // Performance testing utilities
 global.performance = {

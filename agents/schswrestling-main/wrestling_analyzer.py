@@ -145,7 +145,7 @@ if 'processing_cancelled' not in st.session_state:
 # Initialize Gemini model
 @st.cache_resource
 def get_gemini_model():
-    return genai.GenerativeModel('gemini-2.0-pro-vision')
+    return genai.GenerativeModel('gemini-2.5-flash')
 
 # Function to create enhanced analysis prompt
 def create_analysis_prompt(user_query):

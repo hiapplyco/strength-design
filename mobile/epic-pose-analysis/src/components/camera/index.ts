@@ -1,2 +1,0 @@
-
-export { CameraCapture } from './CameraCapture';

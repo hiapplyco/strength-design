@@ -76,7 +76,7 @@ except ImportError:
     logging.error("Ensure 'google-api-core' library is installed.")
 
 # --- Configuration ---
-GEMINI_MODEL_NAME = "gemini-2.5-flashflash"
+GEMINI_MODEL_NAME = "gemini-2.5-flash"
 REQUEST_TIMEOUT = 900
 
 RESULTS_DIR = "analysis_results"

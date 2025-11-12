@@ -18,7 +18,7 @@ except ImportError:
     pass
 
 # Constants
-GEMINI_MODEL_ID = "gemini-2.0-flash"
+GEMINI_MODEL_ID = "gemini-2.5-flash"
 DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"  # Default ElevenLabs voice ID
 MAX_VIDEO_PROCESSING_TIME = 180  # seconds
 SAGE_CREEK_LOGO = "https://files.smartsites.parentsquare.com/3483/design_img__ljsgi1.png"

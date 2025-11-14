@@ -72,17 +72,16 @@ export default function CleanExerciseLibraryScreen({ navigation }) {
     searchSuggestions,
     showSuggestions,
     recentSearches,
-    popularSearches,
-    activeFilters,
-    activeFilterCount,
-    updateSearchQuery,
-    updateFilters,
-    addFilter,
-    removeFilter,
-    clearAllFilters,
+    selectedCategory,
+    selectedEquipment,
+    sortOption,
+    setSearchQuery,
+    handleSearch,
     clearSearch,
-    selectSuggestion,
-    applyPreset,
+    handleSuggestionSelect,
+    setSelectedCategory,
+    setSelectedEquipment,
+    setSortOption,
     setShowSuggestions
   } = useExerciseSearch();
 
@@ -157,19 +156,21 @@ export default function CleanExerciseLibraryScreen({ navigation }) {
 
   // Handle search input changes
   const handleSearchInputChange = (text) => {
-    updateSearchQuery(text);
+    setSearchQuery(text);
     setShowSuggestions(text.length > 0);
   };
 
-  // Handle suggestion selection
-  const handleSuggestionSelect = (suggestion) => {
-    selectSuggestion(suggestion);
+  // Handle suggestion selection from list
+  const handleSuggestionPress = (suggestion) => {
+    handleSuggestionSelect(suggestion);
     setShowSuggestions(false);
   };
 
   // Handle filter changes
   const handleFiltersChange = (newFilters) => {
-    updateFilters(newFilters);
+    if (newFilters.category) setSelectedCategory(newFilters.category);
+    if (newFilters.equipment) setSelectedEquipment(newFilters.equipment);
+    if (newFilters.sort) setSortOption(newFilters.sort);
   };
 
   // Clear recent searches
@@ -298,7 +299,7 @@ export default function CleanExerciseLibraryScreen({ navigation }) {
         <SearchSuggestions
           suggestions={searchSuggestions}
           recentSearches={recentSearches}
-          popularSearches={popularSearches}
+          popularSearches={[]}
           isVisible={showSuggestions}
           searchQuery={searchQuery}
           onSuggestionSelect={handleSuggestionSelect}
@@ -307,13 +308,22 @@ export default function CleanExerciseLibraryScreen({ navigation }) {
       </View>
 
       {/* Enhanced Filters */}
-      <SearchFilters
-        activeFilters={activeFilters}
-        onFiltersChange={handleFiltersChange}
-        onClearAll={clearAllFilters}
-        isVisible={showFilters}
-        onToggleVisibility={() => setShowFilters(!showFilters)}
-      />
+      {showFilters && (
+        <SearchFilters
+          selectedCategory={selectedCategory}
+          selectedEquipment={selectedEquipment}
+          sortOption={sortOption}
+          onCategorySelect={setSelectedCategory}
+          onEquipmentSelect={setSelectedEquipment}
+          onSortChange={setSortOption}
+          onClearFilters={() => {
+            setSelectedCategory(null);
+            setSelectedEquipment(null);
+            setSortOption('relevance');
+          }}
+          hasActiveFilters={!!(selectedCategory || selectedEquipment || sortOption !== 'relevance')}
+        />
+      )}
 
       {/* Main Content */}
       {error ? (
@@ -321,12 +331,11 @@ export default function CleanExerciseLibraryScreen({ navigation }) {
           <Ionicons name="alert-circle-outline" size={64} color="#FF6B35" />
           <Text style={styles.errorTitle}>Oops! Something went wrong</Text>
           <Text style={styles.errorMessage}>{error}</Text>
-          <TouchableOpacity 
-            style={styles.retryButton} 
+          <TouchableOpacity
+            style={styles.retryButton}
             onPress={() => {
-              // Reload the screen by clearing error and triggering search
-              updateSearchQuery(searchQuery || 'test');
-              setTimeout(() => updateSearchQuery(searchQuery), 100);
+              // Reload the screen by triggering search
+              handleSearch(searchQuery || '');
             }}
           >
             <LinearGradient

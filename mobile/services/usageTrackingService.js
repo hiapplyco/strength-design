@@ -13,7 +13,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth, db } from '../config/firebase';
+import { auth, db } from '../firebaseConfig';
 import { 
   collection, 
   doc,

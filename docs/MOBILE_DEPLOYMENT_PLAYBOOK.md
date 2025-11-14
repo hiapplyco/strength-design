@@ -211,7 +211,7 @@ expo start --dev-client
 | AI Chat (mobile) | `mobile/screens/ContextAwareGeneratorScreen.js`, `mobile/services/aiService.js` |
 | Exercise Search | `mobile/screens/UnifiedSearchScreen.js`, `mobile/services/searchService.js`, `src/lib/services/exerciseSearchService.ts` |
 | Workout Generation | `mobile/services/WorkoutService.js`, `functions/src/ai/generateWorkout.ts`, `src/pages/WorkoutGenerator.tsx` |
-| Pose Analysis | `mobile/screens/PoseAnalysis*.js`, `mobile/services/poseDetection/PoseAnalysisService.ts`, `functions/src/pose/formContextBuilder.ts` |
+| Pose Analysis | `mobile/screens/PoseAnalysis*.js`, `mobile/screens/PoseAnalysisLiveScreen.js`, `mobile/services/poseDetection/PoseAnalysisService.ts`, `mobile/services/geminiLiveStreamService.js`, `functions/src/pose/formContextBuilder.ts` |
 | Nutrition | `mobile/services/NutritionService.js`, `src/pages/NutritionDiary.tsx` |
 | Health Integration | `mobile/services/healthService.js`, `mobile/services/progressDataAggregator.js` |
 | Knowledge Search | `mobile/services/KnowledgeService.js`, `functions/src/knowledge/*`, `knowledge-pipeline/src/fitness-ingestor.ts` |

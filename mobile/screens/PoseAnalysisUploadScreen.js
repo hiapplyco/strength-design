@@ -89,7 +89,21 @@ const AVAILABLE_EXERCISES = [
 ];
 
 export default function PoseAnalysisUploadScreen({ navigation, route }) {
-  const { theme, isDarkMode } = useTheme();
+  const themeContext = useTheme();
+  const { colors: themeColors, isDarkMode } = themeContext;
+
+  // Defensive: ensure colors are available
+  const theme = themeColors || {
+    primary: '#FF6B35',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    textTertiary: '#6E6E73',
+    surface: '#1C1C1E',
+    border: '#38383A',
+    success: '#34C759',
+    error: '#DC2626',
+  };
+
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [videoUri, setVideoUri] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -541,6 +555,59 @@ export default function PoseAnalysisUploadScreen({ navigation, route }) {
             />
           </GlassContainer>
 
+          {/* Live Analysis (Gemini) */}
+          <GlassContainer
+            variant="medium"
+            style={styles.sectionContainer}
+            accessibilityLabel="Live analysis with Gemini"
+          >
+            <View style={styles.liveHeader}>
+              <View style={styles.liveBadge}>
+                <Ionicons name="radio" size={16} color="#FFFFFF" />
+                <Text style={styles.liveBadgeText}>LIVE BETA</Text>
+              </View>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                Gemini Live Analysis
+              </Text>
+            </View>
+            <Text style={[styles.sectionSubtitle, { color: theme.textSecondary }]}>
+              Stream directly to Gemini 2.5 Flash for instant coaching cues. Works
+              best with a tripod and bright lighting.
+            </Text>
+
+            <GlassButton
+              onPress={() =>
+                navigation.navigate('PoseAnalysisLive', {
+                  exerciseType: selectedExercise?.type,
+                  exerciseName: selectedExercise?.name,
+                })
+              }
+              disabled={!selectedExercise}
+              style={[
+                styles.liveButton,
+                !selectedExercise && styles.liveButtonDisabled,
+              ]}
+            >
+              <View style={styles.liveButtonContent}>
+                <Ionicons
+                  name="flash-outline"
+                  size={20}
+                  color={selectedExercise ? '#FFFFFF' : theme.textTertiary}
+                />
+                <Text
+                  style={[
+                    styles.liveButtonText,
+                    {
+                      color: selectedExercise ? '#FFFFFF' : theme.textTertiary,
+                    },
+                  ]}
+                >
+                  Go Live with Gemini
+                </Text>
+              </View>
+            </GlassButton>
+          </GlassContainer>
+
           {/* Analysis Tips */}
           <GlassContainer variant="subtle" style={styles.tipsContainer}>
             <View style={styles.tipsHeader}>
@@ -758,6 +825,45 @@ const styles = StyleSheet.create({
   tip: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  liveHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  liveBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  liveButton: {
+    marginTop: 16,
+    borderRadius: 20,
+    paddingVertical: 14,
+  },
+  liveButtonDisabled: {
+    opacity: 0.5,
+  },
+  liveButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  liveButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
   },
   bottomSection: {
     position: 'absolute',

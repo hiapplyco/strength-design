@@ -131,10 +131,10 @@ export default function RealAIWorkoutGenerator({ navigation }) {
       setMessages([{ role: 'assistant', content: fullResponse }]);
       
     } catch (error) {
-      console.error('Initialization error:', error);
-      setMessages([{ 
-        role: 'assistant', 
-        content: "Welcome! I'm your AI fitness coach. Let's create your perfect workout plan. First, could you tell me about your current fitness level and any exercise experience you have?" 
+      console.warn('Initialization failed (using fallback):', error.message || error);
+      setMessages([{
+        role: 'assistant',
+        content: "Welcome! I'm your AI fitness coach. Let's create your perfect workout plan. First, could you tell me about your current fitness level and any exercise experience you have?"
       }]);
     } finally {
       setIsInitializing(false);
@@ -265,10 +265,10 @@ Please continue the conversation as a fitness coach. If you have enough informat
       setMessages(prev => [...prev, { role: 'assistant', content: fullResponse }]);
       
     } catch (error) {
-      console.error('Chat error:', error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: '❌ Sorry, I encountered an error. Please try again.' 
+      console.warn('Chat error (non-critical):', error.message || error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '❌ Sorry, I encountered an error. Please try again.'
       }]);
     } finally {
       setIsStreaming(false);
@@ -368,7 +368,7 @@ Format the response as a detailed, actionable workout program.`;
       );
 
     } catch (error) {
-      console.error('Generation error:', error);
+      console.warn('Workout generation failed:', error.message || error);
       Alert.alert('Error', 'Failed to generate workout. Please try again.');
     } finally {
       setIsGenerating(false);

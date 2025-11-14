@@ -262,11 +262,13 @@ const styles = StyleSheet.create({
   },
   ctaContainer: {
     paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   ctaButton: {
     borderRadius: 25,
     overflow: 'hidden',
     marginBottom: 12,
+    marginHorizontal: 16,
   },
   ctaGradient: {
     flexDirection: 'row',
@@ -279,10 +281,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   ctaText: {
-    color: '#FFF',
+    color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     marginHorizontal: 8,
+    letterSpacing: 0.5,
   },
   ctaHint: {
     fontSize: 13,

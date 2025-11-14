@@ -124,7 +124,9 @@ const PROGRESS_LEVELS = {
 };
 
 export default function TutorialScreen({ navigation, route }) {
-  const { theme, isDarkMode } = useTheme();
+  const themeContext = useTheme();
+  const { colors: themeColors = {} } = themeContext;
+  const theme = themeColors;
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');

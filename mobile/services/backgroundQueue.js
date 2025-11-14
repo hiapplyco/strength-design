@@ -143,7 +143,8 @@ class BackgroundQueue {
 
       console.log('BackgroundQueue: Background task registered');
     } catch (error) {
-      console.error('BackgroundQueue: Failed to register background task', error);
+      // This is expected in Expo Go - background tasks only work in development builds
+      console.warn('BackgroundQueue: Failed to register background task (expected in Expo Go)', error.message);
     }
   }
 

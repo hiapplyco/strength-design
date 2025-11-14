@@ -45,8 +45,17 @@ export default function WorkoutsScreen({ navigation }) {
   const [editedExercises, setEditedExercises] = useState([]);
   const [searchModalVisible, setSearchModalVisible] = useState(false);
   const [contextModalVisible, setContextModalVisible] = useState(false);
-  
+
   const theme = useTheme();
+
+  // Defensive: ensure colors are available
+  const colors = theme?.colors || {
+    primary: '#FF6B35',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    textOnGlass: '#FFFFFF',
+    surface: '#1C1C1E',
+  };
   const neonAnim = useRef(new Animated.Value(0)).current;
   
   useEffect(() => {
@@ -261,7 +270,7 @@ export default function WorkoutsScreen({ navigation }) {
           style={StyleSheet.absoluteFillObject}
         />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.theme.primary} />
+          <ActivityIndicator size="large" color={theme?.colors?.primary || '#FF6B35'} />
         </View>
       </View>
     );
@@ -308,7 +317,7 @@ export default function WorkoutsScreen({ navigation }) {
             </Animated.Text>
             {/* Removed outline - keeping just glow */}
           </View>
-          <Text style={[styles.headerSubtitle, { color: theme.theme.textSecondary }]}>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
             Search for highly technical workout programs and get AI-tailored workouts
           </Text>
           
@@ -342,11 +351,11 @@ export default function WorkoutsScreen({ navigation }) {
         <View style={styles.workoutsContainer}>
           {dailyWorkouts.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="barbell-outline" size={80} color={theme.theme.textSecondary} />
-              <Text style={[styles.emptyTitle, { color: theme.theme.textOnGlass }]}>
+              <Ionicons name="barbell-outline" size={80} color={colors.textSecondary} />
+              <Text style={[styles.emptyTitle, { color: colors.textOnGlass }]}>
                 Ready to Start?
               </Text>
-              <Text style={[styles.emptyText, { color: theme.theme.textSecondary }]}>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 Search for technical programs and we'll create personalized workouts based on your context
               </Text>
             </View>

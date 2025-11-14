@@ -71,7 +71,21 @@ const ANALYSIS_STEPS = [
 ];
 
 export default function PoseAnalysisProcessingScreen({ navigation, route }) {
-  const { theme, isDarkMode } = useTheme();
+  const themeContext = useTheme();
+  const { colors: themeColors, isDarkMode } = themeContext;
+
+  // Defensive: ensure colors are available
+  const theme = themeColors || {
+    primary: '#FF6B35',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    textTertiary: '#6E6E73',
+    surface: '#1C1C1E',
+    border: '#38383A',
+    success: '#34C759',
+    error: '#DC2626',
+  };
+
   const { exerciseType, videoUri, exerciseName } = route.params;
   
   const [currentStep, setCurrentStep] = useState(0);

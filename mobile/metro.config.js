@@ -1,11 +1,18 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
+const { resolve } = require('metro-resolver');
 
 module.exports = (() => {
   const config = getDefaultConfig(__dirname);
   const { serializer } = config;
 
   const originalProcessModuleFilter = serializer?.processModuleFilter;
+  const aliasMap = {
+    'event-target-shim/index': path.resolve(
+      __dirname,
+      'shims/event-target-shim-index.js'
+    ),
+  };
 
   config.serializer = {
     ...serializer,
@@ -33,6 +40,20 @@ module.exports = (() => {
       }
 
       return originalProcessModuleFilter ? originalProcessModuleFilter(module) : true;
+    },
+  };
+
+  config.resolver = {
+    ...config.resolver,
+    resolveRequest(context, moduleName, platform, realModuleName) {
+      const normalizedName = realModuleName || moduleName;
+      if (aliasMap[normalizedName]) {
+        return {
+          type: 'sourceFile',
+          filePath: aliasMap[normalizedName],
+        };
+      }
+      return resolve(context, moduleName, platform, realModuleName);
     },
   };
 

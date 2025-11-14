@@ -81,7 +81,20 @@ const generateMockPoseSequence = (analysisResult) => {
 };
 
 export default function PoseAnalysisResultsScreen({ navigation, route }) {
-  const { theme } = useTheme();
+  const themeContext = useTheme();
+
+  // Defensive: ensure colors are available
+  const theme = themeContext?.colors || {
+    primary: '#FF6B35',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    textTertiary: '#6E6E73',
+    surface: '#1C1C1E',
+    border: '#38383A',
+    success: '#34C759',
+    error: '#DC2626',
+  };
+
   const { analysisResult, exerciseType, exerciseName, videoUri } = route.params;
   
   // State management

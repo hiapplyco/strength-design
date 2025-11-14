@@ -30,6 +30,17 @@ import GlobalContextStatusLine from '../components/GlobalContextStatusLine';
 
 export default function ProfileScreen({ navigation }) {
   const theme = useTheme();
+
+  // Defensive: ensure colors are available
+  const colors = theme?.colors || {
+    primary: '#FF6B35',
+    text: '#FFFFFF',
+    textSecondary: '#8E8E93',
+    surface: '#1C1C1E',
+    border: '#38383A',
+    success: '#34C759',
+  };
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const neonAnim = useRef(new Animated.Value(0)).current;
@@ -682,8 +693,8 @@ export default function ProfileScreen({ navigation }) {
           </View>
             </TouchableOpacity>
             
-            <Text style={[styles.name, { color: theme.theme.text }]}>{userData.displayName || 'User'}</Text>
-            <Text style={[styles.email, { color: theme.theme.textSecondary }]}>{userData.email}</Text>
+            <Text style={[styles.name, { color: colors.text }]}>{userData.displayName || 'User'}</Text>
+            <Text style={[styles.email, { color: colors.textSecondary }]}>{userData.email}</Text>
             
             <TouchableOpacity
               style={styles.editButton}
@@ -859,7 +870,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.sectionDividerText}>HEALTH INTEGRATION</Text>
           <View style={styles.neonLine} />
         </View>
-        <Text style={[styles.sectionTitle, { color: theme.theme.text }]}>Health Integration</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Health Integration</Text>
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
@@ -1020,8 +1031,8 @@ export default function ProfileScreen({ navigation }) {
         {/* Theme Toggle */}
         <View style={styles.settingRowColumn}>
           <View style={styles.settingInfo}>
-            <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Theme</Text>
-            <Text style={[styles.settingDescription, { color: theme.theme.textSecondary }]}>Choose your preferred appearance</Text>
+            <Text style={[styles.settingLabel, { color: colors.text }]}>Theme</Text>
+            <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>Choose your preferred appearance</Text>
           </View>
           <View style={styles.themeSelector}>
             {['light', 'dark', 'system'].map((mode) => (
@@ -1030,12 +1041,12 @@ export default function ProfileScreen({ navigation }) {
                 style={[
                   styles.themeOption,
                   theme.themeMode === mode && styles.themeOptionActive,
-                  { 
-                    backgroundColor: theme.themeMode === mode 
-                      ? theme.theme.primary 
+                  {
+                    backgroundColor: theme.themeMode === mode
+                      ? theme?.colors?.primary || '#FF6B35'
                       : theme.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-                    borderColor: theme.themeMode === mode 
-                      ? theme.theme.primary 
+                    borderColor: theme.themeMode === mode
+                      ? theme?.colors?.primary || '#FF6B35'
                       : theme.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
                   }
                 ]}
@@ -1044,12 +1055,12 @@ export default function ProfileScreen({ navigation }) {
                 <Ionicons 
                   name={mode === 'light' ? 'sunny' : mode === 'dark' ? 'moon' : 'phone-portrait'} 
                   size={16} 
-                  color={theme.themeMode === mode ? '#FFFFFF' : theme.theme.textSecondary} 
+                  color={theme.themeMode === mode ? '#FFFFFF' : colors.textSecondary} 
                 />
                 <Text
                   style={[
                     styles.themeOptionText,
-                    { color: theme.themeMode === mode ? '#FFFFFF' : theme.theme.textSecondary }
+                    { color: theme.themeMode === mode ? '#FFFFFF' : colors.textSecondary }
                   ]}
                 >
                   {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -1061,8 +1072,8 @@ export default function ProfileScreen({ navigation }) {
         
         <View style={styles.settingRowColumn}>
           <View style={styles.settingInfo}>
-            <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Measurement Unit</Text>
-            <Text style={[styles.settingDescription, { color: theme.theme.textSecondary }]}>Choose your preferred measurement system</Text>
+            <Text style={[styles.settingLabel, { color: colors.text }]}>Measurement Unit</Text>
+            <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>Choose your preferred measurement system</Text>
           </View>
           <View style={styles.compactSegmentedControl}>
             {['metric', 'imperial'].map((unit) => (
@@ -1098,8 +1109,8 @@ export default function ProfileScreen({ navigation }) {
         
         <View style={styles.settingRow}>
           <View style={styles.settingInfo}>
-            <Text style={[styles.settingLabel, { color: theme.theme.text }]}>Body Metrics & Goals</Text>
-            <Text style={[styles.settingDescription, { color: theme.theme.textSecondary }]}>
+            <Text style={[styles.settingLabel, { color: colors.text }]}>Body Metrics & Goals</Text>
+            <Text style={[styles.settingDescription, { color: colors.textSecondary }]}>
               Manage your body composition, performance data, and fitness goals
             </Text>
             {Object.keys(biometricData).length > 0 && (
@@ -1118,38 +1129,38 @@ export default function ProfileScreen({ navigation }) {
 
         {Object.keys(biometricData).length > 0 && (
           <View style={styles.biometricSummary}>
-            <Text style={[styles.subSectionTitle, { color: theme.theme.textSecondary }]}>Quick Stats</Text>
+            <Text style={[styles.subSectionTitle, { color: colors.textSecondary }]}>Quick Stats</Text>
             <View style={styles.statsRow}>
               {biometricData.age && (
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.age}</Text>
-                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>Age</Text>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{biometricData.age}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Age</Text>
                 </View>
               )}
               {biometricData.bmi && (
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.bmi}</Text>
-                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>BMI</Text>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{biometricData.bmi}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>BMI</Text>
                 </View>
               )}
               {biometricData.bodyFatPercentage && (
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.bodyFatPercentage}%</Text>
-                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>Body Fat</Text>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{biometricData.bodyFatPercentage}%</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Body Fat</Text>
                 </View>
               )}
               {biometricData.restingHeartRate && (
                 <View style={styles.statItem}>
-                  <Text style={[styles.statValue, { color: theme.theme.text }]}>{biometricData.restingHeartRate}</Text>
-                  <Text style={[styles.statLabel, { color: theme.theme.textSecondary }]}>RHR</Text>
+                  <Text style={[styles.statValue, { color: colors.text }]}>{biometricData.restingHeartRate}</Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>RHR</Text>
                 </View>
               )}
             </View>
             
             {biometricData.fitnessGoals && biometricData.fitnessGoals.length > 0 && (
               <View style={styles.goalsPreview}>
-                <Text style={[styles.goalsLabel, { color: theme.theme.textSecondary }]}>Goals:</Text>
-                <Text style={[styles.goalsText, { color: theme.theme.text }]}>
+                <Text style={[styles.goalsLabel, { color: colors.textSecondary }]}>Goals:</Text>
+                <Text style={[styles.goalsText, { color: colors.text }]}>
                   {biometricData.fitnessGoals.map(goal => goal.replace('_', ' ')).join(', ')}
                 </Text>
               </View>
@@ -1169,7 +1180,7 @@ export default function ProfileScreen({ navigation }) {
         {loadingPoseHistory ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator color="#9C27B0" />
-            <Text style={[styles.loadingText, { color: theme.theme.textSecondary }]}>
+            <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
               Loading analysis history...
             </Text>
           </View>
@@ -1179,10 +1190,10 @@ export default function ProfileScreen({ navigation }) {
             onPress={() => navigation.navigate('PoseAnalysisUpload')}
           >
             <Ionicons name="analytics-outline" size={48} color="#9C27B0" />
-            <Text style={[styles.emptyStateTitle, { color: theme.theme.text }]}>
+            <Text style={[styles.emptyStateTitle, { color: colors.text }]}>
               No form analysis yet
             </Text>
-            <Text style={[styles.emptyStateSubtitle, { color: theme.theme.textSecondary }]}>
+            <Text style={[styles.emptyStateSubtitle, { color: colors.textSecondary }]}>
               Upload a video to get AI-powered form feedback
             </Text>
             <View style={styles.emptyStateButton}>
@@ -1195,29 +1206,29 @@ export default function ProfileScreen({ navigation }) {
             <View style={styles.analysisOverview}>
               <View style={styles.analysisStats}>
                 <View style={styles.analysisStat}>
-                  <Text style={[styles.analysisStatValue, { color: theme.theme.text }]}>
+                  <Text style={[styles.analysisStatValue, { color: colors.text }]}>
                     {poseAnalysisHistory.length}
                   </Text>
-                  <Text style={[styles.analysisStatLabel, { color: theme.theme.textSecondary }]}>
+                  <Text style={[styles.analysisStatLabel, { color: colors.textSecondary }]}>
                     Analyses
                   </Text>
                 </View>
                 <View style={styles.analysisStat}>
-                  <Text style={[styles.analysisStatValue, { color: theme.theme.text }]}>
+                  <Text style={[styles.analysisStatValue, { color: colors.text }]}>
                     {poseAnalysisHistory.length > 0 
                       ? (poseAnalysisHistory.reduce((sum, item) => sum + item.overallScore, 0) / poseAnalysisHistory.length).toFixed(1)
                       : '0.0'
                     }
                   </Text>
-                  <Text style={[styles.analysisStatLabel, { color: theme.theme.textSecondary }]}>
+                  <Text style={[styles.analysisStatLabel, { color: colors.textSecondary }]}>
                     Avg Score
                   </Text>
                 </View>
                 <View style={styles.analysisStat}>
-                  <Text style={[styles.analysisStatValue, { color: theme.theme.text }]}>
+                  <Text style={[styles.analysisStatValue, { color: colors.text }]}>
                     {[...new Set(poseAnalysisHistory.map(item => item.exerciseType))].length}
                   </Text>
-                  <Text style={[styles.analysisStatLabel, { color: theme.theme.textSecondary }]}>
+                  <Text style={[styles.analysisStatLabel, { color: colors.textSecondary }]}>
                     Exercises
                   </Text>
                 </View>
@@ -1244,7 +1255,7 @@ export default function ProfileScreen({ navigation }) {
                         size={20} 
                         color="#9C27B0" 
                       />
-                      <Text style={[styles.analysisExerciseText, { color: theme.theme.text }]}>
+                      <Text style={[styles.analysisExerciseText, { color: colors.text }]}>
                         {analysis.exerciseType.toLowerCase().replace('_', ' ')}
                       </Text>
                     </View>
@@ -1258,7 +1269,7 @@ export default function ProfileScreen({ navigation }) {
                     </View>
                   </View>
                   
-                  <Text style={[styles.analysisDate, { color: theme.theme.textSecondary }]}>
+                  <Text style={[styles.analysisDate, { color: colors.textSecondary }]}>
                     {new Date(analysis.createdAt).toLocaleDateString('en-US', { 
                       month: 'short', 
                       day: 'numeric',
@@ -1278,7 +1289,7 @@ export default function ProfileScreen({ navigation }) {
                             color={feedback.severity === 'error' ? '#F44336' : 
                                   feedback.severity === 'warning' ? '#FF9800' : '#4CAF50'}
                           />
-                          <Text style={[styles.feedbackText, { color: theme.theme.textSecondary }]}>
+                          <Text style={[styles.feedbackText, { color: colors.textSecondary }]}>
                             {feedback.category}: {feedback.score}/10
                           </Text>
                         </View>

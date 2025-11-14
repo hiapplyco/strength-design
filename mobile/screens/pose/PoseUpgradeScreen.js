@@ -118,7 +118,9 @@ const SUCCESS_STORIES = [
 ];
 
 export default function PoseUpgradeScreen({ navigation, route }) {
-  const { theme, isDarkMode } = useTheme();
+  const themeContext = useTheme();
+  const { colors: themeColors = {} } = themeContext;
+  const theme = themeColors;
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [quotaStatus, setQuotaStatus] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -39,6 +39,7 @@ import PoseAnalysisProcessingScreen from './screens/PoseAnalysisProcessingScreen
 import PoseAnalysisResultsScreen from './screens/PoseAnalysisResultsScreen';
 import PoseProgressScreen from './screens/PoseProgressScreen';
 import WorkoutResultsScreen from './screens/WorkoutResultsScreen';
+import PoseAnalysisLiveScreen from './screens/PoseAnalysisLiveScreen';
 
 // Ignore specific warnings for better development experience
 LogBox.ignoreLogs([
@@ -162,6 +163,11 @@ function RootStack() {
             name="PoseAnalysisUpload"
             component={PoseAnalysisUploadScreen}
             options={{ presentation: 'modal' }}
+          />
+          <Stack.Screen
+            name="PoseAnalysisLive"
+            component={PoseAnalysisLiveScreen}
+            options={{ presentation: 'card' }}
           />
           <Stack.Screen
             name="PoseAnalysisProcessing"

@@ -99,7 +99,7 @@ const PoseProgressScreen = ({ navigation, theme }) => {
       ]);
       
     } catch (error) {
-      console.error('❌ Error initializing progress data:', error);
+      console.warn('⚠️ Failed to initializing progress data:', error);
       setError('Failed to load progress data');
     } finally {
       setIsLoading(false);
@@ -186,7 +186,7 @@ const PoseProgressScreen = ({ navigation, theme }) => {
       });
       
     } catch (error) {
-      console.error('❌ Error loading overview stats:', error);
+      console.warn('⚠️ Failed to loading overview stats:', error);
     }
   };
 
@@ -261,7 +261,7 @@ const PoseProgressScreen = ({ navigation, theme }) => {
       setRecentAchievements(achievements.slice(0, 5));
       
     } catch (error) {
-      console.error('❌ Error loading recent achievements:', error);
+      console.warn('⚠️ Failed to loading recent achievements:', error);
     }
   };
 
@@ -273,7 +273,7 @@ const PoseProgressScreen = ({ navigation, theme }) => {
       const data = await poseProgressService.getAllUserProgress();
       setProgressData(data);
     } catch (error) {
-      console.error('❌ Error loading progress data:', error);
+      console.warn('⚠️ Failed to loading progress data:', error);
     }
   };
 
@@ -299,7 +299,7 @@ const PoseProgressScreen = ({ navigation, theme }) => {
     try {
       await initializeProgressData();
     } catch (error) {
-      console.error('❌ Error refreshing data:', error);
+      console.warn('⚠️ Failed to refreshing data:', error);
     } finally {
       setIsRefreshing(false);
     }
@@ -340,7 +340,7 @@ const PoseProgressScreen = ({ navigation, theme }) => {
       console.log('📤 Progress shared:', result);
       
     } catch (error) {
-      console.error('❌ Error sharing progress:', error);
+      console.warn('⚠️ Failed to sharing progress:', error);
     }
   };
 

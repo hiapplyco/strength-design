@@ -144,7 +144,24 @@ export const colors = {
       glass: { color: '#FFB86B', opacity: 0.25, blur: 12, offset: [0, 0] }, // Glow effect
     },
   },
-  
+
+  // Backward-compatible flat color exports for components expecting simple color values
+  // Use this when you need direct color strings instead of the full nested structure
+  flat: {
+    // Primary colors (flat strings)
+    primary: '#FF6B35',
+    primaryLight: '#FF8F65',
+    primaryDark: '#E55100',
+    secondary: '#4ECDC4',
+    accent: '#00FFFF',
+
+    // Common colors for both themes
+    success: '#10B981',
+    error: '#DC2626',
+    warning: '#D97706',
+    info: '#2563EB',
+  },
+
   // Semantic Colors - Theme Adaptive
   semantic: {
     success: {

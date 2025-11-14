@@ -49,7 +49,7 @@ import { functions } from '../firebaseConfig';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const WorkoutResultsScreen = ({ route, navigation }) => {
-  const { isDarkMode, theme } = useTheme();
+  const { isDarkMode } = useTheme();
   const { generatedWorkout, programData, userPreferences } = route.params || {};
   
   // State management

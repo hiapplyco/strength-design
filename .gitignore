@@ -35,3 +35,8 @@ dist-ssr
 wger-exercises/
 workout-cool/
 wrkout-exercises/
+
+# Archived React Native mobile app (migrated to Flutter)
+mobile-rn-archive/node_modules/
+mobile-rn-archive/ios/Pods/
+mobile-rn-archive/.expo/

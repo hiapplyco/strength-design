@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "269493681863",
+    "project_id": "strength-design",
+    "storage_bucket": "strength-design.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269493681863:android:08c89b6201413a4d22c8e2",
+        "android_client_info": {
+          "package_name": "com.example.mobile_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269493681863-r98d1gprkviq33ioaj416r5q2jmti7o0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChlOjfWQ5qahIdo2qTGRvSIcbQrCkCJjQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269493681863-r98d1gprkviq33ioaj416r5q2jmti7o0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "269493681863-ddq3kn7dm77gustetiuh741pp7qac55e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.strength.design"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

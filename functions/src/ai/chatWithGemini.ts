@@ -96,7 +96,6 @@ export const chatWithGemini = onRequest({ secrets: [geminiApiKey] }, async (req:
         contents: contents,
         generationConfig: generationConfig,
         safetySettings: safetySettings,
-        // Remove systemInstruction for now as it's causing issues with the API
       });
 
       const response = result.response;

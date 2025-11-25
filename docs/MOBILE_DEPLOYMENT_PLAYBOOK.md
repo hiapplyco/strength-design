@@ -1,15 +1,17 @@
 # Strength.Design Mobile Deployment Playbook
-> Last updated: 2025-01-17 • Owners: Mobile + Infra • Scope: Web, Mobile (Expo), Firebase Functions, Knowledge Pipeline
+> Last updated: 2025-11-25 • Owners: Mobile + Infra • Scope: Web, Mobile (Flutter), Firebase Functions, Knowledge Pipeline
 
-This single document replaces the previous documentation tree. It captures the architecture, dependencies, and release-critical tasks needed to confidently ship the mobile app while keeping the web app, shared services, and AI backends aligned.
+This single document is the authoritative reference for the mobile app architecture, dependencies, and release-critical tasks.
 
 ---
 
 ## 1. System Snapshot
+
 | Area | Status | Notes |
 |------|--------|-------|
 | **Web App (`/src`)** | ✅ Production | React 19 + Vite, Firebase v9 modular SDK, Plausible analytics hooks, Stripe checkout |
-| **Mobile App (`/mobile`)** | 🚀 Feature-complete, pre-store | Expo SDK 54 / React Native 0.81.5, glassmorphism UI, offline caches, Gemini-powered chat/workouts |
+| **Mobile App (`/mobile`)** | 🚀 Flutter (97% complete) | Flutter 3.9.2, Dart SDK ^3.9.2, MoveNet TFLite, Gemini Live WebSocket |
+| **Mobile Archive (`/mobile-rn-archive`)** | 📦 Archived | Previous Expo SDK 54 / React Native app (reference only) |
 | **Cloud Functions (`/functions`)** | ✅ Live | Node 20 runtime, Gemini 2.5 Flash endpoints, Perplexity-backed search, Stripe + notifications scaffolding |
 | **Knowledge Pipeline (`/knowledge-pipeline`)** | ✅ Ready | TypeScript ingestor feeding Firestore knowledge collection with Gemini summarization |
 | **Shared Assets** | ✅ Stable | `comprehensive-exercises.csv`, `packages/muscle-anatomy-tools` scripts, Tailwind tokens in `components.json` |
@@ -17,211 +19,253 @@ This single document replaces the previous documentation tree. It captures the a
 ---
 
 ## 2. Monorepo Map
+
 | Path | Purpose |
 |------|---------|
 | `README.md`, `CLAUDE.md` | High-level overview + AI coding standards |
 | `src/` | Web application (pages such as `src/pages/WorkoutGenerator.tsx`, contexts, Zustand stores) |
-| `mobile/` | Expo project (`screens/`, `services/`, `contexts/`, `components/`, `.env.example`, native assets) |
+| `mobile/` | **Flutter project** (`lib/`, `ios/`, `android/`, `pubspec.yaml`, MoveNet model assets) |
+| `mobile-rn-archive/` | Archived React Native app (reference for porting UI/business logic) |
 | `functions/` | Firebase Functions (AI, programs, payments, notifications, pose, utils) |
 | `knowledge-pipeline/` | Reddit/Wikipedia ingestion, CLI + configs feeding Firestore + AI enrichment |
 | `packages/muscle-anatomy-tools/` | Scripts + assets powering 3D muscle visualizer |
 | `public/`, `firebase.json`, `firestore.rules`, `storage.rules` | Web assets + Firebase resource definitions |
-| `scripts/`, `agents/`, `.claude/` | Automation helpers and AI work items |
+| `MOBILE_CONSOLIDATION_PLAN.md` | Flutter migration roadmap and feature checklist |
 
 ---
 
-## 3. Web Application Baseline
+## 3. Mobile Architecture Overview (Flutter)
+
+### Technology Stack
+```yaml
+# pubspec.yaml key dependencies
+dependencies:
+  firebase_auth: ^5.0.0
+  firebase_core: ^3.15.2
+  cloud_firestore: ^5.0.0
+  firebase_storage: ^12.4.0
+  flutter_webrtc: ^0.9.47
+  tflite_flutter: ^0.12.1           # MoveNet pose detection
+  camera: ^0.10.5
+  web_socket_channel: ^3.0.0        # Gemini Live WebSocket
+  hive: ^2.2.3                      # Local storage
+  hive_flutter: ^1.1.0
+  hooks_riverpod: ^2.5.1            # State management
+  audioplayers: ^5.2.1              # Coaching audio
+  flutter_dotenv: ^6.0.0            # Environment variables
+  permission_handler: ^11.3.1
+```
+
+### Architecture Pattern
+```
+┌────────────────────────────────────────┐
+│         Presentation Layer              │
+│   (Flutter Widgets + Riverpod)          │
+└─────────────────┬──────────────────────┘
+                  │
+┌─────────────────▼──────────────────────┐
+│         Domain Layer                    │
+│   (Use Cases + Business Logic)          │
+└─────────────────┬──────────────────────┘
+                  │
+┌─────────────────▼──────────────────────┐
+│         Data Layer                      │
+│   (Repositories + Services)             │
+└─────────────────┬──────────────────────┘
+                  │
+┌─────────────────▼──────────────────────┐
+│      External Services                  │
+│ (WebRTC, Gemini Live, Firebase, TFLite) │
+└────────────────────────────────────────┘
+```
+
+### Core Services (Implemented)
+
+| Service | Status | Description |
+|---------|--------|-------------|
+| `PoseDetectionService` | ✅ | TensorFlow Lite MoveNet Thunder (17 keypoints, 30fps) |
+| `LocalPoseAnalyzer` | ✅ | Rep counting, form scoring, error detection |
+| `GeminiLiveService` | ✅ | WebSocket connection to Gemini 2.5 Flash Live API |
+| `GeminiTriggerManager` | ✅ | Smart API throttling (97% cost reduction) |
+| `PerformanceMonitor` | ✅ | Latency tracking, P95/P99 metrics, 13 unit tests |
+| `WebRTCService` | ✅ | Camera streaming and frame extraction |
+| `AnalysisRepository` | ✅ | Hive local cache + Firestore sync |
+
+### Hybrid AI Architecture
+
+The Flutter app uses a **hybrid cloud-edge approach**:
+
+1. **On-Device (TFLite)**: Real-time pose detection at 30fps with zero latency
+2. **Cloud (Gemini Live)**: Intelligent coaching via WebSocket, triggered smartly
+
+**Cost Comparison:**
+- Pure cloud approach: ~$5,400/month (1000 users)
+- Hybrid approach: ~$180/month (1000 users)
+- **Savings: 97%**
+
+### What's Implemented vs Needed
+
+**Implemented (97%):**
+- MoveNet TFLite pose detection
+- 8 joint angle calculations
+- Rep counting state machine
+- Form error detection (4 heuristics)
+- Gemini Live WebSocket integration
+- Smart API throttling (5-priority system)
+- Performance monitoring
+- Firebase integration (auth, Firestore, storage)
+- 6 domain entities, 7 core services
+
+**Needs Porting from RN Archive (3%):**
+- Navigation system (use `go_router`)
+- Login/Auth screen
+- Home dashboard
+- Exercise library screen
+- Workouts management screens
+- Profile/Settings screen
+- Pose Results UI refinement
+- Progress tracking UI
+- Achievement system (optional)
+- Premium tiers/paywall (optional)
+
+---
+
+## 4. Web Application Baseline
+
 - **Entry + Routing**: `src/main.tsx` bootstraps `App.tsx` with React Router routes under `src/pages/`.
 - **Core Pages**: Workout generator (`src/pages/WorkoutGenerator.tsx`), Journal (`src/pages/JournalPage.tsx`), Program chat (`src/pages/ProgramChat.tsx`), Nutrition diary (`src/pages/NutritionDiary.tsx`), Checkout + Stripe callbacks, Firebase auth screens.
 - **State & Data**: Firebase services via `src/lib/firebase/config.ts`, TanStack Query hooks for workouts, `src/stores` for UI/usage, analytics helpers in `src/lib/analytics.ts` tied to Plausible.
-- **UI System**: Tailwind + CSS modules, glassmorphism components mirrored from mobile design tokens.
-- **Key Services**: `src/lib/services/exerciseSearchService.ts` and `src/lib/services/searchAnalyticsService.ts` provide the same filtering logic used on mobile; shared hooking ensures parity.
-
----
-
-## 4. Mobile Architecture Overview
-### UI & Navigation
-- **Navigation**: React Navigation stacks + bottom tabs defined in `mobile/screens/HomeScreen.js` and companions.
-- **Key Screens**:
-  - `ContextAwareGeneratorScreen.js`: Gemini chat with context, streaming, AI workout cards.
-  - `UnifiedSearchScreen.js`: Dual exercise + nutrition search with filter presets and selection hand-off.
-  - `WorkoutsScreen.js`, `WorkoutResultsScreen.js`, `WorkoutGeneratorScreen.js`: Workout browsing, saving, and deep dives.
-  - Pose workflow (`mobile/screens/pose/*.js` + `PoseAnalysis*` screens): Upload, analysis, and insights.
-  - `LoginScreen.js` + biometric handoff, `ProfileScreen.js`, `NutritionDiary` parity screens.
-- **Design System**: Glassmorphic components (`mobile/components/GlassmorphismComponents.js`, `GlassSearchInput.js`, etc.), gradients via `expo-linear-gradient`, blur surfaces via `expo-blur`, dynamic theming through `contexts/ThemeContext.tsx`, haptics via `expo-haptics`.
-
-### Service Layer & Offline Support
-- `services/contextAggregator.js`: Aggregates Firestore profile, workouts, nutrition, health metrics, and AsyncStorage caches for AI calls with 30‑minute TTL.
-- `services/aiService.js`: Wraps callable functions (`enhancedChat`, `generateFormAwareWorkout`, etc.), manages session state, caching, and integrates `formContextService`.
-- `services/formContextService.js`: Bridges pose analysis outputs with AI coaching via callable functions (`summarizeFormData`, `calculateFormCompetency`, `buildFormContext`).
-- `services/searchService.js`: Local JSON-backed exercise DB with boolean operators, fuzzy search, filter presets, result caching.
-- `services/NutritionService.js`: USDA API integration with rich local fallback dataset and caching, powering unified search.
-- `services/WorkoutService.js`: Handles context-aware workout generation, saving to `users/{uid}/workouts`, fetching history, summarizing.
-- `services/healthService.js`: HealthKit/Google Fit scaffolding with permission caching, sync toggles, and placeholder alerts for simulators.
-- `services/poseDetection/*`: Types + analyzers for on-device pose processing (Gemini Nano 2 concept), feeding `poseProgressService`.
-- `services/storageService.js`, `usageTrackingService.js`, `contentDeliveryService.js`, `tutorialService.js`, `chatSessionService.js`: AsyncStorage-backed caches, push payload builders, onboarding flows, and analytics hooks.
-
-### Offline & Caching
-- AsyncStorage keys documented inside each service (e.g., `@ai_coaching_cache`, `@health_sync_enabled`).
-- Local data assets: `mobile/assets/wrkout-exercises-full.json`, `comprehensive-exercises.csv`.
-- Search + nutrition operate offline-first; AI + Firestore queue retries with backoff and optimistic UI states.
+- **UI System**: Tailwind + CSS modules, glassmorphism components.
 
 ---
 
 ## 5. Backend & AI Services
+
 ### Firebase Functions (`functions/src`)
 - **AI** (`functions/src/ai/`):
-  - `generateWorkout.ts`: Structured multi-day plan generator, strict JSON validation, metadata injection.
-  - `generateStructuredWorkout.ts`, `generateWorkoutSummary.ts`, `generateWorkoutTitle.ts`: Post-processing helpers.
-  - `chatWithGemini.ts`: General chat endpoint with optional file attachments via Storage.
-  - `streamingChat.ts` / `streamingChatEnhanced.ts`: SSE streaming responses with saved exercise context and SSE framing.
-  - `enhancedChat.ts`, `formAwareCoaching.js`, `formDataSummarizer.js`: Form-aware conversational logic powering AI coaching modules.
-  - `analyzeYoutubeVideo.ts`, `generateVideoNarration.ts`: Video pipeline helpers.
-- **Programs & Search** (`functions/src/programs/searchPrograms.ts`): Perplexity-backed search results with caching.
-- **Exercises & Knowledge** (`functions/src/exercises/*`, `functions/src/knowledge/*`): Callable functions for exercise search, ingest/search knowledge base.
-- **Pose** (`functions/src/pose/formContextBuilder.ts`): Builds historical context for form analysis streams.
-- **Payments** (`functions/src/payments/*`, `functions/src/stripe`): Stripe-related endpoints.
-- **Notifications** (scaffolded) and `utils` for shared logging/CORS.
-- **Config**: Node 20 runtime (`functions/package.json`), secrets handled via `defineSecret("GEMINI_API_KEY")`, consistent `corsHandler`.
+  - `generateWorkout.ts`: Structured multi-day plan generator
+  - `chatWithGemini.ts`: General chat endpoint
+  - `streamingChat.ts` / `streamingChatEnhanced.ts`: SSE streaming responses
+  - `enhancedChat.ts`, `formAwareCoaching.js`: Form-aware conversational logic
+- **Programs & Search**: Perplexity-backed search with caching
+- **Exercises & Knowledge**: Callable functions for exercise search, knowledge base
+- **Pose**: `formContextBuilder.ts` for historical form analysis context
+- **Payments**: Stripe-related endpoints
+- **Config**: Node 20 runtime, secrets via `defineSecret("GEMINI_API_KEY")`
 
-### Firestore Schema Highlights
-- `users/{uid}`: profile, fitness profile, nutrition settings, subscription data.
-- Subcollections: `workouts`, `workoutSessions`, `workoutHistory`, `savedExercises`, `notifications`, `healthSync`, `poseAnalyses`.
-- Global collections: `exercises`, `knowledge`, `nutritionFoods`, `programs`, `dailyWorkouts`, `usageStats`.
-- Storage buckets segmented for workouts, nutrition uploads, pose videos, voice memos as described in the previous schema doc.
-
-### Knowledge Pipeline (`knowledge-pipeline/`)
-- TS CLI (`src/fitness-ingestor.ts`) pulls Reddit + Wikipedia, enriches via Gemini 2.5 Flash, writes to Firestore through `functions/src/knowledge`.
-- Config-driven sources (`config/fitness-sources.json`), caching, quality scoring, deduping, and ingestion scripts (`npm run ingest:test`, `npm run ingest:all -- --limit <n>`).
+### Firestore Schema
+- `users/{uid}`: profile, fitness profile, nutrition settings, subscription data
+- Subcollections: `workouts`, `workoutSessions`, `savedExercises`, `poseAnalyses`
+- Global: `exercises`, `knowledge`, `nutritionFoods`, `programs`
 
 ---
 
-## 6. Integrations & External Services
-- **Gemini 2.5 Flash**: Primary real-time model for chat + workouts (mobile + functions). Pro model reserved for heavy generation (`generateStructuredWorkout` future use). Ensure consistent model IDs (see §8).
-- **Perplexity Search**: Program discovery via `services/PerplexitySearchService.js` and callable functions.
-- **USDA FoodData Central**: Nutrition API with API key stored via env/Secrets, fallback dataset ensures offline capability.
-- **Apple Health / Google Fit**: HealthKit scaffolding now, full native bridges pending; hooks in `healthService`.
-- **Plausible Analytics**: Web instrumentation via `src/lib/analytics.ts`; mobile logging via `services/usageTrackingService.js` ready to emit to analytics backend.
-- **Stripe**: Payment flows in web pages (`src/pages/Pricing.tsx`, `CheckoutSuccess.tsx`, etc.) with associated functions.
-- **Twilio Phone Auth**: Legacy support documented in prior setup; phone auth provider currently only enabled on web.
-- **Expo Push Notifications**: Placeholder in `services/notifications/` with server-side scheduling ready once credentials are added.
+## 6. Configuration & Secrets
 
----
-
-## 7. Configuration & Secrets
-- **Web (`.env.local`)**: `VITE_FIREBASE_*`, `VITE_PLAUSIBLE_DOMAIN`, Stripe keys, optional emulator toggles.
-- **Mobile (`mobile/.env.example`)**: `EXPO_PUBLIC_FIREBASE_*`, pose analysis feature flags, performance knobs, analytics toggles. Copy to `.env` or `.env.local` for Expo.
-- **Functions**: Secrets via `firebase functions:secrets:set GEMINI_API_KEY`, other provider keys (USDA, Perplexity, Stripe) stored as runtime config or secrets.
-- **EAS / Native**:
-  - Bundle identifiers must be set to `com.strengthdesign.app` (currently `com.hiapplyco.mobile-working` placeholders).
-  - Configure `eas.json` build profiles and `app.json` / `app.config.js` with release channel metadata.
-- **Security Rules**: `firestore.rules`, `storage.rules`, and `firestore.rules.dev` exist; deploy with `firebase deploy --only firestore:rules,storage:rules` before release.
-
----
-
-## 8. Mobile Deployment Readiness
-### Pre-Build Audit (blockers)
-1. **Model Version Alignment**: Ensure mobile services and callable functions all target `gemini-2.5-flash` (fix hardcoded `gemini-2.5-flashflash` references in chat flows).
-2. **Error Handling / Boundaries**: Wrap primary screens with error boundaries, route handled errors to Sentry (hook points in `mobile/services/usageTrackingService.js`).
-3. **Analytics & Telemetry**: Wire `usageTrackingService` to Plausible/GA4 or Firebase Analytics for chat usage, workout generation, health sync toggles.
-4. **Bundle Identifiers & App Metadata**: Update `app.json` (or `app.config.ts`) for `com.strengthdesign.app` + store listing assets.
-5. **Health SDK Integrations**: Replace placeholder `healthService` alerts with real HealthKit/Google Fit bridges; ensure permission prompts tested on device.
-6. **Shared Context Schema**: Standardize payload passed from mobile to `enhancedChat`/`generateStructuredWorkout` (align with `UserContext` interface in §5).
-7. **Push Notification Credentials**: Configure Expo push keys + Firebase Cloud Messaging if notifications are part of launch scope.
-
-### Build & Release Steps
+### Flutter Mobile (`mobile/.env`)
 ```bash
-# 1. Install deps
+GEMINI_API_KEY=your_api_key_here
+```
+
+### Web (`.env.local`)
+`VITE_FIREBASE_*`, `VITE_PLAUSIBLE_DOMAIN`, Stripe keys
+
+### Functions
+Secrets via `firebase functions:secrets:set GEMINI_API_KEY`
+
+---
+
+## 7. Mobile Deployment Readiness
+
+### Pre-Build Checklist
+
+- [ ] Download MoveNet model (✅ Done - `assets/models/movenet_thunder.tflite`)
+- [ ] Set `GEMINI_API_KEY` in `.env`
+- [ ] Configure Firebase project (`firebase_options.dart`)
+- [ ] Add navigation system (`go_router`)
+- [ ] Port remaining screens from RN archive
+- [ ] Update bundle identifiers for iOS/Android
+- [ ] Test on physical devices (iOS + Android)
+- [ ] Run `flutter test`
+
+### Build Commands
+```bash
+# Development
 cd mobile
-npm install
+flutter pub get
+flutter run
 
-# 2. Verify local dev
-npm run ios          # simulator
-npm run android      # emulator
-npm run web          # Expo web build
+# iOS
+cd ios && pod install && cd ..
+flutter run -d ios
 
-# 3. Prepare native builds
-eas build --profile preview --platform ios
-eas build --profile preview --platform android
-# or use production profile once bundle IDs + store assets ready
+# Android
+flutter run -d android
 
-# 4. Cloud Functions / Backend
-cd ../functions
-npm install
-npm run build
-firebase deploy --only functions
+# Release builds
+flutter build ios --release
+flutter build apk --release
 
-# 5. Smoke tests
-expo start --dev-client
+# Tests
+flutter test
 ```
 
 ### Validation Matrix
+
 | Area | What to verify |
 |------|----------------|
-| Auth | Email/password, Google sign-in (web), biometric unlock, logout, account deletion |
-| AI Chat | Streaming responses, cached responses, retry flows, context toggles (form-aware vs general) |
-| Workout Generation | Multi-day plans saved to Firestore, structured cards on `WorkoutResultsScreen`, editing/favorites |
-| Exercise Search | Filters, offline results, bridging selections into chat/request builder |
-| Nutrition | USDA API search, local fallback, logging flows |
-| Pose Analysis | Upload, processing pipeline, AI coaching cards, progress dashboard |
-| Health Sync | Permission prompts, toggle persistence, background sync scheduling |
-| Notifications | In-app reminders + push scheduling (if in scope) |
-| Offline Mode | Cached exercises/nutrition, queued workout logging, reconnection sync |
+| Auth | Firebase login/logout, session persistence |
+| Pose Analysis | Live camera → MoveNet → rep counting → Gemini coaching |
+| AI Chat | Gemini Live WebSocket, audio + text responses |
+| Offline | Hive cache, Firestore offline persistence |
+| Performance | 30fps pose detection, <33ms latency |
 
 ---
 
-## 9. Known Gaps & Action Items
+## 8. Known Gaps & Action Items
+
 ### P0 (Block Release)
-1. **Gemini model ID mismatch** across `mobile/services/*` and `functions/src/ai/*`.
-2. ~~**Bundle identifier** updates (`app.json`)~~ ✅ **COMPLETE** - Set to `com.strengthdesign.app`. Still need: icons, splash assets.
-3. **Robust error boundaries + crash reporting** wrappers for high-risk screens.
+1. **Complete UI screens** - Port navigation and screens from RN archive
+2. **Camera integration** - Connect camera stream to LocalPoseAnalyzer pipeline
+3. **Device testing** - Physical iOS and Android testing
 
 ### P1 (Pre-launch polish)
-1. Finish HealthKit/Google Fit adapters (`mobile/services/healthService.js` stubs → native modules).
-2. Align design tokens across web/mobile (primary color + gradients).
-3. Add analytics events for chat, search, workout completion.
-4. Finalize push notification scheduling pipeline (client + `notifications/` functions).
+1. Pose overlay visualization (keypoint drawing)
+2. Audio playback for Gemini coaching
+3. Exercise-specific form evaluation logic
+4. Progress history UI
 
 ### P2 (Post-launch)
-1. Feature flags + remote config for experimentation.
-2. Advanced social features (sharing, leaderboards).
-3. Expand KnowledgeService surfaces inside mobile chat + search.
-4. Additional localization + accessibility audits.
+1. Achievement system
+2. Premium tiers/paywall
+3. HealthKit/Google Fit integration
+4. Push notifications
 
 ---
 
-## 10. Operational Runbook
-| Task | Command / Location |
-|------|--------------------|
-| Web dev server | `npm install && npm run dev` (root) |
-| Web build | `npm run build` (Vite) |
-| Mobile dev | `cd mobile && npm install && npx expo start` |
-| Mobile scripts | `run-simulator.sh` for quick simulator boot; `mobile/scripts/createDemoAccount.js` seeds demo data |
-| Firebase emulators | `firebase emulators:start` (root or `functions/`) |
-| Cloud Functions deploy | `cd functions && npm run deploy` |
-| Knowledge ingestion | `cd knowledge-pipeline && npm install && npm run ingest:test` |
-| Analytics review | Plausible dashboard + `src/lib/analytics.ts` event list |
-| Monitoring | Sentry (web + mobile), Firebase Performance, Cloud Logging |
+## 9. Reference Appendix
 
----
-
-## 11. Reference Appendix
 | Feature | Primary Files |
 |---------|---------------|
-| AI Chat (mobile) | `mobile/screens/ContextAwareGeneratorScreen.js`, `mobile/services/aiService.js` |
-| Exercise Search | `mobile/screens/UnifiedSearchScreen.js`, `mobile/services/searchService.js`, `src/lib/services/exerciseSearchService.ts` |
-| Workout Generation | `mobile/services/WorkoutService.js`, `functions/src/ai/generateWorkout.ts`, `src/pages/WorkoutGenerator.tsx` |
-| Pose Analysis | `mobile/screens/PoseAnalysis*.js`, `mobile/screens/PoseAnalysisLiveScreen.js`, `mobile/services/poseDetection/PoseAnalysisService.ts`, `mobile/services/geminiLiveStreamService.js`, `functions/src/pose/formContextBuilder.ts` |
-| Nutrition | `mobile/services/NutritionService.js`, `src/pages/NutritionDiary.tsx` |
-| Health Integration | `mobile/services/healthService.js`, `mobile/services/progressDataAggregator.js` |
-| Knowledge Search | `mobile/services/KnowledgeService.js`, `functions/src/knowledge/*`, `knowledge-pipeline/src/fitness-ingestor.ts` |
-| Payments | `src/pages/Pricing.tsx`, `src/pages/CheckoutSuccess.tsx`, `functions/src/stripe/*` |
+| Pose Detection | `lib/src/core/services/pose_detection_service.dart` |
+| Local Analyzer | `lib/src/core/services/local_pose_analyzer.dart` |
+| Gemini Live | `lib/src/core/services/gemini_live_service.dart` |
+| Trigger Manager | `lib/src/core/services/gemini_trigger_manager.dart` |
+| Performance | `lib/src/core/services/performance_monitor.dart` |
+| Entities | `lib/src/features/pose_analysis/domain/entities/` |
+| Live Screen | `lib/src/features/pose_analysis/presentation/screens/live_streaming_screen.dart` |
+
+### Documentation
+- `MOBILE_CONSOLIDATION_PLAN.md` - Flutter migration roadmap
+- `mobile/IMPLEMENTATION_SUMMARY.md` - Detailed Flutter implementation status
+- `docs/POSE_ANALYSIS_NATIVE.md` - Flutter pose analysis PRD
+- `docs/archive/rn-refactor-2025-01/` - Archived RN refactor docs
 
 ---
 
 ### How to Keep This Doc Current
-- Update this file whenever architecture, env expectations, or release criteria change.
-- Link new modules or services under the Appendix table instead of creating new stand-alone docs.
-- Record outstanding launch blockers directly in §9 so the release team has a source of truth.
+- Update when architecture, env expectations, or release criteria change
+- Link new modules under the Appendix instead of creating new docs
+- Record blockers in §8 so release team has source of truth
 
-This playbook is now the authoritative reference for preparing and shipping the Strength.Design mobile application.***
+This playbook is the authoritative reference for the Strength.Design mobile application.

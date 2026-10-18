@@ -4,8 +4,6 @@
   "exclude": [
     "node_modules",
     "jest.setup.js",
-    "jest.config.js",
-    "services/ProgramSearchService-OLD.js",
-    "screens/ContextAwareGeneratorScreen.js"
+    "jest.config.js"
   ]
 }

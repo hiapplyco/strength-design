@@ -65,7 +65,7 @@ Use `rg` for searches (`rg "term" path/`) and `jq` for JSON formatting when need
 ### Mobile (Expo SDK 53)
 1. Screens under `mobile/screens`; services under `mobile/services`.
 2. AsyncStorage caches require TTL comments; follow patterns in `contextAggregator`.
-3. For pose/AI work, reference `services/aiService.js` + `services/formContextService.js`.
+3. For pose/AI work, reference `services/poseDetection/PoseAnalysisService.ts` + `services/formContextService.js`.
 4. Use `expo start --dev-client` for integrated testing when needed.
 
 ### Firebase Functions
